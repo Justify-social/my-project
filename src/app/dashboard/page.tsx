@@ -1,8 +1,7 @@
 // src/app/dashboard/page.tsx
-import React from "react";
 import { redirect } from "next/navigation";
-import Sidebar from "../../components/Sidebar";
-import { getSession } from "../../lib/session"; // correct import
+import { getSession } from "../../lib/session"; // your session helper
+import DashboardContent from "./DashboardContent";
 
 export default async function Dashboard() {
   // Retrieve the session using our helper.
@@ -16,13 +15,6 @@ export default async function Dashboard() {
 
   const user = session.user;
 
-  return (
-    <div style={{ display: "flex" }}>
-      <Sidebar user={user} />
-      <main style={{ padding: "1rem" }}>
-        <h1>Dashboard</h1>
-        <p>Welcome, {user.name}!</p>
-      </main>
-    </div>
-  );
+  // Render the client component and pass the user data.
+  return <DashboardContent user={user} />;
 }
