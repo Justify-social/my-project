@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import OnboardingModal from "../../components/OnboardingModal";
+import dynamic from "next/dynamic";
+
+// Dynamically import CalendarUpcoming with SSR disabled.
+const CalendarUpcoming = dynamic(
+  () => import("../../components/CalendarUpcoming"),
+  { ssr: false }
+);
 
 interface DashboardContentProps {
   user: {
@@ -13,18 +20,37 @@ interface DashboardContentProps {
   };
 }
 
+interface Campaign {
+  id: number;
+  name: string;
+  startDate: string;
+  endDate?: string;
+}
+
 export default function DashboardContent({ user }: DashboardContentProps) {
-  // If the user has not seen onboarding, show the modal.
   const [showModal, setShowModal] = useState(!user.hasSeenOnboarding);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 
   const handleOnboardingComplete = async () => {
-    // Call your API endpoint to update the user's onboarding status.
     await fetch("/api/user/setOnboardingTrue", {
       method: "POST",
     });
-    // After updating, hide the modal.
     setShowModal(false);
   };
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      const res = await fetch("/api/campaigns");
+      const data = await res.json();
+      setCampaigns(data);
+    };
+    fetchCampaigns();
+  }, []);
+
+  // Sort campaigns by startDate and select the top 3 upcoming ones.
+  const upcomingCampaigns = [...campaigns]
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .slice(0, 3);
 
   return (
     <div style={{ display: "flex" }}>
@@ -33,6 +59,18 @@ export default function DashboardContent({ user }: DashboardContentProps) {
         <h1>Dashboard</h1>
         <p>Welcome, {user.name}!</p>
         {showModal && <OnboardingModal onComplete={handleOnboardingComplete} />}
+        <div style={{ marginTop: "2rem" }}>
+          <h2>Upcoming Campaigns</h2>
+          {/* Render the calendar only on the client */}
+          <CalendarUpcoming campaigns={campaigns} />
+          <ul>
+            {upcomingCampaigns.map(campaign => (
+              <li key={campaign.id}>
+                {campaign.name} - {new Date(campaign.startDate).toLocaleDateString()}
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
     </div>
   );
