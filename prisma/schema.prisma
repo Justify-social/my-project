@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// This is your complete Prisma schema file.
+// It defines the generator (Prisma Client) and your datasource (PostgreSQL via an environment variable).
+// It also defines two models: Campaign and User.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,9 +10,31 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// The Campaign model represents a marketing campaign.
+// - The 'id' is the primary key and auto-increments.
+// - The 'name' field is required.
+// - The 'startDate' and 'endDate' fields are optional (note the '?' indicating that they can be null).
+// - The 'createdAt' and 'updatedAt' fields track when the record was created and last updated.
+model Campaign {
+  id        Int      @id @default(autoincrement())
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// The User model represents a user in your system.
+// - The 'id' is the primary key and auto-increments.
+// - The 'email' field is required and must be unique.
+// - The 'role' field is a string that defaults to "marketer" (you can update this to "admin", "editor", etc. as needed).
+// - The 'hasSeenOnboarding' field is a Boolean that tracks if the user has completed onboarding.
 model User {
   id               Int      @id @default(autoincrement())
   email            String   @unique
   role             String   @default("marketer")
   hasSeenOnboarding Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

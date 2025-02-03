@@ -1,7 +1,6 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // With the experimental appDir flag removed, Next.js will use your "pages" folder.
 };
 
-export default nextConfig;
+module.exports = nextConfig;
