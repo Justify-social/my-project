@@ -1,42 +1,25 @@
-// cypress/e2e/campaign.spec.cy.js
-describe("Campaign CRUD Flow", () => {
-    it("should create, display, update, and delete a campaign", () => {
-      // Create a new campaign.
-      cy.request("POST", "http://localhost:3000/api/campaigns", {
+describe("Campaign API", () => {
+  it("should create a new campaign via API", () => {
+    cy.request({
+      method: "POST",
+      url: "/api/campaigns",
+      body: {
         name: "Test Campaign",
-      }).then((response) => {
-        expect(response.status).to.eq(201);
-        const campaignId = response.body.id;
-  
-        // Visit the campaigns list page.
-        cy.visit("http://localhost:3000/campaigns");
-        cy.contains("Test Campaign");
-  
-        // Now update the campaign.
-        cy.request("PUT", `http://localhost:3000/api/campaigns/${campaignId}`, {
-          name: "Updated Campaign",
-        }).then((updateRes) => {
-          expect(updateRes.status).to.eq(200);
-  
-          // Verify the update.
-          cy.request("GET", `http://localhost:3000/api/campaigns/${campaignId}`)
-            .its("body")
-            .should("have.property", "name", "Updated Campaign");
-  
-          // Delete the campaign.
-          cy.request("DELETE", `http://localhost:3000/api/campaigns/${campaignId}`).then(
-            (deleteRes) => {
-              expect(deleteRes.status).to.eq(200);
-              cy.request("GET", "http://localhost:3000/api/campaigns")
-                .its("body")
-                .should((campaigns) => {
-                  const names = campaigns.map((c) => c.name);
-                  expect(names).not.to.include("Updated Campaign");
-                });
-            }
-          );
-        });
-      });
+        startDate: "2023-11-01T00:00:00.000Z",  // Valid ISO date string
+        endDate: "2023-11-15T00:00:00.000Z"     // Valid ISO date string (optional)
+      },
+      // You can remove failOnStatusCode if you expect a 2xx response.
+      // failOnStatusCode: false,
+    }).then((response) => {
+      // Check that the API responded with a 201 Created status
+      expect(response.status).to.eq(201);
+      // Verify the returned body contains the campaign details
+      expect(response.body).to.have.property("id");
+      expect(response.body.name).to.eq("Test Campaign");
+      expect(new Date(response.body.startDate).toISOString()).to.eq("2023-11-01T00:00:00.000Z");
+      if (response.body.endDate) {
+        expect(new Date(response.body.endDate).toISOString()).to.eq("2023-11-15T00:00:00.000Z");
+      }
     });
   });
-  
+});

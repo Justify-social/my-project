@@ -1,49 +1,44 @@
-// src/app/api/campaigns/[id]/route.ts
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  try {
-    const id = parseInt(params.id, 10);
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-    });
-    if (!campaign) {
-      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
-    }
-    return NextResponse.json(campaign);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch campaign" }, { status: 500 });
+export async function GET(request: Request, context: { params: { id: string } }) {
+  const { id } = context.params;
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: Number(id) },
+  });
+  if (!campaign) {
+    return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
   }
+  return NextResponse.json(campaign);
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: { id: string } }) {
+  const { id } = context.params;
+  const body = await request.json();
+  const { name, startDate, endDate } = body;
   try {
-    const id = parseInt(params.id, 10);
-    const body = await request.json();
-    const { name, startDate, endDate } = body;
     const updatedCampaign = await prisma.campaign.update({
-      where: { id },
+      where: { id: Number(id) },
       data: {
         name,
-        startDate: startDate ? new Date(startDate) : null,
+        startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
       },
     });
     return NextResponse.json(updatedCampaign);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update campaign" }, { status: 500 });
+    return NextResponse.error();
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: { id: string } }) {
+  const { id } = context.params;
   try {
-    const id = parseInt(params.id, 10);
     await prisma.campaign.delete({
-      where: { id },
+      where: { id: Number(id) },
     });
-    return NextResponse.json({ message: "Campaign deleted" });
+    return NextResponse.json({ message: "Deleted" });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to delete campaign" }, { status: 500 });
+    return NextResponse.error();
   }
 }

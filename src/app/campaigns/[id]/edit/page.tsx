@@ -1,31 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 
-export default function NewCampaign() {
+export default function EditCampaign() {
   const router = useRouter();
+  const { id } = useParams();
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  useEffect(() => {
+    async function fetchCampaign() {
+      const res = await fetch(`/api/campaigns/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setName(data.name || "");
+        if (data.startDate) {
+          setStartDate(new Date(data.startDate).toISOString().split("T")[0]);
+        }
+        if (data.endDate) {
+          setEndDate(new Date(data.endDate).toISOString().split("T")[0]);
+        }
+      } else {
+        alert("Campaign not found");
+      }
+    }
+    if (id) {
+      fetchCampaign();
+    }
+  }, [id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/campaigns", {
-      method: "POST",
+    const res = await fetch(`/api/campaigns/${id}`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, startDate, endDate }),
     });
     if (res.ok) {
       router.push("/campaigns");
     } else {
-      alert("Error creating campaign");
+      alert("Error updating campaign");
     }
   };
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h1>New Campaign</h1>
+      <h1>Edit Campaign</h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Campaign Name:</label>
@@ -55,7 +77,7 @@ export default function NewCampaign() {
           />
         </div>
         <button data-testid="campaign-submit-button" type="submit">
-          Create Campaign
+          Update Campaign
         </button>
       </form>
     </div>
