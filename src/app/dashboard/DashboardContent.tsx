@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import Sidebar from "../../components/Sidebar";
 import OnboardingModal from "../../components/OnboardingModal";
 import dynamic from "next/dynamic";
+import BrandHealthCard from "../../components/BrandHealthCard";
+import InfluencerCard from "../../components/InfluencerCard";
 
 // Dynamically import CalendarUpcoming with SSR disabled.
 const CalendarUpcoming = dynamic(
@@ -32,9 +35,7 @@ export default function DashboardContent({ user }: DashboardContentProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 
   const handleOnboardingComplete = async () => {
-    await fetch("/api/user/setOnboardingTrue", {
-      method: "POST",
-    });
+    await fetch("/api/user/setOnboardingTrue", { method: "POST" });
     setShowModal(false);
   };
 
@@ -49,27 +50,56 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 
   // Sort campaigns by startDate and select the top 3 upcoming ones.
   const upcomingCampaigns = [...campaigns]
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .sort(
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    )
     .slice(0, 3);
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex" }} role="region" aria-label="Dashboard Area">
       <Sidebar user={user} />
-      <main style={{ padding: "1rem", flex: 1 }}>
-        <h1>Dashboard</h1>
+      <main style={{ padding: "1rem", flex: 1 }} role="main" aria-label="Dashboard main content">
+        <h1 tabIndex={0}>Dashboard</h1>
         <p>Welcome, {user.name}!</p>
         {showModal && <OnboardingModal onComplete={handleOnboardingComplete} />}
         <div style={{ marginTop: "2rem" }}>
-          <h2>Upcoming Campaigns</h2>
+          <h2 tabIndex={0}>Upcoming Campaigns</h2>
           {/* Render the calendar only on the client */}
           <CalendarUpcoming campaigns={campaigns} />
           <ul>
-            {upcomingCampaigns.map(campaign => (
+            {upcomingCampaigns.map((campaign) => (
               <li key={campaign.id}>
-                {campaign.name} - {new Date(campaign.startDate).toLocaleDateString()}
+                <Link 
+                  href={`/campaigns/${campaign.id}`} 
+                  aria-label={`View details for campaign ${campaign.name}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  {campaign.name} - {new Date(campaign.startDate).toLocaleDateString()}
+                </Link>
               </li>
             ))}
           </ul>
+          {/* Brand Health Card wrapped in a navigation link */}
+          <div style={{ marginTop: "2rem" }}>
+            <Link 
+              href="/dashboard/brand-health" 
+              aria-label="View detailed Brand Health metrics" 
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <BrandHealthCard />
+            </Link>
+          </div>
+          {/* Influencer Card wrapped in a navigation link */}
+          <div style={{ marginTop: "2rem" }}>
+            <Link 
+              href="/dashboard/influencers" 
+              aria-label="View detailed Influencer Management information" 
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <InfluencerCard />
+            </Link>
+          </div>
         </div>
       </main>
     </div>
