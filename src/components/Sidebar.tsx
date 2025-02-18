@@ -1,5 +1,3 @@
-// Sidebar.tsx
-
 import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
@@ -28,13 +26,13 @@ const navItems: NavItem[] = [
     icon: "/Campaigns.svg",
     children: [
       { label: "List", href: "/campaigns" },
-      { label: "Wizard", href: "/campaigns/wizard" },
+      { label: "Wizard", href: "/campaigns/wizard/step-1" },
     ],
   },
   {
     label: "Creative Testing",
     href: "/creative-testing",
-    icon: "/Creative_Asset_testing.svg",
+    icon: "/Creative_Asset_Testing.svg",
     children: [
       { label: "List", href: "/creative-testing/list" },
       { label: "Reports", href: "/creative-testing/reports" },
@@ -49,17 +47,26 @@ const navItems: NavItem[] = [
       { label: "Reports", href: "/brand-lift/reports" },
     ],
   },
-  { label: "Brand Health", href: "/dashboard/brand-health", icon: "/Brand_Health.svg" },
-  { label: "Influencers", href: "/dashboard/influencers", icon: "/Influencers.svg" },
+  { label: "Brand Health", href: "/brand-health", icon: "/Brand_Health.svg" },
+  {
+    label: "Influencers",
+    // The parent link itself points to Marketplace:
+    href: "/influencers/marketplace",
+    icon: "/Influencers.svg",
+    children: [
+      { label: "Marketplace", href: "/influencers/marketplace" },
+      { label: "List", href: "/influencers" },
+    ],
+  },
   {
     label: "MMM",
-    href: "/mmm-analysis",
+    href: "/mmm",
     icon: "/MMM.svg",
     children: [
-      { label: "Dashboard", href: "/mmm-analysis/dashboard" },
-      { label: "Attribution", href: "/mmm-analysis/attribution" },
-      { label: "Weightings", href: "/mmm-analysis/weightings" },
-      { label: "Cross-channel", href: "/mmm-analysis/cross-channel" },
+      { label: "Dashboard", href: "/mmm/dashboard" },
+      { label: "Attribution", href: "/mmm/attribution" },
+      { label: "Weightings", href: "/mmm/weightings" },
+      { label: "Cross-channel", href: "/mmm/cross-channel" },
     ],
   },
   {
@@ -84,60 +91,112 @@ const settingsNavItem: NavItem = {
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const pathname = usePathname();
 
-  // Determines if the provided href is the current (active) route.
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+  // Returns true if the main nav item is active.
+  function isNavItemActive(href: string) {
+    return pathname === href || pathname.startsWith(href + "/");
+  }
 
-  // Responsive font sizes for main menu and submenu items.
+  /**
+   * Checks if a submenu item is active.
+   *
+   * Special cases:
+   * 1. For Campaigns Wizard, if the child href is "/campaigns/wizard/step-1",
+   *    we consider it active if the pathname starts with "/campaigns/wizard".
+   * 2. For Influencers, we prevent "/influencers/marketplace" from highlighting "List".
+   */
+  function isChildActive(parentHref: string, childHref: string) {
+    // Special case for Campaigns Wizard.
+    if (childHref === "/campaigns/wizard/step-1") {
+      return pathname.startsWith("/campaigns/wizard");
+    }
+
+    // Special handling for Influencers.
+    if (parentHref === "/influencers/marketplace") {
+      if (childHref === "/influencers/marketplace") {
+        return (
+          pathname === "/influencers/marketplace" ||
+          pathname.startsWith("/influencers/marketplace/")
+        );
+      } else if (childHref === "/influencers") {
+        // "List" is active if the path is "/influencers" or deeper,
+        // BUT must not be active if the path starts with "/influencers/marketplace".
+        if (pathname.startsWith("/influencers/marketplace")) {
+          return false;
+        }
+        return pathname === "/influencers" || pathname.startsWith("/influencers/");
+      }
+      return false;
+    }
+
+    // If a child has the same href as its parent, require an exact match.
+    if (childHref === parentHref) {
+      return pathname === childHref;
+    }
+
+    // Normal rule for all other submenu items.
+    return pathname === childHref || pathname.startsWith(childHref + "/");
+  }
+
   const mainFont = "text-sm md:text-base";
   const submenuFont = "text-xs md:text-sm";
 
-  // Active main menu items use the accent blue; otherwise inherit the color.
   const activeClasses = `text-[#00BFFF] font-medium ${mainFont} px-3 py-2`;
   const defaultClasses = `text-inherit font-medium ${mainFont} px-3 py-2`;
 
-  // Submenu items are indented more (using pl-12) and use dark grey when inactive.
   const activeSubmenuClasses = `text-[#00BFFF] font-medium ${submenuFont} pl-12`;
   const defaultSubmenuClasses = `text-[#4A5568] font-medium ${submenuFont} pl-12`;
 
   return (
-    <aside data-testid="sidebar" className="fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-100 flex flex-col">
-      {/* Navigation Items */}
+    <aside
+      data-testid="sidebar"
+      className="fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-100 flex flex-col"
+    >
       <nav aria-label="Sidebar Navigation" className="p-4 flex-grow">
         <ul className="list-none space-y-3">
           {navItems.map((item, index) => {
-            const active = isActive(item.href);
+            const parentIsActive = isNavItemActive(item.href);
+            const childIsActive = item.children?.some((child) =>
+              isChildActive(item.href, child.href)
+            );
+            const active = parentIsActive || childIsActive;
+
             return (
               <li key={index}>
-                <Link legacyBehavior href={item.href}>
-                  <a className={`flex items-center gap-2 no-underline ${active ? activeClasses : defaultClasses}`}>
-                    {item.icon && (
-                      <img
-                        src={item.icon}
-                        alt={`${item.label} icon`}
-                        className="w-5 h-5"
-                        style={{
-                          filter: active
-                            ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
-                            : "none",
-                        }}
-                      />
-                    )}
-                    <span>{item.label}</span>
-                  </a>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-2 no-underline ${
+                    active ? activeClasses : defaultClasses
+                  }`}
+                >
+                  {item.icon && (
+                    <img
+                      src={item.icon}
+                      alt={`${item.label} icon`}
+                      className="w-5 h-5"
+                      style={{
+                        filter: active
+                          ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
+                          : "none",
+                      }}
+                    />
+                  )}
+                  <span>{item.label}</span>
                 </Link>
                 {item.children && active && (
                   <ul className="list-none mt-1 space-y-1">
                     {item.children.map((child, childIndex) => {
-                      const childActive =
-                        pathname === child.href ||
-                        pathname.startsWith(child.href + "/");
+                      const childActiveResult = isChildActive(item.href, child.href);
                       return (
                         <li key={childIndex}>
-                          <Link legacyBehavior href={child.href}>
-                            <a className={`no-underline ${childActive ? activeSubmenuClasses : defaultSubmenuClasses}`}>
-                              {child.label}
-                            </a>
+                          <Link
+                            href={child.href}
+                            className={`no-underline ${
+                              childActiveResult
+                                ? activeSubmenuClasses
+                                : defaultSubmenuClasses
+                            }`}
+                          >
+                            {child.label}
                           </Link>
                         </li>
                       );
@@ -149,24 +208,30 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
           })}
         </ul>
       </nav>
-      {/* Settings fixed at the bottom left */}
-      <div className="px-4 py-3 border-t border-gray-300">
-        <Link legacyBehavior href={settingsNavItem.href}>
-          <a className={`flex items-center gap-2 no-underline ${isActive(settingsNavItem.href) ? activeClasses : defaultClasses}`}>
-            {settingsNavItem.icon && (
-              <img
-                src={settingsNavItem.icon}
-                alt={`${settingsNavItem.label} icon`}
-                className="w-5 h-5"
-                style={{
-                  filter: isActive(settingsNavItem.href)
-                    ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
-                    : "none",
-                }}
-              />
-            )}
-            <span>{settingsNavItem.label}</span>
-          </a>
+      {/* Bottom "Settings" section */}
+      <div
+        className="px-4 py-3 border-t border-gray-300"
+        style={{ height: "65px" }}
+      >
+        <Link
+          href={settingsNavItem.href}
+          className={`flex items-center gap-2 no-underline ${
+            isNavItemActive(settingsNavItem.href) ? activeClasses : defaultClasses
+          }`}
+        >
+          {settingsNavItem.icon && (
+            <img
+              src={settingsNavItem.icon}
+              alt={`${settingsNavItem.label} icon`}
+              className="w-5 h-5"
+              style={{
+                filter: isNavItemActive(settingsNavItem.href)
+                  ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
+                  : "none",
+              }}
+            />
+          )}
+          <span>{settingsNavItem.label}</span>
         </Link>
       </div>
     </aside>

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ReportsPage() {
+  const router = useRouter();
+
   // Local state for report configuration
   const [reportFormat, setReportFormat] = useState("PDF");
   const [metrics, setMetrics] = useState<string[]>([]);
@@ -39,7 +42,35 @@ AI Insights: ${includeAIInsights ? "Included" : "Not included"}
 
   return (
     <div className="container mx-auto p-4">
+      {/* Header Navigation */}
+      <div className="mb-6 border-b border-gray-300">
+        <nav className="flex space-x-4">
+          <button
+            onClick={() => router.push('/reports')}
+            className="py-2 px-4 font-bold border-b-2 border-blue-500"
+            aria-current="page"
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => router.push('/reports/historical')}
+            className="py-2 px-4 text-blue-500 hover:underline"
+          >
+            Historical Reports
+          </button>
+          <button
+            onClick={() => router.push('/reports/custom')}
+            className="py-2 px-4 text-blue-500 hover:underline"
+          >
+            Custom Reports
+          </button>
+        </nav>
+      </div>
+
+      {/* Page Title */}
       <h1 className="text-2xl font-bold mb-4">Report Generation Interface</h1>
+
+      {/* Report Form */}
       <form onSubmit={handleSubmit} className="mb-4 space-y-4">
         {/* Report Format */}
         <div>

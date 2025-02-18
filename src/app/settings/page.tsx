@@ -1,0 +1,540 @@
+"use client";
+
+import React, {
+  useState,
+  useCallback,
+  ChangeEvent,
+  FormEvent,
+  memo,
+} from 'react';
+import { useRouter } from 'next/navigation';
+
+/* --------------------------------------------------
+   Type Definitions
+----------------------------------------------------- */
+interface PersonalInfo {
+  firstName: string;
+  surname: string;
+  companyName: string;
+  email: string; // Read-only
+}
+
+interface NotificationPreferences {
+  campaignUpdates: boolean;
+  brandHealthAlerts: boolean;
+  aiInsightNotifications: boolean;
+}
+
+interface PasswordState {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+/* --------------------------------------------------
+   Helper Functions
+----------------------------------------------------- */
+// A simple password validator that checks for at least 8 characters,
+// 1 uppercase letter, 1 number and 1 special character.
+const validatePassword = (password: string): boolean => {
+  const minLength = 8;
+  const uppercaseRegex = /[A-Z]/;
+  const numberRegex = /[0-9]/;
+  const specialCharRegex = /[@#$%^&*(),.?":{}|<>]/;
+  return (
+    password.length >= minLength &&
+    uppercaseRegex.test(password) &&
+    numberRegex.test(password) &&
+    specialCharRegex.test(password)
+  );
+};
+
+/* --------------------------------------------------
+   Sub-Components
+----------------------------------------------------- */
+
+// Personal Information Section
+const PersonalInfoSection: React.FC<{
+  personalInfo: PersonalInfo;
+  isEditing: boolean;
+  onChange: (field: keyof Omit<PersonalInfo, 'email'>, value: string) => void;
+  onToggleEdit: () => void;
+}> = memo(({ personalInfo, isEditing, onChange, onToggleEdit }) => {
+  return (
+    <section className="mb-8">
+      <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+      <div className="space-y-4">
+        <div className="flex items-center">
+          <label className="w-32">Firstname:</label>
+          <input
+            type="text"
+            value={personalInfo.firstName}
+            onChange={(e) => onChange('firstName', e.target.value)}
+            disabled={!isEditing}
+            className="border p-2 w-64"
+            aria-label="Firstname"
+          />
+        </div>
+        <div className="flex items-center">
+          <label className="w-32">Surname:</label>
+          <input
+            type="text"
+            value={personalInfo.surname}
+            onChange={(e) => onChange('surname', e.target.value)}
+            disabled={!isEditing}
+            className="border p-2 w-64"
+            aria-label="Surname"
+          />
+        </div>
+        <div className="flex items-center">
+          <label className="w-32">Email:</label>
+          <input
+            type="email"
+            value={personalInfo.email}
+            readOnly
+            className="border p-2 w-64 bg-gray-100"
+            title="Email cannot be changed. Contact support for updates."
+            aria-label="Email address (read-only)"
+          />
+        </div>
+        <div className="flex items-center">
+          <label className="w-32">Company Name:</label>
+          <input
+            type="text"
+            value={personalInfo.companyName}
+            onChange={(e) => onChange('companyName', e.target.value)}
+            disabled={!isEditing}
+            className="border p-2 w-64"
+            aria-label="Company Name"
+          />
+        </div>
+        <button
+          onClick={onToggleEdit}
+          className="text-blue-500 underline"
+          aria-label="Edit profile settings"
+        >
+          {isEditing ? 'Stop Editing' : 'Edit'}
+        </button>
+      </div>
+    </section>
+  );
+});
+
+// Profile Picture Section
+const ProfilePictureSection: React.FC<{
+  profilePicturePreview: string;
+  onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onRemove: () => void;
+  error: string;
+}> = memo(({ profilePicturePreview, onFileChange, onRemove, error }) => {
+  return (
+    <section className="mb-8">
+      <h2 className="text-xl font-semibold mb-4">Profile Picture</h2>
+      <div className="space-y-4">
+        {profilePicturePreview && (
+          <div>
+            <img
+              src={profilePicturePreview}
+              alt="Profile preview"
+              className="w-20 h-20 object-cover rounded-full"
+            />
+          </div>
+        )}
+        <div>
+          <label
+            htmlFor="profilePicture"
+            className="cursor-pointer inline-block bg-blue-500 text-white py-2 px-4 rounded"
+          >
+            Upload or Change
+          </label>
+          <input
+            id="profilePicture"
+            type="file"
+            accept="image/jpeg, image/png"
+            onChange={onFileChange}
+            className="hidden"
+            aria-label="Upload or change profile picture"
+          />
+        </div>
+        {profilePicturePreview && (
+          <button
+            onClick={onRemove}
+            className="text-red-500 underline"
+            aria-label="Remove Profile Picture"
+          >
+            Remove Profile Picture
+          </button>
+        )}
+        {error && <p className="text-red-500">{error}</p>}
+      </div>
+    </section>
+  );
+});
+
+// Password Management Section
+const PasswordManagementSection: React.FC<{
+  passwordState: PasswordState;
+  onChange: (field: keyof PasswordState, value: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  error: string;
+  success: string;
+}> = memo(({ passwordState, onChange, onSubmit, error, success }) => {
+  return (
+    <section className="mb-8">
+      <h2 className="text-xl font-semibold mb-4">Password Management</h2>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="flex items-center">
+          <label className="w-40">Current Password:</label>
+          <input
+            type="password"
+            value={passwordState.currentPassword}
+            onChange={(e) => onChange('currentPassword', e.target.value)}
+            placeholder="*****************"
+            className="border p-2 w-64"
+            aria-label="Current Password"
+          />
+        </div>
+        <div className="flex items-center">
+          <label className="w-40">New Password:</label>
+          <input
+            type="password"
+            value={passwordState.newPassword}
+            onChange={(e) => onChange('newPassword', e.target.value)}
+            placeholder="Enter new password"
+            className="border p-2 w-64"
+            aria-label="New Password"
+          />
+        </div>
+        <div className="flex items-center">
+          <label className="w-40">Confirm New Password:</label>
+          <input
+            type="password"
+            value={passwordState.confirmNewPassword}
+            onChange={(e) => onChange('confirmNewPassword', e.target.value)}
+            placeholder="Re-enter new password"
+            className="border p-2 w-64"
+            aria-label="Confirm New Password"
+          />
+        </div>
+        {error && <p className="text-red-500">{error}</p>}
+        {success && <p className="text-green-500">{success}</p>}
+        <button
+          type="submit"
+          disabled={
+            !passwordState.currentPassword ||
+            !passwordState.newPassword ||
+            !passwordState.confirmNewPassword ||
+            !validatePassword(passwordState.newPassword)
+          }
+          className={`w-40 h-10 rounded text-white ${
+            !passwordState.currentPassword ||
+            !passwordState.newPassword ||
+            !passwordState.confirmNewPassword ||
+            !validatePassword(passwordState.newPassword)
+              ? 'bg-blue-300'
+              : 'bg-blue-500'
+          }`}
+          aria-label="Change password"
+        >
+          Change Password
+        </button>
+      </form>
+    </section>
+  );
+});
+
+// Notification Preferences Section
+const NotificationPreferencesSection: React.FC<{
+  preferences: NotificationPreferences;
+  onToggle: (field: keyof NotificationPreferences, value: boolean) => void;
+}> = memo(({ preferences, onToggle }) => {
+  return (
+    <section className="mb-8">
+      <h2 className="text-xl font-semibold mb-4">Notification Preferences</h2>
+      <div className="space-y-2">
+        <div>
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={preferences.campaignUpdates}
+              onChange={(e) => onToggle('campaignUpdates', e.target.checked)}
+              className="form-checkbox"
+              aria-label="Toggle campaign update notifications"
+            />
+            <span className="ml-2">Campaign Updates</span>
+          </label>
+        </div>
+        <div>
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={preferences.brandHealthAlerts}
+              onChange={(e) => onToggle('brandHealthAlerts', e.target.checked)}
+              className="form-checkbox"
+              aria-label="Toggle brand health alerts"
+            />
+            <span className="ml-2">Brand Health Alerts</span>
+          </label>
+        </div>
+        <div>
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={preferences.aiInsightNotifications}
+              onChange={(e) => onToggle('aiInsightNotifications', e.target.checked)}
+              className="form-checkbox"
+              aria-label="Toggle AI insight notifications"
+            />
+            <span className="ml-2">AI Insight Notifications</span>
+          </label>
+        </div>
+      </div>
+    </section>
+  );
+});
+
+/* --------------------------------------------------
+   Main Profile Settings Page Component
+----------------------------------------------------- */
+const ProfileSettingsPage: React.FC = () => {
+  const router = useRouter();
+
+  // Personal Information state
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    firstName: 'Ed',
+    surname: 'Addams',
+    companyName: 'The Write Company',
+    email: 'edaddams@domain.com',
+  });
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handlePersonalInfoChange = useCallback(
+    (field: keyof Omit<PersonalInfo, 'email'>, value: string) => {
+      setPersonalInfo((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+  const toggleEditing = useCallback(() => setIsEditing((prev) => !prev), []);
+
+  // Profile Picture state
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState('');
+  const [profilePictureError, setProfilePictureError] = useState('');
+
+  const handleProfilePictureChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setProfilePictureError('');
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      const validTypes = ['image/jpeg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        setProfilePictureError('Error: Unsupported file type. Please upload a JPG or PNG.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setProfilePictureError('Error: File size too large. Maximum allowed size is 5MB.');
+        return;
+      }
+      setProfilePicture(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicturePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const removeProfilePicture = useCallback(() => {
+    setProfilePicture(null);
+    setProfilePicturePreview('');
+  }, []);
+
+  // Password Management state
+  const [passwordState, setPasswordState] = useState<PasswordState>({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  const handlePasswordChange = useCallback(
+    (field: keyof PasswordState, value: string) => {
+      setPasswordState((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  const handlePasswordSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      setPasswordError('');
+      setPasswordSuccess('');
+      if (passwordState.newPassword !== passwordState.confirmNewPassword) {
+        setPasswordError('Error: Passwords do not match.');
+        return;
+      }
+      if (!validatePassword(passwordState.newPassword)) {
+        setPasswordError('Error: Password does not meet security requirements.');
+        return;
+      }
+      setPasswordSuccess('Password updated successfully!');
+      setPasswordState({
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      });
+    },
+    [passwordState]
+  );
+
+  // Notification Preferences state
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
+    campaignUpdates: false,
+    brandHealthAlerts: false,
+    aiInsightNotifications: false,
+  });
+
+  const handleTogglePreference = useCallback(
+    (field: keyof NotificationPreferences, value: boolean) => {
+      setPreferences((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  // Save and Cancel state
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const markChanges = useCallback(() => setHasChanges(true), []);
+
+  const handlePersonalInfoChangeWithMark = useCallback(
+    (field: keyof Omit<PersonalInfo, 'email'>, value: string) => {
+      handlePersonalInfoChange(field, value);
+      markChanges();
+    },
+    [handlePersonalInfoChange, markChanges]
+  );
+  const handleTogglePreferenceWithMark = useCallback(
+    (field: keyof NotificationPreferences, value: boolean) => {
+      handleTogglePreference(field, value);
+      markChanges();
+    },
+    [handleTogglePreference, markChanges]
+  );
+
+  const handleSaveChanges = useCallback(() => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      setHasChanges(false);
+      alert('Profile updated successfully!');
+    }, 2000);
+  }, []);
+
+  const handleCancel = useCallback(() => {
+    setPersonalInfo({
+      firstName: 'Ed',
+      surname: 'Addams',
+      companyName: 'The Write Company',
+      email: 'edaddams@domain.com',
+    });
+    setIsEditing(false);
+    setProfilePicture(null);
+    setProfilePicturePreview('');
+    setPreferences({
+      campaignUpdates: false,
+      brandHealthAlerts: false,
+      aiInsightNotifications: false,
+    });
+    setHasChanges(false);
+  }, []);
+
+  return (
+    <div className="p-6">
+      {/* Page Title & Primary Action Buttons */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-[#333333]">Profile Settings</h1>
+        <div className="space-x-2">
+          <button
+            onClick={handleCancel}
+            className="w-36 h-10 bg-gray-500 text-white rounded"
+            aria-label="Cancel edits"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveChanges}
+            disabled={!hasChanges || isSaving}
+            className={`w-36 h-10 rounded text-white ${
+              !hasChanges || isSaving ? 'bg-blue-300' : 'bg-blue-500'
+            }`}
+            aria-label="Save profile updates"
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="mb-6 border-b border-gray-300">
+        <nav className="flex space-x-4">
+          <button
+            onClick={() => router.push('/settings')}
+            className="py-2 px-4 font-bold border-b-2 border-blue-500"
+            aria-current="page"
+          >
+            Profile Settings
+          </button>
+          <button
+            onClick={() => router.push('/settings/team-management')}
+            className="py-2 px-4 text-blue-500 hover:underline"
+          >
+            Team Management
+          </button>
+          <button
+            onClick={() => router.push('/settings/branding')}
+            className="py-2 px-4 text-blue-500 hover:underline"
+          >
+            Branding
+          </button>
+        </nav>
+      </div>
+
+      {/* Render Sub-Components */}
+      <PersonalInfoSection
+        personalInfo={personalInfo}
+        isEditing={isEditing}
+        onChange={handlePersonalInfoChangeWithMark}
+        onToggleEdit={toggleEditing}
+      />
+
+      <ProfilePictureSection
+        profilePicturePreview={profilePicturePreview}
+        onFileChange={(e) => {
+          handleProfilePictureChange(e);
+          markChanges();
+        }}
+        onRemove={() => {
+          removeProfilePicture();
+          markChanges();
+        }}
+        error={profilePictureError}
+      />
+
+      <PasswordManagementSection
+        passwordState={passwordState}
+        onChange={handlePasswordChange}
+        onSubmit={handlePasswordSubmit}
+        error={passwordError}
+        success={passwordSuccess}
+      />
+
+      <NotificationPreferencesSection
+        preferences={preferences}
+        onToggle={handleTogglePreferenceWithMark}
+      />
+    </div>
+  );
+};
+
+export default ProfileSettingsPage;
