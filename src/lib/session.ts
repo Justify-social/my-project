@@ -1,23 +1,8 @@
 // src/lib/session.ts
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function getSession(request?: Request): Promise<any | null> {
-  // Await cookies() so that we can use get()
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("appSession.0");
-  console.log("Session cookie in getSession:", sessionCookie);
-
-  // For testing, if the session cookie exists, return a dummy session object.
-  if (sessionCookie) {
-    return {
-      user: {
-        email: "admin@example.com",
-        name: "Test User",
-        role: "admin",
-      },
-    };
-  }
-
-  // Otherwise return null.
+export async function getSession() {
+  // Temporarily return null until auth is fully set up
   return null;
 }

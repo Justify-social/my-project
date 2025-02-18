@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, ChangeEvent, useCallback } from "react";
+import React, { useState, ChangeEvent, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ResponsiveContainer,
@@ -132,7 +132,7 @@ const EngagementLineChart: React.FC = () => (
 // -------------------------------------------------------------------
 // Main Influencer Profile Page Component
 // -------------------------------------------------------------------
-export default function InfluencerProfilePage() {
+const ProfileContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const influencerId = searchParams.get("id");
@@ -435,5 +435,14 @@ export default function InfluencerProfilePage() {
         </button>
       </div>
     </div>
+  );
+};
+
+// Main page component with Suspense boundary
+export default function InfluencerProfilePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProfileContent />
+    </Suspense>
   );
 }

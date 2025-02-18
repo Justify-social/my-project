@@ -1,7 +1,17 @@
 // src/app/api/auth/callback/route.ts
 import { handleCallback } from "@auth0/nextjs-auth0";
-import prisma from "../../../../lib/prisma";
-import { getSession } from "../../../../lib/session";
+import { PrismaClient } from '@prisma/client'
+
+// Initialize Prisma Client properly for edge runtime
+declare global {
+  var prisma: PrismaClient | undefined
+}
+
+const prisma = globalThis.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma
+}
 
 export const GET = async (request: Request) => {
   try {
