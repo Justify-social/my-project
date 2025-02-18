@@ -1,198 +1,79 @@
 "use client";
 
-import React, {
-  useState,
-  useReducer,
-  useEffect,
-  useCallback,
-  ChangeEvent,
-  FC
-} from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
-
-// Dynamically import react-beautiful-dnd components (client-only)
-const DragDropContext = dynamic(
-  () => import("react-beautiful-dnd").then((mod) => mod.DragDropContext),
-  { ssr: false }
-);
-const Droppable = dynamic(
-  () => import("react-beautiful-dnd").then((mod) => mod.Droppable),
-  { ssr: false }
-);
-const Draggable = dynamic(
-  () => import("react-beautiful-dnd").then((mod) => mod.Draggable),
-  { ssr: false }
-);
-
-/* ============================================================================
-   TYPE DEFINITIONS
-   ============================================================================ */
-
-interface ReviewerComment {
-  id: number;
-  name: string;
-  comment: string;
-  suggestion: "Implement Suggestions" | "No Changes Needed";
-}
-
-interface SurveyAnswer {
-  id: string;
-  label: string;
-  imageUrl?: string;
-}
-
-interface SurveyQuestion {
-  id: string;
-  prompt: string;
-  type: "radio" | "text" | "multiple";
-  kpi: string;
-  answers?: SurveyAnswer[];
-  placeholder?: string;
-  selectedAnswer?: string;
-  typedResponse?: string;
-}
-
-interface SurveyData {
-  id: number;
-  title: string;
-  subTitle: string;
-  questions: SurveyQuestion[];
-}
-
-/**
- * Maps a KPI key to its display title.
- */
-function getKpiTitle(key: string): string {
-  const kpiMap: Record<string, string> = {
-    adRecall: "Ad Recall",
-    brandAwareness: "Brand Awareness",
-    consideration: "Consideration",
-    messageAssociation: "Message Association",
-    brandPreference: "Brand Preference",
-    purchaseIntent: "Purchase Intent",
-    actionIntent: "Action Intent",
-    recommendationIntent: "Recommendation Intent",
-    advocacy: "Advocacy",
-    overall: "Overall Brand Lift"
-  };
-  return kpiMap[key] || key;
-}
-
-/* ============================================================================
-   DEFAULT DATA (Fallback)
-   ============================================================================ */
-
-const catImages = [
-  "https://placekitten.com/100/100",
-  "https://placekitten.com/101/100",
-  "https://placekitten.com/102/100",
-  "https://placekitten.com/103/100"
-];
-
-const defaultSurvey: SurveyData = {
-  id: 1,
-  title: "Collaborative Approval & Sign-Off",
-  subTitle:
-    "A process to ensure team consensus and final sign-off before completion",
-  questions: [
-    {
-      id: "q1",
-      prompt: "How familiar are you with the brand shown in the clip?",
-      type: "radio",
-      kpi: "adRecall",
-      answers: [
-        { id: "q1a1", label: "very familiar", imageUrl: catImages[0] },
-        { id: "q1a2", label: "somewhat familiar", imageUrl: catImages[1] },
-        { id: "q1a3", label: "not familiar at all", imageUrl: catImages[2] },
-        { id: "q1a4", label: "no/other", imageUrl: catImages[3] }
-      ]
-    },
-    // ... rest of the questions array (exactly as in your original file)
-  ]
-};
-
-const defaultComments: ReviewerComment[] = [
-  {
-    id: 1,
-    name: "Lucas Atkins",
-    comment: "Could we add a short intro or a note at the beginning for clarity?",
-    suggestion: "Implement Suggestions"
-  },
-  {
-    id: 2,
-    name: "Ethan Clay",
-    comment: "Maybe we shorten the question about brand talk? It's a bit long.",
-    suggestion: "Implement Suggestions"
-  },
-  {
-    id: 3,
-    name: "Marta Escobar",
-    comment: "I think the images are fun! No real changes needed.",
-    suggestion: "No Changes Needed"
-  },
-  {
-    id: 4,
-    name: "Asra Patel",
-    comment: "All good from my side!",
-    suggestion: "No Changes Needed"
-  }
-];
-
-/* ============================================================================
-   STATE MANAGEMENT WITH useReducer
-   ============================================================================ */
-
-type SurveyAction =
-  | { type: "SET_SURVEY"; survey: SurveyData }
-  | { type: "SELECT_ANSWER"; questionId: string; answerId: string }
-  | { type: "TYPE_RESPONSE"; questionId: string; response: string };
-
-function surveyReducer(
-  state: SurveyData,
-  action: SurveyAction
-): SurveyData {
-  switch (action.type) {
-    case "SET_SURVEY":
-      return action.survey;
-    case "SELECT_ANSWER":
-      return {
-        ...state,
-        questions: state.questions.map(q =>
-          q.id === action.questionId && q.answers
-            ? { ...q, selectedAnswer: action.answerId }
-            : q
-        )
-      };
-    case "TYPE_RESPONSE":
-      return {
-        ...state,
-        questions: state.questions.map(q =>
-          q.id === action.questionId && q.type === "text"
-            ? { ...q, typedResponse: action.response }
-            : q
-        )
-      };
-    default:
-      return state;
-  }
-}
-
-/* ============================================================================
-   COMPONENTS
-   ============================================================================ */
-
-// ... All your component definitions (SurveyHeader, SurveyQuestionCard, etc.) exactly as they were
-
-/* ============================================================================
-   MAIN COMPONENT
-   ============================================================================ */
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SurveyApprovalContent() {
+  const router = useRouter();
+  const [selectedSurvey, setSelectedSurvey] = useState('');
+
+  const surveys = [
+    {
+      id: '1',
+      name: 'Summer Campaign Survey',
+      status: 'Pending Approval',
+      questions: 12,
+      lastModified: '2024-02-18',
+    },
+    {
+      id: '2',
+      name: 'Product Launch Survey',
+      status: 'Approved',
+      questions: 15,
+      lastModified: '2024-02-17',
+    },
+    {
+      id: '3',
+      name: 'Brand Awareness Survey',
+      status: 'In Review',
+      questions: 10,
+      lastModified: '2024-02-16',
+    },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Approved':
+        return 'bg-green-100 text-green-800';
+      case 'Pending Approval':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'In Review':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleSurveySelect = (surveyId: string) => {
+    setSelectedSurvey(surveyId);
+    router.push(`/brand-lift/survey-design?survey=${surveyId}`);
+  };
+
   return (
-    <div>
-      <h1>Survey Approval Content</h1>
-      {/* Full content will be added later */}
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <h1 className="text-2xl font-bold mb-6">Survey Approval</h1>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {surveys.map((survey) => (
+          <div
+            key={survey.id}
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handleSurveySelect(survey.id)}
+          >
+            <h3 className="text-lg font-semibold mb-2">{survey.name}</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className={`px-2 py-1 rounded text-sm ${getStatusColor(survey.status)}`}>
+                  {survey.status}
+                </span>
+                <span className="text-gray-600">{survey.questions} Questions</span>
+              </div>
+              <div className="text-sm text-gray-500">
+                Last modified: {survey.lastModified}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 } 

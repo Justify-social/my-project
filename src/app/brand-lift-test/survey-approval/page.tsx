@@ -3,8 +3,8 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-const SurveyPreviewContent = dynamic(
-  () => import('@/components/brand-lift/SurveyPreviewContent'),
+const SurveyApprovalContent = dynamic(
+  () => import('@/components/brand-lift/SurveyApprovalContent'),
   {
     ssr: false,
     loading: () => <div>Loading...</div>
@@ -14,7 +14,7 @@ const SurveyPreviewContent = dynamic(
 export default function Page() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SurveyPreviewContent />
+      <SurveyApprovalContent />
     </Suspense>
   );
 }

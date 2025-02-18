@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, Variants } from "framer-motion";
@@ -14,9 +14,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler,
-  ChartData,
-  ChartOptions
+  Filler
 } from 'chart.js';
 
 // Register ChartJS components
@@ -147,27 +145,47 @@ const KeyMetricsAtAGlance: React.FC<{ metrics: KeyMetric[] }> = ({ metrics }) =>
  * BarChartSection
  * Displays a bar chart with a title.
  */
-const BarChartSection = ({ title, data, options }: { title: string; data: ChartData<'bar'>; options: ChartOptions<'bar'> }) => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h3 className="text-lg font-medium mb-4">{title}</h3>
-    <div className="h-[300px]">
-      <Bar data={data} options={options} />
-    </div>
-  </div>
-);
+const BarChartSection: React.FC<BarChartProps> = ({ title, data, options }) => {
+  return (
+    <motion.div
+      className="bg-white rounded-lg shadow p-4"
+      variants={sectionVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+    >
+      <h2 className="text-base font-semibold text-primary-color mb-4">
+        {title}
+      </h2>
+      <div className="relative w-full h-64">
+        <Bar data={data} options={options} />
+      </div>
+    </motion.div>
+  );
+};
 
 /**
  * LineChartSection
  * Displays a line chart with a title.
  */
-const LineChartSection = ({ title, data, options }: { title: string; data: ChartData<'line'>; options: ChartOptions<'line'> }) => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h3 className="text-lg font-medium mb-4">{title}</h3>
-    <div className="h-[300px]">
-      <Line data={data} options={options} />
-    </div>
-  </div>
-);
+const LineChartSection: React.FC<LineChartProps> = ({ title, data, options }) => {
+  return (
+    <motion.div
+      className="bg-white rounded-lg shadow p-4"
+      variants={sectionVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+    >
+      <h2 className="text-base font-semibold text-primary-color mb-4">
+        {title}
+      </h2>
+      <div className="relative w-full h-64">
+        <Line data={data} options={options} />
+      </div>
+    </motion.div>
+  );
+};
 
 /**
  * WordCloudSection
@@ -196,7 +214,7 @@ const WordCloudSection: React.FC = () => {
    MAIN COMPONENT: BrandLiftResultsPage
    ============================================================================ */
 
-function BrandLiftReportContent() {
+export default function BrandLiftResultsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -481,13 +499,5 @@ function BrandLiftReportContent() {
         </section>
       </div>
     </main>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <BrandLiftReportContent />
-    </Suspense>
   );
 }
