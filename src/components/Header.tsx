@@ -1,20 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 interface HeaderProps {
   companyName: string;
   remainingCredits: number;
   notificationsCount: number;
-  profileImageUrl: string;
+  profileImageUrl?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits,
   notificationsCount,
-  profileImageUrl,
+  profileImageUrl = "/profile-image.svg",
 }) => {
+  const { user } = useUser();
+
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
       <div className="flex items-center justify-between px-4 py-3">
@@ -70,10 +73,18 @@ const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Profile Image - Wrapped in Link to /settings */}
+          {/* Profile Image */}
           <Link href="/settings">
             <div className="w-8 h-8 rounded-full overflow-hidden cursor-pointer">
-              <Image src={profileImageUrl} alt="Profile" width={32} height={32} />
+              <img 
+                src={user?.picture || profileImageUrl} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/profile-image.svg";
+                }}
+              />
             </div>
           </Link>
         </div>
