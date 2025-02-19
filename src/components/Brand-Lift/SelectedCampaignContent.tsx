@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SelectedCampaignContent() {
   const router = useRouter();
-  const [selectedCampaign, setSelectedCampaign] = useState('');
+  const [selectedCampaign, setSelectedCampaign] = useState("");
 
   const campaigns = [
-    { id: '1', name: 'Summer Campaign 2024', status: 'Active', progress: 75 },
-    { id: '2', name: 'Product Launch Q1', status: 'Completed', progress: 100 },
-    { id: '3', name: 'Brand Awareness Drive', status: 'Active', progress: 45 },
+    { id: "1", name: "Summer Campaign 2024", status: "Active", progress: 75 },
+    { id: "2", name: "Product Launch Q1", status: "Completed", progress: 100 },
+    { id: "3", name: "Brand Awareness Drive", status: "Active", progress: 45 },
   ];
 
   const handleCampaignSelect = (campaignId: string) => {
@@ -31,7 +31,7 @@ export default function SelectedCampaignContent() {
             <h3 className="text-lg font-semibold mb-2">{campaign.name}</h3>
             <div className="flex justify-between items-center mb-4">
               <span className={`px-2 py-1 rounded text-sm ${
-                campaign.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                campaign.status === "Active" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
               }`}>
                 {campaign.status}
               </span>
@@ -48,4 +48,4 @@ export default function SelectedCampaignContent() {
       </div>
     </div>
   );
-} 
+}
