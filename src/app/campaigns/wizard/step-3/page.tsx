@@ -570,13 +570,38 @@ export default function AudienceTargetingStep() {
     competitors: data.audience.competitors || [],
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values: AudienceValues,
     actions: FormikHelpers<AudienceValues>
   ) => {
-    updateData("audience", values);
-    router.push("/campaigns/wizard/step-4");
-    actions.setSubmitting(false);
+    try {
+      // Get campaign ID from context or URL
+      const campaignId = data.campaignId; // Assuming you have this in your wizard context
+
+      // Save to database
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save campaign data');
+      }
+
+      // Update local state
+      updateData("audience", values);
+      
+      // Proceed to next step
+      router.push("/campaigns/wizard/step-4");
+    } catch (error) {
+      console.error('Error saving campaign data:', error);
+      actions.setStatus({ error: 'Failed to save campaign data. Please try again.' });
+    } finally {
+      actions.setSubmitting(false);
+    }
   };
 
   return (

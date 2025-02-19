@@ -8,12 +8,23 @@ datasource db {
 }
 
 model Campaign {
-  id        Int       @id @default(autoincrement())
-  name      String
-  startDate DateTime?
-  endDate   DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  name              String
+  businessGoal      String?   @db.Text
+  startDate         DateTime?
+  endDate           DateTime?
+  timeZone          String?
+  platforms         String[]  @default([])
+  totalBudget       Float?
+  socialMediaBudget Float?
+  primaryContact    Json?     // Stores contact information
+  secondaryContact  Json?     // Stores optional contact information
+  currency          String?
+  platform          String?
+  influencerHandle  String?
+  currentStep       Int       @default(1)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model User {

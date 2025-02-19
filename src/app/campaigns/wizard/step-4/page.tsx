@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
@@ -26,8 +27,19 @@ interface Asset {
   };
 }
 
-export interface CreativeAssetsValues {
-  // This step does not use Formik for assets; assets are managed in component state.
+interface CreativeAsset {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  title: string;
+  description?: string;
+}
+
+export interface CreativeValues {
+  assets: CreativeAsset[];
+  guidelines: string;
+  requirements: string[];
+  notes: string;
 }
 
 // =============================================================================
@@ -43,6 +55,21 @@ const assetDetailsSchema = Yup.object().shape({
     .positive("Budget cannot be negative.")
     .max(campaignBudget, "Budget cannot exceed total campaign budget.")
     .required("Budget is required."),
+});
+
+const CreativeSchema = Yup.object().shape({
+  assets: Yup.array().of(
+    Yup.object().shape({
+      id: Yup.string().required(),
+      type: Yup.string().oneOf(['image', 'video']).required(),
+      url: Yup.string().required('Asset URL is required'),
+      title: Yup.string().required('Asset title is required'),
+      description: Yup.string(),
+    })
+  ),
+  guidelines: Yup.string(),
+  requirements: Yup.array().of(Yup.string()),
+  notes: Yup.string(),
 });
 
 // =============================================================================
@@ -418,7 +445,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 };
 
 // =============================================================================
-// MAIN PAGE COMPONENT: CREATIVE ASSETS (STEP 4)
+// MAIN COMPONENT: CREATIVE ASSETS (STEP 4)
 // =============================================================================
 
 export default function CreativeAssetsStep() {
@@ -427,6 +454,23 @@ export default function CreativeAssetsStep() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [confirmDeleteAsset, setConfirmDeleteAsset] = useState<Asset | null>(null);
+  const [error, setError] = useState('');
+
+  const initialValues: CreativeValues = {
+    assets: data.creativeAssets?.assets || [],
+    guidelines: data.creativeAssets?.guidelines || '',
+    requirements: data.creativeAssets?.requirements || [],
+    notes: data.creativeAssets?.notes || '',
+  };
+
+  const handleSubmit = (
+    values: CreativeValues,
+    actions: FormikHelpers<CreativeValues>
+  ) => {
+    updateData("creativeAssets", values);
+    router.push("/campaigns/wizard/step-5");
+    actions.setSubmitting(false);
+  };
 
   // ---------- File Upload Handling ----------
   const handleFilesAdded = (files: FileList) => {
@@ -503,15 +547,19 @@ export default function CreativeAssetsStep() {
 
   // ---------- Save as Draft ----------
   const handleSaveAsDraft = () => {
-    updateData("creativeAssets", assets);
+    updateData("creativeAssets", {
+      assets: assets.map((a) => ({
+        id: a.id,
+        type: a.file.type.split('/')[0] as 'image' | 'video',
+        url: URL.createObjectURL(a.file),
+        title: a.details.assetName,
+        description: a.details.description,
+      })),
+      guidelines: '',
+      requirements: [],
+      notes: '',
+    });
     alert("Draft saved!");
-  };
-
-  // ---------- Next Button Handling ----------
-  const handleSubmit = () => {
-    if (isNextDisabled) return;
-    updateData("creativeAssets", assets);
-    router.push("/campaigns/wizard/step-5");
   };
 
   // ---------- Keyboard: Close preview on Escape ----------
@@ -527,118 +575,141 @@ export default function CreativeAssetsStep() {
 
   return (
     <ErrorBoundary>
-      <div className="max-w-4xl mx-auto p-5 space-y-8" style={{ paddingBottom: "100px" }}>
-        <Header currentStep={4} totalSteps={5} />
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Step 4: Creative Assets</h1>
-          <button
-            onClick={handleSaveAsDraft}
-            className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 transition"
-          >
-            Save as Draft
-          </button>
-        </div>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={CreativeSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ setFieldValue, isValid, isSubmitting, submitForm, values }) => (
+          <>
+            <div className="max-w-4xl mx-auto p-4 pb-32">
+              <Header currentStep={4} totalSteps={5} />
+              
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">Step 4: Creative Assets</h1>
+                <button
+                  onClick={handleSaveAsDraft}
+                  className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+                >
+                  Save as Draft
+                </button>
+              </div>
 
-        {/* Asset Upload Section */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Asset Upload</h2>
-          <UploadArea onFilesAdded={handleFilesAdded} />
-        </section>
+              <Form className="space-y-8">
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                  </div>
+                )}
 
-        {/* Uploaded Assets List */}
-        {assets.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-xl font-bold">Uploaded Assets</h2>
-            {assets.map((asset) => (
-              <AssetRow
-                key={asset.id}
-                asset={asset}
-                onPreview={(asset) => setPreviewAsset(asset)}
-                onDelete={handleDeleteAsset}
-                onRetry={() => {}}
-                onUpdate={(updatedAsset) =>
-                  setAssets((prev) => prev.map((a) => (a.id === updatedAsset.id ? updatedAsset : a)))
-                }
-                autoEdit={asset.progress === 100 && !asset.error}
-              />
-            ))}
-          </section>
+                {/* Creative Assets Upload Section */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Upload Assets</h2>
+                  <UploadArea onFilesAdded={handleFilesAdded} />
+                </div>
+
+                {/* Guidelines Section */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Creative Guidelines</h2>
+                  <Field
+                    as="textarea"
+                    name="guidelines"
+                    className="w-full p-2 border rounded"
+                    rows={4}
+                    placeholder="Enter creative guidelines..."
+                  />
+                  <ErrorMessage
+                    name="guidelines"
+                    component="div"
+                    className="text-red-600 text-sm"
+                  />
+                </div>
+
+                {/* Requirements Section */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Requirements</h2>
+                  {/* Add your requirements component here */}
+                </div>
+
+                {/* Notes Section */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Additional Notes</h2>
+                  <Field
+                    as="textarea"
+                    name="notes"
+                    className="w-full p-2 border rounded"
+                    rows={4}
+                    placeholder="Enter any additional notes..."
+                  />
+                  <ErrorMessage
+                    name="notes"
+                    component="div"
+                    className="text-red-600 text-sm"
+                  />
+                </div>
+              </Form>
+            </div>
+
+            {/* Fixed Bottom Navigation Bar */}
+            <ProgressBar
+              currentStep={4}
+              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
+              onBack={() => router.push("/campaigns/wizard/step-3")}
+              onNext={submitForm}
+              disableNext={!isValid || isSubmitting}
+              data-cy="next-button"
+            />
+          </>
         )}
+      </Formik>
 
-        {/* Full-width Next Button with validation feedback */}
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isNextDisabled}
-            className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            Next
-          </button>
-          {isNextDisabled && (
-            <p className="mt-2 text-center text-red-600 text-sm">
-              Please ensure all fully uploaded assets have a valid asset name and budget.
-            </p>
-          )}
-        </div>
-
-        {/* Modal for File Preview */}
-        <Modal isOpen={!!previewAsset} onClose={() => setPreviewAsset(null)}>
-          {previewAsset && (
-            <div>
-              <h2 className="font-bold mb-4">Preview: {previewAsset.file.name}</h2>
-              {previewAsset.file.type.includes("video") ? (
-                <video controls className="w-full">
-                  <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
-                  Your browser does not support the video tag.
-                </video>
-              ) : previewAsset.file.type.includes("image") ? (
-                <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full" />
-              ) : previewAsset.file.type.includes("pdf") ? (
-                <embed
-                  src={URL.createObjectURL(previewAsset.file)}
-                  type="application/pdf"
-                  width="100%"
-                  height="600px"
-                />
-              ) : (
-                <p>Preview not available for this file type.</p>
-              )}
-            </div>
-          )}
-        </Modal>
-
-        {/* Modal for Delete Confirmation */}
-        <Modal isOpen={!!confirmDeleteAsset} onClose={() => setConfirmDeleteAsset(null)}>
+      {/* Modal for File Preview */}
+      <Modal isOpen={!!previewAsset} onClose={() => setPreviewAsset(null)}>
+        {previewAsset && (
           <div>
-            <h2 className="font-bold mb-4">Confirm Delete</h2>
-            <p>Are you sure you want to delete this asset? This action cannot be undone.</p>
-            <div className="mt-4 flex space-x-4">
-              <button
-                onClick={() => setConfirmDeleteAsset(null)}
-                className="px-4 py-2 border rounded hover:bg-gray-100 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-              >
-                Delete Permanently
-              </button>
-            </div>
+            <h2 className="font-bold mb-4">Preview: {previewAsset.file.name}</h2>
+            {previewAsset.file.type.includes("video") ? (
+              <video controls className="w-full">
+                <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
+                Your browser does not support the video tag.
+              </video>
+            ) : previewAsset.file.type.includes("image") ? (
+              <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full" />
+            ) : previewAsset.file.type.includes("pdf") ? (
+              <embed
+                src={URL.createObjectURL(previewAsset.file)}
+                type="application/pdf"
+                width="100%"
+                height="600px"
+              />
+            ) : (
+              <p>Preview not available for this file type.</p>
+            )}
           </div>
-        </Modal>
-      </div>
+        )}
+      </Modal>
 
-      {/* Fixed Bottom Navigation Bar using the imported ProgressBar component */}
-      <ProgressBar
-        currentStep={4}
-        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-        onBack={() => router.push("/campaigns/wizard/step-3")}
-        onNext={() => handleSubmit()}
-        disableNext={isNextDisabled}
-      />
+      {/* Modal for Delete Confirmation */}
+      <Modal isOpen={!!confirmDeleteAsset} onClose={() => setConfirmDeleteAsset(null)}>
+        <div>
+          <h2 className="font-bold mb-4">Confirm Delete</h2>
+          <p>Are you sure you want to delete this asset? This action cannot be undone.</p>
+          <div className="mt-4 flex space-x-4">
+            <button
+              onClick={() => setConfirmDeleteAsset(null)}
+              className="px-4 py-2 border rounded hover:bg-gray-100 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+            >
+              Delete Permanently
+            </button>
+          </div>
+        </div>
+      </Modal>
     </ErrorBoundary>
   );
 }
