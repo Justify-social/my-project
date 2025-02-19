@@ -21,11 +21,12 @@
 }
 
 body {
-  background-color: var(--background-color);
-  color: var(--primary-color);
-  font-family: 'Work Sans', sans-serif;
+  background-color: white;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
+  color: var(--primary-color);
+  font-family: 'Work Sans', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -36,4 +37,13 @@ h1, h2, h3, h4, h5, h6 {
 a {
   color: var(--accent-color);
   text-decoration: none;
+}
+
+/* This ensures any potential gaps are also white */
+#__next {
+  background-color: white;
+}
+
+html {
+  background-color: white;
 }
