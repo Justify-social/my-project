@@ -4,7 +4,10 @@ import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    return await handleLogout(req);
+    return await handleLogout(req, {
+      returnTo: 'https://app.justify.social/',
+      federated: true
+    });
   } catch (error) {
     console.error("Logout error:", error);
     return new Response(`Logout error: ${error.message}`, { status: 500 });
