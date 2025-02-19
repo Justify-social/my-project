@@ -76,27 +76,27 @@ interface Step1Data {
 export default function Overview() {
   const router = useRouter();
   const { data, updateData } = useWizard();
-  const [formData, setFormData] = useState<Step1Data>({
-    name: data.overview.name || "",
-    businessGoal: data.overview.businessGoal || "",
-    startDate: data.overview.startDate || "",
-    endDate: data.overview.endDate || "",
-    timeZone: data.overview.timeZone || "UTC",
-    platforms: data.overview.platforms || [],
-    totalBudget: data.overview.totalBudget || 5000,
-    socialMediaBudget: data.overview.socialMediaBudget || 0,
+
+  // Initialize form data with empty values
+  const initialValues = {
+    name: '',
+    businessGoal: '',
+    startDate: '',
+    endDate: '',
+    timeZone: '',
+    platforms: [],
+    totalBudget: '',
+    socialMediaBudget: '',
     primaryContact: {
-      firstName: data.overview.primaryContact?.firstName || "",
-      surname: data.overview.primaryContact?.surname || "",
-      email: data.overview.primaryContact?.email || "",
-      position: data.overview.primaryContact?.position || "",
+      firstName: '',
+      surname: '',
+      email: '',
+      position: ''
     },
-    secondaryContact: data.overview.secondaryContact || undefined,
-    currency: data.overview.currency || "",
-    platform: data.overview.platform || "",
-    influencerHandle: data.overview.influencerHandle || "",
-  });
-  const [error, setError] = useState('');
+    currency: '',
+    platform: '',
+    influencerHandle: ''
+  };
 
   const handleSubmit = async (values: Step1Data, actions: FormikHelpers<Step1Data>) => {
     console.log('Form values being submitted:', values); // Debug log
@@ -145,161 +145,181 @@ export default function Overview() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="name" className="block font-semibold">
-            Campaign Name
-          </label>
-          <div className="flex items-center">
-            <input
-              id="name"
-              name="name"
-              placeholder="Campaign Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full p-2 border rounded"
-            />
-            <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-              Edit
-            </button>
-          </div>
-          <ErrorMessage name="name" component="div" className="text-red-600 text-sm" />
-        </div>
-
-        <div>
-          <label htmlFor="businessGoal" className="block font-semibold">
-            What business goal does this campaign support?
-          </label>
-          <div className="flex items-center">
-            <textarea
-              id="businessGoal"
-              name="businessGoal"
-              placeholder="e.g. Increase market share by 5% in the next quarter. Launch a new product line targeting millennials."
-              value={formData.businessGoal}
-              onChange={(e) => setFormData({ ...formData, businessGoal: e.target.value })}
-              className="w-full p-2 border rounded"
-              maxLength={3000}
-            />
-            <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-              Edit
-            </button>
-          </div>
-          <ErrorMessage name="businessGoal" component="div" className="text-red-600 text-sm" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="startDate" className="block font-semibold">
-              Start Date
-            </label>
-            <input
-              id="startDate"
-              name="startDate"
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              className="w-full p-2 border rounded"
-            />
-            <ErrorMessage name="startDate" component="div" className="text-red-600 text-sm" />
-          </div>
-          <div>
-            <label htmlFor="endDate" className="block font-semibold">
-              End Date
-            </label>
-            <input
-              id="endDate"
-              name="endDate"
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-              className="w-full p-2 border rounded"
-            />
-            <ErrorMessage name="endDate" component="div" className="text-red-600 text-sm" />
-          </div>
-          <div>
-            <label htmlFor="timeZone" className="block font-semibold">
-              Select from common time zones
-            </label>
-            <select
-              id="timeZone"
-              name="timeZone"
-              value={formData.timeZone}
-              onChange={(e) => setFormData({ ...formData, timeZone: e.target.value })}
-              className="w-full p-2 border rounded"
-            >
-              <option value="UTC">UTC</option>
-              <option value="GMT">GMT</option>
-              <option value="EST">EST</option>
-              <option value="PST">PST</option>
-            </select>
-            <ErrorMessage name="timeZone" component="div" className="text-red-600 text-sm" />
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-xl font-bold mb-2">Platforms</h2>
-          <div className="space-y-2">
-            {['Instagram', 'TikTok', 'YouTube', 'Facebook'].map((platform) => (
-              <label key={platform} className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.platforms.includes(platform)}
-                  onChange={(e) => {
-                    const updatedPlatforms = e.target.checked
-                      ? [...formData.platforms, platform]
-                      : formData.platforms.filter(p => p !== platform);
-                    setFormData({ ...formData, platforms: updatedPlatforms });
-                  }}
-                  className="mr-2"
-                />
-                {platform}
+      <Formik
+        initialValues={initialValues}
+        validationSchema={OverviewSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ values, isSubmitting }) => (
+          <Form className="space-y-8">
+            <div>
+              <label htmlFor="name" className="block font-semibold">
+                Campaign Name
               </label>
-            ))}
-          </div>
-        </div>
+              <div className="flex items-center">
+                <input
+                  id="name"
+                  name="name"
+                  placeholder="Campaign Name"
+                  value={values.name}
+                  onChange={(e) => {
+                    const updatedValues = { ...values, name: e.target.value };
+                    actions.setValues(updatedValues);
+                  }}
+                  className="w-full p-2 border rounded"
+                />
+                <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
+                  Edit
+                </button>
+              </div>
+              <ErrorMessage name="name" component="div" className="text-red-600 text-sm" />
+            </div>
 
-        <div>
-          <h2 className="text-xl font-bold mb-2">Budget</h2>
-          <div className="flex items-center">
-            <input
-              id="totalBudget"
-              name="totalBudget"
-              type="number"
-              min="0"
-              step="100"
-              value={formData.totalBudget}
-              onChange={(e) => setFormData({ ...formData, totalBudget: Number(e.target.value) })}
-              className="w-full p-2 border rounded"
-            />
-            <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-              Edit
-            </button>
-          </div>
-          <ErrorMessage name="totalBudget" component="div" className="text-red-600 text-sm" />
-        </div>
+            <div>
+              <label htmlFor="businessGoal" className="block font-semibold">
+                What business goal does this campaign support?
+              </label>
+              <div className="flex items-center">
+                <textarea
+                  id="businessGoal"
+                  name="businessGoal"
+                  placeholder="e.g. Increase market share by 5% in the next quarter. Launch a new product line targeting millennials."
+                  value={values.businessGoal}
+                  onChange={(e) => {
+                    const updatedValues = { ...values, businessGoal: e.target.value };
+                    actions.setValues(updatedValues);
+                  }}
+                  className="w-full p-2 border rounded"
+                  maxLength={3000}
+                />
+                <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
+                  Edit
+                </button>
+              </div>
+              <ErrorMessage name="businessGoal" component="div" className="text-red-600 text-sm" />
+            </div>
 
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => router.push('/campaigns')}
-            className="px-4 py-2 border rounded hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Next Step
-          </button>
-        </div>
-      </form>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="startDate" className="block font-semibold">
+                  Start Date
+                </label>
+                <input
+                  id="startDate"
+                  name="startDate"
+                  type="date"
+                  value={values.startDate}
+                  onChange={(e) => {
+                    const updatedValues = { ...values, startDate: e.target.value };
+                    actions.setValues(updatedValues);
+                  }}
+                  className="w-full p-2 border rounded"
+                />
+                <ErrorMessage name="startDate" component="div" className="text-red-600 text-sm" />
+              </div>
+              <div>
+                <label htmlFor="endDate" className="block font-semibold">
+                  End Date
+                </label>
+                <input
+                  id="endDate"
+                  name="endDate"
+                  type="date"
+                  value={values.endDate}
+                  onChange={(e) => {
+                    const updatedValues = { ...values, endDate: e.target.value };
+                    actions.setValues(updatedValues);
+                  }}
+                  className="w-full p-2 border rounded"
+                />
+                <ErrorMessage name="endDate" component="div" className="text-red-600 text-sm" />
+              </div>
+              <div>
+                <label htmlFor="timeZone" className="block font-semibold">
+                  Select from common time zones
+                </label>
+                <select
+                  id="timeZone"
+                  name="timeZone"
+                  value={values.timeZone}
+                  onChange={(e) => {
+                    const updatedValues = { ...values, timeZone: e.target.value };
+                    actions.setValues(updatedValues);
+                  }}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="UTC">UTC</option>
+                  <option value="GMT">GMT</option>
+                  <option value="EST">EST</option>
+                  <option value="PST">PST</option>
+                </select>
+                <ErrorMessage name="timeZone" component="div" className="text-red-600 text-sm" />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-2">Platforms</h2>
+              <div className="space-y-2">
+                {['Instagram', 'TikTok', 'YouTube', 'Facebook'].map((platform) => (
+                  <label key={platform} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={values.platforms.includes(platform)}
+                      onChange={(e) => {
+                        const updatedPlatforms = e.target.checked
+                          ? [...values.platforms, platform]
+                          : values.platforms.filter(p => p !== platform);
+                        actions.setValues({ ...values, platforms: updatedPlatforms });
+                      }}
+                      className="mr-2"
+                    />
+                    {platform}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-2">Budget</h2>
+              <div className="flex items-center">
+                <input
+                  id="totalBudget"
+                  name="totalBudget"
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={values.totalBudget}
+                  onChange={(e) => {
+                    const updatedValues = { ...values, totalBudget: Number(e.target.value) };
+                    actions.setValues(updatedValues);
+                  }}
+                  className="w-full p-2 border rounded"
+                />
+                <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
+                  Edit
+                </button>
+              </div>
+              <ErrorMessage name="totalBudget" component="div" className="text-red-600 text-sm" />
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => router.push('/campaigns')}
+                className="px-4 py-2 border rounded hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Next Step
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 }
