@@ -395,9 +395,9 @@ export default function Overview() {
             <ProgressBar
               currentStep={1}
               onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-              onBack={() => router.push("/campaigns/wizard/overview")}
-              onNext={() => submitForm()}
-              disableNext={isSubmitting || !isValid}
+              onBack={() => router.push("/campaigns/wizard")}
+              onNext={submitForm}
+              disableNext={isSubmitting}
             />
           </>
         )}
