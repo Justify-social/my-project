@@ -71,12 +71,44 @@ export default function Overview() {
     platform: data.overview.platform || "",
     influencerHandle: data.overview.influencerHandle || "",
   };
+
+  const saveDraft = async (values: any) => {
+    try {
+      const response = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...values,
+          isDraft: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save draft');
+      }
+
+      const campaign = await response.json();
+      console.log('Draft saved:', campaign);
+      
+      router.push('/campaigns');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      alert('Failed to save draft. Please try again.');
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4 pb-20">
       <Header currentStep={1} totalSteps={5} />
       <h1 className="text-2xl font-bold mb-4">Step 1: Campaign Details</h1>
       <div className="flex justify-end mb-4">
-        <button className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100">
+        <button 
+          type="button" 
+          onClick={() => saveDraft(initialValues)}
+          className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+        >
           Save as Draft
         </button>
       </div>
