@@ -19,7 +19,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Home", href: "/dashboard", icon: "/home.svg" },
+  { label: "Home", href: "/dashboard", icon: "/Home.svg" },
   {
     label: "Campaigns",
     href: "/campaigns",
@@ -173,6 +173,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                       src={item.icon}
                       alt={`${item.label} icon`}
                       className="w-5 h-5"
+                      onError={(e) => {
+                        console.error(`Failed to load icon: ${item.icon}`);
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null; // Prevent infinite loop
+                      }}
                       style={{
                         filter: active
                           ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"

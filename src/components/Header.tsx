@@ -17,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({
   profileImageUrl = "/profile-image.svg",
 }) => {
   const { user } = useUser();
+  console.log('Profile URL:', user?.picture || profileImageUrl);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
@@ -81,8 +82,10 @@ const Header: React.FC<HeaderProps> = ({
                 alt="Profile" 
                 className="w-full h-full object-cover"
                 onError={(e) => {
+                  console.error(`Failed to load profile image: ${user?.picture || profileImageUrl}`);
                   const target = e.target as HTMLImageElement;
                   target.src = "/profile-image.svg";
+                  target.onerror = null;
                 }}
               />
             </div>
