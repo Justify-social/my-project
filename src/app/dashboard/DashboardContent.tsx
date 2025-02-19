@@ -86,11 +86,7 @@ interface PerformanceMetrics {
 // -----------------------
 // DashboardContent Component
 // -----------------------
-export default function DashboardContent({
-  user,
-}: {
-  user: { name: string; email: string; role: string; hasSeenOnboarding: boolean };
-}) {
+export default function DashboardContent() {
   const router = useRouter();
 
   // State: Campaign Data, Loading, and Errors
