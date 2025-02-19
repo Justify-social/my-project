@@ -1,5 +1,5 @@
 // src/app/api/auth/callback/route.ts
-import { handleCallback } from "@auth0/nextjs-auth0";
+import { handleCallback, getSession } from "@auth0/nextjs-auth0";
 import { PrismaClient } from '@prisma/client'
 
 // Initialize Prisma Client properly for edge runtime
