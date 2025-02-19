@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "create-test-fixtures": "node cypress/fixtures/createTestImage.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "generate:campaign": "prisma generate --schema=./prisma/schemas/campaign-wizard.prisma",
+    "migrate:campaign": "prisma migrate dev --schema=./prisma/schemas/campaign-wizard.prisma --name init_campaign_wizard"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
