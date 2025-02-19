@@ -3,7 +3,7 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': `${__dirname}/src`,
+      '@': require('path').resolve(__dirname, 'src'),
     };
     return config;
   },
