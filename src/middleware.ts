@@ -4,9 +4,10 @@ export default withMiddlewareAuthRequired();
 
 export const config = {
   matcher: [
-    // Add routes that should be protected
+    '/',  // Protect root path
     '/brand-lift/:path*',
     '/brand-lift-test/:path*',
-    '/api/:path((?!auth).*)'  // Match API routes except /api/auth/*
+    '/api/:path((?!auth).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)'  // Protect all routes except auth and Next.js internals
   ]
 }; 
