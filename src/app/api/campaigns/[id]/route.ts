@@ -27,22 +27,51 @@ export async function GET(
   }
 }
 
-export async function PUT(request: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
-  const body = await request.json();
-  const { name, startDate, endDate } = body;
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
+    const campaignId = params.id;
+    const data = await request.json();
+
+    // Update campaign with audience targeting data
     const updatedCampaign = await prisma.campaign.update({
-      where: { id: Number(id) },
-      data: {
-        name,
-        startDate: new Date(startDate),
-        endDate: endDate ? new Date(endDate) : null,
+      where: {
+        id: parseInt(campaignId)
       },
+      data: {
+        // Demographics
+        location: data.location,
+        ageDistribution: data.ageDistribution,
+        gender: data.gender,
+        otherGender: data.otherGender,
+        
+        // Screening & Languages
+        screeningQuestions: data.screeningQuestions,
+        languages: data.languages,
+        
+        // Advanced Targeting
+        educationLevel: data.educationLevel,
+        jobTitles: data.jobTitles,
+        incomeLevel: data.incomeLevel,
+        
+        // Competitors
+        competitors: data.competitors,
+        
+        // Update the step completion
+        currentStep: 3,
+        updatedAt: new Date(),
+      }
     });
+
     return NextResponse.json(updatedCampaign);
   } catch (error) {
-    return NextResponse.error();
+    console.error('Failed to update campaign:', error);
+    return NextResponse.json(
+      { error: 'Failed to update campaign' },
+      { status: 500 }
+    );
   }
 }
 
