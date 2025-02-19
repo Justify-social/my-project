@@ -83,10 +83,18 @@ interface PerformanceMetrics {
   creditsChange: number;
 }
 
+interface DashboardContentProps {
+  user?: {
+    name?: string;
+    email?: string;
+    picture?: string;
+  };
+}
+
 // -----------------------
 // DashboardContent Component
 // -----------------------
-export default function DashboardContent() {
+export default function DashboardContent({ user }: DashboardContentProps) {
   const router = useRouter();
 
   // State: Campaign Data, Loading, and Errors
