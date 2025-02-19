@@ -7,6 +7,6 @@ export const config = {
     // Add routes that should be protected
     '/brand-lift/:path*',
     '/brand-lift-test/:path*',
-    '/api/(?!auth).*'
+    '/api/:path((?!auth).*)'  // Match API routes except /api/auth/*
   ]
 }; 
