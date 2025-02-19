@@ -1,39 +1,33 @@
 // src/app/api/auth/callback/route.ts
-import { handleCallback, getSession } from "@auth0/nextjs-auth0";
-import { PrismaClient } from '@prisma/client'
+import { handleCallback } from "@auth0/nextjs-auth0";
+import { NextRequest } from "next/server";
+import { getSession } from "@auth0/nextjs-auth0";
+import prisma from "@/lib/prisma";
 
-// Initialize Prisma Client properly for edge runtime
-declare global {
-  var prisma: PrismaClient | undefined
-}
-
-const prisma = globalThis.prisma || new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prisma = prisma
-}
-
-export const GET = async (request: Request) => {
+export async function GET(req: NextRequest) {
   try {
-    // Pass the request so getSession can correctly read cookies.
-    const session = await getSession(request);
-    console.log("Callback session:", session);
-
-    // If a session exists and contains a user email, upsert that user in your DB.
-    if (session && session.user && session.user.email) {
+    const res = await handleCallback(req);
+    const session = await getSession();
+    
+    if (session?.user) {
       await prisma.user.upsert({
         where: { email: session.user.email },
-        update: {},
-        create: {
+        update: {
+          name: session.user.name,
           email: session.user.email,
-          role: "marketer", // or default role as needed
+          image: session.user.picture,
+        },
+        create: {
+          name: session.user.name,
+          email: session.user.email,
+          image: session.user.picture,
         },
       });
     }
-    // Let Auth0 handle the rest of the callback.
-    return await handleCallback(request);
+    
+    return res;
   } catch (error) {
-    console.error("Error in callback route:", error);
-    return new Response("Internal Server Error", { status: 500 });
+    console.error("Callback error:", error);
+    return new Response(`Callback error: ${error.message}`, { status: 500 });
   }
-};
+}
