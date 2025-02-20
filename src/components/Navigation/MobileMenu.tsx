@@ -51,8 +51,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const isExpanded = (href: string) => expandedItems.includes(href);
 
   const menuVariants = {
-    closed: { x: '100%' },
-    open: { x: 0 }
+    closed: { 
+      x: '100%',
+      transition: {
+        type: "tween",
+        duration: 0.2,
+        ease: "easeInOut"
+      }
+    },
+    open: { 
+      x: 0,
+      transition: {
+        type: "tween",
+        duration: 0.2,
+        ease: "easeInOut"
+      }
+    }
   };
 
   return (
@@ -63,6 +77,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50"
             onClick={onClose}
           />
@@ -78,7 +93,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             role="dialog"
             aria-modal="true"
           >
-            {/* Updated Header */}
+            {/* Header */}
             <div className="flex items-center justify-between p-2 border-b">
               {/* Logo and Company Name */}
               <div className="flex items-center space-x-3">
@@ -90,6 +105,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               <div className="flex items-center space-x-4">
                 {isSignedIn && (
                   <>
+                    {/* Search - Updated icon path */}
+                    <button className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+                      <Image src="/magnifying-glass.svg" alt="Search" width={20} height={20} />
+                    </button>
+                    
                     {/* Credits */}
                     <Link href="/billing" className="flex items-center space-x-1">
                       <Image src="/coins.svg" alt="Credits" width={20} height={20} />
