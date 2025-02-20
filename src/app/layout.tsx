@@ -35,12 +35,14 @@ export default function RootLayout({
               </div>
               <div className="flex-1 pl-64">
                 <div className="flex flex-col min-h-screen">
-                  <Header 
-                    companyName="Justify"
-                    remainingCredits={100}
-                    notificationsCount={3}
-                  />
-                  <main className="flex-1 overflow-auto bg-gray-50 p-6">
+                  <div className="fixed top-0 right-0 left-64 z-40 bg-white">
+                    <Header 
+                      companyName="Justify"
+                      remainingCredits={100}
+                      notificationsCount={3}
+                    />
+                  </div>
+                  <main className="flex-1 pt-16 bg-gray-50 p-6">
                     {children}
                   </main>
                 </div>
