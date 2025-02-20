@@ -1,6 +1,6 @@
 // /src/app/api/user/setOnboardingTrue/route.ts
 import { NextResponse } from "next/server";
-import prisma from "../../../../lib/prisma"; // Adjusted relative path
+import { prisma } from '@/lib/prisma'
 import { getSession } from "../../../../lib/session"; // Adjusted relative path
 
 export async function POST(request: Request) {
