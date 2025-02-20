@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -5,26 +7,23 @@ import Image from 'next/image';
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { usePathname } from 'next/navigation';
 import type { NavItem } from '@/config/navigation';
+import { navItems, settingsItem } from "@/config/navigation";
 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  navItems: NavItem[];
-  settingsNavItem: NavItem;
+  companyName: string;
   remainingCredits: number;
   notificationsCount: number;
-  companyName: string;
 }
 
-const MobileMenu = ({
+const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   onClose,
-  navItems,
-  settingsNavItem,
+  companyName,
   remainingCredits,
   notificationsCount,
-  companyName
-}: MobileMenuProps) => {
+}) => {
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
   const { isSignedIn } = useAuth();
@@ -216,28 +215,28 @@ const MobileMenu = ({
 
                 {/* Settings */}
                 <Link
-                  href={settingsNavItem.href}
+                  href={settingsItem.href}
                   className={`flex items-center space-x-2 px-3 py-1.5 rounded-md mt-1 ${
-                    isNavItemActive(settingsNavItem.href)
+                    isNavItemActive(settingsItem.href)
                       ? 'bg-blue-50 text-[#00BFFF]'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                   onClick={onClose}
                 >
-                  {settingsNavItem.icon && (
+                  {settingsItem.icon && (
                     <Image 
-                      src={settingsNavItem.icon} 
+                      src={settingsItem.icon} 
                       alt="" 
                       width={16} 
                       height={16}
                       style={{
-                        filter: isNavItemActive(settingsNavItem.href)
+                        filter: isNavItemActive(settingsItem.href)
                           ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
                           : "none",
                       }}
                     />
                   )}
-                  <span className="text-sm font-medium">{settingsNavItem.label}</span>
+                  <span className="text-sm font-medium">{settingsItem.label}</span>
                 </Link>
               </div>
             </motion.nav>
