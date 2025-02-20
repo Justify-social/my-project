@@ -14,6 +14,11 @@ if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
   throw new Error('Missing Clerk Publishable Key')
 }
 
+export const metadata = {
+  title: 'Justify Social',
+  description: 'Campaign Management Platform',
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -44,9 +49,4 @@ export default function RootLayout({
       </ClerkProvider>
     </html>
   );
-}
-
-export const metadata = {
-  title: 'Justify Social',
-  description: 'Campaign Management Platform',
 }
