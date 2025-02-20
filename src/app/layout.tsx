@@ -10,8 +10,11 @@ if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
 }
 
 export const metadata = {
-  title: 'Justify Social',
+  title: 'Justify',
   description: 'Campaign Management Platform',
+  icons: {
+    icon: '/favicon.png',
+  },
 }
 
 export default function RootLayout({
@@ -20,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="h-full bg-gray-100">
-      <body className={`h-full ${inter.className}`}>
+    <html lang="en">
+      <body className={`${inter.className} bg-white`}>
         <ClerkProvider>
           <ClientLayout>
             <main className="min-h-screen bg-gray-100">
