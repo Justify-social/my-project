@@ -20,10 +20,12 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <ClerkProvider>
+      <ClerkProvider
+        publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      >
         <SidebarProvider>
           <UserProvider>
-            <body>
+            <body className={inter.className}>
               <Header 
                 companyName="Justify"
                 remainingCredits={100}
@@ -40,4 +42,9 @@ export default function RootLayout({
       </ClerkProvider>
     </html>
   );
+}
+
+export const metadata = {
+  title: 'Justify Social',
+  description: 'Campaign Management Platform',
 }
