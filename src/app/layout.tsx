@@ -5,6 +5,8 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Sidebar from "../components/Sidebar";
 import { UserProvider, useUser } from '@auth0/nextjs-auth0/client';
+import { SidebarProvider } from '@/components/providers/sidebar-provider'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,20 +20,24 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <UserProvider>
-        <body>
-          <Header 
-            companyName="Justify"
-            remainingCredits={100}
-            notificationsCount={0}
-            profileImageUrl="/profile-image.svg"
-          />
-          <Sidebar />
-          <main className="flex-1 p-4 md:p-6 lg:p-8 ml-[240px] mt-[64px]">
-            {children}
-          </main>
-        </body>
-      </UserProvider>
+      <ClerkProvider>
+        <SidebarProvider>
+          <UserProvider>
+            <body>
+              <Header 
+                companyName="Justify"
+                remainingCredits={100}
+                notificationsCount={0}
+                profileImageUrl="/profile-image.svg"
+              />
+              <Sidebar />
+              <main className="flex-1 p-4 md:p-6 lg:p-8 ml-[240px] mt-[64px]">
+                {children}
+              </main>
+            </body>
+          </UserProvider>
+        </SidebarProvider>
+      </ClerkProvider>
     </html>
   );
 }
