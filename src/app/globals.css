@@ -11,6 +11,7 @@
   --accent-color: #00BFFF;       /* Deep Sky Blue */
   --background-color: #F5F5F5;   /* White Smoke */
   --divider-color: #D1D5DB;      /* French Grey */
+  background-color: white;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,4 +47,24 @@ a {
 
 html {
   background-color: white;
+}
+
+/* Check if there are any global styles here setting a gray background */
+/* You might find something like: */
+body {
+  background-color: rgb(243 244 246); /* or similar gray value */
+}
+
+/* Or it might be in the :root or html selectors */
+:root {
+  /* ... */
+}
+
+html {
+  /* ... */
+}
+
+/* Override any Tailwind or other styles */
+.bg-gray-100, .bg-gray-50, .bg-slate-50, .bg-slate-100 {
+  background-color: white !important;
 }
