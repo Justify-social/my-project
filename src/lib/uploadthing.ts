@@ -1,4 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next"
+import { generateComponents } from "@uploadthing/react";
+import { generateReactHelpers } from "@uploadthing/react/hooks";
 
 const f = createUploadthing()
 
@@ -14,3 +16,7 @@ export const ourFileRouter = {
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter 
+
+export const { useUploadThing, uploadFiles } = generateReactHelpers<OurFileRouter>();
+
+export const { UploadButton, UploadDropzone } = generateComponents<OurFileRouter>(); 
