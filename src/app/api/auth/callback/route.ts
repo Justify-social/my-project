@@ -6,26 +6,19 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs'
 import { Prisma } from '@prisma/client'
+import { createErrorResponse, APIError } from '@/lib/error-logging'
 
 export async function GET() {
   try {
     const { userId } = auth()
     
     if (!userId) {
-      console.error('Auth callback: No userId found in request')
-      return new NextResponse('Unauthorized: No user ID provided', { 
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+      throw new APIError('Unauthorized: No user ID provided', 401)
     }
 
     try {
       const user = await prisma.user.findUnique({
-        where: {
-          clerkId: userId
-        }
+        where: { clerkId: userId }
       })
 
       if (!user) {
@@ -36,53 +29,25 @@ export async function GET() {
             onboardingComplete: false
           }
         })
-        console.log(`Successfully created user record for Clerk ID: ${userId}`)
-      } else {
-        console.log(`Found existing user record for Clerk ID: ${userId}`)
       }
 
-      return NextResponse.json({ 
+      return Response.json({ 
         success: true,
         message: user ? 'Existing user found' : 'New user created',
-        userId: userId
+        userId 
       })
 
-    } catch (dbError) {
-      if (dbError instanceof Prisma.PrismaClientKnownRequestError) {
-        console.error('Prisma error:', {
-          code: dbError.code,
-          message: dbError.message,
-          meta: dbError.meta
-        })
-        return NextResponse.json({
-          error: 'Database operation failed',
-          code: dbError.code
-        }, { status: 500 })
-      }
-
-      console.error('Unknown database error:', dbError)
-      return NextResponse.json({
-        error: 'Internal server error during database operation'
-      }, { status: 500 })
+    } catch (error) {
+      return createErrorResponse(error, {
+        userId,
+        route: '/api/auth/callback',
+        additionalData: { operation: 'user_creation' }
+      })
     }
 
   } catch (error) {
-    console.error('Critical error in auth callback:', {
-      error: error instanceof Error ? {
-        message: error.message,
-        stack: error.stack
-      } : error,
-      timestamp: new Date().toISOString()
-    })
-
-    return NextResponse.json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
-    }, { 
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    return createErrorResponse(error, {
+      route: '/api/auth/callback'
     })
   }
 }
