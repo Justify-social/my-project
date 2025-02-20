@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -83,7 +83,7 @@ const ObjectivesSchema = Yup.object().shape({
   features: Yup.array().of(Yup.string()),
 });
 
-export default function Step2ObjectivesMessaging() {
+function CampaignStep2Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -356,5 +356,13 @@ export default function Step2ObjectivesMessaging() {
         )}
       </Formik>
     </div>
+  );
+}
+
+export default function CampaignStep2() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CampaignStep2Content />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, KeyboardEvent } from "react";
+import React, { useState, useEffect, KeyboardEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -545,7 +545,7 @@ const CompetitorTracking: React.FC<CompetitorTrackingProps> = ({ selected, onCha
 // MAIN COMPONENT: AUDIENCE TARGETING (STEP 3)
 // =============================================================================
 
-export default function AudienceTargetingStep() {
+function AudienceTargetingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -617,114 +617,127 @@ export default function AudienceTargetingStep() {
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={AudienceSchema}
-      onSubmit={handleSubmit}
-    >
-      {({ setFieldValue, isValid, isSubmitting, submitForm, values }) => (
-        <>
-          <div className="max-w-4xl mx-auto p-4 pb-32">
-            <Header currentStep={3} totalSteps={5} />
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold">Step 3: Audience Targeting</h1>
-              <button className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100">
-                Save as Draft
-              </button>
-            </div>
-            <Form className="space-y-8">
-              {/* DEMOGRAPHICS SECTION */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Demographics</h2>
-                <LocationSelector
-                  selectedLocations={values.location}
-                  onChange={(locs) => setFieldValue("location", locs)}
-                />
-                <AgeDistributionSlider
-                  values={[
-                    values.ageDistribution.age1824,
-                    values.ageDistribution.age2534,
-                    values.ageDistribution.age3544,
-                    values.ageDistribution.age4554,
-                    values.ageDistribution.age5564,
-                    values.ageDistribution.age65plus,
-                  ]}
-                  onChange={(newVals) =>
-                    setFieldValue("ageDistribution", {
-                      age1824: Math.round(newVals[0]),
-                      age2534: Math.round(newVals[1]),
-                      age3544: Math.round(newVals[2]),
-                      age4554: Math.round(newVals[3]),
-                      age5564: Math.round(newVals[4]),
-                      age65plus: Math.round(newVals[5]),
-                    })
-                  }
-                />
-                <ErrorMessage
-                  name="ageDistribution"
-                  component="div"
-                  className="text-red-600 text-sm"
-                />
-                <GenderSelection
-                  selected={values.gender}
-                  otherGender={values.otherGender}
-                  onChange={(genders) => setFieldValue("gender", genders)}
-                  onOtherChange={(val) => setFieldValue("otherGender", val)}
-                />
-              </div>
-
-              {/* SCREENING QUESTIONS SECTION */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
-                <ScreeningQuestions
-                  selectedTags={values.screeningQuestions}
-                  onChange={(tags) => setFieldValue("screeningQuestions", tags)}
-                />
-              </div>
-
-              {/* LANGUAGES SECTION */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Languages</h2>
-                <LanguagesSelector
-                  selected={values.languages}
-                  onChange={(langs) => setFieldValue("languages", langs)}
-                />
-              </div>
-
-              {/* ADVANCED TARGETING (Collapsible) */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="mb-4 text-blue-600 underline"
-                >
-                  {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
-                </button>
-                {showAdvanced && <AdvancedTargeting />}
-              </div>
-
-              {/* COMPETITOR TRACKING SECTION */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
-                <CompetitorTracking
-                  selected={values.competitors}
-                  onChange={(companies) => setFieldValue("competitors", companies)}
-                />
-              </div>
-            </Form>
+    <>
+      <div className="max-w-4xl mx-auto p-4 pb-32">
+        <Header currentStep={3} totalSteps={5} />
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Step 3: Audience Targeting</h1>
+          <button className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100">
+            Save as Draft
+          </button>
+        </div>
+        <Form className="space-y-8">
+          {/* DEMOGRAPHICS SECTION */}
+          <div>
+            <h2 className="text-xl font-bold mb-2">Demographics</h2>
+            <LocationSelector
+              selectedLocations={initialValues.location}
+              onChange={(locs) => {
+                // Update the formik values
+                setFieldValue("location", locs);
+              }}
+            />
+            <AgeDistributionSlider
+              values={[
+                initialValues.ageDistribution.age1824,
+                initialValues.ageDistribution.age2534,
+                initialValues.ageDistribution.age3544,
+                initialValues.ageDistribution.age4554,
+                initialValues.ageDistribution.age5564,
+                initialValues.ageDistribution.age65plus,
+              ]}
+              onChange={(newVals) => {
+                setFieldValue("ageDistribution", {
+                  age1824: Math.round(newVals[0]),
+                  age2534: Math.round(newVals[1]),
+                  age3544: Math.round(newVals[2]),
+                  age4554: Math.round(newVals[3]),
+                  age5564: Math.round(newVals[4]),
+                  age65plus: Math.round(newVals[5]),
+                });
+              }}
+            />
+            <ErrorMessage
+              name="ageDistribution"
+              component="div"
+              className="text-red-600 text-sm"
+            />
+            <GenderSelection
+              selected={initialValues.gender}
+              otherGender={initialValues.otherGender}
+              onChange={(genders) => {
+                setFieldValue("gender", genders);
+              }}
+              onOtherChange={(val) => {
+                setFieldValue("otherGender", val);
+              }}
+            />
           </div>
 
-          {/* Fixed Bottom Navigation Bar using ProgressBar */}
-          <ProgressBar
-            currentStep={3}
-            onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-            onBack={() => router.push("/campaigns/wizard/step-2")}
-            onNext={submitForm}
-            disableNext={!isValid || isSubmitting}
-            data-cy="next-button"
-          />
-        </>
-      )}
-    </Formik>
+          {/* SCREENING QUESTIONS SECTION */}
+          <div>
+            <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
+            <ScreeningQuestions
+              selectedTags={initialValues.screeningQuestions}
+              onChange={(tags) => {
+                setFieldValue("screeningQuestions", tags);
+              }}
+            />
+          </div>
+
+          {/* LANGUAGES SECTION */}
+          <div>
+            <h2 className="text-xl font-bold mb-2">Languages</h2>
+            <LanguagesSelector
+              selected={initialValues.languages}
+              onChange={(langs) => {
+                setFieldValue("languages", langs);
+              }}
+            />
+          </div>
+
+          {/* ADVANCED TARGETING (Collapsible) */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="mb-4 text-blue-600 underline"
+            >
+              {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
+            </button>
+            {showAdvanced && <AdvancedTargeting />}
+          </div>
+
+          {/* COMPETITOR TRACKING SECTION */}
+          <div>
+            <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
+            <CompetitorTracking
+              selected={initialValues.competitors}
+              onChange={(companies) => {
+                setFieldValue("competitors", companies);
+              }}
+            />
+          </div>
+        </Form>
+      </div>
+
+      {/* Fixed Bottom Navigation Bar using ProgressBar */}
+      <ProgressBar
+        currentStep={3}
+        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
+        onBack={() => router.push("/campaigns/wizard/step-2")}
+        onNext={submitForm}
+        disableNext={!isValid || isSubmitting}
+        data-cy="next-button"
+      />
+    </>
+  );
+}
+
+export default function AudienceTargetingStep() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AudienceTargetingContent />
+    </Suspense>
   );
 }
