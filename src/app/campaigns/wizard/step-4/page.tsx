@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import Slider from "rc-slider";
@@ -450,11 +450,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
 export default function CreativeAssetsStep() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get('id');
   const { data, updateData } = useWizard();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [confirmDeleteAsset, setConfirmDeleteAsset] = useState<Asset | null>(null);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialValues: CreativeValues = {
     assets: data.creativeAssets?.assets || [],
@@ -463,14 +466,52 @@ export default function CreativeAssetsStep() {
     notes: data.creativeAssets?.notes || '',
   };
 
-  const handleSubmit = (
-    values: CreativeValues,
-    actions: FormikHelpers<CreativeValues>
-  ) => {
-    updateData("creativeAssets", values);
-    router.push("/campaigns/wizard/step-5");
-    actions.setSubmitting(false);
-  };
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      // Assuming you have multiple creative assets and requirements
+      const creativeAssets = formData.getAll('assetUrls').map((url, index) => ({
+        type: formData.getAll('assetTypes')[index],
+        url: url,
+        title: formData.getAll('assetTitles')[index],
+        description: formData.getAll('assetDescriptions')[index],
+        influencerAssigned: formData.getAll('assetInfluencers')[index],
+        influencerHandle: formData.getAll('assetInfluencerHandles')[index],
+        influencerBudget: parseFloat(formData.getAll('assetBudgets')[index] as string)
+      }))
+
+      const creativeRequirements = formData.getAll('requirements').map(req => ({
+        requirement: req
+      }))
+
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          step: 4,
+          data: {
+            creativeGuidelines: formData.get('creativeGuidelines'),
+            creativeNotes: formData.get('creativeNotes'),
+            creativeAssets,
+            creativeRequirements
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update campaign')
+      }
+
+      router.push(`/campaigns/wizard/step-5?id=${campaignId}`)
+    } catch (error) {
+      console.error('Error saving step 4:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // ---------- File Upload Handling ----------
   const handleFilesAdded = (files: FileList) => {

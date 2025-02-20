@@ -5,14 +5,24 @@ import Link from "next/link";
 
 interface Campaign {
   id: number;
-  name: string;
-  objective: string;
-  status: "Live" | "Paused" | "Completed";
+  campaignName: string;
+  primaryKPI: string;
+  submissionStatus: "draft" | "submitted";
   startDate: string;
-  endDate?: string;
-  surveysComplete: string; // e.g., "86%"
-  tools: number; // e.g., 150
-  kpi: string; // e.g., "24.3% Awareness"
+  endDate: string;
+  platform: "Instagram" | "YouTube" | "TikTok";
+  totalBudget: number;
+  primaryContact: {
+    firstName: string;
+    surname: string;
+  };
+  audience?: {
+    locations: { location: string }[];
+  };
+  creativeAssets: {
+    id: number;
+    type: string;
+  }[];
 }
 
 type SortDirection = "ascending" | "descending";
@@ -32,7 +42,7 @@ const CampaignList: React.FC = () => {
     direction: SortDirection;
   } | null>(null);
 
-  // Fetch campaigns from API
+  // Updated fetch campaigns from API
   useEffect(() => {
     async function fetchCampaigns() {
       try {
@@ -41,7 +51,23 @@ const CampaignList: React.FC = () => {
           throw new Error("Failed to fetch campaigns");
         }
         const data = await res.json();
-        setCampaigns(data);
+        // Transform the data to match the table display
+        const transformedData = data.map((campaign: Campaign) => ({
+          id: campaign.id,
+          name: campaign.campaignName,
+          objective: campaign.primaryKPI,
+          status: campaign.submissionStatus === "submitted" ? "Live" : "Draft",
+          startDate: campaign.startDate,
+          endDate: campaign.endDate,
+          surveysComplete: "0%", // You might want to calculate this based on your needs
+          tools: campaign.creativeAssets?.length || 0,
+          kpi: `${campaign.primaryKPI}`,
+          platform: campaign.platform,
+          budget: campaign.totalBudget,
+          location: campaign.audience?.locations?.map(l => l.location).join(", ") || "N/A",
+          contactName: `${campaign.primaryContact.firstName} ${campaign.primaryContact.surname}`
+        }));
+        setCampaigns(transformedData);
       } catch (err: any) {
         setError(err.message || "Something went wrong");
       } finally {
@@ -165,8 +191,7 @@ const CampaignList: React.FC = () => {
         >
           <option value="">All Status</option>
           <option value="Live">Live</option>
-          <option value="Paused">Paused</option>
-          <option value="Completed">Completed</option>
+          <option value="Draft">Draft</option>
         </select>
         <select
           value={objectiveFilter}
@@ -208,9 +233,9 @@ const CampaignList: React.FC = () => {
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("objective")}
+                    onClick={() => requestSort("platform")}
                   >
-                    Objective
+                    Platform
                   </th>
                   <th
                     scope="col"
@@ -233,14 +258,33 @@ const CampaignList: React.FC = () => {
                   >
                     End Date
                   </th>
-                  <th scope="col" className="px-4 py-2 font-bold">
-                    Surveys Complete
+                  <th
+                    scope="col"
+                    className="px-4 py-2 font-bold cursor-pointer"
+                    onClick={() => requestSort("budget")}
+                  >
+                    Budget
                   </th>
-                  <th scope="col" className="px-4 py-2 font-bold">
-                    Tools
+                  <th
+                    scope="col"
+                    className="px-4 py-2 font-bold cursor-pointer"
+                    onClick={() => requestSort("kpi")}
+                  >
+                    Primary KPI
                   </th>
-                  <th scope="col" className="px-4 py-2 font-bold">
-                    KPI
+                  <th
+                    scope="col"
+                    className="px-4 py-2 font-bold cursor-pointer"
+                    onClick={() => requestSort("location")}
+                  >
+                    Location
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-2 font-bold cursor-pointer"
+                    onClick={() => requestSort("contactName")}
+                  >
+                    Contact
                   </th>
                   <th scope="col" className="px-4 py-2 font-bold">
                     Actions
@@ -257,58 +301,43 @@ const CampaignList: React.FC = () => {
                     }}
                   >
                     <td className="px-4 py-2">
-                      <Link href={`/campaigns/${campaign.id}/edit`} legacyBehavior>
-                        <a className="text-blue-600 hover:underline">{campaign.name}</a>
+                      <Link href={`/campaigns/${campaign.id}`}>
+                        <span className="text-blue-600 hover:underline cursor-pointer">
+                          {campaign.name}
+                        </span>
                       </Link>
                     </td>
-                    <td className="px-4 py-2">{campaign.objective}</td>
+                    <td className="px-4 py-2">{campaign.platform}</td>
                     <td className="px-4 py-2">
                       <span
-                        style={{
-                          color:
-                            campaign.status === "Live"
-                              ? "#28a745"
-                              : campaign.status === "Paused"
-                              ? "#FFC107"
-                              : "#6c757d",
-                        }}
+                        className={`px-2 py-1 rounded-full text-sm ${
+                          campaign.status === "Live"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
                       >
                         {campaign.status}
                       </span>
                     </td>
                     <td className="px-4 py-2">
-                      {new Date(campaign.startDate).toLocaleDateString("en-US", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {new Date(campaign.startDate).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2">
-                      {campaign.endDate
-                        ? new Date(campaign.endDate).toLocaleDateString("en-US", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "N/A"}
+                      {new Date(campaign.endDate).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-2">{campaign.surveysComplete}</td>
-                    <td className="px-4 py-2">{campaign.tools}</td>
+                    <td className="px-4 py-2">
+                      ${campaign.budget.toLocaleString()}
+                    </td>
                     <td className="px-4 py-2">{campaign.kpi}</td>
+                    <td className="px-4 py-2">{campaign.location}</td>
+                    <td className="px-4 py-2">{campaign.contactName}</td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <Link href={`/campaigns/${campaign.id}/edit`} legacyBehavior>
-                          <a
-                            className="text-blue-600 hover:underline"
-                            title="Edit Campaign – Modify settings and objectives"
-                          >
-                            ✏️
-                          </a>
+                        <Link href={`/campaigns/${campaign.id}/edit`}>
+                          <span className="cursor-pointer text-blue-600">✏️</span>
                         </Link>
                         <button
                           onClick={() => handleDeleteCampaign(campaign.id)}
-                          title="Delete Campaign – This action cannot be undone"
-                          aria-label={`Delete campaign ${campaign.name}`}
                           className="text-red-600"
                         >
                           ❌

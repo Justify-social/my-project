@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -43,9 +43,12 @@ const OverviewSchema = disableValidation
       platform: Yup.string().required("Platform is required"),
       influencerHandle: Yup.string().required("Influencer handle is required"),
     });
+
 export default function Overview() {
   const router = useRouter();
   const { data, updateData } = useWizard();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const initialValues = {
     name: data.overview.name || "",
     businessGoal: data.overview.businessGoal || "",
@@ -72,30 +75,78 @@ export default function Overview() {
     influencerHandle: data.overview.influencerHandle || "",
   };
 
-  const saveDraft = async (values: any) => {
+  const handleSubmit = async (formData: FormData) => {
     try {
+      setIsSubmitting(true);
+      
       const response = await fetch('/api/campaigns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...values,
-          isDraft: true,
-        }),
+          campaignName: formData.get('name'),
+          description: formData.get('businessGoal'),
+          startDate: formData.get('startDate'),
+          endDate: formData.get('endDate'),
+          timeZone: formData.get('timeZone'),
+          currency: formData.get('currency'),
+          totalBudget: parseFloat(formData.get('totalBudget') as string),
+          socialMediaBudget: parseFloat(formData.get('socialMediaBudget') as string),
+          platform: formData.get('platform'),
+          influencerHandle: formData.get('influencerHandle'),
+          primaryContact: {
+            firstName: formData.get('primaryContact.firstName'),
+            surname: formData.get('primaryContact.surname'),
+            email: formData.get('primaryContact.email'),
+            position: formData.get('primaryContact.position'),
+          },
+          secondaryContact: {
+            firstName: formData.get('secondaryContact.firstName'),
+            surname: formData.get('secondaryContact.surname'),
+            email: formData.get('secondaryContact.email'),
+            position: formData.get('secondaryContact.position'),
+          }
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save draft');
+        throw new Error('Failed to create campaign');
       }
 
       const campaign = await response.json();
-      console.log('Draft saved:', campaign);
-      
-      router.push('/campaigns');
+      updateData("campaignId", campaign.id);
+      updateData("overview", {
+        name: formData.get('name'),
+        businessGoal: formData.get('businessGoal'),
+        startDate: formData.get('startDate'),
+        endDate: formData.get('endDate'),
+        timeZone: formData.get('timeZone'),
+        contacts: formData.get('contacts'),
+        primaryContact: {
+          firstName: formData.get('primaryContact.firstName'),
+          surname: formData.get('primaryContact.surname'),
+          email: formData.get('primaryContact.email'),
+          position: formData.get('primaryContact.position'),
+        },
+        secondaryContact: {
+          firstName: formData.get('secondaryContact.firstName'),
+          surname: formData.get('secondaryContact.surname'),
+          email: formData.get('secondaryContact.email'),
+          position: formData.get('secondaryContact.position'),
+        },
+        currency: formData.get('currency'),
+        totalBudget: parseFloat(formData.get('totalBudget') as string),
+        socialMediaBudget: parseFloat(formData.get('socialMediaBudget') as string),
+        platform: formData.get('platform'),
+        influencerHandle: formData.get('influencerHandle'),
+      });
+      router.push(`/campaigns/wizard/step-2?id=${campaign.id}`);
     } catch (error) {
-      console.error('Error saving draft:', error);
-      alert('Failed to save draft. Please try again.');
+      console.error('Error saving step 1:', error);
+      // Handle error (show error message to user)
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -106,8 +157,9 @@ export default function Overview() {
       <div className="flex justify-end mb-4">
         <button 
           type="button" 
-          onClick={() => saveDraft(initialValues)}
+          onClick={() => handleSubmit(new FormData())}
           className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+          disabled={isSubmitting}
         >
           Save as Draft
         </button>
@@ -115,41 +167,7 @@ export default function Overview() {
       <Formik
         initialValues={initialValues}
         validationSchema={OverviewSchema}
-        onSubmit={async (values, actions) => {
-          try {
-            console.log('Submitting form values:', values);
-
-            // Save to database
-            const response = await fetch('/api/campaigns', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(values),
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json();
-              console.error('API Error:', errorData);
-              throw new Error('Failed to create campaign');
-            }
-
-            const campaign = await response.json();
-            console.log('Campaign created successfully:', campaign);
-
-            // Update wizard context
-            updateData("campaignId", campaign.id);
-            updateData("overview", values);
-            
-            // Navigate to next step
-            router.push("/campaigns/wizard/step-2");
-          } catch (error) {
-            console.error('Error submitting form:', error);
-            actions.setStatus({ error: 'Failed to create campaign. Please try again.' });
-          } finally {
-            actions.setSubmitting(false);
-          }
-        }}
+        onSubmit={handleSubmit}
       >
         {({ submitForm, isSubmitting, isValid }) => (
           <>

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { Component, ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { useState } from "react";
 
 // =============================================================================
 // SAMPLE DATA (In production, this comes from your Wizard Context or API)
@@ -324,7 +325,10 @@ const CampaignSubmissionSummary: React.FC = () => {
 
 export default function ReviewSubmitStep() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get('id');
   const { updateData } = useWizard();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Disable the submit button if required fields are missing.
   const isSubmitDisabled = !requiredCampaignFieldsExist;
@@ -334,10 +338,34 @@ export default function ReviewSubmitStep() {
     alert("Draft saved successfully.");
   };
 
-  const handleSubmit = () => {
-    if (isSubmitDisabled) return;
-    updateData("reviewSubmit", { status: "submitted" });
-    router.push("/campaigns/wizard/submission");
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          step: 5,
+          data: {
+            submissionStatus: 'submitted'
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit campaign');
+      }
+
+      // After successful submission, redirect to the campaign overview or success page
+      router.push(`/campaigns/${campaignId}`);
+    } catch (error) {
+      console.error('Error submitting campaign:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -389,7 +417,7 @@ export default function ReviewSubmitStep() {
         currentStep={5}
         onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
         onBack={() => router.push("/campaigns/wizard/step-4")}
-        onNext={() => handleSubmit()}
+        onNext={() => handleSubmit}
         disableNext={isSubmitDisabled}
       />
     </ErrorBoundary>

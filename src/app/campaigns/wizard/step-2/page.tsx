@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
@@ -85,7 +85,10 @@ const ObjectivesSchema = Yup.object().shape({
 
 export default function Step2ObjectivesMessaging() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get('id');
   const { data, updateData } = useWizard();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialValues = {
     mainMessage: data.objectives.mainMessage || "",
@@ -97,6 +100,44 @@ export default function Step2ObjectivesMessaging() {
     primaryKPI: data.objectives.primaryKPI || "",
     secondaryKPIs: data.objectives.secondaryKPIs || [],
     features: data.objectives.features || [],
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          step: 2,
+          data: {
+            mainMessage: formData.get('mainMessage'),
+            hashtags: formData.get('hashtags'),
+            memorability: formData.get('memorability'),
+            keyBenefits: formData.get('keyBenefits'),
+            expectedAchievements: formData.get('expectedAchievements'),
+            purchaseIntent: formData.get('purchaseIntent'),
+            brandPerception: formData.get('brandPerception'),
+            primaryKPI: formData.get('primaryKPI'),
+            secondaryKPIs: formData.getAll('secondaryKPIs'),
+            features: formData.getAll('features')
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update campaign');
+      }
+
+      router.push(`/campaigns/wizard/step-3?id=${campaignId}`);
+    } catch (error) {
+      console.error('Error saving step 2:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,10 +156,7 @@ export default function Step2ObjectivesMessaging() {
       <Formik
         initialValues={initialValues}
         validationSchema={ObjectivesSchema}
-        onSubmit={(values) => {
-          updateData("objectives", values);
-          router.push("/campaigns/wizard/step-3");
-        }}
+        onSubmit={handleSubmit}
       >
         {({ handleSubmit, isSubmitting, isValid }) => (
           <>

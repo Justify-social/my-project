@@ -1,0 +1,228 @@
+// schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+//////////////////////
+// Enums
+//////////////////////
+
+enum Currency {
+  GBP
+  USD
+  EUR
+}
+
+enum Platform {
+  Instagram
+  YouTube
+  TikTok
+}
+
+enum KPI {
+  adRecall
+  brandAwareness
+  consideration
+  messageAssociation
+  brandPreference
+  purchaseIntent
+  actionIntent
+  recommendationIntent
+  advocacy
+}
+
+enum Feature {
+  CREATIVE_ASSET_TESTING
+  BRAND_LIFT
+  BRAND_HEALTH
+  MIXED_MEDIA_MODELLING
+}
+
+enum Position {
+  Manager
+  Director
+  VP
+}
+
+enum CreativeAssetType {
+  image
+  video
+}
+
+enum SubmissionStatus {
+  draft
+  submitted
+}
+
+//////////////////////
+// Main Model (Steps 1, 2 & 5)
+//////////////////////
+
+model CampaignWizardSubmission {
+  id                Int      @id @default(autoincrement())
+  // --- Step 1: Campaign Details ---
+  campaignName      String
+  // "description" here represents the business goal / campaign description.
+  description       String   @db.VarChar(3000)
+  startDate         DateTime
+  endDate           DateTime
+  timeZone          String
+  contacts          String
+  currency          Currency
+  totalBudget       Float // (Validate ≥ 0 at application level)
+  socialMediaBudget Float // (Validate ≥ 0 at application level)
+  platform          Platform
+  influencerHandle  String
+
+  // Contact details (normalized into separate tables)
+  primaryContactId   Int              @unique
+  secondaryContactId Int              @unique
+  primaryContact     PrimaryContact   @relation("PrimaryContactSubmission", fields: [primaryContactId], references: [id])
+  secondaryContact   SecondaryContact @relation("SecondaryContactSubmission", fields: [secondaryContactId], references: [id])
+
+  // --- Step 2: Objectives & Messaging ---
+  mainMessage          String    @db.VarChar(3000)
+  hashtags             String
+  memorability         String
+  keyBenefits          String
+  expectedAchievements String
+  purchaseIntent       String
+  // Additional objective field from review (e.g. brand perception)
+  brandPerception      String
+  primaryKPI           KPI
+  secondaryKPIs        KPI[] // Array of up to 4 secondary KPIs
+  features             Feature[] // Selected features
+
+  // --- Step 4: Creative Assets ---
+  creativeGuidelines String
+  creativeNotes      String
+
+  // Submission status from Step 5 (review & submit)
+  submissionStatus SubmissionStatus @default(draft)
+
+  createdAt DateTime @default(now())
+
+  // --- Relation to Audience (Step 3) ---
+  audience Audience?
+
+  // --- Relations to Creative Assets & Requirements (Step 4) ---
+  creativeAssets       CreativeAsset[]
+  creativeRequirements CreativeRequirement[]
+}
+
+//////////////////////
+// Contact Models
+//////////////////////
+
+model PrimaryContact {
+  id         Int                       @id @default(autoincrement())
+  firstName  String
+  surname    String
+  email      String
+  position   Position
+  submission CampaignWizardSubmission? @relation("PrimaryContactSubmission")
+}
+
+model SecondaryContact {
+  id         Int                       @id @default(autoincrement())
+  firstName  String
+  surname    String
+  email      String
+  position   Position
+  submission CampaignWizardSubmission? @relation("SecondaryContactSubmission")
+}
+
+//////////////////////
+// Step 3: Audience Targeting
+//////////////////////
+
+model Audience {
+  id         Int                      @id @default(autoincrement())
+  campaignId Int                      @unique
+  campaign   CampaignWizardSubmission @relation(fields: [campaignId], references: [id])
+
+  // Age distribution (the sum should equal 100; enforce in application logic)
+  age1824   Int
+  age2534   Int
+  age3544   Int
+  age4554   Int
+  age5564   Int
+  age65plus Int
+
+  otherGender String
+
+  educationLevel String
+  jobTitles      String
+  incomeLevel    String
+
+  locations          AudienceLocation[]
+  genders            AudienceGender[]
+  screeningQuestions AudienceScreeningQuestion[]
+  languages          AudienceLanguage[]
+  competitors        AudienceCompetitor[]
+}
+
+model AudienceLocation {
+  id         Int      @id @default(autoincrement())
+  audienceId Int
+  audience   Audience @relation(fields: [audienceId], references: [id])
+  location   String
+}
+
+model AudienceGender {
+  id         Int      @id @default(autoincrement())
+  audienceId Int
+  audience   Audience @relation(fields: [audienceId], references: [id])
+  gender     String // e.g. "Male", "Female", "Other"
+}
+
+model AudienceScreeningQuestion {
+  id         Int      @id @default(autoincrement())
+  audienceId Int
+  audience   Audience @relation(fields: [audienceId], references: [id])
+  question   String
+}
+
+model AudienceLanguage {
+  id         Int      @id @default(autoincrement())
+  audienceId Int
+  audience   Audience @relation(fields: [audienceId], references: [id])
+  language   String
+}
+
+model AudienceCompetitor {
+  id         Int      @id @default(autoincrement())
+  audienceId Int
+  audience   Audience @relation(fields: [audienceId], references: [id])
+  competitor String
+}
+
+//////////////////////
+// Step 4: Creative Assets
+//////////////////////
+
+model CreativeAsset {
+  id                 Int                      @id @default(autoincrement())
+  type               CreativeAssetType
+  url                String
+  title              String
+  description        String?
+  influencerAssigned String?
+  influencerHandle   String?
+  influencerBudget   Float?
+  submissionId       Int
+  submission         CampaignWizardSubmission @relation(fields: [submissionId], references: [id])
+}
+
+model CreativeRequirement {
+  id           Int                      @id @default(autoincrement())
+  requirement  String
+  submissionId Int
+  submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id])
+}
