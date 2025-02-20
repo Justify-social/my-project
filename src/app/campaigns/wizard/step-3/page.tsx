@@ -573,7 +573,7 @@ export default function AudienceTargetingStep() {
     competitors: data.audience.competitors || [],
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (values: AudienceValues) => {
     try {
       setIsSubmitting(true);
       
@@ -586,37 +586,16 @@ export default function AudienceTargetingStep() {
           step: 3,
           data: {
             audience: {
-              age1824: parseInt(formData.get('age1824') as string),
-              age2534: parseInt(formData.get('age2534') as string),
-              age3544: parseInt(formData.get('age3544') as string),
-              age4554: parseInt(formData.get('age4554') as string),
-              age5564: parseInt(formData.get('age5564') as string),
-              age65plus: parseInt(formData.get('age65plus') as string),
-              otherGender: formData.get('otherGender'),
-              educationLevel: formData.get('educationLevel'),
-              jobTitles: formData.get('jobTitles'),
-              incomeLevel: formData.get('incomeLevel'),
-              
-              // Handle arrays of data
-              locations: formData.getAll('locations').map(location => ({
-                location: location
-              })),
-              
-              genders: formData.getAll('genders').map(gender => ({
-                gender: gender
-              })),
-              
-              screeningQuestions: formData.getAll('screeningQuestions').map(question => ({
-                question: question
-              })),
-              
-              languages: formData.getAll('languages').map(language => ({
-                language: language
-              })),
-              
-              competitors: formData.getAll('competitors').map(competitor => ({
-                competitor: competitor
-              }))
+              ageDistribution: values.ageDistribution,
+              location: values.location,
+              gender: values.gender,
+              otherGender: values.otherGender,
+              screeningQuestions: values.screeningQuestions,
+              languages: values.languages,
+              educationLevel: values.educationLevel,
+              jobTitles: values.jobTitles,
+              incomeLevel: values.incomeLevel,
+              competitors: values.competitors
             }
           }
         })
@@ -627,39 +606,7 @@ export default function AudienceTargetingStep() {
       }
 
       // Update local state
-      updateData("audience", {
-        age1824: parseInt(formData.get('age1824') as string),
-        age2534: parseInt(formData.get('age2534') as string),
-        age3544: parseInt(formData.get('age3544') as string),
-        age4554: parseInt(formData.get('age4554') as string),
-        age5564: parseInt(formData.get('age5564') as string),
-        age65plus: parseInt(formData.get('age65plus') as string),
-        otherGender: formData.get('otherGender'),
-        educationLevel: formData.get('educationLevel'),
-        jobTitles: formData.get('jobTitles'),
-        incomeLevel: formData.get('incomeLevel'),
-        
-        // Handle arrays of data
-        locations: formData.getAll('locations').map(location => ({
-          location: location
-        })),
-        
-        genders: formData.getAll('genders').map(gender => ({
-          gender: gender
-        })),
-        
-        screeningQuestions: formData.getAll('screeningQuestions').map(question => ({
-          question: question
-        })),
-        
-        languages: formData.getAll('languages').map(language => ({
-          language: language
-        })),
-        
-        competitors: formData.getAll('competitors').map(competitor => ({
-          competitor: competitor
-        }))
-      }));
+      updateData("audience", values);
       
       router.push(`/campaigns/wizard/step-4?id=${campaignId}`);
     } catch (error) {
