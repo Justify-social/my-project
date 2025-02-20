@@ -210,7 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         fixed top-16 left-0 h-[calc(100vh-4rem)]
         w-48 sm:w-56 lg:w-64 bg-[#f5f5f5] flex flex-col
         transition-all duration-300 ease-in-out
-        md:translate-x-0
+        hidden md:flex
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}
     >

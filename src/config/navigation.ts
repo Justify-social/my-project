@@ -6,7 +6,7 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { label: "Home", href: "/", icon: "/Home.svg" },
+  { label: "Home", href: "/dashboard", icon: "/Home.svg" },
   {
     label: "Campaigns",
     href: "/campaigns",
@@ -19,7 +19,7 @@ export const navItems: NavItem[] = [
   {
     label: "Creative Testing",
     href: "/creative-testing",
-    icon: "/Creative.svg",
+    icon: "/Creative_Asset_Testing.svg",
     children: [
       { label: "List", href: "/creative-testing/list" },
       { label: "Reports", href: "/creative-testing/reports" },
@@ -28,13 +28,13 @@ export const navItems: NavItem[] = [
   {
     label: "Brand Lift",
     href: "/brand-lift",
-    icon: "/Brand-Lift.svg",
+    icon: "/Brand_Lift.svg",
     children: [
       { label: "List", href: "/brand-lift/list" },
       { label: "Reports", href: "/brand-lift/reports" },
     ],
   },
-  { label: "Brand Health", href: "/brand-health", icon: "/Brand-Health.svg" },
+  { label: "Brand Health", href: "/brand-health", icon: "/Brand_Health.svg" },
   {
     label: "Influencers",
     href: "/influencers",
