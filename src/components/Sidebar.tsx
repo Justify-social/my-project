@@ -1,7 +1,8 @@
 import Link from "next/link";
-import React, { useRef, useEffect } from "react";
+import Image from "next/image";
+import React, { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useSidebar } from "../context/SidebarContext";
+import { useSidebar } from "@/components/providers/sidebar-provider";
 
 interface User {
   role: string;
@@ -15,12 +16,12 @@ interface SidebarProps {
 interface NavItem {
   label: string;
   href: string;
-  icon?: string;
+  icon?: string; // Path to an SVG icon in the public folder.
   children?: NavItem[];
 }
 
 const navItems: NavItem[] = [
-  // ... (your nav items as before)
+  // ... (same nav items as before)
 ];
 
 const settingsNavItem: NavItem = {
@@ -40,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         closeSidebar();
       }
     };
+
     if (isSidebarOpen) {
       document.addEventListener("keydown", handleKeyDown);
       closeButtonRef.current?.focus();
@@ -47,6 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     } else {
       document.body.style.overflow = "";
     }
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
@@ -58,7 +61,6 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   }
 
   function isChildActive(parentHref: string, childHref: string) {
-    // ... (same logic as before)
     if (childHref === "/campaigns/wizard/step-1") {
       return pathname.startsWith("/campaigns/wizard");
     }
@@ -162,50 +164,37 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             aria-label="Close navigation menu"
             className="absolute top-4 right-4 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <svg
-              className="w-6 h-6 text-black"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          {/* Mobile header items: credits, search, notifications, profile */}
+
+          {/* Mobile header items for navigation (Credits, Search, Profile) */}
           <div className="flex items-center justify-around p-4 border-b">
             <Link href="/billing" onClick={closeSidebar}>
               <div className="flex flex-col items-center">
                 <Image src="/coins.svg" alt="Credits" width={24} height={24} />
-                <span className="text-xs">{/* Optionally show remaining credits */}</span>
+                <span className="text-xs">Credits</span>
               </div>
             </Link>
             <button onClick={closeSidebar}>
-              <Image src="/magnifying-glass.svg" alt="Search" width={24} height={24} />
+              <div className="flex flex-col items-center">
+                <Image src="/magnifying-glass.svg" alt="Search" width={24} height={24} />
+                <span className="text-xs">Search</span>
+              </div>
             </button>
-            <div className="relative">
-              <Image src="/bell.svg" alt="Notifications" width={24} height={24} />
-              {/* Optionally add notification count */}
-            </div>
             <Link href="/settings" onClick={closeSidebar}>
-              <div className="w-8 h-8 rounded-full overflow-hidden">
-                <img 
-                  src={user?.picture || "/profile-image.svg"} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error(`Failed to load profile image: ${user?.picture || "/profile-image.svg"}`);
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/profile-image.svg";
-                    target.onerror = null;
-                  }}
-                />
+              <div className="flex flex-col items-center">
+                <Image src={user?.picture || "/profile-image.svg"} alt="Profile" width={24} height={24} />
+                <span className="text-xs">Profile</span>
               </div>
             </Link>
           </div>
+
           <nav aria-label="Sidebar Navigation" className="mt-4 p-4 flex-grow overflow-auto">
             {renderNavItems()}
           </nav>
+
           {/* Bottom "Settings" section */}
           <div className="px-4 py-3 border-t border-gray-300">
             <Link
@@ -231,7 +220,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         </div>
       )}
 
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar remains unchanged */}
       <aside className="hidden md:flex fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-100 flex-col">
         <nav aria-label="Sidebar Navigation" className="p-4 flex-grow overflow-auto">
           {renderNavItems()}
