@@ -4,13 +4,13 @@ import { NextRequest } from "next/server";
 import { getSession } from "@auth0/nextjs-auth0";
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs'
+import { getAuth } from '@clerk/nextjs/server'
 import { Prisma } from '@prisma/client'
 import { createErrorResponse, APIError } from '@/lib/error-logging'
 
 export async function GET() {
   try {
-    const { userId } = auth()
+    const { userId } = getAuth()
     
     if (!userId) {
       throw new APIError('Unauthorized: No user ID provided', 401)
