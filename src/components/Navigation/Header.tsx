@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useSidebar } from "@/providers/sidebar-provider";
 import MobileMenu from "./MobileMenu";
-import { navItems, settingsNavItem } from "@/config/navigation";
+import { navItems, settingsItem } from "@/config/navigation";
 
 interface HeaderProps {
   companyName: string;
@@ -103,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         navItems={navItems}
-        settingsNavItem={settingsNavItem}
+        settingsItem={settingsItem}
         remainingCredits={remainingCredits}
         notificationsCount={notificationsCount}
         companyName={companyName}
