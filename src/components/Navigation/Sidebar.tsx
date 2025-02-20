@@ -15,76 +15,6 @@ interface SidebarProps {
   user?: User;
 }
 
-export const navItems: NavItem[] = [
-  { label: "Home", href: "/dashboard", icon: "/Home.svg" },
-  {
-    label: "Campaigns",
-    href: "/campaigns",
-    icon: "/Campaigns.svg",
-    children: [
-      { label: "List", href: "/campaigns" },
-      { label: "Wizard", href: "/campaigns/wizard/step-1" },
-    ],
-  },
-  {
-    label: "Creative Testing",
-    href: "/creative-testing",
-    icon: "/Creative_Asset_Testing.svg",
-    children: [
-      { label: "List", href: "/creative-testing/list" },
-      { label: "Reports", href: "/creative-testing/reports" },
-    ],
-  },
-  {
-    label: "Brand Lift",
-    href: "/brand-lift",
-    icon: "/Brand_Lift.svg",
-    children: [
-      { label: "List", href: "/brand-lift/list" },
-      { label: "Reports", href: "/brand-lift/reports" },
-    ],
-  },
-  { label: "Brand Health", href: "/brand-health", icon: "/Brand_Health.svg" },
-  {
-    label: "Influencers",
-    // The parent link itself points to Marketplace:
-    href: "/influencers/marketplace",
-    icon: "/Influencers.svg",
-    children: [
-      { label: "Marketplace", href: "/influencers/marketplace" },
-      { label: "List", href: "/influencers" },
-    ],
-  },
-  {
-    label: "MMM",
-    href: "/mmm",
-    icon: "/MMM.svg",
-    children: [
-      { label: "Dashboard", href: "/mmm/dashboard" },
-      { label: "Attribution", href: "/mmm/attribution" },
-      { label: "Weightings", href: "/mmm/weightings" },
-      { label: "Cross-channel", href: "/mmm/cross-channel" },
-    ],
-  },
-  {
-    label: "Reports",
-    href: "/reports",
-    icon: "/Reports.svg",
-    children: [
-      { label: "Insight", href: "/reports/insight" },
-      { label: "Dashboard", href: "/reports/dashboard" },
-    ],
-  },
-  { label: "Billing", href: "/billing", icon: "/Billing.svg" },
-  { label: "Help", href: "/help", icon: "/Help.svg" },
-];
-
-export const settingsItem: NavItem = {
-  label: "Settings",
-  href: "/settings",
-  icon: "/Settings.svg",
-};
-
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const pathname = usePathname();
   const { isOpen } = useSidebar();
@@ -210,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         fixed top-16 left-0 h-[calc(100vh-4rem)]
         w-48 sm:w-56 lg:w-64 bg-[#f5f5f5] flex flex-col
         transition-all duration-300 ease-in-out
-        hidden md:flex
+        md:translate-x-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}
     >
