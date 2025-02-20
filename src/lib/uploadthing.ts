@@ -20,4 +20,4 @@ export type OurFileRouter = typeof ourFileRouter
 
 export const { useUploadThing, uploadFiles } = generateReactHelpers<OurFileRouter>();
 
-export const { UploadButton, UploadDropzone } = generateComponents<OurFileRouter>(); 
+export const { UploadButton, UploadDropzone, Uploader } = generateComponents<OurFileRouter>(); 
