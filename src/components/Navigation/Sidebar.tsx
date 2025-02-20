@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/providers/sidebar-provider";
-import { navItems, settingsNavItem, type NavItem } from "@/config/navigation";
+import { navItems, settingsItem } from "@/config/navigation";
 
 interface User {
   role: string;
@@ -79,7 +79,7 @@ export const navItems: NavItem[] = [
   { label: "Help", href: "/help", icon: "/Help.svg" },
 ];
 
-export const settingsNavItem: NavItem = {
+export const settingsItem: NavItem = {
   label: "Settings",
   href: "/settings",
   icon: "/Settings.svg",
@@ -201,6 +201,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     </ul>
   );
 
+  if (!isOpen) return null;
+
   return (
     <aside
       data-testid="sidebar"
@@ -217,25 +219,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       </nav>
       <div className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 border-t border-gray-300">
         <Link
-          href={settingsNavItem.href}
+          href={settingsItem.href}
           className={`flex items-center gap-1.5 sm:gap-2 no-underline ${
-            isNavItemActive(settingsNavItem.href) ? activeClasses : defaultClasses
+            isNavItemActive(settingsItem.href) ? activeClasses : defaultClasses
           }`}
         >
-          {settingsNavItem.icon && (
+          {settingsItem.icon && (
             <img
-              src={settingsNavItem.icon}
-              alt={`${settingsNavItem.label} icon`}
+              src={settingsItem.icon}
+              alt={`${settingsItem.label} icon`}
               className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200"
               style={{
-                filter: isNavItemActive(settingsNavItem.href)
+                filter: isNavItemActive(settingsItem.href)
                   ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
                   : "none",
               }}
             />
           )}
           <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-            {settingsNavItem.label}
+            {settingsItem.label}
           </span>
         </Link>
       </div>

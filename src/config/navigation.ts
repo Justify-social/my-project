@@ -6,7 +6,7 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { label: "Home", href: "/dashboard", icon: "/Home.svg" },
+  { label: "Home", href: "/", icon: "/Home.svg" },
   {
     label: "Campaigns",
     href: "/campaigns",
@@ -19,7 +19,7 @@ export const navItems: NavItem[] = [
   {
     label: "Creative Testing",
     href: "/creative-testing",
-    icon: "/Creative_Asset_Testing.svg",
+    icon: "/Creative.svg",
     children: [
       { label: "List", href: "/creative-testing/list" },
       { label: "Reports", href: "/creative-testing/reports" },
@@ -28,16 +28,16 @@ export const navItems: NavItem[] = [
   {
     label: "Brand Lift",
     href: "/brand-lift",
-    icon: "/Brand_Lift.svg",
+    icon: "/Brand-Lift.svg",
     children: [
       { label: "List", href: "/brand-lift/list" },
       { label: "Reports", href: "/brand-lift/reports" },
     ],
   },
-  { label: "Brand Health", href: "/brand-health", icon: "/Brand_Health.svg" },
+  { label: "Brand Health", href: "/brand-health", icon: "/Brand-Health.svg" },
   {
     label: "Influencers",
-    href: "/influencers/marketplace",
+    href: "/influencers",
     icon: "/Influencers.svg",
     children: [
       { label: "Marketplace", href: "/influencers/marketplace" },
@@ -68,7 +68,7 @@ export const navItems: NavItem[] = [
   { label: "Help", href: "/help", icon: "/Help.svg" },
 ];
 
-export const settingsNavItem: NavItem = {
+export const settingsItem: NavItem = {
   label: "Settings",
   href: "/settings",
   icon: "/Settings.svg",
