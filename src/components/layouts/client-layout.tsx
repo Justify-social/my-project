@@ -1,29 +1,33 @@
-'use client'
+"use client";
 
-import { SidebarProvider } from '@/providers/sidebar-provider'
-import Header from '@/components/Header'
-import Sidebar from '@/components/Sidebar'
+import React from "react";
+import Header from "@/components/Navigation/Header";
+import Sidebar from "@/components/Navigation/Sidebar";
+import { SidebarProvider } from "@/providers/sidebar-provider";
 
-export default function ClientLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+interface ClientLayoutProps {
+  children: React.ReactNode;
+  companyName: string;
+}
+
+const ClientLayout: React.FC<ClientLayoutProps> = ({ children, companyName }) => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-white">
-        <Header 
-          companyName="Justify"
-          remainingCredits={100}
-          notificationsCount={0}
-        />
+      <div className="flex h-screen">
         <Sidebar />
-        <main className="md:ml-64 pt-16 bg-white">
-          <div className="h-full w-full bg-white">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header 
+            companyName={companyName}
+            remainingCredits={100}
+            notificationsCount={3}
+          />
+          <main className="flex-1 overflow-auto bg-gray-50">
             {children}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
-  )
-} 
+  );
+};
+
+export default ClientLayout; 
