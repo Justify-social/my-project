@@ -10,6 +10,10 @@ import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ["latin"] });
 
+if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+  throw new Error('Missing Clerk Publishable Key')
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -20,9 +24,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.png" />
       </head>
-      <ClerkProvider
-        publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-      >
+      <ClerkProvider>
         <SidebarProvider>
           <UserProvider>
             <body className={inter.className}>

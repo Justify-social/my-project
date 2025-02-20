@@ -1,13 +1,9 @@
-import { withMiddlewareAuthRequired } from '@auth0/nextjs-auth0/edge';
+import { authMiddleware } from "@clerk/nextjs"
 
-export default withMiddlewareAuthRequired();
+export default authMiddleware({
+  publicRoutes: ["/", "/api/webhooks(.*)", "/api/uploadthing"],
+})
 
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/brand-lift/:path*',
-    '/brand-lift-test/:path*',
-    '/api/:path((?!auth).*)',
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.svg$).*)'  // Exclude SVG files
-  ]
-}; 
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+} 
