@@ -1,6 +1,7 @@
 "use client";
-import Link from "next/link";
 import React from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/providers/sidebar-provider";
 import { navItems, settingsNavItem, type NavItem } from "@/config/navigation";
