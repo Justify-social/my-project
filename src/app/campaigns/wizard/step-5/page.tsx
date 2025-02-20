@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Component, ReactNode } from "react";
+import React, { Component, ReactNode, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
@@ -323,7 +323,7 @@ const CampaignSubmissionSummary: React.FC = () => {
 // MAIN PAGE COMPONENT: STEP 5 - REVIEW & SUBMIT
 // =============================================================================
 
-export default function ReviewSubmitStep() {
+function CampaignStep5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -421,5 +421,13 @@ export default function ReviewSubmitStep() {
         disableNext={isSubmitDisabled}
       />
     </ErrorBoundary>
+  );
+}
+
+export default function CampaignStep5() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CampaignStep5Content />
+    </Suspense>
   );
 }

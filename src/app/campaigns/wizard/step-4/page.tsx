@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -448,7 +448,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 // MAIN COMPONENT: CREATIVE ASSETS (STEP 4)
 // =============================================================================
 
-export default function CreativeAssetsStep() {
+function CampaignStep4Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -753,4 +753,12 @@ export default function CreativeAssetsStep() {
       </Modal>
     </ErrorBoundary>
   );
+}
+
+export default function CampaignStep4() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CampaignStep4Content />
+    </Suspense>
+  )
 }
