@@ -9,8 +9,11 @@ export default authMiddleware({
     "/",
     "/sign-in(.*)",
     "/sign-up(.*)",
-    "/api(.*)",
-    "/dashboard"  // Temporarily make dashboard public for testing
+    "/api(.*)"
+  ],
+  ignoredRoutes: [
+    "/((?!api|trpc))(_next|.+\\.[\\w]+$)",
+    "/api/webhooks(.*)"
   ],
   afterAuth(auth, req, evt) {
     // Debug authentication state
@@ -25,7 +28,12 @@ export default authMiddleware({
 
 // Stop Middleware running on static files and API routes
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/((?!.*\\..*|_next).*)",
+    "/",
+    "/(api|trpc)(.*)",
+    "!/(api|_next|_vercel|.*\\..*)(.*)"
+  ]
 };
 
 // Check if we're getting the right environment

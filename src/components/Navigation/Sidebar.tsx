@@ -15,6 +15,34 @@ interface SidebarProps {
   user?: User;
 }
 
+const routes = [
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: "Home"
+  },
+  {
+    label: "Campaigns",
+    href: "/campaigns",
+    icon: "Campaigns"
+  },
+  {
+    label: "Influencers",
+    href: "/influencers",
+    icon: "Influencers"
+  },
+  {
+    label: "Reports",
+    href: "/reports",
+    icon: "Reports"
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: "Settings"
+  }
+];
+
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const pathname = usePathname();
   const { isOpen } = useSidebar();
@@ -69,65 +97,25 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   // Render navigation items (DRY approach)
   const renderNavItems = () => (
     <ul className="list-none space-y-2 sm:space-y-3">
-      {navItems.map((item, index) => {
-        const parentIsActive = isNavItemActive(item.href);
-        const childIsActive = item.children?.some((child) =>
-          isChildActive(item.href, child.href)
-        );
-        const active = parentIsActive || childIsActive;
-        return (
-          <li key={index}>
-            <Link
-              href={item.href}
-              className={`flex items-center gap-1.5 sm:gap-2 no-underline ${
-                active ? activeClasses : defaultClasses
-              }`}
-            >
-              {item.icon && (
-                <img
-                  src={item.icon}
-                  alt={`${item.label} icon`}
-                  className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200"
-                  onError={(e) => {
-                    console.error(`Failed to load icon: ${item.icon}`);
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null;
-                  }}
-                  style={{
-                    filter: active
-                      ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
-                      : "none",
-                  }}
-                />
-              )}
-              <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>
-            </Link>
-            {item.children && active && (
-              <ul className="list-none mt-1 space-y-1">
-                {item.children.map((child, childIndex) => {
-                  const childActiveResult = isChildActive(item.href, child.href);
-                  return (
-                    <li key={childIndex}>
-                      <Link
-                        href={child.href}
-                        className={`no-underline block py-1 ${
-                          childActiveResult
-                            ? activeSubmenuClasses
-                            : defaultSubmenuClasses
-                        }`}
-                      >
-                        <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-                          {child.label}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
-        );
-      })}
+      {routes.map((route) => (
+        <li key={route.href}>
+          <Link
+            href={route.href}
+            className={`flex items-center px-6 py-3 text-sm ${
+              pathname === route.href
+                ? "bg-gray-100 text-blue-600"
+                : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <img
+              src={`/${route.icon}.svg`}
+              alt={route.label}
+              className="w-5 h-5 mr-3"
+            />
+            {route.label}
+          </Link>
+        </li>
+      ))}
     </ul>
   );
 
