@@ -2,13 +2,11 @@
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import SelectedCampaignContent from '@/components/brand-lift/SelectedCampaignContent';
 
 const SelectedCampaignContent = dynamic(
-  () => import('@/components/Brand-Lift/SelectedCampaignContent'),
+  () => import('../../../components/brand-lift/SelectedCampaignContent'),
   {
     ssr: false,
-    loading: () => <div>Loading...</div>
   }
 );
 
