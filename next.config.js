@@ -27,6 +27,37 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: '(?!app\\.justify\\.social).*', // Matches any domain except app.justify.social
+          },
+        ],
+        destination: 'https://app.justify.social/:path*',
+        permanent: true,
+      },
+    ];
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/:path*',
+          has: [
+            {
+              type: 'host',
+              value: 'app.justify.social',
+            },
+          ],
+          destination: '/:path*',
+        },
+      ],
+    };
+  },
 }
 
 module.exports = nextConfig 

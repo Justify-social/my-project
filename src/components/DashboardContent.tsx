@@ -108,13 +108,25 @@ export default function DashboardContent({ user }: DashboardContentProps) {
       try {
         const res = await fetch("/api/campaigns");
         if (!res.ok) {
-          throw new Error("Network response was not ok");
+          console.error("Campaign fetch error:", await res.text());
+          throw new Error("Failed to fetch campaigns");
         }
         const data = await res.json();
         setCampaigns(data);
       } catch (error) {
-        console.error("Failed to fetch campaigns:", error);
-        setCampaignError("Error: Unable to load campaign data. Please refresh the page.");
+        console.error("Campaign fetch error:", error);
+        setCampaignError("Unable to load campaigns");
+        // Set dummy data for development
+        setCampaigns([
+          {
+            id: 1,
+            name: "Sample Campaign",
+            status: "Live",
+            budget: 10000,
+            usersEngaged: { current: 50, total: 100 },
+            startDate: new Date().toISOString(),
+          }
+        ]);
       } finally {
         setIsLoadingCampaigns(false);
       }

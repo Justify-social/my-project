@@ -17,22 +17,20 @@ export default function DashboardPage() {
     }
   }, [isLoaded, userId, router]);
 
-  if (!isLoaded) {
-    return <div>Loading...</div>;
-  }
-
-  if (!userId) {
+  if (!isLoaded || !userId) {
     return null;
   }
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen">
         <Sidebar />
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 flex flex-col">
           <Header />
           <MobileMenu />
-          <DashboardContent />
+          <main className="flex-1 overflow-auto p-6 mt-16 ml-64">
+            <DashboardContent />
+          </main>
         </div>
       </div>
     </SidebarProvider>
