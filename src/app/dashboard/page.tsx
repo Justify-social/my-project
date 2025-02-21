@@ -1,14 +1,28 @@
-import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import DashboardContent from "@/components/DashboardContent";
 import { Header, Sidebar, MobileMenu } from "@/components/Navigation";
 import { SidebarProvider } from "@/providers/sidebar-provider";
 
-export default async function DashboardPage() {
-  const { userId } = auth();
+export default function DashboardPage() {
+  const { isLoaded, userId } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && !userId) {
+      router.push("/sign-in");
+    }
+  }, [isLoaded, userId, router]);
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
   if (!userId) {
-    redirect("/sign-in");
+    return null;
   }
 
   return (
