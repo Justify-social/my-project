@@ -19,6 +19,19 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
+    },
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/dashboard',
+        destination: '/api/auth/login',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig 

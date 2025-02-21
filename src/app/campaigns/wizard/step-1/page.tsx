@@ -7,6 +7,7 @@ import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { toast } from "react-hot-toast";
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
@@ -44,6 +45,34 @@ const OverviewSchema = disableValidation
       influencerHandle: Yup.string().required("Influencer handle is required"),
     });
 
+// First, add these enums at the top of your file
+enum Currency {
+  GBP = "GBP",
+  USD = "USD",
+  EUR = "EUR"
+}
+
+enum Platform {
+  Instagram = "Instagram",
+  YouTube = "YouTube",
+  TikTok = "TikTok"
+}
+
+enum Position {
+  Manager = "Manager",
+  Director = "Director",
+  VP = "VP"
+}
+
+// Add this debug function at the top
+const debugFormData = (values: any, isDraft: boolean) => {
+  console.log('Form Submission Debug:', {
+    type: isDraft ? 'DRAFT' : 'SUBMIT',
+    timestamp: new Date().toISOString(),
+    values: values,
+  });
+};
+
 export default function Overview() {
   const router = useRouter();
   const { data, updateData } = useWizard();
@@ -75,76 +104,44 @@ export default function Overview() {
     influencerHandle: data.overview.influencerHandle || "",
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (values: any, isDraft = false) => {
     try {
       setIsSubmitting(true);
-      
+      console.log('Save Draft clicked');
+      console.log('Form values:', values);
+
       const response = await fetch('/api/campaigns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          campaignName: formData.get('name'),
-          description: formData.get('businessGoal'),
-          startDate: formData.get('startDate'),
-          endDate: formData.get('endDate'),
-          timeZone: formData.get('timeZone'),
-          currency: formData.get('currency'),
-          totalBudget: parseFloat(formData.get('totalBudget') as string),
-          socialMediaBudget: parseFloat(formData.get('socialMediaBudget') as string),
-          platform: formData.get('platform'),
-          influencerHandle: formData.get('influencerHandle'),
-          primaryContact: {
-            firstName: formData.get('primaryContact.firstName'),
-            surname: formData.get('primaryContact.surname'),
-            email: formData.get('primaryContact.email'),
-            position: formData.get('primaryContact.position'),
-          },
-          secondaryContact: {
-            firstName: formData.get('secondaryContact.firstName'),
-            surname: formData.get('secondaryContact.surname'),
-            email: formData.get('secondaryContact.email'),
-            position: formData.get('secondaryContact.position'),
-          }
-        })
+          name: values.name,
+          businessGoal: values.businessGoal,
+          startDate: values.startDate,
+          endDate: values.endDate,
+          timeZone: values.timeZone,
+        }),
       });
+
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error('Failed to create campaign');
+        console.error('Server response:', data);
+        throw new Error(data.error || 'Failed to save campaign');
       }
 
-      const campaign = await response.json();
-      updateData("campaignId", campaign.id);
-      updateData("overview", {
-        name: formData.get('name'),
-        businessGoal: formData.get('businessGoal'),
-        startDate: formData.get('startDate'),
-        endDate: formData.get('endDate'),
-        timeZone: formData.get('timeZone'),
-        contacts: formData.get('contacts'),
-        primaryContact: {
-          firstName: formData.get('primaryContact.firstName'),
-          surname: formData.get('primaryContact.surname'),
-          email: formData.get('primaryContact.email'),
-          position: formData.get('primaryContact.position'),
-        },
-        secondaryContact: {
-          firstName: formData.get('secondaryContact.firstName'),
-          surname: formData.get('secondaryContact.surname'),
-          email: formData.get('secondaryContact.email'),
-          position: formData.get('secondaryContact.position'),
-        },
-        currency: formData.get('currency'),
-        totalBudget: parseFloat(formData.get('totalBudget') as string),
-        socialMediaBudget: parseFloat(formData.get('socialMediaBudget') as string),
-        platform: formData.get('platform'),
-        influencerHandle: formData.get('influencerHandle'),
-      });
-      router.push(`/campaigns/wizard/step-2?id=${campaign.id}`);
+      console.log('Success response:', data);
+      
+      if (isDraft) {
+        toast.success('Draft saved successfully');
+      } else {
+        router.push(`/campaigns/wizard/step-2?id=${data.id}`);
+      }
+
     } catch (error) {
-      console.error('Error saving step 1:', error);
-      // Handle error (show error message to user)
+      console.error('Submission error:', error);
+      toast.error(error.message || 'Failed to save campaign');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,23 +151,29 @@ export default function Overview() {
     <div className="max-w-4xl mx-auto p-4 pb-20">
       <Header currentStep={1} totalSteps={5} />
       <h1 className="text-2xl font-bold mb-4">Step 1: Campaign Details</h1>
-      <div className="flex justify-end mb-4">
-        <button 
-          type="button" 
-          onClick={() => handleSubmit(new FormData())}
-          className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
-          disabled={isSubmitting}
-        >
-          Save as Draft
-        </button>
-      </div>
+      
       <Formik
         initialValues={initialValues}
         validationSchema={OverviewSchema}
         onSubmit={handleSubmit}
       >
-        {({ submitForm, isSubmitting, isValid }) => (
+        {({ values, submitForm }) => (
           <>
+            <div className="flex justify-end mb-4">
+              <button 
+                type="button" 
+                onClick={() => {
+                  console.log('Save Draft clicked');
+                  console.log('Form values:', values);
+                  handleSubmit(values, true);
+                }}
+                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+                disabled={isSubmitting}
+              >
+                Save as Draft
+              </button>
+            </div>
+
             <Form className="space-y-8">
               {/* Campaign Name */}
               <div>
@@ -307,9 +310,9 @@ export default function Overview() {
                         className="w-full p-2 border rounded"
                       >
                         <option value="">Select Position</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Director">Director</option>
-                        <option value="VP">VP</option>
+                        <option value={Position.Manager}>{Position.Manager}</option>
+                        <option value={Position.Director}>{Position.Director}</option>
+                        <option value={Position.VP}>{Position.VP}</option>
                       </Field>
                       <ErrorMessage name="primaryContact.position" component="div" className="text-red-600 text-sm" />
                     </div>
@@ -362,9 +365,9 @@ export default function Overview() {
                         className="w-full p-2 border rounded"
                       >
                         <option value="">Select Position</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Director">Director</option>
-                        <option value="VP">VP</option>
+                        <option value={Position.Manager}>{Position.Manager}</option>
+                        <option value={Position.Director}>{Position.Director}</option>
+                        <option value={Position.VP}>{Position.VP}</option>
                       </Field>
                     </div>
                   </div>
@@ -379,9 +382,9 @@ export default function Overview() {
                       Currency
                     </label>
                     <Field as="select" id="currency" name="currency" className="w-full p-2 border rounded">
-                      <option value="£">£</option>
-                      <option value="$">$</option>
-                      <option value="€">€</option>
+                      <option value={Currency.GBP}>GBP (£)</option>
+                      <option value={Currency.USD}>USD ($)</option>
+                      <option value={Currency.EUR}>EUR (€)</option>
                     </Field>
                     <ErrorMessage name="currency" component="div" className="text-red-600 text-sm" />
                   </div>
@@ -421,9 +424,9 @@ export default function Overview() {
                     </label>
                     <Field as="select" id="platform" name="platform" className="w-full p-2 border rounded">
                       <option value="">Select Platform</option>
-                      <option value="Instagram">Instagram</option>
-                      <option value="YouTube">YouTube</option>
-                      <option value="TikTok">TikTok</option>
+                      <option value={Platform.Instagram}>{Platform.Instagram}</option>
+                      <option value={Platform.YouTube}>{Platform.YouTube}</option>
+                      <option value={Platform.TikTok}>{Platform.TikTok}</option>
                     </Field>
                     <ErrorMessage name="platform" component="div" className="text-red-600 text-sm" />
                   </div>
