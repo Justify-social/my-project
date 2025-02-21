@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 const SurveyApprovalContent = dynamic(
-  () => import('@/components/Brand-Lift/SurveyApprovalContent'),
+  () => import('@/components/brand-lift/SurveyApprovalContent').then(mod => mod.default),
   {
     ssr: false,
     loading: () => <div>Loading...</div>
