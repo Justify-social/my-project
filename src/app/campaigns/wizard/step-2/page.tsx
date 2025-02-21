@@ -68,19 +68,15 @@ const kpis = [
 
 // Define the validation schema for Step 2 fields.
 const ObjectivesSchema = Yup.object().shape({
-  // Messaging fields
-  mainMessage: Yup.string().max(3000, "Maximum 3000 characters").required("Main message is required"),
+  mainMessage: Yup.string().required("Main message is required"),
   hashtags: Yup.string(),
-  memorability: Yup.string().required("Memorability statement is required"),
+  memorability: Yup.string().required("Memorability is required"),
   keyBenefits: Yup.string().required("Key benefits are required"),
-  // Hypotheses fields
   expectedAchievements: Yup.string().required("Expected achievements are required"),
-  purchaseIntent: Yup.string().required("Purchase intent impact is required"),
-  // KPI selection fields
+  purchaseIntent: Yup.string().required("Purchase intent is required"),
   primaryKPI: Yup.string().required("Primary KPI is required"),
-  secondaryKPIs: Yup.array().of(Yup.string()).max(4, "Select up to 4 secondary KPIs"),
-  // Optional features checkboxes
-  features: Yup.array().of(Yup.string()),
+  secondaryKPIs: Yup.array().of(Yup.string()).max(4, "Maximum 4 secondary KPIs"),
+  features: Yup.array().of(Yup.string())
 });
 
 function CampaignStep2Content() {
@@ -91,21 +87,28 @@ function CampaignStep2Content() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialValues = {
-    mainMessage: data.objectives.mainMessage || "",
-    hashtags: data.objectives.hashtags || "",
-    memorability: data.objectives.memorability || "",
-    keyBenefits: data.objectives.keyBenefits || "",
-    expectedAchievements: data.objectives.expectedAchievements || "",
-    purchaseIntent: data.objectives.purchaseIntent || "",
-    primaryKPI: data.objectives.primaryKPI || "",
-    secondaryKPIs: data.objectives.secondaryKPIs || [],
-    features: data.objectives.features || [],
+    mainMessage: data.objectives?.mainMessage || "",
+    hashtags: data.objectives?.hashtags || "",
+    memorability: data.objectives?.memorability || "",
+    keyBenefits: data.objectives?.keyBenefits || "",
+    expectedAchievements: data.objectives?.expectedAchievements || "",
+    purchaseIntent: data.objectives?.purchaseIntent || "",
+    primaryKPI: data.objectives?.primaryKPI || "",
+    secondaryKPIs: data.objectives?.secondaryKPIs || [],
+    features: data.objectives?.features || [],
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (values: typeof initialValues) => {
     try {
       setIsSubmitting(true);
       
+      // Update the local wizard context
+      updateData({
+        ...data,
+        objectives: values
+      });
+
+      // Send to API
       const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
         method: 'PATCH',
         headers: {
@@ -114,16 +117,19 @@ function CampaignStep2Content() {
         body: JSON.stringify({
           step: 2,
           data: {
-            mainMessage: formData.get('mainMessage'),
-            hashtags: formData.get('hashtags'),
-            memorability: formData.get('memorability'),
-            keyBenefits: formData.get('keyBenefits'),
-            expectedAchievements: formData.get('expectedAchievements'),
-            purchaseIntent: formData.get('purchaseIntent'),
-            brandPerception: formData.get('brandPerception'),
-            primaryKPI: formData.get('primaryKPI'),
-            secondaryKPIs: formData.getAll('secondaryKPIs'),
-            features: formData.getAll('features')
+            objectives: {
+              create: {
+                mainMessage: values.mainMessage,
+                hashtags: values.hashtags,
+                memorability: values.memorability,
+                keyBenefits: values.keyBenefits,
+                expectedAchievements: values.expectedAchievements,
+                purchaseIntent: values.purchaseIntent,
+                primaryKPI: values.primaryKPI,
+                secondaryKPIs: values.secondaryKPIs,
+                features: values.features
+              }
+            }
           }
         })
       });
