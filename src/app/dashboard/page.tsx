@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import DashboardContent from "@/components/DashboardContent";
-import { Header, Sidebar } from "@/components/Navigation";
+import { Header, Sidebar, MobileMenu } from "@/components/Navigation";
+import { SidebarProvider } from "@/providers/sidebar-provider";
 
 export default async function DashboardPage() {
   const { userId } = auth();
@@ -11,12 +12,15 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <Header />
-        <DashboardContent />
+    <SidebarProvider>
+      <div className="flex h-screen bg-gray-100">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <Header />
+          <MobileMenu />
+          <DashboardContent />
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
