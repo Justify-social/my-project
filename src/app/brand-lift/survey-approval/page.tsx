@@ -2,6 +2,7 @@
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import SurveyApprovalContent from '@/components/brand-lift/SurveyApprovalContent';
 
 const SurveyApprovalContent = dynamic(
   () => import('/src/components/Brand-Lift/SurveyApprovalContent'),
@@ -12,9 +13,5 @@ const SurveyApprovalContent = dynamic(
 );
 
 export default function Page() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SurveyApprovalContent />
-    </Suspense>
-  );
+  return <SurveyApprovalContent />;
 }
