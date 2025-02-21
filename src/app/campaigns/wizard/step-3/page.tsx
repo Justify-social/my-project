@@ -158,100 +158,73 @@ interface AgeDistributionSliderProps {
   onChange: (newValues: number[]) => void;
 }
 const AgeDistributionSlider: React.FC<AgeDistributionSliderProps> = ({
-  values: propValues,
+  values,
   onChange,
 }) => {
   const ageGroups = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
-  const [values, setValues] = useState<number[]>(propValues);
-  const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    setValues(propValues);
-  }, [propValues]);
+  const handleSliderChange = (index: number, newValue: number) => {
+    const newValues = [...values];
+    const oldValue = newValues[index];
+    newValues[index] = newValue;
 
-  const recalcDistribution = (
-    index: number,
-    newValue: number,
-    current: number[]
-  ): number[] => {
-    const newDistribution = [...current];
-    newDistribution[index] = newValue;
-    const otherIndices = current
-      .map((_, i) => i)
-      .filter((i) => i !== index);
-    const sumOthers = otherIndices.reduce((sum, i) => sum + current[i], 0);
-    const remaining = 100 - newValue;
-    if (sumOthers === 0) {
-      const share = remaining / otherIndices.length;
-      otherIndices.forEach((i) => (newDistribution[i] = share));
-    } else {
-      otherIndices.forEach((i) => {
-        newDistribution[i] = Math.round((current[i] / sumOthers) * remaining);
-      });
+    // Calculate the adjustment needed for other values
+    const diff = newValue - oldValue;
+    if (diff !== 0) {
+      // Get indices of other values that can be adjusted
+      const adjustableIndices = values
+        .map((_, i) => i)
+        .filter(i => i !== index && newValues[i] > 0);
+
+      if (adjustableIndices.length > 0) {
+        // Distribute the difference proportionally among other values
+        const totalOthers = adjustableIndices.reduce((sum, i) => sum + newValues[i], 0);
+        adjustableIndices.forEach(i => {
+          const proportion = newValues[i] / totalOthers;
+          newValues[i] = Math.max(0, newValues[i] - (diff * proportion));
+        });
+      }
     }
-    const total = newDistribution.reduce((a, b) => a + b, 0);
+
+    // Round all values to integers
+    const roundedValues = newValues.map(v => Math.round(v));
+    
+    // Ensure total is 100
+    const total = roundedValues.reduce((sum, v) => sum + v, 0);
     if (total !== 100) {
-      const diff = 100 - total;
-      let candidateIndex = otherIndices[0];
-      otherIndices.forEach((i) => {
-        if (newDistribution[i] > newDistribution[candidateIndex])
-          candidateIndex = i;
-      });
-      newDistribution[candidateIndex] += diff;
+      const largestIndex = roundedValues.indexOf(Math.max(...roundedValues));
+      roundedValues[largestIndex] += (100 - total);
     }
-    return newDistribution;
-  };
 
-  const handleChange = (index: number, newVal: number) => {
-    const newVals = recalcDistribution(index, newVal, values);
-    setValues(newVals);
-    onChange(newVals);
-    const total = newVals.reduce((a, b) => a + b, 0);
-    setError(total !== 100 ? "Total allocation must be exactly 100%." : "");
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
-    let newVal = values[index];
-    if (e.key === "ArrowUp" || e.key === "ArrowRight") {
-      newVal = Math.min(newVal + 1, 100);
-    } else if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
-      newVal = Math.max(newVal - 1, 0);
-    }
-    handleChange(index, newVal);
+    onChange(roundedValues);
   };
 
   return (
     <div className="mb-4">
       <p className="italic text-sm mb-2">
-        Adjust the sliders to allocate percentages across age groups. The total must equal 100%. Moving one slider will auto‑adjust the others.
+        Adjust the sliders to allocate percentages across age groups. The total must equal 100%. Moving one slider will auto-adjust the others.
       </p>
       {ageGroups.map((group, index) => (
-        <div key={index} className="flex items-center mb-3" style={{ paddingBottom: "12px" }}>
+        <div key={index} className="flex items-center mb-3">
           <span className="w-20 text-left">{group}</span>
           <div className="flex-grow mx-4">
             <Slider
               min={0}
               max={100}
-              value={Math.round(values[index])}
-              onChange={(val: number) => handleChange(index, val)}
-              onAfterChange={(val: number) => handleChange(index, val)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              trackStyle={{ backgroundColor: "#3182ce", height: 8 }}
+              value={values[index]}
+              onChange={(value) => handleSliderChange(index, typeof value === 'number' ? value : value[0])}
+              className="slider-blue"
+              trackStyle={{ backgroundColor: '#2563EB' }}
               handleStyle={{
-                borderColor: "#3182ce",
-                height: 24,
-                width: 24,
-                marginLeft: -12,
-                marginTop: -8,
-                backgroundColor: "#fff",
+                borderColor: '#2563EB',
+                backgroundColor: '#2563EB',
               }}
-              railStyle={{ backgroundColor: "#e2e8f0", height: 8 }}
+              railStyle={{ backgroundColor: '#E5E7EB' }}
             />
           </div>
-          <span className="w-12 text-right font-bold">{Math.round(values[index])}%</span>
+          <span className="w-16 text-right">{Math.round(values[index])}%</span>
         </div>
       ))}
-      {error && <p className="text-red-600 text-sm">{error}</p>}
     </div>
   );
 };
@@ -586,151 +559,269 @@ function AudienceTargetingContent() {
           step: 3,
           data: {
             audience: {
-              ageDistribution: values.ageDistribution,
-              location: values.location,
-              gender: values.gender,
-              otherGender: values.otherGender,
-              screeningQuestions: values.screeningQuestions,
-              languages: values.languages,
-              educationLevel: values.educationLevel,
-              jobTitles: values.jobTitles,
-              incomeLevel: values.incomeLevel,
-              competitors: values.competitors
+              create: {
+                // Age distribution
+                age1824: values.ageDistribution.age1824,
+                age2534: values.ageDistribution.age2534,
+                age3544: values.ageDistribution.age3544,
+                age4554: values.ageDistribution.age4554,
+                age5564: values.ageDistribution.age5564,
+                age65plus: values.ageDistribution.age65plus,
+                
+                // Other demographics
+                otherGender: values.otherGender,
+                educationLevel: values.educationLevel,
+                jobTitles: values.jobTitles,
+                incomeLevel: values.incomeLevel,
+                
+                // Related arrays using nested create
+                locations: {
+                  create: values.location.map(loc => ({
+                    location: loc
+                  }))
+                },
+                genders: {
+                  create: values.gender.map(g => ({
+                    gender: g
+                  }))
+                },
+                screeningQuestions: {
+                  create: values.screeningQuestions.map(q => ({
+                    question: q
+                  }))
+                },
+                languages: {
+                  create: values.languages.map(lang => ({
+                    language: lang
+                  }))
+                },
+                competitors: {
+                  create: values.competitors.map(comp => ({
+                    competitor: comp
+                  }))
+                }
+              }
             }
           }
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update campaign');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save audience data');
       }
 
       // Update local state
       updateData("audience", values);
       
+      // Navigate to next step
       router.push(`/campaigns/wizard/step-4?id=${campaignId}`);
     } catch (error) {
       console.error('Error saving step 3:', error);
+      toast.error('Failed to save audience data');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveDraft = async (values: AudienceValues) => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          step: 3,
+          data: {
+            audience: {
+              create: {
+                // Same structure as handleSubmit
+                age1824: values.ageDistribution.age1824,
+                age2534: values.ageDistribution.age2534,
+                age3544: values.ageDistribution.age3544,
+                age4554: values.ageDistribution.age4554,
+                age5564: values.ageDistribution.age5564,
+                age65plus: values.ageDistribution.age65plus,
+                otherGender: values.otherGender,
+                educationLevel: values.educationLevel,
+                jobTitles: values.jobTitles,
+                incomeLevel: values.incomeLevel,
+                locations: {
+                  create: values.location.map(loc => ({
+                    location: loc
+                  }))
+                },
+                genders: {
+                  create: values.gender.map(g => ({
+                    gender: g
+                  }))
+                },
+                screeningQuestions: {
+                  create: values.screeningQuestions.map(q => ({
+                    question: q
+                  }))
+                },
+                languages: {
+                  create: values.languages.map(lang => ({
+                    language: lang
+                  }))
+                },
+                competitors: {
+                  create: values.competitors.map(comp => ({
+                    competitor: comp
+                  }))
+                }
+              }
+            },
+            submissionStatus: 'draft'
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save draft');
+      }
+
+      toast.success('Draft saved successfully');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast.error('Failed to save draft');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <div className="max-w-4xl mx-auto p-4 pb-32">
-        <Header currentStep={3} totalSteps={5} />
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Step 3: Audience Targeting</h1>
-          <button className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100">
-            Save as Draft
-          </button>
-        </div>
-        <Form className="space-y-8">
-          {/* DEMOGRAPHICS SECTION */}
-          <div>
-            <h2 className="text-xl font-bold mb-2">Demographics</h2>
-            <LocationSelector
-              selectedLocations={initialValues.location}
-              onChange={(locs) => {
-                // Update the formik values
-                setFieldValue("location", locs);
-              }}
-            />
-            <AgeDistributionSlider
-              values={[
-                initialValues.ageDistribution.age1824,
-                initialValues.ageDistribution.age2534,
-                initialValues.ageDistribution.age3544,
-                initialValues.ageDistribution.age4554,
-                initialValues.ageDistribution.age5564,
-                initialValues.ageDistribution.age65plus,
-              ]}
-              onChange={(newVals) => {
-                setFieldValue("ageDistribution", {
-                  age1824: Math.round(newVals[0]),
-                  age2534: Math.round(newVals[1]),
-                  age3544: Math.round(newVals[2]),
-                  age4554: Math.round(newVals[3]),
-                  age5564: Math.round(newVals[4]),
-                  age65plus: Math.round(newVals[5]),
-                });
-              }}
-            />
-            <ErrorMessage
-              name="ageDistribution"
-              component="div"
-              className="text-red-600 text-sm"
-            />
-            <GenderSelection
-              selected={initialValues.gender}
-              otherGender={initialValues.otherGender}
-              onChange={(genders) => {
-                setFieldValue("gender", genders);
-              }}
-              onOtherChange={(val) => {
-                setFieldValue("otherGender", val);
-              }}
-            />
-          </div>
+    <div className="max-w-4xl mx-auto p-4 pb-32">
+      <Header currentStep={3} totalSteps={5} />
+      
+      <Formik
+        initialValues={initialValues}
+        validationSchema={AudienceSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ values, setFieldValue, submitForm, isValid }) => (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-2xl font-bold">Step 3: Audience Targeting</h1>
+              <button 
+                type="button"
+                onClick={() => handleSaveDraft(values)}
+                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Save as Draft'}
+              </button>
+            </div>
 
-          {/* SCREENING QUESTIONS SECTION */}
-          <div>
-            <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
-            <ScreeningQuestions
-              selectedTags={initialValues.screeningQuestions}
-              onChange={(tags) => {
-                setFieldValue("screeningQuestions", tags);
-              }}
+            <Form className="space-y-8">
+              {/* DEMOGRAPHICS SECTION */}
+              <div>
+                <h2 className="text-xl font-bold mb-2">Demographics</h2>
+                <LocationSelector
+                  selectedLocations={initialValues.location}
+                  onChange={(locs) => {
+                    // Update the formik values
+                    setFieldValue("location", locs);
+                  }}
+                />
+                <AgeDistributionSlider
+                  values={[
+                    values.ageDistribution.age1824,
+                    values.ageDistribution.age2534,
+                    values.ageDistribution.age3544,
+                    values.ageDistribution.age4554,
+                    values.ageDistribution.age5564,
+                    values.ageDistribution.age65plus,
+                  ]}
+                  onChange={(newValues) => {
+                    setFieldValue('ageDistribution', {
+                      age1824: newValues[0],
+                      age2534: newValues[1],
+                      age3544: newValues[2],
+                      age4554: newValues[3],
+                      age5564: newValues[4],
+                      age65plus: newValues[5],
+                    });
+                  }}
+                />
+                <ErrorMessage
+                  name="ageDistribution"
+                  component="div"
+                  className="text-red-600 text-sm"
+                />
+                <GenderSelection
+                  selected={initialValues.gender}
+                  otherGender={initialValues.otherGender}
+                  onChange={(genders) => {
+                    setFieldValue("gender", genders);
+                  }}
+                  onOtherChange={(val) => {
+                    setFieldValue("otherGender", val);
+                  }}
+                />
+              </div>
+
+              {/* SCREENING QUESTIONS SECTION */}
+              <div>
+                <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
+                <ScreeningQuestions
+                  selectedTags={initialValues.screeningQuestions}
+                  onChange={(tags) => {
+                    setFieldValue("screeningQuestions", tags);
+                  }}
+                />
+              </div>
+
+              {/* LANGUAGES SECTION */}
+              <div>
+                <h2 className="text-xl font-bold mb-2">Languages</h2>
+                <LanguagesSelector
+                  selected={initialValues.languages}
+                  onChange={(langs) => {
+                    setFieldValue("languages", langs);
+                  }}
+                />
+              </div>
+
+              {/* ADVANCED TARGETING (Collapsible) */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="mb-4 text-blue-600 underline"
+                >
+                  {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
+                </button>
+                {showAdvanced && <AdvancedTargeting />}
+              </div>
+
+              {/* COMPETITOR TRACKING SECTION */}
+              <div>
+                <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
+                <CompetitorTracking
+                  selected={initialValues.competitors}
+                  onChange={(companies) => {
+                    setFieldValue("competitors", companies);
+                  }}
+                />
+              </div>
+            </Form>
+
+            <ProgressBar
+              currentStep={3}
+              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
+              onBack={() => router.push("/campaigns/wizard/step-2")}
+              onNext={submitForm}
+              disableNext={!isValid || isSubmitting}
             />
-          </div>
-
-          {/* LANGUAGES SECTION */}
-          <div>
-            <h2 className="text-xl font-bold mb-2">Languages</h2>
-            <LanguagesSelector
-              selected={initialValues.languages}
-              onChange={(langs) => {
-                setFieldValue("languages", langs);
-              }}
-            />
-          </div>
-
-          {/* ADVANCED TARGETING (Collapsible) */}
-          <div>
-            <button
-              type="button"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="mb-4 text-blue-600 underline"
-            >
-              {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
-            </button>
-            {showAdvanced && <AdvancedTargeting />}
-          </div>
-
-          {/* COMPETITOR TRACKING SECTION */}
-          <div>
-            <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
-            <CompetitorTracking
-              selected={initialValues.competitors}
-              onChange={(companies) => {
-                setFieldValue("competitors", companies);
-              }}
-            />
-          </div>
-        </Form>
-      </div>
-
-      {/* Fixed Bottom Navigation Bar using ProgressBar */}
-      <ProgressBar
-        currentStep={3}
-        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-        onBack={() => router.push("/campaigns/wizard/step-2")}
-        onNext={submitForm}
-        disableNext={!isValid || isSubmitting}
-        data-cy="next-button"
-      />
-    </>
+          </>
+        )}
+      </Formik>
+    </div>
   );
 }
 
