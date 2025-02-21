@@ -7,6 +7,8 @@ import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { KPI, Feature } from '@prisma/client';
+import { toast } from "react-hot-toast";
 
 // Define the available KPIs for the table
 const kpis = [
@@ -74,9 +76,12 @@ const ObjectivesSchema = Yup.object().shape({
   keyBenefits: Yup.string().required("Key benefits are required"),
   expectedAchievements: Yup.string().required("Expected achievements are required"),
   purchaseIntent: Yup.string().required("Purchase intent is required"),
-  primaryKPI: Yup.string().required("Primary KPI is required"),
-  secondaryKPIs: Yup.array().of(Yup.string()).max(4, "Maximum 4 secondary KPIs"),
-  features: Yup.array().of(Yup.string())
+  primaryKPI: Yup.string().oneOf(Object.values(KPI)).required("Primary KPI is required"),
+  secondaryKPIs: Yup.array()
+    .of(Yup.string().oneOf(Object.values(KPI)))
+    .max(4, "Maximum 4 secondary KPIs"),
+  features: Yup.array()
+    .of(Yup.string().oneOf(Object.values(Feature)))
 });
 
 function CampaignStep2Content() {
@@ -93,9 +98,9 @@ function CampaignStep2Content() {
     keyBenefits: data.objectives?.keyBenefits || "",
     expectedAchievements: data.objectives?.expectedAchievements || "",
     purchaseIntent: data.objectives?.purchaseIntent || "",
-    primaryKPI: data.objectives?.primaryKPI || "",
-    secondaryKPIs: data.objectives?.secondaryKPIs || [],
-    features: data.objectives?.features || [],
+    primaryKPI: data.objectives?.primaryKPI || "" as KPI,
+    secondaryKPIs: data.objectives?.secondaryKPIs || [] as KPI[],
+    features: data.objectives?.features || [] as Feature[],
   };
 
   const handleSubmit = async (values: typeof initialValues) => {
@@ -108,7 +113,11 @@ function CampaignStep2Content() {
         objectives: values
       });
 
-      // Send to API
+      if (!campaignId) {
+        throw new Error('Campaign ID is required');
+      }
+
+      // Use your existing API route structure
       const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
         method: 'PATCH',
         headers: {
@@ -117,30 +126,74 @@ function CampaignStep2Content() {
         body: JSON.stringify({
           step: 2,
           data: {
-            objectives: {
-              create: {
-                mainMessage: values.mainMessage,
-                hashtags: values.hashtags,
-                memorability: values.memorability,
-                keyBenefits: values.keyBenefits,
-                expectedAchievements: values.expectedAchievements,
-                purchaseIntent: values.purchaseIntent,
-                primaryKPI: values.primaryKPI,
-                secondaryKPIs: values.secondaryKPIs,
-                features: values.features
-              }
-            }
+            mainMessage: values.mainMessage,
+            hashtags: values.hashtags,
+            memorability: values.memorability,
+            keyBenefits: values.keyBenefits,
+            expectedAchievements: values.expectedAchievements,
+            purchaseIntent: values.purchaseIntent,
+            primaryKPI: values.primaryKPI,
+            secondaryKPIs: values.secondaryKPIs,
+            features: values.features
           }
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update campaign');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update campaign');
       }
 
       router.push(`/campaigns/wizard/step-3?id=${campaignId}`);
     } catch (error) {
       console.error('Error saving step 2:', error);
+      toast.error(error.message || 'Failed to save campaign objectives');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Add this function to handle draft saving
+  const handleSaveDraft = async (values: typeof initialValues) => {
+    try {
+      setIsSubmitting(true);
+      const campaignId = searchParams.get('id');
+      
+      if (!campaignId) {
+        throw new Error('Campaign ID is required');
+      }
+
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          step: 2,
+          data: {
+            mainMessage: values.mainMessage,
+            hashtags: values.hashtags,
+            memorability: values.memorability,
+            keyBenefits: values.keyBenefits,
+            expectedAchievements: values.expectedAchievements,
+            purchaseIntent: values.purchaseIntent,
+            primaryKPI: values.primaryKPI,
+            secondaryKPIs: values.secondaryKPIs,
+            features: values.features,
+            submissionStatus: 'draft'
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save draft');
+      }
+
+      toast.success('Draft saved successfully');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast.error(error.message || 'Failed to save draft');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,8 +207,13 @@ function CampaignStep2Content() {
       {/* Page Title and Save as Draft button */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Step 2: Objectives & Messaging</h1>
-        <button className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100">
-          Save as Draft
+        <button 
+          type="button"
+          onClick={() => handleSaveDraft(initialValues)}
+          className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Saving...' : 'Save as Draft'}
         </button>
       </div>
 
@@ -164,7 +222,7 @@ function CampaignStep2Content() {
         validationSchema={ObjectivesSchema}
         onSubmit={handleSubmit}
       >
-        {({ handleSubmit, isSubmitting, isValid }) => (
+        {({ values, submitForm, isSubmitting, isValid }) => (
           <>
             <Form className="space-y-8">
               {/* Collapsible KPI Table */}
@@ -200,9 +258,9 @@ function CampaignStep2Content() {
                             name="secondaryKPIs"
                             value={kpi.key}
                             disabled={
-                              initialValues.primaryKPI === kpi.key ||
-                              (!initialValues.secondaryKPIs.includes(kpi.key) &&
-                                initialValues.secondaryKPIs.length >= 4)
+                              values.primaryKPI === kpi.key ||
+                              (!values.secondaryKPIs.includes(kpi.key) &&
+                                values.secondaryKPIs.length >= 4)
                             }
                           />
                         </td>
@@ -237,7 +295,7 @@ function CampaignStep2Content() {
                     </button>
                   </div>
                   <div className="text-right text-sm text-gray-500">
-                    {String(initialValues.mainMessage).length}/3000
+                    {String(values.mainMessage).length}/3000
                   </div>
                   <ErrorMessage name="mainMessage" component="div" className="text-red-600 text-sm" />
                 </div>
@@ -355,7 +413,7 @@ function CampaignStep2Content() {
               currentStep={2}
               onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
               onBack={() => router.push("/campaigns/wizard/step-1")}
-              onNext={() => handleSubmit()}
+              onNext={submitForm}
               disableNext={isSubmitting || !isValid}
             />
           </>

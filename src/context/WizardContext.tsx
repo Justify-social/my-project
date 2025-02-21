@@ -31,10 +31,15 @@ interface WizardData {
     influencerHandle: string;
   };
   objectives: {
-    objectives: string;
-    kpis: string;
-    keyMessaging: string;
-    valueProps: string;
+    mainMessage: string;
+    hashtags: string;
+    memorability: string;
+    keyBenefits: string;
+    expectedAchievements: string;
+    purchaseIntent: string;
+    primaryKPI: KPI;
+    secondaryKPIs: KPI[];
+    features: Feature[];
   };
   audience: {
     segments: string[];
@@ -80,7 +85,19 @@ const defaultWizardData: WizardData = {
     platform: "",
     influencerHandle: "",
   },
-  objectives: { objectives: "", kpis: "", keyMessaging: "", valueProps: "" },
+  objectives: {
+    mainMessage: "",
+    hashtags: "",
+    memorability: "",
+    keyBenefits: "",
+    expectedAchievements: "",
+    purchaseIntent: "",
+    primaryKPI: {
+      // Assuming KPI is an object with properties
+    },
+    secondaryKPIs: [],
+    features: [],
+  },
   audience: { segments: [], competitors: [] },
   assets: { files: [] },
 };

@@ -52,21 +52,12 @@ export async function PATCH(
         updateData = {
           audience: {
             create: {
-              age1824: data.audience.age1824,
-              age2534: data.audience.age2534,
-              age3544: data.audience.age3544,
-              age4554: data.audience.age4554,
-              age5564: data.audience.age5564,
-              age65plus: data.audience.age65plus,
-              otherGender: data.audience.otherGender,
-              educationLevel: data.audience.educationLevel,
-              jobTitles: data.audience.jobTitles,
-              incomeLevel: data.audience.incomeLevel,
-              locations: { create: data.audience.locations },
-              genders: { create: data.audience.genders },
-              screeningQuestions: { create: data.audience.screeningQuestions },
-              languages: { create: data.audience.languages },
-              competitors: { create: data.audience.competitors }
+              ...data.audience.create,
+              locations: data.audience.create.locations,
+              genders: data.audience.create.genders,
+              screeningQuestions: data.audience.create.screeningQuestions,
+              languages: data.audience.create.languages,
+              competitors: data.audience.create.competitors
             }
           }
         }
