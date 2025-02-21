@@ -2,10 +2,12 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import DashboardContent from "@/components/DashboardContent";
 import { Header, Sidebar, MobileMenu } from "@/components/Navigation";
 import { SidebarProvider } from "@/providers/sidebar-provider";
+import Loading from "../loading";
+import Error from "../error";
 
 export default function DashboardPage() {
   const { isLoaded, userId } = useAuth();
@@ -17,7 +19,11 @@ export default function DashboardPage() {
     }
   }, [isLoaded, userId, router]);
 
-  if (!isLoaded || !userId) {
+  if (!isLoaded) {
+    return <Loading />;
+  }
+
+  if (!userId) {
     return null;
   }
 
@@ -28,9 +34,11 @@ export default function DashboardPage() {
         <div className="flex-1 flex flex-col">
           <Header />
           <MobileMenu />
-          <main className="flex-1 overflow-auto p-6 mt-16 ml-64">
-            <DashboardContent />
-          </main>
+          <Suspense fallback={<Loading />}>
+            <main className="flex-1 overflow-auto p-4 mt-14 ml-56">
+              <DashboardContent />
+            </main>
+          </Suspense>
         </div>
       </div>
     </SidebarProvider>
