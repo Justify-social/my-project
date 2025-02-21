@@ -27,11 +27,11 @@ const Header: React.FC<HeaderProps> = ({
     <>
       <header className="fixed top-0 left-0 w-full z-50 bg-white border-b">
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Left: Logo & Company Name */}
-          <div className="flex items-center space-x-2">
+          {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
+          <Link href="/dashboard" className="flex items-center space-x-2">
             <Image src="/logo.png" alt="Justify Logo" width={40} height={40} />
             <span className="font-bold text-black text-xl">{companyName}</span>
-          </div>
+          </Link>
 
           {/* Center: Search Bar (hidden on mobile) */}
           <div className="hidden md:flex flex-grow justify-center px-4">
@@ -89,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({
               </svg>
             </button>
 
-            {/* UserButton always visible */}
+            {/* User Button (visible on desktop) */}
             <div className="hidden md:block">
               {user && (
                 <Link href="/settings">

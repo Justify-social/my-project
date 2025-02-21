@@ -39,12 +39,29 @@ const MobileMenu = ({
     if (childHref === "/campaigns/wizard/step-1") {
       return pathname.startsWith("/campaigns/wizard");
     }
+    if (parentHref === "/influencers/marketplace") {
+      if (childHref === "/influencers/marketplace") {
+        return (
+          pathname === "/influencers/marketplace" ||
+          pathname.startsWith("/influencers/marketplace/")
+        );
+      } else if (childHref === "/influencers") {
+        if (pathname.startsWith("/influencers/marketplace")) {
+          return false;
+        }
+        return pathname === "/influencers" || pathname.startsWith("/influencers/");
+      }
+      return false;
+    }
+    if (childHref === parentHref) {
+      return pathname === childHref;
+    }
     return pathname === childHref || pathname.startsWith(childHref + "/");
   }, [pathname]);
 
   const toggleExpanded = (href: string) => {
-    setExpandedItems(prev => 
-      prev.includes(href) 
+    setExpandedItems(prev =>
+      prev.includes(href)
         ? prev.filter(item => item !== href)
         : [...prev, href]
     );
@@ -113,91 +130,96 @@ const MobileMenu = ({
             {/* Navigation */}
             <nav className="flex-1 p-4 overflow-y-auto">
               <div className="space-y-2">
-                {navItems.map((item) => (
-                  <div key={item.href} className="space-y-0.5">
-                    {/* Main Menu Item */}
-                    <div
-                      className={`flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer ${
-                        isNavItemActive(item.href)
-                          ? 'bg-blue-50 text-[#00BFFF]'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      onClick={() => {
-                        if (item.children?.length) {
-                          toggleExpanded(item.href);
-                        } else {
-                          onClose();
-                        }
-                      }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        {item.icon && (
-                          <Image 
-                            src={item.icon} 
-                            alt="" 
-                            width={16} 
-                            height={16}
-                            style={{
-                              filter: isNavItemActive(item.href)
-                                ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
-                                : "none",
-                            }}
-                          />
+                {navItems.map((item) => {
+                  // Force "Home" to use "/dashboard"
+                  const linkHref = item.label === "Home" ? "/dashboard" : item.href;
+                  const active = isNavItemActive(linkHref);
+                  return (
+                    <div key={linkHref} className="space-y-0.5">
+                      {/* Main Menu Item */}
+                      <div
+                        className={`flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer ${
+                          active
+                            ? 'bg-blue-50 text-[#00BFFF]'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                        onClick={() => {
+                          if (item.children?.length) {
+                            toggleExpanded(linkHref);
+                          } else {
+                            onClose();
+                          }
+                        }}
+                      >
+                        <div className="flex items-center space-x-2">
+                          {item.icon && (
+                            <Image 
+                              src={item.icon} 
+                              alt="" 
+                              width={16} 
+                              height={16}
+                              style={{
+                                filter: active
+                                  ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
+                                  : "none",
+                              }}
+                            />
+                          )}
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </div>
+                        {item.children && (
+                          <svg
+                            className={`w-4 h-4 transition-transform ${
+                              isExpanded(linkHref) ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
                         )}
-                        <span className="text-sm font-medium">{item.label}</span>
                       </div>
+
+                      {/* Submenu Items */}
                       {item.children && (
-                        <svg
-                          className={`w-4 h-4 transition-transform ${
-                            isExpanded(item.href) ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
+                        <AnimatePresence>
+                          {isExpanded(linkHref) && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="ml-6 overflow-hidden"
+                            >
+                              <div className="grid gap-0.5 py-1">
+                                {item.children.map((child) => (
+                                  <Link
+                                    key={child.href}
+                                    href={child.href}
+                                    className={`flex items-center px-3 py-1 rounded-md text-xs ${
+                                      isChildActive(linkHref, child.href)
+                                        ? 'text-[#00BFFF] bg-blue-50'
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                    }`}
+                                    onClick={onClose}
+                                  >
+                                    {child.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       )}
                     </div>
-
-                    {/* Submenu Items */}
-                    {item.children && (
-                      <AnimatePresence>
-                        {isExpanded(item.href) && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="ml-6 overflow-hidden"
-                          >
-                            <div className="grid gap-0.5 py-1">
-                              {item.children.map((child) => (
-                                <Link
-                                  key={child.href}
-                                  href={child.href}
-                                  className={`flex items-center px-3 py-1 rounded-md text-xs ${
-                                    isChildActive(item.href, child.href)
-                                      ? 'text-[#00BFFF] bg-blue-50'
-                                      : 'text-gray-600 hover:bg-gray-50'
-                                  }`}
-                                  onClick={onClose}
-                                >
-                                  {child.label}
-                                </Link>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Settings */}
                 <Link
@@ -244,4 +266,4 @@ const MobileMenu = ({
   );
 };
 
-export default MobileMenu; 
+export default MobileMenu;
