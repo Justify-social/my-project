@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
-import { useUser, UserButton } from "@clerk/nextjs";
-import { useSidebar } from "@/providers/sidebar-provider";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { useSidebar } from "@/providers/SidebarProvider";
 import MobileMenu from "./MobileMenu";
 import { navItems, settingsNavItem } from "@/config/navigation";
 
@@ -91,7 +91,17 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* UserButton always visible */}
             <div className="hidden md:block">
-              <UserButton afterSignOutUrl="/" />
+              {user && (
+                <Link href="/settings">
+                  <Image 
+                    src="/profile-image.svg"
+                    alt="Profile" 
+                    width={32} 
+                    height={32} 
+                    className="rounded-full"
+                  />
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -106,6 +116,7 @@ const Header: React.FC<HeaderProps> = ({
         remainingCredits={remainingCredits}
         notificationsCount={notificationsCount}
         companyName={companyName}
+        user={user}
       />
     </>
   );

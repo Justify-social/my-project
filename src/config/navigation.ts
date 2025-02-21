@@ -2,7 +2,7 @@ export interface NavItem {
   label: string;
   href: string;
   icon?: string;
-  children?: NavItem[];
+  children?: { label: string; href: string }[];
 }
 
 export const navItems: NavItem[] = [

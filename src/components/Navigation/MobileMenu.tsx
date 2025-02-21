@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { usePathname } from 'next/navigation';
 import type { NavItem } from '@/config/navigation';
 
@@ -14,6 +14,7 @@ interface MobileMenuProps {
   remainingCredits: number;
   notificationsCount: number;
   companyName: string;
+  user?: any;
 }
 
 const MobileMenu = ({
@@ -23,11 +24,11 @@ const MobileMenu = ({
   settingsNavItem,
   remainingCredits,
   notificationsCount,
-  companyName
+  companyName,
+  user
 }: MobileMenuProps) => {
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
-  const { isSignedIn } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const isNavItemActive = useCallback((href: string) => {
@@ -51,11 +52,6 @@ const MobileMenu = ({
 
   const isExpanded = (href: string) => expandedItems.includes(href);
 
-  const menuVariants = {
-    closed: { x: '100%' },
-    open: { x: 0 }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -70,64 +66,53 @@ const MobileMenu = ({
           
           <motion.div
             ref={menuRef}
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={menuVariants}
-            className="fixed inset-0 bg-white z-50 flex flex-col outline-none"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+            className="fixed inset-0 bg-white z-50 flex flex-col"
             tabIndex={-1}
             role="dialog"
             aria-modal="true"
           >
-            {/* Updated Header */}
-            <div className="flex items-center justify-between p-2 border-b">
-              {/* Logo and Company Name */}
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center space-x-3">
                 <Image src="/logo.png" alt="Justify Logo" width={32} height={32} priority />
-                <span className="font-semibold text-sm text-gray-900">{companyName}</span>
+                <span className="font-semibold text-gray-900">{companyName}</span>
               </div>
 
-              {/* User Actions Group */}
-              <div className="flex items-center space-x-4">
-                {isSignedIn && (
-                  <>
-                    {/* Credits */}
-                    <Link href="/billing" className="flex items-center space-x-1">
-                      <Image src="/coins.svg" alt="Credits" width={20} height={20} />
-                      <span className="text-sm font-medium text-gray-700">{remainingCredits}</span>
-                    </Link>
-                    
-                    {/* Notifications */}
-                    <div className="relative">
-                      <Image src="/bell.svg" alt="Notifications" width={20} height={20} />
-                      {notificationsCount > 0 && (
-                        <motion.span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-3.5 h-3.5 flex items-center justify-center text-[10px]">
-                          {notificationsCount}
-                        </motion.span>
-                      )}
-                    </div>
+              <button 
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full"
+                aria-label="Close menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-                    {/* UserButton */}
-                    <UserButton afterSignOutUrl="/" />
-                  </>
-                )}
-
-                {/* Close Button */}
-                <button 
-                  onClick={onClose}
-                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                  aria-label="Close menu"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+            {/* User Profile */}
+            <div className="p-4 border-b">
+              <div className="flex items-center space-x-3">
+                <Image 
+                  src="/profile-image.svg" 
+                  alt="Profile" 
+                  width={40} 
+                  height={40}
+                  className="rounded-full"
+                />
+                <div>
+                  <div className="font-medium">{user?.name}</div>
+                  <div className="text-sm text-gray-500">{user?.email}</div>
+                </div>
               </div>
             </div>
 
             {/* Navigation */}
-            <motion.nav className="flex-1 px-2 py-1 overflow-y-auto">
-              <div className="grid gap-1">
+            <nav className="flex-1 p-4 overflow-y-auto">
+              <div className="space-y-2">
                 {navItems.map((item) => (
                   <div key={item.href} className="space-y-0.5">
                     {/* Main Menu Item */}
@@ -240,7 +225,18 @@ const MobileMenu = ({
                   <span className="text-sm font-medium">{settingsNavItem.label}</span>
                 </Link>
               </div>
-            </motion.nav>
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t">
+              <Link
+                href="/api/auth/logout"
+                className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                onClick={onClose}
+              >
+                Sign Out
+              </Link>
+            </div>
           </motion.div>
         </>
       )}

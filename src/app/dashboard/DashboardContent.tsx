@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -13,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import useSWR from 'swr';
 
 // Import dynamically loaded components and ensure they are exported correctly.
 const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming"), {
@@ -84,7 +85,7 @@ interface PerformanceMetrics {
 }
 
 interface DashboardContentProps {
-  user?: {
+  user: {
     name?: string;
     email?: string;
     picture?: string;
@@ -94,66 +95,43 @@ interface DashboardContentProps {
 // -----------------------
 // DashboardContent Component
 // -----------------------
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
 export default function DashboardContent({ user }: DashboardContentProps) {
   const router = useRouter();
-
-  // State: Campaign Data, Loading, and Errors
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [campaignError, setCampaignError] = useState<string>("");
-  const [isLoadingCampaigns, setIsLoadingCampaigns] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string>("");
 
-  useEffect(() => {
-    async function fetchCampaigns() {
-      try {
-        const res = await fetch("/api/campaigns");
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await res.json();
-        setCampaigns(data);
-      } catch (error) {
-        console.error("Failed to fetch campaigns:", error);
-        setCampaignError("Error: Unable to load campaign data. Please refresh the page.");
-      } finally {
-        setIsLoadingCampaigns(false);
-      }
-    }
-    fetchCampaigns();
-  }, []);
+  // Replace useEffect with useSWR
+  const { data: campaigns = [], error: campaignError } = useSWR('/api/campaigns', fetcher, {
+    fallbackData: [
+      {
+        id: 1,
+        name: "Clicks & Connections",
+        status: "Live",
+        budget: 12314,
+        usersEngaged: { current: 12, total: 100 },
+        startDate: "2024-09-04",
+      },
+      {
+        id: 2,
+        name: "Beyond the Horizon",
+        status: "Live",
+        budget: 10461,
+        usersEngaged: { current: 46, total: 413 },
+        startDate: "2024-09-10",
+      },
+      {
+        id: 3,
+        name: "Engage 360",
+        status: "Paused",
+        budget: 1134,
+        usersEngaged: { current: 31, total: 450 },
+        startDate: "2024-09-15",
+      },
+    ]
+  });
 
-  // Fallback dummy data if API returns empty
-  useEffect(() => {
-    if (!isLoadingCampaigns && campaigns.length === 0 && !campaignError) {
-      const dummyCampaigns: Campaign[] = [
-        {
-          id: 1,
-          name: "Clicks & Connections",
-          status: "Live",
-          budget: 12314,
-          usersEngaged: { current: 12, total: 100 },
-          startDate: "2024-09-04",
-        },
-        {
-          id: 2,
-          name: "Beyond the Horizon",
-          status: "Live",
-          budget: 10461,
-          usersEngaged: { current: 46, total: 413 },
-          startDate: "2024-09-10",
-        },
-        {
-          id: 3,
-          name: "Engage 360",
-          status: "Paused",
-          budget: 1134,
-          usersEngaged: { current: 31, total: 450 },
-          startDate: "2024-09-15",
-        },
-      ];
-      setCampaigns(dummyCampaigns);
-    }
-  }, [isLoadingCampaigns, campaigns, campaignError]);
+  const isLoadingCampaigns = !campaigns && !campaignError;
 
   // New Campaign navigation (goes to wizard step-1)
   const handleNewCampaign = () => {
@@ -262,7 +240,7 @@ export default function DashboardContent({ user }: DashboardContentProps) {
   );
 
   return (
-    <main className="p-6 bg-gray-50" role="main" aria-label="Dashboard main content">
+    <main className="p-6" role="main" aria-label="Dashboard main content">
       {toastMessage && <Toast message={toastMessage} />}
 
       {/* Header: Only New Campaign Button */}

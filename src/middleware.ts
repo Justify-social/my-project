@@ -1,18 +1,11 @@
-import { authMiddleware } from "@clerk/nextjs/server"
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { withMiddlewareAuthRequired } from '@auth0/nextjs-auth0/edge';
 
-export default authMiddleware({
-  publicRoutes: [
-    "/",
-    "/api/webhooks(.*)",
-    "/api/uploadthing",
-    "/api/auth/callback"
-  ],
-})
+export default withMiddlewareAuthRequired(function middleware(request: NextRequest) {
+  return NextResponse.next();
+});
 
 export const config = {
-  matcher: [
-    "/((?!.+\\.[\\w]+$|_next).*)",
-    "/",
-    "/(api|trpc)(.*)"
-  ],
-} 
+  matcher: ['/dashboard/:path*']
+}; 

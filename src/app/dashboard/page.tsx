@@ -1,14 +1,20 @@
-// src/app/dashboard/page.tsx
 import { getSession } from '@auth0/nextjs-auth0';
 import { redirect } from 'next/navigation';
 import DashboardContent from './DashboardContent';
 
-export default async function Dashboard() {
+export default async function DashboardPage() {
   const session = await getSession();
   
-  if (!session) {
+  if (!session?.user) {
     redirect('/api/auth/login');
   }
 
-  return <DashboardContent user={session.user} />;
+  // Pass only the necessary user data
+  const userData = {
+    name: session.user.name,
+    email: session.user.email,
+    picture: session.user.picture
+  };
+
+  return <DashboardContent user={userData} />;
 }
