@@ -10,15 +10,24 @@ export default authMiddleware({
     "/sign-in",
     "/sign-up",
     "/sign-in/(.*)",
-    "/sign-up/(.*)"
+    "/sign-up/(.*)",
+    "/api/webhooks/clerk"
   ],
   ignoredRoutes: [
-    "/api/webhook/clerk",
-    "/api/webhook/stripe"
-  ]
+    "/((?!api|trpc))(_next|.+\\.[\\w]+$)",
+    "/api/webhooks(.*)"
+  ],
+  beforeAuth: (req) => {
+    console.log('Middleware Request:', {
+      url: req.url,
+      nextUrl: req.nextUrl,
+      headers: Object.fromEntries(req.headers)
+    });
+    return null;
+  }
 });
 
 // Stop Middleware running on static files and API routes
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 }; 
