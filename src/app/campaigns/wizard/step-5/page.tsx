@@ -318,7 +318,14 @@ const DataRow = ({ label, value }: { label: string; value: string | number | nul
 function CampaignStep5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const campaignId = searchParams.get('id');
+  
+  // Handle both correct and incorrect URL formats
+  const campaignId = searchParams.get('id') || searchParams.toString().match(/id(\d+)/)?.[1];
+  
+  console.log('URL:', window.location.href);
+  console.log('Search Params:', searchParams.toString());
+  console.log('Extracted Campaign ID:', campaignId);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [campaignData, setCampaignData] = useState<any>(null);
@@ -333,20 +340,25 @@ function CampaignStep5Content() {
 
   useEffect(() => {
     const loadCampaignData = async () => {
-      if (!campaignId) {
-        setError('No campaign ID provided');
-        setIsLoading(false);
-        return;
-      }
-
       try {
+        if (!campaignId) {
+          // If we detect the wrong URL format, let's fix it
+          const wrongFormatMatch = searchParams.toString().match(/id(\d+)/);
+          if (wrongFormatMatch) {
+            const correctId = wrongFormatMatch[1];
+            router.replace(`/campaigns/wizard/step-5?id=${correctId}`);
+            return;
+          }
+          setError('Campaign ID is required');
+          setIsLoading(false);
+          return;
+        }
+
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/campaigns/${campaignId}`);
+        const response = await fetch(`/api/campaigns?id=${campaignId}`);
         const result = await response.json();
-
-        console.log('API Response:', result);
 
         if (!response.ok) {
           throw new Error(result.error || 'Failed to load campaign');
@@ -362,7 +374,7 @@ function CampaignStep5Content() {
     };
 
     loadCampaignData();
-  }, [campaignId]);
+  }, [campaignId, router, searchParams]);
 
   const StatusBadge = ({ status }: { status: string }) => {
     const statusConfig = {
@@ -413,6 +425,29 @@ function CampaignStep5Content() {
       </div>
     </motion.section>
   );
+
+  const handleSubmit = async () => {
+    if (window.confirm('Are you sure you want to submit this campaign?')) {
+      try {
+        setIsSubmitting(true);
+        const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
+          method: 'POST',
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert('Campaign submitted successfully!');
+          router.push('/campaigns');
+        } else {
+          throw new Error(result.error || 'Failed to submit campaign');
+        }
+      } catch (error) {
+        console.error('Error submitting campaign:', error);
+        alert('Failed to submit campaign. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -543,50 +578,21 @@ function CampaignStep5Content() {
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end mt-8">
+        <div className="flex justify-end mt-12">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={async () => {
-              if (window.confirm('Are you sure you want to submit this campaign?')) {
-                try {
-                  setIsSubmitting(true);
-                  const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
-                    method: 'POST',
-                  });
-                  const result = await response.json();
-                  if (response.ok) {
-                    toast.success('Campaign submitted successfully!');
-                    router.push(`/campaigns/wizard/submission?id=${campaignId}`);
-                  } else {
-                    throw new Error(result.error || 'Failed to submit campaign');
-                  }
-                } catch (error) {
-                  console.error('Error submitting campaign:', error);
-                  toast.error('Failed to submit campaign. Please try again.');
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }
-            }}
-            className={`
-              bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-lg 
-              font-medium shadow-lg hover:shadow-xl transition-all duration-300
-              ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:from-blue-700 hover:to-blue-800'}
-            `}
             disabled={isSubmitting}
+            onClick={handleSubmit}
+            className={`
+              px-8 py-3 rounded-lg font-medium text-white
+              ${isSubmitting 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'}
+              shadow-lg hover:shadow-xl transition-all duration-300
+            `}
           >
-            {isSubmitting ? (
-              <div className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Submitting...
-              </div>
-            ) : (
-              'Submit Campaign'
-            )}
+            {isSubmitting ? 'Submitting...' : 'Submit Campaign'}
           </motion.button>
         </div>
 

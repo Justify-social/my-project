@@ -1,73 +1,54 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from '@/lib/prisma'
 import { Currency, Platform, KPI, SubmissionStatus, Position } from '@prisma/client';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    console.log('Starting GET request to /api/campaigns');
+    const searchParams = request.nextUrl.searchParams;
+    const id = parseInt(searchParams.get('id') || '');
     
-    if (!prisma) {
-      console.error('Prisma client is not initialized');
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Database connection error' 
-        },
-        { status: 500 }
-      );
+    if (isNaN(id)) {
+      return new Response(JSON.stringify({ error: 'Invalid campaign ID' }), {
+        status: 400,
+      });
     }
 
-    const campaigns = await prisma.campaignWizardSubmission.findMany({
-      select: {
-        id: true,
-        campaignName: true,
-        createdAt: true,
-        submissionStatus: true,
-        platform: true,
-        startDate: true,
-        endDate: true,
-        totalBudget: true,
-        primaryKPI: true,
-        primaryContact: {
-          select: {
-            firstName: true,
-            surname: true
+    const campaign = await prisma.campaignWizardSubmission.findUnique({
+      where: { id },
+      include: {
+        primaryContact: true,
+        secondaryContact: true,
+        audience: {
+          include: {
+            locations: true,
+            genders: true,
+            screeningQuestions: true,
+            languages: true,
+            competitors: true
           }
         },
-        audience: {
-          select: {
-            locations: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
+        creativeAssets: true,
+        creativeRequirements: true
       }
     });
 
-    console.log('Successfully fetched campaigns:', campaigns.length);
+    if (!campaign) {
+      return new Response(JSON.stringify({ error: 'Campaign not found' }), {
+        status: 404,
+      });
+    }
 
-    return NextResponse.json({
-      success: true,
-      campaigns: campaigns,
-      count: campaigns.length,
-      message: 'Campaigns fetched successfully'
+    return new Response(JSON.stringify({ campaign }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   } catch (error) {
-    console.error('Detailed error in GET /api/campaigns:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch campaign' }), {
+      status: 500,
     });
-
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch campaigns',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
   }
 }
 
