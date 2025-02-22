@@ -115,32 +115,22 @@ export default function Overview() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: values.name,
-          businessGoal: values.businessGoal,
-          startDate: values.startDate,
-          endDate: values.endDate,
-          timeZone: values.timeZone,
-        }),
+        body: JSON.stringify(values),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (!response.ok) {
-        console.error('Server response:', data);
-        throw new Error(data.error || 'Failed to save campaign');
-      }
-
-      console.log('Success response:', data);
-      
-      if (isDraft) {
-        toast.success('Draft saved successfully');
+      if (result.success) {
+        // Store the campaign ID for later steps
+        const campaignId = result.campaign.id;
+        
+        // Navigate to step 2 with the campaign ID
+        router.push(`/campaigns/wizard/step-2?campaignId=${campaignId}`);
       } else {
-        router.push(`/campaigns/wizard/step-2?id=${data.id}`);
+        console.error('Failed to save campaign:', result.error);
       }
-
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('Error saving campaign:', error);
       toast.error(error.message || 'Failed to save campaign');
     } finally {
       setIsSubmitting(false);
