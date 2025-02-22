@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@auth0/nextjs-auth0';
-import { z } from 'zod'; // For input validation
-import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { z } from 'zod'; // For input validation
+import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 
 type RouteParams = { params: { id: string } }
 
@@ -136,6 +135,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Get the session using NextAuth instead of Auth0
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
@@ -151,7 +151,8 @@ export async function DELETE(
     const campaign = await prisma.campaign.findFirst({
       where: {
         id: campaignId,
-        userId: session.user.id
+        // Use the correct user ID field from the session
+        userId: session.user.id || ''
       }
     });
 
@@ -164,7 +165,6 @@ export async function DELETE(
 
     // Delete related records first (if any)
     await prisma.$transaction([
-      // Delete any related records here
       prisma.campaignAsset.deleteMany({
         where: { campaignId }
       }),
