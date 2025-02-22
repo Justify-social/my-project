@@ -1,154 +1,73 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React from 'react';
+import Link from 'next/link';
 
-export default function PostSubmissionScreen() {
-  const router = useRouter();
-
-  // State for CTA loading and error messages
-  const [loadingBrandLift, setLoadingBrandLift] = useState(false);
-  const [errorBrandLift, setErrorBrandLift] = useState("");
-  const [loadingAssetTesting, setLoadingAssetTesting] = useState(false);
-  const [errorAssetTesting, setErrorAssetTesting] = useState("");
-  const [loadingCampaignDashboard, setLoadingCampaignDashboard] = useState(false);
-  const [errorCampaignDashboard, setErrorCampaignDashboard] = useState("");
-
-  // CTA Option 1: Set Up Brand Lift Study
-  const handleBrandLiftStudy = async () => {
-    setErrorBrandLift("");
-    setLoadingBrandLift(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/campaigns/wizard/submission/brand-lift-study");
-    } catch (error) {
-      setErrorBrandLift("Error: Unable to load the requested page. Please try again later.");
-    } finally {
-      setLoadingBrandLift(false);
-    }
-  };
-
-  // CTA Option 2: Start Creative Asset Testing
-  const handleAssetTesting = async () => {
-    setErrorAssetTesting("");
-    setLoadingAssetTesting(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/campaigns/wizard/submission/asset-testing");
-    } catch (error) {
-      setErrorAssetTesting("Error: Unable to load the requested page. Please try again later.");
-    } finally {
-      setLoadingAssetTesting(false);
-    }
-  };
-
-  // CTA Option 3: View Campaign Dashboard
-  const handleCampaignDashboard = async () => {
-    setErrorCampaignDashboard("");
-    setLoadingCampaignDashboard(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/campaigns/dashboard");
-    } catch (error) {
-      setErrorCampaignDashboard("Error: Unable to load the requested page. Please try again later.");
-    } finally {
-      setLoadingCampaignDashboard(false);
-    }
-  };
-
+const SubmissionPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4">
-      {/* Header and Confirmation Message */}
-      <h1 className="text-center font-bold mb-4" style={{ fontSize: "32px", color: "#333333" }}>
-        Submission
-      </h1>
-      <p className="mb-8 text-center" style={{ fontSize: "20px", color: "#666666" }}>
-        Your campaign has been submitted successfully!
-      </p>
+    <div className="min-h-screen bg-white p-8">
+      {/* Success Message */}
+      <div className="max-w-4xl mx-auto text-center mb-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Submission
+        </h1>
+        <p className="text-xl text-gray-600">
+          Your campaign has been submitted successfully!
+        </p>
+      </div>
 
-      {/* CTA Options */}
-      <div className="flex flex-col md:flex-row gap-8 items-center">
-        {/* Option 1: Set Up Brand Lift Study */}
-        <div className="flex flex-col items-center bg-white border rounded p-6 w-[220px]">
-          <h2 className="font-bold text-lg">Set Up Brand Lift Study</h2>
-          <p className="mt-2 text-center">
+      {/* Cards Grid */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Brand Lift Card */}
+        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Set Up Brand Lift Study
+          </h2>
+          <p className="text-gray-600 mb-8 h-24">
             Measure how your campaign impacts brand awareness and consumer behavior with a Brand Lift Study.
           </p>
-          <button
-            onClick={handleBrandLiftStudy}
-            disabled={loadingBrandLift}
-            className="mt-4 w-[220px] h-[50px] rounded transition duration-200 text-white"
-            style={{ backgroundColor: loadingBrandLift ? "#CCCCCC" : "#007BFF" }}
-            onMouseOver={(e) => { if (!loadingBrandLift) e.currentTarget.style.backgroundColor = "#0056b3"; }}
-            onMouseOut={(e) => { if (!loadingBrandLift) e.currentTarget.style.backgroundColor = "#007BFF"; }}
-            aria-label="Press Enter to set up Brand Lift Study"
+          <Link 
+            href="/brand-lift" 
+            className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg text-center transition-colors duration-200"
           >
-            {loadingBrandLift ? "Loading..." : "Set Up"}
-          </button>
-          {errorBrandLift && (
-            <div className="mt-2 flex items-center text-red-600 text-sm">
-              <span>{errorBrandLift}</span>
-              <button onClick={handleBrandLiftStudy} className="ml-2 underline" aria-label="Retry Brand Lift Study Setup">
-                Retry
-              </button>
-            </div>
-          )}
+            Set Up
+          </Link>
         </div>
 
-        {/* Option 2: Start Creative Asset Testing */}
-        <div className="flex flex-col items-center bg-white border rounded p-6 w-[220px]">
-          <h2 className="font-bold text-lg">Start Creative Asset Testing</h2>
-          <p className="mt-2 text-center">
+        {/* Creative Testing Card */}
+        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Start Creative Asset Testing
+          </h2>
+          <p className="text-gray-600 mb-8 h-24">
             Test your creative assets to see how they perform and resonate with your audience.
           </p>
-          <button
-            onClick={handleAssetTesting}
-            disabled={loadingAssetTesting}
-            className="mt-4 w-[220px] h-[50px] rounded transition duration-200 text-white"
-            style={{ backgroundColor: loadingAssetTesting ? "#CCCCCC" : "#007BFF" }}
-            onMouseOver={(e) => { if (!loadingAssetTesting) e.currentTarget.style.backgroundColor = "#0056b3"; }}
-            onMouseOut={(e) => { if (!loadingAssetTesting) e.currentTarget.style.backgroundColor = "#007BFF"; }}
-            aria-label="Press Enter to start Creative Asset Testing"
+          <Link 
+            href="/creative-testing" 
+            className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg text-center transition-colors duration-200"
           >
-            {loadingAssetTesting ? "Testing in progress..." : "Start Testing"}
-          </button>
-          {errorAssetTesting && (
-            <div className="mt-2 flex items-center text-red-600 text-sm">
-              <span>{errorAssetTesting}</span>
-              <button onClick={handleAssetTesting} className="ml-2 underline" aria-label="Retry Creative Asset Testing">
-                Retry
-              </button>
-            </div>
-          )}
+            Start Testing
+          </Link>
         </div>
 
-        {/* Option 3: View Campaign Dashboard */}
-        <div className="flex flex-col items-center bg-white border rounded p-6 w-[220px]">
-          <h2 className="font-bold text-lg">View Campaign Dashboard</h2>
-          <p className="mt-2 text-center">
+        {/* Dashboard Card */}
+        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            View Campaign Dashboard
+          </h2>
+          <p className="text-gray-600 mb-8 h-24">
             Access detailed insights and performance metrics for your campaign.
           </p>
-          <button
-            onClick={handleCampaignDashboard}
-            disabled={loadingCampaignDashboard}
-            className="mt-4 w-[220px] h-[50px] rounded transition duration-200 text-white"
-            style={{ backgroundColor: loadingCampaignDashboard ? "#CCCCCC" : "#007BFF" }}
-            onMouseOver={(e) => { if (!loadingCampaignDashboard) e.currentTarget.style.backgroundColor = "#0056b3"; }}
-            onMouseOut={(e) => { if (!loadingCampaignDashboard) e.currentTarget.style.backgroundColor = "#007BFF"; }}
-            aria-label="Press Enter to view your Campaign Dashboard"
+          <Link 
+            href="/campaigns" 
+            className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg text-center transition-colors duration-200"
           >
-            {loadingCampaignDashboard ? "Loading..." : "View Campaign"}
-          </button>
-          {errorCampaignDashboard && (
-            <div className="mt-2 flex items-center text-red-600 text-sm">
-              <span>{errorCampaignDashboard}</span>
-              <button onClick={handleCampaignDashboard} className="ml-2 underline" aria-label="Retry viewing Campaign Dashboard">
-                Retry
-              </button>
-            </div>
-          )}
+            View Campaign
+          </Link>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default SubmissionPage;

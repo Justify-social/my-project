@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode, Suspense } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -9,6 +9,7 @@ import "rc-slider/assets/index.css";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { toast } from "react-hot-toast";
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -24,6 +25,7 @@ interface Asset {
     influencer?: string;
     description?: string;
     budget: number;
+    whyInfluencer?: string;
   };
 }
 
@@ -37,9 +39,6 @@ interface CreativeAsset {
 
 export interface CreativeValues {
   assets: CreativeAsset[];
-  guidelines: string;
-  requirements: string[];
-  notes: string;
 }
 
 // =============================================================================
@@ -66,10 +65,7 @@ const CreativeSchema = Yup.object().shape({
       title: Yup.string().required('Asset title is required'),
       description: Yup.string(),
     })
-  ),
-  guidelines: Yup.string(),
-  requirements: Yup.array().of(Yup.string()),
-  notes: Yup.string(),
+  )
 });
 
 // =============================================================================
@@ -104,25 +100,7 @@ interface UploadAreaProps {
 }
 const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
   const [dragOver, setDragOver] = useState(false);
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onFilesAdded(e.dataTransfer.files);
-      e.dataTransfer.clearData();
-    }
-  };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div
@@ -130,22 +108,41 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
       style={{
         border: dragOver ? "2px solid #007BFF" : "2px dashed #E0E0E0",
       }}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      aria-label="Drag and drop files here"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        if (e.dataTransfer.files) {
+          onFilesAdded(e.dataTransfer.files);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      onClick={() => fileInputRef.current?.click()}
+      onKeyPress={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          fileInputRef.current?.click();
+        }
+      }}
     >
       <p className="text-gray-600">Drag and drop files here or click to upload</p>
       <input
+        ref={fileInputRef}
         type="file"
         multiple
         accept=".mp4,.png,.jpeg,.jpg,.gif,.pdf"
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+        onChange={(e) => {
           if (e.target.files) onFilesAdded(e.target.files);
         }}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        aria-label="Click to upload a file"
-        aria-hidden="true"
+        className="hidden"
+        aria-label="File upload"
       />
     </div>
   );
@@ -159,7 +156,6 @@ interface AssetRowProps {
   asset: Asset;
   onPreview: (asset: Asset) => void;
   onDelete: (asset: Asset) => void;
-  onRetry: (asset: Asset) => void;
   onUpdate: (updatedAsset: Asset) => void;
   autoEdit?: boolean;
 }
@@ -167,237 +163,165 @@ const AssetRow: React.FC<AssetRowProps> = ({
   asset,
   onPreview,
   onDelete,
-  onRetry,
   onUpdate,
   autoEdit = false,
 }) => {
   const [isEditing, setIsEditing] = useState(autoEdit);
   const [editAssetName, setEditAssetName] = useState(asset.details.assetName);
-  const [editInfluencer, setEditInfluencer] = useState(asset.details.influencer || "");
-  const [editDescription, setEditDescription] = useState(asset.details.description || "");
-  const [editBudget, setEditBudget] = useState(asset.details.budget.toString());
-  const [errors, setErrors] = useState<{ budget?: string }>({});
   const [influencerQuery, setInfluencerQuery] = useState("");
+  const [selectedInfluencer, setSelectedInfluencer] = useState(asset.details.influencer || "");
+  const [whyInfluencer, setWhyInfluencer] = useState(asset.details.whyInfluencer || "");
+  const [budget, setBudget] = useState(asset.details.budget?.toString() || "");
 
-  useEffect(() => {
-    if (autoEdit) {
-      setIsEditing(true);
-    }
-  }, [autoEdit]);
-
+  // Mock influencer data - replace with your actual data
   const influencerOptions = [
-    { name: "Olivia Bennett", handle: "oliviabennett", followers: "7k" },
-    { name: "Liam Johnson", handle: "liamjohnson", followers: "12k" },
-    { name: "Emma Wilson", handle: "emmawilson", followers: "5k" },
+    { 
+      name: "Olivia Bennett", 
+      handle: "@oliviabennett", 
+      followers: "7k",
+      avatar: "/path/to/avatar.jpg" // Add actual avatar path
+    },
+    // Add more influencers...
   ];
-  const filteredInfluencers = influencerOptions.filter((inf) =>
-    inf.handle.toLowerCase().includes(influencerQuery.toLowerCase())
-  );
-
-  const validateBudget = (value: string): string | null => {
-    const num = parseFloat(value);
-    if (isNaN(num)) return "Budget must be a valid number.";
-    if (num <= 0) return "Budget cannot be negative.";
-    if (num > campaignBudget) return "Budget cannot exceed total campaign budget.";
-    return null;
-  };
-
-  const handleSave = () => {
-    const budgetError = validateBudget(editBudget);
-    if (budgetError) {
-      setErrors({ budget: budgetError });
-      return;
-    }
-    const updatedAsset: Asset = {
-      ...asset,
-      details: {
-        assetName: editAssetName,
-        influencer: editInfluencer,
-        description: editDescription,
-        budget: parseFloat(editBudget),
-      },
-    };
-    onUpdate(updatedAsset);
-    setIsEditing(false);
-  };
 
   return (
-    <div className="border p-4 rounded mb-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <span className="text-2xl" aria-hidden="true">
-            {asset.file.type.includes("video")
-              ? "🎥"
-              : asset.file.type.includes("image")
-              ? "🖼️"
-              : asset.file.type.includes("pdf")
-              ? "📄"
-              : "📁"}
-          </span>
+    <div className="border rounded-lg p-6 mb-4 bg-white">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">📁</span>
           <span className="font-medium">{asset.file.name}</span>
         </div>
-        <div className="flex items-center space-x-2 mt-2 md:mt-0">
+        <div className="flex gap-2">
           <button
-            type="button"
             onClick={() => onPreview(asset)}
-            className="px-2 py-1 border rounded text-sm hover:bg-gray-100 transition"
-            aria-label={`Preview ${asset.file.name}`}
+            className="text-blue-600 hover:text-blue-800"
           >
             Preview
           </button>
           <button
-            type="button"
             onClick={() => onDelete(asset)}
-            className="px-2 py-1 border rounded text-sm hover:bg-gray-100 transition"
-            aria-label={`Delete ${asset.file.name}`}
+            className="text-red-600 hover:text-red-800"
           >
             Delete
           </button>
-          {asset.error && (
-            <button
-              type="button"
-              onClick={() => onRetry(asset)}
-              className="px-2 py-1 border rounded text-sm text-red-600 hover:bg-red-50 transition"
-              aria-label={`Retry upload for ${asset.file.name}`}
-            >
-              Retry
-            </button>
-          )}
         </div>
       </div>
-      <div className="mt-2">
-        {asset.progress < 100 ? (
-          <>
-            <div className="text-xs text-gray-600">
-              {asset.file.name} [Uploading... {asset.progress}%]
-            </div>
-            <div className="w-full bg-gray-200 h-2 rounded">
-              <div
-                className="bg-blue-600 h-2 rounded transition-all duration-300 ease-in-out"
-                style={{ width: `${asset.progress}%` }}
-              ></div>
-            </div>
-          </>
-        ) : (
-          !asset.error && <div className="text-xs text-green-600">Upload complete</div>
-        )}
-        {asset.error && <p className="text-red-600 text-xs mt-1">{asset.error}</p>}
-      </div>
-      {asset.progress === 100 && !asset.error && (
-        <div className="mt-4 border-t pt-4">
-          {isEditing ? (
-            <>
-              <div className="mb-4">
-                <label className="block font-semibold mb-1" htmlFor={`assetName-${asset.id}`}>
-                  Asset Name
-                </label>
-                <input
-                  id={`assetName-${asset.id}`}
-                  type="text"
-                  value={editAssetName}
-                  onChange={(e) => setEditAssetName(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <div className="mb-4 relative">
-                <label className="block font-semibold mb-1" htmlFor={`influencer-${asset.id}`}>
-                  Start typing influencer's handle
-                </label>
-                <input
-                  id={`influencer-${asset.id}`}
-                  type="text"
-                  placeholder="Start typing influencer's handle"
-                  value={influencerQuery}
-                  onChange={(e) => setInfluencerQuery(e.target.value)}
-                  className="w-full p-2 border rounded"
-                  aria-label="Edit influencer selection"
-                />
-                {influencerQuery && filteredInfluencers.length > 0 && (
-                  <ul className="absolute z-10 bg-white border w-full mt-1 list-none">
-                    {filteredInfluencers.map((inf) => (
-                      <li
-                        key={inf.handle}
-                        onClick={() => {
-                          setEditInfluencer(`${inf.name} | ${inf.handle} (${inf.followers} followers)`);
-                          setInfluencerQuery("");
-                        }}
-                        className="p-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {inf.name} | {inf.handle} ({inf.followers} followers)
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {editInfluencer && (
-                  <div className="mt-2 flex items-center">
-                    <span className="bg-gray-200 px-3 py-1 rounded-full">{editInfluencer}</span>
-                    <button
-                      type="button"
-                      onClick={() => setEditInfluencer("")}
-                      className="ml-2 text-red-500"
-                      aria-label="Clear influencer selection"
-                    >
-                      ×
-                    </button>
+
+      <div className="space-y-4">
+        {/* Asset Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Asset Name
+            <span className="text-blue-500 ml-1 cursor-help" title="Give your asset a descriptive name">ⓘ</span>
+          </label>
+          <input
+            type="text"
+            value={editAssetName}
+            onChange={(e) => setEditAssetName(e.target.value)}
+            className="w-full p-2 border rounded-md"
+            placeholder="Enter asset name"
+          />
+        </div>
+
+        {/* Influencer Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Start typing influencer's handle
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={influencerQuery}
+              onChange={(e) => setInfluencerQuery(e.target.value)}
+              className="w-full p-2 border rounded-md"
+              placeholder="@username"
+            />
+            {influencerQuery && (
+              <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg">
+                {influencerOptions.map((inf) => (
+                  <div
+                    key={inf.handle}
+                    className="flex items-center p-2 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedInfluencer(inf.handle);
+                      setInfluencerQuery("");
+                    }}
+                  >
+                    <img
+                      src={inf.avatar}
+                      alt={inf.name}
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                    <div>
+                      <div className="font-medium">{inf.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {inf.handle} • {inf.followers} followers
+                      </div>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
-              <div className="mb-4">
-                <label className="block font-semibold mb-1" htmlFor={`description-${asset.id}`}>
-                  Description (Optional)
-                </label>
-                <textarea
-                  id={`description-${asset.id}`}
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Describe how this asset will be used"
-                  className="w-full p-2 border rounded"
-                  maxLength={3000}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block font-semibold mb-1" htmlFor={`budget-${asset.id}`}>
-                  Budget for Influencer
-                </label>
-                <div className="flex items-center">
-                  <span className="mr-2 font-bold">£</span>
-                  <input
-                    id={`budget-${asset.id}`}
-                    type="number"
-                    value={editBudget}
-                    onChange={(e) => setEditBudget(e.target.value)}
-                    placeholder="Enter budget"
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-                {errors.budget && (
-                  <p className="text-red-600 text-sm mt-1">{errors.budget}</p>
-                )}
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-blue-600 text-white rounded transition hover:bg-blue-700"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 border rounded transition hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-sm text-gray-600">
-              Asset details are required. Please fill in the above fields.
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Why this influencer */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Why this influencer?
+            <span className="text-blue-500 ml-1 cursor-help" title="Explain why you chose this influencer">ⓘ</span>
+          </label>
+          <textarea
+            value={whyInfluencer}
+            onChange={(e) => setWhyInfluencer(e.target.value)}
+            className="w-full p-2 border rounded-md"
+            rows={3}
+            placeholder="Explain why you chose this influencer..."
+          />
+        </div>
+
+        {/* Budget */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Budget for Influencer
+            <span className="text-blue-500 ml-1 cursor-help" title="Set the budget for this influencer">ⓘ</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-2">£</span>
+            <input
+              type="number"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              className="w-full pl-8 p-2 border rounded-md"
+              placeholder="Enter budget per post"
+            />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            onClick={() => onUpdate({
+              ...asset,
+              details: {
+                assetName: editAssetName,
+                influencer: selectedInfluencer,
+                whyInfluencer,
+                budget: parseFloat(budget) || 0,
+              }
+            })}
+            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => onDelete(asset)}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -461,29 +385,37 @@ function CampaignStep4Content() {
 
   const initialValues: CreativeValues = {
     assets: data.creativeAssets?.assets || [],
-    guidelines: data.creativeAssets?.guidelines || '',
-    requirements: data.creativeAssets?.requirements || [],
-    notes: data.creativeAssets?.notes || '',
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (values: CreativeValues) => {
     try {
       setIsSubmitting(true);
-      
-      // Assuming you have multiple creative assets and requirements
-      const creativeAssets = formData.getAll('assetUrls').map((url, index) => ({
-        type: formData.getAll('assetTypes')[index],
-        url: url,
-        title: formData.getAll('assetTitles')[index],
-        description: formData.getAll('assetDescriptions')[index],
-        influencerAssigned: formData.getAll('assetInfluencers')[index],
-        influencerHandle: formData.getAll('assetInfluencerHandles')[index],
-        influencerBudget: parseFloat(formData.getAll('assetBudgets')[index] as string)
-      }))
 
-      const creativeRequirements = formData.getAll('requirements').map(req => ({
-        requirement: req
-      }))
+      // Validate that we have at least one asset
+      if (assets.length === 0) {
+        toast.error('Please upload at least one asset');
+        return;
+      }
+
+      // Validate that all assets are fully uploaded
+      const incompleteAssets = assets.filter(asset => asset.progress < 100);
+      if (incompleteAssets.length > 0) {
+        toast.error('Please wait for all assets to finish uploading');
+        return;
+      }
+
+      // Validate that all assets have required fields
+      const invalidAssets = assets.filter(asset => {
+        return !asset.details.assetName || 
+               !asset.details.influencer ||
+               !asset.details.whyInfluencer ||
+               !asset.details.budget;
+      });
+
+      if (invalidAssets.length > 0) {
+        toast.error('Please complete all required fields for each asset');
+        return;
+      }
 
       const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
         method: 'PATCH',
@@ -493,25 +425,37 @@ function CampaignStep4Content() {
         body: JSON.stringify({
           step: 4,
           data: {
-            creativeGuidelines: formData.get('creativeGuidelines'),
-            creativeNotes: formData.get('creativeNotes'),
-            creativeAssets,
-            creativeRequirements
+            creativeAssets: {
+              create: assets.map(asset => ({
+                type: asset.file.type.includes('video') ? 'video' : 'image',
+                url: URL.createObjectURL(asset.file),
+                fileName: asset.file.name,
+                fileSize: asset.file.size,
+                assetName: asset.details.assetName,
+                influencerHandle: asset.details.influencer,
+                whyInfluencer: asset.details.whyInfluencer,
+                budget: parseFloat(asset.details.budget.toString()),
+              }))
+            }
           }
         })
-      })
+      });
+
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error('Failed to update campaign')
+        throw new Error(data.message || 'Failed to update campaign');
       }
 
-      router.push(`/campaigns/wizard/step-5?id=${campaignId}`)
+      toast.success('Assets saved successfully');
+      router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
     } catch (error) {
-      console.error('Error saving step 4:', error)
+      console.error('Error saving step 4:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save campaign data');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // ---------- File Upload Handling ----------
   const handleFilesAdded = (files: FileList) => {
@@ -587,20 +531,48 @@ function CampaignStep4Content() {
   const isNextDisabled = assets.filter((a) => a.progress === 100 && !a.error).length === 0 || !areAssetsValid();
 
   // ---------- Save as Draft ----------
-  const handleSaveAsDraft = () => {
-    updateData("creativeAssets", {
-      assets: assets.map((a) => ({
-        id: a.id,
-        type: a.file.type.split('/')[0] as 'image' | 'video',
-        url: URL.createObjectURL(a.file),
-        title: a.details.assetName,
-        description: a.details.description,
-      })),
-      guidelines: '',
-      requirements: [],
-      notes: '',
-    });
-    alert("Draft saved!");
+  const handleSaveDraft = async (values: CreativeValues) => {
+    try {
+      setIsSubmitting(true);
+
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          step: 4,
+          submissionStatus: 'draft',
+          data: {
+            creativeAssets: {
+              create: assets.map(asset => ({
+                type: asset.file.type.includes('video') ? 'video' : 'image',
+                url: URL.createObjectURL(asset.file),
+                fileName: asset.file.name,
+                fileSize: asset.file.size,
+                assetName: asset.details.assetName || asset.file.name,
+                influencerHandle: asset.details.influencer || '',
+                whyInfluencer: asset.details.whyInfluencer || '',
+                budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
+              }))
+            }
+          }
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to save draft');
+      }
+
+      toast.success('Draft saved successfully');
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save draft');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ---------- Keyboard: Close preview on Escape ----------
@@ -621,114 +593,90 @@ function CampaignStep4Content() {
         validationSchema={CreativeSchema}
         onSubmit={handleSubmit}
       >
-        {({ setFieldValue, isValid, isSubmitting, submitForm, values }) => (
+        {({ values, setFieldValue, isValid, submitForm }) => (
           <>
             <div className="max-w-4xl mx-auto p-4 pb-32">
               <Header currentStep={4} totalSteps={5} />
               
               <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Step 4: Creative Assets</h1>
-                <button
-                  onClick={handleSaveAsDraft}
+                <button 
+                  type="button"
+                  onClick={() => handleSaveDraft(values)}
                   className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+                  disabled={isSubmitting}
                 >
-                  Save as Draft
+                  {isSubmitting ? 'Saving...' : 'Save as Draft'}
                 </button>
               </div>
 
               <Form className="space-y-8">
-                {error && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    {error}
-                  </div>
-                )}
-
-                {/* Creative Assets Upload Section */}
+                {/* Upload Area */}
                 <div>
                   <h2 className="text-xl font-bold mb-2">Upload Assets</h2>
                   <UploadArea onFilesAdded={handleFilesAdded} />
                 </div>
 
-                {/* Guidelines Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Creative Guidelines</h2>
-                  <Field
-                    as="textarea"
-                    name="guidelines"
-                    className="w-full p-2 border rounded"
-                    rows={4}
-                    placeholder="Enter creative guidelines..."
-                  />
-                  <ErrorMessage
-                    name="guidelines"
-                    component="div"
-                    className="text-red-600 text-sm"
-                  />
-                </div>
-
-                {/* Requirements Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Requirements</h2>
-                  {/* Add your requirements component here */}
-                </div>
-
-                {/* Notes Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Additional Notes</h2>
-                  <Field
-                    as="textarea"
-                    name="notes"
-                    className="w-full p-2 border rounded"
-                    rows={4}
-                    placeholder="Enter any additional notes..."
-                  />
-                  <ErrorMessage
-                    name="notes"
-                    component="div"
-                    className="text-red-600 text-sm"
-                  />
+                {/* Asset List */}
+                <div className="space-y-4">
+                  {assets.map((asset) => (
+                    <AssetRow
+                      key={asset.id}
+                      asset={asset}
+                      onPreview={() => setPreviewAsset(asset)}
+                      onDelete={() => handleDeleteAsset(asset)}
+                      onUpdate={(updatedAsset) => {
+                        setAssets(assets.map(a => 
+                          a.id === updatedAsset.id ? updatedAsset : a
+                        ));
+                      }}
+                    />
+                  ))}
                 </div>
               </Form>
             </div>
 
-            {/* Fixed Bottom Navigation Bar */}
             <ProgressBar
               currentStep={4}
               onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
               onBack={() => router.push("/campaigns/wizard/step-3")}
               onNext={submitForm}
               disableNext={!isValid || isSubmitting}
-              data-cy="next-button"
             />
           </>
         )}
       </Formik>
 
-      {/* Modal for File Preview */}
-      <Modal isOpen={!!previewAsset} onClose={() => setPreviewAsset(null)}>
-        {previewAsset && (
-          <div>
-            <h2 className="font-bold mb-4">Preview: {previewAsset.file.name}</h2>
-            {previewAsset.file.type.includes("video") ? (
-              <video controls className="w-full">
-                <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
-                Your browser does not support the video tag.
-              </video>
-            ) : previewAsset.file.type.includes("image") ? (
-              <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full" />
-            ) : previewAsset.file.type.includes("pdf") ? (
-              <embed
-                src={URL.createObjectURL(previewAsset.file)}
-                type="application/pdf"
-                width="100%"
-                height="600px"
-              />
-            ) : (
-              <p>Preview not available for this file type.</p>
-            )}
-          </div>
-        )}
-      </Modal>
+      {/* Modals */}
+      {previewAsset && (
+        <Modal
+          isOpen={!!previewAsset}
+          onClose={() => setPreviewAsset(null)}
+        >
+          {previewAsset && (
+            <div>
+              <h2 className="font-bold mb-4">Preview: {previewAsset.file.name}</h2>
+              {previewAsset.file.type.includes("video") ? (
+                <video controls className="w-full">
+                  <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
+                  Your browser does not support the video tag.
+                </video>
+              ) : previewAsset.file.type.includes("image") ? (
+                <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full" />
+              ) : previewAsset.file.type.includes("pdf") ? (
+                <embed
+                  src={URL.createObjectURL(previewAsset.file)}
+                  type="application/pdf"
+                  width="100%"
+                  height="600px"
+                />
+              ) : (
+                <p>Preview not available for this file type.</p>
+              )}
+            </div>
+          )}
+        </Modal>
+      )}
 
       {/* Modal for Delete Confirmation */}
       <Modal isOpen={!!confirmDeleteAsset} onClose={() => setConfirmDeleteAsset(null)}>

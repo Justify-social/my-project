@@ -60,7 +60,13 @@ const Header: React.FC<HeaderProps> = ({
 
               {/* Notifications */}
               <div className="relative">
-                <Image src="/bell.svg" alt="Notifications" width={24} height={24} />
+                <Image 
+                  src="/bell.svg" 
+                  alt="Notifications" 
+                  width={24}
+                  height={24}
+                  className="w-6 h-6"
+                />
                 {notificationsCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
                     {notificationsCount}

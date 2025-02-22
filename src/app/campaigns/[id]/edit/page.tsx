@@ -496,6 +496,11 @@ export default function EditCampaign() {
     )
   }
 
+  // Need to format dates from ISO to yyyy-MM-dd
+  const formatDate = (isoDate: string) => {
+    return new Date(isoDate).toISOString().split('T')[0];
+  };
+
   if (loading) return <div className="p-8">Loading...</div>
   if (error) return (
     <div className="p-8">
@@ -957,7 +962,9 @@ export default function EditCampaign() {
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable 
                 droppableId="creative-assets"
+                ignoreContainerClipping={false}
                 isDropDisabled={false}
+                isCombineEnabled={false}
               >
                 {(provided, snapshot) => (
                   <div

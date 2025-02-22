@@ -3,6 +3,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/providers/SidebarProvider";
 import { navItems, settingsNavItem, type NavItem } from "@/config/navigation";
+import { useSettingsPosition } from '@/providers/SettingsPositionProvider';
 
 interface User {
   name?: string;
@@ -17,6 +18,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const { isOpen } = useSidebar();
   const pathname = usePathname();
+  const { setSettingsRef } = useSettingsPosition();
 
   // Returns true if the main nav item is active.
   function isNavItemActive(href: string) {
@@ -132,7 +134,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       </nav>
       
       {/* Settings section */}
-      <div className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 border-t border-gray-300">
+      <div 
+        ref={setSettingsRef}
+        className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 border-t border-gray-300"
+      >
         <Link
           href={settingsNavItem.href}
           className={`flex items-center gap-1.5 sm:gap-2 no-underline ${

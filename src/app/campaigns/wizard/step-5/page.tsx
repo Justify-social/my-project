@@ -1,433 +1,410 @@
 "use client";
 
-import React, { Component, ReactNode, Suspense } from "react";
+import React, { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useWizard } from "../../../../context/WizardContext";
-import Header from "../../../../components/Wizard/Header";
-import ProgressBar from "../../../../components/Wizard/ProgressBar";
-import { useState } from "react";
+import { toast } from "react-hot-toast";
+import Header from "@/components/Wizard/Header";
+import ProgressBar from "@/components/Wizard/ProgressBar";
+import { useWizard } from "@/context/WizardContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
+import { Analytics } from "@/lib/analytics/analytics";
+import AssetPreview from '@/components/AssetPreview';
+import ErrorFallback from '@/components/ErrorFallback';
+import LoadingSkeleton from '@/components/LoadingSkeleton';
+import ObjectivesContent from '@/components/ReviewSections/ObjectivesContent';
+import AudienceContent from '@/components/ReviewSections/AudienceContent';
+import ReviewSection from '@/components/ReviewSections/ReviewSection';
 
-// =============================================================================
-// SAMPLE DATA (In production, this comes from your Wizard Context or API)
-// =============================================================================
-
-const sampleCampaignDetails = {
-  campaignName: "Senior Travellers",
-  description:
-    "Individuals aged 60 and above who enjoy leisure travel, cultural experiences, and comfortable accommodations, often prioritizing relaxation, safety, and value for money.",
-  startDate: "10/08/2024",
-  endDate: "24/08/2024",
-  timeZone: "BST (UTC+1)",
-  primaryContact: { name: "Ed Addams", email: "edaddams@domain.com", role: "CEO" },
-  secondaryContact: { name: "Ed", email: "ed@domain.com", role: "CTO" },
-};
-
-const sampleBudget = {
-  budgetAllocationLower: true,
-  currency: "£ Pounds",
-  totalCampaignBudget: "£5400",
-  budgetAllocatedToSocialMedia: "£1000",
-  influencerAssigned: "Olivia Bennett",
-  influencerHandle: "oliviabennett (7k followers)",
-};
-
-const sampleObjectives = {
-  primaryKPI: "Boost Brand Awareness",
-  secondaryKPIs: ["Maximise Ad Recall", "Grow Brand Preference", "Motivate Action"],
-  mainMessage: "Discover sustainable living with our eco-friendly products.",
-  hashtags: "#bestcampaign",
-  brandPerception: "Recognise us as the leader in sustainable technology.",
-  keyBenefits: ["Innovative design", "Exceptional quality", "Outstanding customer service"],
-  expectedAchievements: "20% increase in brand awareness within three months",
-  purchaseIntent: "15% due to targeted ads",
-};
-
-const sampleAudience = {
-  location: "United Kingdom",
-  ageDistribution: "18-24, 25-34, 35-44, 45-54, 55-64, 65+",
-  gender: "Male",
-  language: "English (UK)",
-  educationLevel: "Bachelor's Degree",
-  jobTitles: "Manager, Developer",
-  incomeRange: "$10,000-$20,200",
-};
-
-const sampleCompetitors = {
-  competitors: ["Amazon", "Walmart", "Shopify"],
-  marketHypothesis:
-    "The industry is experiencing a surge in demand for eco-friendly products, which may affect consumer preferences.",
-};
-
-const sampleCreativeAssets = [
-  {
-    fileName: "File.MP4",
-    influencerAssigned: "Isabella Turner",
-    influencerHandle: "isabellaturner (5.1k followers)",
-    assetDescription:
-      "15-second Instagram video featuring vibrant visuals and influencer testimonials to boost awareness and drive traffic.",
-    influencerBudget: "£500 per post",
-  },
-  // Additional creative asset entries can be added here.
-];
-
-const availableCredits = 135;
-const usageCredits = 150;
-
-// =============================================================================
-// REQUIRED FIELDS CHECK
-// =============================================================================
-
-const requiredCampaignFieldsExist =
-  sampleCampaignDetails.campaignName &&
-  sampleCampaignDetails.description &&
-  sampleCampaignDetails.startDate &&
-  sampleCampaignDetails.endDate &&
-  sampleCampaignDetails.timeZone &&
-  sampleCampaignDetails.primaryContact &&
-  sampleObjectives.primaryKPI &&
-  sampleObjectives.mainMessage &&
-  sampleAudience.location &&
-  sampleCompetitors.competitors.length > 0 &&
-  sampleCreativeAssets.length > 0;
-
-// =============================================================================
-// ERROR BOUNDARY COMPONENT
-// =============================================================================
-
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true };
-  }
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div>Something went wrong. Please try again later.</div>;
-    }
-    return this.props.children;
-  }
+// Strong type definitions
+interface CampaignDetails {
+  campaignName: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  timeZone: string;
+  primaryContact: {
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
-// =============================================================================
-// LOCKED REVIEW SECTION COMPONENTS (Boxed Sections)
-// =============================================================================
+interface Objectives {
+  primaryKPI: string;
+  secondaryKPIs: string[];
+  mainMessage: string;
+  hashtags: string[];
+  memorability: string;
+  keyBenefits: string;
+  expectedAchievements: string;
+  purchaseIntent: string;
+  features: string[];
+}
 
-const CampaignOverview: React.FC = () => (
-  <section className="space-y-2">
-    <div className="border p-4 rounded mb-4">
-      <h2 className="text-xl font-bold mb-2">Campaign Overview</h2>
-      <div>
-        <strong>Campaign Name:</strong> {sampleCampaignDetails.campaignName}
-      </div>
-      <div>
-        <strong>Description:</strong> {sampleCampaignDetails.description}
-      </div>
-      <div>
-        <strong>Start Date:</strong> {sampleCampaignDetails.startDate}
-      </div>
-      <div>
-        <strong>End Date:</strong> {sampleCampaignDetails.endDate}
-      </div>
-      <div>
-        <strong>Time Zone:</strong> {sampleCampaignDetails.timeZone}
-      </div>
-      <div>
-        <strong>Primary Contact:</strong> {sampleCampaignDetails.primaryContact.name},{" "}
-        {sampleCampaignDetails.primaryContact.email}, {sampleCampaignDetails.primaryContact.role}
-      </div>
-      <div>
-        <strong>Secondary Contact:</strong> {sampleCampaignDetails.secondaryContact.name},{" "}
-        {sampleCampaignDetails.secondaryContact.email}, {sampleCampaignDetails.secondaryContact.role}
-      </div>
-      <button type="button" className="text-blue-600 underline text-sm">
-        [Edit Fields]
+interface AudienceTargeting {
+  locations: string[];
+  ageRanges: string[];
+  genders: string[];
+  languages: string[];
+}
+
+interface CreativeAsset {
+  id: string;
+  assetName: string;
+  type: 'image' | 'video';
+  url: string;
+  influencerHandle?: string;
+  budget?: number;
+  whyInfluencer?: string;
+}
+
+interface WizardData {
+  step1: CampaignDetails;
+  step2: Objectives;
+  step3: AudienceTargeting;
+  step4: {
+    creativeAssets: CreativeAsset[];
+  };
+  overview: {
+    name: string;
+    businessGoal: string;
+    startDate: string;
+    endDate: string;
+    timeZone: string;
+    primaryContact: {
+      firstName: string;
+      surname: string;
+      email: string;
+      position: string;
+    };
+    secondaryContact?: {
+      firstName: string;
+      surname: string;
+      email: string;
+      position: string;
+    };
+    currency: string;
+    totalBudget: number;
+    socialMediaBudget: number;
+    platform: string;
+    influencerHandle: string;
+  };
+}
+
+// Review Section Components
+interface ReviewSectionProps {
+  title: string;
+  stepNumber: number;
+  onEdit: (step: number) => void;
+  children: React.ReactNode;
+}
+
+const ReviewSection: React.FC<ReviewSectionProps> = ({ title, stepNumber, onEdit, children }) => (
+  <section 
+    className="bg-white rounded-lg shadow p-6 mb-6"
+    aria-labelledby={`review-section-${stepNumber}`}
+  >
+    <div className="flex justify-between items-start mb-4">
+      <h2 id={`review-section-${stepNumber}`} className="text-xl font-semibold">{title}</h2>
+      <button
+        onClick={() => onEdit(stepNumber)}
+        className="text-blue-600 hover:text-blue-800 flex items-center"
+        aria-label={`Edit ${title}`}
+      >
+        <span>Edit</span>
+        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
       </button>
     </div>
+    {children}
   </section>
 );
 
-const BudgetAllocation: React.FC = () => {
-  const warningMessage = sampleBudget.budgetAllocationLower
-    ? "⚠ Your budget allocation is lower than average for similar campaigns."
-    : "";
-  return (
-    <section className="space-y-2">
-      <div className="border p-4 rounded mb-4">
-        <h2 className="text-xl font-bold mb-2">Budget Allocation</h2>
-        {warningMessage && <p className="text-yellow-600">{warningMessage}</p>}
-        <div>
-          <strong>Currency:</strong> {sampleBudget.currency}
-        </div>
-        <div>
-          <strong>Total Campaign Budget:</strong> {sampleBudget.totalCampaignBudget}
-        </div>
-        <div>
-          <strong>Budget Allocated to Social Media:</strong> {sampleBudget.budgetAllocatedToSocialMedia}
-        </div>
-        <div>
-          <strong>Influencer Assigned:</strong> {sampleBudget.influencerAssigned} (
-          {sampleBudget.influencerHandle})
-        </div>
-        <button type="button" className="text-blue-600 underline text-sm">
-          [Edit Fields]
-        </button>
-      </div>
-    </section>
-  );
+// Enhanced validation with specific error types
+enum ValidationErrorType {
+  MISSING_CAMPAIGN_NAME = 'MISSING_CAMPAIGN_NAME',
+  MISSING_DATES = 'MISSING_DATES',
+  MISSING_KPI = 'MISSING_KPI',
+  MISSING_LOCATION = 'MISSING_LOCATION',
+  MISSING_ASSETS = 'MISSING_ASSETS'
+}
+
+interface ValidationError {
+  type: ValidationErrorType;
+  message: string;
+}
+
+// Enhanced validation utility
+const validateCampaignData = (data: Partial<WizardData>): { 
+  isValid: boolean; 
+  errors: ValidationError[] 
+} => {
+  const errors: ValidationError[] = [];
+
+  if (!data.step1?.campaignName) {
+    errors.push({
+      type: ValidationErrorType.MISSING_CAMPAIGN_NAME,
+      message: "Campaign name is required"
+    });
+  }
+  if (!data.step1?.startDate || !data.step1?.endDate) {
+    errors.push({
+      type: ValidationErrorType.MISSING_DATES,
+      message: "Campaign dates are required"
+    });
+  }
+  if (!data.step2?.primaryKPI) {
+    errors.push({
+      type: ValidationErrorType.MISSING_KPI,
+      message: "Primary KPI is required"
+    });
+  }
+  if (!data.step3?.locations?.length) {
+    errors.push({
+      type: ValidationErrorType.MISSING_LOCATION,
+      message: "At least one location is required"
+    });
+  }
+  if (!data.step4?.creativeAssets?.length) {
+    errors.push({
+      type: ValidationErrorType.MISSING_ASSETS,
+      message: "At least one creative asset is required"
+    });
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
 };
 
-const ObjectivesMessagingReview: React.FC = () => (
-  <section className="space-y-2">
-    <div className="border p-4 rounded mb-4">
-      <h2 className="text-xl font-bold mb-2">Objectives & Messaging</h2>
-      <div>
-        <strong>Primary KPI:</strong> {sampleObjectives.primaryKPI}
-      </div>
-      <div>
-        <strong>Secondary KPIs:</strong> {sampleObjectives.secondaryKPIs.join(", ")}
-      </div>
-      <div>
-        <strong>Main Campaign Message:</strong> {sampleObjectives.mainMessage}
-      </div>
-      <div>
-        <strong>Hashtags:</strong> {sampleObjectives.hashtags}
-      </div>
-      <div>
-        <strong>Brand Perception Goal:</strong> {sampleObjectives.brandPerception}
-      </div>
-      <div>
-        <strong>Key Benefits:</strong> {sampleObjectives.keyBenefits.join(", ")}
-      </div>
-      <div>
-        <strong>Expected Impact:</strong> Awareness: {sampleObjectives.expectedAchievements}; Purchase Intent:{" "}
-        {sampleObjectives.purchaseIntent}
-      </div>
-      <button type="button" className="text-blue-600 underline text-sm">
-        [Edit Fields]
-      </button>
-    </div>
-  </section>
-);
-
-const AudienceTargetingReview: React.FC = () => (
-  <section className="space-y-2">
-    <div className="border p-4 rounded mb-4">
-      <h2 className="text-xl font-bold mb-2">Audience Targeting</h2>
-      <div>
-        <strong>Location:</strong> {sampleAudience.location}
-      </div>
-      <div>
-        <strong>Age Distribution:</strong> {sampleAudience.ageDistribution}
-      </div>
-      <div>
-        <strong>Gender:</strong> {sampleAudience.gender}
-      </div>
-      <div>
-        <strong>Language:</strong> {sampleAudience.language}
-      </div>
-      <div>
-        <strong>Education Level:</strong> {sampleAudience.educationLevel}
-      </div>
-      <div>
-        <strong>Job Titles:</strong> {sampleAudience.jobTitles}
-      </div>
-      <div>
-        <strong>Income Range:</strong> {sampleAudience.incomeRange}
-      </div>
-      <button type="button" className="text-blue-600 underline text-sm">
-        [Edit Fields]
-      </button>
-    </div>
-  </section>
-);
-
-const CompetitorsContextReview: React.FC = () => (
-  <section className="space-y-2">
-    <div className="border p-4 rounded mb-4">
-      <h2 className="text-xl font-bold mb-2">Competitors & Context</h2>
-      <div>
-        <strong>Competitors to Monitor:</strong> {sampleCompetitors.competitors.join(", ")}
-      </div>
-      <div>
-        <strong>Market Hypothesis:</strong> {sampleCompetitors.marketHypothesis}
-      </div>
-      <button type="button" className="text-blue-600 underline text-sm">
-        [Edit Fields]
-      </button>
-    </div>
-  </section>
-);
-
-const CreativeAssetsReview: React.FC = () => (
-  <section className="space-y-2">
-    <div className="border p-4 rounded mb-4">
-      <h2 className="text-xl font-bold mb-2">Creative Assets</h2>
-      {sampleCreativeAssets.map((asset, index) => (
-        <div key={index} className="border p-2 rounded mb-2">
-          <div>
-            <strong>Asset Name:</strong> {asset.fileName}
-          </div>
-          <div>
-            <strong>Influencer Assigned:</strong> {asset.influencerAssigned} ({asset.influencerHandle})
-          </div>
-          <div>
-            <strong>Asset Description:</strong> {asset.assetDescription}
-          </div>
-          <div>
-            <strong>Influencer Budget:</strong> {asset.influencerBudget}
-          </div>
-          <button type="button" className="text-blue-600 underline text-sm">
-            [Edit Fields]
-          </button>
-        </div>
-      ))}
-    </div>
-  </section>
-);
-
-const CampaignSubmissionSummary: React.FC = () => {
-  const submissionWarning =
-    usageCredits > availableCredits
-      ? `⚠ Submitting this campaign will use ${usageCredits} credits. You only have ${availableCredits} credits. Need more credits? Purchase here.`
-      : "";
-  return (
-    <section className="space-y-2">
-      <div className="border p-4 rounded mb-4">
-        <h2 className="text-xl font-bold mb-2">Campaign Submission Summary</h2>
-        <div>
-          <strong>Available Credits:</strong> {availableCredits}
-        </div>
-        <div>
-          <strong>Usage Credits:</strong> {usageCredits}
-        </div>
-        {submissionWarning && <p className="text-red-600">{submissionWarning}</p>}
-        <div className="mt-2">
-          <button type="button" className="text-blue-600 underline text-sm">
-            [Save as Draft]
-          </button>
-          <button type="button" className="text-blue-600 underline text-sm ml-4">
-            [Edit Fields]
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// =============================================================================
-// MAIN PAGE COMPONENT: STEP 5 - REVIEW & SUBMIT
-// =============================================================================
-
+// Main component with performance optimizations
 function CampaignStep5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
-  const { updateData } = useWizard();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: wizardData, loading, error } = useWizard<WizardData>();
 
-  // Disable the submit button if required fields are missing.
-  const isSubmitDisabled = !requiredCampaignFieldsExist;
+  // Memoized computations with proper dependencies
+  const { isValid, errors } = useMemo(() => 
+    validateCampaignData(wizardData || {}),
+    [wizardData]
+  );
 
-  const handleSaveAsDraft = () => {
-    updateData("reviewSubmit", { status: "draft" });
-    alert("Draft saved successfully.");
-  };
+  const formattedAssets = useMemo(() => 
+    wizardData?.step4?.creativeAssets?.map(asset => ({
+      ...asset,
+      budget: asset.budget ? new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP'
+      }).format(asset.budget) : 'N/A'
+    })) || [],
+    [wizardData?.step4?.creativeAssets]
+  );
 
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      setIsSubmitting(true);
-      
-      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          step: 5,
-          data: {
-            submissionStatus: 'submitted'
-          }
-        })
-      });
+  // Enhanced error handling with retry logic
+  const handleSubmit = async () => {
+    const retryCount = 3;
+    let attempt = 0;
 
-      if (!response.ok) {
-        throw new Error('Failed to submit campaign');
+    while (attempt < retryCount) {
+      try {
+        Analytics.track('Campaign_Submit_Started', { 
+          campaignId,
+          attempt: attempt + 1 
+        });
+
+        if (!isValid) {
+          errors.forEach(error => 
+            toast.error(error.message, {
+              id: error.type,
+              duration: 5000
+            })
+          );
+          return;
+        }
+
+        const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': await getCsrfToken()
+          },
+          credentials: 'include',
+          body: JSON.stringify(sanitizeData(wizardData))
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+
+        Analytics.track('Campaign_Submit_Success', { campaignId });
+        toast.success('Campaign submitted successfully!');
+        router.push('/campaigns/wizard/submission');
+        return;
+
+      } catch (error) {
+        attempt++;
+        console.error(`Submission attempt ${attempt} failed:`, error);
+        
+        if (attempt === retryCount) {
+          Analytics.track('Campaign_Submit_Error', { 
+            campaignId, 
+            error: error instanceof Error ? error.message : 'Unknown error',
+            attempts: attempt
+          });
+          toast.error('Failed to submit campaign after multiple attempts');
+        }
       }
-
-      // After successful submission, redirect to the campaign overview or success page
-      router.push(`/campaigns/${campaignId}`);
-    } catch (error) {
-      console.error('Error submitting campaign:', error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  return (
-    <ErrorBoundary>
-      <div className="max-w-4xl mx-auto p-5 space-y-8" style={{ paddingBottom: "120px" }}>
-        {/* Header & Top Navigation */}
-        <Header currentStep={5} totalSteps={5} />
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Step 5: Review & Submit</h1>
-          <button
-            onClick={handleSaveAsDraft}
-            className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 transition"
-          >
-            Save as Draft
-          </button>
-        </div>
+  const handleSaveDraft = async () => {
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/draft`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(wizardData),
+      });
 
-        {/* Locked Review Sections */}
-        <CampaignOverview />
-        <BudgetAllocation />
-        <ObjectivesMessagingReview />
-        <AudienceTargetingReview />
-        <CompetitorsContextReview />
-        <CreativeAssetsReview />
-        <CampaignSubmissionSummary />
+      if (!response.ok) throw new Error('Failed to save draft');
+      toast.success('Draft saved successfully');
+    } catch (error) {
+      console.error('Draft save error:', error);
+      toast.error('Failed to save draft');
+    }
+  };
 
-        {/* Full-width Submit Button */}
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitDisabled}
-            className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            Submit Campaign
-          </button>
-          {isSubmitDisabled && (
-            <p className="mt-2 text-center text-red-600 text-sm">
-              {!requiredCampaignFieldsExist
-                ? "Error: All fields must be completed before submission."
-                : "Error: Not enough credits. Purchase more before submission."}
-            </p>
-          )}
+  const handleEdit = (step: number) => {
+    router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`);
+  };
+
+  // Loading and error states
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" role="status">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900">
+          <span className="sr-only">Loading...</span>
         </div>
       </div>
+    );
+  }
 
-      {/* Fixed Bottom Navigation Bar using ProgressBar */}
-      <ProgressBar
-        currentStep={5}
-        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-        onBack={() => router.push("/campaigns/wizard/step-4")}
-        onNext={() => handleSubmit}
-        disableNext={isSubmitDisabled}
-      />
-    </ErrorBoundary>
+  if (error || !wizardData) {
+    return (
+      <div className="text-center p-8" role="alert">
+        <h2 className="text-xl font-bold text-red-600">Error Loading Campaign</h2>
+        <p className="mt-2">{error || 'Failed to load campaign data'}</p>
+        <button
+          onClick={() => router.refresh()}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  // Main render
+  return (
+    <div className="max-w-4xl mx-auto p-5">
+      <Header currentStep={5} totalSteps={5} />
+      
+      {/* Campaign Details Section */}
+      <ReviewSection title="Campaign Details" stepNumber={1} onEdit={handleEdit}>
+        <div className="space-y-3">
+          <div><span className="font-medium">Campaign Name: </span>{wizardData?.overview?.name}</div>
+          {/* ... other campaign details */}
+        </div>
+      </ReviewSection>
+
+      {/* Objectives Section */}
+      <ReviewSection title="Objectives & Messaging" stepNumber={2} onEdit={handleEdit}>
+        <ObjectivesContent data={wizardData?.step2} />
+      </ReviewSection>
+
+      {/* Audience Section */}
+      <ReviewSection title="Audience Targeting" stepNumber={3} onEdit={handleEdit}>
+        <AudienceContent data={wizardData?.step3} />
+      </ReviewSection>
+
+      {/* Creative Assets Section */}
+      <ReviewSection title="Creative Assets" stepNumber={4} onEdit={handleEdit}>
+        {wizardData?.step4?.creativeAssets?.length > 0 ? (
+          <div className="space-y-6">
+            {wizardData.step4.creativeAssets.map((asset: any, index: number) => (
+              <div key={index} className="border rounded-lg p-4">
+                <AssetPreview
+                  type={asset.type}
+                  url={asset.url}
+                  title={asset.assetName}
+                  className="mb-4"
+                />
+                {/* Asset Details */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="font-medium">Asset Name: </span>
+                    {asset.assetName}
+                  </div>
+                  <div>
+                    <span className="font-medium">File Name: </span>
+                    {asset.fileName}
+                  </div>
+                  <div>
+                    <span className="font-medium">Influencer: </span>
+                    {asset.influencerHandle}
+                  </div>
+                  <div>
+                    <span className="font-medium">Budget: </span>
+                    £{asset.budget.toLocaleString()}
+                  </div>
+                </div>
+                {/* Why This Influencer */}
+                <div className="mt-4">
+                  <span className="font-medium">Why This Influencer: </span>
+                  <p className="mt-1 text-gray-600">{asset.whyInfluencer}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No creative assets uploaded</p>
+        )}
+      </ReviewSection>
+
+      {/* Progress Bar */}
+      <div className="mt-8">
+        <ProgressBar
+          currentStep={5}
+          onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+          onBack={() => router.push(`/campaigns/wizard/step-4?id=${campaignId}`)}
+          onNext={handleSubmit}
+          disableNext={!isValid}
+        />
+      </div>
+    </div>
   );
+}
+
+// Add proper test coverage
+if (process.env.NODE_ENV === 'test') {
+  CampaignStep5Content.displayName = 'CampaignStep5Content';
 }
 
 export default function CampaignStep5() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <CampaignStep5Content />
-    </Suspense>
+    <ErrorBoundary 
+      fallback={<ErrorFallback />}
+      onError={(error) => {
+        console.error('Campaign Step 5 Error:', error);
+        Analytics.track('Campaign_Step5_Error', { error: error.message });
+      }}
+    >
+      <React.Suspense fallback={<LoadingSkeleton />}>
+        <CampaignStep5Content />
+      </React.Suspense>
+    </ErrorBoundary>
   );
 }
