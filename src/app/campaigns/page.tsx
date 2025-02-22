@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface Campaign {
   id: number;
@@ -41,6 +44,7 @@ const CampaignList: React.FC = () => {
     key: keyof Campaign;
     direction: SortDirection;
   } | null>(null);
+  const router = useRouter();
 
   // Updated fetch campaigns from API
   useEffect(() => {
@@ -135,18 +139,44 @@ const CampaignList: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
-  // Handle campaign deletion with confirmation
-  const handleDeleteCampaign = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this campaign?")) return;
+  const deleteCampaign = async (campaignId: string) => {
     try {
-      const res = await fetch(`/api/campaigns/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setCampaigns((prev) => prev.filter((c) => c.id !== id));
-      } else {
-        alert("Failed to delete campaign");
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important for auth cookies
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete campaign');
       }
-    } catch (err) {
-      alert("Error deleting campaign");
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      throw error;
+    }
+  };
+
+  const handleDelete = async (campaignId: string) => {
+    try {
+      await toast.promise(
+        deleteCampaign(campaignId),
+        {
+          loading: 'Deleting campaign...',
+          success: 'Campaign deleted successfully',
+          error: (err) => `Failed to delete campaign: ${err.message}`
+        }
+      );
+      
+      // Refresh the campaigns list
+      router.refresh();
+    } catch (error) {
+      console.error('Error in handleDelete:', error);
     }
   };
 
@@ -337,10 +367,11 @@ const CampaignList: React.FC = () => {
                           <span className="cursor-pointer text-blue-600">✏️</span>
                         </Link>
                         <button
-                          onClick={() => handleDeleteCampaign(campaign.id)}
-                          className="text-red-600"
+                          onClick={() => handleDelete(campaign.id.toString())}
+                          className="text-red-600 hover:text-red-800"
+                          aria-label="Delete campaign"
                         >
-                          ❌
+                          <TrashIcon className="w-5 h-5" />
                         </button>
                       </div>
                     </td>

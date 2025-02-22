@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@auth0/nextjs-auth0';
 import { z } from 'zod'; // For input validation
 import { Currency, Platform, SubmissionStatus } from '@prisma/client';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 type RouteParams = { params: { id: string } }
 
@@ -129,14 +131,57 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(request: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    await prisma.campaign.delete({
-      where: { id: Number(id) },
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const campaignId = params.id;
+
+    // First check if the campaign exists and belongs to the user
+    const campaign = await prisma.campaign.findFirst({
+      where: {
+        id: campaignId,
+        userId: session.user.id
+      }
     });
-    return NextResponse.json({ message: "Deleted" });
+
+    if (!campaign) {
+      return NextResponse.json(
+        { error: 'Campaign not found or unauthorized' },
+        { status: 404 }
+      );
+    }
+
+    // Delete related records first (if any)
+    await prisma.$transaction([
+      // Delete any related records here
+      prisma.campaignAsset.deleteMany({
+        where: { campaignId }
+      }),
+      prisma.campaign.delete({
+        where: { id: campaignId }
+      })
+    ]);
+
+    return NextResponse.json(
+      { message: 'Campaign deleted successfully' },
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.error();
+    console.error('Error deleting campaign:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete campaign' },
+      { status: 500 }
+    );
   }
 }
