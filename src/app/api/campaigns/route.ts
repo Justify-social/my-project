@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma'
 import { PrismaClient } from '@prisma/client';
-import { Currency, Platform, KPI, SubmissionStatus } from '@prisma/client';
+import { Currency, Platform, KPI, SubmissionStatus, Position } from '@prisma/client';
 
 const prismaClient = new PrismaClient();
 
@@ -28,33 +28,44 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     
-    // Detailed logging of received data
     console.log('=== DEBUG START ===');
     console.log('Raw form data:', JSON.stringify(data, null, 2));
-    console.log('Database URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
-    
-    // Validate required fields
-    if (!data.name) {
-      return NextResponse.json(
-        { error: 'Campaign name is required' },
-        { status: 400 }
-      );
-    }
 
-    // Create minimal campaign first
+    // First create the contacts
+    const primaryContact = await prisma.primaryContact.create({
+      data: {
+        firstName: 'Default',
+        surname: 'User',
+        email: 'default@example.com',
+        position: 'Manager' as Position
+      }
+    });
+
+    const secondaryContact = await prisma.secondaryContact.create({
+      data: {
+        firstName: 'Default',
+        surname: 'User',
+        email: 'default2@example.com',
+        position: 'Manager' as Position
+      }
+    });
+
     const campaign = await prisma.campaignWizardSubmission.create({
       data: {
-        campaignName: data.name,
+        // Basic campaign details
+        campaignName: data.name || 'Untitled Campaign',
         description: data.businessGoal || '',
         startDate: new Date(data.startDate || new Date()),
         endDate: new Date(data.endDate || new Date()),
         timeZone: data.timeZone || 'UTC',
         contacts: '',
-        currency: 'USD',
+        currency: (data.currency as Currency) || 'USD',
         totalBudget: 0,
         socialMediaBudget: 0,
-        platform: 'Instagram',
+        platform: (data.platform as Platform) || 'Instagram',
         influencerHandle: '',
+
+        // Required message fields
         mainMessage: '',
         hashtags: '',
         memorability: '',
@@ -62,26 +73,18 @@ export async function POST(request: Request) {
         expectedAchievements: '',
         purchaseIntent: '',
         brandPerception: '',
-        primaryKPI: 'adRecall',
-        creativeGuidelines: '',
+        primaryKPI: 'adRecall' as KPI,
         
-        // Create basic contacts
-        primaryContact: {
-          create: {
-            firstName: 'Default',
-            surname: 'User',
-            email: 'default@example.com',
-            position: 'Manager'
-          }
-        },
-        secondaryContact: {
-          create: {
-            firstName: 'Default',
-            surname: 'User',
-            email: 'default2@example.com',
-            position: 'Manager'
-          }
-        }
+        // Optional arrays
+        secondaryKPIs: [],
+        features: [],
+        
+        // Status
+        submissionStatus: 'draft' as SubmissionStatus,
+        
+        // Link the contacts
+        primaryContactId: primaryContact.id,
+        secondaryContactId: secondaryContact.id
       }
     });
 
@@ -91,7 +94,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       campaign,
-      message: 'Campaign created successfully'
+      message: 'Campaign created successfully' 
     });
 
   } catch (error) {
@@ -103,8 +106,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { 
         error: 'Failed to create campaign',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
