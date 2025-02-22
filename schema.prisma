@@ -203,17 +203,12 @@ model AudienceCompetitor {
 // Step 4: Creative Assets
 //////////////////////
 
-model Campaign {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // ... other campaign fields ...
-
-  creativeAssets CreativeAsset[]
-
-  // ... other relations ...
-}
+// model Campaign {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   creativeAssets CreativeAsset[]
+// }
 
 model CreativeAsset {
   id        String   @id @default(cuid())
@@ -233,16 +228,14 @@ model CreativeAsset {
   influencerHandle    String?
   influencerName      String?
   influencerFollowers String?
-  whyInfluencer       String?  // New field for "Why this influencer?"
-  
-  // Budget
-  budget      Float?  // For storing the "Budget for Influencer" value
+  whyInfluencer       String?
+  budget      Float?
 
-  // Campaign relation
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  campaignId String
+  // Update the relation to point to CampaignWizardSubmission instead of Campaign
+  submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id])
+  submissionId Int
 
-  @@index([campaignId])
+  @@index([submissionId])
 }
 
 model CreativeRequirement {
