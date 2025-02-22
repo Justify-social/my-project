@@ -92,6 +92,14 @@ interface DashboardContentProps {
   };
 }
 
+// Update the type to match the API response
+interface CampaignsResponse {
+  success: boolean;
+  campaigns: Campaign[];
+  count: number;
+  message: string;
+}
+
 // -----------------------
 // DashboardContent Component
 // -----------------------
@@ -101,37 +109,10 @@ export default function DashboardContent({ user }: DashboardContentProps) {
   const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string>("");
 
-  // Replace useEffect with useSWR
-  const { data: campaigns = [], error: campaignError } = useSWR('/api/campaigns', fetcher, {
-    fallbackData: [
-      {
-        id: 1,
-        name: "Clicks & Connections",
-        status: "Live",
-        budget: 12314,
-        usersEngaged: { current: 12, total: 100 },
-        startDate: "2024-09-04",
-      },
-      {
-        id: 2,
-        name: "Beyond the Horizon",
-        status: "Live",
-        budget: 10461,
-        usersEngaged: { current: 46, total: 413 },
-        startDate: "2024-09-10",
-      },
-      {
-        id: 3,
-        name: "Engage 360",
-        status: "Paused",
-        budget: 1134,
-        usersEngaged: { current: 31, total: 450 },
-        startDate: "2024-09-15",
-      },
-    ]
-  });
+  // Update the SWR hook to use the correct type
+  const { data, error: campaignError } = useSWR<CampaignsResponse>('/api/campaigns', fetcher);
 
-  const isLoadingCampaigns = !campaigns && !campaignError;
+  const isLoadingCampaigns = !data && !campaignError;
 
   // New Campaign navigation (goes to wizard step-1)
   const handleNewCampaign = () => {
@@ -174,11 +155,26 @@ export default function DashboardContent({ user }: DashboardContentProps) {
     { date: "30 Aug", engagement: 20 },
   ];
 
+  // Then, modify the useMemo hook to use the campaigns array from the response
   const upcomingCampaigns = useMemo(() => {
-    return [...campaigns]
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    // Add debug logging
+    console.log('Data in useMemo:', data);
+
+    // Safely access the campaigns array
+    const campaignsArray = data?.campaigns || [];
+    
+    return campaignsArray
+      .filter(campaign => campaign && campaign.startDate)
+      .sort((a, b) => {
+        const dateA = new Date(a.startDate).getTime();
+        const dateB = new Date(b.startDate).getTime();
+        return dateA - dateB;
+      })
       .slice(0, 3);
-  }, [campaigns]);
+  }, [data]);
+
+  // Add debug logging for the result
+  console.log('Upcoming campaigns:', upcomingCampaigns);
 
   const getRiskColor = (risk: "Low" | "Medium" | "High") => {
     if (risk === "High") return "#DC3545";
@@ -259,16 +255,16 @@ export default function DashboardContent({ user }: DashboardContentProps) {
         {/* Left Column */}
         <div className="space-y-8">
           <Card title="Upcoming Campaigns">
-            <CalendarUpcoming campaigns={campaigns} />
+            <CalendarUpcoming campaigns={data?.campaigns || []} />
           </Card>
           <Card title="Active Campaign Performance">
             {isLoadingCampaigns ? (
               <Spinner />
             ) : campaignError ? (
               <p className="text-red-500">{campaignError}</p>
-            ) : campaigns.filter((c) => c.status !== "Completed").length > 0 ? (
+            ) : data?.campaigns.filter((c) => c.status !== "Completed").length > 0 ? (
               <ul className="space-y-2">
-                {campaigns
+                {data?.campaigns
                   .filter((campaign) => campaign.status !== "Completed")
                   .map((campaign) => (
                     <li
