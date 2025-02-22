@@ -11,23 +11,20 @@ import { auth0 } from '@/lib/auth';
 interface Campaign {
   id: number;
   campaignName: string;
-  primaryKPI: string;
   submissionStatus: "draft" | "submitted";
+  platform: "Instagram" | "YouTube" | "TikTok";
   startDate: string;
   endDate: string;
-  platform: "Instagram" | "YouTube" | "TikTok";
   totalBudget: number;
+  primaryKPI: string;
   primaryContact: {
     firstName: string;
     surname: string;
   };
+  createdAt: string;
   audience?: {
     locations: { location: string }[];
   };
-  creativeAssets: {
-    id: number;
-    type: string;
-  }[];
 }
 
 type SortDirection = "ascending" | "descending";
@@ -57,7 +54,6 @@ const CampaignList: React.FC = () => {
           throw new Error('Not authenticated');
         }
 
-        // Log the request
         console.log('Fetching campaigns...');
 
         const response = await fetch('/api/campaigns', {
@@ -68,7 +64,6 @@ const CampaignList: React.FC = () => {
           },
         });
 
-        // Log the response
         console.log('Response status:', response.status);
 
         if (!response.ok) {
@@ -76,13 +71,13 @@ const CampaignList: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Campaigns data:', data); // Log the data
+        console.log('Campaigns data:', data);
         
-        // The API returns an array directly, not wrapped in an object
-        const campaignsData = Array.isArray(data) ? data : [];
-        console.log('Setting campaigns:', campaignsData);
-        
-        setCampaigns(campaignsData);
+        if (data.success && Array.isArray(data.campaigns)) {
+          setCampaigns(data.campaigns);
+        } else {
+          throw new Error('Invalid data format received from server');
+        }
       } catch (error) {
         console.error('Error fetching campaigns:', error);
         setError(error instanceof Error ? error.message : 'Failed to load campaigns');
@@ -374,11 +369,11 @@ const CampaignList: React.FC = () => {
                     <td className="px-4 py-2">
                       <Link href={`/campaigns/${campaign.id}`}>
                         <span className="text-blue-600 hover:underline cursor-pointer">
-                          {campaign.campaignName}
+                          {campaign.campaignName || 'Untitled Campaign'}
                         </span>
                       </Link>
                     </td>
-                    <td className="px-4 py-2">{campaign.platform}</td>
+                    <td className="px-4 py-2">{campaign.platform || 'N/A'}</td>
                     <td className="px-4 py-2">
                       <span
                         className={`px-2 py-1 rounded-full text-sm ${
@@ -391,17 +386,24 @@ const CampaignList: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-2">
-                      {new Date(campaign.startDate).toLocaleDateString()}
+                      {campaign.startDate ? new Date(campaign.startDate).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-4 py-2">
-                      {new Date(campaign.endDate).toLocaleDateString()}
+                      {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-4 py-2">
-                      ${campaign.totalBudget.toLocaleString()}
+                      {campaign.totalBudget ? `$${campaign.totalBudget.toLocaleString()}` : 'N/A'}
                     </td>
-                    <td className="px-4 py-2">{campaign.primaryKPI}</td>
-                    <td className="px-4 py-2">{campaign.audience?.locations?.map(l => l.location).join(", ") || "N/A"}</td>
-                    <td className="px-4 py-2">{`${campaign.primaryContact.firstName} ${campaign.primaryContact.surname}`}</td>
+                    <td className="px-4 py-2">{campaign.primaryKPI || 'N/A'}</td>
+                    <td className="px-4 py-2">
+                      {campaign.audience?.locations?.map(l => l.location).join(", ") || "N/A"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {campaign.primaryContact ? 
+                        `${campaign.primaryContact.firstName} ${campaign.primaryContact.surname}` : 
+                        'N/A'
+                      }
+                    </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <Link href={`/campaigns/${campaign.id}/edit`}>
@@ -451,3 +453,4 @@ const CampaignList: React.FC = () => {
 };
 
 export default CampaignList;
+

@@ -4,18 +4,68 @@ import { Currency, Platform, KPI, SubmissionStatus, Position } from '@prisma/cli
 
 export async function GET() {
   try {
+    console.log('Starting GET request to /api/campaigns');
+    
+    if (!prisma) {
+      console.error('Prisma client is not initialized');
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Database connection error' 
+        },
+        { status: 500 }
+      );
+    }
+
     const campaigns = await prisma.campaignWizardSubmission.findMany({
-      include: {
-        primaryContact: true,
-        secondaryContact: true,
+      select: {
+        id: true,
+        campaignName: true,
+        createdAt: true,
+        submissionStatus: true,
+        platform: true,
+        startDate: true,
+        endDate: true,
+        totalBudget: true,
+        primaryKPI: true,
+        primaryContact: {
+          select: {
+            firstName: true,
+            surname: true
+          }
+        },
+        audience: {
+          select: {
+            locations: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
-    
-    return NextResponse.json(campaigns);
+
+    console.log('Successfully fetched campaigns:', campaigns.length);
+
+    return NextResponse.json({
+      success: true,
+      campaigns: campaigns,
+      count: campaigns.length,
+      message: 'Campaigns fetched successfully'
+    });
   } catch (error) {
-    console.error('Error fetching campaigns:', error);
+    console.error('Detailed error in GET /api/campaigns:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+
     return NextResponse.json(
-      { error: 'Error fetching campaigns' },
+      { 
+        success: false, 
+        error: 'Failed to fetch campaigns',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
