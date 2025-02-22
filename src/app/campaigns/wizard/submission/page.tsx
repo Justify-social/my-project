@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircleIcon, ArrowLeftIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 
-export default function CampaignSubmissionPage() {
+function SubmissionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -169,5 +169,17 @@ export default function CampaignSubmissionPage() {
         </details>
       </motion.div>
     </div>
+  );
+}
+
+export default function CampaignSubmissionPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      </div>
+    }>
+      <SubmissionContent />
+    </Suspense>
   );
 }
