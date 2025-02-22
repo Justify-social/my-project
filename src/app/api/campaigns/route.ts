@@ -28,67 +28,83 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     
-    // Log the incoming data
-    console.log('Received form data:', data);
+    // Detailed logging of received data
+    console.log('=== DEBUG START ===');
+    console.log('Raw form data:', JSON.stringify(data, null, 2));
+    console.log('Database URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
+    
+    // Validate required fields
+    if (!data.name) {
+      return NextResponse.json(
+        { error: 'Campaign name is required' },
+        { status: 400 }
+      );
+    }
 
-    // Map the form fields to match the schema
-    const campaignData = {
-      campaignName: data.name, // Changed from name to campaignName
-      description: data.businessGoal, // Changed from businessGoal to description
-      startDate: new Date(data.startDate),
-      endDate: new Date(data.endDate),
-      timeZone: data.timeZone,
-      contacts: data.contacts || '', // Provide default if missing
-      currency: data.currency || 'USD', // Default currency
-      totalBudget: parseFloat(data.budget || '0'),
-      socialMediaBudget: parseFloat(data.socialMediaBudget || '0'),
-      platform: data.platform || 'Instagram',
-      influencerHandle: data.influencerHandle || '',
-      
-      // Required fields with defaults
-      mainMessage: data.mainMessage || '',
-      hashtags: data.hashtags || '',
-      memorability: data.memorability || '',
-      keyBenefits: data.keyBenefits || '',
-      expectedAchievements: data.expectedAchievements || '',
-      purchaseIntent: data.purchaseIntent || '',
-      brandPerception: data.brandPerception || '',
-      primaryKPI: data.primaryKPI || 'adRecall',
-
-      // Create contacts if provided
-      primaryContact: {
-        create: {
-          firstName: data.primaryContact?.firstName || '',
-          surname: data.primaryContact?.surname || '',
-          email: data.primaryContact?.email || '',
-          position: data.primaryContact?.position || 'Manager'
-        }
-      },
-      secondaryContact: {
-        create: {
-          firstName: data.secondaryContact?.firstName || '',
-          surname: data.secondaryContact?.surname || '',
-          email: data.secondaryContact?.email || '',
-          position: data.secondaryContact?.position || 'Manager'
+    // Create minimal campaign first
+    const campaign = await prisma.campaignWizardSubmission.create({
+      data: {
+        campaignName: data.name,
+        description: data.businessGoal || '',
+        startDate: new Date(data.startDate || new Date()),
+        endDate: new Date(data.endDate || new Date()),
+        timeZone: data.timeZone || 'UTC',
+        contacts: '',
+        currency: 'USD',
+        totalBudget: 0,
+        socialMediaBudget: 0,
+        platform: 'Instagram',
+        influencerHandle: '',
+        mainMessage: '',
+        hashtags: '',
+        memorability: '',
+        keyBenefits: '',
+        expectedAchievements: '',
+        purchaseIntent: '',
+        brandPerception: '',
+        primaryKPI: 'adRecall',
+        creativeGuidelines: '',
+        
+        // Create basic contacts
+        primaryContact: {
+          create: {
+            firstName: 'Default',
+            surname: 'User',
+            email: 'default@example.com',
+            position: 'Manager'
+          }
+        },
+        secondaryContact: {
+          create: {
+            firstName: 'Default',
+            surname: 'User',
+            email: 'default2@example.com',
+            position: 'Manager'
+          }
         }
       }
-    };
-
-    console.log('Processed campaign data:', campaignData);
-
-    const campaign = await prisma.campaignWizardSubmission.create({
-      data: campaignData
     });
 
-    return NextResponse.json({ success: true, campaign });
+    console.log('Campaign created:', campaign);
+    console.log('=== DEBUG END ===');
+
+    return NextResponse.json({ 
+      success: true, 
+      campaign,
+      message: 'Campaign created successfully'
+    });
+
   } catch (error) {
-    // Log the detailed error
-    console.error('Campaign creation error:', error);
+    console.error('=== ERROR DETAILS ===');
+    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Full error:', error);
     
     return NextResponse.json(
       { 
         error: 'Failed to create campaign',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       },
       { status: 500 }
     );
