@@ -59,28 +59,40 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const id = parseInt(params.id);
+    
     const campaign = await prisma.campaignWizardSubmission.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id },
       include: {
         primaryContact: true,
         secondaryContact: true,
+        audience: true,
+        creativeAssets: true,
+        creativeRequirements: true,
       },
     });
 
     if (!campaign) {
-      return NextResponse.json(
-        { error: 'Campaign not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        success: false,
+        error: 'Campaign not found',
+        message: `No campaign found with ID ${id}`
+      }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, campaign });
+    return NextResponse.json({
+      success: true,
+      exists: true,
+      campaign,
+      message: `Campaign ${id} found`
+    });
   } catch (error) {
     console.error('Error fetching campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch campaign' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch campaign',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
