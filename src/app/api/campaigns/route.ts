@@ -29,60 +29,67 @@ export async function POST(request: Request) {
     const data = await request.json();
     
     // Log the incoming data
-    console.log('Received campaign data:', data);
+    console.log('Received form data:', data);
+
+    // Map the form fields to match the schema
+    const campaignData = {
+      campaignName: data.name, // Changed from name to campaignName
+      description: data.businessGoal, // Changed from businessGoal to description
+      startDate: new Date(data.startDate),
+      endDate: new Date(data.endDate),
+      timeZone: data.timeZone,
+      contacts: data.contacts || '', // Provide default if missing
+      currency: data.currency || 'USD', // Default currency
+      totalBudget: parseFloat(data.budget || '0'),
+      socialMediaBudget: parseFloat(data.socialMediaBudget || '0'),
+      platform: data.platform || 'Instagram',
+      influencerHandle: data.influencerHandle || '',
+      
+      // Required fields with defaults
+      mainMessage: data.mainMessage || '',
+      hashtags: data.hashtags || '',
+      memorability: data.memorability || '',
+      keyBenefits: data.keyBenefits || '',
+      expectedAchievements: data.expectedAchievements || '',
+      purchaseIntent: data.purchaseIntent || '',
+      brandPerception: data.brandPerception || '',
+      primaryKPI: data.primaryKPI || 'adRecall',
+
+      // Create contacts if provided
+      primaryContact: {
+        create: {
+          firstName: data.primaryContact?.firstName || '',
+          surname: data.primaryContact?.surname || '',
+          email: data.primaryContact?.email || '',
+          position: data.primaryContact?.position || 'Manager'
+        }
+      },
+      secondaryContact: {
+        create: {
+          firstName: data.secondaryContact?.firstName || '',
+          surname: data.secondaryContact?.surname || '',
+          email: data.secondaryContact?.email || '',
+          position: data.secondaryContact?.position || 'Manager'
+        }
+      }
+    };
+
+    console.log('Processed campaign data:', campaignData);
 
     const campaign = await prisma.campaignWizardSubmission.create({
-      data: {
-        // Make sure all required fields are present
-        campaignName: data.campaignName,
-        description: data.description,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
-        timeZone: data.timeZone,
-        contacts: data.contacts,
-        currency: data.currency,
-        totalBudget: parseFloat(data.totalBudget),
-        socialMediaBudget: parseFloat(data.socialMediaBudget),
-        platform: data.platform,
-        influencerHandle: data.influencerHandle,
-        
-        // Create primary contact
-        primaryContact: {
-          create: {
-            firstName: data.primaryContact.firstName,
-            surname: data.primaryContact.surname,
-            email: data.primaryContact.email,
-            position: data.primaryContact.position,
-          }
-        },
-        
-        // Create secondary contact
-        secondaryContact: {
-          create: {
-            firstName: data.secondaryContact.firstName,
-            surname: data.secondaryContact.surname,
-            email: data.secondaryContact.email,
-            position: data.secondaryContact.position,
-          }
-        },
-
-        // Required fields from schema
-        mainMessage: '',
-        hashtags: '',
-        memorability: '',
-        keyBenefits: '',
-        expectedAchievements: '',
-        purchaseIntent: '',
-        brandPerception: '',
-        primaryKPI: 'adRecall', // Default value
-      }
+      data: campaignData
     });
 
     return NextResponse.json({ success: true, campaign });
   } catch (error) {
+    // Log the detailed error
     console.error('Campaign creation error:', error);
+    
     return NextResponse.json(
-      { error: 'Failed to create campaign' },
+      { 
+        error: 'Failed to create campaign',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
