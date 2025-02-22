@@ -12,6 +12,13 @@ import ProgressBar from "../../../../components/Wizard/ProgressBar";
 import { Section } from '@/components/ui/section';
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
+import LocationSelector from "@/components/AudienceTargeting/LocationSelector";
+import AgeDistributionSlider from "@/components/AudienceTargeting/AgeDistributionSlider";
+import GenderSelection from "@/components/AudienceTargeting/GenderSelection";
+import ScreeningQuestions from "@/components/AudienceTargeting/ScreeningQuestions";
+import LanguagesSelector from "@/components/AudienceTargeting/LanguagesSelector";
+import AdvancedTargeting from "@/components/AudienceTargeting/AdvancedTargeting";
+import CompetitorTracking from "@/components/AudienceTargeting/CompetitorTracking";
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -561,7 +568,6 @@ function AudienceTargetingContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update the useEffect for loading campaign data
   useEffect(() => {
     const loadCampaignData = async () => {
       if (campaignId) {
@@ -594,7 +600,6 @@ function AudienceTargetingContent() {
     loadCampaignData();
   }, [campaignId]);
 
-  // Update initialValues to remove default values
   const initialValues: AudienceValues = {
     location: data.audience?.location || [],
     ageDistribution: {
@@ -615,7 +620,6 @@ function AudienceTargetingContent() {
     competitors: data.audience?.competitors || [],
   };
 
-  // Update handleSubmit with better error handling
   const handleSubmit = async (values: AudienceValues) => {
     try {
       setIsSaving(true);
@@ -652,7 +656,6 @@ function AudienceTargetingContent() {
     }
   };
 
-  // Update handleSaveDraft
   const handleSaveDraft = async (values: AudienceValues) => {
     try {
       setIsSaving(true);
@@ -689,7 +692,6 @@ function AudienceTargetingContent() {
     }
   };
 
-  // Add loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -699,7 +701,6 @@ function AudienceTargetingContent() {
     );
   }
 
-  // Add error state
   if (error) {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded-md">
@@ -718,7 +719,6 @@ function AudienceTargetingContent() {
   return (
     <div className="max-w-4xl mx-auto p-4 pb-32">
       <Header currentStep={3} totalSteps={5} />
-      
       <Formik
         initialValues={initialValues}
         validationSchema={AudienceSchema}
@@ -746,7 +746,6 @@ function AudienceTargetingContent() {
             </div>
 
             <Form className="space-y-8">
-              {/* DEMOGRAPHICS SECTION */}
               <div>
                 <h2 className="text-xl font-bold mb-2">Demographics</h2>
                 <LocationSelector
@@ -792,7 +791,6 @@ function AudienceTargetingContent() {
                 />
               </div>
 
-              {/* SCREENING QUESTIONS SECTION */}
               <div>
                 <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
                 <ScreeningQuestions
@@ -803,7 +801,6 @@ function AudienceTargetingContent() {
                 />
               </div>
 
-              {/* LANGUAGES SECTION */}
               <div>
                 <h2 className="text-xl font-bold mb-2">Languages</h2>
                 <LanguagesSelector
@@ -814,7 +811,6 @@ function AudienceTargetingContent() {
                 />
               </div>
 
-              {/* ADVANCED TARGETING (Collapsible) */}
               <div>
                 <button
                   type="button"
@@ -826,7 +822,6 @@ function AudienceTargetingContent() {
                 {showAdvanced && <AdvancedTargeting />}
               </div>
 
-              {/* COMPETITOR TRACKING SECTION */}
               <div>
                 <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
                 <CompetitorTracking
@@ -852,14 +847,16 @@ function AudienceTargetingContent() {
   );
 }
 
-export default function AudienceTargetingStep() {
+export default function AudienceTargeting() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-        <p className="ml-2">Loading...</p>
-      </div>
-    }>
+    <Suspense 
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner />
+          <p className="ml-2">Loading...</p>
+        </div>
+      }
+    >
       <AudienceTargetingContent />
     </Suspense>
   );

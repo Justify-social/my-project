@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -85,7 +85,7 @@ const ObjectivesSchema = Yup.object().shape({
     .of(Yup.string().oneOf(Object.values(Feature)))
 });
 
-export default function CampaignStep2() {
+function CampaignStep2Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -94,13 +94,6 @@ export default function CampaignStep2() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Add debug logging
-  useEffect(() => {
-    console.log('Campaign ID from URL:', campaignId);
-    console.log('Current data:', data);
-  }, [campaignId, data]);
-
-  // Load campaign data
   useEffect(() => {
     const loadCampaignData = async () => {
       if (campaignId) {
@@ -502,5 +495,20 @@ export default function CampaignStep2() {
         }}
       </Formik>
     </div>
+  );
+}
+
+export default function CampaignStep2() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner />
+          <p className="ml-2">Loading...</p>
+        </div>
+      }
+    >
+      <CampaignStep2Content />
+    </Suspense>
   );
 }

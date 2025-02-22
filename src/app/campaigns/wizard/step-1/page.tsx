@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -73,7 +73,7 @@ const debugFormData = (values: any, isDraft: boolean) => {
   });
 };
 
-export default function Overview() {
+function OverviewContent() {
   const router = useRouter();
   const { data, updateData } = useWizard();
   const searchParams = useSearchParams();
@@ -643,5 +643,20 @@ export default function Overview() {
         }}
       </Formik>
     </div>
+  );
+}
+
+export default function Overview() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner />
+          <p className="ml-2">Loading...</p>
+        </div>
+      }
+    >
+      <OverviewContent />
+    </Suspense>
   );
 }

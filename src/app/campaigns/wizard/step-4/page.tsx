@@ -821,12 +821,17 @@ function CampaignStep4Content() {
 
 export default function CampaignStep4() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-      </div>
-    }>
-      <CampaignStep4Content />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense 
+        fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            <LoadingSpinner />
+            <p className="ml-2">Loading...</p>
+          </div>
+        }
+      >
+        <CampaignStep4Content />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
