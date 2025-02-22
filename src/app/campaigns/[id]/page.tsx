@@ -160,6 +160,55 @@ interface CampaignDetail {
   updatedAt: string;
 }
 
+// Update the interface to match the exact API response structure
+interface APICampaignResponse {
+  id: number;
+  campaignName: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  timeZone: string;
+  contacts: string;
+  currency: string;
+  totalBudget: number;
+  socialMediaBudget: number;
+  platform: string;
+  influencerHandle: string;
+  primaryContactId: number;
+  secondaryContactId: number;
+  mainMessage: string;
+  hashtags: string;
+  memorability: string;
+  keyBenefits: string;
+  expectedAchievements: string;
+  purchaseIntent: string;
+  brandPerception: string;
+  primaryKPI: string;
+  secondaryKPIs: string[];
+  features: string[];
+  submissionStatus: string;
+  createdAt: string;
+  primaryContact: {
+    id: number;
+    firstName: string;
+    surname: string;
+    email: string;
+    position: string;
+  };
+  secondaryContact: {
+    id: number;
+    firstName: string;
+    surname: string;
+    email: string;
+    position: string;
+  };
+  audience: null | {
+    // ... audience fields if needed ...
+  };
+  creativeAssets: any[];
+  creativeRequirements: any[];
+}
+
 // Animation variants
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -595,304 +644,392 @@ if (typeof window !== 'undefined') {
   };
 }
 
-export default function CampaignDetail() {
-  console.log('Component rendering');
-  const params = useParams()
-  const router = useRouter()
-  const [data, setData] = useState<CampaignDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
+// Add validation interface
+interface CampaignValidation {
+  isValid: boolean;
+  errors: string[];
+}
 
-  // 4. Implement memoized string transformations
-  const transformStrings = useCallback((obj: any) => {
-    if (!obj) return null;
+// Add validation function
+function validateCampaignData(data: any): CampaignValidation {
+  const errors: string[] = [];
 
-    try {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        // Only transform string values
-        if (typeof value === 'string') {
-          acc[key] = SafeString.transform(value, 'toUpperCase', `field:${key}`);
-        } else {
-          acc[key] = value;
-        }
-        return acc;
-      }, {} as Record<string, any>);
-    } catch (err) {
-      console.error('String transformation error:', err);
-      return obj;
+  if (!data) {
+    errors.push('No campaign data received');
+    return { isValid: false, errors };
+  }
+
+  // Required fields
+  const requiredFields = [
+    'id',
+    'campaignName',
+    'startDate',
+    'endDate',
+    'currency',
+    'totalBudget',
+    'platform',
+    'submissionStatus'
+  ];
+
+  requiredFields.forEach(field => {
+    if (!data[field]) {
+      errors.push(`Missing required field: ${field}`);
     }
-  }, []);
+  });
 
-  // 5. Implement instrumented data fetching
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+// Add StatusBadge component
+interface StatusBadgeProps {
+  status: string;
+}
+
+const StatusBadge = ({ status }: StatusBadgeProps) => {
+  const statusConfig = {
+    draft: { 
+      color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+      icon: ClockIcon,
+      label: 'Draft'
+    },
+    submitted: { 
+      color: 'bg-green-100 text-green-800 border-green-200', 
+      icon: CheckCircleIcon,
+      label: 'Submitted'
+    },
+    rejected: { 
+      color: 'bg-red-100 text-red-800 border-red-200', 
+      icon: XCircleIcon,
+      label: 'Rejected'
+    }
+  }[status.toLowerCase()] || { 
+    color: 'bg-gray-100 text-gray-800 border-gray-200', 
+    icon: ClockIcon,
+    label: status
+  };
+
+  const Icon = statusConfig.icon;
+
+  return (
+    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium 
+      ${statusConfig.color} border shadow-sm`}>
+      <Icon className="w-4 h-4 mr-2" />
+      {statusConfig.label}
+    </span>
+  );
+};
+
+// Add DetailSection component
+interface DetailSectionProps {
+  icon: any;
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const DetailSection = ({ icon: Icon, title, children, className = '' }: DetailSectionProps) => (
+  <motion.section
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden ${className}`}
+  >
+    <div className="p-6">
+      <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-800">
+        <Icon className="w-6 h-6 mr-2 text-gray-600" />
+        {title}
+      </h3>
+      <div className="space-y-4">{children}</div>
+    </div>
+  </motion.section>
+);
+
+export default function CampaignDetail() {
+  const params = useParams();
+  const router = useRouter();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
-      const startTime = performance.now();
-      
       try {
-        debugLog({
-          type: 'NETWORK',
-          message: 'Fetching campaign data',
-          data: { params }
-        });
+        setLoading(true);
+        setError(null);
 
         const response = await fetch(`/api/campaigns/${params.id}`);
-        const rawData = await response.json();
-
-        debugLog({
-          type: 'DATA',
-          message: 'Raw API response',
-          data: rawData
-        });
-
-        if (!isCampaignData(rawData)) {
-          throw new Error('Invalid campaign data structure');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Validate iterables before processing
-        Object.entries(rawData).forEach(([key, value]) => {
-          if (Array.isArray(value) && !isIterable(value)) {
-            debugLog({
-              type: 'ITERATION',
-              message: `Non-iterable array found`,
-              data: { key, value }
-            });
-          }
-        });
-
-        // Transform data with instrumentation
-        const processedData = transformStrings(rawData);
-        setData(processedData);
+        const rawData = await response.json();
         
+        // Extract campaign data from response
+        const campaignData = rawData.data || rawData.campaign || rawData;
+
+        // Validate the campaign data
+        const validation = validateCampaignData(campaignData);
+
+        if (!validation.isValid) {
+          console.error('Campaign data validation failed:', validation.errors);
+          throw new Error(`Invalid campaign data: ${validation.errors.join(', ')}`);
+        }
+
+        setData(campaignData);
+        setError(null);
+
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        debugLog({
-          type: 'ERROR',
-          message: 'Error in data fetching',
-          error,
-          stack: error.stack,
-          data: { params, timeElapsed: performance.now() - startTime }
-        });
-        setError(error);
+        console.error('Error fetching campaign:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load campaign');
+        setData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (params?.id) fetchData();
-  }, [params?.id, transformStrings]);
+    if (params?.id) {
+      fetchData();
+    }
+  }, [params?.id]);
 
-  // Development helper for debugging
-  if (DEBUG) {
-    console.log('Debug History:', debugHistory);
-  }
-
-  // Add this at the top of your component
+  // Add this temporary debug output
   useEffect(() => {
-    const debugAPI = async () => {
-      const response = await fetch(`/api/campaigns/${params.id}`);
-      const data = await response.json();
-      console.log('API Response:', {
-        rawData: data,
-        stringFields: Object.entries(data)
-          .filter(([_, v]) => typeof v === 'string')
-          .map(([k, v]) => ({ key: k, value: v, type: typeof v }))
+    if (data) {
+      console.log('Campaign data set:', {
+        id: data.id,
+        name: data.campaignName,
+        dataKeys: Object.keys(data)
       });
-    };
-    debugAPI();
-  }, [params.id]);
+    }
+  }, [data]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4" />
+          <p className="text-gray-600">Loading campaign details...</p>
+        </div>
       </div>
-    )
+    );
   }
 
   if (error || !data) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Campaign</h2>
-          <p className="text-gray-600">{error?.message || 'Campaign not found'}</p>
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Return to Campaigns
-          </button>
+      <motion.div 
+        {...fadeIn}
+        className="min-h-screen flex items-center justify-center bg-gray-50 p-6"
+      >
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full">
+          <div className="flex items-center justify-center mb-6">
+            <XCircleIcon className="w-12 h-12 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
+            Error Loading Campaign
+          </h2>
+          <p className="text-gray-600 text-center mb-8">{error}</p>
+          <div className="space-y-4">
+            <button
+              onClick={() => router.push('/campaigns')}
+              className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Return to Campaigns
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
-      </div>
-    )
+      </motion.div>
+    );
   }
 
-  // Wrap the render in a try/catch to catch any string processing errors
-  try {
-    return (
-      <ErrorBoundary
-        FallbackComponent={({ error }) => {
-          console.error('Render error:', error);
-          return <div>Something went wrong: {error.message}</div>;
-        }}
-      >
-        <div className="min-h-screen bg-white py-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-          >
-            {/* Header Section */}
-            <div className="border-b border-gray-100 pb-6 mb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{SafeString.transform(data.campaignName, 'toUpperCase', 'render:campaignName')}</h1>
-                  <p className="mt-2 text-gray-600">{SafeString.transform(data.description, 'toUpperCase', 'render:description')}</p>
-                  <div className="mt-4 flex items-center gap-4">
-                    <span className="text-sm text-gray-500">
-                      Created: {data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'N/A'}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      Last updated: {data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'N/A'}
-                    </span>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Campaign Header */}
+        <motion.div 
+          className="bg-white rounded-lg shadow-sm p-6 mb-8"
+          {...fadeIn}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                {data?.campaignName}
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Created on {data?.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'N/A'}
+              </p>
+            </div>
+            <StatusBadge status={data?.submissionStatus || 'draft'} />
+          </div>
+        </motion.div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <MetricCard
+            icon={CurrencyDollarIcon}
+            title="Total Budget"
+            value={`${data?.currency || 'USD'} ${(data?.totalBudget || 0).toLocaleString()}`}
+            color="blue"
+          />
+          <MetricCard
+            icon={CalendarIcon}
+            title="Campaign Duration"
+            value={data?.startDate && data?.endDate ? 
+              `${Math.ceil((new Date(data.endDate).getTime() - new Date(data.startDate).getTime()) / (1000 * 60 * 60 * 24))} Days` 
+              : 'N/A'}
+            color="purple"
+          />
+          <MetricCard
+            icon={GlobeAltIcon}
+            title="Platform"
+            value={data?.platform || 'N/A'}
+            color="green"
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <DetailSection icon={DocumentTextIcon} title="Campaign Details">
+              <div className="space-y-3">
+                <DataRow label="Platform" value={data.platform} />
+                <DataRow 
+                  label="Start Date" 
+                  value={new Date(data.startDate).toLocaleDateString()} 
+                />
+                <DataRow 
+                  label="End Date" 
+                  value={new Date(data.endDate).toLocaleDateString()} 
+                />
+                <DataRow label="Time Zone" value={data.timeZone} />
+                <DataRow label="Influencer Handle" value={data.influencerHandle} />
+              </div>
+            </DetailSection>
+
+            <DetailSection icon={UserCircleIcon} title="Contact Information">
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Primary Contact</h4>
+                  <p className="text-gray-800">
+                    {data.primaryContact.firstName} {data.primaryContact.surname}
+                  </p>
+                  <p className="text-blue-600">{data.primaryContact.email}</p>
+                  <p className="text-gray-600">{data.primaryContact.position}</p>
+                </div>
+                {data.secondaryContact?.email && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">Secondary Contact</h4>
+                    <p className="text-gray-800">
+                      {data.secondaryContact.firstName} {data.secondaryContact.surname}
+                    </p>
+                    <p className="text-blue-600">{data.secondaryContact.email}</p>
+                    <p className="text-gray-600">{data.secondaryContact.position}</p>
                   </div>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className={`
-                    px-4 py-2 rounded-full text-sm font-medium
-                    ${SafeString.transform(data.submissionStatus, 'toUpperCase', 'render:submissionStatus').toLowerCase() === 'submitted' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'}
-                  `}>
-                    {SafeString.transform(data.submissionStatus, 'toUpperCase', 'render:submissionStatus').toLowerCase() === 'submitted' ? 'Live' : 'Draft'}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    Platform: {SafeString.transform(data.platform, 'toUpperCase', 'render:platform')}
-                  </span>
-                </div>
+                )}
+              </div>
+            </DetailSection>
+          </div>
+
+          <DetailSection icon={SparklesIcon} title="Campaign Objectives">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <DataRow label="Primary KPI" value={data.primaryKPI} />
+                <DataRow 
+                  label="Secondary KPIs" 
+                  value={data.secondaryKPIs.join(', ') || 'None'} 
+                />
+                <DataRow label="Main Message" value={data.mainMessage} />
+                <DataRow label="Hashtags" value={data.hashtags || 'None'} />
+              </div>
+              <div className="space-y-3">
+                <DataRow label="Brand Perception" value={data.brandPerception} />
+                <DataRow label="Key Benefits" value={data.keyBenefits} />
+                <DataRow 
+                  label="Expected Achievements" 
+                  value={data.expectedAchievements} 
+                />
               </div>
             </div>
+          </DetailSection>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <MetricCard
-                icon={CurrencyDollarIcon}
-                title="Total Budget"
-                value={`${data.currency} ${data.totalBudget.toLocaleString()}`}
-                subtext={`${data.socialMediaBudget.toLocaleString()} for social`}
-                color="blue"
-              />
-              <MetricCard
-                icon={CalendarIcon}
-                title="Duration"
-                value={`${Math.ceil((new Date(data.endDate).getTime() - 
-                  new Date(data.startDate).getTime()) / (1000 * 60 * 60 * 24))} Days`}
-                subtext={data.timeZone}
-                color="purple"
-              />
-              <MetricCard
-                icon={ChartBarIcon}
-                title="Primary KPI"
-                value={data.primaryKPI}
-                subtext={data.secondaryKPIs.join(', ')}
-                color="green"
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <DetailSection icon={CheckCircleIcon} title="Selected Features">
+              <div className="flex flex-wrap gap-2">
+                {data.features.length > 0 ? (
+                  data.features.map((feature, index) => (
+                    <motion.span
+                      key={index}
+                      whileHover={{ scale: 1.05 }}
+                      className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                    >
+                      {feature}
+                    </motion.span>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">No features selected</p>
+                )}
+              </div>
+            </DetailSection>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Campaign Details */}
-              <DataCard title="Campaign Details" icon={DocumentTextIcon} className="col-span-2">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <DataRow label="Start Date" value={new Date(data.startDate).toLocaleDateString()} />
-                    <DataRow label="End Date" value={new Date(data.endDate).toLocaleDateString()} />
-                    <DataRow label="Time Zone" value={data.timeZone} />
-                    <DataRow label="Platform" value={SafeString.transform(data.platform, 'toUpperCase', 'render:platform')} />
-                  </div>
-                  <div className="space-y-4">
-                    <DataRow label="Currency" value={data.currency} />
-                    <DataRow label="Total Budget" value={`${data.currency} ${data.totalBudget.toLocaleString()}`} />
-                    <DataRow label="Social Budget" value={`${data.currency} ${data.socialMediaBudget.toLocaleString()}`} />
-                    <DataRow label="Influencer" value={data.influencerHandle} />
-                  </div>
-                </div>
-              </DataCard>
-              
-              {/* Contact Information */}
-              <DataCard title="Contact Information" icon={UserCircleIcon}>
-                <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-medium text-gray-900 mb-2">Primary Contact</h3>
-                    <p>{data.primaryContact.firstName} {data.primaryContact.surname}</p>
-                    <p className="text-blue-600">{data.primaryContact.email}</p>
-                    <p className="text-gray-500">{data.primaryContact.position}</p>
-                  </div>
-                  {data.secondaryContact && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="font-medium text-gray-900 mb-2">Secondary Contact</h3>
-                      <p>{data.secondaryContact.firstName} {data.secondaryContact.surname}</p>
-                      <p className="text-blue-600">{data.secondaryContact.email}</p>
-                      <p className="text-gray-500">{data.secondaryContact.position}</p>
-                    </div>
-                  )}
-                </div>
-              </DataCard>
-              
-              {/* Objectives & Messaging */}
-              <ObjectivesSection campaign={data} />
-              
-              {/* Audience Demographics */}
-              {data.audience && <AudienceSection audience={data.audience} />}
-              
-              {/* Audience Insights */}
-              {data.audience && <AudienceInsightsSection audience={data.audience} />}
-              
-              {/* Add Creative Requirements before Creative Assets */}
-              <CreativeRequirementsSection requirements={data.creativeRequirements} />
-              
-              {/* Creative Assets */}
-              <CreativeAssetsGallery assets={data.creativeAssets} />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-8 flex justify-end space-x-4 border-t pt-8">
-              <button
-                onClick={() => router.push('/campaigns')}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Back to Campaigns
-              </button>
-              <button
-                onClick={() => router.push(`/campaigns/${data.id}/edit`)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Edit Campaign
-              </button>
-              {/* Add Share button */}
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success('Campaign URL copied to clipboard');
-                }}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
-              >
-                <ShareIcon className="w-4 h-4" />
-                Share
-              </button>
-            </div>
-          </motion.div>
+            <DetailSection icon={PhotoIcon} title="Creative Requirements">
+              <div className="space-y-2">
+                {data.creativeRequirements.length > 0 ? (
+                  data.creativeRequirements.map((req, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ x: 5 }}
+                      className="flex items-center p-3 bg-gray-50 rounded-lg"
+                    >
+                      <DocumentTextIcon className="w-5 h-5 text-gray-400 mr-3" />
+                      <span className="text-gray-700">{req.requirement}</span>
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">
+                    No creative requirements specified
+                  </p>
+                )}
+              </div>
+            </DetailSection>
+          </div>
         </div>
 
-        {/* Debug panel in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <pre className="mt-8 p-4 bg-gray-100 rounded">
-            {JSON.stringify(StringOperationTracker.getOperations(), null, 2)}
-          </pre>
-        )}
-      </ErrorBoundary>
-    );
-  } catch (renderError) {
-    console.error('Render error:', renderError);
-    return <div>Error rendering page: {String(renderError)}</div>;
-  }
+        {/* Action Buttons */}
+        <motion.div 
+          className="mt-8 flex justify-end space-x-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => router.push('/campaigns')}
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 
+              hover:bg-gray-50 transition-all duration-300"
+          >
+            Back to Campaigns
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => router.push(`/campaigns/${data.id}/edit`)}
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 
+              text-white rounded-lg hover:from-blue-700 hover:to-blue-800 
+              transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            Edit Campaign
+          </motion.button>
+        </motion.div>
+      </div>
+    </div>
+  );
 } 
