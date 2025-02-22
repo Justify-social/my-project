@@ -27,30 +27,46 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log('[API] Received data:', data);
-
-    // Validate the incoming data
-    if (!data.name) {
-      console.log('[API] Missing name field');
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-    }
-
-    // Log the attempt to create
-    console.log('[API] Attempting to create campaign...');
+    
+    // Log the incoming data
+    console.log('Received campaign data:', data);
 
     const campaign = await prisma.campaignWizardSubmission.create({
       data: {
-        campaignName: data.name,
-        description: data.businessGoal || '',
+        // Make sure all required fields are present
+        campaignName: data.campaignName,
+        description: data.description,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
-        timeZone: data.timeZone || 'UTC',
-        contacts: '',
-        currency: 'USD' as Currency,
-        totalBudget: 0,
-        socialMediaBudget: 0,
-        platform: 'Instagram' as Platform,
-        influencerHandle: '',
+        timeZone: data.timeZone,
+        contacts: data.contacts,
+        currency: data.currency,
+        totalBudget: parseFloat(data.totalBudget),
+        socialMediaBudget: parseFloat(data.socialMediaBudget),
+        platform: data.platform,
+        influencerHandle: data.influencerHandle,
+        
+        // Create primary contact
+        primaryContact: {
+          create: {
+            firstName: data.primaryContact.firstName,
+            surname: data.primaryContact.surname,
+            email: data.primaryContact.email,
+            position: data.primaryContact.position,
+          }
+        },
+        
+        // Create secondary contact
+        secondaryContact: {
+          create: {
+            firstName: data.secondaryContact.firstName,
+            surname: data.secondaryContact.surname,
+            email: data.secondaryContact.email,
+            position: data.secondaryContact.position,
+          }
+        },
+
+        // Required fields from schema
         mainMessage: '',
         hashtags: '',
         memorability: '',
@@ -58,45 +74,16 @@ export async function POST(request: Request) {
         expectedAchievements: '',
         purchaseIntent: '',
         brandPerception: '',
-        primaryKPI: 'adRecall' as KPI,
-        creativeGuidelines: '',
-        creativeNotes: '',
-        submissionStatus: 'draft' as SubmissionStatus,
-        // Create contacts inline
-        primaryContact: {
-          create: {
-            firstName: 'Default',
-            surname: 'User',
-            email: 'default@example.com',
-            position: 'Manager'
-          }
-        },
-        secondaryContact: {
-          create: {
-            firstName: 'Default',
-            surname: 'User',
-            email: 'default2@example.com',
-            position: 'Manager'
-          }
-        }
-      },
+        primaryKPI: 'adRecall', // Default value
+      }
     });
 
-    console.log('[API] Campaign created successfully:', campaign);
-    return NextResponse.json(campaign, { status: 201 });
-
-  } catch (error: any) {
-    console.error('[API] Error details:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-      stack: error.stack
-    });
-
-    return NextResponse.json({
-      error: 'Failed to create campaign',
-      details: error.message,
-      code: error.code
-    }, { status: 500 });
+    return NextResponse.json({ success: true, campaign });
+  } catch (error) {
+    console.error('Campaign creation error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create campaign' },
+      { status: 500 }
+    );
   }
 }
