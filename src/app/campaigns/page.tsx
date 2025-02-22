@@ -5,6 +5,8 @@ import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { auth0 } from '@/lib/auth';
 
 interface Campaign {
   id: number;
@@ -31,7 +33,7 @@ interface Campaign {
 type SortDirection = "ascending" | "descending";
 
 const CampaignList: React.FC = () => {
-  // State for campaigns, search/filters, sorting, pagination, and error/loading messages
+  const { user, isLoading: userLoading, error: userError } = useUser();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -48,79 +50,106 @@ const CampaignList: React.FC = () => {
 
   // Updated fetch campaigns from API
   useEffect(() => {
-    async function fetchCampaigns() {
+    const fetchCampaigns = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("/api/campaigns");
-        if (!res.ok) {
-          throw new Error("Failed to fetch campaigns");
+        if (!user) {
+          throw new Error('Not authenticated');
         }
-        const data = await res.json();
-        // Transform the data to match the table display
-        const transformedData = data.map((campaign: Campaign) => ({
-          id: campaign.id,
-          name: campaign.campaignName,
-          objective: campaign.primaryKPI,
-          status: campaign.submissionStatus === "submitted" ? "Live" : "Draft",
-          startDate: campaign.startDate,
-          endDate: campaign.endDate,
-          surveysComplete: "0%", // You might want to calculate this based on your needs
-          tools: campaign.creativeAssets?.length || 0,
-          kpi: `${campaign.primaryKPI}`,
-          platform: campaign.platform,
-          budget: campaign.totalBudget,
-          location: campaign.audience?.locations?.map(l => l.location).join(", ") || "N/A",
-          contactName: `${campaign.primaryContact.firstName} ${campaign.primaryContact.surname}`
-        }));
-        setCampaigns(transformedData);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
+
+        // Log the request
+        console.log('Fetching campaigns...');
+
+        const response = await fetch('/api/campaigns', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // Log the response
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`Failed to load campaigns: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Campaigns data:', data); // Log the data
+        
+        // The API returns an array directly, not wrapped in an object
+        const campaignsData = Array.isArray(data) ? data : [];
+        console.log('Setting campaigns:', campaignsData);
+        
+        setCampaigns(campaignsData);
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load campaigns');
       } finally {
         setLoading(false);
       }
+    };
+
+    if (!userLoading && user) {
+      fetchCampaigns();
     }
-    fetchCampaigns();
-  }, []);
+  }, [user, userLoading]);
 
   // Filter campaigns based on search text and dropdown filters
   const filteredCampaigns = useMemo(() => {
+    if (!campaigns) return [];
+    
     return campaigns.filter((campaign) => {
-      const matchesSearch = campaign.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const matchesStatus = statusFilter ? campaign.status === statusFilter : true;
-      const matchesObjective = objectiveFilter
-        ? campaign.objective === objectiveFilter
-        : true;
+      if (!campaign) return false;
+      
+      const matchesSearch = campaign.campaignName
+        ?.toLowerCase()
+        ?.includes(search.toLowerCase()) ?? false;
+        
+      const matchesStatus = !statusFilter || campaign.submissionStatus === statusFilter;
+      const matchesObjective = !objectiveFilter || campaign.primaryKPI === objectiveFilter;
+      
       return matchesSearch && matchesStatus && matchesObjective;
     });
   }, [campaigns, search, statusFilter, objectiveFilter]);
 
   // Sort campaigns based on the active sort configuration
   const sortedCampaigns = useMemo(() => {
-    if (sortConfig !== null) {
-      return [...filteredCampaigns].sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
-        // Sort dates by converting to timestamps
-        if (sortConfig.key === "startDate" || sortConfig.key === "endDate") {
-          const aDate = aVal ? new Date(aVal as string).getTime() : 0;
-          const bDate = bVal ? new Date(bVal as string).getTime() : 0;
-          return sortConfig.direction === "ascending" ? aDate - bDate : bDate - aDate;
-        }
-        // Compare strings
-        if (typeof aVal === "string" && typeof bVal === "string") {
-          return sortConfig.direction === "ascending"
-            ? aVal.localeCompare(bVal)
-            : bVal.localeCompare(aVal);
-        }
-        // Compare numbers
-        if (typeof aVal === "number" && typeof bVal === "number") {
-          return sortConfig.direction === "ascending" ? aVal - bVal : bVal - aVal;
-        }
-        return 0;
-      });
-    }
-    return filteredCampaigns;
+    if (!filteredCampaigns || filteredCampaigns.length === 0) return [];
+    if (!sortConfig) return filteredCampaigns;
+
+    return [...filteredCampaigns].sort((a, b) => {
+      if (!a || !b) return 0;
+      
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+      
+      // Add null checks
+      if (aVal === null || aVal === undefined) return 1;
+      if (bVal === null || bVal === undefined) return -1;
+
+      // Sort dates by converting to timestamps
+      if (sortConfig.key === "startDate" || sortConfig.key === "endDate") {
+        const aDate = new Date(aVal as string).getTime();
+        const bDate = new Date(bVal as string).getTime();
+        return sortConfig.direction === "ascending" ? aDate - bDate : bDate - aDate;
+      }
+
+      // Compare strings
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortConfig.direction === "ascending"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      // Compare numbers
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortConfig.direction === "ascending" ? aVal - bVal : bVal - aVal;
+      }
+
+      return 0;
+    });
   }, [filteredCampaigns, sortConfig]);
 
   // Pagination calculations
@@ -141,20 +170,32 @@ const CampaignList: React.FC = () => {
 
   const deleteCampaign = async (campaignId: string) => {
     try {
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
+
+      console.log('Deleting campaign:', campaignId); // Debug
+
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Important for auth cookies
+        credentials: 'include',
       });
 
+      const data = await response.json();
+      console.log('Delete response:', data); // Debug
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete campaign');
+        throw new Error(data.message || `Failed to delete campaign: ${response.status}`);
       }
 
-      const data = await response.json();
+      // Update local state
+      setCampaigns(prevCampaigns => 
+        prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
+      );
+
       return data;
     } catch (error) {
       console.error('Error deleting campaign:', error);
@@ -169,14 +210,12 @@ const CampaignList: React.FC = () => {
         {
           loading: 'Deleting campaign...',
           success: 'Campaign deleted successfully',
-          error: (err) => `Failed to delete campaign: ${err.message}`
+          error: (err) => `Error: ${err.message}`
         }
       );
-      
-      // Refresh the campaigns list
-      router.refresh();
     } catch (error) {
       console.error('Error in handleDelete:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
     }
   };
 
@@ -220,8 +259,8 @@ const CampaignList: React.FC = () => {
           className="border p-2 rounded"
         >
           <option value="">All Status</option>
-          <option value="Live">Live</option>
-          <option value="Draft">Draft</option>
+          <option value="submitted">Submitted</option>
+          <option value="draft">Draft</option>
         </select>
         <select
           value={objectiveFilter}
@@ -240,8 +279,10 @@ const CampaignList: React.FC = () => {
       </div>
 
       {/* Loading, Error, or Empty States */}
-      {loading ? (
-        <p>Loading...</p>
+      {userLoading ? (
+        <p>Loading user...</p>
+      ) : loading ? (
+        <p>Loading campaigns...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : sortedCampaigns.length === 0 ? (
@@ -256,7 +297,7 @@ const CampaignList: React.FC = () => {
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("name")}
+                    onClick={() => requestSort("campaignName")}
                   >
                     Campaign Name
                   </th>
@@ -270,7 +311,7 @@ const CampaignList: React.FC = () => {
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("status")}
+                    onClick={() => requestSort("submissionStatus")}
                   >
                     Status
                   </th>
@@ -291,28 +332,28 @@ const CampaignList: React.FC = () => {
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("budget")}
+                    onClick={() => requestSort("totalBudget")}
                   >
                     Budget
                   </th>
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("kpi")}
+                    onClick={() => requestSort("primaryKPI")}
                   >
                     Primary KPI
                   </th>
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("location")}
+                    onClick={() => requestSort("audience.locations.location")}
                   >
                     Location
                   </th>
                   <th
                     scope="col"
                     className="px-4 py-2 font-bold cursor-pointer"
-                    onClick={() => requestSort("contactName")}
+                    onClick={() => requestSort("primaryContact.firstName")}
                   >
                     Contact
                   </th>
@@ -333,7 +374,7 @@ const CampaignList: React.FC = () => {
                     <td className="px-4 py-2">
                       <Link href={`/campaigns/${campaign.id}`}>
                         <span className="text-blue-600 hover:underline cursor-pointer">
-                          {campaign.name}
+                          {campaign.campaignName}
                         </span>
                       </Link>
                     </td>
@@ -341,12 +382,12 @@ const CampaignList: React.FC = () => {
                     <td className="px-4 py-2">
                       <span
                         className={`px-2 py-1 rounded-full text-sm ${
-                          campaign.status === "Live"
+                          campaign.submissionStatus === "submitted"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {campaign.status}
+                        {campaign.submissionStatus === "submitted" ? "Live" : "Draft"}
                       </span>
                     </td>
                     <td className="px-4 py-2">
@@ -356,11 +397,11 @@ const CampaignList: React.FC = () => {
                       {new Date(campaign.endDate).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2">
-                      ${campaign.budget.toLocaleString()}
+                      ${campaign.totalBudget.toLocaleString()}
                     </td>
-                    <td className="px-4 py-2">{campaign.kpi}</td>
-                    <td className="px-4 py-2">{campaign.location}</td>
-                    <td className="px-4 py-2">{campaign.contactName}</td>
+                    <td className="px-4 py-2">{campaign.primaryKPI}</td>
+                    <td className="px-4 py-2">{campaign.audience?.locations?.map(l => l.location).join(", ") || "N/A"}</td>
+                    <td className="px-4 py-2">{`${campaign.primaryContact.firstName} ${campaign.primaryContact.surname}`}</td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <Link href={`/campaigns/${campaign.id}/edit`}>

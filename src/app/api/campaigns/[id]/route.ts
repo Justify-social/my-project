@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { z } from 'zod'; // For input validation
 import { Currency, Platform, SubmissionStatus } from '@prisma/client';
+import { getSession } from '@auth0/nextjs-auth0';
 
 type RouteParams = { params: { id: string } }
 
@@ -134,54 +135,105 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  console.log('Starting delete operation for campaign:', params.id);
+  
   try {
-    // Get the session using NextAuth instead of Auth0
-    const session = await getServerSession(authOptions);
-    
+    const session = await getSession();
+    console.log('Session:', session);
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+      return new NextResponse(
+        JSON.stringify({ message: 'Unauthorized - No session' }),
+        { 
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
-    const campaignId = params.id;
+    const campaignId = parseInt(params.id);
+    
+    if (isNaN(campaignId)) {
+      return new NextResponse(
+        JSON.stringify({ message: 'Invalid campaign ID' }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
-    // First check if the campaign exists and belongs to the user
-    const campaign = await prisma.campaign.findFirst({
-      where: {
-        id: campaignId,
-        // Use the correct user ID field from the session
-        userId: session.user.id || ''
+    // Delete everything in the correct order within a transaction
+    await prisma.$transaction(async (tx) => {
+      // 1. First, find the campaign to get related IDs
+      const campaign = await tx.campaignWizardSubmission.findUnique({
+        where: { id: campaignId },
+        include: {
+          audience: true,
+        }
+      });
+
+      if (!campaign) {
+        throw new Error('Campaign not found');
       }
+
+      // 2. Delete audience-related records if they exist
+      if (campaign.audience) {
+        await tx.audienceLocation.deleteMany({
+          where: { audienceId: campaign.audience.id }
+        });
+        await tx.audienceGender.deleteMany({
+          where: { audienceId: campaign.audience.id }
+        });
+        await tx.audienceScreeningQuestion.deleteMany({
+          where: { audienceId: campaign.audience.id }
+        });
+        await tx.audienceLanguage.deleteMany({
+          where: { audienceId: campaign.audience.id }
+        });
+        await tx.audienceCompetitor.deleteMany({
+          where: { audienceId: campaign.audience.id }
+        });
+        await tx.audience.delete({
+          where: { id: campaign.audience.id }
+        });
+      }
+
+      // 3. Delete creative assets and requirements
+      await tx.creativeAsset.deleteMany({
+        where: { submissionId: campaignId }
+      });
+      await tx.creativeRequirement.deleteMany({
+        where: { submissionId: campaignId }
+      });
+
+      // 4. Delete the main campaign record first (this will cascade to contacts)
+      await tx.campaignWizardSubmission.delete({
+        where: { id: campaignId }
+      });
     });
 
-    if (!campaign) {
-      return NextResponse.json(
-        { error: 'Campaign not found or unauthorized' },
-        { status: 404 }
-      );
-    }
-
-    // Delete related records first (if any)
-    await prisma.$transaction([
-      prisma.campaignAsset.deleteMany({
-        where: { campaignId }
+    return new NextResponse(
+      JSON.stringify({ 
+        message: 'Campaign deleted successfully'
       }),
-      prisma.campaign.delete({
-        where: { id: campaignId }
-      })
-    ]);
-
-    return NextResponse.json(
-      { message: 'Campaign deleted successfully' },
-      { status: 200 }
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
+
   } catch (error) {
-    console.error('Error deleting campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete campaign' },
-      { status: 500 }
+    console.error('Server error deleting campaign:', error);
+    return new NextResponse(
+      JSON.stringify({ 
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : String(error)
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 }
