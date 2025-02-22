@@ -142,127 +142,40 @@ function OverviewContent() {
   }, [campaignId]);
 
   const handleSubmit = async (values: any) => {
-    setState(prev => ({ ...prev, isSubmitting: true, error: null }));
-    
     try {
-      console.log('Starting form submission:', values);
-
-      // Prepare the request data
-      const requestData = {
-        name: values.name,
-        businessGoal: values.businessGoal,
-        startDate: values.startDate,
-        endDate: values.endDate,
-        timeZone: values.timeZone,
-        primaryContact: values.primaryContact,
-        secondaryContact: values.secondaryContact,
-        currency: values.currency,
-        totalBudget: Number(values.totalBudget),
-        socialMediaBudget: Number(values.socialMediaBudget),
-        platform: values.platform,
-        influencerHandle: values.influencerHandle,
-        step: 1,
-        status: 'in_progress'
-      };
-
-      // Add retry logic
-      let retries = 3;
-      let response;
-      let result;
-
-      while (retries > 0) {
-        try {
-          console.log(`Attempt ${4 - retries}: Sending request to /api/campaigns`);
-          
-          response = await fetch('/api/campaigns', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-          });
-
-          // Try to parse the response as text first
-          const responseText = await response.text();
-          console.log('Raw response text:', responseText);
-
-          try {
-            // Then try to parse it as JSON if possible
-            result = JSON.parse(responseText);
-            console.log('Parsed response:', result);
-          } catch (e) {
-            console.error('Failed to parse response as JSON:', e);
-            result = { error: responseText };
-          }
-
-          if (response.ok) {
-            break; // Success, exit retry loop
-          }
-
-          console.error('API Error Response:', {
-            status: response.status,
-            statusText: response.statusText,
-            body: responseText,
-            parsedBody: result
-          });
-
-          // If we get a 500 error, retry
-          if (response.status === 500) {
-            retries--;
-            if (retries > 0) {
-              console.log(`Retrying... ${retries} attempts remaining`);
-              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-              continue;
-            }
-          }
-
-          // For other errors, throw immediately
-          throw new Error(result?.error || `API Error: ${response.status} ${response.statusText}`);
-        } catch (fetchError) {
-          console.error('Fetch attempt failed:', fetchError);
-          retries--;
-          if (retries === 0) throw fetchError;
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-      // If we have a successful response
-      if (response?.ok && result?.id) {
-        // Update local state
-        updateData({
-          ...data,
-          overview: values,
-          id: result.id
-        });
-
-        toast.success('Campaign saved successfully');
-        
-        // Navigate to next step
-        const nextUrl = `/campaigns/wizard/step-2?id=${result.id}`;
-        try {
-          await router.push(nextUrl);
-        } catch (navError) {
-          console.error('Navigation error:', navError);
-          window.location.href = nextUrl;
-        }
-      } else {
-        throw new Error('Failed to get valid response from server');
-      }
-
-    } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'An unexpected error occurred';
+      setState(prev => ({ ...prev, isSubmitting: true, error: null }));
       
-      console.error('Final submission error:', {
-        error,
-        message: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined
+      // Create campaign first to get ID
+      const response = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...values,
+          status: 'draft'
+        })
       });
-      
-      setState(prev => ({ ...prev, error: errorMessage }));
-      toast.error(errorMessage);
+
+      const result = await response.json();
+      console.log('Campaign created:', result);
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create campaign');
+      }
+
+      // Store the campaign ID and data
+      updateData({
+        ...data,
+        campaignId: result.id,
+        step1: values
+      });
+
+      // Navigate to next step with the new ID
+      router.push(`/campaigns/wizard/step-2?id=${result.id}`);
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      toast.error('Failed to create campaign');
     } finally {
       setState(prev => ({ ...prev, isSubmitting: false }));
     }

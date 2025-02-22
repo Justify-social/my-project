@@ -15,6 +15,8 @@ import ObjectivesContent from '@/components/ReviewSections/ObjectivesContent';
 import AudienceContent from '@/components/ReviewSections/AudienceContent';
 import ReviewSection from '@/components/ReviewSections/ReviewSection';
 import { Section } from '@/components/ui/section';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, CalendarIcon, UserGroupIcon, SparklesIcon, DocumentTextIcon, CurrencyDollarIcon, PhotoIcon } from '@heroicons/react/24/solid';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Strong type definitions
 interface CampaignDetails {
@@ -180,184 +182,432 @@ const validateCampaignData = (data: Partial<WizardData>): {
   };
 };
 
+interface MetricCardProps {
+  icon: any;
+  title: string;
+  value: string;
+  color: 'blue' | 'purple' | 'green';
+}
+
+const MetricCard = ({ icon: Icon, title, value, color }: MetricCardProps) => {
+  const colorClasses = {
+    blue: 'from-blue-500 to-blue-600',
+    purple: 'from-purple-500 to-purple-600',
+    green: 'from-green-500 to-green-600'
+  };
+
+  return (
+    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-xl p-6 text-white`}>
+      <div className="flex items-center mb-2">
+        <Icon className="w-6 h-6 text-white/80" />
+        <p className="ml-2 text-white/80">{title}</p>
+      </div>
+      <p className="text-2xl font-bold">{value}</p>
+    </div>
+  );
+};
+
+interface DetailSectionProps {
+  icon: any;
+  title: string;
+  content: React.ReactNode;
+}
+
+const DetailSection = ({ icon: Icon, title, content }: DetailSectionProps) => (
+  <motion.section
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
+  >
+    <div className="p-6">
+      <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-800">
+        <Icon className="w-6 h-6 mr-2 text-gray-600" />
+        {title}
+      </h3>
+      <div className="space-y-4">{content}</div>
+    </div>
+  </motion.section>
+);
+
+const CampaignDetails = ({ data }: { data: any }) => (
+  <div className="space-y-3">
+    <DataRow label="Platform" value={data.platform} />
+    <DataRow label="Start Date" value={new Date(data.startDate).toLocaleDateString()} />
+    <DataRow label="End Date" value={new Date(data.endDate).toLocaleDateString()} />
+    <DataRow label="Time Zone" value={data.timeZone} />
+    <DataRow label="Influencer Handle" value={data.influencerHandle} />
+  </div>
+);
+
+const ContactInfo = ({ data }: { data: any }) => (
+  <div className="space-y-4">
+    <div className="bg-gray-50 rounded-lg p-4">
+      <h4 className="font-medium text-gray-700 mb-2">Primary Contact</h4>
+      <p>{data.primaryContact.firstName} {data.primaryContact.surname}</p>
+      <p className="text-blue-600">{data.primaryContact.email}</p>
+      <p className="text-gray-500">{data.primaryContact.position}</p>
+    </div>
+    {data.secondaryContact?.email && (
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h4 className="font-medium text-gray-700 mb-2">Secondary Contact</h4>
+        <p>{data.secondaryContact.firstName} {data.secondaryContact.surname}</p>
+        <p className="text-blue-600">{data.secondaryContact.email}</p>
+        <p className="text-gray-500">{data.secondaryContact.position}</p>
+      </div>
+    )}
+  </div>
+);
+
+const CampaignObjectives = ({ data }: { data: any }) => (
+  <div className="grid grid-cols-2 gap-6">
+    <div>
+      <DataRow label="Primary KPI" value={data.primaryKPI} />
+      <DataRow label="Secondary KPIs" value={data.secondaryKPIs?.join(', ') || 'None'} />
+      <DataRow label="Main Message" value={data.mainMessage} />
+    </div>
+    <div>
+      <DataRow label="Brand Perception" value={data.brandPerception} />
+      <DataRow label="Key Benefits" value={data.keyBenefits} />
+      <DataRow label="Expected Achievements" value={data.expectedAchievements} />
+    </div>
+  </div>
+);
+
+const FeaturesList = ({ features }: { features: string[] }) => (
+  <div>
+    {features?.length > 0 ? (
+      <ul className="space-y-2">
+        {features.map((feature: string, index: number) => (
+          <li key={index} className="flex items-center text-gray-700">
+            <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
+            {feature}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-gray-500 italic">No features selected</p>
+    )}
+  </div>
+);
+
+const RequirementsList = ({ requirements }: { requirements: any[] }) => (
+  <div>
+    {requirements?.length > 0 ? (
+      <ul className="space-y-2">
+        {requirements.map((req: any, index: number) => (
+          <li key={index} className="flex items-center text-gray-700">
+            <CheckCircleIcon className="w-5 h-5 text-blue-500 mr-2" />
+            {req.requirement}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-gray-500 italic">No creative requirements specified</p>
+    )}
+  </div>
+);
+
+const DataRow = ({ label, value }: { label: string; value: string | number | null }) => (
+  <div className="flex items-center py-2 border-b border-gray-100 last:border-0">
+    <span className="font-medium text-gray-600 w-1/3">{label}</span>
+    <span className="text-gray-800">{value || 'Not specified'}</span>
+  </div>
+);
+
 // Main component with performance optimizations
 function CampaignStep5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
-  const { data: wizardData, updateData } = useWizard();
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [campaignData, setCampaignData] = useState<any>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
 
   useEffect(() => {
     const loadCampaignData = async () => {
-      if (campaignId && !hasLoadedInitialData) {
-        try {
-          setIsLoading(true);
-          const response = await fetch(`/api/campaigns/${campaignId}`);
-          const result = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(result.error || 'Failed to load campaign');
-          }
+      if (!campaignId) {
+        setError('No campaign ID provided');
+        setIsLoading(false);
+        return;
+      }
 
-          if (result.success) {
-            const mappedData = {
-              overview: result.campaign.overview || {},
-              objectives: result.campaign.objectives || {},
-              audience: result.campaign.audience || {},
-              assets: {
-                creativeAssets: result.campaign.creativeAssets || []
-              }
-            };
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/campaigns/${campaignId}`);
+        const result = await response.json();
 
-            updateData(mappedData);
-            setHasLoadedInitialData(true);
-          }
-        } catch (error) {
-          console.error('Error loading campaign:', error);
-          toast.error('Failed to load campaign data');
-        } finally {
-          setIsLoading(false);
+        console.log('API Response:', result);
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to load campaign');
         }
+
+        setCampaignData(result.campaign);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load campaign');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadCampaignData();
-  }, [campaignId, hasLoadedInitialData, updateData]);
+  }, [campaignId]);
 
-  const handleSubmit = async () => {
-    try {
-      // Your submit logic here
-      router.push(`/campaigns/wizard/submission?id=${campaignId}`);
-    } catch (error) {
-      console.error('Error submitting campaign:', error);
-      toast.error('Failed to submit campaign');
-    }
-  };
-
-  // Enhanced helper functions
-  const safeJoin = (arr: any[] | undefined | null, separator: string = ', ') => {
-    if (!Array.isArray(arr)) return 'N/A';
-    return arr.length > 0 ? arr.join(separator) : 'N/A';
-  };
-
-  const safeString = (value: any): string => {
-    if (value === null || value === undefined) return 'N/A';
-    if (typeof value === 'string') return value || 'N/A';
-    if (typeof value === 'number') return value.toString();
-    if (Array.isArray(value)) return safeJoin(value);
-    if (typeof value === 'object') {
-      // Handle nested objects carefully
-      return 'N/A';
-    }
-    return 'N/A';
-  };
-
-  const formatContact = (contact: any) => {
-    if (!contact) return 'N/A';
-    const name = [contact.firstName, contact.surname].filter(Boolean).join(' ');
-    return {
-      name: name || 'N/A',
-      email: contact.email || 'N/A',
-      position: contact.position || 'N/A'
+  const StatusBadge = ({ status }: { status: string }) => {
+    const statusConfig = {
+      draft: { 
+        color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+        icon: ClockIcon,
+        label: 'Draft'
+      },
+      submitted: { 
+        color: 'bg-green-100 text-green-800 border-green-200', 
+        icon: CheckCircleIcon,
+        label: 'Submitted'
+      },
+      rejected: { 
+        color: 'bg-red-100 text-red-800 border-red-200', 
+        icon: XCircleIcon,
+        label: 'Rejected'
+      }
+    }[status.toLowerCase()] || { 
+      color: 'bg-gray-100 text-gray-800 border-gray-200', 
+      icon: ClockIcon,
+      label: status
     };
+
+    return (
+      <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium 
+        ${statusConfig.color} border shadow-sm`}>
+        <statusConfig.icon className="w-4 h-4 mr-2" />
+        {statusConfig.label}
+      </span>
+    );
   };
 
-  if (isLoading || !wizardData) {
-    return <LoadingSkeleton />;
+  const SectionCard = ({ title, children, id }: { title: string; children: React.ReactNode; id: string }) => (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden
+        ${activeSection === id ? 'ring-2 ring-blue-500' : ''}`}
+      onClick={() => setActiveSection(id)}
+    >
+      <div className="p-6">
+        <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-800">
+          {title}
+        </h3>
+        <div className="space-y-4">{children}</div>
+      </div>
+    </motion.section>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="h-32 bg-gray-100 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  const primaryContact = formatContact(wizardData?.overview?.primaryContact);
+  if (error) {
+    return (
+      <motion.div 
+        {...fadeIn}
+        className="max-w-4xl mx-auto p-6"
+      >
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+          <div className="flex items-center">
+            <XCircleIcon className="w-6 h-6 text-red-400 mr-3" />
+            <h3 className="text-red-800 font-medium">Error Loading Campaign</h3>
+          </div>
+          <p className="mt-2 text-red-700">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-3 text-red-600 hover:text-red-500 font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-5">
-      <Header currentStep={5} totalSteps={5} />
-      
-      {/* Campaign Details Section */}
-      <ReviewSection title="Campaign Details" stepNumber={1} onEdit={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}>
-        <div className="space-y-3">
-          <div><span className="font-medium">Campaign Name: </span>{safeString(wizardData?.overview?.name)}</div>
-          <div><span className="font-medium">Description: </span>{safeString(wizardData?.overview?.businessGoal)}</div>
-          <div><span className="font-medium">Start Date: </span>{safeString(wizardData?.overview?.startDate)}</div>
-          <div><span className="font-medium">End Date: </span>{safeString(wizardData?.overview?.endDate)}</div>
-          <div><span className="font-medium">Time Zone: </span>{safeString(wizardData?.overview?.timeZone)}</div>
-          <div className="mt-4">
-            <span className="font-medium">Primary Contact:</span>
-            <div className="ml-4">
-              <div>Name: {primaryContact.name}</div>
-              <div>Email: {primaryContact.email}</div>
-              <div>Role: {primaryContact.position}</div>
-            </div>
-          </div>
-        </div>
-      </ReviewSection>
-
-      {/* Objectives Section */}
-      <ReviewSection title="Objectives & Messaging" stepNumber={2} onEdit={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}>
-        <div className="space-y-3">
-          <div><span className="font-medium">Primary KPI: </span>{safeString(wizardData?.objectives?.primaryKPI)}</div>
+    <div className="max-w-6xl mx-auto p-6">
+      <motion.div 
+        className="space-y-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-12">
           <div>
-            <span className="font-medium">Secondary KPIs: </span>
-            {safeJoin(wizardData?.objectives?.secondaryKPIs)}
+            <motion.h1 
+              className="text-4xl font-bold text-gray-900 mb-2"
+              {...fadeIn}
+            >
+              {campaignData.campaignName}
+            </motion.h1>
+            <motion.p 
+              className="text-gray-500"
+              {...fadeIn}
+              transition={{ delay: 0.1 }}
+            >
+              Created on {new Date(campaignData.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </motion.p>
           </div>
-          <div><span className="font-medium">Main Message: </span>{safeString(wizardData?.objectives?.mainMessage)}</div>
-          <div><span className="font-medium">Hashtags: </span>{safeJoin(wizardData?.objectives?.hashtags)}</div>
+          <StatusBadge status={campaignData.submissionStatus} />
         </div>
-      </ReviewSection>
 
-      {/* Audience Section */}
-      <ReviewSection title="Audience Targeting" stepNumber={3} onEdit={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}>
-        <div className="space-y-3">
-          <div><span className="font-medium">Locations: </span>{safeJoin(wizardData?.audience?.locations)}</div>
-          <div><span className="font-medium">Age Ranges: </span>{safeJoin(wizardData?.audience?.ageRanges)}</div>
-          <div><span className="font-medium">Genders: </span>{safeJoin(wizardData?.audience?.genders)}</div>
-          <div><span className="font-medium">Languages: </span>{safeJoin(wizardData?.audience?.languages)}</div>
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <MetricCard
+            icon={CurrencyDollarIcon}
+            title="Total Budget"
+            value={`${campaignData.currency} ${campaignData.totalBudget.toLocaleString()}`}
+            color="blue"
+          />
+          <MetricCard
+            icon={CalendarIcon}
+            title="Campaign Duration"
+            value={`${Math.ceil((new Date(campaignData.endDate).getTime() - 
+              new Date(campaignData.startDate).getTime()) / (1000 * 60 * 60 * 24))} Days`}
+            color="purple"
+          />
+          <MetricCard
+            icon={UserGroupIcon}
+            title="Platform"
+            value={campaignData.platform}
+            color="green"
+          />
         </div>
-      </ReviewSection>
 
-      {/* Creative Assets Section */}
-      <ReviewSection title="Creative Assets" stepNumber={4} onEdit={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}>
-        <div className="space-y-6">
-          {Array.isArray(wizardData?.assets?.creativeAssets) && wizardData.assets.creativeAssets.length > 0 ? (
-            wizardData.assets.creativeAssets.map((asset, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div><span className="font-medium">Asset Name: </span>{safeString(asset.assetName)}</div>
-                  <div><span className="font-medium">Type: </span>{safeString(asset.type)}</div>
-                  <div><span className="font-medium">Influencer: </span>{safeString(asset.influencerHandle)}</div>
-                  <div>
-                    <span className="font-medium">Budget: </span>
-                    {typeof asset.budget === 'number' ? 
-                      new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(asset.budget) 
-                      : 'N/A'}
-                  </div>
-                </div>
-                {asset.url && (
-                  <AssetPreview
-                    type={asset.type}
-                    url={safeString(asset.url)}
-                    title={safeString(asset.assetName)}
-                    className="mt-4"
-                  />
-                )}
+        {/* Main Content Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <DetailSection
+            icon={DocumentTextIcon}
+            title="Campaign Details"
+            content={<CampaignDetails data={campaignData} />}
+          />
+          <DetailSection
+            icon={UserGroupIcon}
+            title="Contact Information"
+            content={<ContactInfo data={campaignData} />}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-8">
+          <DetailSection
+            icon={SparklesIcon}
+            title="Campaign Objectives"
+            content={<CampaignObjectives data={campaignData} />}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <DetailSection
+            icon={CheckCircleIcon}
+            title="Selected Features"
+            content={<FeaturesList features={campaignData.features} />}
+          />
+          <DetailSection
+            icon={PhotoIcon}
+            title="Creative Requirements"
+            content={<RequirementsList requirements={campaignData.creativeRequirements} />}
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end mt-8">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={async () => {
+              if (window.confirm('Are you sure you want to submit this campaign?')) {
+                try {
+                  setIsSubmitting(true);
+                  const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
+                    method: 'POST',
+                  });
+                  const result = await response.json();
+                  if (response.ok) {
+                    toast.success('Campaign submitted successfully!');
+                    router.push(`/campaigns/wizard/submission?id=${campaignId}`);
+                  } else {
+                    throw new Error(result.error || 'Failed to submit campaign');
+                  }
+                } catch (error) {
+                  console.error('Error submitting campaign:', error);
+                  toast.error('Failed to submit campaign. Please try again.');
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }
+            }}
+            className={`
+              bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-lg 
+              font-medium shadow-lg hover:shadow-xl transition-all duration-300
+              ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:from-blue-700 hover:to-blue-800'}
+            `}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
               </div>
-            ))
-          ) : (
-            <p>No creative assets added</p>
-          )}
+            ) : (
+              'Submit Campaign'
+            )}
+          </motion.button>
         </div>
-      </ReviewSection>
 
-      <ProgressBar
-        currentStep={5}
-        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-        onBack={() => router.push(`/campaigns/wizard/step-4?id=${campaignId}`)}
-        onNext={handleSubmit}
-        disableNext={false}
-        isFormValid={true}
-        isDirty={false}
-      />
+        {/* Debug Information */}
+        <motion.div 
+          className="mt-16 border-t pt-8"
+          {...fadeIn}
+          transition={{ delay: 0.3 }}
+        >
+          <details className="bg-gray-50 rounded-lg overflow-hidden">
+            <summary className="cursor-pointer bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200 transition-colors">
+              Debug Information
+            </summary>
+            <div className="p-4">
+              <pre className="bg-white p-4 rounded-md overflow-auto text-sm">
+                {JSON.stringify(campaignData, null, 2)}
+              </pre>
+            </div>
+          </details>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
