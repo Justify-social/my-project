@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode, Suspense, useRef } from "react";
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode, Suspense, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -10,6 +10,8 @@ import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
+import { Section } from '@/components/ui/section';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -46,6 +48,16 @@ export interface CreativeValues {
 // =============================================================================
 
 const campaignBudget = 1000000; // Example total campaign budget
+const mockInfluencers = [
+  {
+    id: 1,
+    name: 'Influencer Name',
+    avatar: '/placeholder.jpg',  // Update this path
+    // ... other properties
+  },
+  // ... other influencers
+];
+const PLACEHOLDER_AVATAR = '/placeholder.jpg';
 
 const assetDetailsSchema = Yup.object().shape({
   assetName: Yup.string().required("Asset name is required"),
@@ -67,6 +79,15 @@ const CreativeSchema = Yup.object().shape({
     })
   )
 });
+
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+const ALLOWED_FILE_TYPES = {
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/gif': ['.gif'],
+  'video/mp4': ['.mp4'],
+  'application/pdf': ['.pdf']
+};
 
 // =============================================================================
 // ERROR BOUNDARY COMPONENT
@@ -173,15 +194,21 @@ const AssetRow: React.FC<AssetRowProps> = ({
   const [whyInfluencer, setWhyInfluencer] = useState(asset.details.whyInfluencer || "");
   const [budget, setBudget] = useState(asset.details.budget?.toString() || "");
 
-  // Mock influencer data - replace with your actual data
+  // Update the influencer options with more realistic data
   const influencerOptions = [
     { 
       name: "Olivia Bennett", 
       handle: "@oliviabennett", 
       followers: "7k",
-      avatar: "/path/to/avatar.jpg" // Add actual avatar path
+      avatar: "/placeholder.jpg"
     },
-    // Add more influencers...
+    { 
+      name: "James Wilson", 
+      handle: "@jameswilson", 
+      followers: "12k",
+      avatar: "/placeholder.jpg"
+    },
+    // Add more as needed
   ];
 
   return (
@@ -232,34 +259,36 @@ const AssetRow: React.FC<AssetRowProps> = ({
             <input
               type="text"
               value={influencerQuery}
-              onChange={(e) => setInfluencerQuery(e.target.value)}
+              onChange={(e) => {
+                setInfluencerQuery(e.target.value);
+                // When typing, update the selected influencer
+                if (e.target.value.startsWith('@')) {
+                  setSelectedInfluencer(e.target.value);
+                  onUpdate({
+                    ...asset,
+                    details: {
+                      ...asset.details,
+                      influencer: e.target.value,
+                    }
+                  });
+                }
+              }}
+              onKeyPress={(e) => {
+                // Ensure handle starts with @
+                if (e.key === '@' && influencerQuery === '') {
+                  return;
+                }
+                if (!influencerQuery.startsWith('@') && influencerQuery === '') {
+                  setInfluencerQuery('@' + e.key);
+                  e.preventDefault();
+                }
+              }}
               className="w-full p-2 border rounded-md"
               placeholder="@username"
             />
-            {influencerQuery && (
-              <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg">
-                {influencerOptions.map((inf) => (
-                  <div
-                    key={inf.handle}
-                    className="flex items-center p-2 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => {
-                      setSelectedInfluencer(inf.handle);
-                      setInfluencerQuery("");
-                    }}
-                  >
-                    <img
-                      src={inf.avatar}
-                      alt={inf.name}
-                      className="w-8 h-8 rounded-full mr-2"
-                    />
-                    <div>
-                      <div className="font-medium">{inf.name}</div>
-                      <div className="text-sm text-gray-500">
-                        {inf.handle} • {inf.followers} followers
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            {selectedInfluencer && (
+              <div className="mt-2 p-2 bg-gray-50 rounded-md">
+                <p className="text-sm text-gray-600">Selected: {selectedInfluencer}</p>
               </div>
             )}
           </div>
@@ -306,13 +335,14 @@ const AssetRow: React.FC<AssetRowProps> = ({
               details: {
                 assetName: editAssetName,
                 influencer: selectedInfluencer,
-                whyInfluencer,
+                whyInfluencer: whyInfluencer,
                 budget: parseFloat(budget) || 0,
+                description: asset.details.description
               }
             })}
             className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800"
           >
-            Edit
+            Save
           </button>
           <button
             onClick={() => onDelete(asset)}
@@ -382,125 +412,152 @@ function CampaignStep4Content() {
   const [confirmDeleteAsset, setConfirmDeleteAsset] = useState<Asset | null>(null);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [campaignData, setCampaignData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const initialValues: CreativeValues = {
     assets: data.creativeAssets?.assets || [],
   };
 
+  // Improved file upload handling
+  const handleFilesAdded = useCallback((files: FileList) => {
+    const newAssets: Asset[] = [];
+    const errors: string[] = [];
+
+    Array.from(files).forEach((file) => {
+      // Validate file type
+      if (!Object.keys(ALLOWED_FILE_TYPES).includes(file.type)) {
+        errors.push(`${file.name}: Unsupported file type`);
+        return;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`${file.name}: File size exceeds 500MB limit`);
+        return;
+      }
+
+      // Check for duplicates
+      if (assets.some(asset => asset.file.name === file.name)) {
+        errors.push(`${file.name}: File already exists`);
+        return;
+      }
+
+      newAssets.push({
+        id: `${Date.now()}-${file.name}`,
+        file,
+        progress: 0,
+        details: {
+          assetName: file.name,
+          budget: 0,
+          description: '',
+        }
+      });
+    });
+
+    // Show errors if any
+    if (errors.length > 0) {
+      toast.error(
+        <div>
+          <p>Some files couldn't be uploaded:</p>
+          <ul className="list-disc pl-4">
+            {errors.map((err, i) => <li key={i}>{err}</li>)}
+          </ul>
+        </div>
+      );
+    }
+
+    // Add valid assets
+    if (newAssets.length > 0) {
+      setAssets(prev => [...prev, ...newAssets]);
+      newAssets.forEach(asset => simulateUpload(asset.id));
+      toast.success(`${newAssets.length} file(s) added successfully`);
+    }
+  }, [assets]);
+
+  // Improved upload simulation with progress tracking
+  const simulateUpload = useCallback((assetId: string) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 30;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+      }
+      
+      setAssets(prev => prev.map(asset => 
+        asset.id === assetId 
+          ? { ...asset, progress: Math.min(Math.round(progress), 100) }
+          : asset
+      ));
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSubmit = async (values: CreativeValues) => {
     try {
-      setIsSubmitting(true);
-
-      // Validate that we have at least one asset
+      setIsSaving(true);
+      
+      // Validate assets
       if (assets.length === 0) {
-        toast.error('Please upload at least one asset');
-        return;
+        throw new Error('Please upload at least one asset');
       }
 
-      // Validate that all assets are fully uploaded
-      const incompleteAssets = assets.filter(asset => asset.progress < 100);
+      const incompleteAssets = assets.filter(a => a.progress < 100);
       if (incompleteAssets.length > 0) {
-        toast.error('Please wait for all assets to finish uploading');
-        return;
+        throw new Error('Please wait for all uploads to complete');
       }
 
-      // Validate that all assets have required fields
-      const invalidAssets = assets.filter(asset => {
-        return !asset.details.assetName || 
-               !asset.details.influencer ||
-               !asset.details.whyInfluencer ||
-               !asset.details.budget;
+      // Updated validation to check all required fields
+      const invalidAssets = assets.filter(a => {
+        const details = a.details;
+        return !details.assetName || 
+               !details.influencer || 
+               !details.whyInfluencer ||
+               !details.budget ||
+               details.budget <= 0;
       });
 
       if (invalidAssets.length > 0) {
-        toast.error('Please complete all required fields for each asset');
-        return;
+        console.log('Invalid assets:', invalidAssets); // For debugging
+        throw new Error('Please complete all required fields for each asset');
       }
 
-      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+      // Process assets
+      const processedAssets = await Promise.all(
+        assets.map(async (asset) => ({
+          type: asset.file.type.includes('video') ? 'video' : 'image',
+          url: URL.createObjectURL(asset.file),
+          fileName: asset.file.name,
+          fileSize: asset.file.size,
+          assetName: asset.details.assetName,
+          influencerHandle: asset.details.influencer,
+          whyInfluencer: asset.details.whyInfluencer,
+          budget: parseFloat(asset.details.budget?.toString() || '0'),
+        }))
+      );
+
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          step: 4,
-          data: {
-            creativeAssets: {
-              create: assets.map(asset => ({
-                type: asset.file.type.includes('video') ? 'video' : 'image',
-                url: URL.createObjectURL(asset.file),
-                fileName: asset.file.name,
-                fileSize: asset.file.size,
-                assetName: asset.details.assetName,
-                influencerHandle: asset.details.influencer,
-                whyInfluencer: asset.details.whyInfluencer,
-                budget: parseFloat(asset.details.budget.toString()),
-              }))
-            }
-          }
+          creativeAssets: processedAssets
         })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update campaign');
+        throw new Error('Failed to save assets');
       }
 
       toast.success('Assets saved successfully');
       router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
     } catch (error) {
-      console.error('Error saving step 4:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save campaign data');
+      toast.error(error instanceof Error ? error.message : 'Failed to save assets');
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
-  };
-
-  // ---------- File Upload Handling ----------
-  const handleFilesAdded = (files: FileList) => {
-    Array.from(files).forEach((file) => {
-      if (assets.some((asset) => asset.file.name === file.name)) {
-        alert("Duplicate file upload is not allowed.");
-        return;
-      }
-      const validTypes = ["video/mp4", "image/png", "image/jpeg", "image/gif", "application/pdf"];
-      if (!validTypes.includes(file.type)) {
-        alert("This file type is not supported.");
-        return;
-      }
-      if (file.size > 500 * 1024 * 1024) {
-        alert("Max file size exceeded (500MB).");
-        return;
-      }
-      const newAsset: Asset = {
-        id: `${Date.now()}-${file.name}`,
-        file,
-        progress: 0,
-        details: { assetName: file.name, budget: 0 },
-      };
-      setAssets((prev) => [...prev, newAsset]);
-      simulateUpload(newAsset.id);
-    });
-  };
-
-  // ---------- Simulate File Upload ----------
-  const simulateUpload = (assetId: string) => {
-    const interval = setInterval(() => {
-      setAssets((prevAssets) =>
-        prevAssets.map((asset) => {
-          if (asset.id === assetId) {
-            let newProgress = asset.progress + 20;
-            if (newProgress >= 100) {
-              newProgress = 100;
-              clearInterval(interval);
-            }
-            return { ...asset, progress: newProgress };
-          }
-          return asset;
-        })
-      );
-    }, 500);
   };
 
   // ---------- Delete Asset ----------
@@ -533,29 +590,26 @@ function CampaignStep4Content() {
   // ---------- Save as Draft ----------
   const handleSaveDraft = async (values: CreativeValues) => {
     try {
-      setIsSubmitting(true);
+      setIsSaving(true);
+      setError(null);
 
-      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          step: 4,
-          submissionStatus: 'draft',
-          data: {
-            creativeAssets: {
-              create: assets.map(asset => ({
-                type: asset.file.type.includes('video') ? 'video' : 'image',
-                url: URL.createObjectURL(asset.file),
-                fileName: asset.file.name,
-                fileSize: asset.file.size,
-                assetName: asset.details.assetName || asset.file.name,
-                influencerHandle: asset.details.influencer || '',
-                whyInfluencer: asset.details.whyInfluencer || '',
-                budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
-              }))
-            }
+          creativeAssets: {
+            create: assets.map(asset => ({
+              type: asset.file.type.includes('video') ? 'video' : 'image',
+              url: URL.createObjectURL(asset.file),
+              fileName: asset.file.name,
+              fileSize: asset.file.size,
+              assetName: asset.details.assetName || asset.file.name,
+              influencerHandle: asset.details.influencer || '',
+              whyInfluencer: asset.details.whyInfluencer || '',
+              budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
+            }))
           }
         })
       });
@@ -571,7 +625,7 @@ function CampaignStep4Content() {
       console.error('Error saving draft:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save draft');
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
@@ -585,6 +639,62 @@ function CampaignStep4Content() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [previewAsset]);
+
+  // Load campaign data
+  useEffect(() => {
+    const loadCampaignData = async () => {
+      if (campaignId) {
+        try {
+          setIsLoading(true);
+          setError(null);
+          const response = await fetch(`/api/campaigns/${campaignId}`);
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to load campaign');
+          }
+
+          if (data.success) {
+            setCampaignData(data.campaign);
+            updateData(data.campaign);
+            toast.success('Campaign data loaded');
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Failed to load campaign';
+          setError(message);
+          toast.error(message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadCampaignData();
+  }, [campaignId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner />
+        <p className="ml-2">Loading campaign data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-800 font-semibold">Error</h3>
+        <p className="text-red-600">{error}</p>
+        <button
+          onClick={() => router.push('/campaigns')}
+          className="mt-4 btn btn-secondary"
+        >
+          Return to Campaigns
+        </button>
+      </div>
+    );
+  }
 
   return (
     <ErrorBoundary>
@@ -604,9 +714,9 @@ function CampaignStep4Content() {
                   type="button"
                   onClick={() => handleSaveDraft(values)}
                   className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
-                  disabled={isSubmitting}
+                  disabled={isSaving}
                 >
-                  {isSubmitting ? 'Saving...' : 'Save as Draft'}
+                  {isSaving ? 'Saving...' : 'Save as Draft'}
                 </button>
               </div>
 
@@ -638,10 +748,16 @@ function CampaignStep4Content() {
 
             <ProgressBar
               currentStep={4}
-              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-              onBack={() => router.push("/campaigns/wizard/step-3")}
+              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+              onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)}
               onNext={submitForm}
-              disableNext={!isValid || isSubmitting}
+              disableNext={!isValid || isSubmitting || assets.some(asset => 
+                !asset.details.assetName || 
+                !asset.details.influencer || 
+                !asset.details.whyInfluencer || 
+                !asset.details.budget ||
+                asset.details.budget <= 0
+              )}
             />
           </>
         )}
@@ -705,8 +821,12 @@ function CampaignStep4Content() {
 
 export default function CampaignStep4() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner />
+      </div>
+    }>
       <CampaignStep4Content />
     </Suspense>
-  )
+  );
 }

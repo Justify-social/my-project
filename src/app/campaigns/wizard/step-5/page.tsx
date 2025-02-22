@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Header from "@/components/Wizard/Header";
@@ -14,6 +14,7 @@ import LoadingSkeleton from '@/components/LoadingSkeleton';
 import ObjectivesContent from '@/components/ReviewSections/ObjectivesContent';
 import AudienceContent from '@/components/ReviewSections/AudienceContent';
 import ReviewSection from '@/components/ReviewSections/ReviewSection';
+import { Section } from '@/components/ui/section';
 
 // Strong type definitions
 interface CampaignDetails {
@@ -183,8 +184,29 @@ const validateCampaignData = (data: Partial<WizardData>): {
 function CampaignStep5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const campaignId = searchParams.get('id');
+  const campaignId = searchParams.get('campaignId');
   const { data: wizardData, loading, error } = useWizard<WizardData>();
+  const [campaignData, setCampaignData] = useState(null);
+
+  // Load campaign data
+  useEffect(() => {
+    const loadCampaignData = async () => {
+      if (campaignId) {
+        try {
+          const response = await fetch(`/api/campaigns/${campaignId}`);
+          const data = await response.json();
+          if (data.success) {
+            setCampaignData(data.campaign);
+            reset(data.campaign);
+          }
+        } catch (error) {
+          console.error('Error loading campaign:', error);
+        }
+      }
+    };
+
+    loadCampaignData();
+  }, [campaignId]);
 
   // Memoized computations with proper dependencies
   const { isValid, errors } = useMemo(() => 
@@ -204,7 +226,7 @@ function CampaignStep5Content() {
   );
 
   // Enhanced error handling with retry logic
-  const handleSubmit = async () => {
+  const handleSubmit = async (data: FormData) => {
     const retryCount = 3;
     let attempt = 0;
 
@@ -225,24 +247,32 @@ function CampaignStep5Content() {
           return;
         }
 
-        const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
-          method: 'POST',
+        // First update the campaign data
+        const updateResponse = await fetch(`/api/campaigns/${campaignId}`, {
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-Token': await getCsrfToken()
           },
-          credentials: 'include',
-          body: JSON.stringify(sanitizeData(wizardData))
+          body: JSON.stringify(data),
         });
 
-        if (!response.ok) {
-          throw new Error(await response.text());
-        }
+        const updateResult = await updateResponse.json();
 
-        Analytics.track('Campaign_Submit_Success', { campaignId });
-        toast.success('Campaign submitted successfully!');
-        router.push('/campaigns/wizard/submission');
-        return;
+        if (updateResult.success) {
+          // Then submit the campaign
+          const submitResponse = await fetch(`/api/campaigns/${campaignId}/submit`, {
+            method: 'POST',
+          });
+
+          const submitResult = await submitResponse.json();
+
+          if (submitResult.success) {
+            Analytics.track('Campaign_Submit_Success', { campaignId });
+            toast.success('Campaign submitted successfully!');
+            router.push(`/campaigns/wizard/submission?campaignId=${campaignId}`);
+            return;
+          }
+        }
 
       } catch (error) {
         attempt++;
@@ -278,7 +308,7 @@ function CampaignStep5Content() {
   };
 
   const handleEdit = (step: number) => {
-    router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`);
+    router.push(`/campaigns/wizard/step-${step}?campaignId=${campaignId}`);
   };
 
   // Loading and error states
@@ -315,71 +345,115 @@ function CampaignStep5Content() {
       {/* Campaign Details Section */}
       <ReviewSection title="Campaign Details" stepNumber={1} onEdit={handleEdit}>
         <div className="space-y-3">
-          <div><span className="font-medium">Campaign Name: </span>{wizardData?.overview?.name}</div>
-          {/* ... other campaign details */}
+          <div><span className="font-medium">Campaign Name: </span>{wizardData?.step1?.campaignName}</div>
+          <div><span className="font-medium">Description: </span>{wizardData?.step1?.description}</div>
+          <div><span className="font-medium">Start Date: </span>{wizardData?.step1?.startDate}</div>
+          <div><span className="font-medium">End Date: </span>{wizardData?.step1?.endDate}</div>
+          <div><span className="font-medium">Time Zone: </span>{wizardData?.step1?.timeZone}</div>
+          <div className="mt-4">
+            <span className="font-medium">Primary Contact:</span>
+            <div className="ml-4">
+              <div>Name: {wizardData?.step1?.primaryContact?.name}</div>
+              <div>Email: {wizardData?.step1?.primaryContact?.email}</div>
+              <div>Role: {wizardData?.step1?.primaryContact?.role}</div>
+            </div>
+          </div>
         </div>
       </ReviewSection>
 
       {/* Objectives Section */}
       <ReviewSection title="Objectives & Messaging" stepNumber={2} onEdit={handleEdit}>
-        <ObjectivesContent data={wizardData?.step2} />
+        <div className="space-y-3">
+          <div><span className="font-medium">Primary KPI: </span>{wizardData?.step2?.primaryKPI}</div>
+          <div>
+            <span className="font-medium">Secondary KPIs: </span>
+            <ul className="list-disc ml-5">
+              {wizardData?.step2?.secondaryKPIs?.map((kpi, index) => (
+                <li key={index}>{kpi}</li>
+              ))}
+            </ul>
+          </div>
+          <div><span className="font-medium">Main Message: </span>{wizardData?.step2?.mainMessage}</div>
+          <div>
+            <span className="font-medium">Hashtags: </span>
+            {wizardData?.step2?.hashtags?.join(', ')}
+          </div>
+          <div><span className="font-medium">Memorability: </span>{wizardData?.step2?.memorability}</div>
+          <div><span className="font-medium">Key Benefits: </span>{wizardData?.step2?.keyBenefits}</div>
+          <div><span className="font-medium">Expected Achievements: </span>{wizardData?.step2?.expectedAchievements}</div>
+          <div><span className="font-medium">Purchase Intent: </span>{wizardData?.step2?.purchaseIntent}</div>
+        </div>
       </ReviewSection>
 
       {/* Audience Section */}
       <ReviewSection title="Audience Targeting" stepNumber={3} onEdit={handleEdit}>
-        <AudienceContent data={wizardData?.step3} />
+        <div className="space-y-3">
+          <div>
+            <span className="font-medium">Locations: </span>
+            {wizardData?.step3?.locations?.join(', ')}
+          </div>
+          <div>
+            <span className="font-medium">Age Ranges: </span>
+            {wizardData?.step3?.ageRanges?.join(', ')}
+          </div>
+          <div>
+            <span className="font-medium">Genders: </span>
+            {wizardData?.step3?.genders?.join(', ')}
+          </div>
+          <div>
+            <span className="font-medium">Languages: </span>
+            {wizardData?.step3?.languages?.join(', ')}
+          </div>
+        </div>
       </ReviewSection>
 
       {/* Creative Assets Section */}
       <ReviewSection title="Creative Assets" stepNumber={4} onEdit={handleEdit}>
-        {wizardData?.step4?.creativeAssets?.length > 0 ? (
-          <div className="space-y-6">
-            {wizardData.step4.creativeAssets.map((asset: any, index: number) => (
-              <div key={index} className="border rounded-lg p-4">
-                <AssetPreview
-                  type={asset.type}
-                  url={asset.url}
-                  title={asset.assetName}
-                  className="mb-4"
-                />
-                {/* Asset Details */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="font-medium">Asset Name: </span>
-                    {asset.assetName}
-                  </div>
-                  <div>
-                    <span className="font-medium">File Name: </span>
-                    {asset.fileName}
-                  </div>
-                  <div>
-                    <span className="font-medium">Influencer: </span>
-                    {asset.influencerHandle}
-                  </div>
-                  <div>
-                    <span className="font-medium">Budget: </span>
-                    £{asset.budget.toLocaleString()}
-                  </div>
+        <div className="space-y-6">
+          {wizardData?.step4?.creativeAssets?.map((asset, index) => (
+            <div key={index} className="border rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium">Asset Name: </span>
+                  {asset.assetName}
                 </div>
-                {/* Why This Influencer */}
-                <div className="mt-4">
-                  <span className="font-medium">Why This Influencer: </span>
-                  <p className="mt-1 text-gray-600">{asset.whyInfluencer}</p>
+                <div>
+                  <span className="font-medium">Type: </span>
+                  {asset.type}
+                </div>
+                <div>
+                  <span className="font-medium">Influencer Handle: </span>
+                  {asset.influencerHandle || 'Not specified'}
+                </div>
+                <div>
+                  <span className="font-medium">Budget: </span>
+                  {new Intl.NumberFormat('en-GB', {
+                    style: 'currency',
+                    currency: 'GBP'
+                  }).format(asset.budget || 0)}
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No creative assets uploaded</p>
-        )}
+              <div className="mt-4">
+                <span className="font-medium">Why This Influencer: </span>
+                <p className="mt-1 text-gray-600">{asset.whyInfluencer || 'Not specified'}</p>
+              </div>
+              <AssetPreview
+                type={asset.type}
+                url={asset.url}
+                title={asset.assetName}
+                className="mt-4"
+              />
+            </div>
+          ))}
+        </div>
       </ReviewSection>
 
       {/* Progress Bar */}
       <div className="mt-8">
         <ProgressBar
           currentStep={5}
-          onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-          onBack={() => router.push(`/campaigns/wizard/step-4?id=${campaignId}`)}
+          onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?campaignId=${campaignId}`)}
+          onBack={() => router.push(`/campaigns/wizard/step-4?campaignId=${campaignId}`)}
           onNext={handleSubmit}
           disableNext={!isValid}
         />
