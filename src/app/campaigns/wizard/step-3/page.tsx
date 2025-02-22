@@ -9,6 +9,9 @@ import "rc-slider/assets/index.css";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { Section } from '@/components/ui/section';
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "react-hot-toast";
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -142,9 +145,6 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({ selectedLocations, 
           </span>
         ))}
       </div>
-      <button type="button" className="mt-2 text-sm text-blue-600 underline">
-        Edit Field
-      </button>
     </div>
   );
 };
@@ -162,69 +162,111 @@ const AgeDistributionSlider: React.FC<AgeDistributionSliderProps> = ({
   onChange,
 }) => {
   const ageGroups = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
-
+  
   const handleSliderChange = (index: number, newValue: number) => {
-    const newValues = [...values];
+    let newValues = [...values];
     const oldValue = newValues[index];
-    newValues[index] = newValue;
-
-    // Calculate the adjustment needed for other values
+    
+    // Ensure newValue is between 0 and 100
+    newValue = Math.max(0, Math.min(100, newValue));
+    
+    // Calculate the difference to distribute
     const diff = newValue - oldValue;
-    if (diff !== 0) {
-      // Get indices of other values that can be adjusted
-      const adjustableIndices = values
-        .map((_, i) => i)
-        .filter(i => i !== index && newValues[i] > 0);
-
-      if (adjustableIndices.length > 0) {
-        // Distribute the difference proportionally among other values
-        const totalOthers = adjustableIndices.reduce((sum, i) => sum + newValues[i], 0);
-        adjustableIndices.forEach(i => {
-          const proportion = newValues[i] / totalOthers;
-          newValues[i] = Math.max(0, newValues[i] - (diff * proportion));
+    
+    // If increasing one value, decrease others proportionally
+    if (diff > 0) {
+      const availableToDecrease = newValues.reduce((sum, val, i) => 
+        i !== index ? sum + val : sum, 0);
+      
+      if (availableToDecrease > 0) {
+        newValues = newValues.map((val, i) => {
+          if (i === index) return newValue;
+          const decrease = (val / availableToDecrease) * diff;
+          return Math.max(0, val - decrease);
+        });
+      }
+    } 
+    // If decreasing one value, increase others proportionally
+    else if (diff < 0) {
+      const availableToIncrease = 100 - newValues.reduce((sum, val, i) => 
+        i !== index ? sum + val : sum, 0);
+      
+      if (availableToIncrease > 0) {
+        const totalOthers = newValues.reduce((sum, val, i) => 
+          i !== index ? sum + val : sum, 0);
+        
+        newValues = newValues.map((val, i) => {
+          if (i === index) return newValue;
+          const increase = (val / totalOthers) * Math.abs(diff);
+          return val + increase;
         });
       }
     }
 
-    // Round all values to integers
-    const roundedValues = newValues.map(v => Math.round(v));
+    // Round all values and ensure they sum to 100
+    newValues = newValues.map(v => Math.round(v));
+    const total = newValues.reduce((sum, v) => sum + v, 0);
     
-    // Ensure total is 100
-    const total = roundedValues.reduce((sum, v) => sum + v, 0);
     if (total !== 100) {
-      const largestIndex = roundedValues.indexOf(Math.max(...roundedValues));
-      roundedValues[largestIndex] += (100 - total);
+      const difference = 100 - total;
+      // Find largest value that's not the current index
+      const maxIndex = newValues
+        .map((v, i) => i !== index ? v : -1)
+        .reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+      
+      if (maxIndex >= 0) {
+        newValues[maxIndex] += difference;
+      }
     }
 
-    onChange(roundedValues);
+    onChange(newValues);
   };
 
   return (
-    <div className="mb-4">
-      <p className="italic text-sm mb-2">
-        Adjust the sliders to allocate percentages across age groups. The total must equal 100%. Moving one slider will auto-adjust the others.
+    <div className="mb-6">
+      <p className="text-sm text-gray-600 mb-4">
+        Adjust the sliders to allocate percentages across age groups. The total must equal 100%.
       </p>
-      {ageGroups.map((group, index) => (
-        <div key={index} className="flex items-center mb-3">
-          <span className="w-20 text-left">{group}</span>
-          <div className="flex-grow mx-4">
-            <Slider
-              min={0}
-              max={100}
-              value={values[index]}
-              onChange={(value) => handleSliderChange(index, typeof value === 'number' ? value : value[0])}
-              className="slider-blue"
-              trackStyle={{ backgroundColor: '#2563EB' }}
-              handleStyle={{
-                borderColor: '#2563EB',
-                backgroundColor: '#2563EB',
-              }}
-              railStyle={{ backgroundColor: '#E5E7EB' }}
-            />
+      
+      <div className="space-y-4">
+        {ageGroups.map((group, index) => (
+          <div key={group} className="flex items-center gap-4">
+            <span className="w-16 text-sm font-medium">{group}</span>
+            <div className="flex-grow">
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                value={values[index]}
+                onChange={(value) => handleSliderChange(index, typeof value === 'number' ? value : value[0])}
+                className="slider-blue"
+                trackStyle={{ 
+                  backgroundColor: '#2563EB', 
+                  height: 4,
+                  transition: 'all 0.3s ease' 
+                }}
+                handleStyle={{
+                  borderColor: '#2563EB',
+                  backgroundColor: '#2563EB',
+                  opacity: 1,
+                  boxShadow: '0 0 0 5px rgba(37, 99, 235, 0.1)',
+                  width: 16,
+                  height: 16,
+                  marginTop: -6,
+                  transition: 'all 0.3s ease'
+                }}
+                railStyle={{ 
+                  backgroundColor: '#E5E7EB',
+                  height: 4 
+                }}
+              />
+            </div>
+            <span className="w-12 text-right text-sm font-medium">
+              {Math.round(values[index])}%
+            </span>
           </div>
-          <span className="w-16 text-right">{Math.round(values[index])}%</span>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
@@ -383,9 +425,6 @@ const LanguagesSelector: React.FC<LanguagesSelectorProps> = ({ selected, onChang
           </option>
         ))}
       </select>
-      <button type="button" className="mt-2 text-sm text-blue-600 underline">
-        Edit Field
-      </button>
     </div>
   );
 };
@@ -413,9 +452,6 @@ const AdvancedTargeting: React.FC = () => (
         <option value="University">University</option>
         <option value="Postgraduate">Postgraduate</option>
       </Field>
-      <button type="button" className="mt-2 text-sm text-blue-600 underline">
-        Edit Field
-      </button>
       <ErrorMessage name="educationLevel" component="div" className="text-red-600 text-sm" />
     </div>
     <div className="mb-4">
@@ -428,9 +464,6 @@ const AdvancedTargeting: React.FC = () => (
         placeholder="Type to search job titles"
         className="w-full p-2 border rounded"
       />
-      <button type="button" className="mt-2 text-sm text-blue-600 underline">
-        Edit Field
-      </button>
       <ErrorMessage name="jobTitles" component="div" className="text-red-600 text-sm" />
     </div>
     <div className="mb-4">
@@ -524,175 +557,163 @@ function AudienceTargetingContent() {
   const campaignId = searchParams.get('id');
   const { data, updateData } = useWizard();
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Update the useEffect for loading campaign data
+  useEffect(() => {
+    const loadCampaignData = async () => {
+      if (campaignId) {
+        try {
+          setIsLoading(true);
+          setError(null);
+          const response = await fetch(`/api/campaigns/${campaignId}`);
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to load campaign');
+          }
+
+          if (data.success) {
+            updateData(data.campaign);
+            toast.success('Campaign data loaded');
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Failed to load campaign';
+          setError(message);
+          toast.error(message);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    loadCampaignData();
+  }, [campaignId]);
+
+  // Update initialValues to remove default values
   const initialValues: AudienceValues = {
-    location: data.audience.location || [],
+    location: data.audience?.location || [],
     ageDistribution: {
-      age1824: data.audience.ageDistribution?.age1824 ?? 20,
-      age2534: data.audience.ageDistribution?.age2534 ?? 25,
-      age3544: data.audience.ageDistribution?.age3544 ?? 20,
-      age4554: data.audience.ageDistribution?.age4554 ?? 15,
-      age5564: data.audience.ageDistribution?.age5564 ?? 10,
-      age65plus: data.audience.ageDistribution?.age65plus ?? 10,
+      age1824: data.audience?.ageDistribution?.age1824 ?? 0,
+      age2534: data.audience?.ageDistribution?.age2534 ?? 0,
+      age3544: data.audience?.ageDistribution?.age3544 ?? 0,
+      age4554: data.audience?.ageDistribution?.age4554 ?? 0,
+      age5564: data.audience?.ageDistribution?.age5564 ?? 0,
+      age65plus: data.audience?.ageDistribution?.age65plus ?? 0,
     },
-    gender: data.audience.gender || [],
-    otherGender: data.audience.otherGender || "",
-    screeningQuestions: data.audience.screeningQuestions || [],
-    languages: data.audience.languages || [],
-    educationLevel: data.audience.educationLevel || "",
-    jobTitles: data.audience.jobTitles || "",
-    incomeLevel: data.audience.incomeLevel || "",
-    competitors: data.audience.competitors || [],
+    gender: data.audience?.gender || [],
+    otherGender: data.audience?.otherGender || "",
+    screeningQuestions: data.audience?.screeningQuestions || [],
+    languages: data.audience?.languages || [],
+    educationLevel: data.audience?.educationLevel || "",
+    jobTitles: data.audience?.jobTitles || "",
+    incomeLevel: data.audience?.incomeLevel || "",
+    competitors: data.audience?.competitors || [],
   };
 
+  // Update handleSubmit with better error handling
   const handleSubmit = async (values: AudienceValues) => {
     try {
-      setIsSubmitting(true);
-      
-      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+      setIsSaving(true);
+      setError(null);
+
+      if (!campaignId) {
+        throw new Error('Campaign ID is required');
+      }
+
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          step: 3,
-          data: {
-            audience: {
-              create: {
-                // Age distribution
-                age1824: values.ageDistribution.age1824,
-                age2534: values.ageDistribution.age2534,
-                age3544: values.ageDistribution.age3544,
-                age4554: values.ageDistribution.age4554,
-                age5564: values.ageDistribution.age5564,
-                age65plus: values.ageDistribution.age65plus,
-                
-                // Other demographics
-                otherGender: values.otherGender,
-                educationLevel: values.educationLevel,
-                jobTitles: values.jobTitles,
-                incomeLevel: values.incomeLevel,
-                
-                // Related arrays using nested create
-                locations: {
-                  create: values.location.map(loc => ({
-                    location: loc
-                  }))
-                },
-                genders: {
-                  create: values.gender.map(g => ({
-                    gender: g
-                  }))
-                },
-                screeningQuestions: {
-                  create: values.screeningQuestions.map(q => ({
-                    question: q
-                  }))
-                },
-                languages: {
-                  create: values.languages.map(lang => ({
-                    language: lang
-                  }))
-                },
-                competitors: {
-                  create: values.competitors.map(comp => ({
-                    competitor: comp
-                  }))
-                }
-              }
-            }
-          }
-        })
+          audience: values
+        }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save audience data');
+        throw new Error(result.error || 'Failed to update campaign');
       }
 
-      // Update local state
-      updateData("audience", values);
-      
-      // Navigate to next step
+      toast.success('Campaign updated successfully');
       router.push(`/campaigns/wizard/step-4?id=${campaignId}`);
     } catch (error) {
-      console.error('Error saving step 3:', error);
-      toast.error('Failed to save audience data');
+      const message = error instanceof Error ? error.message : 'Failed to update campaign';
+      setError(message);
+      toast.error(message);
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
+  // Update handleSaveDraft
   const handleSaveDraft = async (values: AudienceValues) => {
     try {
-      setIsSubmitting(true);
-      
-      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
+      setIsSaving(true);
+      setError(null);
+
+      if (!campaignId) {
+        throw new Error('Campaign ID is required');
+      }
+
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          step: 3,
-          data: {
-            audience: {
-              create: {
-                // Same structure as handleSubmit
-                age1824: values.ageDistribution.age1824,
-                age2534: values.ageDistribution.age2534,
-                age3544: values.ageDistribution.age3544,
-                age4554: values.ageDistribution.age4554,
-                age5564: values.ageDistribution.age5564,
-                age65plus: values.ageDistribution.age65plus,
-                otherGender: values.otherGender,
-                educationLevel: values.educationLevel,
-                jobTitles: values.jobTitles,
-                incomeLevel: values.incomeLevel,
-                locations: {
-                  create: values.location.map(loc => ({
-                    location: loc
-                  }))
-                },
-                genders: {
-                  create: values.gender.map(g => ({
-                    gender: g
-                  }))
-                },
-                screeningQuestions: {
-                  create: values.screeningQuestions.map(q => ({
-                    question: q
-                  }))
-                },
-                languages: {
-                  create: values.languages.map(lang => ({
-                    language: lang
-                  }))
-                },
-                competitors: {
-                  create: values.competitors.map(comp => ({
-                    competitor: comp
-                  }))
-                }
-              }
-            },
-            submissionStatus: 'draft'
-          }
-        })
+          audience: values,
+          submissionStatus: 'draft'
+        }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to save draft');
+        throw new Error(result.error || 'Failed to save draft');
       }
 
       toast.success('Draft saved successfully');
     } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error('Failed to save draft');
+      const message = error instanceof Error ? error.message : 'Failed to save draft';
+      setError(message);
+      toast.error(message);
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
+
+  // Add loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner />
+        <p className="ml-2">Loading campaign data...</p>
+      </div>
+    );
+  }
+
+  // Add error state
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-800 font-semibold">Error</h3>
+        <p className="text-red-600">{error}</p>
+        <button
+          onClick={() => router.push('/campaigns')}
+          className="mt-4 btn btn-secondary"
+        >
+          Return to Campaigns
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 pb-32">
@@ -710,10 +731,17 @@ function AudienceTargetingContent() {
               <button 
                 type="button"
                 onClick={() => handleSaveDraft(values)}
-                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
-                disabled={isSubmitting}
+                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 flex items-center"
+                disabled={isSaving}
               >
-                {isSubmitting ? 'Saving...' : 'Save as Draft'}
+                {isSaving ? (
+                  <>
+                    <LoadingSpinner className="w-4 h-4 mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Draft'
+                )}
               </button>
             </div>
 
@@ -722,9 +750,8 @@ function AudienceTargetingContent() {
               <div>
                 <h2 className="text-xl font-bold mb-2">Demographics</h2>
                 <LocationSelector
-                  selectedLocations={initialValues.location}
+                  selectedLocations={values.location}
                   onChange={(locs) => {
-                    // Update the formik values
                     setFieldValue("location", locs);
                   }}
                 />
@@ -754,8 +781,8 @@ function AudienceTargetingContent() {
                   className="text-red-600 text-sm"
                 />
                 <GenderSelection
-                  selected={initialValues.gender}
-                  otherGender={initialValues.otherGender}
+                  selected={values.gender}
+                  otherGender={values.otherGender}
                   onChange={(genders) => {
                     setFieldValue("gender", genders);
                   }}
@@ -769,7 +796,7 @@ function AudienceTargetingContent() {
               <div>
                 <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
                 <ScreeningQuestions
-                  selectedTags={initialValues.screeningQuestions}
+                  selectedTags={values.screeningQuestions}
                   onChange={(tags) => {
                     setFieldValue("screeningQuestions", tags);
                   }}
@@ -780,7 +807,7 @@ function AudienceTargetingContent() {
               <div>
                 <h2 className="text-xl font-bold mb-2">Languages</h2>
                 <LanguagesSelector
-                  selected={initialValues.languages}
+                  selected={values.languages}
                   onChange={(langs) => {
                     setFieldValue("languages", langs);
                   }}
@@ -803,7 +830,7 @@ function AudienceTargetingContent() {
               <div>
                 <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
                 <CompetitorTracking
-                  selected={initialValues.competitors}
+                  selected={values.competitors}
                   onChange={(companies) => {
                     setFieldValue("competitors", companies);
                   }}
@@ -813,10 +840,10 @@ function AudienceTargetingContent() {
 
             <ProgressBar
               currentStep={3}
-              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-              onBack={() => router.push("/campaigns/wizard/step-2")}
+              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+              onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
               onNext={submitForm}
-              disableNext={!isValid || isSubmitting}
+              disableNext={!isValid || isSaving}
             />
           </>
         )}
@@ -827,7 +854,12 @@ function AudienceTargetingContent() {
 
 export default function AudienceTargetingStep() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner />
+        <p className="ml-2">Loading...</p>
+      </div>
+    }>
       <AudienceTargetingContent />
     </Suspense>
   );

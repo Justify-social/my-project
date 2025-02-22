@@ -5,34 +5,45 @@ import { useSidebar } from "@/providers/SidebarProvider";
 import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
 
 export interface ProgressBarProps {
-  currentStep: number; // 1-indexed
-  totalSteps?: number; // defaults to 5
-  steps?: string[];    // wizard step labels
-  onStepClick: (step: number) => void; // when user clicks a completed step
-  onBack: () => void;
-  onNext: () => void;  // used for "Next" or "Submit Campaign"
-  disableNext: boolean;
+  currentStep: number;
+  onStepClick: (step: number) => void;
+  onBack: (() => void) | null;
+  onNext: () => void;
+  disableNext?: boolean;
+  isFormValid?: boolean;
+  isDirty?: boolean;
 }
+
+const STEPS = [
+  "Campaign Details",
+  "Objectives & Messaging",
+  "Target Audience",
+  "Creative Assets",
+  "Review"
+];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   currentStep,
-  totalSteps = 5,
-  steps = [
-    "Campaign Details",
-    "Objectives & Messaging",
-    "Audience Targeting",
-    "Creative Assets",
-    "Review & Submit",
-  ],
   onStepClick,
   onBack,
   onNext,
-  disableNext,
+  disableNext = false,
+  isFormValid = true,
+  isDirty = true,
 }) => {
   const { isOpen } = useSidebar();
   const { position } = useSettingsPosition();
 
-  // Calculate dynamic height with minimum of 65px
+  const isNextDisabled = disableNext || (!isFormValid && isDirty);
+
+  console.log('ProgressBar State:', {
+    currentStep,
+    disableNext,
+    isFormValid,
+    isDirty,
+    isNextDisabled
+  });
+
   const progressBarHeight = position.topOffset
     ? Math.max(65, position.topOffset)
     : 65;
@@ -64,30 +75,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       }}
     >
       <div className="absolute top-0 left-0 right-0 h-[65px] flex justify-between items-center">
-        {/* STEPS LIST */}
-        <ul
-          className="
-            flex
-            items-center
-            space-x-2
-            overflow-x-auto
-            whitespace-nowrap
-            px-2
-            h-full
-            flex-grow
-            min-w-0
-          "
-        >
-          {steps.map((label, index) => {
+        <ul className="flex items-center space-x-2 overflow-x-auto whitespace-nowrap px-2 h-full flex-grow min-w-0">
+          {STEPS.map((label, index) => {
             const stepNumber = index + 1;
-            let status: "completed" | "current" | "upcoming";
-            if (stepNumber < currentStep) {
-              status = "completed";
-            } else if (stepNumber === currentStep) {
-              status = "current";
-            } else {
-              status = "upcoming";
-            }
+            const status = 
+              stepNumber < currentStep ? "completed" :
+              stepNumber === currentStep ? "current" : "upcoming";
 
             return (
               <li
@@ -120,31 +113,38 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 >
                   {label}
                 </span>
-                {index < steps.length - 1 && <span className="mx-1 text-gray-500">→</span>}
+                {index < STEPS.length - 1 && <span className="mx-1 text-gray-500">→</span>}
               </li>
             );
           })}
         </ul>
 
-        {/* NAVIGATION BUTTONS */}
         <div className="flex space-x-2 px-4 h-full items-center flex-shrink-0">
-          <button
-            type="button"
-            onClick={onBack}
-            disabled={currentStep === 1}
-            data-cy="back-button"
-            className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-200 disabled:opacity-50"
-          >
-            Back
-          </button>
+          {onBack && currentStep > 1 && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-200"
+            >
+              Back
+            </button>
+          )}
           <button
             type="button"
             onClick={onNext}
-            disabled={disableNext}
+            disabled={isNextDisabled}
             data-cy="next-button"
-            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+            className={`
+              px-3 py-1 
+              rounded 
+              transition duration-200 
+              ${isNextDisabled 
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                : "bg-blue-600 text-white hover:bg-blue-700"
+              }
+            `}
           >
-            {currentStep < totalSteps ? "Next" : "Submit Campaign"}
+            {currentStep < STEPS.length ? "Next" : "Submit Campaign"}
           </button>
         </div>
       </div>

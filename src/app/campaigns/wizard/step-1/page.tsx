@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
@@ -21,7 +22,6 @@ const OverviewSchema = disableValidation
       startDate: Yup.string().required("Start date is required"),
       endDate: Yup.string().required("End date is required"),
       timeZone: Yup.string().required("Time zone is required"),
-      contacts: Yup.string().required("Contacts are required"),
       primaryContact: Yup.object().shape({
         firstName: Yup.string().required("First name is required"),
         surname: Yup.string().required("Surname is required"),
@@ -76,7 +76,14 @@ const debugFormData = (values: any, isDraft: boolean) => {
 export default function Overview() {
   const router = useRouter();
   const { data, updateData } = useWizard();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get('id');
+  
+  const [state, setState] = useState({
+    isSubmitting: false,
+    isLoading: false,
+    error: null as string | null,
+  });
 
   const initialValues = {
     name: data.overview.name || "",
@@ -84,7 +91,6 @@ export default function Overview() {
     startDate: data.overview.startDate || "",
     endDate: data.overview.endDate || "",
     timeZone: data.overview.timeZone || "UTC",
-    contacts: data.overview.contacts || "",
     primaryContact: {
       firstName: data.overview.primaryContact?.firstName || "",
       surname: data.overview.primaryContact?.surname || "",
@@ -97,93 +103,303 @@ export default function Overview() {
       email: data.overview.secondaryContact?.email || "",
       position: data.overview.secondaryContact?.position || "",
     },
-    currency: data.overview.currency || "£",
-    totalBudget: data.overview.totalBudget || 5000,
-    socialMediaBudget: data.overview.socialMediaBudget || 1000,
+    currency: data.overview.currency || "",
+    totalBudget: data.overview.totalBudget || "",
+    socialMediaBudget: data.overview.socialMediaBudget || "",
     platform: data.overview.platform || "",
     influencerHandle: data.overview.influencerHandle || "",
   };
 
-  const handleSubmit = async (values: any, isDraft = false) => {
+  useEffect(() => {
+    const loadCampaignData = async () => {
+      if (campaignId) {
+        try {
+          setState(prev => ({ ...prev, isLoading: true, error: null }));
+          const response = await fetch(`/api/campaigns/${campaignId}`);
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to load campaign');
+          }
+
+          if (data.success) {
+            updateData(data.campaign);
+            toast.success('Campaign data loaded');
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Failed to load campaign';
+          setState(prev => ({ ...prev, error: message }));
+          toast.error(message);
+        } finally {
+          setState(prev => ({ ...prev, isLoading: false }));
+        }
+      } else {
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    loadCampaignData();
+  }, [campaignId]);
+
+  const handleSubmit = async (values: any) => {
+    setState(prev => ({ ...prev, isSubmitting: true, error: null }));
+    
     try {
-      setIsSubmitting(true);
-      console.log('Save Draft clicked');
-      console.log('Form values:', values);
+      console.log('Starting form submission:', values);
+
+      // Prepare the request data
+      const requestData = {
+        name: values.name,
+        businessGoal: values.businessGoal,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        timeZone: values.timeZone,
+        primaryContact: values.primaryContact,
+        secondaryContact: values.secondaryContact,
+        currency: values.currency,
+        totalBudget: Number(values.totalBudget),
+        socialMediaBudget: Number(values.socialMediaBudget),
+        platform: values.platform,
+        influencerHandle: values.influencerHandle,
+        step: 1,
+        status: 'in_progress'
+      };
+
+      // Add retry logic
+      let retries = 3;
+      let response;
+      let result;
+
+      while (retries > 0) {
+        try {
+          console.log(`Attempt ${4 - retries}: Sending request to /api/campaigns`);
+          
+          response = await fetch('/api/campaigns', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+          });
+
+          // Try to parse the response as text first
+          const responseText = await response.text();
+          console.log('Raw response text:', responseText);
+
+          try {
+            // Then try to parse it as JSON if possible
+            result = JSON.parse(responseText);
+            console.log('Parsed response:', result);
+          } catch (e) {
+            console.error('Failed to parse response as JSON:', e);
+            result = { error: responseText };
+          }
+
+          if (response.ok) {
+            break; // Success, exit retry loop
+          }
+
+          console.error('API Error Response:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: responseText,
+            parsedBody: result
+          });
+
+          // If we get a 500 error, retry
+          if (response.status === 500) {
+            retries--;
+            if (retries > 0) {
+              console.log(`Retrying... ${retries} attempts remaining`);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+              continue;
+            }
+          }
+
+          // For other errors, throw immediately
+          throw new Error(result?.error || `API Error: ${response.status} ${response.statusText}`);
+        } catch (fetchError) {
+          console.error('Fetch attempt failed:', fetchError);
+          retries--;
+          if (retries === 0) throw fetchError;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // If we have a successful response
+      if (response?.ok && result?.id) {
+        // Update local state
+        updateData({
+          ...data,
+          overview: values,
+          id: result.id
+        });
+
+        toast.success('Campaign saved successfully');
+        
+        // Navigate to next step
+        const nextUrl = `/campaigns/wizard/step-2?id=${result.id}`;
+        try {
+          await router.push(nextUrl);
+        } catch (navError) {
+          console.error('Navigation error:', navError);
+          window.location.href = nextUrl;
+        }
+      } else {
+        throw new Error('Failed to get valid response from server');
+      }
+
+    } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'An unexpected error occurred';
+      
+      console.error('Final submission error:', {
+        error,
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      setState(prev => ({ ...prev, error: errorMessage }));
+      toast.error(errorMessage);
+    } finally {
+      setState(prev => ({ ...prev, isSubmitting: false }));
+    }
+  };
+
+  const handleSaveDraft = async (values: any) => {
+    try {
+      setState(prev => ({ ...prev, isSubmitting: true }));
 
       const response = await fetch('/api/campaigns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          name: values.name,
+          businessGoal: values.businessGoal,
+          startDate: values.startDate,
+          endDate: values.endDate,
+          timeZone: values.timeZone,
+          primaryContact: values.primaryContact,
+          secondaryContact: values.secondaryContact,
+          currency: values.currency,
+          totalBudget: Number(values.totalBudget),
+          socialMediaBudget: Number(values.socialMediaBudget),
+          platform: values.platform,
+          influencerHandle: values.influencerHandle,
+          step: 1,
+          status: 'draft'
+        }),
       });
 
       const result = await response.json();
 
-      if (result.success) {
-        // Store the campaign ID for later steps
-        const campaignId = result.campaign.id;
-        
-        // Navigate to step 2 with the campaign ID
-        router.push(`/campaigns/wizard/step-2?campaignId=${campaignId}`);
-      } else {
-        console.error('Failed to save campaign:', result.error);
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save draft');
       }
+
+      updateData({
+        ...data,
+        overview: values,
+        id: result.id
+      });
+
+      toast.success('Draft saved successfully');
     } catch (error) {
-      console.error('Error saving campaign:', error);
-      toast.error(error.message || 'Failed to save campaign');
+      console.error('Draft save error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save draft');
     } finally {
-      setIsSubmitting(false);
+      setState(prev => ({ ...prev, isSubmitting: false }));
     }
   };
+
+  if (state.isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner />
+        <p className="ml-2">Loading campaign data...</p>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-800 font-semibold">Error</h3>
+        <p className="text-red-600">{state.error}</p>
+        <button
+          onClick={() => router.push('/campaigns')}
+          className="mt-4 btn btn-secondary"
+        >
+          Return to Campaigns
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 pb-20">
       <Header currentStep={1} totalSteps={5} />
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Step 1: Campaign Details</h1>
-        <button 
-          type="button"
-          onClick={() => handleSubmit(initialValues, true)}
-          className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving...' : 'Save as Draft'}
-        </button>
-      </div>
-      
       <Formik
         initialValues={initialValues}
         validationSchema={OverviewSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, submitForm }) => (
-          <>
-            <Form className="space-y-8">
-              {/* Campaign Name */}
-              <div>
-                <label htmlFor="name" className="block font-semibold">
-                  Campaign Name
-                </label>
-                <div className="flex items-center">
+        {({ values, isValid, dirty, errors }) => {
+          const handleNextStep = async () => {
+            if (!isValid) {
+              const errorKeys = Object.keys(errors);
+              console.log('Validation errors:', errors);
+              toast.error(`Please fix the following: ${errorKeys.join(', ')}`);
+              return;
+            }
+
+            await handleSubmit(values);
+          };
+
+          return (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">Step 1: Campaign Details</h1>
+                <button 
+                  type="button"
+                  onClick={() => handleSaveDraft(values)}
+                  className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 flex items-center"
+                  disabled={state.isSubmitting}
+                >
+                  {state.isSubmitting ? (
+                    <>
+                      <LoadingSpinner className="w-4 h-4 mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Draft'
+                  )}
+                </button>
+              </div>
+
+              <Form className="space-y-8">
+                {/* Campaign Name */}
+                <div>
+                  <label htmlFor="name" className="block font-semibold">
+                    Campaign Name
+                  </label>
                   <Field
                     id="name"
                     name="name"
                     placeholder="Campaign Name"
                     className="w-full p-2 border rounded"
                   />
-                  <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-                    Edit
-                  </button>
+                  <ErrorMessage name="name" component="div" className="text-red-600 text-sm" />
                 </div>
-                <ErrorMessage name="name" component="div" className="text-red-600 text-sm" />
-              </div>
-              {/* Business Goal */}
-              <div>
-                <label htmlFor="businessGoal" className="block font-semibold">
-                  What business goal does this campaign support?
-                </label>
-                <div className="flex items-center">
+                {/* Business Goal */}
+                <div>
+                  <label htmlFor="businessGoal" className="block font-semibold">
+                    What business goal does this campaign support?
+                  </label>
                   <Field
                     as="textarea"
                     id="businessGoal"
@@ -192,253 +408,239 @@ export default function Overview() {
                     className="w-full p-2 border rounded"
                     maxLength={3000}
                   />
-                  <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-                    Edit
-                  </button>
+                  <ErrorMessage name="businessGoal" component="div" className="text-red-600 text-sm" />
                 </div>
-                <ErrorMessage name="businessGoal" component="div" className="text-red-600 text-sm" />
-              </div>
-              {/* Date & Time */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label htmlFor="startDate" className="block font-semibold">
-                    Start Date
-                  </label>
-                  <Field id="startDate" name="startDate" type="date" className="w-full p-2 border rounded" />
-                  <ErrorMessage name="startDate" component="div" className="text-red-600 text-sm" />
-                </div>
-                <div>
-                  <label htmlFor="endDate" className="block font-semibold">
-                    End Date
-                  </label>
-                  <Field id="endDate" name="endDate" type="date" className="w-full p-2 border rounded" />
-                  <ErrorMessage name="endDate" component="div" className="text-red-600 text-sm" />
-                </div>
-                <div>
-                  <label htmlFor="timeZone" className="block font-semibold">
-                    Select from common time zones
-                  </label>
-                  <Field as="select" id="timeZone" name="timeZone" className="w-full p-2 border rounded">
-                    <option value="UTC">UTC</option>
-                    <option value="GMT">GMT</option>
-                    <option value="EST">EST</option>
-                    <option value="PST">PST</option>
-                  </Field>
-                  <ErrorMessage name="timeZone" component="div" className="text-red-600 text-sm" />
-                </div>
-              </div>
-              {/* Contacts / Influencers Section */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Influencers Section</h2>
-                {/* Added the missing "contacts" field */}
-                <div>
-                  <label htmlFor="contacts" className="block font-semibold">
-                    Contacts
-                  </label>
-                  <Field
-                    id="contacts"
-                    name="contacts"
-                    placeholder="Enter contacts"
-                    className="w-full p-2 border rounded"
-                  />
-                  <ErrorMessage name="contacts" component="div" className="text-red-600 text-sm" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  {/* Primary Contact */}
-                  <div className="border p-4 rounded">
-                    <h3 className="font-semibold mb-2">Primary Contact</h3>
-                    <div className="mb-2">
-                      <label htmlFor="primaryContact.firstName" className="block text-sm font-medium">
-                        First Name
-                      </label>
-                      <Field
-                        id="primaryContact.firstName"
-                        name="primaryContact.firstName"
-                        placeholder="Ed"
-                        className="w-full p-2 border rounded"
-                      />
-                      <ErrorMessage name="primaryContact.firstName" component="div" className="text-red-600 text-sm" />
-                    </div>
-                    <div className="mb-2">
-                      <label htmlFor="primaryContact.surname" className="block text-sm font-medium">
-                        Surname
-                      </label>
-                      <Field
-                        id="primaryContact.surname"
-                        name="primaryContact.surname"
-                        placeholder="Addams"
-                        className="w-full p-2 border rounded"
-                      />
-                      <ErrorMessage name="primaryContact.surname" component="div" className="text-red-600 text-sm" />
-                    </div>
-                    <div className="mb-2">
-                      <label htmlFor="primaryContact.email" className="block text-sm font-medium">
-                        Email
-                      </label>
-                      <Field
-                        id="primaryContact.email"
-                        name="primaryContact.email"
-                        type="email"
-                        placeholder="edaddams@domain.com"
-                        className="w-full p-2 border rounded"
-                      />
-                      <ErrorMessage name="primaryContact.email" component="div" className="text-red-600 text-sm" />
-                    </div>
-                    <div>
-                      <label htmlFor="primaryContact.position" className="block text-sm font-medium">
-                        Position
-                      </label>
-                      <Field
-                        as="select"
-                        id="primaryContact.position"
-                        name="primaryContact.position"
-                        className="w-full p-2 border rounded"
-                      >
-                        <option value="">Select Position</option>
-                        <option value={Position.Manager}>{Position.Manager}</option>
-                        <option value={Position.Director}>{Position.Director}</option>
-                        <option value={Position.VP}>{Position.VP}</option>
-                      </Field>
-                      <ErrorMessage name="primaryContact.position" component="div" className="text-red-600 text-sm" />
-                    </div>
-                  </div>
-                  {/* Secondary Contact */}
-                  <div className="border p-4 rounded">
-                    <h3 className="font-semibold mb-2">Secondary Contact</h3>
-                    <div className="mb-2">
-                      <label htmlFor="secondaryContact.firstName" className="block text-sm font-medium">
-                        First Name
-                      </label>
-                      <Field
-                        id="secondaryContact.firstName"
-                        name="secondaryContact.firstName"
-                        placeholder="Ed"
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div className="mb-2">
-                      <label htmlFor="secondaryContact.surname" className="block text-sm font-medium">
-                        Surname
-                      </label>
-                      <Field
-                        id="secondaryContact.surname"
-                        name="secondaryContact.surname"
-                        placeholder="Addams"
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div className="mb-2">
-                      <label htmlFor="secondaryContact.email" className="block text-sm font-medium">
-                        Email
-                      </label>
-                      <Field
-                        id="secondaryContact.email"
-                        name="secondaryContact.email"
-                        type="email"
-                        placeholder="edaddams@domain.com"
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="secondaryContact.position" className="block text-sm font-medium">
-                        Position
-                      </label>
-                      <Field
-                        as="select"
-                        id="secondaryContact.position"
-                        name="secondaryContact.position"
-                        className="w-full p-2 border rounded"
-                      >
-                        <option value="">Select Position</option>
-                        <option value={Position.Manager}>{Position.Manager}</option>
-                        <option value={Position.Director}>{Position.Director}</option>
-                        <option value={Position.VP}>{Position.VP}</option>
-                      </Field>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Budget Section */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Budget Section</h2>
+                {/* Date & Time */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label htmlFor="currency" className="block font-semibold">
-                      Currency
+                    <label htmlFor="startDate" className="block font-semibold">
+                      Start Date
                     </label>
-                    <Field as="select" id="currency" name="currency" className="w-full p-2 border rounded">
-                      <option value={Currency.GBP}>GBP (£)</option>
-                      <option value={Currency.USD}>USD ($)</option>
-                      <option value={Currency.EUR}>EUR (€)</option>
+                    <Field id="startDate" name="startDate" type="date" className="w-full p-2 border rounded" />
+                    <ErrorMessage name="startDate" component="div" className="text-red-600 text-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="endDate" className="block font-semibold">
+                      End Date
+                    </label>
+                    <Field id="endDate" name="endDate" type="date" className="w-full p-2 border rounded" />
+                    <ErrorMessage name="endDate" component="div" className="text-red-600 text-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="timeZone" className="block font-semibold">
+                      Select from common time zones
+                    </label>
+                    <Field as="select" id="timeZone" name="timeZone" className="w-full p-2 border rounded">
+                      <option value="UTC">UTC</option>
+                      <option value="GMT">GMT</option>
+                      <option value="EST">EST</option>
+                      <option value="PST">PST</option>
                     </Field>
-                    <ErrorMessage name="currency" component="div" className="text-red-600 text-sm" />
-                  </div>
-                  <div>
-                    <label htmlFor="totalBudget" className="block font-semibold">
-                      Total campaign budget
-                    </label>
-                    <div className="flex items-center">
-                      <Field id="totalBudget" name="totalBudget" type="number" className="w-full p-2 border rounded" />
-                      <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-                        Edit
-                      </button>
-                    </div>
-                    <ErrorMessage name="totalBudget" component="div" className="text-red-600 text-sm" />
-                  </div>
-                  <div>
-                    <label htmlFor="socialMediaBudget" className="block font-semibold">
-                      Budget allocated to social media
-                    </label>
-                    <div className="flex items-center">
-                      <Field id="socialMediaBudget" name="socialMediaBudget" type="number" className="w-full p-2 border rounded" />
-                      <button type="button" className="ml-2 px-2 py-1 border rounded text-sm">
-                        Edit
-                      </button>
-                    </div>
-                    <ErrorMessage name="socialMediaBudget" component="div" className="text-red-600 text-sm" />
+                    <ErrorMessage name="timeZone" component="div" className="text-red-600 text-sm" />
                   </div>
                 </div>
-              </div>
-              {/* Platform & Influencer Selection */}
-              <div>
-                <h2 className="text-xl font-bold mb-2">Platform & Influencer Selection</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="platform" className="block font-semibold">
-                      Platform
-                    </label>
-                    <Field as="select" id="platform" name="platform" className="w-full p-2 border rounded">
-                      <option value="">Select Platform</option>
-                      <option value={Platform.Instagram}>{Platform.Instagram}</option>
-                      <option value={Platform.YouTube}>{Platform.YouTube}</option>
-                      <option value={Platform.TikTok}>{Platform.TikTok}</option>
-                    </Field>
-                    <ErrorMessage name="platform" component="div" className="text-red-600 text-sm" />
-                  </div>
-                  <div>
-                    <label htmlFor="influencerHandle" className="block font-semibold">
-                      Start typing influencer's handle
-                    </label>
-                    <Field
-                      id="influencerHandle"
-                      name="influencerHandle"
-                      placeholder="e.g. oliviabennett"
-                      className="w-full p-2 border rounded"
-                    />
-                    <ErrorMessage name="influencerHandle" component="div" className="text-red-600 text-sm" />
+                {/* Contacts / Influencers Section */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Who's in charge?</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {/* Primary Contact */}
+                    <div className="border p-4 rounded">
+                      <h3 className="font-semibold mb-2">Primary Contact</h3>
+                      <div className="mb-2">
+                        <label htmlFor="primaryContact.firstName" className="block text-sm font-medium">
+                          First Name
+                        </label>
+                        <Field
+                          id="primaryContact.firstName"
+                          name="primaryContact.firstName"
+                          placeholder="First Name"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div className="mb-2">
+                        <label htmlFor="primaryContact.surname" className="block text-sm font-medium">
+                          Surname
+                        </label>
+                        <Field
+                          id="primaryContact.surname"
+                          name="primaryContact.surname"
+                          placeholder="Surname"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div className="mb-2">
+                        <label htmlFor="primaryContact.email" className="block text-sm font-medium">
+                          Email
+                        </label>
+                        <Field
+                          id="primaryContact.email"
+                          name="primaryContact.email"
+                          type="email"
+                          placeholder="email@domain.com"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="primaryContact.position" className="block text-sm font-medium">
+                          Position
+                        </label>
+                        <Field
+                          as="select"
+                          id="primaryContact.position"
+                          name="primaryContact.position"
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="">Select Position</option>
+                          <option value={Position.Manager}>{Position.Manager}</option>
+                          <option value={Position.Director}>{Position.Director}</option>
+                          <option value={Position.VP}>{Position.VP}</option>
+                        </Field>
+                        <ErrorMessage name="primaryContact.position" component="div" className="text-red-600 text-sm" />
+                      </div>
+                    </div>
+                    {/* Secondary Contact */}
+                    <div className="border p-4 rounded">
+                      <h3 className="font-semibold mb-2">Secondary Contact</h3>
+                      <div className="mb-2">
+                        <label htmlFor="secondaryContact.firstName" className="block text-sm font-medium">
+                          First Name
+                        </label>
+                        <Field
+                          id="secondaryContact.firstName"
+                          name="secondaryContact.firstName"
+                          placeholder="First Name"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div className="mb-2">
+                        <label htmlFor="secondaryContact.surname" className="block text-sm font-medium">
+                          Surname
+                        </label>
+                        <Field
+                          id="secondaryContact.surname"
+                          name="secondaryContact.surname"
+                          placeholder="Surname"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div className="mb-2">
+                        <label htmlFor="secondaryContact.email" className="block text-sm font-medium">
+                          Email
+                        </label>
+                        <Field
+                          id="secondaryContact.email"
+                          name="secondaryContact.email"
+                          type="email"
+                          placeholder="email@domain.com"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="secondaryContact.position" className="block text-sm font-medium">
+                          Position
+                        </label>
+                        <Field
+                          as="select"
+                          id="secondaryContact.position"
+                          name="secondaryContact.position"
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="">Select Position</option>
+                          <option value={Position.Manager}>{Position.Manager}</option>
+                          <option value={Position.Director}>{Position.Director}</option>
+                          <option value={Position.VP}>{Position.VP}</option>
+                        </Field>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Form>
-            <ProgressBar
-              currentStep={1}
-              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
-              onBack={() => router.push("/campaigns/wizard")}
-              onNext={submitForm}
-              disableNext={isSubmitting}
-            />
-          </>
-        )}
+                {/* Budget Section */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Budget</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label htmlFor="currency" className="block font-semibold">
+                        Currency
+                      </label>
+                      <Field as="select" id="currency" name="currency" className="w-full p-2 border rounded">
+                        <option value="">Select Currency</option>
+                        <option value={Currency.GBP}>GBP (£)</option>
+                        <option value={Currency.USD}>USD ($)</option>
+                        <option value={Currency.EUR}>EUR (€)</option>
+                      </Field>
+                      <ErrorMessage name="currency" component="div" className="text-red-600 text-sm" />
+                    </div>
+                    <div>
+                      <label htmlFor="totalBudget" className="block font-semibold">
+                        Total campaign budget
+                      </label>
+                      <Field 
+                        id="totalBudget" 
+                        name="totalBudget" 
+                        type="number" 
+                        placeholder="Enter budget"
+                        className="w-full p-2 border rounded" 
+                      />
+                      <ErrorMessage name="totalBudget" component="div" className="text-red-600 text-sm" />
+                    </div>
+                    <div>
+                      <label htmlFor="socialMediaBudget" className="block font-semibold">
+                        Budget allocated to social media
+                      </label>
+                      <Field 
+                        id="socialMediaBudget" 
+                        name="socialMediaBudget" 
+                        type="number" 
+                        placeholder="Enter social media budget"
+                        className="w-full p-2 border rounded" 
+                      />
+                      <ErrorMessage name="socialMediaBudget" component="div" className="text-red-600 text-sm" />
+                    </div>
+                  </div>
+                </div>
+                {/* Platform & Influencer Selection */}
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Platform & Influencer Selection</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="platform" className="block font-semibold">
+                        Platform
+                      </label>
+                      <Field as="select" id="platform" name="platform" className="w-full p-2 border rounded">
+                        <option value="">Select Platform</option>
+                        <option value={Platform.Instagram}>{Platform.Instagram}</option>
+                        <option value={Platform.YouTube}>{Platform.YouTube}</option>
+                        <option value={Platform.TikTok}>{Platform.TikTok}</option>
+                      </Field>
+                      <ErrorMessage name="platform" component="div" className="text-red-600 text-sm" />
+                    </div>
+                    <div>
+                      <label htmlFor="influencerHandle" className="block font-semibold">
+                        Start typing influencer's handle
+                      </label>
+                      <Field
+                        id="influencerHandle"
+                        name="influencerHandle"
+                        placeholder="e.g. oliviabennett"
+                        className="w-full p-2 border rounded"
+                      />
+                      <ErrorMessage name="influencerHandle" component="div" className="text-red-600 text-sm" />
+                    </div>
+                  </div>
+                </div>
+              </Form>
+              <ProgressBar
+                currentStep={1}
+                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
+                onBack={null}
+                onNext={handleNextStep}
+                disableNext={state.isSubmitting || !isValid}
+                isFormValid={isValid}
+                isDirty={dirty}
+              />
+            </>
+          );
+        }}
       </Formik>
     </div>
   );

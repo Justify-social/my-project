@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@auth0/nextjs-auth0';
 import { z } from 'zod'; // For input validation
+import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 
 type RouteParams = { params: { id: string } }
 
@@ -56,22 +57,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid campaign ID' },
-        { status: 400 }
-      );
-    }
-
     const campaign = await prisma.campaignWizardSubmission.findUnique({
-      where: { id },
+      where: { id: parseInt(params.id) },
       include: {
         primaryContact: true,
         secondaryContact: true,
-        // Include other relations if needed
-      }
+      },
     });
 
     if (!campaign) {
@@ -81,8 +72,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(campaign);
-
+    return NextResponse.json({ success: true, campaign });
   } catch (error) {
     console.error('Error fetching campaign:', error);
     return NextResponse.json(
@@ -92,49 +82,48 @@ export async function GET(
   }
 }
 
-export async function PUT(
+export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-    const data = await request.json();
+    const campaignId = parseInt(params.id);
+    const body = await request.json();
+    console.log('Updating campaign:', campaignId, 'with data:', body);
 
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid campaign ID' },
-        { status: 400 }
-      );
-    }
+    // Create the update data object
+    const updateData = {
+      ...(body.name && { campaignName: body.name }),
+      ...(body.businessGoal && { description: body.businessGoal }),
+      ...(body.startDate && { startDate: new Date(body.startDate) }),
+      ...(body.endDate && { endDate: new Date(body.endDate) }),
+      ...(body.timeZone && { timeZone: body.timeZone }),
+      ...(body.currency && { currency: body.currency as Currency }),
+      ...(body.totalBudget && { totalBudget: parseFloat(body.totalBudget) }),
+      ...(body.socialMediaBudget && { socialMediaBudget: parseFloat(body.socialMediaBudget) }),
+      ...(body.platform && { platform: body.platform as Platform }),
+      ...(body.influencerHandle && { influencerHandle: body.influencerHandle }),
+      submissionStatus: "draft" as SubmissionStatus,
+    };
 
-    const campaign = await prisma.campaignWizardSubmission.update({
-      where: { id },
-      data: {
-        campaignName: data.campaignName,
-        description: data.description,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
-        timeZone: data.timeZone,
-        currency: data.currency,
-        totalBudget: data.totalBudget,
-        socialMediaBudget: data.socialMediaBudget,
-        platform: data.platform,
-        influencerHandle: data.influencerHandle,
-        submissionStatus: data.submissionStatus,
-        // Add other fields as needed
-      },
-      include: {
-        primaryContact: true,
-        secondaryContact: true,
-      }
+    const updatedCampaign = await prisma.campaignWizardSubmission.update({
+      where: { id: campaignId },
+      data: updateData,
     });
 
-    return NextResponse.json(campaign);
+    return NextResponse.json({ 
+      success: true, 
+      id: updatedCampaign.id 
+    });
 
   } catch (error) {
-    console.error('Error updating campaign:', error);
+    console.error('Campaign update error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to update campaign' },
+      { 
+        error: 'Failed to update campaign',
+        details: errorMessage
+      },
       { status: 500 }
     );
   }
