@@ -1,11 +1,13 @@
-import { Suspense } from 'react';
-import Step1Content from './Step1Content';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Suspense } from "react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import Step1ContentLoader from "./Step1ContentLoader";
 
-export default function Step1Page() {
+export default function Page() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <Step1Content />
+      <Step1ContentLoader />
     </Suspense>
   );
 }
+
+export const dynamic = "force-dynamic"; // Critical for proper client-side rendering
