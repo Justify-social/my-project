@@ -78,8 +78,15 @@ const debugFormData = (values: any, isDraft: boolean) => {
 const Step1Content = () => {
   const router = useRouter();
   const { data, updateData, campaignData, isEditing, loading } = useWizard();
-  const campaignId = useSearchParamsHook();
+  const [campaignId, setCampaignId] = useState<string | null>(null);
   
+  // Use useEffect to get the campaign ID from URL after mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    setCampaignId(id);
+  }, []);
+
   // Add debug logs
   console.log('WizardContext values:', {
     isEditing,

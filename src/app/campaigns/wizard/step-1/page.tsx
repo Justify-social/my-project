@@ -1,17 +1,11 @@
 "use client";
 
-import React from 'react';
 import dynamic from 'next/dynamic';
 
-// Dynamically import components with no SSR
-const DynamicSearchParamsWrapper = dynamic(
-  () => import('@/components/SearchParamsWrapper'),
-  { ssr: false }
-);
-
-const DynamicStep1Content = dynamic(
-  () => import('./Step1Content'),
-  { 
+// Import the Step1Content component with no SSR and proper error boundary
+const Step1Content = dynamic(
+  () => import('./Step1Content').then(mod => mod.default),
+  {
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center min-h-screen">
@@ -21,11 +15,12 @@ const DynamicStep1Content = dynamic(
   }
 );
 
-// Simple wrapper component
-export default function CampaignStep1Page() {
-  return (
-    <DynamicSearchParamsWrapper>
-      <DynamicStep1Content />
-    </DynamicSearchParamsWrapper>
-  );
+// Create a client-side only wrapper component
+function ClientSideWrapper() {
+  return <Step1Content />;
+}
+
+// Export a server component that renders the client wrapper
+export default function Page() {
+  return <ClientSideWrapper />;
 }
