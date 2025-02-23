@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircleIcon, ArrowLeftIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 function SubmissionContent() {
   const router = useRouter();
@@ -172,13 +173,11 @@ function SubmissionContent() {
   );
 }
 
-export default function CampaignSubmissionPage() {
+export const dynamic = "force-dynamic";
+
+export default function Page() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-      </div>
-    }>
+    <Suspense fallback={<LoadingSpinner />}>
       <SubmissionContent />
     </Suspense>
   );
