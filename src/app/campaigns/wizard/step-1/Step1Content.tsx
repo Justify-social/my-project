@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
@@ -9,6 +9,7 @@ import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useSearchParamsHook } from '@/components/SearchParamsWrapper';
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
@@ -77,8 +78,7 @@ const debugFormData = (values: any, isDraft: boolean) => {
 const Step1Content = () => {
   const router = useRouter();
   const { data, updateData, campaignData, isEditing, loading } = useWizard();
-  const searchParams = useSearchParams();
-  const campaignId = searchParams.get('id');
+  const campaignId = useSearchParamsHook();
   
   // Add debug logs
   console.log('WizardContext values:', {

@@ -3,8 +3,13 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 
-// Dynamically import the entire page content with no SSR
-const DynamicStep1Page = dynamic(
+// Dynamically import components with no SSR
+const DynamicSearchParamsWrapper = dynamic(
+  () => import('@/components/SearchParamsWrapper'),
+  { ssr: false }
+);
+
+const DynamicStep1Content = dynamic(
   () => import('./Step1Content'),
   { 
     ssr: false,
@@ -18,5 +23,9 @@ const DynamicStep1Page = dynamic(
 
 // Simple wrapper component
 export default function CampaignStep1Page() {
-  return <DynamicStep1Page />;
+  return (
+    <DynamicSearchParamsWrapper>
+      <DynamicStep1Content />
+    </DynamicSearchParamsWrapper>
+  );
 }
