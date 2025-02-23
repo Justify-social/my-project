@@ -73,16 +73,19 @@ const debugFormData = (values: any, isDraft: boolean) => {
   });
 };
 
+// Create a wrapper component for the search params
+const SearchParamsWrapper = ({ children }: { children: React.ReactNode }) => {
+  const searchParams = useSearchParams();
+  return children(searchParams);
+};
+
 function OverviewContent() {
   const router = useRouter();
   const { data, updateData, campaignData, isEditing, loading } = useWizard();
-  const searchParams = useSearchParams();
-  const campaignId = searchParams.get('id');
   
   // Add debug logs
   console.log('WizardContext values:', {
     isEditing,
-    campaignId,
     campaignData,
     loading
   });
@@ -128,10 +131,10 @@ function OverviewContent() {
 
   useEffect(() => {
     const loadCampaignData = async () => {
-      if (campaignId) {
+      if (campaignData.campaignId) {
         try {
           setState(prev => ({ ...prev, isLoading: true, error: null }));
-          const response = await fetch(`/api/campaigns/${campaignId}`);
+          const response = await fetch(`/api/campaigns/${campaignData.campaignId}`);
           const data = await response.json();
           
           if (!response.ok) {
@@ -155,14 +158,14 @@ function OverviewContent() {
     };
 
     loadCampaignData();
-  }, [campaignId]);
+  }, [campaignData.campaignId]);
 
   const handleSubmit = async (values: any) => {
     try {
       setState(prev => ({ ...prev, isSubmitting: true, error: null }));
       
       const method = isEditing ? 'PATCH' : 'POST';
-      const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+      const url = isEditing ? `/api/campaigns/${campaignData.campaignId}` : '/api/campaigns';
       
       const response = await fetch(url, {
         method,
@@ -184,14 +187,14 @@ function OverviewContent() {
       // Store the campaign ID and data
       updateData({
         ...data,
-        campaignId: result.id || campaignId,
+        campaignId: result.id || campaignData.campaignId,
         step1: values
       });
 
       toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
 
       // Navigate to next step
-      router.push(`/campaigns/wizard/step-2?id=${result.id || campaignId}`);
+      router.push(`/campaigns/wizard/step-2?id=${result.id || campaignData.campaignId}`);
     } catch (error) {
       console.error('Error:', error);
       toast.error(error instanceof Error ? error.message : 'An error occurred');
@@ -205,7 +208,7 @@ function OverviewContent() {
       setState(prev => ({ ...prev, isSubmitting: true }));
 
       const method = isEditing ? 'PATCH' : 'POST';
-      const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+      const url = isEditing ? `/api/campaigns/${campaignData.campaignId}` : '/api/campaigns';
 
       const response = await fetch(url, {
         method,
@@ -228,7 +231,7 @@ function OverviewContent() {
       updateData({
         ...data,
         overview: values,
-        id: result.id || campaignId
+        id: result.id || campaignData.campaignId
       });
 
       toast.success('Draft saved successfully');
@@ -584,7 +587,11 @@ export default function Overview() {
         </div>
       }
     >
-      <OverviewContent />
+      <SearchParamsWrapper>
+        {(searchParams) => (
+          <OverviewContent />
+        )}
+      </SearchParamsWrapper>
     </Suspense>
   );
 }
