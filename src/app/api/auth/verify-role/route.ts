@@ -12,19 +12,42 @@ export async function GET() {
       }, { status: 401 });
     }
 
-    // Get roles directly from the user object
-    const roles = session.user.roles || [];
-    const isSuperAdmin = roles.includes('super_admin');
+    // Check all possible locations for roles
+    const possibleRoleLocations = {
+      directRoles: session.user.roles,
+      namespacedRoles: session.user['https://justify.social/roles'],
+      rawRoles: session.user.raw?.roles,
+      authorizationRoles: session.user.authorization?.roles,
+    };
+
+    console.log('Checking role locations:', possibleRoleLocations);
+
+    // Combine all possible roles
+    const roles = [
+      ...(possibleRoleLocations.directRoles || []),
+      ...(possibleRoleLocations.namespacedRoles || []),
+      ...(possibleRoleLocations.rawRoles || []),
+      ...(possibleRoleLocations.authorizationRoles || [])
+    ].filter(Boolean);
+
+    // Remove duplicates
+    const uniqueRoles = [...new Set(roles)];
+    const isSuperAdmin = uniqueRoles.includes('super_admin');
 
     return NextResponse.json({
       message: 'Session found',
       user: {
         email: session.user.email,
-        roles: roles,
+        roles: uniqueRoles,
         isSuperAdmin: isSuperAdmin,
-        // Include these for debugging
-        sessionRoles: session.user['https://justify.social/roles'],
-        rawRoles: session.user.raw?.roles,
+        debug: {
+          possibleRoleLocations,
+          sessionUser: {
+            ...session.user,
+            // Remove large profile picture URL for clarity
+            picture: session.user.picture ? 'exists' : null
+          }
+        }
       }
     });
   } catch (error) {
