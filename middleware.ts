@@ -20,18 +20,11 @@ const staticRoutes = [
   '/api/health',
 ];
 
-export default withMiddlewareAuthRequired({
-  returnTo: '/api/auth/login',
-});
+export default withMiddlewareAuthRequired();
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * 1. Auth0 authentication routes (/api/auth/*)
-     * 2. Next.js static files and images
-     * 3. Favicon
-     */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+    // Match all paths except auth endpoints and static files
+    '/((?!_next/static|_next/image|favicon.ico|api/auth/.*|images).*)',
   ],
 }; 
