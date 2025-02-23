@@ -69,6 +69,10 @@ const MobileMenu = ({
 
   const isExpanded = (href: string) => expandedItems.includes(href);
 
+  const handleSignOut = useCallback(() => {
+    window.location.href = '/api/auth/logout';
+  }, []);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -251,13 +255,12 @@ const MobileMenu = ({
 
             {/* Footer */}
             <div className="p-4 border-t">
-              <Link
-                href="/api/auth/logout"
+              <button
+                onClick={handleSignOut}
                 className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                onClick={onClose}
               >
                 Sign Out
-              </Link>
+              </button>
             </div>
           </motion.div>
         </>
