@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
+import { Card } from '@/components/ui/card';
 
 interface Campaign {
   id: number;
@@ -32,6 +34,34 @@ export default function BrandLiftPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const features = [
+    {
+      title: 'Create New Survey',
+      description: 'Design and launch a new brand lift survey',
+      href: '/brand-lift/survey-design',
+      icon: '📝'
+    },
+    {
+      title: 'Active Campaigns',
+      description: 'View and manage your ongoing brand lift studies',
+      href: '/brand-lift/list',
+      icon: '📊'
+    },
+    {
+      title: 'Reports',
+      description: 'Access detailed brand lift measurement reports',
+      href: '/brand-lift/reports',
+      icon: '📈'
+    },
+    {
+      title: 'Survey Progress',
+      description: 'Track the progress of your active surveys',
+      href: '/brand-lift/progress',
+      icon: '🎯'
+    }
+  ];
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -91,125 +121,79 @@ export default function BrandLiftPage() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      {/* Header Section */}
-      <h1 className="text-3xl font-semibold text-[#333]">Brand Lift</h1>
-      <p className="text-lg text-gray-600">
-        Discover how your campaign impacts brand lift and audience perception.
-      </p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Brand Lift Measurement</h1>
+        <p className="mt-2 text-gray-600">
+          Measure the impact of your campaigns on brand awareness, consideration, and preference
+        </p>
+      </div>
 
-      {/* Campaign Selection Section */}
-      <div className="border p-4 rounded-lg bg-white shadow-sm">
-        <h2 className="text-xl font-semibold">Select a Campaign</h2>
-        <select
-          className="mt-2 p-2 border rounded-md w-full"
-          value={selectedCampaign}
-          onChange={(e) => handleCampaignSelection(e.target.value)}
-        >
-          <option value="" disabled>
-            Select a campaign
-          </option>
-          {campaigns.map((campaign) => (
-            <option key={campaign.id} value={campaign.id}>
-              {campaign.campaignName} ({campaign.platform})
-            </option>
-          ))}
-        </select>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {features.map((feature) => (
+          <Link href={feature.href} key={feature.title}>
+            <Card className="p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full">
+              <div className="text-4xl mb-4">{feature.icon}</div>
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
+            </Card>
+          </Link>
+        ))}
+      </div>
 
-        {selectedCampaign && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Campaign Overview</h3>
-            {(() => {
-              const campaign = campaigns.find(c => c.id.toString() === selectedCampaign);
-              if (!campaign) return null;
-              
-              return (
-                <div className="space-y-2">
-                  <div><strong>Campaign Name:</strong> {campaign.campaignName}</div>
-                  <div><strong>Platform:</strong> {campaign.platform}</div>
-                  <div><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</div>
-                  <div><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</div>
-                  <div><strong>Budget:</strong> ${campaign.totalBudget.toLocaleString()}</div>
-                  <div><strong>Primary KPI:</strong> {campaign.primaryKPI}</div>
-                  <button
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
-                    onClick={handleStartTest}
-                  >
-                    Launch Brand Lift Test
-                  </button>
-                </div>
-              );
-            })()}
+      <div className="mt-12 bg-white rounded-lg shadow p-6">
+        <h2 className="text-2xl font-semibold mb-4">Quick Stats</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="text-blue-600 text-lg font-semibold">Active Surveys</div>
+            <div className="text-3xl font-bold mt-2">3</div>
           </div>
-        )}
+          <div className="bg-green-50 p-4 rounded-lg">
+            <div className="text-green-600 text-lg font-semibold">Completed Studies</div>
+            <div className="text-3xl font-bold mt-2">12</div>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <div className="text-purple-600 text-lg font-semibold">Average Lift</div>
+            <div className="text-3xl font-bold mt-2">+24%</div>
+          </div>
+        </div>
       </div>
 
-      {/* Recent Brand Lift Results Section */}
-      <div className="border p-4 rounded-lg bg-white shadow-sm mt-4">
-        <h2 className="text-xl font-semibold">Recent Brand Lift Results</h2>
-        <table className="min-w-full mt-4 border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-2">Test Name</th>
-              <th className="text-left p-2">Status</th>
-              <th className="text-left p-2">Date</th>
-              <th className="text-left p-2">KPI</th>
-              <th className="text-left p-2">Survey Completions</th>
-              <th className="text-left p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* These rows are mocked. In production, replace with dynamic data. */}
-            <tr className="border-t">
-              <td className="p-2">Test A</td>
-              <td className="p-2">Paused</td>
-              <td className="p-2">01/05/24</td>
-              <td className="p-2">N/A</td>
-              <td className="p-2">150</td>
-              <td className="p-2">
-                <button className="text-blue-600 hover:text-blue-800">See Report</button>
-              </td>
-            </tr>
-            <tr className="border-t">
-              <td className="p-2">Test B</td>
-              <td className="p-2">Completed</td>
-              <td className="p-2">15/04/24</td>
-              <td className="p-2">60% Awareness</td>
-              <td className="p-2">300</td>
-              <td className="p-2">
-                <button className="text-blue-600 hover:text-blue-800">See Report</button>
-              </td>
-            </tr>
-            <tr className="border-t">
-              <td className="p-2">Test C</td>
-              <td className="p-2">Completed</td>
-              <td className="p-2">20/03/24</td>
-              <td className="p-2">80% Consideration</td>
-              <td className="p-2">300</td>
-              <td className="p-2">
-                <button className="text-blue-600 hover:text-blue-800">See Report</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Bottom Navigation with Progress Bar Placeholder */}
-      <div className="flex justify-between items-center mt-6">
-        <div className="text-sm text-gray-600">Progress Bar goes here</div>
-        <div className="space-x-4">
-          <button
-            onClick={() => router.push("/campaigns")}
-            className="px-4 py-2 bg-gray-500 text-white rounded-md"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleStartTest}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md"
-          >
-            Start Test
-          </button>
+      <div className="mt-12">
+        <h2 className="text-2xl font-semibold mb-4">Recent Activity</h2>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="divide-y divide-gray-200">
+            {[
+              {
+                action: 'Survey Completed',
+                campaign: 'Q4 Brand Awareness Campaign',
+                date: '2 hours ago',
+                status: 'success'
+              },
+              {
+                action: 'New Survey Started',
+                campaign: 'Product Launch Campaign',
+                date: '1 day ago',
+                status: 'info'
+              },
+              {
+                action: 'Report Generated',
+                campaign: 'Holiday Marketing Campaign',
+                date: '2 days ago',
+                status: 'success'
+              }
+            ].map((activity, index) => (
+              <div key={index} className="p-4 hover:bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">{activity.action}</p>
+                    <p className="text-sm text-gray-600">{activity.campaign}</p>
+                  </div>
+                  <span className="text-sm text-gray-500">{activity.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
