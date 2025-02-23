@@ -687,23 +687,6 @@ function FormContent() {
                   </div>
                 </div>
               </Form>
-              <div className="flex justify-between mt-8">
-                <button
-                  type="button"
-                  onClick={() => handleSaveDraft(values)}
-                  className="btn btn-secondary"
-                  disabled={isSubmitting}
-                >
-                  Save Draft
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={isSubmitting || !isValid}
-                >
-                  Next Step
-                </button>
-              </div>
               <ProgressBar
                 currentStep={1}
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
