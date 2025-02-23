@@ -26,13 +26,12 @@ export default withMiddlewareAuthRequired({
 
 export const config = {
   matcher: [
-    // Match all routes
+    /*
+     * Match all request paths except:
+     * 1. Auth0 authentication routes (/api/auth/*)
+     * 2. Next.js static files and images
+     * 3. Favicon
+     */
     '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
-    
-    // Exclude public routes using negative lookahead
-    ...publicRoutes.map(route => `(?!${route})`),
-    
-    // Exclude static routes
-    ...staticRoutes.map(route => `(?!${route})`),
   ],
 }; 
