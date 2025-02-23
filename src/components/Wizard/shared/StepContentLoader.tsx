@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ErrorBoundary } from "./ErrorBoundary";
+import { ErrorBoundary } from "@/components/Wizard/shared/ErrorBoundary";
 
 interface StepLoaderProps {
   step: number;
