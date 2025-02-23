@@ -1,7 +1,21 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  CreditCardIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  CurrencyDollarIcon,
+  DocumentTextIcon,
+  ClockIcon,
+  SparklesIcon,
+  PlusIcon,
+  ArrowDownTrayIcon,
+  ArrowPathRoundedSquareIcon,
+} from '@heroicons/react/24/outline';
 
 interface PaymentMethod {
   id: number;
@@ -18,6 +32,131 @@ interface Transaction {
   amount: string;
   status: "Pending" | "Completed";
 }
+
+// Enhanced UI Components
+const Card = memo(({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+  >
+    {children}
+  </motion.div>
+));
+
+const SectionHeader: React.FC<{
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+}> = memo(({ icon: Icon, title, description }) => (
+  <div className="flex items-center mb-6">
+    <div className="bg-blue-50 p-3 rounded-lg">
+      <Icon className="w-6 h-6 text-blue-600" />
+    </div>
+    <div className="ml-4">
+      <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+      {description && (
+        <p className="mt-1 text-sm text-gray-500">{description}</p>
+      )}
+    </div>
+  </div>
+));
+
+const PlanCard: React.FC<{
+  title: string;
+  price: string;
+  features: string[];
+  isRecommended?: boolean;
+  onUpgrade: () => void;
+}> = memo(({ title, price, features, isRecommended, onUpgrade }) => (
+  <motion.div
+    whileHover={{ scale: 1.02 }}
+    className={`p-6 rounded-xl border-2 ${
+      isRecommended ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+    }`}
+  >
+    {isRecommended && (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-4">
+        Recommended
+      </span>
+    )}
+    <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+    <p className="mt-2 text-3xl font-bold text-gray-900">{price}</p>
+    <p className="mt-1 text-sm text-gray-500">per month</p>
+    <ul className="mt-6 space-y-4">
+      {features.map((feature, idx) => (
+        <li key={idx} className="flex items-start">
+          <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
+          <span className="text-gray-600">{feature}</span>
+        </li>
+      ))}
+    </ul>
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onUpgrade}
+      className={`mt-8 w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center ${
+        isRecommended
+          ? 'bg-blue-600 text-white hover:bg-blue-700'
+          : 'bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-50'
+      }`}
+    >
+      <SparklesIcon className="w-5 h-5 mr-2" />
+      Upgrade Plan
+    </motion.button>
+  </motion.div>
+));
+
+const CreditPackageCard: React.FC<{
+  credits: number;
+  price: string;
+  isSelected: boolean;
+  onSelect: () => void;
+}> = memo(({ credits, price, isSelected, onSelect }) => (
+  <motion.div
+    whileHover={{ scale: 1.02 }}
+    onClick={onSelect}
+    className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+      isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'
+    }`}
+  >
+    <div className="flex items-center justify-between">
+      <div>
+        <h4 className="font-semibold text-gray-900">{credits} Credits</h4>
+        <p className="text-sm text-gray-500">Best value</p>
+      </div>
+      <p className="text-xl font-bold text-gray-900">{price}</p>
+    </div>
+  </motion.div>
+));
+
+const Modal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}> = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-xl p-6 max-w-md w-full mx-4 relative"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
+        >
+          <XCircleIcon className="w-6 h-6" />
+        </button>
+        {children}
+      </motion.div>
+    </div>
+  );
+};
 
 const SubscriptionBillingPage: React.FC = () => {
   const router = useRouter();
@@ -142,465 +281,518 @@ const SubscriptionBillingPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Page Title & Primary Action Buttons */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[#333333]">Subscription & Billing</h1>
-        <div className="space-x-2">
-          <button
-            onClick={handleViewBillingHistory}
-            className="w-36 h-10 bg-blue-500 text-white rounded"
-            aria-label="View Billing History"
-          >
-            Billing History
-          </button>
-          <button
-            onClick={handleUpdatePaymentMethod}
-            className="w-36 h-10 bg-blue-500 text-white rounded"
-            aria-label="Update Payment Method"
-          >
-            Update
-          </button>
-          <button
-            onClick={handleChangePlan}
-            className="w-36 h-10 bg-blue-500 text-white rounded"
-            aria-label="Change Plan"
-          >
-            Change
-          </button>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-gray-50"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold text-gray-900"
+            >
+              Subscription & Billing
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-2 text-gray-500"
+            >
+              Manage your subscription, billing, and credits
+            </motion.p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleViewBillingHistory}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+                transition-colors duration-200 font-medium flex items-center"
+            >
+              <DocumentTextIcon className="w-5 h-5 mr-2" />
+              Billing History
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleUpdatePaymentMethod}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                transition-colors duration-200 font-medium flex items-center"
+            >
+              <CreditCardIcon className="w-5 h-5 mr-2" />
+              Update Payment
+            </motion.button>
+          </div>
         </div>
-      </div>
 
-      {/* Navigation Tabs */}
-      <div className="mb-6 border-b border-gray-300">
-        <nav className="flex space-x-4">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`py-2 px-4 ${
-              activeTab === "overview" ? "font-bold border-b-2 border-blue-500" : "text-blue-500 hover:underline"
-            }`}
-            aria-current={activeTab === "overview" ? "page" : undefined}
-          >
-            Subscription Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("credits")}
-            className={`py-2 px-4 ${
-              activeTab === "credits" ? "font-bold border-b-2 border-blue-500" : "text-blue-500 hover:underline"
-            }`}
-          >
-            Credits & Purchase
-          </button>
-        </nav>
-      </div>
+        {/* Navigation Tabs */}
+        <div className="mb-8 border-b border-gray-200">
+          <nav className="flex space-x-1" aria-label="Billing navigation">
+            {['overview', 'credits'].map((tab) => {
+              const isActive = activeTab === tab;
+              const Icon = tab === 'overview' ? CreditCardIcon : CurrencyDollarIcon;
+              
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as "overview" | "credits")}
+                  className={`
+                    relative py-4 px-6 flex items-center transition-all duration-200
+                    ${isActive 
+                      ? 'text-blue-600 bg-blue-50/50' 
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}
+                    rounded-t-lg
+                  `}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="w-5 h-5 mr-2" />
+                  <span className="font-medium capitalize">
+                    {tab === 'overview' ? 'Subscription Overview' : 'Credits & Purchase'}
+                  </span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
-      {/* Main Content based on active tab */}
-      {activeTab === "overview" ? (
-        <>
-          {/* Subscription Overview Section */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">Subscription Plan</h2>
-            <div className="p-4 border rounded mb-2 font-bold break-words whitespace-normal">
-              {subscriptionPlan}
+        {/* Main Content */}
+        <div className="space-y-8">
+          {activeTab === "overview" ? (
+            <>
+              {/* Current Plan Card */}
+              <Card>
+                <SectionHeader
+                  icon={SparklesIcon}
+                  title="Current Plan"
+                  description="Your current subscription plan and features"
+                />
+                <div className="bg-blue-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{subscriptionPlan}</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Next payment: {nextPaymentAmount} on {renewalDate}
+                      </p>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleChangePlan}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                        transition-colors duration-200 font-medium flex items-center"
+                    >
+                      <ArrowPathIcon className="w-5 h-5 mr-2" />
+                      Change Plan
+                    </motion.button>
+                  </div>
+                  <div className="mt-6 grid grid-cols-2 gap-4">
+                    {subscriptionFeatures.map((feature, idx) => (
+                      <div key={idx} className="flex items-center">
+                        <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
+                        <span className="text-gray-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Payment Methods Card */}
+              <Card>
+                <SectionHeader
+                  icon={CreditCardIcon}
+                  title="Payment Methods"
+                  description="Manage your payment methods and billing information"
+                />
+                <div className="space-y-4">
+                  {paymentMethods.map(method => (
+                    <div
+                      key={method.id}
+                      className="flex items-center justify-between p-4 rounded-lg border border-gray-200"
+                    >
+                      <div className="flex items-center">
+                        <div className="bg-gray-100 p-2 rounded-lg">
+                          <CreditCardIcon className="w-6 h-6 text-gray-600" />
+                        </div>
+                        <div className="ml-4">
+                          <p className="font-medium text-gray-900">
+                            {method.cardType} •••• {method.last4}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Expires {method.expiry}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setUpdatePaymentModalOpen(true)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                        >
+                          <ArrowPathIcon className="w-5 h-5" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            if (paymentMethods.length <= 1) {
+                              alert("Warning: Cannot remove last payment method.");
+                              return;
+                            }
+                            setPaymentMethods(paymentMethods.filter(m => m.id !== method.id));
+                            setToastMessage("Payment method removed successfully!");
+                            setTimeout(() => setToastMessage(""), 3000);
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                        >
+                          <XCircleIcon className="w-5 h-5" />
+                        </motion.button>
+                      </div>
+                    </div>
+                  ))}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setAddPaymentModalOpen(true)}
+                    className="mt-4 px-4 py-2 border-2 border-dashed border-gray-300 
+                      text-gray-600 rounded-lg hover:border-blue-500 hover:text-blue-500 
+                      transition-colors duration-200 w-full flex items-center justify-center"
+                  >
+                    <PlusIcon className="w-5 h-5 mr-2" />
+                    Add Payment Method
+                  </motion.button>
+                </div>
+              </Card>
+
+              {/* Billing History Card */}
+              <Card>
+                <SectionHeader
+                  icon={DocumentTextIcon}
+                  title="Billing History"
+                  description="View and download your past invoices"
+                />
+                <div className="overflow-hidden rounded-lg border border-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Invoice
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Amount
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {transactions.map(tx => (
+                        <motion.tr
+                          key={tx.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {tx.billNumber}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {tx.description}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{tx.date}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {tx.amount}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                              ${tx.status === 'Completed'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                              }`}
+                            >
+                              {tx.status === 'Completed' ? (
+                                <CheckCircleIcon className="w-4 h-4 mr-1" />
+                              ) : (
+                                <ClockIcon className="w-4 h-4 mr-1" />
+                              )}
+                              {tx.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div className="flex space-x-2">
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => alert("Downloading invoice...")}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                title="Download Invoice"
+                              >
+                                <ArrowDownTrayIcon className="w-5 h-5" />
+                              </motion.button>
+                              {tx.status === 'Pending' && (
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => alert("Retrying payment...")}
+                                  className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg"
+                                  title="Retry Payment"
+                                >
+                                  <ArrowPathRoundedSquareIcon className="w-5 h-5" />
+                                </motion.button>
+                              )}
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </>
+          ) : (
+            <>
+              {/* Credits Balance Card */}
+              <Card>
+                <SectionHeader
+                  icon={CurrencyDollarIcon}
+                  title="Credits Balance"
+                  description="View and manage your credits"
+                />
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-90">Available Credits</p>
+                      <h3 className="text-4xl font-bold mt-1">{creditsBalance}</h3>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setBuyCreditsModalOpen(true)}
+                      className="px-4 py-2 bg-white text-blue-600 rounded-lg 
+                        hover:bg-blue-50 transition-colors duration-200 font-medium 
+                        flex items-center"
+                    >
+                      <PlusIcon className="w-5 h-5 mr-2" />
+                      Buy Credits
+                    </motion.button>
+                  </div>
+                  {creditsBalance < 10 && (
+                    <div className="mt-4 bg-white bg-opacity-10 rounded-lg p-3 flex items-center">
+                      <XCircleIcon className="w-5 h-5 mr-2" />
+                      <p className="text-sm">
+                        Low balance warning! Purchase more credits to avoid service interruption.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Credit Packages Card */}
+              <Card>
+                <SectionHeader
+                  icon={SparklesIcon}
+                  title="Credit Packages"
+                  description="Choose a credit package that suits your needs"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {creditPackages.map(pkg => (
+                    <CreditPackageCard
+                      key={pkg.credits}
+                      credits={pkg.credits}
+                      price={pkg.price}
+                      isSelected={selectedCreditPackage === pkg.credits}
+                      onSelect={() => setSelectedCreditPackage(pkg.credits)}
+                    />
+                  ))}
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setBuyCreditsModalOpen(true)}
+                  className="mt-6 w-full px-4 py-3 bg-blue-600 text-white rounded-lg 
+                    hover:bg-blue-700 transition-colors duration-200 font-medium 
+                    flex items-center justify-center"
+                >
+                  <CurrencyDollarIcon className="w-5 h-5 mr-2" />
+                  Purchase Credits
+                </motion.button>
+              </Card>
+            </>
+          )}
+        </div>
+
+        {/* Modals */}
+        <Modal
+          isOpen={updatePaymentModalOpen}
+          onClose={() => {
+            setUpdatePaymentModalOpen(false);
+            setPaymentMethodError("");
+          }}
+        >
+          <h3 className="text-lg font-semibold mb-4">Update Payment Method</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Card Number
+              </label>
+              <input
+                type="text"
+                value={newCardNumber}
+                onChange={(e) => setNewCardNumber(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                  focus:ring-blue-500 focus:border-blue-500"
+                placeholder="1234 5678 9012 3456"
+              />
             </div>
-            <ul className="mb-2 space-y-1 break-words">
-              {subscriptionFeatures.map((feature, idx) => (
-                <li key={idx} className="flex items-center">
-                  <span className="mr-2">✅</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="break-words">
-              <strong>Renewal Date:</strong> {renewalDate}
-            </p>
-            <p className="break-words">
-              <strong>Next Payment Amount:</strong> {nextPaymentAmount}
-            </p>
-          </section>
-
-          {/* Credits Balance Section */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Credits Balance</h2>
-            <div className="p-4 border rounded font-bold break-words whitespace-normal">
-              {creditsBalance} remaining
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Expiry Date
+                </label>
+                <input
+                  type="text"
+                  value={newExpiry}
+                  onChange={(e) => setNewExpiry(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                    focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="MM/YY"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CVV
+                </label>
+                <input
+                  type="text"
+                  value={newCVV}
+                  onChange={(e) => setNewCVV(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                    focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="123"
+                />
+              </div>
             </div>
-            {creditsBalance < 10 && (
-              <p className="text-red-500 mt-2 break-words">
-                Warning: Low credit balance! Purchase more to avoid service interruptions.
+            {paymentMethodError && (
+              <p className="text-sm text-red-600 flex items-center">
+                <XCircleIcon className="w-5 h-5 mr-1" />
+                {paymentMethodError}
               </p>
             )}
-          </section>
-
-          {/* Payment Methods Section */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">Payment Methods</h2>
-            <ul className="mb-4 space-y-2">
-              {paymentMethods.map(method => (
-                <li key={method.id} className="flex flex-wrap items-center">
-                  <span className="break-words">
-                    {method.cardType} {method.last4} - Expires on {method.expiry}
-                  </span>
-                  <button
-                    onClick={() => setUpdatePaymentModalOpen(true)}
-                    className="ml-4 w-24 h-8 bg-blue-500 text-white rounded"
-                    aria-label="Edit payment method"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (paymentMethods.length <= 1) {
-                        alert("Warning: No active payment methods. Add a card to continue.");
-                        return;
-                      }
-                      setPaymentMethods(paymentMethods.filter(m => m.id !== method.id));
-                      setToastMessage("Payment method removed.");
-                      setTimeout(() => setToastMessage(""), 3000);
-                    }}
-                    className="ml-2 w-24 h-8 bg-red-500 text-white rounded"
-                    aria-label="Remove payment method"
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={() => setAddPaymentModalOpen(true)}
-              className="w-36 h-10 bg-blue-500 text-white rounded"
-              aria-label="Add payment method"
+          </div>
+          <div className="mt-6 flex justify-end space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setUpdatePaymentModalOpen(false);
+                setPaymentMethodError("");
+              }}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+                transition-colors duration-200"
             >
-              Add
-            </button>
-          </section>
-
-          {/* Plan Upgrade Section */}
-          <section id="planUpgrade" className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">Plan Upgrade Options</h2>
-            <div className="mb-4 p-4 border rounded break-words whitespace-normal">
-              <h3 className="font-bold">Normal Plan</h3>
-              <p>$9.99/month or $99/year</p>
-              <ul className="mb-2 space-y-1 break-words">
-                <li>Basic Support</li>
-                <li>Limited Access</li>
-                <li>Access to standard content</li>
-                <li>Single device login</li>
-              </ul>
-              <button
-                onClick={() => { setSelectedUpgradePlan("Normal"); setUpgradeModalOpen(true); }}
-                className="w-36 h-10 bg-blue-500 text-white rounded"
-                aria-label="Upgrade to Normal Plan"
-              >
-                Upgrade
-              </button>
-            </div>
-            <div className="mb-4 p-4 border rounded break-words whitespace-normal">
-              <h3 className="font-bold">Advanced Plan</h3>
-              <p>$19.99/month or $199/year</p>
-              <ul className="mb-2 space-y-1 break-words">
-                <li>Priority Support</li>
-                <li>Unlimited Access</li>
-                <li>Early access to new features</li>
-                <li>Multi-device login</li>
-              </ul>
-              <button
-                onClick={() => { setSelectedUpgradePlan("Advanced"); setUpgradeModalOpen(true); }}
-                className="w-36 h-10 bg-blue-500 text-white rounded"
-                aria-label="Upgrade to Advanced Plan"
-              >
-                Upgrade
-              </button>
-            </div>
-          </section>
-
-          {/* Purchase Extra Credits Section */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Need more credits? Top up instantly and keep going!
-            </h2>
-            <button
-              onClick={() => setBuyCreditsModalOpen(true)}
-              className="w-36 h-10 bg-blue-500 text-white rounded"
-              aria-label="Buy More Credits"
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleAddPaymentMethod}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                transition-colors duration-200"
             >
-              Buy
-            </button>
-          </section>
-
-          {/* Billing History Section */}
-          <section id="billingHistory" className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">Billing History</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto border">
-                <thead>
-                  <tr>
-                    <th className="p-2 text-left font-bold border break-words">Bill Number</th>
-                    <th className="p-2 text-left font-bold border break-words">Date</th>
-                    <th className="p-2 text-left font-bold border break-words">Description</th>
-                    <th className="p-2 text-left font-bold border break-words">Amount</th>
-                    <th className="p-2 text-left font-bold border break-words">Status</th>
-                    <th className="p-2 text-left font-bold border break-words">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map(tx => (
-                    <tr key={tx.id} className="hover:bg-gray-100">
-                      <td className="p-2 border break-words">{tx.billNumber}</td>
-                      <td className="p-2 border break-words">{tx.date}</td>
-                      <td className="p-2 border break-words">{tx.description}</td>
-                      <td className="p-2 border break-words">{tx.amount}</td>
-                      <td className="p-2 border break-words">
-                        {tx.status === "Pending" ? (
-                          <span className="bg-yellow-300 px-2 py-1 rounded break-words">⚠ Pending</span>
-                        ) : (
-                          <span className="bg-green-500 text-white px-2 py-1 rounded break-words">✓ Completed</span>
-                        )}
-                      </td>
-                      <td className="p-2 border break-words">
-                        <button
-                          onClick={() => alert("Downloading invoice...")}
-                          className="mr-2 w-28 h-8 bg-blue-500 text-white rounded"
-                          aria-label="Download Invoice"
-                        >
-                          Download
-                        </button>
-                        {tx.status === "Pending" && (
-                          <button
-                            onClick={() => alert("Retrying payment...")}
-                            className="w-28 h-8 bg-yellow-300 text-black rounded"
-                            aria-label="Retry Payment"
-                          >
-                            Retry
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </>
-      ) : (
-        // Credits & Purchase Tab Content
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Credits & Purchase</h2>
-          <p className="mb-4 break-words">
-            This section will allow you to purchase extra credits and view your credit history.
-          </p>
-          <button
-            onClick={() => setBuyCreditsModalOpen(true)}
-            className="w-36 h-10 bg-blue-500 text-white rounded"
-            aria-label="Buy More Credits"
-          >
-            Buy
-          </button>
-        </section>
-      )}
-
-      {/* Modals */}
-      {/* Update Payment Method Modal */}
-      {updatePaymentModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded w-96">
-            <h2 className="text-xl font-bold mb-4">Update Payment Method</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-1">Card Number</label>
-                <input
-                  type="text"
-                  value={newCardNumber}
-                  onChange={(e) => setNewCardNumber(e.target.value)}
-                  placeholder="16-digit card number"
-                  className="border p-2 w-full break-words"
-                  aria-label="Card Number"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Expiry Date (MM/YY)</label>
-                <input
-                  type="text"
-                  value={newExpiry}
-                  onChange={(e) => setNewExpiry(e.target.value)}
-                  placeholder="MM/YY"
-                  className="border p-2 w-full break-words"
-                  aria-label="Expiry Date"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">CVV</label>
-                <input
-                  type="text"
-                  value={newCVV}
-                  onChange={(e) => setNewCVV(e.target.value)}
-                  placeholder="3-digit CVV"
-                  className="border p-2 w-full break-words"
-                  aria-label="CVV"
-                />
-              </div>
-              {paymentMethodError && <p className="text-red-500 break-words">{paymentMethodError}</p>}
-            </div>
-            <div className="flex justify-end space-x-4 mt-4">
-              <button
-                onClick={() => { setUpdatePaymentModalOpen(false); setPaymentMethodError(""); }}
-                className="w-28 h-10 bg-gray-500 text-white rounded"
-                aria-label="Cancel"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddPaymentMethod}
-                className="w-28 h-10 bg-blue-500 text-white rounded"
-                aria-label="Save Payment Method"
-              >
-                Save
-              </button>
-            </div>
+              Update Payment Method
+            </motion.button>
           </div>
-        </div>
-      )}
+        </Modal>
 
-      {/* Add Payment Method Modal */}
-      {addPaymentModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded w-96">
-            <h2 className="text-xl font-bold mb-4">Add Payment Method</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-1">Card Number</label>
-                <input
-                  type="text"
-                  value={newCardNumber}
-                  onChange={(e) => setNewCardNumber(e.target.value)}
-                  placeholder="16-digit card number"
-                  className="border p-2 w-full break-words"
-                  aria-label="Card Number"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Expiry Date (MM/YY)</label>
-                <input
-                  type="text"
-                  value={newExpiry}
-                  onChange={(e) => setNewExpiry(e.target.value)}
-                  placeholder="MM/YY"
-                  className="border p-2 w-full break-words"
-                  aria-label="Expiry Date"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">CVV</label>
-                <input
-                  type="text"
-                  value={newCVV}
-                  onChange={(e) => setNewCVV(e.target.value)}
-                  placeholder="3-digit CVV"
-                  className="border p-2 w-full break-words"
-                  aria-label="CVV"
-                />
-              </div>
-              {paymentMethodError && <p className="text-red-500 break-words">{paymentMethodError}</p>}
-            </div>
-            <div className="flex justify-end space-x-4 mt-4">
-              <button
-                onClick={() => { setAddPaymentModalOpen(false); setPaymentMethodError(""); }}
-                className="w-28 h-10 bg-gray-500 text-white rounded"
-                aria-label="Cancel"
+        <Modal
+          isOpen={buyCreditsModalOpen}
+          onClose={() => setBuyCreditsModalOpen(false)}
+        >
+          <h3 className="text-lg font-semibold mb-4">Purchase Credits</h3>
+          <div className="space-y-4">
+            {creditPackages.map(pkg => (
+              <div
+                key={pkg.credits}
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                  selectedCreditPackage === pkg.credits
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-200'
+                }`}
+                onClick={() => setSelectedCreditPackage(pkg.credits)}
               >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddPaymentMethod}
-                className="w-28 h-10 bg-blue-500 text-white rounded"
-                aria-label="Add Payment Method"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upgrade Plan Modal */}
-      {upgradeModalOpen && selectedUpgradePlan && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded w-96">
-            <h2 className="text-xl font-bold mb-4">Confirm Upgrade</h2>
-            <p className="mb-4 break-words">
-              Confirm Upgrade? Your new billing cycle will start immediately.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setUpgradeModalOpen(false)}
-                className="w-28 h-10 bg-gray-500 text-white rounded"
-                aria-label="Cancel Upgrade"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmUpgrade}
-                className="w-28 h-10 bg-blue-500 text-white rounded"
-                aria-label="Confirm Upgrade"
-              >
-                Upgrade
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Buy Credits Modal */}
-      {buyCreditsModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded w-96">
-            <h2 className="text-xl font-bold mb-4">Buy More Credits</h2>
-            <p className="mb-4 break-words">Select a credit package:</p>
-            <div className="space-y-2">
-              {creditPackages.map(pkg => (
-                <div key={pkg.credits} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="creditPackage"
-                    value={pkg.credits}
-                    checked={selectedCreditPackage === pkg.credits}
-                    onChange={() => setSelectedCreditPackage(pkg.credits)}
-                    className="mr-2"
-                    aria-label={`${pkg.credits} Credits`}
-                  />
-                  <span className="break-words">
-                    {pkg.credits} Credits - {pkg.price}
-                  </span>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{pkg.credits} Credits</h4>
+                    <p className="text-sm text-gray-500">Best value</p>
+                  </div>
+                  <p className="text-xl font-bold text-gray-900">{pkg.price}</p>
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-end space-x-4 mt-4">
-              <button
-                onClick={() => setBuyCreditsModalOpen(false)}
-                className="w-28 h-10 bg-gray-500 text-white rounded"
-                aria-label="Cancel"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmBuyCredits}
-                className="w-28 h-10 bg-blue-500 text-white rounded"
-                aria-label="Confirm Purchase"
-              >
-                Confirm
-              </button>
-            </div>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+          <div className="mt-6 flex justify-end space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setBuyCreditsModalOpen(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+                transition-colors duration-200"
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleConfirmBuyCredits}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                transition-colors duration-200"
+            >
+              Confirm Purchase
+            </motion.button>
+          </div>
+        </Modal>
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded break-words">
-          {toastMessage}
-        </div>
-      )}
-    </div>
+        {/* Toast Message */}
+        <AnimatePresence>
+          {toastMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg 
+                shadow-lg flex items-center"
+            >
+              <CheckCircleIcon className="w-5 h-5 mr-2" />
+              {toastMessage}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 };
 

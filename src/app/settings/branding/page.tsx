@@ -1,7 +1,41 @@
 "use client";
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, memo } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { XCircleIcon, CheckCircleIcon, PhotoIcon, SwatchIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import NavigationTabs from '../components/NavigationTabs';
+
+// Enhanced UI Components
+const Card = memo(({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+  >
+    {children}
+  </motion.div>
+));
+
+const SectionHeader: React.FC<{
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+}> = memo(({ icon: Icon, title, description }) => (
+  <div className="flex items-center mb-6">
+    <div className="bg-blue-50 p-3 rounded-lg">
+      <Icon className="w-6 h-6 text-blue-600" />
+    </div>
+    <div className="ml-4">
+      <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+      {description && (
+        <p className="mt-1 text-sm text-gray-500">{description}</p>
+      )}
+    </div>
+  </div>
+));
 
 const BrandingSettingsPage: React.FC = () => {
   const router = useRouter();
@@ -192,238 +226,318 @@ const BrandingSettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      {/* Page Title & Primary Action Buttons */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[#333333]">Branding Settings</h1>
-        <div className="space-x-2">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="w-36 h-10 bg-gray-500 text-white rounded"
-            aria-label="Cancel branding edits"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSaveChanges}
-            disabled={!isDirty || isLoading}
-            className={`w-36 h-10 rounded text-white ${
-              !isDirty || isLoading ? 'bg-blue-300' : 'bg-blue-500'
-            }`}
-            aria-label="Save branding updates"
-          >
-            {isLoading ? "Loading..." : "Save Changes"}
-          </button>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="mb-6 border-b border-gray-300">
-        <nav className="flex space-x-4">
-          <button
-            onClick={() => router.push('/settings')}
-            className="py-2 px-4 text-blue-500 hover:underline"
-          >
-            Profile Settings
-          </button>
-          <button
-            onClick={() => router.push('/settings/team-management')}
-            className="py-2 px-4 text-blue-500 hover:underline"
-          >
-            Team Management
-          </button>
-          <button
-            className="py-2 px-4 font-bold border-b-2 border-blue-500"
-            aria-current="page"
-          >
-            Branding
-          </button>
-        </nav>
-      </div>
-
-      {/* Colour Palette Section */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Colour Palette</h2>
-        <div className="mb-4">
-          <label htmlFor="primaryColour" className="block mb-1">
-            Primary Colour
-          </label>
-          <div className="flex items-center">
-            <input
-              id="primaryColour"
-              type="text"
-              value={primaryColour}
-              onChange={handlePrimaryColourChange}
-              aria-label="Select primary colour for your brand."
-              className="w-[400px] p-2 border border-gray-300 rounded"
-            />
-            <div
-              className="ml-4"
-              style={{
-                width: '30px',
-                height: '30px',
-                backgroundColor: primaryColour,
-                border: '1px solid #ccc',
-              }}
-            />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-gray-50"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold text-gray-900"
+            >
+              Branding Settings
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-2 text-gray-500"
+            >
+              Customize your brand appearance and identity
+            </motion.p>
           </div>
-          {primaryColourError && (
-            <p className="text-red-500 mt-1">{primaryColourError}</p>
-          )}
-        </div>
-        <div className="mb-4">
-          <label htmlFor="secondaryColour" className="block mb-1">
-            Secondary Colour
-          </label>
-          <div className="flex items-center">
-            <input
-              id="secondaryColour"
-              type="text"
-              value={secondaryColour}
-              onChange={handleSecondaryColourChange}
-              aria-label="Select secondary colour for your brand."
-              className="w-[400px] p-2 border border-gray-300 rounded"
-            />
-            <div
-              className="ml-4"
-              style={{
-                width: '30px',
-                height: '30px',
-                backgroundColor: secondaryColour,
-                border: '1px solid #ccc',
-              }}
-            />
+          <div className="flex items-center space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCancel}
+              disabled={isLoading}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+                transition-colors duration-200 font-medium flex items-center"
+            >
+              <XCircleIcon className="w-5 h-5 mr-2" />
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSaveChanges}
+              disabled={!isDirty || isLoading}
+              className={`px-4 py-2 rounded-lg transition-colors duration-200 font-medium 
+                flex items-center ${
+                  !isDirty || isLoading
+                    ? 'bg-blue-300 cursor-not-allowed text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+            >
+              {isLoading ? (
+                <>
+                  <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </motion.button>
           </div>
-          {secondaryColourError && (
-            <p className="text-red-500 mt-1">{secondaryColourError}</p>
-          )}
         </div>
-      </div>
 
-      {/* Typography Section */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Typography</h2>
-        <div className="mb-4">
-          <label htmlFor="headerFont" className="block mb-1">
-            Header Typography
-          </label>
-          <select
-            id="headerFont"
-            value={headerFont}
-            onChange={handleHeaderFontChange}
-            aria-label="Choose a font for headers."
-            className="w-[400px] p-2 border border-gray-300 rounded"
-          >
-            <option value="Arial">Arial</option>
-            <option value="Roboto">Roboto</option>
-            <option value="Work Sans">Work Sans</option>
-            <option value="Open Sans">Open Sans</option>
-            <option value="Montserrat">Montserrat</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="headerFontSize" className="block mb-1">
-            Header Font Size
-          </label>
-          <input
-            id="headerFontSize"
-            type="text"
-            value={headerFontSize}
-            onChange={handleHeaderFontSizeChange}
-            aria-label="Font size input for header typography."
-            className="w-[400px] p-2 border border-gray-300 rounded"
-          />
-          {headerFontSizeError && (
-            <p className="text-red-500 mt-1">{headerFontSizeError}</p>
-          )}
-        </div>
-        <div className="mb-4">
-          <label htmlFor="bodyFont" className="block mb-1">
-            Body Typography
-          </label>
-          <select
-            id="bodyFont"
-            value={bodyFont}
-            onChange={handleBodyFontChange}
-            aria-label="Choose a font for body text."
-            className="w-[400px] p-2 border border-gray-300 rounded"
-          >
-            <option value="Arial">Arial</option>
-            <option value="Roboto">Roboto</option>
-            <option value="Work Sans">Work Sans</option>
-            <option value="Open Sans">Open Sans</option>
-            <option value="Montserrat">Montserrat</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="bodyFontSize" className="block mb-1">
-            Body Font Size
-          </label>
-          <input
-            id="bodyFontSize"
-            type="text"
-            value={bodyFontSize}
-            onChange={handleBodyFontSizeChange}
-            aria-label="Font size input for body typography."
-            className="w-[400px] p-2 border border-gray-300 rounded"
-          />
-          {bodyFontSizeError && (
-            <p className="text-red-500 mt-1">{bodyFontSizeError}</p>
-          )}
-        </div>
-      </div>
+        {/* Navigation Tabs */}
+        <NavigationTabs
+          activeTab="branding"
+          isSuperAdmin={true}
+          onTabChange={(tab) => {
+            switch (tab) {
+              case 'profile':
+                router.push('/settings');
+                break;
+              case 'team':
+                router.push('/settings/team-management');
+                break;
+              case 'admin':
+                router.push('/admin');
+                break;
+            }
+          }}
+        />
 
-      {/* Brand Logo Section */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Brand Logo</h2>
-        <div className="mb-4">
-          <label className="block mb-1">Upload Logo</label>
-          <input
-            type="file"
-            accept=".jpg, .jpeg, .png"
-            onChange={handleLogoUpload}
-            aria-label="Upload or change brand logo."
-          />
-          {logoError && <p className="text-red-500 mt-1">{logoError}</p>}
-        </div>
-        {logoPreview && (
-          <div className="mb-4">
-            <img
-              src={logoPreview}
-              alt="Logo Preview"
-              className="w-24 h-24 object-contain"
+        {/* Main Content */}
+        <div className="space-y-8">
+          {/* Logo Section */}
+          <Card>
+            <SectionHeader
+              icon={PhotoIcon}
+              title="Logo"
+              description="Upload and manage your brand logo"
             />
-            <div>
-              <button
-                type="button"
-                onClick={handleRemoveLogo}
-                className="mt-2 w-36 h-10 bg-gray-500 text-white rounded"
-                aria-label="Remove logo"
-              >
-                Remove Logo
-              </button>
+            <div className="flex items-start space-x-8">
+              <div className="flex-shrink-0">
+                {logoPreview ? (
+                  <div className="relative">
+                    <img
+                      src={logoPreview}
+                      alt="Logo preview"
+                      className="w-32 h-32 object-contain bg-gray-50 rounded-lg"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleRemoveLogo}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1
+                        hover:bg-red-600 transition-colors duration-200"
+                      aria-label="Remove logo"
+                    >
+                      <XCircleIcon className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <PhotoIcon className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-grow">
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="logo"
+                      className="relative cursor-pointer inline-flex items-center px-4 py-2 
+                        bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                        transition-colors duration-200 font-medium group"
+                    >
+                      <PhotoIcon className="w-5 h-5 mr-2" />
+                      <span>Upload New Logo</span>
+                      <input
+                        id="logo"
+                        type="file"
+                        accept="image/jpeg, image/png"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Supported formats: JPG, PNG. Maximum file size: 5MB
+                  </p>
+                  {logoError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-500 text-sm flex items-center"
+                    >
+                      <XCircleIcon className="w-5 h-5 mr-1" />
+                      {logoError}
+                    </motion.p>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          </Card>
 
-      {/* Live Preview (Optional) */}
-      <div className="p-4 border rounded mb-4" style={{ fontFamily: headerFont, fontSize: headerFontSize }}>
-        <p>Header Typography Preview</p>
-      </div>
-      <div className="p-4 border rounded" style={{ fontFamily: bodyFont, fontSize: bodyFontSize }}>
-        <p>Body Typography Preview</p>
-      </div>
+          {/* Colors Section */}
+          <Card>
+            <SectionHeader
+              icon={SwatchIcon}
+              title="Brand Colors"
+              description="Define your brand's color palette"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Primary Color
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="color"
+                    value={primaryColour}
+                    onChange={handlePrimaryColourChange}
+                    className="h-10 w-20 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={primaryColour}
+                    onChange={handlePrimaryColourChange}
+                    className="flex-grow px-3 py-2 border border-gray-300 rounded-md 
+                      focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="#000000"
+                  />
+                </div>
+                {primaryColourError && (
+                  <p className="mt-1 text-sm text-red-600">{primaryColourError}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Secondary Color
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="color"
+                    value={secondaryColour}
+                    onChange={handleSecondaryColourChange}
+                    className="h-10 w-20 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={secondaryColour}
+                    onChange={handleSecondaryColourChange}
+                    className="flex-grow px-3 py-2 border border-gray-300 rounded-md 
+                      focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="#000000"
+                  />
+                </div>
+                {secondaryColourError && (
+                  <p className="mt-1 text-sm text-red-600">{secondaryColourError}</p>
+                )}
+              </div>
+            </div>
+          </Card>
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded">
-          {toastMessage}
+          {/* Typography Section */}
+          <Card>
+            <SectionHeader
+              icon={DocumentTextIcon}
+              title="Typography"
+              description="Configure your brand's typography settings"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Header Font
+                  </label>
+                  <select
+                    value={headerFont}
+                    onChange={handleHeaderFontChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                      focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="Work Sans">Work Sans</option>
+                    <option value="Inter">Inter</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Header Font Size
+                  </label>
+                  <input
+                    type="text"
+                    value={headerFontSize}
+                    onChange={handleHeaderFontSizeChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                      focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="18px"
+                  />
+                  {headerFontSizeError && (
+                    <p className="mt-1 text-sm text-red-600">{headerFontSizeError}</p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Body Font
+                  </label>
+                  <select
+                    value={bodyFont}
+                    onChange={handleBodyFontChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                      focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="Work Sans">Work Sans</option>
+                    <option value="Inter">Inter</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Body Font Size
+                  </label>
+                  <input
+                    type="text"
+                    value={bodyFontSize}
+                    onChange={handleBodyFontSizeChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                      focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="14px"
+                  />
+                  {bodyFontSizeError && (
+                    <p className="mt-1 text-sm text-red-600">{bodyFontSizeError}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
-      )}
-    </div>
+
+        {/* Toast Message */}
+        <AnimatePresence>
+          {toastMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg 
+                shadow-lg flex items-center"
+            >
+              <CheckCircleIcon className="w-5 h-5 mr-2" />
+              {toastMessage}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 };
 
