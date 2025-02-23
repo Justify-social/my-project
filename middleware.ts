@@ -13,10 +13,7 @@ export const config = {
     '/settings/:path*',
     '/dashboard/:path*',
     
-    // Exclude pricing page temporarily for testing
-    // '/pricing',
-    
-    // Exclude authentication routes and public pages
+    // Exclude public pages and API routes
     '/((?!api|_next/static|_next/image|favicon.ico|auth|pricing).*)',
   ],
 }; 
