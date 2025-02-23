@@ -69,7 +69,27 @@ const kpis = [
   },
 ];
 
-// Define the validation schema for Step 2 fields.
+// First, ensure KPI and Feature enums are properly defined
+enum KPI {
+  adRecall = "adRecall",
+  brandAwareness = "brandAwareness",
+  consideration = "consideration",
+  messageAssociation = "messageAssociation",
+  brandPreference = "brandPreference",
+  purchaseIntent = "purchaseIntent",
+  actionIntent = "actionIntent",
+  recommendationIntent = "recommendationIntent",
+  advocacy = "advocacy"
+}
+
+enum Feature {
+  CREATIVE_ASSET_TESTING = "CREATIVE_ASSET_TESTING",
+  BRAND_LIFT = "BRAND_LIFT",
+  BRAND_HEALTH = "BRAND_HEALTH",
+  MIXED_MEDIA_MODELLING = "MIXED_MEDIA_MODELLING"
+}
+
+// Update the validation schema
 const ObjectivesSchema = Yup.object().shape({
   mainMessage: Yup.string().required("Main message is required"),
   hashtags: Yup.string(),
@@ -77,80 +97,84 @@ const ObjectivesSchema = Yup.object().shape({
   keyBenefits: Yup.string().required("Key benefits are required"),
   expectedAchievements: Yup.string().required("Expected achievements are required"),
   purchaseIntent: Yup.string().required("Purchase intent is required"),
-  primaryKPI: Yup.string().oneOf(Object.values(KPI)).required("Primary KPI is required"),
+  brandPerception: Yup.string(),
+  primaryKPI: Yup.string()
+    .required("Primary KPI is required")
+    .oneOf([
+      KPI.adRecall,
+      KPI.brandAwareness,
+      KPI.consideration,
+      KPI.messageAssociation,
+      KPI.brandPreference,
+      KPI.purchaseIntent,
+      KPI.actionIntent,
+      KPI.recommendationIntent,
+      KPI.advocacy
+    ], "Invalid KPI selected"),
   secondaryKPIs: Yup.array()
-    .of(Yup.string().oneOf(Object.values(KPI)))
+    .of(Yup.string().oneOf([
+      KPI.adRecall,
+      KPI.brandAwareness,
+      KPI.consideration,
+      KPI.messageAssociation,
+      KPI.brandPreference,
+      KPI.purchaseIntent,
+      KPI.actionIntent,
+      KPI.recommendationIntent,
+      KPI.advocacy
+    ], "Invalid KPI selected"))
     .max(4, "Maximum 4 secondary KPIs"),
   features: Yup.array()
-    .of(Yup.string().oneOf(Object.values(Feature)))
+    .of(Yup.string().oneOf([
+      Feature.CREATIVE_ASSET_TESTING,
+      Feature.BRAND_LIFT,
+      Feature.BRAND_HEALTH,
+      Feature.MIXED_MEDIA_MODELLING
+    ], "Invalid feature selected"))
 });
 
 function CampaignStep2Content() {
   const router = useRouter();
+  const { data, updateData, campaignData, isEditing, loading } = useWizard();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
-  const { data, updateData } = useWizard();
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadCampaignData = async () => {
-      if (campaignId) {
-        try {
-          setIsLoading(true);
-          setError(null);
-          const response = await fetch(`/api/campaigns/${campaignId}`);
-          const data = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to load campaign');
-          }
-
-          if (data.success) {
-            updateData(data.campaign);
-            toast.success('Campaign data loaded');
-          }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to load campaign';
-          setError(message);
-          toast.error(message);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    loadCampaignData();
-  }, [campaignId]);
+  console.log('Campaign Data:', campaignData); // Debug log
 
   const initialValues = {
-    mainMessage: data.objectives?.mainMessage || "",
-    hashtags: data.objectives?.hashtags || "",
-    memorability: data.objectives?.memorability || "",
-    keyBenefits: data.objectives?.keyBenefits || "",
-    expectedAchievements: data.objectives?.expectedAchievements || "",
-    purchaseIntent: data.objectives?.purchaseIntent || "",
-    primaryKPI: data.objectives?.primaryKPI || "" as KPI,
-    secondaryKPIs: data.objectives?.secondaryKPIs || [] as KPI[],
-    features: data.objectives?.features || [] as Feature[],
+    mainMessage: isEditing ? campaignData?.mainMessage || "" : "",
+    hashtags: isEditing ? campaignData?.hashtags || "" : "",
+    memorability: isEditing ? campaignData?.memorability || "" : "",
+    keyBenefits: isEditing ? campaignData?.keyBenefits || "" : "",
+    expectedAchievements: isEditing ? campaignData?.expectedAchievements || "" : "",
+    purchaseIntent: isEditing ? campaignData?.purchaseIntent || "" : "",
+    brandPerception: isEditing ? campaignData?.brandPerception || "" : "",
+    primaryKPI: isEditing ? campaignData?.primaryKPI as KPI : "" as KPI,
+    secondaryKPIs: isEditing ? (campaignData?.secondaryKPIs || []) : [] as KPI[],
+    features: isEditing ? (campaignData?.features || []) : [] as Feature[],
   };
+
+  useEffect(() => {
+    // Debug log to verify data mapping
+    console.log('Form Initial Values:', {
+      mainMessage: campaignData?.mainMessage,
+      primaryKPI: campaignData?.primaryKPI,
+      secondaryKPIs: campaignData?.secondaryKPIs,
+      features: campaignData?.features
+    });
+  }, [campaignData]);
 
   const handleSubmit = async (values: any) => {
     try {
       setIsSaving(true);
       setError(null);
 
-      // Get campaign ID from context if not in URL
       const currentCampaignId = campaignId || data.id;
-
       if (!currentCampaignId) {
         throw new Error('Campaign ID is required');
       }
-
-      console.log('Submitting with campaign ID:', currentCampaignId);
 
       const response = await fetch(`/api/campaigns/${currentCampaignId}`, {
         method: 'PATCH',
@@ -158,18 +182,18 @@ function CampaignStep2Content() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          objectives: {  // Nest under objectives
-            mainMessage: values.mainMessage,
-            hashtags: values.hashtags,
-            memorability: values.memorability,
-            keyBenefits: values.keyBenefits,
-            expectedAchievements: values.expectedAchievements,
-            purchaseIntent: values.purchaseIntent,
-            primaryKPI: values.primaryKPI,
-            secondaryKPIs: values.secondaryKPIs,
-            features: values.features,
-          },
-          step: 2
+          mainMessage: values.mainMessage,
+          hashtags: values.hashtags,
+          memorability: values.memorability,
+          keyBenefits: values.keyBenefits,
+          expectedAchievements: values.expectedAchievements,
+          purchaseIntent: values.purchaseIntent,
+          brandPerception: values.brandPerception,
+          primaryKPI: values.primaryKPI,
+          secondaryKPIs: values.secondaryKPIs || [],
+          features: values.features || [],
+          step: 2,
+          submissionStatus: 'draft'
         }),
       });
 
@@ -182,21 +206,17 @@ function CampaignStep2Content() {
       // Update local data
       updateData({
         ...data,
-        objectives: values,
+        ...result,
         id: currentCampaignId
       });
 
       toast.success('Campaign updated successfully');
-      
-      // Navigate to next step
-      console.log('Navigating to step 3...');
       router.push(`/campaigns/wizard/step-3?id=${currentCampaignId}`);
       
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update campaign';
       setError(message);
       toast.error(message);
-      console.error('Submit error:', error);
     } finally {
       setIsSaving(false);
     }
@@ -238,7 +258,48 @@ function CampaignStep2Content() {
     }
   };
 
-  if (isLoading) {
+  // Update the Features section in the form
+  const renderFeaturesSection = () => (
+    <div>
+      <h2 className="text-xl font-bold mb-2">Features to Include</h2>
+      <div role="group" className="flex flex-col">
+        <label className="inline-flex items-center">
+          <Field 
+            type="checkbox" 
+            name="features" 
+            value={Feature.CREATIVE_ASSET_TESTING}
+          />
+          <span className="ml-2">Creative Asset Testing</span>
+        </label>
+        <label className="inline-flex items-center">
+          <Field 
+            type="checkbox" 
+            name="features" 
+            value={Feature.BRAND_LIFT}
+          />
+          <span className="ml-2">Brand Lift</span>
+        </label>
+        <label className="inline-flex items-center">
+          <Field 
+            type="checkbox" 
+            name="features" 
+            value={Feature.BRAND_HEALTH}
+          />
+          <span className="ml-2">Brand Health</span>
+        </label>
+        <label className="inline-flex items-center">
+          <Field 
+            type="checkbox" 
+            name="features" 
+            value={Feature.MIXED_MEDIA_MODELLING}
+          />
+          <span className="ml-2">Mixed Media Modelling</span>
+        </label>
+      </div>
+    </div>
+  );
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner />
@@ -289,8 +350,7 @@ function CampaignStep2Content() {
         initialValues={initialValues}
         validationSchema={ObjectivesSchema}
         onSubmit={handleSubmit}
-        validateOnMount={true}
-        validateOnChange={true}
+        enableReinitialize={true}
       >
         {({ values, submitForm, isValid, dirty, errors, isSubmitting }) => {
           console.log('Form State:', { 
@@ -458,27 +518,7 @@ function CampaignStep2Content() {
                 </div>
 
                 {/* Features Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Features to Include</h2>
-                  <div role="group" className="flex flex-col">
-                    <label className="inline-flex items-center">
-                      <Field type="checkbox" name="features" value="Creative Asset Testing" />
-                      <span className="ml-2">Creative Asset Testing</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <Field type="checkbox" name="features" value="Brand Lift" />
-                      <span className="ml-2">Brand Lift</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <Field type="checkbox" name="features" value="Brand Health" />
-                      <span className="ml-2">Brand Health</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <Field type="checkbox" name="features" value="Mixed Media Modelling" />
-                      <span className="ml-2">Mixed Media Modelling</span>
-                    </label>
-                  </div>
-                </div>
+                {renderFeaturesSection()}
               </Form>
               
               <ProgressBar

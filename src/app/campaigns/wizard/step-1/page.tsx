@@ -75,39 +75,55 @@ const debugFormData = (values: any, isDraft: boolean) => {
 
 function OverviewContent() {
   const router = useRouter();
-  const { data, updateData } = useWizard();
+  const { data, updateData, campaignData, isEditing, loading } = useWizard();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
   
+  // Add debug logs
+  console.log('WizardContext values:', {
+    isEditing,
+    campaignId,
+    campaignData,
+    loading
+  });
+
   const [state, setState] = useState({
     isSubmitting: false,
     isLoading: false,
     error: null as string | null,
   });
 
+  // Log the campaign data to debug
+  console.log('Campaign Data:', campaignData);
+
+  // Update initialValues to match the exact API data structure
   const initialValues = {
-    name: data.overview.name || "",
-    businessGoal: data.overview.businessGoal || "",
-    startDate: data.overview.startDate || "",
-    endDate: data.overview.endDate || "",
-    timeZone: data.overview.timeZone || "UTC",
+    name: isEditing ? campaignData?.campaignName : data?.overview?.name || "",
+    businessGoal: isEditing ? campaignData?.description : data?.overview?.businessGoal || "",
+    startDate: isEditing && campaignData?.startDate 
+      ? new Date(campaignData.startDate).toISOString().split('T')[0] 
+      : data?.overview?.startDate || "",
+    endDate: isEditing && campaignData?.endDate
+      ? new Date(campaignData.endDate).toISOString().split('T')[0]
+      : data?.overview?.endDate || "",
+    timeZone: isEditing ? campaignData?.timeZone : data?.overview?.timeZone || "UTC",
     primaryContact: {
-      firstName: data.overview.primaryContact?.firstName || "",
-      surname: data.overview.primaryContact?.surname || "",
-      email: data.overview.primaryContact?.email || "",
-      position: data.overview.primaryContact?.position || "",
+      firstName: isEditing ? campaignData?.primaryContact?.firstName : data?.overview?.primaryContact?.firstName || "",
+      surname: isEditing ? campaignData?.primaryContact?.surname : data?.overview?.primaryContact?.surname || "",
+      email: isEditing ? campaignData?.primaryContact?.email : data?.overview?.primaryContact?.email || "",
+      position: isEditing ? campaignData?.primaryContact?.position : data?.overview?.primaryContact?.position || "",
     },
     secondaryContact: {
-      firstName: data.overview.secondaryContact?.firstName || "",
-      surname: data.overview.secondaryContact?.surname || "",
-      email: data.overview.secondaryContact?.email || "",
-      position: data.overview.secondaryContact?.position || "",
+      firstName: isEditing ? campaignData?.secondaryContact?.firstName : data?.overview?.secondaryContact?.firstName || "",
+      surname: isEditing ? campaignData?.secondaryContact?.surname : data?.overview?.secondaryContact?.surname || "",
+      email: isEditing ? campaignData?.secondaryContact?.email : data?.overview?.secondaryContact?.email || "",
+      position: isEditing ? campaignData?.secondaryContact?.position : data?.overview?.secondaryContact?.position || "",
     },
-    currency: data.overview.currency || "",
-    totalBudget: data.overview.totalBudget || "",
-    socialMediaBudget: data.overview.socialMediaBudget || "",
-    platform: data.overview.platform || "",
-    influencerHandle: data.overview.influencerHandle || "",
+    currency: isEditing ? campaignData?.currency : data?.overview?.currency || "",
+    totalBudget: isEditing ? campaignData?.totalBudget : data?.overview?.totalBudget || "",
+    socialMediaBudget: isEditing ? campaignData?.socialMediaBudget : data?.overview?.socialMediaBudget || "",
+    platform: isEditing ? campaignData?.platform : data?.overview?.platform || "",
+    influencerHandle: isEditing ? campaignData?.influencerHandle : data?.overview?.influencerHandle || "",
   };
 
   useEffect(() => {
@@ -145,9 +161,11 @@ function OverviewContent() {
     try {
       setState(prev => ({ ...prev, isSubmitting: true, error: null }));
       
-      // Create campaign first to get ID
-      const response = await fetch('/api/campaigns', {
-        method: 'POST',
+      const method = isEditing ? 'PATCH' : 'POST';
+      const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -158,24 +176,25 @@ function OverviewContent() {
       });
 
       const result = await response.json();
-      console.log('Campaign created:', result);
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to create campaign');
+        throw new Error(result.error || `Failed to ${isEditing ? 'update' : 'create'} campaign`);
       }
 
       // Store the campaign ID and data
       updateData({
         ...data,
-        campaignId: result.id,
+        campaignId: result.id || campaignId,
         step1: values
       });
 
-      // Navigate to next step with the new ID
-      router.push(`/campaigns/wizard/step-2?id=${result.id}`);
+      toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
+
+      // Navigate to next step
+      router.push(`/campaigns/wizard/step-2?id=${result.id || campaignId}`);
     } catch (error) {
-      console.error('Error creating campaign:', error);
-      toast.error('Failed to create campaign');
+      console.error('Error:', error);
+      toast.error(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
@@ -185,24 +204,16 @@ function OverviewContent() {
     try {
       setState(prev => ({ ...prev, isSubmitting: true }));
 
-      const response = await fetch('/api/campaigns', {
-        method: 'POST',
+      const method = isEditing ? 'PATCH' : 'POST';
+      const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: values.name,
-          businessGoal: values.businessGoal,
-          startDate: values.startDate,
-          endDate: values.endDate,
-          timeZone: values.timeZone,
-          primaryContact: values.primaryContact,
-          secondaryContact: values.secondaryContact,
-          currency: values.currency,
-          totalBudget: Number(values.totalBudget),
-          socialMediaBudget: Number(values.socialMediaBudget),
-          platform: values.platform,
-          influencerHandle: values.influencerHandle,
+          ...values,
           step: 1,
           status: 'draft'
         }),
@@ -217,7 +228,7 @@ function OverviewContent() {
       updateData({
         ...data,
         overview: values,
-        id: result.id
+        id: result.id || campaignId
       });
 
       toast.success('Draft saved successfully');
@@ -260,8 +271,12 @@ function OverviewContent() {
         initialValues={initialValues}
         validationSchema={OverviewSchema}
         onSubmit={handleSubmit}
+        enableReinitialize={true}
       >
         {({ values, isValid, dirty, errors }) => {
+          // Add debug log for form values
+          console.log('Form values:', values);
+          
           const handleNextStep = async () => {
             if (!isValid) {
               const errorKeys = Object.keys(errors);

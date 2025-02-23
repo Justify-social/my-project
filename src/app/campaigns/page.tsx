@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { auth0 } from '@/lib/auth';
 
@@ -406,9 +406,12 @@ const CampaignList: React.FC = () => {
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <Link href={`/campaigns/${campaign.id}/edit`}>
-                          <span className="cursor-pointer text-blue-600">✏️</span>
-                        </Link>
+                        <button
+                          onClick={() => router.push(`/campaigns/wizard?id=${campaign.id}`)}
+                          className="text-gray-600 hover:text-blue-600"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
                         <button
                           onClick={() => handleDelete(campaign.id.toString())}
                           className="text-red-600 hover:text-red-800"
