@@ -34,9 +34,17 @@ export default withMiddlewareAuthRequired(
 
     // Check for admin routes
     if (path.startsWith('/admin')) {
-      const roles = session?.user?.roles || [];
-      if (!roles.includes('super_admin')) {
-        console.log('Access denied to admin route. User roles:', roles);
+      // Get roles directly from the session
+      const userRoles = session?.user?.roles || [];
+      
+      console.log('Auth Check:', {
+        email: session?.user?.email,
+        path,
+        roles: userRoles,
+        hasRole: userRoles.includes('super_admin')
+      });
+
+      if (!userRoles.includes('super_admin')) {
         return NextResponse.redirect(new URL('/dashboard', req.url));
       }
     }

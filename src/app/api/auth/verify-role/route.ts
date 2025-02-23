@@ -1,77 +1,65 @@
 import { getSession } from '@auth0/nextjs-auth0';
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     
-    if (!session || !session.user) {
-      return NextResponse.json({ 
-        error: 'No session found',
-        session: null 
-      }, { status: 401 });
-    }
+    // Check all possible locations for roles
+    const userRoles = session?.user?.roles || [];
+    const namespacedRoles = session?.user?.['https://justify.social/roles'] || [];
+    const authRoles = session?.user?.['https://justify.social/authorization']?.roles || [];
+    const appMetadataRoles = session?.user?.['https://justify.social/app_metadata']?.roles || [];
+    
+    // Combine all roles
+    const allRoles = [...new Set([
+      ...userRoles,
+      ...namespacedRoles,
+      ...authRoles,
+      ...appMetadataRoles
+    ])];
+    
+    const isSuperAdmin = allRoles.includes('super_admin');
+    
+    console.log('Role check:', {
+      email: session?.user?.email,
+      allRoles,
+      isSuperAdmin,
+      session: {
+        user: session?.user,
+        accessToken: !!session?.accessToken,
+        idToken: !!session?.idToken
+      }
+    });
 
-    // Get all possible locations where roles might be
-    const roleLocations = {
-      directRoles: session.user.roles,
-      authRoles: session.user['https://justify.social/roles'],
-      rawRoles: session.user.raw?.roles,
-      appMetadata: session.user.app_metadata?.roles,
-      userMetadata: session.user.user_metadata?.roles,
-    };
-
-    // Full session debug (excluding sensitive data)
-    const sessionDebug = {
+    return Response.json({
+      message: "Session found",
       user: {
-        ...session.user,
-        picture: session.user.picture ? '[exists]' : null,
-        sub: session.user.sub,
-        sid: session.user.sid,
-      },
-      accessTokenClaims: session.accessTokenClaims,
-      idTokenClaims: session.idTokenClaims,
-    };
-
-    console.log('Full session debug:', sessionDebug);
-    console.log('Role locations:', roleLocations);
-
-    // Combine all possible roles
-    const allRoles = [
-      ...(roleLocations.directRoles || []),
-      ...(roleLocations.authRoles || []),
-      ...(roleLocations.rawRoles || []),
-      ...(roleLocations.appMetadata?.roles || []),
-      ...(roleLocations.userMetadata?.roles || [])
-    ].filter(Boolean);
-
-    // Remove duplicates
-    const uniqueRoles = [...new Set(allRoles)];
-    const isSuperAdmin = uniqueRoles.includes('super_admin');
-
-    return NextResponse.json({
-      message: 'Session found',
-      user: {
-        email: session.user.email,
-        roles: uniqueRoles,
-        isSuperAdmin: isSuperAdmin,
+        email: session?.user?.email,
+        roles: allRoles,
+        isSuperAdmin,
         debug: {
-          roleLocations,
-          sessionInfo: {
-            hasAccessToken: !!session.accessTokenClaims,
-            hasIdToken: !!session.idTokenClaims,
-            tokenExpiry: session.accessTokenClaims?.exp,
-            sessionExpiry: session.idTokenClaims?.exp,
+          roleLocations: {
+            directRoles: userRoles,
+            namespacedRoles,
+            authRoles,
+            appMetadataRoles
           },
-          fullSession: sessionDebug
+          sessionInfo: {
+            hasAccessToken: !!session?.accessToken,
+            hasIdToken: !!session?.idToken
+          },
+          fullSession: {
+            user: {
+              ...session?.user,
+              picture: session?.user?.picture ? '[exists]' : null
+            }
+          }
         }
       }
     });
   } catch (error) {
-    console.error('Error checking session:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Verify role error:', error);
+    return Response.json({ error: 'Failed to verify role' }, { status: 500 });
   }
 } 
