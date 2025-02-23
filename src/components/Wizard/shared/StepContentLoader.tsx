@@ -1,27 +1,25 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
-interface StepLoaderProps {
-  step: number;
-}
+import React, { Suspense } from 'react';
+import dynamic from 'next/dynamic';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { ErrorBoundary } from './ErrorBoundary';
+import { StepLoaderProps } from './types';
 
 export function StepLoader({ step }: StepLoaderProps) {
-  const StepContent = dynamic(
+  const DynamicContent = dynamic(
     () => import(`@/app/campaigns/wizard/step-${step}/Step${step}Content`),
-    { 
-      ssr: false,
+    {
       loading: () => <LoadingSpinner />,
+      ssr: false
     }
   );
 
-  return function ContentLoader() {
-    return (
+  return (
+    <ErrorBoundary>
       <Suspense fallback={<LoadingSpinner />}>
-        <StepContent />
+        <DynamicContent />
       </Suspense>
-    );
-  };
+    </ErrorBoundary>
+  );
 } 

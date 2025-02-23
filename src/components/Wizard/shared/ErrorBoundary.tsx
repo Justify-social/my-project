@@ -1,43 +1,38 @@
 'use client';
 
-import { Component, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { toast } from 'react-hot-toast';
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  error?: Error;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false,
-    error: null
+    hasError: false
   };
 
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error) {
-    console.error('Form Error:', error);
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
     toast.error('An unexpected error occurred. Our team has been notified.');
   }
 
   public render() {
     if (this.state.hasError) {
-      return (
+      return this.props.fallback || (
         <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-          <h3 className="text-red-800 font-semibold">Something went wrong</h3>
-          <button
-            onClick={() => this.setState({ hasError: false })}
-            className="mt-4 btn btn-secondary"
-          >
-            Try again
-          </button>
+          <h2 className="text-red-800 font-semibold">Something went wrong</h2>
+          <p className="text-red-600">{this.state.error?.message}</p>
         </div>
       );
     }

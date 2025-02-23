@@ -36,4 +36,23 @@ export enum Position {
   Manager = "Manager",
   Director = "Director",
   VP = "VP"
+}
+
+export interface StepLoaderProps {
+  step: number;
+}
+
+export interface StepContentProps {
+  step: number;
+  onNext?: () => void;
+  onBack?: () => void;
+  isLoading?: boolean;
+}
+
+export interface WizardStepProps {
+  currentStep: number;
+  totalSteps: number;
+  onNext?: () => void;
+  onBack?: () => void;
+  isLoading?: boolean;
 } 
