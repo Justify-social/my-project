@@ -61,6 +61,9 @@ interface WizardContextType {
   isEditing: boolean;
   campaignData: any | null;
   loading: boolean;
+  formData: FormData;
+  updateFormData: (updates: Partial<FormData>) => void;
+  resetForm: () => void;
 }
 
 // Default values for the wizard data.
@@ -115,6 +118,18 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(!!campaignId);
   const [campaignData, setCampaignData] = useState<any | null>(null);
   const [data, setData] = useState<WizardData>(defaultWizardData);
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    businessGoal: '',
+    startDate: '',
+    endDate: '',
+    timeZone: '',
+    currency: '',
+    totalBudget: '',
+    socialMediaBudget: '',
+    platform: '',
+    influencerHandle: '',
+  });
 
   // Add debug log
   console.log('WizardProvider:', { campaignId, loading, campaignData });
@@ -170,6 +185,25 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const updateFormData = (updates: Partial<FormData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      businessGoal: '',
+      startDate: '',
+      endDate: '',
+      timeZone: '',
+      currency: '',
+      totalBudget: '',
+      socialMediaBudget: '',
+      platform: '',
+      influencerHandle: '',
+    });
+  };
+
   // Include your existing context values along with new ones
   const value = {
     data,
@@ -177,6 +211,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     isEditing: !!campaignId,
     campaignData,
     loading,
+    formData,
+    updateFormData,
+    resetForm,
   };
 
   return (
