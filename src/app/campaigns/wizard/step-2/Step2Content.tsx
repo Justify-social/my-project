@@ -10,7 +10,6 @@ import ProgressBar from "../../../../components/Wizard/ProgressBar";
 import { KPI, Feature } from '@prisma/client';
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ErrorBoundary } from '@/components/Wizard/shared/ErrorBoundary';
 
 // Define the available KPIs for the table
 const kpis = [
@@ -541,10 +540,8 @@ function FormContent() {
 
 export default function Step2Content() {
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner />}>
-        <FormContent />
-      </Suspense>
-    </ErrorBoundary>
+    <Suspense fallback={<LoadingSpinner />}>
+      <FormContent />
+    </Suspense>
   );
 }
