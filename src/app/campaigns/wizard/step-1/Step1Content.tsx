@@ -4,13 +4,11 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useWizard } from "../../../../context/WizardContext";
-import Header from "../../../../components/Wizard/Header";
-import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { useWizard } from "@/context/WizardContext";
+import Header from "@/components/Wizard/Header";
+import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { useSearchParamsHook } from '@/components/SearchParamsWrapper';
-import dynamic from 'next/dynamic';
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
@@ -75,47 +73,22 @@ const debugFormData = (values: any, isDraft: boolean) => {
   });
 };
 
-// Dynamically import the component that uses search params
-const SearchParamsForm = dynamic(
-  () => import('./SearchParamsForm').then(mod => mod.default),
-  {
-    ssr: false,
-    loading: () => <LoadingSpinner />
-  }
-);
-
-// Create a separate component for the form content
-function FormContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { data, updateData, campaignData, isEditing, loading } = useWizard();
+export default function Step1Content() {
+  // 1. All useState hooks first
+  const [mounted, setMounted] = useState(false);
   const [campaignId, setCampaignId] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const id = searchParams?.get('id');
-    if (id) {
-      setCampaignId(id);
-    }
-  }, [searchParams]);
-
-  // Add debug logs
-  console.log('WizardContext values:', {
-    isEditing,
-    campaignId,
-    campaignData,
-    loading
-  });
-
   const [state, setState] = useState({
     isSubmitting: false,
     isLoading: false,
     error: null as string | null,
   });
 
-  // Log the campaign data to debug
-  console.log('Campaign Data:', campaignData);
+  // 2. All other hooks
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data, updateData, campaignData, isEditing, loading } = useWizard();
 
-  // Update initialValues to match the exact API data structure
+  // 3. Define initialValues
   const initialValues = {
     name: isEditing ? campaignData?.campaignName : data?.overview?.name || "",
     businessGoal: isEditing ? campaignData?.description : data?.overview?.businessGoal || "",
@@ -145,6 +118,15 @@ function FormContent() {
     influencerHandle: isEditing ? campaignData?.influencerHandle : data?.overview?.influencerHandle || "",
   };
 
+  // 4. useEffect hooks
+  useEffect(() => {
+    setMounted(true);
+    const id = searchParams?.get('id');
+    if (id) {
+      setCampaignId(id);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const loadCampaignData = async () => {
       if (campaignId) {
@@ -168,14 +150,33 @@ function FormContent() {
         } finally {
           setState(prev => ({ ...prev, isLoading: false }));
         }
-      } else {
-        setState(prev => ({ ...prev, isLoading: false }));
       }
     };
 
     loadCampaignData();
   }, [campaignId]);
 
+  // 5. Early returns
+  if (!mounted || state.isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (state.error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-800 font-semibold">Error</h3>
+        <p className="text-red-600">{state.error}</p>
+        <button
+          onClick={() => router.push('/campaigns')}
+          className="mt-4 btn btn-secondary"
+        >
+          Return to Campaigns
+        </button>
+      </div>
+    );
+  }
+
+  // 6. Rest of your component logic
   const handleSubmit = async (values: any) => {
     try {
       setState(prev => ({ ...prev, isSubmitting: true, error: null }));
@@ -258,30 +259,6 @@ function FormContent() {
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
   };
-
-  if (state.isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-        <p className="ml-2">Loading campaign data...</p>
-      </div>
-    );
-  }
-
-  if (state.error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-red-800 font-semibold">Error</h3>
-        <p className="text-red-600">{state.error}</p>
-        <button
-          onClick={() => router.push('/campaigns')}
-          className="mt-4 btn btn-secondary"
-        >
-          Return to Campaigns
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 pb-20">
@@ -576,6 +553,23 @@ function FormContent() {
                   </div>
                 </div>
               </Form>
+              <div className="flex justify-between mt-8">
+                <button
+                  type="button"
+                  onClick={() => handleSaveDraft(values)}
+                  className="btn btn-secondary"
+                  disabled={state.isSubmitting}
+                >
+                  Save Draft
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={state.isSubmitting || !isValid}
+                >
+                  Next Step
+                </button>
+              </div>
               <ProgressBar
                 currentStep={1}
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
@@ -589,39 +583,6 @@ function FormContent() {
           );
         }}
       </Formik>
-    </div>
-  );
-}
-
-// Main wrapper component
-export default function StepOneWrapper() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <LoadingSpinner />;
-  }
-
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <SearchParamsForm />
-    </Suspense>
-  );
-}
-
-// Separate file for the form (create this as SearchParamsForm.tsx)
-function SearchParamsForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { data, updateData, campaignData, isEditing } = useWizard();
-
-  // Your existing form logic here
-  return (
-    <div className="max-w-4xl mx-auto p-4 pb-20">
-      {/* Your existing form content */}
     </div>
   );
 }
