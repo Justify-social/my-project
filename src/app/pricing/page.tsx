@@ -4,12 +4,24 @@ import { useEffect, useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 
 export default function Page() {
+  const [mounted, setMounted] = useState(false);
   const essentialPriceId = process.env.NEXT_PUBLIC_STRIPE_ESSENTIAL_PRICE_ID;
   const proPriceId = process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID;
   const advancedPriceId = process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID;
 
+  useEffect(() => {
+    console.log('PricingPage mounted');
+    console.log('Environment variables:', {
+      essentialPriceId,
+      proPriceId,
+      advancedPriceId
+    });
+    setMounted(true);
+  }, [essentialPriceId, proPriceId, advancedPriceId]);
+
   const handleSubscribe = async (priceId: string) => {
     try {
+      console.log('Attempting to subscribe with priceId:', priceId);
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -21,15 +33,34 @@ export default function Page() {
         }),
       });
 
-      const { url } = await response.json();
-      window.location.href = url;
+      const data = await response.json();
+      console.log('Checkout session response:', data);
+      if (data.url) {
+        window.location.href = data.url;
+      }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Subscription error:', error);
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Loading pricing page...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {mounted && (
+        <div className="fixed top-0 left-0 bg-blue-100 p-2 text-xs z-50">
+          Page loaded
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -98,4 +129,4 @@ export default function Page() {
       </div>
     </div>
   );
-} 
+}
