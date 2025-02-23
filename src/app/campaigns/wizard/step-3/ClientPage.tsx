@@ -1,13 +1,12 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-function ClientPageContent() {
+export default function ClientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const wizardContext = useWizard();
@@ -51,13 +50,5 @@ function ClientPageContent() {
         isDirty={false}
       />
     </div>
-  );
-}
-
-export default function ClientPage() {
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <ClientPageContent />
-    </Suspense>
   );
 } 
