@@ -319,12 +319,14 @@ function CampaignStep5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Handle both correct and incorrect URL formats
-  const campaignId = searchParams.get('id') || searchParams.toString().match(/id(\d+)/)?.[1];
-  
-  console.log('URL:', window.location.href);
-  console.log('Search Params:', searchParams.toString());
-  console.log('Extracted Campaign ID:', campaignId);
+  // Fix: Get the ID correctly from search params
+  const campaignId = useMemo(() => {
+    const rawParams = searchParams.toString();
+    // Handle both formats: ?id=10 and ?=id10
+    const idFromNormal = searchParams.get('id');
+    const idFromMalformed = rawParams.match(/=id(\d+)/)?.[1];
+    return idFromNormal || idFromMalformed;
+  }, [searchParams]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -342,13 +344,6 @@ function CampaignStep5Content() {
     const loadCampaignData = async () => {
       try {
         if (!campaignId) {
-          // If we detect the wrong URL format, let's fix it
-          const wrongFormatMatch = searchParams.toString().match(/id(\d+)/);
-          if (wrongFormatMatch) {
-            const correctId = wrongFormatMatch[1];
-            router.replace(`/campaigns/wizard/step-5?id=${correctId}`);
-            return;
-          }
           setError('Campaign ID is required');
           setIsLoading(false);
           return;
@@ -356,6 +351,10 @@ function CampaignStep5Content() {
 
         setIsLoading(true);
         setError(null);
+        
+        // Debug logs without window reference
+        console.log('Search Params:', searchParams.toString());
+        console.log('Extracted Campaign ID:', campaignId);
         
         const response = await fetch(`/api/campaigns?id=${campaignId}`);
         const result = await response.json();
@@ -374,7 +373,7 @@ function CampaignStep5Content() {
     };
 
     loadCampaignData();
-  }, [campaignId, router, searchParams]);
+  }, [campaignId, searchParams]);
 
   const StatusBadge = ({ status }: { status: string }) => {
     const statusConfig = {
@@ -487,6 +486,191 @@ function CampaignStep5Content() {
     );
   }
 
+  const debugInfo = {
+    // Campaign Metadata
+    metadata: {
+      id: campaignData.id,
+      submissionStatus: campaignData.submissionStatus,
+      createdAt: campaignData.createdAt,
+    },
+
+    // Step 1: Campaign Details
+    campaignDetails: {
+      basic: {
+        campaignName: campaignData.campaignName,
+        description: campaignData.description, // business goal
+        contacts: campaignData.contacts, // raw contacts string
+      },
+      dates: {
+        startDate: campaignData.startDate,
+        endDate: campaignData.endDate,
+        timeZone: campaignData.timeZone
+      },
+      budget: {
+        currency: campaignData.currency,
+        totalBudget: campaignData.totalBudget,
+        socialMediaBudget: campaignData.socialMediaBudget
+      },
+      platform: {
+        name: campaignData.platform,
+        influencerHandle: campaignData.influencerHandle
+      },
+      contacts: {
+        primary: {
+          id: campaignData.primaryContactId,
+          firstName: campaignData.primaryContact.firstName,
+          surname: campaignData.primaryContact.surname,
+          email: campaignData.primaryContact.email,
+          position: campaignData.primaryContact.position,
+          relationId: campaignData.primaryContact.submission?.id
+        },
+        secondary: {
+          id: campaignData.secondaryContactId,
+          firstName: campaignData.secondaryContact.firstName,
+          surname: campaignData.secondaryContact.surname,
+          email: campaignData.secondaryContact.email,
+          position: campaignData.secondaryContact.position,
+          relationId: campaignData.secondaryContact.submission?.id
+        }
+      }
+    },
+
+    // Step 2: Objectives & Messaging
+    objectives: {
+      kpis: {
+        primary: campaignData.primaryKPI,
+        secondary: campaignData.secondaryKPIs || []
+      },
+      messaging: {
+        mainMessage: campaignData.mainMessage,
+        hashtags: campaignData.hashtags,
+        memorability: campaignData.memorability,
+        keyBenefits: campaignData.keyBenefits,
+        expectedAchievements: campaignData.expectedAchievements,
+        purchaseIntent: campaignData.purchaseIntent,
+        brandPerception: campaignData.brandPerception
+      },
+      selectedFeatures: campaignData.features || []
+    },
+
+    // Step 3: Audience Targeting
+    audience: campaignData.audience ? {
+      id: campaignData.audience.id,
+      campaignId: campaignData.audience.campaignId,
+      demographics: {
+        ageDistribution: {
+          "18-24": campaignData.audience.age1824,
+          "25-34": campaignData.audience.age2534,
+          "35-44": campaignData.audience.age3544,
+          "45-54": campaignData.audience.age4554,
+          "55-64": campaignData.audience.age5564,
+          "65+": campaignData.audience.age65plus
+        },
+        genders: campaignData.audience.genders.map(g => ({
+          id: g.id,
+          audienceId: g.audienceId,
+          gender: g.gender
+        })),
+        otherGender: campaignData.audience.otherGender
+      },
+      targeting: {
+        locations: campaignData.audience.locations.map(l => ({
+          id: l.id,
+          audienceId: l.audienceId,
+          location: l.location
+        })),
+        languages: campaignData.audience.languages.map(l => ({
+          id: l.id,
+          audienceId: l.audienceId,
+          language: l.language
+        })),
+        educationLevel: campaignData.audience.educationLevel,
+        jobTitles: campaignData.audience.jobTitles,
+        incomeLevel: campaignData.audience.incomeLevel
+      },
+      screening: {
+        questions: campaignData.audience.screeningQuestions.map(q => ({
+          id: q.id,
+          audienceId: q.audienceId,
+          question: q.question
+        })),
+        competitors: campaignData.audience.competitors.map(c => ({
+          id: c.id,
+          audienceId: c.audienceId,
+          competitor: c.competitor
+        }))
+      }
+    } : null,
+
+    // Step 4: Creative Assets & Requirements
+    creative: {
+      assets: campaignData.creativeAssets.map(asset => ({
+        id: asset.id,
+        submissionId: asset.submissionId,
+        type: asset.type,
+        assetName: asset.assetName,
+        fileDetails: {
+          url: asset.url,
+          fileName: asset.fileName,
+          fileSize: asset.fileSize
+        },
+        influencer: {
+          handle: asset.influencerHandle,
+          name: asset.influencerName,
+          followers: asset.influencerFollowers,
+          whySelected: asset.whyInfluencer,
+          budget: asset.budget
+        },
+        timestamps: {
+          created: asset.createdAt,
+          updated: asset.updatedAt
+        }
+      })),
+      requirements: campaignData.creativeRequirements.map(req => ({
+        id: req.id,
+        submissionId: req.submissionId,
+        requirement: req.requirement
+      }))
+    },
+
+    // Schema Enums (for reference)
+    enums: {
+      currency: ['GBP', 'USD', 'EUR'],
+      platform: ['Instagram', 'YouTube', 'TikTok'],
+      kpi: [
+        'adRecall',
+        'brandAwareness',
+        'consideration',
+        'messageAssociation',
+        'brandPreference',
+        'purchaseIntent',
+        'actionIntent',
+        'recommendationIntent',
+        'advocacy'
+      ],
+      feature: [
+        'CREATIVE_ASSET_TESTING',
+        'BRAND_LIFT',
+        'BRAND_HEALTH',
+        'MIXED_MEDIA_MODELLING'
+      ],
+      position: ['Manager', 'Director', 'VP'],
+      creativeAssetType: ['image', 'video'],
+      submissionStatus: ['draft', 'submitted']
+    }
+  };
+
+  const DebugSection = ({ title, data }: { title: string; data: any }) => (
+    <div className="mb-6">
+      <h3 className="text-lg font-semibold text-gray-700 mb-2 border-b border-gray-200 pb-2">
+        {title}
+      </h3>
+      <pre className="bg-gray-50 p-4 rounded-md overflow-auto text-sm">
+        {JSON.stringify(data, null, 2)}
+      </pre>
+    </div>
+  );
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <motion.div 
@@ -597,22 +781,37 @@ function CampaignStep5Content() {
         </div>
 
         {/* Debug Information */}
-        <motion.div 
-          className="mt-16 border-t pt-8"
-          {...fadeIn}
-          transition={{ delay: 0.3 }}
-        >
-          <details className="bg-gray-50 rounded-lg overflow-hidden">
-            <summary className="cursor-pointer bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200 transition-colors">
-              Debug Information
-            </summary>
-            <div className="p-4">
-              <pre className="bg-white p-4 rounded-md overflow-auto text-sm">
-                {JSON.stringify(campaignData, null, 2)}
-              </pre>
-            </div>
-          </details>
-        </motion.div>
+        <details className="bg-white rounded-lg overflow-hidden shadow-sm mt-8">
+          <summary className="cursor-pointer bg-gray-50 px-6 py-3 text-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+            Debug Information
+          </summary>
+          <div className="p-6 space-y-4">
+            <DebugSection 
+              title="Campaign Metadata" 
+              data={debugInfo.metadata} 
+            />
+            <DebugSection 
+              title="Step 1: Campaign Details" 
+              data={debugInfo.campaignDetails} 
+            />
+            <DebugSection 
+              title="Step 2: Objectives & Messaging" 
+              data={debugInfo.objectives} 
+            />
+            <DebugSection 
+              title="Step 3: Audience Targeting" 
+              data={debugInfo.audience} 
+            />
+            <DebugSection 
+              title="Step 4: Creative Assets & Requirements" 
+              data={debugInfo.creative} 
+            />
+            <DebugSection 
+              title="Available Enums" 
+              data={debugInfo.enums} 
+            />
+          </div>
+        </details>
       </motion.div>
     </div>
   );
