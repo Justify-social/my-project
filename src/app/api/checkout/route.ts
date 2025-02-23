@@ -14,6 +14,10 @@ export async function POST(req: Request) {
       );
     }
 
+    // Get the base URL from the request
+    const url = new URL(req.url);
+    const baseUrl = `${url.protocol}//${url.host}`;
+
     const body = await req.json();
     console.log('Request body:', body); // Debug log
     const { priceId } = body;
@@ -30,7 +34,7 @@ export async function POST(req: Request) {
       const customer = await getStripeCustomer(session.user.email);
       console.log('Stripe customer:', customer); // Debug log
 
-      // Create checkout session
+      // Updated to use subscription mode
       const checkoutSession = await stripe.checkout.sessions.create({
         customer: customer.id,
         line_items: [
@@ -39,12 +43,20 @@ export async function POST(req: Request) {
             quantity: 1,
           },
         ],
-        mode: 'payment',
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/campaigns/wizard/step-1?success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+        mode: 'subscription', // Changed from 'payment' to 'subscription'
+        success_url: `${baseUrl}/campaigns/wizard/step-1?success=true`,
+        cancel_url: `${baseUrl}/pricing?canceled=true`,
         metadata: {
           userId: session.user.sub, // Auth0 user ID
         },
+        subscription_data: {
+          metadata: {
+            userId: session.user.sub,
+          },
+        },
+        allow_promotion_codes: true,
+        billing_address_collection: 'required',
+        payment_method_types: ['card'],
       });
 
       console.log('Checkout session:', checkoutSession); // Debug log
