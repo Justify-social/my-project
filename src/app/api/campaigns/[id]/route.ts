@@ -55,44 +55,54 @@ const campaignSchema = z.object({
 });
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const id = parseInt(params.id);
     
+    if (isNaN(id)) {
+      return new Response(JSON.stringify({ error: 'Invalid campaign ID' }), {
+        status: 400,
+      });
+    }
+
     const campaign = await prisma.campaignWizardSubmission.findUnique({
       where: { id },
       include: {
         primaryContact: true,
         secondaryContact: true,
-        audience: true,
+        audience: {
+          include: {
+            locations: true,
+            genders: true,
+            screeningQuestions: true,
+            languages: true,
+            competitors: true
+          }
+        },
         creativeAssets: true,
-        creativeRequirements: true,
-      },
+        creativeRequirements: true
+      }
     });
 
     if (!campaign) {
-      return NextResponse.json({
-        success: false,
-        error: 'Campaign not found',
-        message: `No campaign found with ID ${id}`
-      }, { status: 404 });
+      return new Response(JSON.stringify({ error: 'Campaign not found' }), {
+        status: 404,
+      });
     }
 
-    return NextResponse.json({
-      success: true,
-      exists: true,
-      campaign,
-      message: `Campaign ${id} found`
+    return new Response(JSON.stringify({ campaign }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   } catch (error) {
-    console.error('Error fetching campaign:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch campaign',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch campaign' }), {
+      status: 500,
+    });
   }
 }
 

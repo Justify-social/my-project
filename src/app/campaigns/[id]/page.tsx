@@ -28,6 +28,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Image from 'next/image';
+import Link from 'next/link';
 
 // Add proper enum types from schema
 enum Currency {
@@ -1018,16 +1019,12 @@ export default function CampaignDetail() {
           >
             Back to Campaigns
           </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => router.push(`/campaigns/${data.id}/edit`)}
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 
-              text-white rounded-lg hover:from-blue-700 hover:to-blue-800 
-              transition-all duration-300 shadow-md hover:shadow-lg"
+          <Link
+            href={`/campaigns/wizard/step-1?id=${data.id}`}
+            className="px-4 py-2 rounded border border-blue-500 text-blue-500 text-lg whitespace-nowrap"
           >
             Edit Campaign
-          </motion.button>
+          </Link>
         </motion.div>
       </div>
     </div>

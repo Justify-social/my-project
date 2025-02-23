@@ -5,16 +5,48 @@ import { Currency, Platform, KPI, SubmissionStatus, Position } from '@prisma/cli
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const id = parseInt(searchParams.get('id') || '');
+    const id = searchParams.get('id');
     
-    if (isNaN(id)) {
-      return new Response(JSON.stringify({ error: 'Invalid campaign ID' }), {
-        status: 400,
+    // If no ID is provided, return all campaigns
+    if (!id) {
+      const campaigns = await prisma.campaignWizardSubmission.findMany({
+        include: {
+          primaryContact: true,
+          secondaryContact: true,
+          audience: {
+            include: {
+              locations: true,
+              genders: true,
+              screeningQuestions: true,
+              languages: true,
+              competitors: true
+            }
+          },
+          creativeAssets: true,
+          creativeRequirements: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      return NextResponse.json({ 
+        success: true, 
+        campaigns 
       });
     }
 
+    // If ID is provided, return specific campaign
+    const campaignId = parseInt(id);
+    if (isNaN(campaignId)) {
+      return NextResponse.json(
+        { error: 'Invalid campaign ID' },
+        { status: 400 }
+      );
+    }
+
     const campaign = await prisma.campaignWizardSubmission.findUnique({
-      where: { id },
+      where: { id: campaignId },
       include: {
         primaryContact: true,
         secondaryContact: true,
@@ -33,22 +65,23 @@ export async function GET(request: NextRequest) {
     });
 
     if (!campaign) {
-      return new Response(JSON.stringify({ error: 'Campaign not found' }), {
-        status: 404,
-      });
+      return NextResponse.json(
+        { error: 'Campaign not found' },
+        { status: 404 }
+      );
     }
 
-    return new Response(JSON.stringify({ campaign }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    return NextResponse.json({ 
+      success: true, 
+      campaign 
     });
+
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch campaign' }), {
-      status: 500,
-    });
+    return NextResponse.json(
+      { error: 'Failed to fetch campaign(s)' },
+      { status: 500 }
+    );
   }
 }
 
