@@ -10,6 +10,7 @@ import ProgressBar from "../../../../components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useSearchParamsHook } from '@/components/SearchParamsWrapper';
+import dynamic from 'next/dynamic';
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
@@ -73,6 +74,15 @@ const debugFormData = (values: any, isDraft: boolean) => {
     values: values,
   });
 };
+
+// Dynamically import the component that uses search params
+const SearchParamsForm = dynamic(
+  () => import('./SearchParamsForm').then(mod => mod.default),
+  {
+    ssr: false,
+    loading: () => <LoadingSpinner />
+  }
+);
 
 // Create a separate component for the form content
 function FormContent() {
@@ -583,21 +593,35 @@ function FormContent() {
   );
 }
 
-// Wrap everything in a client-side component
-export default function ClientSideContent() {
-  const [isClient, setIsClient] = useState(false);
-  
+// Main wrapper component
+export default function StepOneWrapper() {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
-  if (!isClient) {
+  if (!mounted) {
     return <LoadingSpinner />;
   }
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <FormContent />
+      <SearchParamsForm />
     </Suspense>
+  );
+}
+
+// Separate file for the form (create this as SearchParamsForm.tsx)
+function SearchParamsForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data, updateData, campaignData, isEditing } = useWizard();
+
+  // Your existing form logic here
+  return (
+    <div className="max-w-4xl mx-auto p-4 pb-20">
+      {/* Your existing form content */}
+    </div>
   );
 }

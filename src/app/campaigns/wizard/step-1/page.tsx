@@ -1,11 +1,10 @@
-// This is a pure server component
+// Pure server component - no client-side hooks
 export default function Page() {
   return (
     <div className="min-h-screen">
-      <ClientSideContent />
+      <StepOneWrapper />
     </div>
   );
 }
 
-// Import the client-side wrapper
-import ClientSideContent from './Step1Content';
+import StepOneWrapper from './Step1Content';
