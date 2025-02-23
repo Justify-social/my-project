@@ -557,7 +557,7 @@ const CompetitorTracking: React.FC<CompetitorTrackingProps> = ({ selected, onCha
 // MAIN COMPONENT: AUDIENCE TARGETING (STEP 3)
 // =============================================================================
 
-function AudienceTargetingContent() {
+function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -848,17 +848,20 @@ function AudienceTargetingContent() {
   );
 }
 
-export default function AudienceTargeting() {
+export default function Step3Content() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <LoadingSpinner />;
+  }
+
   return (
-    <Suspense 
-      fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <LoadingSpinner />
-          <p className="ml-2">Loading...</p>
-        </div>
-      }
-    >
-      <AudienceTargetingContent />
+    <Suspense fallback={<LoadingSpinner />}>
+      <FormContent />
     </Suspense>
   );
 }
