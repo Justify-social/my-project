@@ -300,18 +300,21 @@ const NotificationPreferencesSection: React.FC<{
 ----------------------------------------------------- */
 const ProfileSettingsPage: React.FC = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
-  // Add effect to check super admin status
   useEffect(() => {
     const checkSuperAdmin = async () => {
       try {
-        const response = await fetch('/api/auth/check-super-admin');
+        const response = await fetch('/api/auth/verify-role');
+        if (!response.ok) {
+          throw new Error('Failed to verify role');
+        }
         const data = await response.json();
-        setIsSuperAdmin(data.isSuperAdmin);
+        setIsSuperAdmin(data?.user?.isSuperAdmin || false);
       } catch (error) {
-        console.error('Failed to check admin status:', error);
+        console.error('Error checking super admin status:', error);
+        setIsSuperAdmin(false);
       }
     };
 
@@ -319,6 +322,24 @@ const ProfileSettingsPage: React.FC = () => {
       checkSuperAdmin();
     }
   }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="bg-yellow-50 text-yellow-800 rounded-lg p-4">
+          Please log in to access settings
+        </div>
+      </div>
+    );
+  }
 
   // Personal Information state
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -476,117 +497,72 @@ const ProfileSettingsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-6">
-      {/* Page Title & Primary Action Buttons */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[#333333]">Profile Settings</h1>
-        <div className="space-x-2">
-          <button
-            onClick={handleCancel}
-            className="w-36 h-10 bg-gray-500 text-white rounded"
-            aria-label="Cancel edits"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSaveChanges}
-            disabled={!hasChanges || isSaving}
-            className={`w-36 h-10 rounded text-white ${
-              !hasChanges || isSaving ? 'bg-blue-300' : 'bg-blue-500'
-            }`}
-            aria-label="Save profile updates"
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="w-36 h-10 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-            aria-label="Sign out"
-          >
-            Sign Out
-          </button>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+      
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <p className="mt-1 text-gray-900">{user.name}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <p className="mt-1 text-gray-900">{user.email}</p>
+          </div>
+          {isSuperAdmin && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-lg font-medium text-blue-800">Super Admin Access</h3>
+              <p className="mt-1 text-blue-600">
+                You have super administrator privileges
+              </p>
+              <a 
+                href="/admin"
+                className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Go to Admin Dashboard
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="mb-6 border-b border-gray-300">
-        <nav className="flex space-x-4">
-          <button
-            onClick={() => router.push('/settings')}
-            className="py-2 px-4 font-bold border-b-2 border-blue-500"
-            aria-current="page"
-          >
-            Profile Settings
-          </button>
-          <button
-            onClick={() => router.push('/settings/team-management')}
-            className="py-2 px-4 text-blue-500 hover:underline"
-          >
-            Team Management
-          </button>
-          <button
-            onClick={() => router.push('/settings/branding')}
-            className="py-2 px-4 text-blue-500 hover:underline"
-          >
-            Branding
-          </button>
-          {isSuperAdmin && (
-            <button
-              onClick={() => router.push('/admin')}
-              className="py-2 px-4 text-purple-500 hover:underline flex items-center space-x-1"
-            >
-              <span>Super Admin Console</span>
-              <svg 
-                className="w-4 h-4" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M8 9l4-4 4 4m0 6l-4 4-4-4" 
-                />
-              </svg>
-            </button>
-          )}
-        </nav>
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Account Status</label>
+            <p className="mt-1 text-green-600">Active</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Last Login</label>
+            <p className="mt-1 text-gray-900">{new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Render Sub-Components */}
-      <PersonalInfoSection
-        personalInfo={personalInfo}
-        isEditing={isEditing}
-        onChange={handlePersonalInfoChangeWithMark}
-        onToggleEdit={toggleEditing}
-      />
-
-      <ProfilePictureSection
-        profilePicturePreview={profilePicturePreview}
-        onFileChange={(e) => {
-          handleProfilePictureChange(e);
-          markChanges();
-        }}
-        onRemove={() => {
-          removeProfilePicture();
-          markChanges();
-        }}
-        error={profilePictureError}
-      />
-
-      <PasswordManagementSection
-        passwordState={passwordState}
-        onChange={handlePasswordChange}
-        onSubmit={handlePasswordSubmit}
-        error={passwordError}
-        success={passwordSuccess}
-      />
-
-      <NotificationPreferencesSection
-        preferences={preferences}
-        onToggle={handleTogglePreferenceWithMark}
-      />
+      {/* Debug Information */}
+      <details className="mt-8 bg-white rounded-lg shadow-sm">
+        <summary className="cursor-pointer bg-gray-50 px-6 py-3 text-lg font-medium text-gray-700 hover:bg-gray-100">
+          Debug Information
+        </summary>
+        <div className="p-6">
+          <pre className="bg-gray-50 p-4 rounded-md overflow-auto text-sm">
+            {JSON.stringify({
+              user: {
+                email: user.email,
+                name: user.name,
+                isSuperAdmin
+              },
+              auth: {
+                isAuthenticated: !!user,
+                lastChecked: new Date().toISOString()
+              }
+            }, null, 2)}
+          </pre>
+        </div>
+      </details>
     </div>
   );
 };
