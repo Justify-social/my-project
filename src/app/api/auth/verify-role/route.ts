@@ -12,26 +12,41 @@ export async function GET() {
       }, { status: 401 });
     }
 
-    // Check all possible locations for roles
-    const possibleRoleLocations = {
+    // Get all possible locations where roles might be
+    const roleLocations = {
       directRoles: session.user.roles,
-      namespacedRoles: session.user['https://justify.social/roles'],
+      authRoles: session.user['https://justify.social/roles'],
       rawRoles: session.user.raw?.roles,
-      authorizationRoles: session.user.authorization?.roles,
+      appMetadata: session.user.app_metadata?.roles,
+      userMetadata: session.user.user_metadata?.roles,
     };
 
-    console.log('Checking role locations:', possibleRoleLocations);
+    // Full session debug (excluding sensitive data)
+    const sessionDebug = {
+      user: {
+        ...session.user,
+        picture: session.user.picture ? '[exists]' : null,
+        sub: session.user.sub,
+        sid: session.user.sid,
+      },
+      accessTokenClaims: session.accessTokenClaims,
+      idTokenClaims: session.idTokenClaims,
+    };
+
+    console.log('Full session debug:', sessionDebug);
+    console.log('Role locations:', roleLocations);
 
     // Combine all possible roles
-    const roles = [
-      ...(possibleRoleLocations.directRoles || []),
-      ...(possibleRoleLocations.namespacedRoles || []),
-      ...(possibleRoleLocations.rawRoles || []),
-      ...(possibleRoleLocations.authorizationRoles || [])
+    const allRoles = [
+      ...(roleLocations.directRoles || []),
+      ...(roleLocations.authRoles || []),
+      ...(roleLocations.rawRoles || []),
+      ...(roleLocations.appMetadata?.roles || []),
+      ...(roleLocations.userMetadata?.roles || [])
     ].filter(Boolean);
 
     // Remove duplicates
-    const uniqueRoles = [...new Set(roles)];
+    const uniqueRoles = [...new Set(allRoles)];
     const isSuperAdmin = uniqueRoles.includes('super_admin');
 
     return NextResponse.json({
@@ -41,12 +56,14 @@ export async function GET() {
         roles: uniqueRoles,
         isSuperAdmin: isSuperAdmin,
         debug: {
-          possibleRoleLocations,
-          sessionUser: {
-            ...session.user,
-            // Remove large profile picture URL for clarity
-            picture: session.user.picture ? 'exists' : null
-          }
+          roleLocations,
+          sessionInfo: {
+            hasAccessToken: !!session.accessTokenClaims,
+            hasIdToken: !!session.idTokenClaims,
+            tokenExpiry: session.accessTokenClaims?.exp,
+            sessionExpiry: session.idTokenClaims?.exp,
+          },
+          fullSession: sessionDebug
         }
       }
     });
