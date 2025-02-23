@@ -539,6 +539,16 @@ function FormContent() {
 }
 
 export default function Step2Content() {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <FormContent />
