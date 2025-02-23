@@ -2,20 +2,12 @@
 
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import dynamic from 'next/dynamic';
-
-const Step3ContentLoader = dynamic(
-  () => import('@/components/Wizard/shared/StepContentLoader').then(mod => mod.StepLoader({ step: 3 })),
-  { 
-    ssr: false,
-    loading: () => <LoadingSpinner />,
-  }
-);
+import { StepLoader } from "@/components/Wizard/shared/StepContentLoader";
 
 export default function ClientPage() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <Step3ContentLoader />
+      <StepLoader step={3} />
     </Suspense>
   );
 } 

@@ -4,9 +4,9 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useWizard } from "../../../../context/WizardContext";
-import Header from "../../../../components/Wizard/Header";
-import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { useWizard } from "@/context/WizardContext";
+import Header from "@/components/Wizard/Header";
+import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
