@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -73,113 +73,219 @@ const debugFormData = (values: any, isDraft: boolean) => {
   });
 };
 
-function InnerContent() {
-  // 1. All useState hooks first
-  const [mounted, setMounted] = useState(false);
-  const [campaignId, setCampaignId] = useState<string | null>(null);
-  const [state, setState] = useState({
-    isSubmitting: false,
-    isLoading: false,
-    error: null as string | null,
-  });
+// Define the form values type
+interface FormValues {
+  name: string;
+  businessGoal: string;
+  startDate: string;
+  endDate: string;
+  timeZone: string;
+  primaryContact: {
+    firstName: string;
+    surname: string;
+    email: string;
+    position: string;
+  };
+  secondaryContact: {
+    firstName: string;
+    surname: string;
+    email: string;
+    position: string;
+  };
+  currency: string;
+  totalBudget: string | number;
+  socialMediaBudget: string | number;
+  platform: string;
+  influencerHandle: string;
+}
 
-  // 2. All other hooks
+// Define the initial values
+const initialValues = {
+  name: '',
+  businessGoal: '',
+  startDate: '',
+  endDate: '',
+  timeZone: '',
+  primaryContact: {
+    firstName: '',
+    surname: '',
+    email: '',
+    position: '',
+  },
+  secondaryContact: {
+    firstName: '',
+    surname: '',
+    email: '',
+    position: '',
+  },
+  currency: '',
+  totalBudget: '',
+  socialMediaBudget: '',
+  platform: '',
+  influencerHandle: '',
+};
+
+function SearchParamsWrapper() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data, updateData, campaignData, isEditing, loading } = useWizard();
+  const wizardContext = useWizard();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // 3. Define initialValues
-  const initialValues = {
-    name: isEditing ? campaignData?.campaignName : data?.overview?.name || "",
-    businessGoal: isEditing ? campaignData?.description : data?.overview?.businessGoal || "",
-    startDate: isEditing && campaignData?.startDate 
-      ? new Date(campaignData.startDate).toISOString().split('T')[0] 
-      : data?.overview?.startDate || "",
-    endDate: isEditing && campaignData?.endDate
-      ? new Date(campaignData.endDate).toISOString().split('T')[0]
-      : data?.overview?.endDate || "",
-    timeZone: isEditing ? campaignData?.timeZone : data?.overview?.timeZone || "UTC",
-    primaryContact: {
-      firstName: isEditing ? campaignData?.primaryContact?.firstName : data?.overview?.primaryContact?.firstName || "",
-      surname: isEditing ? campaignData?.primaryContact?.surname : data?.overview?.primaryContact?.surname || "",
-      email: isEditing ? campaignData?.primaryContact?.email : data?.overview?.primaryContact?.email || "",
-      position: isEditing ? campaignData?.primaryContact?.position : data?.overview?.primaryContact?.position || "",
-    },
-    secondaryContact: {
-      firstName: isEditing ? campaignData?.secondaryContact?.firstName : data?.overview?.secondaryContact?.firstName || "",
-      surname: isEditing ? campaignData?.secondaryContact?.surname : data?.overview?.secondaryContact?.surname || "",
-      email: isEditing ? campaignData?.secondaryContact?.email : data?.overview?.secondaryContact?.email || "",
-      position: isEditing ? campaignData?.secondaryContact?.position : data?.overview?.secondaryContact?.position || "",
-    },
-    currency: isEditing ? campaignData?.currency : data?.overview?.currency || "",
-    totalBudget: isEditing ? campaignData?.totalBudget : data?.overview?.totalBudget || "",
-    socialMediaBudget: isEditing ? campaignData?.socialMediaBudget : data?.overview?.socialMediaBudget || "",
-    platform: isEditing ? campaignData?.platform : data?.overview?.platform || "",
-    influencerHandle: isEditing ? campaignData?.influencerHandle : data?.overview?.influencerHandle || "",
+  // Destructure context with proper type checking
+  if (!wizardContext) {
+    throw new Error('Wizard context is required');
+  }
+  
+  const { 
+    formData,
+    setFormData, 
+    isEdit,
+    setIsEdit, 
+    data, 
+    isEditing, 
+    campaignData 
+  } = wizardContext;
+
+  // Get campaign ID from search params
+  const campaignId = searchParams?.get('id');
+
+  // Helper function to format dates - Define this BEFORE useMemo
+  const formatDate = (date: string | undefined) => {
+    if (!date) return '';
+    try {
+      return new Date(date).toISOString().split('T')[0];
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return '';
+    }
   };
 
-  // 4. useEffect hooks
-  useEffect(() => {
-    setMounted(true);
-    const id = searchParams?.get('id');
-    if (id) {
-      setCampaignId(id);
+  // Define default values first
+  const defaultValues: FormValues = {
+    name: '',
+    businessGoal: '',
+    startDate: '',
+    endDate: '',
+    timeZone: 'UTC',
+    primaryContact: {
+      firstName: '',
+      surname: '',
+      email: '',
+      position: '',
+    },
+    secondaryContact: {
+      firstName: '',
+      surname: '',
+      email: '',
+      position: '',
+    },
+    currency: '',
+    totalBudget: 0,
+    socialMediaBudget: 0,
+    platform: '',
+    influencerHandle: '',
+  };
+
+  // Create initial values using the defaultValues and existing data
+  const initialValues = useMemo(() => {
+    if (isEditing && campaignData) {
+      return {
+        name: campaignData.campaignName || defaultValues.name,
+        businessGoal: campaignData.description || defaultValues.businessGoal,
+        startDate: formatDate(campaignData.startDate) || defaultValues.startDate,
+        endDate: formatDate(campaignData.endDate) || defaultValues.endDate,
+        timeZone: campaignData.timeZone || defaultValues.timeZone,
+        primaryContact: {
+          firstName: campaignData.primaryContact?.firstName || defaultValues.primaryContact.firstName,
+          surname: campaignData.primaryContact?.surname || defaultValues.primaryContact.surname,
+          email: campaignData.primaryContact?.email || defaultValues.primaryContact.email,
+          position: campaignData.primaryContact?.position || defaultValues.primaryContact.position,
+        },
+        secondaryContact: {
+          firstName: campaignData.secondaryContact?.firstName || defaultValues.secondaryContact.firstName,
+          surname: campaignData.secondaryContact?.surname || defaultValues.secondaryContact.surname,
+          email: campaignData.secondaryContact?.email || defaultValues.secondaryContact.email,
+          position: campaignData.secondaryContact?.position || defaultValues.secondaryContact.position,
+        },
+        currency: campaignData.currency || defaultValues.currency,
+        totalBudget: campaignData.totalBudget || defaultValues.totalBudget,
+        socialMediaBudget: campaignData.socialMediaBudget || defaultValues.socialMediaBudget,
+        platform: campaignData.platform || defaultValues.platform,
+        influencerHandle: campaignData.influencerHandle || defaultValues.influencerHandle,
+      };
     }
-  }, [searchParams]);
 
+    // If not editing, check for basic data
+    if (data?.basic) {
+      return {
+        name: data.basic.campaignName || defaultValues.name,
+        businessGoal: data.basic.description || defaultValues.businessGoal,
+        startDate: defaultValues.startDate,
+        endDate: defaultValues.endDate,
+        timeZone: defaultValues.timeZone,
+        primaryContact: {
+          firstName: defaultValues.primaryContact.firstName,
+          surname: defaultValues.primaryContact.surname,
+          email: defaultValues.primaryContact.email,
+          position: defaultValues.primaryContact.position,
+        },
+        secondaryContact: {
+          firstName: defaultValues.secondaryContact.firstName,
+          surname: defaultValues.secondaryContact.surname,
+          email: defaultValues.secondaryContact.email,
+          position: defaultValues.secondaryContact.position,
+        },
+        currency: defaultValues.currency,
+        totalBudget: defaultValues.totalBudget,
+        socialMediaBudget: defaultValues.socialMediaBudget,
+        platform: defaultValues.platform,
+        influencerHandle: defaultValues.influencerHandle,
+      };
+    }
+
+    return defaultValues;
+  }, [isEditing, campaignData, data, defaultValues]);
+
+  // Load campaign data when ID changes
   useEffect(() => {
-    const loadCampaignData = async () => {
-      if (campaignId) {
-        try {
-          setState(prev => ({ ...prev, isLoading: true, error: null }));
-          const response = await fetch(`/api/campaigns/${campaignId}`);
-          const data = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to load campaign');
-          }
+    if (!campaignId) return;
 
-          if (data.success) {
-            updateData(data.campaign);
-            toast.success('Campaign data loaded');
-          }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to load campaign';
-          setState(prev => ({ ...prev, error: message }));
-          toast.error(message);
-        } finally {
-          setState(prev => ({ ...prev, isLoading: false }));
+    const loadCampaignData = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/campaigns/${campaignId}`);
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to load campaign');
         }
+
+        // Make sure we're setting the complete campaign data
+        if (setFormData && setIsEdit) {
+          setFormData(result.data || result.campaign);
+          setIsEdit(true);
+          toast.success('Campaign data loaded');
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to load campaign';
+        setError(message);
+        toast.error(message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadCampaignData();
-  }, [campaignId]);
+  }, [campaignId, setFormData, setIsEdit]);
 
-  // 5. Early returns
-  if (!mounted || state.isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  if (state.error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-red-800 font-semibold">Error</h3>
-        <p className="text-red-600">{state.error}</p>
-        <button
-          onClick={() => router.push('/campaigns')}
-          className="mt-4 btn btn-secondary"
-        >
-          Return to Campaigns
-        </button>
-      </div>
-    );
-  }
-
-  // 6. Rest of your component logic
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: FormValues) => {
     try {
-      setState(prev => ({ ...prev, isSubmitting: true, error: null }));
+      setIsSubmitting(true);
+      setError(null);
       
       const method = isEditing ? 'PATCH' : 'POST';
       const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
@@ -201,28 +307,31 @@ function InnerContent() {
         throw new Error(result.error || `Failed to ${isEditing ? 'update' : 'create'} campaign`);
       }
 
-      // Store the campaign ID and data
-      updateData({
-        ...data,
-        campaignId: result.id || campaignId,
-        step1: values
-      });
+      // Update form data with proper type checking
+      if (setFormData) {
+        setFormData({
+          ...formData,
+          campaignId: result.id || campaignId,
+          step1: values
+        });
+      }
 
       toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
-
-      // Navigate to next step
       router.push(`/campaigns/wizard/step-2?id=${result.id || campaignId}`);
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error instanceof Error ? error.message : 'An error occurred');
+      const message = error instanceof Error ? error.message : 'An error occurred';
+      setError(message);
+      toast.error(message);
     } finally {
-      setState(prev => ({ ...prev, isSubmitting: false }));
+      setIsSubmitting(false);
     }
   };
 
-  const handleSaveDraft = async (values: any) => {
+  const handleSaveDraft = async (values: FormValues) => {
     try {
-      setState(prev => ({ ...prev, isSubmitting: true }));
+      setIsSubmitting(true);
+      setError(null);
 
       const method = isEditing ? 'PATCH' : 'POST';
       const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
@@ -245,20 +354,44 @@ function InnerContent() {
         throw new Error(result.error || 'Failed to save draft');
       }
 
-      updateData({
-        ...data,
-        overview: values,
-        id: result.id || campaignId
-      });
+      // Update form data with proper type checking
+      if (setFormData) {
+        setFormData({
+          ...formData,
+          overview: values,
+          id: result.id || campaignId
+        });
+      }
 
       toast.success('Draft saved successfully');
     } catch (error) {
       console.error('Draft save error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save draft');
+      const message = error instanceof Error ? error.message : 'Failed to save draft';
+      setError(message);
+      toast.error(message);
     } finally {
-      setState(prev => ({ ...prev, isSubmitting: false }));
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-800 font-semibold">Error</h3>
+        <p className="text-red-600">{error}</p>
+        <button
+          onClick={() => router.push('/campaigns')}
+          className="mt-4 btn btn-secondary"
+        >
+          Return to Campaigns
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 pb-20">
@@ -292,9 +425,9 @@ function InnerContent() {
                   type="button"
                   onClick={() => handleSaveDraft(values)}
                   className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 flex items-center"
-                  disabled={state.isSubmitting}
+                  disabled={isSubmitting}
                 >
-                  {state.isSubmitting ? (
+                  {isSubmitting ? (
                     <>
                       <LoadingSpinner className="w-4 h-4 mr-2" />
                       Saving...
@@ -558,14 +691,14 @@ function InnerContent() {
                   type="button"
                   onClick={() => handleSaveDraft(values)}
                   className="btn btn-secondary"
-                  disabled={state.isSubmitting}
+                  disabled={isSubmitting}
                 >
                   Save Draft
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={state.isSubmitting || !isValid}
+                  disabled={isSubmitting || !isValid}
                 >
                   Next Step
                 </button>
@@ -575,7 +708,7 @@ function InnerContent() {
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
                 onBack={null}
                 onNext={handleNextStep}
-                disableNext={state.isSubmitting || !isValid}
+                disableNext={isSubmitting || !isValid}
                 isFormValid={isValid}
                 isDirty={dirty}
               />
@@ -590,7 +723,7 @@ function InnerContent() {
 export default function Step1Content() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <InnerContent />
+      <SearchParamsWrapper />
     </Suspense>
   );
 }
