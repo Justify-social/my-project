@@ -449,6 +449,11 @@ const ProfileSettingsPage: React.FC = () => {
     setHasChanges(false);
   }, []);
 
+  // Add handleSignOut function
+  const handleSignOut = useCallback(() => {
+    window.location.href = '/api/auth/logout';
+  }, []);
+
   return (
     <div className="p-6">
       {/* Page Title & Primary Action Buttons */}
@@ -471,6 +476,13 @@ const ProfileSettingsPage: React.FC = () => {
             aria-label="Save profile updates"
           >
             {isSaving ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="w-36 h-10 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            aria-label="Sign out"
+          >
+            Sign Out
           </button>
         </div>
       </div>
