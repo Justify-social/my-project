@@ -219,15 +219,12 @@ const CampaignList: React.FC = () => {
       {/* Header: Title and "New Campaign" Button in the Top Right */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-[#333333]">Campaign List View</h1>
-        <Link href="/campaigns/wizard/step-1" legacyBehavior>
-          <a>
-            <button
-              className="px-4 py-2 rounded border border-blue-500 text-blue-500 text-lg whitespace-nowrap"
-              aria-label="New Campaign"
-            >
-              New Campaign
-            </button>
-          </a>
+        <Link 
+          href="/campaigns/wizard/step-1" 
+          className="px-4 py-2 rounded border border-blue-500 text-blue-500 text-lg whitespace-nowrap"
+          aria-label="New Campaign"
+        >
+          New Campaign
         </Link>
       </div>
 
@@ -406,12 +403,12 @@ const CampaignList: React.FC = () => {
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => router.push(`/campaigns/wizard?id=${campaign.id}`)}
+                        <Link 
+                          href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                           className="text-gray-600 hover:text-blue-600"
                         >
                           <PencilIcon className="h-5 w-5" />
-                        </button>
+                        </Link>
                         <button
                           onClick={() => handleDelete(campaign.id.toString())}
                           className="text-red-600 hover:text-red-800"
