@@ -2,11 +2,6 @@
 
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 
-export const metadata = {
-  title: 'Pricing - Justify',
-  description: 'Choose your campaign package',
-};
-
 export default function Page() {
   console.log('Pricing page rendering');
   
