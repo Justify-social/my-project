@@ -82,7 +82,10 @@ const Step1Content = () => {
   const [campaignId, setCampaignId] = useState<string | null>(null);
   
   useEffect(() => {
-    setCampaignId(searchParams.get('id'));
+    const id = searchParams?.get('id');
+    if (id) {
+      setCampaignId(id);
+    }
   }, [searchParams]);
 
   // Add debug logs
