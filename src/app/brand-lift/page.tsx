@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 
 interface Campaign {
   id: number;
-  name: string;
-  // ... other campaign properties
+  campaignName: string;
+  platform: string;
+  startDate: string;
+  endDate: string;
+  totalBudget: number;
+  primaryKPI: string;
+  submissionStatus: string;
 }
 
 // MOCK API CALL: Replace this with your real API call.
@@ -44,16 +49,21 @@ export default function BrandLiftPage() {
         }
 
         const data = await response.json();
+        console.log('Fetched campaigns:', data); // Debug log
         
         if (data.success && Array.isArray(data.campaigns)) {
-          setCampaigns(data.campaigns);
+          // Only include submitted campaigns
+          const submittedCampaigns = data.campaigns.filter(
+            (campaign: Campaign) => campaign.submissionStatus === 'submitted'
+          );
+          setCampaigns(submittedCampaigns);
         } else {
-          setCampaigns([]); // Set empty array if no campaigns
+          setCampaigns([]);
         }
       } catch (error) {
         console.error('Error fetching campaigns:', error);
         setError(error instanceof Error ? error.message : 'Failed to load campaigns');
-        setCampaigns([]); // Set empty array on error
+        setCampaigns([]);
       } finally {
         setLoading(false);
       }
@@ -62,15 +72,13 @@ export default function BrandLiftPage() {
     fetchCampaigns();
   }, []);
 
-  // When a campaign is chosen, update state (but DO NOT immediately push navigation)
-  const handleCampaignSelection = (campaignId: number) => {
-    const selected = campaigns.find((campaign) => campaign.id === campaignId);
+  const handleCampaignSelection = (campaignId: string) => {
+    const selected = campaigns.find((campaign) => campaign.id.toString() === campaignId);
     if (selected) {
-      setSelectedCampaign(selected.name);
+      setSelectedCampaign(campaignId);
     }
   };
 
-  // Only navigate if a valid campaign is selected.
   const handleStartTest = () => {
     if (!selectedCampaign) {
       alert("Please select a campaign first!");
@@ -96,14 +104,14 @@ export default function BrandLiftPage() {
         <select
           className="mt-2 p-2 border rounded-md w-full"
           value={selectedCampaign}
-          onChange={(e) => handleCampaignSelection(Number(e.target.value))}
+          onChange={(e) => handleCampaignSelection(e.target.value)}
         >
           <option value="" disabled>
             Select a campaign
           </option>
-          {Array.isArray(campaigns) && campaigns.map((campaign) => (
-            <option key={campaign.id} value={campaign.name}>
-              {campaign.name}
+          {campaigns.map((campaign) => (
+            <option key={campaign.id} value={campaign.id}>
+              {campaign.campaignName} ({campaign.platform})
             </option>
           ))}
         </select>
@@ -111,15 +119,27 @@ export default function BrandLiftPage() {
         {selectedCampaign && (
           <div className="mt-4">
             <h3 className="text-lg font-semibold">Campaign Overview</h3>
-            <div>
-              <strong>Campaign Name:</strong> {selectedCampaign}
-            </div>
-            <button
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md"
-              onClick={handleStartTest}
-            >
-              Launch {selectedCampaign}
-            </button>
+            {(() => {
+              const campaign = campaigns.find(c => c.id.toString() === selectedCampaign);
+              if (!campaign) return null;
+              
+              return (
+                <div className="space-y-2">
+                  <div><strong>Campaign Name:</strong> {campaign.campaignName}</div>
+                  <div><strong>Platform:</strong> {campaign.platform}</div>
+                  <div><strong>Start Date:</strong> {new Date(campaign.startDate).toLocaleDateString()}</div>
+                  <div><strong>End Date:</strong> {new Date(campaign.endDate).toLocaleDateString()}</div>
+                  <div><strong>Budget:</strong> ${campaign.totalBudget.toLocaleString()}</div>
+                  <div><strong>Primary KPI:</strong> {campaign.primaryKPI}</div>
+                  <button
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+                    onClick={handleStartTest}
+                  >
+                    Launch Brand Lift Test
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
