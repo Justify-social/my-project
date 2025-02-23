@@ -7,7 +7,6 @@ import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
 import Header from "../../../../components/Wizard/Header";
 import ProgressBar from "../../../../components/Wizard/ProgressBar";
-import { KPI, Feature } from '@prisma/client';
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -171,7 +170,7 @@ function FormContent() {
       setIsSaving(true);
       setError(null);
 
-      const currentCampaignId = campaignId || data.id;
+      const currentCampaignId = campaignId || (data as any)?.id;
       if (!currentCampaignId) {
         throw new Error('Campaign ID is required');
       }
@@ -207,8 +206,19 @@ function FormContent() {
       updateData({
         ...data,
         ...result,
-        id: currentCampaignId
-      });
+        id: currentCampaignId,
+        step: 2,
+        mainMessage: values.mainMessage,
+        hashtags: values.hashtags,
+        memorability: values.memorability,
+        keyBenefits: values.keyBenefits,
+        expectedAchievements: values.expectedAchievements,
+        purchaseIntent: values.purchaseIntent,
+        brandPerception: values.brandPerception,
+        primaryKPI: values.primaryKPI,
+        secondaryKPIs: values.secondaryKPIs || [],
+        features: values.features || []
+      }, result);
 
       toast.success('Campaign updated successfully');
       router.push(`/campaigns/wizard/step-3?id=${currentCampaignId}`);
@@ -523,8 +533,8 @@ function FormContent() {
               
               <ProgressBar
                 currentStep={2}
-                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId || data.id}`)}
-                onBack={() => router.push(`/campaigns/wizard/step-1?id=${campaignId || data.id}`)}
+                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId || (data as any)?.id}`)}
+                onBack={() => router.push(`/campaigns/wizard/step-1?id=${campaignId || (data as any)?.id}`)}
                 onNext={submitForm}
                 disableNext={isSubmitting}
                 isFormValid={isValid}

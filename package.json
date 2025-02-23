@@ -45,6 +45,7 @@
     "react-select": "^5.10.0",
     "react-tagcloud": "^2.3.3",
     "recharts": "^2.15.1",
+    "stripe": "^17.6.0",
     "swr": "^2.3.2",
     "uploadthing": "^7.5.2",
     "yup": "^1.6.1",

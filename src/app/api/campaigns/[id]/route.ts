@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { z } from 'zod'; // For input validation
 import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 import { getSession } from '@auth0/nextjs-auth0';
+import { connectToDatabase } from '@/lib/db';
 
 type RouteParams = { params: { id: string } }
 
@@ -59,14 +60,18 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    // Wait for params to be available
+    const campaignId = await params.id;
+    const id = parseInt(campaignId);
     
     if (isNaN(id)) {
-      return new Response(JSON.stringify({ error: 'Invalid campaign ID' }), {
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({ error: 'Invalid campaign ID' }), 
+        { status: 400 }
+      );
     }
 
+    const db = await connectToDatabase();
     const campaign = await prisma.campaignWizardSubmission.findUnique({
       where: { id },
       include: {
@@ -92,17 +97,16 @@ export async function GET(
       });
     }
 
-    return new Response(JSON.stringify({ campaign }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    return new Response(
+      JSON.stringify({ success: true, campaign: campaign }), 
+      { status: 200 }
+    );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch campaign' }), {
-      status: 500,
-    });
+    console.error('Error fetching campaign:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to fetch campaign' }), 
+      { status: 500 }
+    );
   }
 }
 
