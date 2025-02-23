@@ -82,9 +82,10 @@ const Step1Content = () => {
   
   // Use useEffect to get the campaign ID from URL after mount
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    setCampaignId(id);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setCampaignId(params.get('id'));
+    }
   }, []);
 
   // Add debug logs
