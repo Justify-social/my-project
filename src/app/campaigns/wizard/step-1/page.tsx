@@ -1,10 +1,13 @@
-// Pure server component - no client-side hooks
+import { Suspense } from 'react';
+import Step1Content from './Step1Content';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+
 export default function Page() {
   return (
     <div className="min-h-screen">
-      <StepOneWrapper />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Step1Content />
+      </Suspense>
     </div>
   );
 }
-
-import StepOneWrapper from './Step1Content';

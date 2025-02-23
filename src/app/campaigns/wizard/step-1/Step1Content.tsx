@@ -73,7 +73,7 @@ const debugFormData = (values: any, isDraft: boolean) => {
   });
 };
 
-export default function Step1Content() {
+function InnerContent() {
   // 1. All useState hooks first
   const [mounted, setMounted] = useState(false);
   const [campaignId, setCampaignId] = useState<string | null>(null);
@@ -584,5 +584,13 @@ export default function Step1Content() {
         }}
       </Formik>
     </div>
+  );
+}
+
+export default function Step1Content() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <InnerContent />
+    </Suspense>
   );
 }
