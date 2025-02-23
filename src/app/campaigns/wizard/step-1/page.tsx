@@ -1,11 +1,11 @@
-import { Suspense } from 'react';
-import Step1Content from './Step1Content';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-
+// This is a pure server component
 export default function Page() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Step1Content />
-    </Suspense>
+    <div className="min-h-screen">
+      <ClientSideContent />
+    </div>
   );
 }
+
+// Import the client-side wrapper
+import ClientSideContent from './Step1Content';
