@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useWizard } from "../../../../context/WizardContext";
@@ -77,16 +77,13 @@ const debugFormData = (values: any, isDraft: boolean) => {
 // Create a separate component for the form content
 const Step1Content = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data, updateData, campaignData, isEditing, loading } = useWizard();
   const [campaignId, setCampaignId] = useState<string | null>(null);
   
-  // Use useEffect to get the campaign ID from URL after mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      setCampaignId(params.get('id'));
-    }
-  }, []);
+    setCampaignId(searchParams.get('id'));
+  }, [searchParams]);
 
   // Add debug logs
   console.log('WizardContext values:', {

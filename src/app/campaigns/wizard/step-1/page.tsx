@@ -1,17 +1,14 @@
-// This should be a server component (no "use client")
 import { Suspense } from 'react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import the component that uses useSearchParams
-const SearchParamsContent = dynamic(
-  () => import('./SearchParamsContent'),
-  { ssr: false } // Disable SSR for this component
-);
+import Step1Content from './Step1Content';
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SearchParamsContent />
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    }>
+      <Step1Content />
     </Suspense>
   );
 }
