@@ -6,8 +6,10 @@ import React, {
   ChangeEvent,
   FormEvent,
   memo,
+  useEffect,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 /* --------------------------------------------------
    Type Definitions
@@ -298,6 +300,25 @@ const NotificationPreferencesSection: React.FC<{
 ----------------------------------------------------- */
 const ProfileSettingsPage: React.FC = () => {
   const router = useRouter();
+  const { user } = useUser();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  // Add effect to check super admin status
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      try {
+        const response = await fetch('/api/auth/check-super-admin');
+        const data = await response.json();
+        setIsSuperAdmin(data.isSuperAdmin);
+      } catch (error) {
+        console.error('Failed to check admin status:', error);
+      }
+    };
+
+    if (user) {
+      checkSuperAdmin();
+    }
+  }, [user]);
 
   // Personal Information state
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -509,6 +530,27 @@ const ProfileSettingsPage: React.FC = () => {
           >
             Branding
           </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => router.push('/admin')}
+              className="py-2 px-4 text-purple-500 hover:underline flex items-center space-x-1"
+            >
+              <span>Super Admin Console</span>
+              <svg 
+                className="w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M8 9l4-4 4 4m0 6l-4 4-4-4" 
+                />
+              </svg>
+            </button>
+          )}
         </nav>
       </div>
 
