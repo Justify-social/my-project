@@ -563,41 +563,52 @@ function FormContent() {
   const campaignId = searchParams.get('id');
   const { data, updateData } = useWizard();
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const loadCampaignData = async () => {
-      if (campaignId) {
-        try {
-          setIsLoading(true);
-          setError(null);
-          const response = await fetch(`/api/campaigns/${campaignId}`);
-          const result = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(result.error || 'Failed to load campaign');
-          }
+    let isMounted = true;
 
-          if (result.success) {
-            updateData(result.campaign, result);
-            toast.success('Campaign data loaded');
-          }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to load campaign';
-          setError(message);
-          toast.error(message);
-        } finally {
-          setIsLoading(false);
+    const loadCampaignData = async () => {
+      if (!campaignId || isInitialized) return;
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(`/api/campaigns/${campaignId}`);
+        const result = await response.json();
+        
+        if (!isMounted) return;
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to load campaign');
         }
-      } else {
-        setIsLoading(false);
+
+        if (result.success) {
+          updateData(result.campaign, result);
+          toast.success('Campaign data loaded');
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        const message = error instanceof Error ? error.message : 'Failed to load campaign';
+        setError(message);
+        toast.error(message);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+          setIsInitialized(true);
+        }
       }
     };
 
     loadCampaignData();
-  }, [campaignId, updateData]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [campaignId, updateData, isInitialized]);
 
   // Update initialValues to use type assertion
   const audienceData = (data as any)?.audience || {};
