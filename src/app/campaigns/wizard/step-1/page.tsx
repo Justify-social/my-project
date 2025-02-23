@@ -2,12 +2,10 @@ import { Suspense } from 'react';
 import Step1Content from './Step1Content';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-export default function Page() {
+export default function Step1Page() {
   return (
-    <div className="min-h-screen">
-      <Suspense fallback={<LoadingSpinner />}>
-        <Step1Content />
-      </Suspense>
-    </div>
+    <Suspense fallback={<LoadingSpinner />}>
+      <Step1Content />
+    </Suspense>
   );
 }

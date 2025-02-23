@@ -125,7 +125,8 @@ const initialValues = {
   influencerHandle: '',
 };
 
-function SearchParamsWrapper() {
+// Separate the search params logic into its own component
+function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const wizardContext = useWizard();
@@ -720,10 +721,21 @@ function SearchParamsWrapper() {
   );
 }
 
+// Main component with Suspense boundary
 export default function Step1Content() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <SearchParamsWrapper />
+      <FormContent />
     </Suspense>
   );
 }
