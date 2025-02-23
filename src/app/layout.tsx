@@ -1,3 +1,5 @@
+'use client';
+
 import { UserProvider } from '@auth0/nextjs-auth0/client'
 import { Inter } from 'next/font/google'
 import ClientLayout from '@/components/layouts/client-layout'
@@ -6,6 +8,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +25,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
+
+  // Check if current path is an auth path
+  const isAuthPath = pathname?.startsWith('/api/auth');
+
   return (
     <html lang="en">
       <body className={`${inter.className} bg-white`}>
