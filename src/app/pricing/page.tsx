@@ -19,15 +19,36 @@ export default function Page() {
     const proPriceId = process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID;
     const advancedPriceId = process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID;
 
+    console.log('Stripe Configuration:', {
+      pubKey: stripePubKey,
+      essential: essentialPriceId,
+      pro: proPriceId,
+      advanced: advancedPriceId
+    });
+
     setStripeInfo({
-      hasStripePubKey: !!stripePubKey,
-      stripePubKeyPrefix: stripePubKey?.substring(0, 8),
-      hasEssentialPrice: !!essentialPriceId,
-      essentialPricePrefix: essentialPriceId?.substring(0, 8),
-      hasProPrice: !!proPriceId,
-      proPricePrefix: proPriceId?.substring(0, 8),
-      hasAdvancedPrice: !!advancedPriceId,
-      advancedPricePrefix: advancedPriceId?.substring(0, 8),
+      stripePubKey: {
+        exists: !!stripePubKey,
+        value: stripePubKey,
+        isTestMode: stripePubKey?.startsWith('pk_test_')
+      },
+      prices: {
+        essential: {
+          exists: !!essentialPriceId,
+          value: essentialPriceId,
+          isTestMode: essentialPriceId?.startsWith('price_test_')
+        },
+        professional: {
+          exists: !!proPriceId,
+          value: proPriceId,
+          isTestMode: proPriceId?.startsWith('price_test_')
+        },
+        advanced: {
+          exists: !!advancedPriceId,
+          value: advancedPriceId,
+          isTestMode: advancedPriceId?.startsWith('price_test_')
+        }
+      }
     });
   }, []);
   
@@ -39,6 +60,11 @@ export default function Page() {
             <div className="px-4 py-5 sm:p-6">
               <h1 className="text-2xl font-bold">Pricing Page Test</h1>
               <p>If you can see this, the route is working!</p>
+              <div className="mt-4 p-4 bg-red-100 rounded">
+                <p className="font-bold text-red-600">⚠️ Mode Mismatch Warning</p>
+                <p>Your price IDs are in live mode but should be in test mode for development.</p>
+                <p>Please create test mode products in Stripe and update the environment variables.</p>
+              </div>
               {pageUrl && (
                 <div className="mt-4 p-4 bg-gray-100 rounded">
                   <p className="font-bold">Debug Info:</p>
