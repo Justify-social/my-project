@@ -1,22 +1,10 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import React from 'react';
 import ClientPage from "./ClientPage";
 
-function Step3Content() {
-  const searchParams = useSearchParams();
-  
-  return <ClientPage />;
-}
-
 export default function Step3Page() {
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Step3Content />
-    </Suspense>
-  );
+  return <ClientPage />;
 }
 
 export const dynamic = "force-dynamic";

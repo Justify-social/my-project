@@ -1,13 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-export default function ClientPage() {
+function ClientPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const wizardContext = useWizard();
 
   if (!wizardContext) {
@@ -15,11 +17,13 @@ export default function ClientPage() {
   }
 
   const handleNextStep = async () => {
-    router.push('/campaigns/wizard/step-4');
+    const campaignId = searchParams.get('id');
+    router.push(`/campaigns/wizard/step-4${campaignId ? `?id=${campaignId}` : ''}`);
   };
 
   const handlePreviousStep = () => {
-    router.push('/campaigns/wizard/step-2');
+    const campaignId = searchParams.get('id');
+    router.push(`/campaigns/wizard/step-2${campaignId ? `?id=${campaignId}` : ''}`);
   };
 
   return (
@@ -37,12 +41,23 @@ export default function ClientPage() {
       
       <ProgressBar
         currentStep={3}
-        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
+        onStepClick={(step) => {
+          const campaignId = searchParams.get('id');
+          router.push(`/campaigns/wizard/step-${step}${campaignId ? `?id=${campaignId}` : ''}`);
+        }}
         onBack={handlePreviousStep}
         onNext={handleNextStep}
         isFormValid={true}
         isDirty={false}
       />
     </div>
+  );
+}
+
+export default function ClientPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <ClientPageContent />
+    </Suspense>
   );
 } 
