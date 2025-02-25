@@ -514,6 +514,98 @@ interface InfluencerMetrics {
 // -----------------------
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
+// Calendar component with month view
+const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['events'] }> = ({ month, events }) => {
+  const [currentMonth, setCurrentMonth] = useState(month);
+  
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+  
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  };
+  
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+  
+  const monthName = currentMonth.toLocaleString('default', { month: 'long' });
+  const year = currentMonth.getFullYear();
+  
+  const days = [];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  // Add empty cells for days before the first day of the month
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    days.push(<div key={`empty-${i}`} className="h-8 text-center text-gray-400"></div>);
+  }
+  
+  // Add cells for each day of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    const hasEvent = events.some(event => {
+      const eventDate = new Date(event.start);
+      return eventDate.getDate() === day && 
+             eventDate.getMonth() === currentMonth.getMonth() && 
+             eventDate.getFullYear() === currentMonth.getFullYear();
+    });
+    
+    days.push(
+      <div 
+        key={`day-${day}`} 
+        className={`h-8 flex items-center justify-center rounded-full w-8 mx-auto ${
+          hasEvent 
+            ? 'bg-blue-100 text-blue-800 font-medium' 
+            : 'text-gray-700'
+        }`}
+      >
+        {day}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="bg-white rounded-lg p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={prevMonth}
+            className="p-1 rounded-full hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h3 className="text-lg font-medium text-gray-900">{monthName} {year}</h3>
+          <button 
+            onClick={nextMonth}
+            className="p-1 rounded-full hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+          Switch to Timeline
+        </button>
+      </div>
+      
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {dayNames.map(day => (
+          <div key={day} className="text-xs text-center text-gray-500 font-medium">
+            {day}
+          </div>
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-7 gap-1">
+        {days}
+      </div>
+    </div>
+  );
+};
+
 export default function DashboardContent({ user }: DashboardContentProps) {
   const router = useRouter();
   const [dateRange, setDateRange] = useState('7d');
@@ -721,10 +813,16 @@ export default function DashboardContent({ user }: DashboardContentProps) {
             title="Campaign Calendar"
             description="Interactive view of campaign schedule"
             icon={CalendarDaysIcon}
+            actions={
+              <button
+                onClick={() => router.push('/calendar')}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                View Full Calendar
+              </button>
+            }
           >
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <CalendarUpcoming events={calendarEvents} />
-            </div>
+            <CalendarMonthView month={new Date()} events={calendarEvents} />
           </Card>
 
           {/* Upcoming Campaigns */}
@@ -741,48 +839,41 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                 <p className="text-gray-600">{fetchError instanceof Error ? fetchError.message : 'Failed to load campaigns'}</p>
               </div>
             ) : upcomingCampaigns.length > 0 ? (
-              <div className="space-y-6">
-                {/* Calendar View */}
-                <div className="bg-white rounded-lg shadow-sm p-4">
-                  <CalendarUpcoming events={calendarEvents} />
-                </div>
-                
-                {/* Campaign List */}
-                <div className="space-y-4">
-                  {upcomingCampaigns.map((campaign) => (
-                    <motion.div
-                      key={campaign.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="bg-gradient-to-r from-blue-50 to-white rounded-lg p-4 border border-blue-100"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-white p-3 rounded-lg shadow-sm">
-                          <CalendarDaysIcon className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900">{campaign.campaignName}</h4>
-                          <p className="text-sm text-gray-600">
-                            Starts {new Date(campaign.startDate).toLocaleDateString()}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Platform: {campaign.platform}
-                          </p>
-                        </div>
-                        <StatusBadge status={campaign.submissionStatus} />
+              <div className="space-y-4">
+                {upcomingCampaigns.map((campaign) => (
+                  <motion.div
+                    key={campaign.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{campaign.campaignName}</h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Starts {new Date(campaign.startDate).toLocaleDateString()}
+                        </p>
                       </div>
-                      <div className="mt-3 flex items-center space-x-4 text-sm text-gray-600">
-                        <span className="flex items-center">
-                          <UserGroupIcon className="w-4 h-4 mr-1" />
-                          {campaign.audience?.locations?.map(l => l.location).join(", ") || "Global"}
-                        </span>
-                        <span className="flex items-center">
-                          <CurrencyDollarIcon className="w-4 h-4 mr-1" />
+                      <div className="flex items-center">
+                        {campaign.submissionStatus === "draft" && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            draft
+                          </span>
+                        )}
+                        <span className="ml-2 text-sm font-medium text-gray-900">
                           ${campaign.totalBudget?.toLocaleString() || 0}
                         </span>
                       </div>
-                    </motion.div>
-                  ))}
+                    </div>
+                  </motion.div>
+                ))}
+                <div className="text-center pt-2">
+                  <button
+                    onClick={() => router.push('/campaigns')}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    View All Campaigns →
+                  </button>
                 </div>
               </div>
             ) : (
@@ -812,21 +903,25 @@ export default function DashboardContent({ user }: DashboardContentProps) {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Brand NPS</p>
-                  <p className="text-2xl font-bold text-gray-900">{brandHealth.nps}</p>
-                  <span className="text-green-600 text-sm flex items-center">
-                    <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-                    +5%
-                  </span>
+                <div className="bg-white rounded-lg p-4 border border-gray-100">
+                  <p className="text-sm text-gray-600 mb-1">Brand NPS</p>
+                  <div className="flex items-baseline">
+                    <p className="text-2xl font-bold text-gray-900">{brandHealth.nps}</p>
+                    <span className="ml-2 text-green-600 text-sm flex items-center">
+                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+                      +5%
+                    </span>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Awareness</p>
-                  <p className="text-2xl font-bold text-gray-900">{brandHealth.awareness}%</p>
-                  <span className="text-blue-600 text-sm flex items-center">
-                    <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-                    +3%
-                  </span>
+                <div className="bg-white rounded-lg p-4 border border-gray-100">
+                  <p className="text-sm text-gray-600 mb-1">Awareness</p>
+                  <div className="flex items-baseline">
+                    <p className="text-2xl font-bold text-gray-900">{brandHealth.awareness}%</p>
+                    <span className="ml-2 text-blue-600 text-sm flex items-center">
+                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+                      +3%
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="h-40">
@@ -872,12 +967,12 @@ export default function DashboardContent({ user }: DashboardContentProps) {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Active Collabs</p>
+                <div className="bg-white rounded-lg p-4 border border-gray-100">
+                  <p className="text-sm text-gray-600 mb-1">Active Collabs</p>
                   <p className="text-2xl font-bold text-gray-900">{influencerMetrics.activeCollaborations}</p>
                 </div>
-                <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Avg Engagement</p>
+                <div className="bg-white rounded-lg p-4 border border-gray-100">
+                  <p className="text-sm text-gray-600 mb-1">Avg Engagement</p>
                   <p className="text-2xl font-bold text-gray-900">{influencerMetrics.averageEngagement}%</p>
                 </div>
               </div>
@@ -887,7 +982,7 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                   <motion.div
                     key={index}
                     className="bg-white rounded-lg p-3 border border-gray-100"
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.01 }}
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -912,6 +1007,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
             title="Active Campaigns"
             description="Currently running campaign performance"
             icon={RocketLaunchIcon}
+            actions={
+              <button
+                onClick={() => router.push('/campaigns')}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                View All
+              </button>
+            }
           >
             {isLoadingCampaigns ? (
               <Spinner />
@@ -923,34 +1026,56 @@ export default function DashboardContent({ user }: DashboardContentProps) {
             ) : activeCampaigns.length > 0 ? (
               <div className="space-y-4">
                 {activeCampaigns.map((campaign) => (
-                  <CampaignCard
+                  <motion.div
                     key={campaign.id}
-                    campaign={{
-                      ...campaign,
-                      status: "Live",
-                      roi: 0,
-                      usersEngaged: { current: 0, total: 0 },
-                      performance: {
-                        engagement: 0,
-                        sentiment: 0,
-                        reach: 0,
-                        conversion: 0
-                      }
-                    }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.01 }}
+                    className="bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer"
                     onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                  />
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{campaign.campaignName}</h4>
+                        <div className="flex items-center mt-1">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+                            Live
+                          </span>
+                          <p className="text-sm text-gray-600">
+                            {campaign.platform}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="flex items-center justify-end">
+                          <svg className="w-4 h-4 text-gray-500 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                          </svg>
+                          <p className="text-sm text-gray-600">
+                            {new Date(campaign.startDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <p className="text-sm font-medium text-gray-900 mt-1">
+                          ${campaign.totalBudget?.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8">
-                <RocketLaunchIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No active campaigns</p>
-                <button
-                  onClick={handleNewCampaign}
-                  className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Start a new campaign →
-                </button>
+                <div className="bg-gray-50 rounded-lg p-8">
+                  <RocketLaunchIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">No active campaigns</p>
+                  <button
+                    onClick={handleNewCampaign}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Start a new campaign
+                  </button>
+                </div>
               </div>
             )}
           </Card>
@@ -963,6 +1088,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
             title="Performance Trends"
             description="Campaign metrics over time"
             icon={ChartBarIcon}
+            actions={
+              <button
+                onClick={() => router.push('/analytics')}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                View All
+              </button>
+            }
           >
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -980,8 +1113,19 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="date" stroke="#6B7280" />
                   <YAxis stroke="#6B7280" />
-                  <RechartsTooltip />
-                  <RechartsLegend />
+                  <RechartsTooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '0.5rem',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <RechartsLegend 
+                    verticalAlign="top" 
+                    height={36}
+                    wrapperStyle={{ paddingBottom: '10px' }}
+                  />
                   <Area
                     type="monotone"
                     dataKey="engagement"
@@ -1008,6 +1152,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
             title="Channel Performance"
             description="Engagement by platform"
             icon={SignalIcon}
+            actions={
+              <button
+                onClick={() => router.push('/analytics/channels')}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                View Details
+              </button>
+            }
           >
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -1015,8 +1167,21 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="channel" stroke="#6B7280" />
                   <YAxis stroke="#6B7280" />
-                  <RechartsTooltip />
-                  <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} name="Engagement" />
+                  <RechartsTooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '0.5rem',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    fill="#3B82F6" 
+                    radius={[4, 4, 0, 0]} 
+                    name="Engagement"
+                    barSize={40}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
