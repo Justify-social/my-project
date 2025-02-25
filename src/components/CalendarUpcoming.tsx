@@ -103,29 +103,23 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({ events }) => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={prevMonth}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={prevMonth} 
+              className="p-1 rounded-lg hover:bg-gray-100"
             >
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-semibold">
+            <span className="text-gray-700 font-medium">
               {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-            </h3>
-            <button
-              onClick={nextMonth}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+            </span>
+            <button 
+              onClick={nextMonth} 
+              className="p-1 rounded-lg hover:bg-gray-100"
             >
               <ChevronRightIcon className="w-5 h-5" />
             </button>
           </div>
-          <button
-            onClick={() => setView('timeline')}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            Switch to Timeline
-          </button>
         </div>
         <div className="grid grid-cols-7 gap-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
