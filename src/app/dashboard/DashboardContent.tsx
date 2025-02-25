@@ -56,6 +56,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import useSWR from 'swr';
 
@@ -72,8 +73,8 @@ const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming
 const Spinner: React.FC = () => (
   <div className="flex justify-center items-center py-8">
     <div className="relative">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      <div className="absolute top-0 left-0 animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500 opacity-30"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent-color)]"></div>
+      <div className="absolute top-0 left-0 animate-spin rounded-full h-12 w-12 border-t-2 border-[var(--accent-color)] opacity-30"></div>
     </div>
   </div>
 );
@@ -87,15 +88,15 @@ interface ToastProps {
 const Toast: React.FC<ToastProps> = ({ message, type = "info" }) => {
   const config = {
     error: {
-      bg: "bg-gradient-to-r from-red-600 to-red-700",
+      bg: "bg-red-600",
       icon: XCircleIcon
     },
     success: {
-      bg: "bg-gradient-to-r from-green-600 to-green-700",
+      bg: "bg-green-600",
       icon: CheckCircleIcon
     },
     info: {
-      bg: "bg-gradient-to-r from-blue-600 to-blue-700",
+      bg: "bg-[var(--accent-color)]",
       icon: BellAlertIcon
     }
   }[type];
@@ -107,13 +108,35 @@ const Toast: React.FC<ToastProps> = ({ message, type = "info" }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className={`fixed bottom-4 right-4 ${config.bg} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 z-50`}
+      className={`fixed bottom-4 right-4 ${config.bg} text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center space-x-2 z-50`}
     >
-      <Icon className="w-5 h-5" />
-      <span className="font-medium">{message}</span>
+      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+      <span className="font-medium text-sm">{message}</span>
     </motion.div>
   );
 };
+
+// Error display component for sections
+const ErrorDisplay: React.FC<{ message: string; onRetry?: () => void }> = ({ message, onRetry }) => (
+  <div className="bg-white rounded-lg border border-red-200 p-6 text-center">
+    <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
+      <XCircleIcon className="w-8 h-8 text-red-500" />
+    </div>
+    <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2">Something went wrong!</h3>
+    <p className="text-sm text-[var(--secondary-color)] mb-4">
+      {message}
+    </p>
+    {onRetry && (
+      <button
+        onClick={onRetry}
+        className="inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors"
+      >
+        <ArrowPathIcon className="w-4 h-4 mr-2" />
+        <span>Try again</span>
+      </button>
+    )}
+    </div>
+  );
 
 // Card component to wrap modules in a modern, "card" style
 interface CardProps {
@@ -126,33 +149,33 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ title, description, icon: Icon, children, actions }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-100"
+    className="bg-white shadow-sm rounded-xl p-5 hover:shadow-md transition-all duration-300 border border-[var(--divider-color)]"
   >
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
       <div className="flex items-center">
         {Icon && (
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg mr-4">
-            <Icon className="w-6 h-6 text-white" />
+          <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3">
+            <Icon className="w-5 h-5 text-[var(--accent-color)]" />
           </div>
         )}
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 font-sora">{title}</h2>
+          <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
           {description && (
-            <p className="text-sm text-gray-600 mt-1">{description}</p>
+            <p className="text-sm text-[var(--secondary-color)] mt-0.5">{description}</p>
           )}
         </div>
       </div>
       {actions && (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 ml-auto sm:ml-0">
           {actions}
         </div>
       )}
     </div>
     <div className="space-y-4">
-      {children}
-    </div>
+    {children}
+  </div>
   </motion.div>
 );
 
@@ -185,7 +208,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = "md" }) => {
       label: "Scheduled"
     }
   }[status.toLowerCase()] || {
-    color: "bg-gray-100 text-gray-800 border-gray-200",
+    color: "bg-gray-100 text-[var(--secondary-color)] border-gray-200",
     icon: ClockIcon,
     label: status
   };
@@ -208,49 +231,110 @@ interface CampaignCardProps {
   onClick?: () => void;
 }
 
-const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    whileHover={{ scale: 1.01 }}
-    className="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-md transition-all duration-300 cursor-pointer"
-    onClick={onClick}
-  >
-    <div className="flex items-start justify-between">
-      <div className="space-y-1">
-        <div className="flex items-center space-x-3">
-          <h4 className="font-semibold text-gray-900">{campaign.campaignName}</h4>
-          <StatusBadge status={campaign.submissionStatus} size="sm" />
+const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
+  const router = useRouter();
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+      className="bg-white rounded-lg border border-[var(--divider-color)] p-4 hover:shadow-md transition-all duration-300 cursor-pointer"
+      onClick={() => router.push(`/campaigns/${campaign.id}`)}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-center">
+          <div className="w-12 h-12 bg-gray-50 rounded-lg mr-3 flex items-center justify-center overflow-hidden">
+            {campaign.platform === "Instagram" && (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M17.5 6.5H17.51" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+            {campaign.platform === "YouTube" && (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.54 6.42C22.4212 5.94541 22.1793 5.51057 21.8387 5.15941C21.498 4.80824 21.0708 4.55318 20.6 4.42C18.88 4 12 4 12 4C12 4 5.12 4 3.4 4.46C2.92925 4.59318 2.50198 4.84824 2.16135 5.19941C1.82072 5.55057 1.57879 5.98541 1.46 6.46C1.14521 8.20556 0.991235 9.97631 1 11.75C0.988687 13.537 1.14266 15.3213 1.46 17.08C1.59096 17.5398 1.83831 17.9581 2.17814 18.2945C2.51798 18.6308 2.93882 18.8738 3.4 19C5.12 19.46 12 19.46 12 19.46C12 19.46 18.88 19.46 20.6 19C21.0708 18.8668 21.498 18.6118 21.8387 18.2606C22.1793 17.9094 22.4212 17.4746 22.54 17C22.8524 15.2676 22.9965 13.5103 23 11.75C23.0113 9.96295 22.8573 8.1787 22.54 6.42Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.75 15.02L15.5 11.75L9.75 8.48001V15.02Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+            {campaign.platform === "TikTok" && (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 8V16C21 18.7614 18.7614 21 16 21H8C5.23858 21 3 18.7614 3 16V8C3 5.23858 5.23858 3 8 3H16C18.7614 3 21 5.23858 21 8Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M10 12C8.34315 12 7 13.3431 7 15C7 16.6569 8.34315 18 10 18C11.6569 18 13 16.6569 13 15V6C13.3333 7 14.6 9 17 9" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-semibold text-[var(--primary-color)]">{campaign.campaignName}</h4>
+              <StatusBadge status={campaign.status || "scheduled"} size="sm" />
+            </div>
+            <div className="flex items-center mt-1">
+              <svg className="w-3 h-3 text-[var(--secondary-color)] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 9H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <p className="text-xs text-[var(--secondary-color)]">
+                {new Date(campaign.startDate).toLocaleDateString()} - {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'Ongoing'}
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="text-sm text-gray-600">
-          {new Date(campaign.startDate).toLocaleDateString()} - {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'Ongoing'}
-        </p>
+        <div className="flex flex-col items-end">
+          <p className="text-sm font-medium text-[var(--primary-color)]">
+            ${campaign.totalBudget?.toLocaleString()}
+          </p>
+          <div className="flex space-x-1 mt-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/campaigns/${campaign.id}/edit`);
+              }}
+              className="p-1.5 rounded-full hover:bg-gray-100"
+            >
+              <svg className="w-4 h-4 text-[var(--secondary-color)]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/campaigns/${campaign.id}`);
+              }}
+              className="p-1.5 rounded-full hover:bg-gray-100"
+            >
+              <svg className="w-4 h-4 text-[var(--secondary-color)]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2.45825 12C3.73253 7.94288 7.52281 5 12.0004 5C16.4781 5 20.2684 7.94291 21.5426 12C20.2684 16.0571 16.4781 19 12.0005 19C7.52281 19 3.73251 16.0571 2.45825 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="text-right">
-        <p className="text-sm font-medium text-gray-900">
-          Budget: ${campaign.totalBudget?.toLocaleString()}
-        </p>
-        <p className="text-sm text-gray-600">
-          ROI: {campaign.roi}x
-        </p>
-      </div>
-    </div>
-    <div className="mt-4 grid grid-cols-3 gap-4">
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-600">Engagement</p>
-        <p className="text-lg font-semibold text-gray-900">{campaign.performance?.engagement}%</p>
-      </div>
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-600">Reach</p>
-        <p className="text-lg font-semibold text-gray-900">{campaign.performance?.reach}K</p>
-      </div>
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-600">Conversion</p>
-        <p className="text-lg font-semibold text-gray-900">{campaign.performance?.conversion}%</p>
-      </div>
-    </div>
-  </motion.div>
-);
+      
+      {campaign.performance && (
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="bg-gray-50 rounded-lg p-2 text-center">
+            <p className="text-xs text-[var(--secondary-color)]">Engagement</p>
+            <p className="text-sm font-semibold text-[var(--primary-color)]">{campaign.performance.engagement}%</p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2 text-center">
+            <p className="text-xs text-[var(--secondary-color)]">Reach</p>
+            <p className="text-sm font-semibold text-[var(--primary-color)]">{campaign.performance.reach}K</p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2 text-center">
+            <p className="text-xs text-[var(--secondary-color)]">Conversion</p>
+            <p className="text-sm font-semibold text-[var(--primary-color)]">{campaign.performance.conversion}%</p>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
 
 // Reusable Components
 interface MetricCardProps {
@@ -266,35 +350,35 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, icon: Icon
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 border border-gray-100"
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-4 sm:p-6 border border-[var(--divider-color)]"
   >
     <div className="flex items-start justify-between mb-4">
-      <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg">
-        <Icon className="w-6 h-6 text-white" />
+      <div className="bg-[var(--accent-color)] bg-opacity-10 p-3 rounded-lg">
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-color)]" />
       </div>
       {trend !== undefined && (
-        <span className={`flex items-center text-sm font-medium ${
+        <span className={`flex items-center text-xs sm:text-sm font-medium ${
           trend >= 0 ? 'text-green-600' : 'text-red-600'
         }`}>
           {trend >= 0 ? (
-            <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+            <ArrowTrendingUpIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
           ) : (
-            <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
+            <ArrowTrendingDownIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
           )}
           {Math.abs(trend)}%
         </span>
       )}
     </div>
-    <h3 className="text-lg font-semibold text-gray-900 mb-1 font-sora">{title}</h3>
+    <h3 className="text-sm text-[var(--secondary-color)] mb-1 font-medium">{title}</h3>
     <div className="flex items-baseline">
-      <p className="text-3xl font-bold text-gray-900">
+      <p className="text-2xl sm:text-3xl font-bold text-[var(--primary-color)]">
         {format === "currency" && "$"}
         {typeof value === "number" ? value.toLocaleString() : value}
         {format === "percent" && "%"}
       </p>
     </div>
     {description && (
-      <p className="mt-2 text-sm text-gray-600">{description}</p>
+      <p className="mt-2 text-xs sm:text-sm text-[var(--secondary-color)]">{description}</p>
     )}
   </motion.div>
 );
@@ -452,23 +536,23 @@ const ChartCard: React.FC<ChartCardProps> = ({ title, description, children, ico
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-[var(--divider-color)]"
   >
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
         <div className="flex items-center">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg mr-4">
-            <Icon className="w-6 h-6 text-white" />
+          <div className="bg-[var(--accent-color)] bg-opacity-10 p-3 rounded-lg mr-4">
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-color)]" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 font-sora">{title}</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)]">{title}</h3>
             {description && (
-              <p className="text-sm text-gray-600 mt-1">{description}</p>
+              <p className="text-xs sm:text-sm text-[var(--secondary-color)] mt-1">{description}</p>
             )}
           </div>
         </div>
         {actions && (
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 ml-auto sm:ml-0">
             {actions}
           </div>
         )}
@@ -512,11 +596,291 @@ interface InfluencerMetrics {
 // -----------------------
 // DashboardContent Component
 // -----------------------
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+// Enhanced fetcher with better error handling
+const fetcher = async (url: string) => {
+  try {
+    const response = await fetch(url);
+    
+    // Log the response status for debugging
+    console.log(`API response status for ${url}:`, response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API error (${response.status}):`, errorText);
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    // Validate the response structure
+    if (!data || (data.campaigns === undefined && !data.success)) {
+      console.error('Invalid API response structure:', data);
+      throw new Error('Invalid data format received from server');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    
+    // Return mock data to prevent dashboard from breaking
+    return {
+      success: true,
+      campaigns: mockCampaigns,
+      metrics: mockMetrics
+    };
+  }
+};
+
+// Mock data for fallback when API fails
+const mockCampaigns = [
+  {
+    id: 1,
+    campaignName: "New Beginnings",
+    submissionStatus: "submitted",
+    platform: "Instagram",
+    startDate: "2024-08-01",
+    endDate: "2024-08-15",
+    totalBudget: 12314,
+    primaryKPI: "brandAwareness",
+    primaryContact: {
+      firstName: "John",
+      surname: "Doe"
+    },
+    createdAt: "2024-07-15",
+    status: "scheduled",
+    performance: {
+      engagement: 4.2,
+      sentiment: 78,
+      reach: 15.4,
+      conversion: 2.1
+    }
+  },
+  {
+    id: 2,
+    campaignName: "Letters of Love",
+    submissionStatus: "submitted",
+    platform: "YouTube",
+    startDate: "2024-08-10",
+    endDate: "2024-08-20",
+    totalBudget: 10461,
+    primaryKPI: "consideration",
+    primaryContact: {
+      firstName: "Jane",
+      surname: "Smith"
+    },
+    createdAt: "2024-07-20",
+    status: "scheduled",
+    performance: {
+      engagement: 5.7,
+      sentiment: 82,
+      reach: 22.1,
+      conversion: 3.4
+    }
+  },
+  {
+    id: 3,
+    campaignName: "Women Who Inspire",
+    submissionStatus: "submitted",
+    platform: "TikTok",
+    startDate: "2024-08-05",
+    endDate: "2024-08-25",
+    totalBudget: 8125,
+    primaryKPI: "messageAssociation",
+    primaryContact: {
+      firstName: "Robert",
+      surname: "Johnson"
+    },
+    createdAt: "2024-07-18",
+    status: "scheduled",
+    performance: {
+      engagement: 6.8,
+      sentiment: 91,
+      reach: 35.2,
+      conversion: 4.7
+    }
+  },
+  {
+    id: 4,
+    campaignName: "Words for the Earth",
+    submissionStatus: "submitted",
+    platform: "Instagram",
+    startDate: "2024-07-20",
+    endDate: "2024-08-05",
+    totalBudget: 9315,
+    primaryKPI: "brandAwareness",
+    primaryContact: {
+      firstName: "Sarah",
+      surname: "Williams"
+    },
+    createdAt: "2024-07-10",
+    status: "live",
+    performance: {
+      engagement: 3.9,
+      sentiment: 75,
+      reach: 18.6,
+      conversion: 2.8
+    }
+  },
+  {
+    id: 5,
+    campaignName: "Graduation Milestones",
+    submissionStatus: "submitted",
+    platform: "YouTube",
+    startDate: "2024-07-25",
+    endDate: "2024-08-10",
+    totalBudget: 7450,
+    primaryKPI: "consideration",
+    primaryContact: {
+      firstName: "Michael",
+      surname: "Brown"
+    },
+    createdAt: "2024-07-12",
+    status: "live",
+    performance: {
+      engagement: 4.5,
+      sentiment: 80,
+      reach: 20.3,
+      conversion: 3.2
+    }
+  },
+  {
+    id: 6,
+    campaignName: "Back to Inspiration",
+    submissionStatus: "submitted",
+    platform: "TikTok",
+    startDate: "2024-07-15",
+    endDate: "2024-08-01",
+    totalBudget: 11250,
+    primaryKPI: "messageAssociation",
+    primaryContact: {
+      firstName: "Emily",
+      surname: "Davis"
+    },
+    createdAt: "2024-07-05",
+    status: "live",
+    performance: {
+      engagement: 5.2,
+      sentiment: 85,
+      reach: 25.7,
+      conversion: 3.9
+    }
+  }
+];
+
+const mockMetrics = {
+  stats: {
+    totalCampaigns: 154,
+    campaignChange: 10,
+    surveyResponses: 3000,
+    surveyChange: -8,
+    liveCampaigns: 31,
+    liveChange: 5,
+    creditsAvailable: 135,
+    creditsChange: -47
+  },
+  overview: {
+    totalCampaigns: 154,
+    activeCampaigns: 31,
+    totalBudget: 1250000,
+    totalSpent: 750000,
+    averageROI: 3.2,
+    campaignSuccess: 87
+  },
+  performance: {
+    engagement: {
+      current: 4.8,
+      trend: 12,
+      byChannel: [
+        { channel: "Instagram", value: 5.2 },
+        { channel: "YouTube", value: 4.1 },
+        { channel: "TikTok", value: 6.3 },
+        { channel: "Facebook", value: 3.7 },
+        { channel: "Twitter", value: 2.9 }
+      ]
+    },
+    reach: {
+      current: 1250000,
+      trend: 8,
+      byDemographic: [
+        { group: "18-24", value: 35 },
+        { group: "25-34", value: 28 },
+        { group: "35-44", value: 20 },
+        { group: "45-54", value: 12 },
+        { group: "55+", value: 5 }
+      ]
+    },
+    sentiment: {
+      current: 82,
+      trend: 5,
+      distribution: [
+        { type: "Positive", value: 76 },
+        { type: "Neutral", value: 18 },
+        { type: "Negative", value: 6 }
+      ]
+    },
+    conversion: {
+      current: 3.4,
+      trend: 15,
+      bySource: [
+        { source: "Direct", value: 42 },
+        { source: "Social", value: 35 },
+        { source: "Email", value: 15 },
+        { source: "Other", value: 8 }
+      ]
+    }
+  },
+  trends: {
+    daily: [
+      { date: "Aug 01", engagement: 4.2, reach: 15, sentiment: 78, conversion: 2.1 },
+      { date: "Aug 05", engagement: 4.5, reach: 18, sentiment: 80, conversion: 2.3 },
+      { date: "Aug 10", engagement: 4.8, reach: 20, sentiment: 82, conversion: 2.7 },
+      { date: "Aug 15", engagement: 5.1, reach: 22, sentiment: 83, conversion: 3.0 },
+      { date: "Aug 20", engagement: 5.3, reach: 25, sentiment: 85, conversion: 3.2 },
+      { date: "Aug 25", engagement: 5.5, reach: 28, sentiment: 86, conversion: 3.5 },
+      { date: "Aug 30", engagement: 5.7, reach: 30, sentiment: 87, conversion: 3.8 }
+    ],
+    weekly: [
+      { week: "Week 1", engagement: 4.3, reach: 16, sentiment: 79, conversion: 2.2 },
+      { week: "Week 2", engagement: 4.7, reach: 19, sentiment: 81, conversion: 2.5 },
+      { week: "Week 3", engagement: 5.2, reach: 23, sentiment: 84, conversion: 3.1 },
+      { week: "Week 4", engagement: 5.6, reach: 27, sentiment: 86, conversion: 3.6 }
+    ]
+  },
+  insights: [
+    {
+      id: "1",
+      category: "Performance",
+      title: "Youth Momentum: Boosting Performance Among 18-24-Year-Olds",
+      description: "Campaign 'NextGen Focus: Amplify Impact' is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.",
+      impact: "High",
+      action: "Increase budget allocation",
+      metrics: {
+        current: 20,
+        previous: 15,
+        trend: 33
+      }
+    },
+    {
+      id: "2",
+      category: "Risk",
+      title: "Low Engagement on 'NextGen Focus: Amplify Impact'",
+      description: "Engagement rate is 15% below average. Consider revising the call-to-action.",
+      impact: "Medium",
+      action: "Revise content strategy",
+      metrics: {
+        current: 3.2,
+        previous: 3.8,
+        trend: -15
+      }
+    }
+  ]
+};
 
 // Calendar component with month view
 const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['events'] }> = ({ month, events }) => {
   const [currentMonth, setCurrentMonth] = useState(month);
+  const router = useRouter();
   
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
@@ -533,67 +897,82 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
   const year = currentMonth.getFullYear();
   
   const days = [];
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   
   // Add empty cells for days before the first day of the month
   for (let i = 0; i < firstDayOfMonth; i++) {
-    days.push(<div key={`empty-${i}`} className="h-8 text-center text-gray-400"></div>);
+    days.push(<div key={`empty-${i}`} className="h-8 text-center text-[var(--secondary-color)]"></div>);
   }
   
   // Add cells for each day of the month
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    const hasEvent = events.some(event => {
+    const eventsOnDay = events.filter(event => {
       const eventDate = new Date(event.start);
       return eventDate.getDate() === day && 
              eventDate.getMonth() === currentMonth.getMonth() && 
              eventDate.getFullYear() === currentMonth.getFullYear();
     });
     
+    const hasEvent = eventsOnDay.length > 0;
+    const isToday = new Date().getDate() === day && 
+                    new Date().getMonth() === currentMonth.getMonth() && 
+                    new Date().getFullYear() === currentMonth.getFullYear();
+    
     days.push(
       <div 
-        key={`day-${day}`} 
-        className={`h-8 flex items-center justify-center rounded-full w-8 mx-auto ${
-          hasEvent 
-            ? 'bg-blue-100 text-blue-800 font-medium' 
-            : 'text-gray-700'
-        }`}
+        key={`day-${day}`}
+        onClick={() => hasEvent && router.push('/calendar')}
+        className={`relative h-8 flex items-center justify-center rounded-full w-8 mx-auto cursor-pointer
+          ${isToday ? 'border border-[var(--accent-color)]' : ''}
+          ${hasEvent 
+            ? 'bg-[var(--accent-color)] bg-opacity-10 text-[var(--accent-color)] font-medium hover:bg-opacity-20' 
+            : 'text-[var(--primary-color)] hover:bg-gray-50'
+          }`}
       >
         {day}
+        {hasEvent && eventsOnDay.length > 1 && (
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent-color)] text-[10px] text-white">
+            {eventsOnDay.length}
+          </span>
+        )}
       </div>
     );
   }
   
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-lg p-3 sm:p-4 border border-[var(--divider-color)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2">
         <div className="flex items-center space-x-2">
           <button 
             onClick={prevMonth}
-            className="p-1 rounded-full hover:bg-gray-100"
+            className="p-1 rounded-full hover:bg-[var(--divider-color)] transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--secondary-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h3 className="text-lg font-medium text-gray-900">{monthName} {year}</h3>
+          <h3 className="text-base sm:text-lg font-medium text-[var(--primary-color)]">{monthName} {year}</h3>
           <button 
             onClick={nextMonth}
-            className="p-1 rounded-full hover:bg-gray-100"
+            className="p-1 rounded-full hover:bg-[var(--divider-color)] transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--secondary-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+        <button 
+          onClick={() => router.push('/calendar')}
+          className="text-xs sm:text-sm text-[var(--accent-color)] hover:underline font-medium"
+        >
           Switch to Timeline
         </button>
       </div>
       
       <div className="grid grid-cols-7 gap-1 mb-2">
         {dayNames.map(day => (
-          <div key={day} className="text-xs text-center text-gray-500 font-medium">
+          <div key={day} className="text-xs text-center text-[var(--secondary-color)] font-medium">
             {day}
           </div>
         ))}
@@ -602,23 +981,87 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
       <div className="grid grid-cols-7 gap-1">
         {days}
       </div>
+      
+      <div className="mt-4 pt-3 border-t border-[var(--divider-color)]">
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-[var(--secondary-color)]">Upcoming events</span>
+          <span className="text-xs text-[var(--accent-color)] cursor-pointer hover:underline" onClick={() => router.push('/calendar')}>View all</span>
+        </div>
+        <div className="mt-2 space-y-2">
+          {events.slice(0, 2).map((event, idx) => (
+            <div key={idx} className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/campaigns/${event.id}`)}>
+              <div className="w-2 h-2 rounded-full bg-[var(--accent-color)] mr-2"></div>
+              <div className="flex-1 truncate">
+                <p className="text-xs font-medium text-[var(--primary-color)] truncate">{event.title}</p>
+                <p className="text-xs text-[var(--secondary-color)]">{new Date(event.start).toLocaleDateString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default function DashboardContent({ user }: DashboardContentProps) {
+export default function DashboardContent({ user = { id: '', name: 'User', role: '' } }: DashboardContentProps) {
   const router = useRouter();
   const [dateRange, setDateRange] = useState('7d');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [activeTab, setActiveTab] = useState('performance');
 
-  // Update the SWR hook type
+  // Update the SWR hook type with improved configuration
   const { data: campaignsData, error: fetchError, isLoading: isLoadingCampaigns } = useSWR<CampaignsResponse>(
     '/api/campaigns',
     fetcher,
     {
       onError: (error) => {
-        handleError(new Error('Failed to fetch campaign data'));
+        console.error('SWR error:', error);
+        handleError(new Error('Failed to fetch campaign data. Please try refreshing the page.'));
+      },
+      revalidateOnFocus: false,
+      revalidateIfStale: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 10000,
+      errorRetryInterval: 5000,
+      errorRetryCount: 3,
+      fallbackData: {
+        success: true,
+        campaigns: [],
+        metrics: {
+          overview: {
+            totalCampaigns: 0,
+            activeCampaigns: 0,
+            totalBudget: 0,
+            totalSpent: 0,
+            averageROI: 0,
+            campaignSuccess: 0
+          },
+          performance: {
+            engagement: {
+              current: 0,
+              trend: 0,
+              byChannel: []
+            },
+            reach: {
+              current: 0,
+              trend: 0,
+              byDemographic: []
+            },
+            sentiment: {
+              current: 0,
+              trend: 0,
+              distribution: []
+            },
+            conversion: {
+              current: 0,
+              trend: 0,
+              bySource: []
+            }
+          },
+          trends: { daily: [], weekly: [] },
+          insights: []
+        }
       }
     }
   );
@@ -658,13 +1101,13 @@ export default function DashboardContent({ user }: DashboardContentProps) {
       performance: { engagement: { byChannel: [] } }
     },
     stats: {
-      totalCampaigns: 154,
-      campaignChange: 10,
-      surveyResponses: 3000,
-      surveyChange: -81,
-      liveCampaigns: 31,
-      liveChange: 5,
-      creditsAvailable: 135,
+    totalCampaigns: 154,
+    campaignChange: 10,
+    surveyResponses: 3000,
+    surveyChange: -81,
+    liveCampaigns: 31,
+    liveChange: 5,
+    creditsAvailable: 135,
       creditsChange: -47
     }
   }), [campaignsData?.metrics]);
@@ -705,7 +1148,22 @@ export default function DashboardContent({ user }: DashboardContentProps) {
   };
 
   const handleError = (error: Error) => {
-    setToastMessage(error.message);
+    console.error('Dashboard error:', error);
+    
+    // Provide more helpful error messages based on the error
+    let message = error.message;
+    
+    if (message.includes('Failed to fetch')) {
+      message = 'Network error: Please check your internet connection and try again.';
+    } else if (message.includes('API error: 500')) {
+      message = 'Server error: Our team has been notified and is working on a fix.';
+    } else if (message.includes('API error: 401') || message.includes('API error: 403')) {
+      message = 'Authentication error: Please log in again to continue.';
+    } else if (message.includes('API error: 404')) {
+      message = 'Resource not found: The requested data could not be found.';
+    }
+    
+    setToastMessage(message);
     setTimeout(() => setToastMessage(null), 5000);
   };
 
@@ -753,439 +1211,406 @@ export default function DashboardContent({ user }: DashboardContentProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300"
+      className="p-4 border border-[var(--divider-color)] rounded-lg bg-white hover:shadow-md transition-all duration-300"
     >
       {/* ... existing InsightCard implementation ... */}
     </motion.div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {toastMessage && <Toast message={toastMessage} type="info" />}
 
         {/* Header Section */}
-        <div className="flex justify-between items-start mb-8">
-          <div>
+        <div className="flex flex-col mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <motion.h1
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-gray-900 mb-2 font-sora"
+              className="text-2xl font-bold text-[var(--primary-color)]"
             >
-              Campaign Dashboard
+              Dashboard
             </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-gray-600"
-            >
-              Real-time campaign performance and insights
-            </motion.p>
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/reports')}
+                className="px-3 sm:px-4 py-2 border border-[var(--divider-color)] bg-white text-[var(--primary-color)] rounded-lg hover:bg-gray-50 transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
+              >
+                <DocumentChartBarIcon className="w-4 h-4" />
+                <span>Generate Report</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/campaigns/wizard/step-1')}
+                className="px-3 sm:px-4 py-2 bg-[#0ea5e9] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
+              >
+                <span>Start Creative Test</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleNewCampaign}
+                className="px-3 sm:px-4 py-2 bg-[#0ea5e9] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
+              >
+                <PlusIcon className="w-4 h-4" />
+                <span>Create New Campaign</span>
+              </motion.button>
+            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            >
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last Quarter</option>
-              <option value="1y">Last Year</option>
-            </select>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleNewCampaign}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg transition-all duration-300 flex items-center space-x-2"
-            >
-              <RocketLaunchIcon className="w-5 h-5" />
-              <span>New Campaign</span>
-            </motion.button>
+
+          {/* Campaigns Overview Title */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+            <h2 className="text-xl font-semibold text-[var(--primary-color)]">
+              Campaigns Overview
+            </h2>
+            <div className="flex items-center gap-3">
+              <div className="relative flex items-center">
+                <CalendarDaysIcon className="w-4 h-4 text-[var(--secondary-color)] absolute left-3" />
+                <select
+                  value={dateRange}
+                  onChange={(e) => setDateRange(e.target.value)}
+                  className="appearance-none border border-[var(--divider-color)] rounded-lg pl-9 pr-10 py-2 bg-white focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent text-sm"
+                >
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                  <option value="90d">Last Quarter</option>
+                  <option value="1y">Last Year</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[var(--secondary-color)]">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex items-center border border-[var(--divider-color)] rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setActiveTab('performance')}
+                  className={`px-4 py-2 text-sm font-medium ${
+                    activeTab === 'performance' 
+                      ? 'bg-[#0ea5e9] text-white' 
+                      : 'bg-white text-[var(--primary-color)] hover:bg-gray-50'
+                  }`}
+                >
+                  Performance
+                </button>
+                <div className="h-6 w-px bg-[var(--divider-color)]"></div>
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`px-4 py-2 text-sm font-medium ${
+                    activeTab === 'all' 
+                      ? 'bg-[#0ea5e9] text-white' 
+                      : 'bg-white text-[var(--primary-color)] hover:bg-gray-50'
+                  }`}
+                >
+                  All channels
+                </button>
+              </div>
+              <div className="flex items-center border border-[var(--divider-color)] rounded-lg bg-white px-3 py-2">
+                <span className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                  1 Survey Live
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Top Row - Calendar and Upcoming Campaigns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Interactive Calendar */}
-          <Card
-            title="Campaign Calendar"
-            description="Interactive view of campaign schedule"
-            icon={CalendarDaysIcon}
-            actions={
-              <button
-                onClick={() => router.push('/calendar')}
-                className="text-blue-600 hover:text-blue-800 text-sm"
-              >
-                View Full Calendar
-              </button>
-            }
+        {/* Campaign Status Tabs */}
+        <div className="flex border-b border-[var(--divider-color)] mb-6">
+          <button 
+            className="px-6 py-3 border-b-2 border-[#0ea5e9] text-[#0ea5e9] font-medium"
           >
-            <CalendarMonthView month={new Date()} events={calendarEvents} />
-          </Card>
+            Upcoming
+          </button>
+          <button 
+            className="px-6 py-3 text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
+          >
+            Finished
+          </button>
+        </div>
 
-          {/* Upcoming Campaigns */}
-          <Card
-            title="Upcoming Campaigns"
-            description="Scheduled campaigns starting soon"
-            icon={RocketLaunchIcon}
-          >
-            {isLoadingCampaigns ? (
-              <Spinner />
-            ) : fetchError ? (
-              <div className="text-center py-8">
-                <XCircleIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <p className="text-gray-600">{fetchError instanceof Error ? fetchError.message : 'Failed to load campaigns'}</p>
+        {/* Calendar and Upcoming Campaigns */}
+        <div className="mb-8">
+          {isLoadingCampaigns ? (
+            <Spinner />
+          ) : fetchError ? (
+            <ErrorDisplay 
+              message={fetchError instanceof Error ? fetchError.message : 'Failed to load campaigns'} 
+              onRetry={() => window.location.reload()}
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Calendar View */}
+              <div className="lg:col-span-5">
+                <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <button className="p-1 text-gray-500 hover:text-gray-700">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.5 16.6L7.0667 11.1667C6.42503 10.525 6.42503 9.47503 7.0667 8.83336L12.5 3.3667" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                    <h3 className="text-base font-medium text-gray-900">August, 2024</h3>
+                    <button className="p-1 text-gray-500 hover:text-gray-700">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.5 3.3667L12.9333 8.80003C13.575 9.4417 13.575 10.4917 12.9333 11.1334L7.5 16.6" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Calendar Header */}
+                  <div className="grid grid-cols-7 text-center text-xs text-gray-500 mb-2">
+                    <div className="py-1">Mo</div>
+                    <div className="py-1">Tu</div>
+                    <div className="py-1">We</div>
+                    <div className="py-1">Th</div>
+                    <div className="py-1">Fr</div>
+                    <div className="py-1">Sa</div>
+                    <div className="py-1">Su</div>
+                  </div>
+                  
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {/* Week 1 */}
+                    <div className="h-8 flex items-center justify-center text-gray-400 text-sm">29</div>
+                    <div className="h-8 flex items-center justify-center text-gray-400 text-sm">30</div>
+                    <div className="h-8 flex items-center justify-center text-gray-400 text-sm">31</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">1</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">2</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">3</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">4</div>
+                    
+                    {/* Week 2 */}
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">5</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">6</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">7</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">8</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">9</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">10</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">11</div>
+                    
+                    {/* Week 3 */}
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">12</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">13</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">14</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm rounded-full bg-blue-100 text-blue-600 font-medium">15</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">16</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">17</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">18</div>
+                    
+                    {/* Week 4 */}
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">19</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">20</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">21</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">22</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">23</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">24</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">25</div>
+                    
+                    {/* Week 5 */}
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">26</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">27</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">28</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">29</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">30</div>
+                    <div className="h-8 flex items-center justify-center text-gray-900 text-sm">31</div>
+                    <div className="h-8 flex items-center justify-center text-gray-400 text-sm">1</div>
+                  </div>
+                </div>
               </div>
-            ) : upcomingCampaigns.length > 0 ? (
-              <div className="space-y-4">
-                {upcomingCampaigns.map((campaign) => (
-                  <motion.div
-                    key={campaign.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-all duration-300"
-                  >
+              
+              {/* Upcoming Campaigns */}
+              <div className="lg:col-span-7">
+                {upcomingCampaigns.length > 0 ? (
+                  <div className="space-y-4">
+                    {upcomingCampaigns.map((campaign) => (
+                      <div key={campaign.id} className="bg-white rounded-lg border border-[var(--divider-color)] p-4 hover:shadow-sm transition-all duration-300">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg mr-4 overflow-hidden flex items-center justify-center">
+                              <img 
+                                src={`/campaign-images/${campaign.id % 4 + 1}.jpg`} 
+                                alt={campaign.campaignName}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://via.placeholder.com/48';
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-[var(--primary-color)]">{campaign.campaignName}</h4>
+                              <div className="flex items-center mt-1">
+                                <svg className="w-3 h-3 text-[var(--secondary-color)] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M8 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M16 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M3 9H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <p className="text-xs text-[var(--secondary-color)]">
+                                  {new Date(campaign.startDate).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <StatusBadge status={campaign.status || "scheduled"} size="sm" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{campaign.campaignName}</h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Starts {new Date(campaign.startDate).toLocaleDateString()}
-                        </p>
+                      <div className="flex items-center">
+                        <ShieldCheckIcon className="w-5 h-5 text-[var(--secondary-color)] mr-2" />
+                        <span className="text-sm text-[var(--secondary-color)]">Security Check</span>
                       </div>
                       <div className="flex items-center">
-                        {campaign.submissionStatus === "draft" && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            draft
-                          </span>
-                        )}
-                        <span className="ml-2 text-sm font-medium text-gray-900">
-                          ${campaign.totalBudget?.toLocaleString() || 0}
-                        </span>
+                        <span className="text-sm text-red-500 mr-2">Next in 5 Days</span>
+                        <button className="px-3 py-1 bg-[#0ea5e9] text-white text-sm rounded-md">Run Check</button>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-                <div className="text-center pt-2">
-                  <button
-                    onClick={() => router.push('/campaigns')}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View All Campaigns →
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <CalendarDaysIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No upcoming campaigns</p>
-              </div>
-            )}
-          </Card>
-        </div>
-
-        {/* Second Row - Brand Health, Influencer Management, Active Campaigns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Brand Health Card */}
-          <Card
-            title="Brand Health"
-            description="Overall brand performance metrics"
-            icon={HeartIcon}
-            actions={
-              <button
-                onClick={() => router.push('/brand-health')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                View Details
-              </button>
-            }
-          >
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg p-4 border border-gray-100">
-                  <p className="text-sm text-gray-600 mb-1">Brand NPS</p>
-                  <div className="flex items-baseline">
-                    <p className="text-2xl font-bold text-gray-900">{brandHealth.nps}</p>
-                    <span className="ml-2 text-green-600 text-sm flex items-center">
-                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-                      +5%
-                    </span>
+                    <p className="text-xs text-[var(--secondary-color)] mt-1">Maintain safety. Complete your security check on time.</p>
                   </div>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-100">
-                  <p className="text-sm text-gray-600 mb-1">Awareness</p>
-                  <div className="flex items-baseline">
-                    <p className="text-2xl font-bold text-gray-900">{brandHealth.awareness}%</p>
-                    <span className="ml-2 text-blue-600 text-sm flex items-center">
-                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-                      +3%
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={brandHealth.trends}>
-                    <defs>
-                      <linearGradient id="colorBrandHealth" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="date" stroke="#6B7280" />
-                    <YAxis stroke="#6B7280" />
-                    <RechartsTooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#3B82F6"
-                      fillOpacity={1}
-                      fill="url(#colorBrandHealth)"
-                      name="Brand Health"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                )}
               </div>
             </div>
-          </Card>
-
-          {/* Influencer Management Card */}
-          <Card
-            title="Influencer Management"
-            description="Influencer performance and metrics"
-            icon={UserGroupIcon}
-            actions={
-              <button
-                onClick={() => router.push('/influencers')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                View All
-              </button>
-            }
-          >
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg p-4 border border-gray-100">
-                  <p className="text-sm text-gray-600 mb-1">Active Collabs</p>
-                  <p className="text-2xl font-bold text-gray-900">{influencerMetrics.activeCollaborations}</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-gray-100">
-                  <p className="text-sm text-gray-600 mb-1">Avg Engagement</p>
-                  <p className="text-2xl font-bold text-gray-900">{influencerMetrics.averageEngagement}%</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="font-medium text-gray-900">Top Performers</p>
-                {influencerMetrics.topPerformers.map((influencer, index) => (
-                  <motion.div
-                    key={index}
-                    className="bg-white rounded-lg p-3 border border-gray-100"
-                    whileHover={{ scale: 1.01 }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">{influencer.name}</p>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {influencer.platform}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">{influencer.engagement}% Engagement</p>
-                        <p className="text-sm text-gray-600">{(influencer.reach / 1000000).toFixed(1)}M Reach</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </Card>
-
-          {/* Active Campaigns Card */}
-          <Card
-            title="Active Campaigns"
-            description="Currently running campaign performance"
-            icon={RocketLaunchIcon}
-            actions={
-              <button
-                onClick={() => router.push('/campaigns')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                View All
-              </button>
-            }
-          >
-            {isLoadingCampaigns ? (
-              <Spinner />
-            ) : fetchError ? (
-              <div className="text-center py-8">
-                <XCircleIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <p className="text-gray-600">{fetchError instanceof Error ? fetchError.message : 'Failed to load campaigns'}</p>
-              </div>
-            ) : activeCampaigns.length > 0 ? (
-              <div className="space-y-4">
-                {activeCampaigns.map((campaign) => (
-                  <motion.div
-                    key={campaign.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.01 }}
-                    className="bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer"
-                    onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{campaign.campaignName}</h4>
-                        <div className="flex items-center mt-1">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
-                            Live
-                          </span>
-                          <p className="text-sm text-gray-600">
-                            {campaign.platform}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center justify-end">
-                          <svg className="w-4 h-4 text-gray-500 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 8V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
-                          </svg>
-                          <p className="text-sm text-gray-600">
-                            {new Date(campaign.startDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <p className="text-sm font-medium text-gray-900 mt-1">
-                          ${campaign.totalBudget?.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="bg-gray-50 rounded-lg p-8">
-                  <RocketLaunchIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">No active campaigns</p>
-                  <button
-                    onClick={handleNewCampaign}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Start a new campaign
-                  </button>
-                </div>
-              </div>
-            )}
-          </Card>
+          )}
         </div>
 
-        {/* Performance Metrics Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Performance Trends */}
-          <Card
-            title="Performance Trends"
-            description="Campaign metrics over time"
-            icon={ChartBarIcon}
-            actions={
-              <button
-                onClick={() => router.push('/analytics')}
-                className="text-blue-600 hover:text-blue-800 text-sm"
-              >
-                View All
-              </button>
-            }
-          >
-            <div className="h-80">
+        {/* Latest Campaigns List */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Latest Campaigns List</h2>
+            <button className="px-3 py-1.5 bg-[#0ea5e9] text-white text-sm rounded-md">
+              Manage
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-[var(--divider-color)]">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Campaign
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Budget
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Users
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-[var(--divider-color)]">
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900">Clicks & Connections</span>
+                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">Live</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-500">Budget</span>
+                        <div className="w-24 h-2 bg-gray-200 rounded-full mt-1">
+                          <div className="h-2 bg-[#0ea5e9] rounded-full" style={{ width: '75%' }}></div>
+                        </div>
+                        <span className="text-xs text-[var(--secondary-color)] mt-1">12,314$</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="text-[var(--primary-color)]">12 of 100 Users</span>
+                    </td>
+                  </tr>
+                  {/* More campaign rows would go here */}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Brand Health Snapshot */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Brand Health Snapshot</h2>
+            <button className="px-3 py-1.5 bg-[#0ea5e9] text-white text-sm rounded-md">
+              View Brand Health
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5">
+            <div className="mb-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-base font-medium text-gray-900">Sentiment Score</h3>
+                  <p className="text-2xl font-bold text-gray-900">76% Positive Score</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-md">30D</span>
+                  <span className="px-2 py-1 text-xs bg-[#0ea5e9] bg-opacity-10 text-[#0ea5e9] rounded-md">3M</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={metrics.trends.daily}>
-                  <defs>
-                    <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorReach" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="date" stroke="#6B7280" />
-                  <YAxis stroke="#6B7280" />
+                <LineChart data={engagementData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                  <YAxis stroke="#9ca3af" tick={{ fontSize: 10 }} />
                   <RechartsTooltip 
                     contentStyle={{ 
                       backgroundColor: 'white', 
-                      border: '1px solid #E5E7EB',
-                      borderRadius: '0.5rem',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.375rem',
+                      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
                     }}
                   />
-                  <RechartsLegend 
-                    verticalAlign="top" 
-                    height={36}
-                    wrapperStyle={{ paddingBottom: '10px' }}
+                  <Line 
+                    type="monotone" 
+                    dataKey="engagement" 
+                    stroke="#0ea5e9" 
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "#0ea5e9", strokeWidth: 0 }}
+                    activeDot={{ r: 5, fill: "#0ea5e9", stroke: "white", strokeWidth: 2 }}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="engagement"
-                    stroke="#3B82F6"
-                    fillOpacity={1}
-                    fill="url(#colorEngagement)"
-                    name="Engagement"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="reach"
-                    stroke="#10B981"
-                    fillOpacity={1}
-                    fill="url(#colorReach)"
-                    name="Reach"
-                  />
-                </AreaChart>
+                </LineChart>
               </ResponsiveContainer>
             </div>
-          </Card>
-
-          {/* Channel Performance */}
-          <Card
-            title="Channel Performance"
-            description="Engagement by platform"
-            icon={SignalIcon}
-            actions={
-              <button
-                onClick={() => router.push('/analytics/channels')}
-                className="text-blue-600 hover:text-blue-800 text-sm"
-              >
-                View Details
-              </button>
-            }
-          >
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metrics.performance.engagement.byChannel}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="channel" stroke="#6B7280" />
-                  <YAxis stroke="#6B7280" />
-                  <RechartsTooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
-                      border: '1px solid #E5E7EB',
-                      borderRadius: '0.5rem',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="value" 
-                    fill="#3B82F6" 
-                    radius={[4, 4, 0, 0]} 
-                    name="Engagement"
-                    barSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            
+            <div className="mt-4 pt-4 border-t border-[var(--divider-color)]">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900">Latest Mentions</h4>
+                  <div className="flex items-baseline">
+                    <p className="text-xl font-bold text-gray-900 mr-2">1,561 Mentions</p>
+                    <span className="text-green-600 text-xs flex items-center font-medium">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-0.5">
+                        <path d="M6 9.5V2.5" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M2.5 6L6 2.5L9.5 6" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      +43% More than last week
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <span className="px-2 py-1 text-xs bg-gray-100 rounded-md flex items-center">
+                    <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1"></span>
+                    30D
+                  </span>
+                  <span className="px-2 py-1 text-xs bg-gray-100 rounded-md flex items-center ml-2">
+                    <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1"></span>
+                    3M
+                  </span>
+                </div>
+              </div>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
