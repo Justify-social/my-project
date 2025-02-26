@@ -702,8 +702,8 @@ function FormContent() {
                 </div>
               </div>
               
-              {/* Add bottom padding to prevent progress bar overlap - reduced from pb-24 to pb-16 */}
-              <div className="pb-16"></div>
+              {/* Add bottom padding to prevent progress bar overlap - reduced from pb-8 to pb-4 */}
+              <div className="pb-4"></div>
               
               <ProgressBar
                 currentStep={2}
