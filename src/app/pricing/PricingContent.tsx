@@ -344,7 +344,7 @@ export default function PricingContent() {
       {/* Add padding to account for proper spacing */}
       <div className="pt-6">
         {/* Mini Navigation Bar - Sticky below header (not fixed at very top) */}
-        <div className="sticky top-[72px] z-40 bg-white py-3 border-b border-gray-200 shadow-sm mb-8">
+        <div className="sticky top-[72px] z-40 bg-white py-3 border-b border-gray-200 shadow-sm mb-8 before:content-[''] before:absolute before:top-[-72px] before:left-0 before:right-0 before:h-[72px] before:bg-white before:z-[-1]">
           <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-sm">
             <button 
               onClick={() => scrollToSection(pricingRef)}
@@ -424,17 +424,8 @@ export default function PricingContent() {
                   tier.id === "pay-as-you-go" ? "rounded-l-md" : ""
                 } ${
                   tier.id === "advanced" ? "rounded-r-md" : ""
-                } ${
-                  tier.popular ? "pt-5" : ""
                 }`}
               >
-                {tier.popular && (
-                  <span className="absolute -top-3 inset-x-0 flex justify-center" style={{ zIndex: 30 }}>
-                    <span className="inline-flex items-center rounded-full bg-[var(--accent-color)] px-2 py-0.5 text-xs font-medium text-white shadow-md">
-                      Most Popular
-                    </span>
-                  </span>
-                )}
                 {tier.name}
               </button>
             ))}
@@ -448,14 +439,7 @@ export default function PricingContent() {
               key={tier.id}
               className={`${activeMobileTab === tier.id ? 'block' : 'hidden'} bg-white rounded-lg shadow-md border border-[var(--divider-color)] p-6 relative`}
             >
-              {tier.popular && (
-                <div className="absolute -top-4 inset-x-0 flex justify-center z-30">
-                  <span className="inline-flex items-center rounded-full bg-[var(--accent-color)] px-3 py-1 text-xs font-medium text-white shadow-md">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              <div className={`text-center mb-6 relative ${tier.popular ? 'pt-3' : ''}`}>
+              <div className="text-center mb-6 relative">
                 <div className="flex flex-col items-center space-y-3">
                   <h3 className="text-xl font-bold text-[var(--primary-color)] font-sora">{tier.name}</h3>
                   <div className="flex items-baseline">
@@ -531,13 +515,6 @@ export default function PricingContent() {
                 {tiers.map((tier) => (
                   <th key={tier.id} className="p-4 w-1/5 bg-white relative">
                     <div className="pt-5 min-h-[130px] flex flex-col items-center justify-between">
-                      {tier.popular && (
-                        <div className="absolute left-1/2 transform -translate-x-1/2 -top-3 z-30">
-                          <div className="px-3 py-1 text-xs font-medium text-[var(--accent-color)] bg-[var(--accent-color-light)] rounded-full shadow-sm whitespace-nowrap">
-                            Most Popular
-                          </div>
-                        </div>
-                      )}
                       <h3 className="text-base lg:text-lg font-bold text-gray-900 font-sora w-full text-center mb-2">{tier.name}</h3>
                       <div className="flex items-baseline justify-center w-full mb-2">
                         <span className="text-xl lg:text-2xl font-light text-gray-900 font-['Work_Sans']">£{tier.price}</span>
