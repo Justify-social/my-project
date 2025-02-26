@@ -105,6 +105,71 @@ export default function SurveyDesignContent() {
         { id: '5-4', text: 'Consider purchasing the product' },
         { id: '5-5', text: 'Nothing/continue browsing' },
       ]
+    },
+    {
+      id: '6',
+      title: 'Which message from our campaign resonated most with you?',
+      type: 'Single Choice',
+      kpi: 'Message Association',
+      options: [
+        { id: '6-1', text: 'Product quality' },
+        { id: '6-2', text: 'Price value' },
+        { id: '6-3', text: 'Brand story' },
+        { id: '6-4', text: 'Social responsibility' },
+        { id: '6-5', text: 'Innovation' },
+      ]
+    },
+    {
+      id: '7',
+      title: 'How would you describe our brand to someone else after seeing the ad?',
+      type: 'Multiple Choice',
+      kpi: 'Brand Perception',
+      options: [
+        { id: '7-1', text: 'Innovative' },
+        { id: '7-2', text: 'Trustworthy' },
+        { id: '7-3', text: 'Premium' },
+        { id: '7-4', text: 'Value-focused' },
+        { id: '7-5', text: 'Sustainable' },
+      ]
+    },
+    {
+      id: '8',
+      title: 'How likely are you to recommend our brand to friends or family?',
+      type: 'Single Choice',
+      kpi: 'Recommendation Intent',
+      options: [
+        { id: '8-1', text: 'Extremely likely' },
+        { id: '8-2', text: 'Very likely' },
+        { id: '8-3', text: 'Somewhat likely' },
+        { id: '8-4', text: 'Not very likely' },
+        { id: '8-5', text: 'Not at all likely' },
+      ]
+    },
+    {
+      id: '9',
+      title: 'What aspect of our brand most influences your purchase decision?',
+      type: 'Single Choice',
+      kpi: 'Purchase Intent',
+      options: [
+        { id: '9-1', text: 'Product features' },
+        { id: '9-2', text: 'Brand reputation' },
+        { id: '9-3', text: 'Price' },
+        { id: '9-4', text: 'Customer reviews' },
+        { id: '9-5', text: 'Friend recommendations' },
+      ]
+    },
+    {
+      id: '10',
+      title: 'How does our brand compare to competitors you\'ve used?',
+      type: 'Single Choice',
+      kpi: 'Brand Preference',
+      options: [
+        { id: '10-1', text: 'Much better' },
+        { id: '10-2', text: 'Somewhat better' },
+        { id: '10-3', text: 'About the same' },
+        { id: '10-4', text: 'Somewhat worse' },
+        { id: '10-5', text: 'Much worse' },
+      ]
     }
   ]);
 
@@ -195,6 +260,16 @@ export default function SurveyDesignContent() {
     setShowGiphyModal(false);
   };
   
+  // Remove image from option
+  const removeImage = (id: string) => {
+    setNewQuestion({
+      ...newQuestion,
+      options: newQuestion.options.map(option => 
+        option.id === id ? { ...option, image: null } : option
+      )
+    });
+  };
+  
   const handlePreview = () => {
     router.push(`/brand-lift/survey-preview?id=${campaignId}`);
   };
@@ -230,6 +305,16 @@ export default function SurveyDesignContent() {
       type: 'Multiple Choice',
       options: [{ id: '1', text: '', image: null as string | null }]
     });
+  };
+
+  // Clear the form
+  const handleClearForm = () => {
+    setNewQuestion({
+      title: '',
+      type: 'Multiple Choice' as 'Multiple Choice' | 'Single Choice',
+      options: [{ id: '1', text: '', image: null as string | null }]
+    });
+    setQuestionKpi('Boost Brand Awareness');
   };
 
   return (
@@ -333,11 +418,12 @@ export default function SurveyDesignContent() {
                       alt={option.text || 'Answer option'} 
                       width={96}
                       height={96}
+                      unoptimized={true}
                       className="rounded-md object-cover w-full h-full"
                     />
                     <button 
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      onClick={() => updateOptionText(option.id, option.text)}
+                      onClick={() => removeImage(option.id)}
                     >
                       <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -369,6 +455,13 @@ export default function SurveyDesignContent() {
               <option>Boost Brand Awareness</option>
               <option>Maximize Ad Recall</option>
               <option>Grow Brand Preference</option>
+              <option>Brand Awareness</option>
+              <option>Ad Recall</option>
+              <option>Message Association</option>
+              <option>Brand Perception</option>
+              <option>Recommendation Intent</option>
+              <option>Purchase Intent</option>
+              <option>Brand Preference</option>
               <option>Motivate Action</option>
             </select>
           </div>
@@ -390,7 +483,10 @@ export default function SurveyDesignContent() {
 
           {/* Action Buttons */}
           <div className="flex space-x-4 mt-6">
-            <button className="flex-1 py-2 bg-red-500 text-white rounded-md font-medium font-['Work_Sans'] hover:bg-red-600 transition-colors flex items-center justify-center">
+            <button 
+              onClick={handleClearForm}
+              className="flex-1 py-2 bg-red-500 text-white rounded-md font-medium font-['Work_Sans'] hover:bg-red-600 transition-colors flex items-center justify-center"
+            >
               <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
@@ -494,6 +590,7 @@ export default function SurveyDesignContent() {
                               alt={option.text} 
                               width={120}
                               height={120}
+                              unoptimized={true}
                               className="object-cover w-full h-full"
                             />
                           </div>
@@ -595,10 +692,13 @@ export default function SurveyDesignContent() {
                       className="cursor-pointer border border-[var(--divider-color)] rounded-md overflow-hidden hover:border-[var(--accent-color)]"
                       onClick={() => selectGif(gif.images.original.url)}
                     >
-                      <img 
+                      <Image 
                         src={gif.images.fixed_height.url} 
-                        alt={gif.title}
+                        alt={gif.title || "GIF"}
+                        width={200}
+                        height={200}
                         className="w-full h-24 object-cover"
+                        unoptimized={true}
                       />
                     </div>
                   ))}

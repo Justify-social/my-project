@@ -8,7 +8,19 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['unavatar.io', 'via.placeholder.com', 'example.com', 'images.unsplash.com'],
+    domains: [
+      'unavatar.io', 
+      'via.placeholder.com', 
+      'example.com', 
+      'images.unsplash.com', 
+      'media.giphy.com',
+      'media0.giphy.com',
+      'media1.giphy.com',
+      'media2.giphy.com',
+      'media3.giphy.com', 
+      'media4.giphy.com',
+      'i.giphy.com'
+    ],
   },
   typescript: {
     // !! WARN !!
