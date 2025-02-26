@@ -45,32 +45,56 @@ interface MetricCardProps {
 
 const MetricCard = ({ icon: Icon, title, value, change, trend, color }: MetricCardProps) => {
   const colorClasses = {
-    blue: 'from-[var(--accent-color)] to-[#0099cc]',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
-    orange: 'from-orange-500 to-orange-600'
+    blue: {
+      bg: 'bg-blue-50',
+      icon: 'text-[var(--accent-color)]',
+      text: 'text-blue-900'
+    },
+    green: {
+      bg: 'bg-green-50',
+      icon: 'text-green-600',
+      text: 'text-green-900'
+    },
+    purple: {
+      bg: 'bg-purple-50',
+      icon: 'text-purple-600',
+      text: 'text-purple-900'
+    },
+    orange: {
+      bg: 'bg-orange-50',
+      icon: 'text-orange-600',
+      text: 'text-orange-900'
+    }
+  };
+
+  const trendIcons = {
+    up: '↑',
+    down: '↓',
+    neutral: '→'
   };
 
   const trendColors = {
-    up: 'text-green-500',
-    down: 'text-red-500',
-    neutral: 'text-[var(--secondary-color)]'
+    up: 'text-green-600',
+    down: 'text-red-600',
+    neutral: 'text-gray-600'
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-xl p-6 text-white shadow-sm hover:shadow-md transition-all duration-300`}>
+    <div className={`${colorClasses[color].bg} rounded-xl p-6 shadow-sm border border-[var(--divider-color)] hover:shadow-md transition-all duration-300`}>
       <div className="flex items-center justify-between mb-4">
-        <Icon className="w-8 h-8 text-white/80" />
+        <div className={`p-3 rounded-lg bg-white`}>
+          <Icon className={`w-6 h-6 ${colorClasses[color].icon}`} />
+        </div>
         <div className={`text-sm font-medium ${trend ? trendColors[trend] : ''}`}>
-          {change && (
-            <span className="bg-white/10 px-2 py-1 rounded">
-              {change}
+          {change && trend && (
+            <span className="bg-white px-2 py-1 rounded-md border border-[var(--divider-color)]">
+              {trendIcons[trend]} {change}
             </span>
           )}
         </div>
       </div>
-      <h3 className="text-lg font-medium text-white/80 mb-1">{title}</h3>
-      <p className="text-3xl font-bold">{value}</p>
+      <h3 className="text-lg font-medium text-[var(--primary-color)] mb-1">{title}</h3>
+      <p className={`text-3xl font-bold ${colorClasses[color].text}`}>{value}</p>
     </div>
   );
 };
@@ -87,23 +111,28 @@ interface ActivityLogProps {
 
 const ActivityLog = ({ activities }: ActivityLogProps) => {
   const typeStyles = {
-    auth: 'bg-blue-100 text-[var(--accent-color)]',
-    system: 'bg-purple-100 text-purple-800',
-    user: 'bg-green-100 text-green-800',
-    error: 'bg-red-100 text-red-800'
+    auth: 'bg-blue-50 text-[var(--accent-color)] border border-blue-200',
+    system: 'bg-purple-50 text-purple-700 border border-purple-200',
+    user: 'bg-green-50 text-green-700 border border-green-200',
+    error: 'bg-red-50 text-red-700 border border-red-200'
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-[var(--divider-color)]">
-      <h3 className="text-xl font-semibold mb-6 flex items-center text-[var(--primary-color)]">
-        <ClockIcon className="w-6 h-6 mr-2 text-[var(--accent-color)]" />
-        Recent Activity
-      </h3>
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-[var(--divider-color)]">
+      <div className="flex items-center mb-6">
+        <div className="bg-[var(--background-color)] p-3 rounded-lg">
+          <ClockIcon className="w-6 h-6 text-[var(--accent-color)]" />
+        </div>
+        <div className="ml-4">
+          <h2 className="text-xl font-semibold text-[var(--primary-color)]">Recent Activity</h2>
+          <p className="text-sm text-[var(--secondary-color)]">Latest system events</p>
+        </div>
+      </div>
       <div className="space-y-4">
         {activities.map((activity) => (
-          <div key={activity.id} className="flex items-center justify-between py-3 border-b border-[var(--divider-color)] last:border-0">
+          <div key={activity.id} className="flex items-center justify-between py-3 px-4 rounded-lg bg-[var(--background-color)] hover:bg-opacity-80 transition-all">
             <div className="flex items-center space-x-4">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${typeStyles[activity.type]}`}>
+              <span className={`px-2 py-1 rounded-md text-xs font-medium ${typeStyles[activity.type]}`}>
                 {activity.type.toUpperCase()}
               </span>
               <div>
@@ -111,7 +140,7 @@ const ActivityLog = ({ activities }: ActivityLogProps) => {
                 <p className="text-sm text-[var(--secondary-color)]">{activity.action}</p>
               </div>
             </div>
-            <span className="text-sm text-[var(--secondary-color)]">
+            <span className="text-sm text-[var(--secondary-color)] bg-white px-2 py-1 rounded-md">
               {new Date(activity.timestamp).toLocaleTimeString()}
             </span>
           </div>
@@ -132,25 +161,30 @@ interface SystemStatusProps {
 
 const SystemStatus = ({ services }: SystemStatusProps) => {
   const statusStyles = {
-    operational: 'bg-green-100 text-green-800',
-    degraded: 'bg-yellow-100 text-yellow-800',
-    down: 'bg-red-100 text-red-800'
+    operational: 'bg-green-50 text-green-700 border border-green-200',
+    degraded: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+    down: 'bg-red-50 text-red-700 border border-red-200'
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-[var(--divider-color)]">
-      <h3 className="text-xl font-semibold mb-6 flex items-center text-[var(--primary-color)]">
-        <ServerIcon className="w-6 h-6 mr-2 text-[var(--accent-color)]" />
-        System Status
-      </h3>
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-[var(--divider-color)]">
+      <div className="flex items-center mb-6">
+        <div className="bg-[var(--background-color)] p-3 rounded-lg">
+          <ServerIcon className="w-6 h-6 text-[var(--accent-color)]" />
+        </div>
+        <div className="ml-4">
+          <h2 className="text-xl font-semibold text-[var(--primary-color)]">System Status</h2>
+          <p className="text-sm text-[var(--secondary-color)]">Current service health</p>
+        </div>
+      </div>
       <div className="space-y-4">
         {services.map((service) => (
-          <div key={service.name} className="flex items-center justify-between py-3 border-b border-[var(--divider-color)] last:border-0">
+          <div key={service.name} className="flex items-center justify-between py-3 px-4 rounded-lg bg-[var(--background-color)] hover:bg-opacity-80 transition-all">
             <div>
               <p className="text-sm font-medium text-[var(--primary-color)]">{service.name}</p>
               <p className="text-sm text-[var(--secondary-color)]">Uptime: {service.uptime}</p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[service.status]}`}>
+            <span className={`px-3 py-1 rounded-md text-sm font-medium ${statusStyles[service.status]}`}>
               {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
             </span>
           </div>
@@ -224,7 +258,7 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-50 text-red-800 rounded-lg p-4">
+        <div className="bg-red-50 text-red-800 rounded-lg p-4 border border-red-200">
           Error loading dashboard: {error.message}
         </div>
       </div>
@@ -234,7 +268,7 @@ export default function AdminDashboard() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-yellow-50 text-yellow-800 rounded-lg p-4">
+        <div className="bg-yellow-50 text-yellow-800 rounded-lg p-4 border border-yellow-200">
           Please log in to access the admin dashboard
         </div>
       </div>
@@ -246,9 +280,9 @@ export default function AdminDashboard() {
   const isSuperAdmin = userRoles.includes('super_admin');
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 bg-white rounded-xl border border-[var(--divider-color)] shadow-sm">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-8 pb-4 border-b border-[var(--divider-color)]">
         <div>
           <h1 className="text-3xl font-bold text-[var(--primary-color)]">Admin Dashboard</h1>
           <p className="text-[var(--secondary-color)] mt-1">
@@ -256,17 +290,17 @@ export default function AdminDashboard() {
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
+          <button className="p-2 bg-[var(--background-color)] rounded-full text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors">
             <BellIcon className="w-6 h-6" />
           </button>
-          <button className="p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
+          <button className="p-2 bg-[var(--background-color)] rounded-full text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors">
             <CogIcon className="w-6 h-6" />
           </button>
         </div>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           icon={UserGroupIcon}
           title="Total Users"
@@ -302,14 +336,14 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <ActivityLog activities={activities} />
         <SystemStatus services={services} />
       </div>
 
       {/* Debug Information */}
-      <details className="bg-white rounded-lg shadow-sm mt-8 border border-[var(--divider-color)]">
-        <summary className="cursor-pointer bg-[var(--background-color)] px-6 py-3 text-lg font-medium text-[var(--primary-color)] hover:bg-opacity-80">
+      <details className="bg-white rounded-xl shadow-sm border border-[var(--divider-color)]">
+        <summary className="cursor-pointer bg-[var(--background-color)] px-6 py-3 text-lg font-medium text-[var(--primary-color)] hover:bg-opacity-80 rounded-t-xl">
           Debug Information
         </summary>
         <div className="p-6">
