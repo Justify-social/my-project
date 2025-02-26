@@ -88,7 +88,7 @@ interface CampaignDetail {
   platform: Platform;
   influencerHandle?: string;
   website?: string;
-  
+
   // Contact Information
   primaryContact: {
     firstName: string;
@@ -123,7 +123,7 @@ interface CampaignDetail {
   purchaseIntent: string;
   brandPerception: string;
   features: string[];
-  
+
   // Audience
   audience: {
     demographics: {
@@ -150,7 +150,7 @@ interface CampaignDetail {
     requirement: string;
     description?: string;
   }>;
-  
+
   // Status and timestamps
   createdAt: string;
   updatedAt: string;
@@ -246,9 +246,9 @@ const MetricCard = ({ title, value, icon: Icon, trend = "none", subtext, format 
 
   const TrendIcon = trendConfig[trend].icon;
   const trendColorClass = trendConfig[trend].textColor;
-  
+
   return (
-    <motion.div
+    <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-5 border border-gray-200"
@@ -256,7 +256,7 @@ const MetricCard = ({ title, value, icon: Icon, trend = "none", subtext, format 
       <div className="flex items-start justify-between mb-4">
         <div className="bg-blue-50 p-2.5 rounded-lg">
           <Icon className="w-5 h-5 text-blue-500" />
-        </div>
+      </div>
         
         {trend !== "none" && TrendIcon && (
           <span className={`flex items-center text-sm font-medium ${trendColorClass}`}>
@@ -303,7 +303,7 @@ const DataCard: React.FC<DataCardProps> = ({
       <div className="flex items-center">
         <div className="bg-blue-50 p-2 rounded-full mr-3">
           <Icon className="h-5 w-5 text-blue-500" />
-        </div>
+    </div>
         <div>
           <h3 className="font-semibold text-gray-900 text-base">{title}</h3>
           {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
@@ -315,8 +315,8 @@ const DataCard: React.FC<DataCardProps> = ({
         </div>
       )}
     </div>
-    {children}
-  </div>
+      {children}
+    </div>
 );
 
 // Add DataRow component before the main CampaignDetail component
@@ -348,8 +348,8 @@ const DataRow = ({ label, value, icon: Icon, tooltip, featured = false }: DataRo
             <InformationCircleIcon className="w-4 h-4 inline" />
           </span>
         )}
-      </span>
-    </div>
+    </span>
+  </div>
     <div className={`text-sm ${featured ? 'font-semibold text-blue-700' : 'font-medium text-gray-800'}`}>
       {value}
     </div>
@@ -462,34 +462,34 @@ const CreativeAssetsGallery: React.FC<{ assets: CampaignDetail['creativeAssets']
       {assets && assets.length > 0 ? (
         assets.map((asset) => (
           <div key={asset.name} className="relative group">
-            <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-100">
-              {asset.type === 'image' ? (
-                <Image
-                  src={asset.url}
+          <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-100">
+            {asset.type === 'image' ? (
+              <Image
+                src={asset.url}
                   alt={asset.name}
-                  fill
-                  className="object-cover"
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <video
+                  src={asset.url}
+                  className="w-full h-full object-cover"
+                  controls
                 />
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <video
-                    src={asset.url}
-                    className="w-full h-full object-cover"
-                    controls
-                  />
-                </div>
-              )}
-            </div>
-            <div className="mt-2 space-y-1">
+              </div>
+            )}
+          </div>
+          <div className="mt-2 space-y-1">
               <h4 className="font-medium text-gray-900">{asset.name}</h4>
               {asset.size && (
                 <p className="text-sm text-gray-600">Size: {asset.size} KB</p>
               )}
               {asset.duration && (
                 <p className="text-sm text-gray-600">Duration: {asset.duration} seconds</p>
-              )}
-            </div>
+            )}
           </div>
+        </div>
         ))
       ) : (
         <div className="col-span-3 p-8 text-center bg-gray-50 rounded-lg">
@@ -520,9 +520,9 @@ const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign })
           <div className="flex flex-wrap gap-2">
             {campaign.features && campaign.features.length > 0 ? (
               campaign.features.map((feature, index) => (
-                <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                  {feature}
-                </span>
+              <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                {feature}
+              </span>
               ))
             ) : (
               <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
@@ -577,9 +577,9 @@ const CreativeRequirementsSection: React.FC<{ requirements: CampaignDetail['crea
       {requirements && requirements.length > 0 ? (
         requirements.map((req) => (
           <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start">
-            <DocumentTextIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
-            <span className="text-gray-700">{req.requirement}</span>
-          </div>
+          <DocumentTextIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
+          <span className="text-gray-700">{req.requirement}</span>
+        </div>
         ))
       ) : (
         <div className="p-3 bg-gray-50 rounded-lg">
@@ -1217,7 +1217,7 @@ export default function CampaignDetail() {
       try {
         setLoading(true);
         console.log(`Fetching campaign data for ID: ${params.id}`);
-        
+
         const response = await fetch(`/api/campaigns/${params.id}`);
         
         if (!response.ok) {
@@ -1506,7 +1506,7 @@ export default function CampaignDetail() {
   }
   
   // Component safety testing
-  if (data) {
+    if (data) {
     ComponentSafetyTester.testBatchProps('MetricCard - Dates', {
       'startDate': data.startDate,
       'endDate': data.endDate
@@ -1558,7 +1558,7 @@ export default function CampaignDetail() {
           >
             Back to Campaigns
           </button>
-        </div>
+          </div>
       </div>
     );
   }
@@ -1576,25 +1576,25 @@ export default function CampaignDetail() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.push('/campaigns')}
+            <button
+              onClick={() => router.push('/campaigns')}
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
-              >
+            >
                 <ArrowLeftIcon className="h-5 w-5" />
-              </button>
+            </button>
               <h1 className="text-xl font-semibold text-gray-900">
                 Campaign Overview
               </h1>
             </div>
             <div>
-              <button 
+            <button
                 className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm 
                 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
+            >
                 Save all drafts
-              </button>
-            </div>
+            </button>
           </div>
+        </div>
         </div>
       </div>
 
@@ -1630,7 +1630,7 @@ export default function CampaignDetail() {
         {/* Two-column layout for key info */}
         <div className="grid grid-cols-2 gap-8 mb-6">
           {/* Date information */}
-          <div>
+            <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">Start Date</h3>
             <div className="flex items-center">
               <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
@@ -1700,12 +1700,12 @@ export default function CampaignDetail() {
                 <button className="p-1 rounded text-red-500 hover:bg-red-50">
                   <XCircleIcon className="h-4 w-4" />
                 </button>
-              </div>
-            </div>
+                </div>
+                  </div>
           ) : (
             <p className="text-sm text-gray-500">No influencer selected</p>
-          )}
-        </div>
+                )}
+              </div>
 
         {/* Platform */}
         <div className="mb-6 pb-5 border-b border-gray-200">
@@ -1716,7 +1716,7 @@ export default function CampaignDetail() {
             </div>
             <span className="text-sm font-medium">{data?.platform || 'Not specified'}</span>
           </div>
-        </div>
+          </div>
 
         {/* Primary KPI */}
         <div className="mb-6 pb-5 border-b border-gray-200">
@@ -1727,9 +1727,9 @@ export default function CampaignDetail() {
                 <ChartBarIcon className="h-4 w-4 text-blue-600" />
               </div>
               <span className="text-sm font-medium text-blue-700">{safe(data?.primaryKPI, 'Not set')}</span>
+              </div>
             </div>
-          </div>
-          
+
           {data?.secondaryKPIs && data.secondaryKPIs.length > 0 && (
             <div className="mt-4">
               <h3 className="text-sm font-medium text-gray-500 mb-2">Secondary KPIs</h3>
@@ -1767,8 +1767,8 @@ export default function CampaignDetail() {
               </div>
             ) : (
               <p className="text-sm text-gray-500">Not specified</p>
-            )}
-          </div>
+                )}
+              </div>
           
           <h3 className="text-lg font-medium text-gray-900 mb-3">Gender</h3>
           <div className="flex flex-wrap gap-2 mb-4">
@@ -1799,15 +1799,15 @@ export default function CampaignDetail() {
             <h2 className="text-lg font-medium text-gray-900">Key Campaign Features</h2>
             <button className="text-sm text-blue-600 hover:text-blue-700">See all</button>
           </div>
-          <div className="space-y-2">
+              <div className="space-y-2">
             {data?.features && data.features.length > 0 ? (
               data.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                   <CheckCircleIcon className="h-5 w-5 text-green-500" />
                   <span className="text-sm font-medium">{feature}</span>
                 </div>
-              ))
-            ) : (
+                  ))
+                ) : (
               <p className="text-sm text-gray-500 italic">No features selected</p>
             )}
           </div>
@@ -1863,17 +1863,17 @@ export default function CampaignDetail() {
                   Add Assets
                 </button>
               </div>
-            )}
+                )}
+              </div>
           </div>
-        </div>
 
         {/* Brand Lift Results - Mocked from Figma */}
         <div className="mb-6 pb-5 border-b border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-medium text-gray-900">Brand Lift Results</h2>
             <button className="text-sm text-blue-600 hover:text-blue-700">See all</button>
-          </div>
-          
+        </div>
+
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-sm text-gray-500 mb-2">Brand Awareness Lift</h3>
@@ -2028,4 +2028,4 @@ export default function CampaignDetail() {
       </div>
     </div>
   );
-}
+} 

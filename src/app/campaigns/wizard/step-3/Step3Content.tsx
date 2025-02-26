@@ -309,8 +309,8 @@ function FormContent() {
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                           </div>
-                          <button
-                            type="button"
+              <button 
+                type="button"
                             className="absolute inset-y-0 right-0 pr-3 flex items-center"
                             onClick={() => {
                               const input = document.getElementById('locationInput') as HTMLInputElement;
@@ -324,9 +324,9 @@ function FormContent() {
                             <div className="bg-blue-500 rounded-full p-1">
                               <PlusIcon className="h-3 w-3 text-white" />
                             </div>
-                          </button>
-                        </div>
-                        
+              </button>
+            </div>
+
                         {values.location.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-2">
                             {values.location.map((loc, index) => (
@@ -520,9 +520,9 @@ function FormContent() {
                         />
                       </div>
                     )}
-                    <ErrorMessage 
+                <ErrorMessage
                       name="gender" 
-                      component="div" 
+                  component="div"
                       className="mt-1 text-sm text-red-600" 
                     />
                   </div>
@@ -569,8 +569,8 @@ function FormContent() {
                         </div>
                       </button>
                     </div>
-                  </div>
-                  
+              </div>
+
                   <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">Suggested Questions</h3>
                     <div className="flex flex-wrap gap-2">
@@ -650,8 +650,8 @@ function FormContent() {
                           </div>
                         ))}
                       </div>
-                    </div>
-                    
+              </div>
+
                     {values.languages.length > 0 && (
                       <div className="mt-3">
                         <div className="flex flex-wrap gap-2">
@@ -691,7 +691,7 @@ function FormContent() {
                   {showAdvanced && (
                     <div className="mt-4 space-y-6">
                       {/* Education Level */}
-                      <div>
+              <div>
                         <div className="mb-2">
                           <label className="block text-sm font-medium text-gray-700">
                             Education Level
@@ -768,8 +768,8 @@ function FormContent() {
                           </div>
                           <div className="mt-2 text-xs text-gray-500">
                             <p>Examples: Marketing Manager, Software Engineer, Financial Analyst</p>
-                          </div>
-                          
+              </div>
+
                           {values.jobTitles.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               {values.jobTitles.map((title, index) => (
@@ -778,8 +778,8 @@ function FormContent() {
                                   className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white"
                                 >
                                   <span>{title}</span>
-                                  <button
-                                    type="button"
+                <button
+                  type="button"
                                     className="ml-2 text-gray-400 hover:text-gray-500"
                                     onClick={() => {
                                       const newJobTitles = [...values.jobTitles];
@@ -788,16 +788,16 @@ function FormContent() {
                                     }}
                                   >
                                     <XMarkIcon className="h-5 w-5" />
-                                  </button>
+                </button>
                                 </span>
                               ))}
                             </div>
                           )}
                         </div>
-                      </div>
-                      
+              </div>
+
                       {/* Income Level */}
-                      <div>
+              <div>
                         <div className="flex justify-between items-center mb-2">
                           <label className="block text-sm font-medium text-gray-700">
                             Income Level
@@ -857,7 +857,7 @@ function FormContent() {
                                 <span>$20k</span>
                                 <span>$50k</span>
                                 <span>$100k+</span>
-                              </div>
+              </div>
                             </div>
                             <div className="mt-2 text-right font-medium text-sm text-gray-700">
                               {values.incomeLevel >= 100000 ? 
@@ -948,20 +948,20 @@ function FormContent() {
                 
                 {/* Add bottom padding to prevent progress bar overlap */}
                 <div className="pb-4"></div>
-              </Form>
-              
-              <ProgressBar
-                currentStep={3}
-                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-                onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
-                onNext={submitForm}
+            </Form>
+
+            <ProgressBar
+              currentStep={3}
+              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+              onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
+              onNext={submitForm}
                 onSaveDraft={() => handleSaveDraft(values)}
-                disableNext={!isValid || isSaving}
+              disableNext={!isValid || isSaving}
                 isFormValid={isValid}
                 isDirty={dirty}
                 isSaving={isSaving}
-              />
-            </>
+            />
+          </>
           );
         }}
       </Formik>
@@ -971,7 +971,7 @@ function FormContent() {
 
 export default function Step3Content() {
   const [mounted, setMounted] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);

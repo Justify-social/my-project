@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { CheckCircleIcon, ArrowLeftIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
+import { 
+  CheckCircleIcon, 
+  ArrowLeftIcon, 
+  DocumentTextIcon,
+  ChevronRightIcon
+} from '@heroicons/react/24/outline';
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
+import ErrorFallback from '@/components/ErrorFallback';
 
 function SubmissionContent() {
   const router = useRouter();
@@ -23,15 +30,24 @@ function SubmissionContent() {
       }
 
       try {
-        const response = await fetch(`/api/campaigns/${campaignId}`);
-        const data = await response.json();
-
+        const response = await fetch(`/api/campaigns?id=${campaignId}`);
+        
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch campaign');
+          throw new Error(`Failed to fetch campaign: ${response.status} ${response.statusText}`);
         }
+        
+        const data = await response.json();
+        console.log("API Response:", data);
 
-        setCampaign(data.campaign);
+        if (data.campaign) {
+          setCampaign(data.campaign);
+        } else if (data.data) {
+          setCampaign(data.data);
+        } else {
+          setCampaign(data);
+        }
       } catch (err) {
+        console.error("Error fetching campaign:", err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
@@ -43,21 +59,42 @@ function SubmissionContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Loading submission details...</div>
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+        <p className="ml-2">Loading campaign details...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-50 p-6 rounded-lg">
-          <h3 className="text-red-800 font-medium">Error</h3>
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 min-h-screen">
+        <div className="bg-red-50 p-6 rounded-lg border border-red-200">
+          <h3 className="text-red-800 font-medium text-lg">Error Loading Campaign</h3>
           <p className="text-red-600 mt-2">{error}</p>
           <button
             onClick={() => router.push('/campaigns')}
-            className="mt-4 text-red-700 hover:text-red-600 font-medium flex items-center"
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center"
+          >
+            <ArrowLeftIcon className="w-4 h-4 mr-2" />
+            Return to Campaigns
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!campaign) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 min-h-screen">
+        <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+          <h3 className="text-yellow-800 font-medium text-lg">Campaign Data Missing</h3>
+          <p className="text-yellow-700 mt-2">
+            Unable to load campaign data. The API response did not contain the expected campaign information.
+          </p>
+          <button
+            onClick={() => router.push('/campaigns')}
+            className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 flex items-center"
           >
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
             Return to Campaigns
@@ -68,117 +105,102 @@ function SubmissionContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
-      >
-        {/* Success Header */}
-        <div className="text-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6"
-          >
-            <CheckCircleIcon className="w-10 h-10 text-green-500" />
-          </motion.div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Campaign Successfully Submitted!
-          </h1>
-          <p className="text-gray-600">
-            Your campaign has been submitted and is now pending review.
-          </p>
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-white min-h-screen">
+      {/* Success Message - Simplified */}
+      <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm mb-12 text-center">
+        <div className="mx-auto w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircleIcon className="h-12 w-12 text-[#00BFFF]" />
         </div>
+        
+        <h2 className="text-2xl font-bold text-[#333333] mb-3 font-['Sora']">
+          Campaign successfully submitted!
+        </h2>
+      </div>
 
-        {/* Campaign Summary */}
-        <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-          <div className="flex items-center justify-between border-b pb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Campaign Summary</h2>
-            <span className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-              {campaign.submissionStatus}
-            </span>
+      {/* Next Steps */}
+      <div className="mb-12">
+        <h3 className="text-xl font-semibold text-[#333333] mb-6 font-['Sora']">Next Steps:</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Set Up Brand Lift Study */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D1D5DB] flex flex-col h-full">
+            <div className="flex-1">
+              <h3 className="font-semibold text-[#333333] text-lg mb-2 font-['Sora']">Set Up Brand Lift Study</h3>
+              <p className="text-[#4A5568] text-sm mb-6 font-['Work Sans']">
+                Measure how your campaign impacts brand awareness and consumer behavior with a Brand Lift Study.
+              </p>
+            </div>
+            <Link 
+              href="/brand-lift"
+              className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium"
+            >
+              <span>Set Up</span>
+              <ChevronRightIcon className="h-4 w-4 ml-1" />
+            </Link>
           </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Campaign Details</h3>
-              <div className="space-y-2">
-                <p><span className="text-gray-600">Name:</span> {campaign.campaignName}</p>
-                <p><span className="text-gray-600">Platform:</span> {campaign.platform}</p>
-                <p>
-                  <span className="text-gray-600">Duration:</span>{' '}
-                  {new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}
-                </p>
-              </div>
+          
+          {/* Start Creative Asset Testing */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D1D5DB] flex flex-col h-full">
+            <div className="flex-1">
+              <h3 className="font-semibold text-[#333333] text-lg mb-2 font-['Sora']">Start Creative Asset Testing</h3>
+              <p className="text-[#4A5568] text-sm mb-6 font-['Work Sans']">
+                Test your creative assets to see how they perform and resonate with your audience.
+              </p>
             </div>
-
-            <div>
-              <h3 className="font-medium text-gray-700 mb-2">Budget Information</h3>
-              <div className="space-y-2">
-                <p>
-                  <span className="text-gray-600">Total Budget:</span>{' '}
-                  {campaign.currency} {campaign.totalBudget?.toLocaleString()}
-                </p>
-                <p>
-                  <span className="text-gray-600">Social Media Budget:</span>{' '}
-                  {campaign.currency} {campaign.socialMediaBudget?.toLocaleString()}
-                </p>
-              </div>
-            </div>
+            <Link 
+              href="/creative-testing"
+              className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium"
+            >
+              <span>Start Testing</span>
+              <ChevronRightIcon className="h-4 w-4 ml-1" />
+            </Link>
           </div>
-
-          <div className="mt-6">
-            <h3 className="font-medium text-gray-700 mb-2">Primary Contact</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p>{campaign.primaryContact?.firstName} {campaign.primaryContact?.surname}</p>
-              <p className="text-blue-600">{campaign.primaryContact?.email}</p>
-              <p className="text-gray-500">{campaign.primaryContact?.position}</p>
+          
+          {/* View Campaign Dashboard */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D1D5DB] flex flex-col h-full">
+            <div className="flex-1">
+              <h3 className="font-semibold text-[#333333] text-lg mb-2 font-['Sora']">View Campaign Dashboard</h3>
+              <p className="text-[#4A5568] text-sm mb-6 font-['Work Sans']">
+                Access detailed insights and performance metrics for your campaign.
+              </p>
             </div>
+            <Link 
+              href={`/campaigns/${campaignId}`}
+              className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium"
+            >
+              <span>View Campaign</span>
+              <ChevronRightIcon className="h-4 w-4 ml-1" />
+            </Link>
           </div>
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-between items-center pt-6">
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4 mr-2" />
-            Back to Campaigns
-          </button>
+      {/* Action Buttons */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => router.push('/campaigns')}
+          className="flex items-center text-[#4A5568] hover:text-[#333333] font-medium font-['Work Sans']"
+        >
+          <ArrowLeftIcon className="w-4 h-4 mr-2" />
+          Back to Campaigns
+        </button>
 
-          <button
-            onClick={() => router.push(`/campaigns/${campaignId}`)}
-            className="flex items-center bg-blue-600 text-white px-6 py-2 rounded-lg 
-                     hover:bg-blue-700 transition-colors"
-          >
-            <DocumentTextIcon className="w-5 h-5 mr-2" />
-            View Full Details
-          </button>
-        </div>
-
-        {/* Debug Information */}
-        <details className="mt-8">
-          <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
-            Debug Information
-          </summary>
-          <pre className="mt-2 p-4 bg-gray-100 rounded-lg overflow-auto text-sm">
-            {JSON.stringify(campaign, null, 2)}
-          </pre>
-        </details>
-      </motion.div>
+        <button
+          onClick={() => router.push(`/campaigns/${campaignId}`)}
+          className="flex items-center bg-[#00BFFF] text-white px-5 py-2 rounded-md hover:bg-blue-600 font-['Work Sans']"
+        >
+          <DocumentTextIcon className="w-5 h-5 mr-2" />
+          View Full Details
+        </button>
+      </div>
     </div>
   );
 }
 
-export const dynamic = "force-dynamic";
-
-export default function Page() {
+export default function WrappedSubmissionContent() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <ErrorBoundary fallback={<ErrorFallback />}>
       <SubmissionContent />
-    </Suspense>
+    </ErrorBoundary>
   );
 }

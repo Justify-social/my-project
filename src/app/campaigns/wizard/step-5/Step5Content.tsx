@@ -393,10 +393,10 @@ function Step5Content() {
 
   // Handle final submission
   const handleSubmit = async () => {
-      try {
-        setIsSubmitting(true);
-        const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
-          method: 'POST',
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -408,13 +408,13 @@ function Step5Content() {
       }
 
       toast.success("Campaign submitted successfully!");
-      router.push("/campaigns");
-      } catch (error) {
+      router.push(`/campaigns/wizard/submission?id=${campaignId}`);
+    } catch (error) {
       console.error("Error submitting campaign:", error);
       toast.error(error instanceof Error ? error.message : "Failed to submit campaign");
-      } finally {
-        setIsSubmitting(false);
-      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handle save as draft
