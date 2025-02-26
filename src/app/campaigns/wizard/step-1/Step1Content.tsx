@@ -9,6 +9,21 @@ import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { 
+  CalendarIcon, 
+  InformationCircleIcon,
+  ChevronDownIcon,
+  UserCircleIcon,
+  CurrencyDollarIcon,
+  GlobeAltIcon,
+  PlusCircleIcon,
+  BriefcaseIcon,
+  ClockIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  BuildingOfficeIcon
+} from "@heroicons/react/24/outline";
+
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
@@ -20,7 +35,13 @@ const OverviewSchema = disableValidation
         .max(3000, "Maximum 3000 characters")
         .required("Business goal is required"),
       startDate: Yup.string().required("Start date is required"),
-      endDate: Yup.string().required("End date is required"),
+      endDate: Yup.string()
+        .required("End date is required")
+        .test('is-after-start-date', 'End date must be after start date', function(endDate) {
+          const { startDate } = this.parent;
+          if (!startDate || !endDate) return true; // Skip validation if dates aren't provided
+          return new Date(endDate) > new Date(startDate);
+        }),
       timeZone: Yup.string().required("Time zone is required"),
       primaryContact: Yup.object().shape({
         firstName: Yup.string().required("First name is required"),
@@ -99,13 +120,28 @@ interface FormValues {
   influencerHandle: string;
 }
 
-// Define the initial values
-const initialValues = {
+// Add this FormData interface to match what's defined in the wizard context
+interface FormData {
+  name: string;
+  businessGoal: string;
+  startDate: string;
+  endDate: string;
+  timeZone: string;
+  currency: string;
+  totalBudget: string | number;
+  socialMediaBudget: string | number;
+  platform: string;
+  influencerHandle: string;
+  [key: string]: any; // Allow for additional properties for extensibility
+}
+
+// Define default values
+const defaultFormValues: FormValues = {
   name: '',
   businessGoal: '',
   startDate: '',
   endDate: '',
-  timeZone: '',
+  timeZone: 'UTC',
   primaryContact: {
     firstName: '',
     surname: '',
@@ -119,11 +155,91 @@ const initialValues = {
     position: '',
   },
   currency: '',
-  totalBudget: '',
-  socialMediaBudget: '',
+  totalBudget: 0,
+  socialMediaBudget: 0,
   platform: '',
   influencerHandle: '',
 };
+
+// Custom Field Component for styled inputs
+const StyledField = ({ label, name, type = "text", as, children, required = false, icon, ...props }: any) => {
+  return (
+    <div className="mb-5">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+        {required && <span className="text-blue-500 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-2.5 text-gray-400">
+            {icon}
+          </div>
+        )}
+        {as ? (
+          <Field
+            as={as}
+            id={name}
+            name={name}
+            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white`}
+            {...props}
+          >
+            {children}
+          </Field>
+        ) : (
+          <Field
+            type={type}
+            id={name}
+            name={name}
+            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white`}
+            {...props}
+          />
+        )}
+        {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
+        {type === "date" && !icon && (
+          <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+        )}
+        {as === "select" && (
+          <ChevronDownIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
+        )}
+      </div>
+      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
+    </div>
+  );
+};
+
+// Custom date field component to handle the calendar icon issue
+const DateField = ({ label, name, required = false, ...props }: any) => {
+  return (
+    <div className="mb-5">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+        {required && <span className="text-blue-500 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        <div className="absolute left-3 top-2.5 text-gray-400">
+          <CalendarIcon className="w-5 h-5" />
+        </div>
+        <Field
+          type="date"
+          id={name}
+          name={name}
+          className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:top-0 [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:bottom-0 [&::-webkit-calendar-picker-indicator]:left-0 [&::-webkit-calendar-picker-indicator]:appearance-none"
+          placeholder="dd/mm/yyyy"
+          {...props}
+        />
+      </div>
+      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
+    </div>
+  );
+};
+
+// Define extended wizard data interface
+interface WizardData {
+  basic?: {
+    campaignName?: string;
+    description?: string;
+  };
+}
 
 // Separate the search params logic into its own component
 function FormContent() {
@@ -141,12 +257,10 @@ function FormContent() {
   
   const { 
     formData,
-    setFormData, 
-    isEdit,
-    setIsEdit, 
+    updateFormData,
     data, 
     isEditing, 
-    campaignData 
+    campaignData
   } = wizardContext;
 
   // Get campaign ID from search params
@@ -163,91 +277,66 @@ function FormContent() {
     }
   };
 
-  // Define default values first
-  const defaultValues: FormValues = {
-    name: '',
-    businessGoal: '',
-    startDate: '',
-    endDate: '',
-    timeZone: 'UTC',
-    primaryContact: {
-      firstName: '',
-      surname: '',
-      email: '',
-      position: '',
-    },
-    secondaryContact: {
-      firstName: '',
-      surname: '',
-      email: '',
-      position: '',
-    },
-    currency: '',
-    totalBudget: 0,
-    socialMediaBudget: 0,
-    platform: '',
-    influencerHandle: '',
-  };
-
   // Create initial values using the defaultValues and existing data
   const initialValues = useMemo(() => {
     if (isEditing && campaignData) {
       return {
-        name: campaignData.campaignName || defaultValues.name,
-        businessGoal: campaignData.description || defaultValues.businessGoal,
-        startDate: formatDate(campaignData.startDate) || defaultValues.startDate,
-        endDate: formatDate(campaignData.endDate) || defaultValues.endDate,
-        timeZone: campaignData.timeZone || defaultValues.timeZone,
+        name: campaignData.campaignName || defaultFormValues.name,
+        businessGoal: campaignData.description || defaultFormValues.businessGoal,
+        startDate: formatDate(campaignData.startDate) || defaultFormValues.startDate,
+        endDate: formatDate(campaignData.endDate) || defaultFormValues.endDate,
+        timeZone: campaignData.timeZone || defaultFormValues.timeZone,
         primaryContact: {
-          firstName: campaignData.primaryContact?.firstName || defaultValues.primaryContact.firstName,
-          surname: campaignData.primaryContact?.surname || defaultValues.primaryContact.surname,
-          email: campaignData.primaryContact?.email || defaultValues.primaryContact.email,
-          position: campaignData.primaryContact?.position || defaultValues.primaryContact.position,
+          firstName: campaignData.primaryContact?.firstName || defaultFormValues.primaryContact.firstName,
+          surname: campaignData.primaryContact?.surname || defaultFormValues.primaryContact.surname,
+          email: campaignData.primaryContact?.email || defaultFormValues.primaryContact.email,
+          position: campaignData.primaryContact?.position || defaultFormValues.primaryContact.position,
         },
         secondaryContact: {
-          firstName: campaignData.secondaryContact?.firstName || defaultValues.secondaryContact.firstName,
-          surname: campaignData.secondaryContact?.surname || defaultValues.secondaryContact.surname,
-          email: campaignData.secondaryContact?.email || defaultValues.secondaryContact.email,
-          position: campaignData.secondaryContact?.position || defaultValues.secondaryContact.position,
+          firstName: campaignData.secondaryContact?.firstName || defaultFormValues.secondaryContact.firstName,
+          surname: campaignData.secondaryContact?.surname || defaultFormValues.secondaryContact.surname,
+          email: campaignData.secondaryContact?.email || defaultFormValues.secondaryContact.email,
+          position: campaignData.secondaryContact?.position || defaultFormValues.secondaryContact.position,
         },
-        currency: campaignData.currency || defaultValues.currency,
-        totalBudget: campaignData.totalBudget || defaultValues.totalBudget,
-        socialMediaBudget: campaignData.socialMediaBudget || defaultValues.socialMediaBudget,
-        platform: campaignData.platform || defaultValues.platform,
-        influencerHandle: campaignData.influencerHandle || defaultValues.influencerHandle,
+        currency: campaignData.currency || defaultFormValues.currency,
+        totalBudget: campaignData.totalBudget || defaultFormValues.totalBudget,
+        socialMediaBudget: campaignData.socialMediaBudget || defaultFormValues.socialMediaBudget,
+        platform: campaignData.platform || defaultFormValues.platform,
+        influencerHandle: campaignData.influencerHandle || defaultFormValues.influencerHandle,
       };
     }
 
     // If not editing, check for basic data
-    if (data?.basic) {
+    if (data && (data as WizardData).basic) {
+      const wizardData = data as WizardData;
       return {
-        name: data.basic.campaignName || defaultValues.name,
-        businessGoal: data.basic.description || defaultValues.businessGoal,
-        startDate: defaultValues.startDate,
-        endDate: defaultValues.endDate,
-        timeZone: defaultValues.timeZone,
+        name: wizardData.basic?.campaignName || defaultFormValues.name,
+        businessGoal: wizardData.basic?.description || defaultFormValues.businessGoal,
+        startDate: defaultFormValues.startDate,
+        endDate: defaultFormValues.endDate,
+        timeZone: defaultFormValues.timeZone,
         primaryContact: {
-          firstName: defaultValues.primaryContact.firstName,
-          surname: defaultValues.primaryContact.surname,
-          email: defaultValues.primaryContact.email,
-          position: defaultValues.primaryContact.position,
+          firstName: defaultFormValues.primaryContact.firstName,
+          surname: defaultFormValues.primaryContact.surname,
+          email: defaultFormValues.primaryContact.email,
+          position: defaultFormValues.primaryContact.position,
         },
         secondaryContact: {
-          firstName: defaultValues.secondaryContact.firstName,
-          surname: defaultValues.secondaryContact.surname,
-          email: defaultValues.secondaryContact.email,
-          position: defaultValues.secondaryContact.position,
+          firstName: defaultFormValues.secondaryContact.firstName,
+          surname: defaultFormValues.secondaryContact.surname,
+          email: defaultFormValues.secondaryContact.email,
+          position: defaultFormValues.secondaryContact.position,
         },
-        currency: defaultValues.currency,
-        totalBudget: defaultValues.totalBudget,
-        socialMediaBudget: defaultValues.socialMediaBudget,
-        platform: defaultValues.platform,
-        influencerHandle: defaultValues.influencerHandle,
+        currency: defaultFormValues.currency,
+        totalBudget: defaultFormValues.totalBudget,
+        socialMediaBudget: defaultFormValues.socialMediaBudget,
+        platform: defaultFormValues.platform,
+        influencerHandle: defaultFormValues.influencerHandle,
       };
     }
 
-    return defaultValues;
-  }, [isEditing, campaignData, data, defaultValues]);
+    return defaultFormValues;
+  }, [isEditing, campaignData, data]);
 
   // Load campaign data when ID changes
   useEffect(() => {
@@ -266,9 +355,8 @@ function FormContent() {
         }
 
         // Make sure we're setting the complete campaign data
-        if (setFormData && setIsEdit) {
-          setFormData(result.data || result.campaign);
-          setIsEdit(true);
+        if (updateFormData) {
+          updateFormData(result.data || result.campaign);
           toast.success('Campaign data loaded');
         }
       } catch (error) {
@@ -281,7 +369,7 @@ function FormContent() {
     };
 
     loadCampaignData();
-  }, [campaignId, setFormData, setIsEdit]);
+  }, [campaignId, updateFormData]);
 
   const handleSubmit = async (values: FormValues) => {
     try {
@@ -308,14 +396,12 @@ function FormContent() {
         throw new Error(result.error || `Failed to ${isEditing ? 'update' : 'create'} campaign`);
       }
 
-      // Update form data with proper type checking
-      if (setFormData) {
-        setFormData({
-          ...formData,
-          campaignId: result.id || campaignId,
-          step1: values
-        });
-      }
+      // Update form data with the new values
+      updateFormData({
+        ...formData,
+        step1: values,
+        campaignId: result.id || campaignId
+      });
 
       toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
       router.push(`/campaigns/wizard/step-2?id=${result.id || campaignId}`);
@@ -355,14 +441,12 @@ function FormContent() {
         throw new Error(result.error || 'Failed to save draft');
       }
 
-      // Update form data with proper type checking
-      if (setFormData) {
-        setFormData({
-          ...formData,
-          overview: values,
-          id: result.id || campaignId
-        });
-      }
+      // Update form data with the new values
+      updateFormData({
+        ...formData,
+        overview: values,
+        id: result.id || campaignId
+      });
 
       toast.success('Draft saved successfully');
     } catch (error) {
@@ -381,7 +465,7 @@ function FormContent() {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+      <div className="p-6 bg-red-50 border border-red-200 rounded-md">
         <h3 className="text-red-800 font-semibold">Error</h3>
         <p className="text-red-600">{error}</p>
         <button
@@ -395,8 +479,12 @@ function FormContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 pb-20">
-      <Header currentStep={1} totalSteps={5} />
+    <div className="w-full max-w-6xl mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
+        <p className="text-gray-500">Complete all required fields to create your campaign</p>
+      </div>
+
       <Formik
         initialValues={initialValues}
         validationSchema={OverviewSchema}
@@ -420,281 +508,247 @@ function FormContent() {
 
           return (
             <>
-              <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">Step 1: Campaign Details</h1>
-                <button 
-                  type="button"
-                  onClick={() => handleSaveDraft(values)}
-                  className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 flex items-center"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <LoadingSpinner className="w-4 h-4 mr-2" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Draft'
-                  )}
-                </button>
-              </div>
-
               <Form className="space-y-8">
-                {/* Campaign Name */}
-                <div>
-                  <label htmlFor="name" className="block font-semibold">
-                    Campaign Name
-                  </label>
-                  <Field
-                    id="name"
+                {/* Campaign Details */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <BriefcaseIcon className="w-5 h-5 mr-2 text-blue-500" />
+                    Campaign Details
+                  </h2>
+                  
+                  <StyledField
+                    label="Campaign Name"
                     name="name"
-                    placeholder="Campaign Name"
-                    className="w-full p-2 border rounded"
+                    placeholder="Enter your campaign name"
+                    required
                   />
-                  <ErrorMessage name="name" component="div" className="text-red-600 text-sm" />
-                </div>
-                {/* Business Goal */}
-                <div>
-                  <label htmlFor="businessGoal" className="block font-semibold">
-                    What business goal does this campaign support?
-                  </label>
-                  <Field
-                    as="textarea"
-                    id="businessGoal"
+
+                  <StyledField
+                    label="What business goals does this campaign support?"
                     name="businessGoal"
+                    as="textarea"
+                    rows={4}
                     placeholder="e.g. Increase market share by 5% in the next quarter. Launch a new product line targeting millennials."
-                    className="w-full p-2 border rounded"
-                    maxLength={3000}
+                    required
                   />
-                  <ErrorMessage name="businessGoal" component="div" className="text-red-600 text-sm" />
-                </div>
-                {/* Date & Time */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label htmlFor="startDate" className="block font-semibold">
-                      Start Date
-                    </label>
-                    <Field id="startDate" name="startDate" type="date" className="w-full p-2 border rounded" />
-                    <ErrorMessage name="startDate" component="div" className="text-red-600 text-sm" />
-                  </div>
-                  <div>
-                    <label htmlFor="endDate" className="block font-semibold">
-                      End Date
-                    </label>
-                    <Field id="endDate" name="endDate" type="date" className="w-full p-2 border rounded" />
-                    <ErrorMessage name="endDate" component="div" className="text-red-600 text-sm" />
-                  </div>
-                  <div>
-                    <label htmlFor="timeZone" className="block font-semibold">
-                      Select from common time zones
-                    </label>
-                    <Field as="select" id="timeZone" name="timeZone" className="w-full p-2 border rounded">
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <DateField
+                      label="Start Date"
+                      name="startDate"
+                      required
+                    />
+                    <DateField
+                      label="End Date"
+                      name="endDate"
+                      required
+                    />
+                    <StyledField
+                      label="Time Zone"
+                      name="timeZone"
+                      as="select"
+                      required
+                      icon={<ClockIcon className="w-5 h-5" />}
+                    >
+                      <option value="">Select time zone</option>
                       <option value="UTC">UTC</option>
                       <option value="GMT">GMT</option>
                       <option value="EST">EST</option>
                       <option value="PST">PST</option>
-                    </Field>
-                    <ErrorMessage name="timeZone" component="div" className="text-red-600 text-sm" />
+                    </StyledField>
                   </div>
                 </div>
-                {/* Contacts / Influencers Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Who's in charge?</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {/* Primary Contact */}
-                    <div className="border p-4 rounded">
-                      <h3 className="font-semibold mb-2">Primary Contact</h3>
-                      <div className="mb-2">
-                        <label htmlFor="primaryContact.firstName" className="block text-sm font-medium">
-                          First Name
-                        </label>
-                        <Field
-                          id="primaryContact.firstName"
-                          name="primaryContact.firstName"
-                          placeholder="First Name"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div className="mb-2">
-                        <label htmlFor="primaryContact.surname" className="block text-sm font-medium">
-                          Surname
-                        </label>
-                        <Field
-                          id="primaryContact.surname"
-                          name="primaryContact.surname"
-                          placeholder="Surname"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div className="mb-2">
-                        <label htmlFor="primaryContact.email" className="block text-sm font-medium">
-                          Email
-                        </label>
-                        <Field
-                          id="primaryContact.email"
-                          name="primaryContact.email"
-                          type="email"
-                          placeholder="email@domain.com"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="primaryContact.position" className="block text-sm font-medium">
-                          Position
-                        </label>
-                        <Field
-                          as="select"
-                          id="primaryContact.position"
-                          name="primaryContact.position"
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="">Select Position</option>
-                          <option value={Position.Manager}>{Position.Manager}</option>
-                          <option value={Position.Director}>{Position.Director}</option>
-                          <option value={Position.VP}>{Position.VP}</option>
-                        </Field>
-                        <ErrorMessage name="primaryContact.position" component="div" className="text-red-600 text-sm" />
-                      </div>
-                    </div>
-                    {/* Secondary Contact */}
-                    <div className="border p-4 rounded">
-                      <h3 className="font-semibold mb-2">Secondary Contact</h3>
-                      <div className="mb-2">
-                        <label htmlFor="secondaryContact.firstName" className="block text-sm font-medium">
-                          First Name
-                        </label>
-                        <Field
-                          id="secondaryContact.firstName"
-                          name="secondaryContact.firstName"
-                          placeholder="First Name"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div className="mb-2">
-                        <label htmlFor="secondaryContact.surname" className="block text-sm font-medium">
-                          Surname
-                        </label>
-                        <Field
-                          id="secondaryContact.surname"
-                          name="secondaryContact.surname"
-                          placeholder="Surname"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div className="mb-2">
-                        <label htmlFor="secondaryContact.email" className="block text-sm font-medium">
-                          Email
-                        </label>
-                        <Field
-                          id="secondaryContact.email"
-                          name="secondaryContact.email"
-                          type="email"
-                          placeholder="email@domain.com"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="secondaryContact.position" className="block text-sm font-medium">
-                          Position
-                        </label>
-                        <Field
-                          as="select"
-                          id="secondaryContact.position"
-                          name="secondaryContact.position"
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="">Select Position</option>
-                          <option value={Position.Manager}>{Position.Manager}</option>
-                          <option value={Position.Director}>{Position.Director}</option>
-                          <option value={Position.VP}>{Position.VP}</option>
-                        </Field>
-                      </div>
-                    </div>
+
+                {/* Primary Contact */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <UserCircleIcon className="w-5 h-5 mr-2 text-blue-500" />
+                    Primary Contact
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <StyledField
+                      label="First Name"
+                      name="primaryContact.firstName"
+                      placeholder="Enter first name"
+                      required
+                      icon={<UserCircleIcon className="w-5 h-5" />}
+                    />
+                    <StyledField
+                      label="Last Name"
+                      name="primaryContact.surname"
+                      placeholder="Enter last name"
+                      required
+                      icon={<UserCircleIcon className="w-5 h-5" />}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <StyledField
+                      label="Email"
+                      name="primaryContact.email"
+                      type="email"
+                      placeholder="email@example.com"
+                      required
+                      icon={<EnvelopeIcon className="w-5 h-5" />}
+                    />
+                    <StyledField
+                      label="Position"
+                      name="primaryContact.position"
+                      as="select"
+                      required
+                      icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                    >
+                      <option value="">Select Position</option>
+                      <option value={Position.Manager}>{Position.Manager}</option>
+                      <option value={Position.Director}>{Position.Director}</option>
+                      <option value={Position.VP}>{Position.VP}</option>
+                    </StyledField>
                   </div>
                 </div>
+
+                {/* Secondary Contact */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <UserCircleIcon className="w-5 h-5 mr-2 text-blue-500" />
+                    Secondary Contact <span className="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <StyledField
+                      label="First Name"
+                      name="secondaryContact.firstName"
+                      placeholder="Enter first name"
+                      icon={<UserCircleIcon className="w-5 h-5" />}
+                    />
+                    <StyledField
+                      label="Last Name"
+                      name="secondaryContact.surname"
+                      placeholder="Enter last name"
+                      icon={<UserCircleIcon className="w-5 h-5" />}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <StyledField
+                      label="Email"
+                      name="secondaryContact.email"
+                      type="email"
+                      placeholder="email@example.com"
+                      icon={<EnvelopeIcon className="w-5 h-5" />}
+                    />
+                    <StyledField
+                      label="Position"
+                      name="secondaryContact.position"
+                      as="select"
+                      icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                    >
+                      <option value="">Select Position</option>
+                      <option value={Position.Manager}>{Position.Manager}</option>
+                      <option value={Position.Director}>{Position.Director}</option>
+                      <option value={Position.VP}>{Position.VP}</option>
+                    </StyledField>
+                  </div>
+                </div>
+
                 {/* Budget Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Budget</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label htmlFor="currency" className="block font-semibold">
-                        Currency
-                      </label>
-                      <Field as="select" id="currency" name="currency" className="w-full p-2 border rounded">
-                        <option value="">Select Currency</option>
-                        <option value={Currency.GBP}>GBP (£)</option>
-                        <option value={Currency.USD}>USD ($)</option>
-                        <option value={Currency.EUR}>EUR (€)</option>
-                      </Field>
-                      <ErrorMessage name="currency" component="div" className="text-red-600 text-sm" />
-                    </div>
-                    <div>
-                      <label htmlFor="totalBudget" className="block font-semibold">
-                        Total campaign budget
-                      </label>
-                      <Field 
-                        id="totalBudget" 
-                        name="totalBudget" 
-                        type="number" 
-                        placeholder="Enter budget"
-                        className="w-full p-2 border rounded" 
-                      />
-                      <ErrorMessage name="totalBudget" component="div" className="text-red-600 text-sm" />
-                    </div>
-                    <div>
-                      <label htmlFor="socialMediaBudget" className="block font-semibold">
-                        Budget allocated to social media
-                      </label>
-                      <Field 
-                        id="socialMediaBudget" 
-                        name="socialMediaBudget" 
-                        type="number" 
-                        placeholder="Enter social media budget"
-                        className="w-full p-2 border rounded" 
-                      />
-                      <ErrorMessage name="socialMediaBudget" component="div" className="text-red-600 text-sm" />
-                    </div>
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <CurrencyDollarIcon className="w-5 h-5 mr-2 text-blue-500" />
+                    Budget
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <StyledField
+                      label="Currency"
+                      name="currency"
+                      as="select"
+                      required
+                      icon={<CurrencyDollarIcon className="w-5 h-5" />}
+                    >
+                      <option value="">Select currency</option>
+                      <option value={Currency.GBP}>GBP (£)</option>
+                      <option value={Currency.USD}>USD ($)</option>
+                      <option value={Currency.EUR}>EUR (€)</option>
+                    </StyledField>
+                    
+                    <StyledField
+                      label="Total Campaign Budget"
+                      name="totalBudget"
+                      type="number"
+                      placeholder="5000"
+                      required
+                      icon={<CurrencyDollarIcon className="w-5 h-5" />}
+                    />
+                    
+                    <StyledField
+                      label="Social Media Budget"
+                      name="socialMediaBudget"
+                      type="number"
+                      placeholder="3000"
+                      required
+                      icon={<CurrencyDollarIcon className="w-5 h-5" />}
+                    />
                   </div>
                 </div>
-                {/* Platform & Influencer Selection */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Platform & Influencer Selection</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="platform" className="block font-semibold">
-                        Platform
-                      </label>
-                      <Field as="select" id="platform" name="platform" className="w-full p-2 border rounded">
-                        <option value="">Select Platform</option>
-                        <option value={Platform.Instagram}>{Platform.Instagram}</option>
-                        <option value={Platform.YouTube}>{Platform.YouTube}</option>
-                        <option value={Platform.TikTok}>{Platform.TikTok}</option>
-                      </Field>
-                      <ErrorMessage name="platform" component="div" className="text-red-600 text-sm" />
-                    </div>
-                    <div>
-                      <label htmlFor="influencerHandle" className="block font-semibold">
-                        Start typing influencer's handle
-                      </label>
-                      <Field
-                        id="influencerHandle"
-                        name="influencerHandle"
-                        placeholder="e.g. oliviabennett"
-                        className="w-full p-2 border rounded"
-                      />
-                      <ErrorMessage name="influencerHandle" component="div" className="text-red-600 text-sm" />
-                    </div>
+
+                {/* Influencers */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <GlobeAltIcon className="w-5 h-5 mr-2 text-blue-500" />
+                    Influencers
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <StyledField
+                      label="Platform"
+                      name="platform"
+                      as="select"
+                      required
+                      icon={<GlobeAltIcon className="w-5 h-5" />}
+                    >
+                      <option value="">Select platform</option>
+                      <option value={Platform.Instagram}>{Platform.Instagram}</option>
+                      <option value={Platform.YouTube}>{Platform.YouTube}</option>
+                      <option value={Platform.TikTok}>{Platform.TikTok}</option>
+                    </StyledField>
+                    
+                    <StyledField
+                      label="Influencer Handle"
+                      name="influencerHandle"
+                      placeholder="@username"
+                      required
+                      icon={<UserCircleIcon className="w-5 h-5" />}
+                    />
                   </div>
+                  
+                  {values.influencerHandle && (
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg mt-4 border border-gray-200">
+                      <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden flex-shrink-0"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Olivia Bennett</p>
+                        <p className="text-xs text-gray-500">@{values.influencerHandle}</p>
+                      </div>
+                      <div className="ml-auto flex items-center gap-2">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                          7k Followers
+                        </span>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                          2.3% Engagement
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Form>
+
+              {/* Add extra bottom padding to prevent progress bar overlap */}
+              <div className="pb-24"></div>
+
               <ProgressBar
                 currentStep={1}
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)}
                 onBack={null}
                 onNext={handleNextStep}
+                onSaveDraft={() => handleSaveDraft(values)}
                 disableNext={isSubmitting || !isValid}
                 isFormValid={isValid}
                 isDirty={dirty}
+                isSaving={isSubmitting}
               />
             </>
           );

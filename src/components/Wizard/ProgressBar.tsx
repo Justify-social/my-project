@@ -9,9 +9,11 @@ export interface ProgressBarProps {
   onStepClick: (step: number) => void;
   onBack: (() => void) | null;
   onNext: () => void;
+  onSaveDraft?: () => void;
   disableNext?: boolean;
   isFormValid?: boolean;
   isDirty?: boolean;
+  isSaving?: boolean;
 }
 
 const STEPS = [
@@ -27,9 +29,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   onStepClick,
   onBack,
   onNext,
+  onSaveDraft,
   disableNext = false,
   isFormValid = true,
   isDirty = true,
+  isSaving = false,
 }) => {
   const { isOpen } = useSidebar();
   const { position } = useSettingsPosition();
@@ -127,6 +131,16 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-200"
             >
               Back
+            </button>
+          )}
+          {onSaveDraft && (
+            <button
+              type="button"
+              onClick={onSaveDraft}
+              disabled={isSaving}
+              className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 transition duration-200"
+            >
+              {isSaving ? "Saving..." : "Save as Draft"}
             </button>
           )}
           <button
