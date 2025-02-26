@@ -1377,101 +1377,112 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Influencers Overview</h2>
-            <button
-              onClick={() => router.push('/influencers/reports')}
-              className="px-4 py-2 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors"
-            >
-              View Detailed Report
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => router.push('/influencers/reports')}
+                className="px-4 py-2 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors"
+              >
+                View Detailed Report
+              </button>
+            </div>
           </div>
           
-          {/* Social Profiles */}
-          <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4">
+          <div className="bg-white rounded-lg border border-[var(--divider-color)]">
+            <div className="flex border-b border-[var(--divider-color)]">
+              <button 
+                className="px-4 py-3 text-sm font-medium text-[#0ea5e9] border-b-2 border-[#0ea5e9]"
+              >
+                Social Profiles
+              </button>
+              <button 
+                className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]"
+              >
+                Engagement
+              </button>
+              <button 
+                className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]"
+              >
+                Likes
+              </button>
+              <button 
+                className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]"
+              >
+                Comments
+              </button>
+            </div>
+            
             {/* Social profiles content */}
-            <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Social Profiles</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500"></th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Engagement</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Likes</th>
-                    <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Comments</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Ethan Edge */}
-                  <tr className="border-b border-gray-100">
+            <div className="overflow-hidden p-4">
+              <table className="min-w-full">
+                <tbody className="divide-y divide-gray-100">
+                  <tr className="hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                          <span className="text-sm font-medium">EE</span>
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">Ethan Edge</p>
-                          <div className="flex items-center mt-1">
-                            <svg className="w-4 h-4 text-[#0ea5e9] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <div className="ml-4">
+                          <div className="flex items-center">
+                            <div className="font-medium text-gray-900">Ethan Edge</div>
+                            <svg className="ml-1 w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8.21 10.08c-.02 0-.04 0-.06-.02-.67-.9-.84-2.44-.89-3.03 0-.11-.13-.18-.23-.12C4.93 8.08 3 10.86 3 13.54 3 18.14 6.2 22 11.7 22c5.15 0 8.7-3.98 8.7-8.46 0-5.87-4.2-9.77-7.93-11.53a.13.13 0 0 0-.19.14c.48 3.16-.18 6.6-4.07 7.93z" fill="#38bdf8" />
+                            </svg>
+                          </div>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                               <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
-                            <span className="text-xs text-gray-500">Back to Inspiration</span>
+                            <span>Back to Inspiration</span>
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '65%' }}></div>
+                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '90%' }}></div>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-sm">3K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">561</td>
                     <td className="py-3 px-4 text-right font-medium text-sm">12</td>
                   </tr>
-                  
-                  {/* Olivia Wave */}
-                  <tr className="border-b border-gray-100">
+                  <tr className="hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                          <span className="text-sm font-medium">OW</span>
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">Olivia Wave</p>
-                          <div className="flex items-center mt-1">
-                            <svg className="w-4 h-4 text-[#0ea5e9] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M21 8V16C21 18.7614 18.7614 21 16 21H8C5.23858 21 3 18.7614 3 16V8C3 5.23858 5.23858 3 8 3H16C18.7614 3 21 5.23858 21 8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M10 12C8.34315 12 7 13.3431 7 15C7 16.6569 8.34315 18 10 18C11.6569 18 13 16.6569 13 15V6C13.3333 7 14.6 9 17 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <div className="ml-4">
+                          <div className="font-medium text-gray-900">Olivia Wave</div>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
                             </svg>
-                            <span className="text-xs text-gray-500">New Beginnings</span>
+                            <span>New Beginnings</span>
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '50%' }}></div>
+                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '85%' }}></div>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-sm">3K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">652</td>
                     <td className="py-3 px-4 text-right font-medium text-sm">52</td>
                   </tr>
-                  
-                  {/* James Reach */}
-                  <tr className="border-b border-gray-100">
+                  <tr className="hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                          <span className="text-sm font-medium">JR</span>
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/86.jpg" alt="" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">James Reach</p>
-                          <div className="flex items-center mt-1">
-                            <svg className="w-4 h-4 text-[#0ea5e9] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M21 8V16C21 18.7614 18.7614 21 16 21H8C5.23858 21 3 18.7614 3 16V8C3 5.23858 5.23858 3 8 3H16C18.7614 3 21 5.23858 21 8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M10 12C8.34315 12 7 13.3431 7 15C7 16.6569 8.34315 18 10 18C11.6569 18 13 16.6569 13 15V6C13.3333 7 14.6 9 17 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <div className="ml-4">
+                          <div className="font-medium text-gray-900">James Reach</div>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
                             </svg>
-                            <span className="text-xs text-gray-500">Letters of Love</span>
+                            <span>Letters of Love</span>
                           </div>
                         </div>
                       </div>
@@ -1482,24 +1493,21 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-sm">7K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">761</td>
                     <td className="py-3 px-4 text-right font-medium text-sm">156</td>
                   </tr>
-                  
-                  {/* Liam Focus */}
-                  <tr>
+                  <tr className="hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                          <span className="text-sm font-medium">LF</span>
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/54.jpg" alt="" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">Liam Focus</p>
-                          <div className="flex items-center mt-1">
-                            <svg className="w-4 h-4 text-[#0ea5e9] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <div className="ml-4">
+                          <div className="font-medium text-gray-900">Liam Focus</div>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                               <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
-                            <span className="text-xs text-gray-500">Women Who Inspire</span>
+                            <span>Women Who Inspire</span>
                           </div>
                         </div>
                       </div>
@@ -1509,8 +1517,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                         <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '90%' }}></div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">17K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">913</td>
+                    <td className="py-3 px-4 text-right font-medium text-sm">10K</td>
                     <td className="py-3 px-4 text-right font-medium text-sm">384</td>
                   </tr>
                 </tbody>
@@ -1518,7 +1525,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
             </div>
             
             {/* Security check box */}
-            <div className="mt-5 border border-gray-200 rounded-lg p-3">
+            <div className="mt-1 border-t border-gray-200 p-4">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium">Security Check</p>
@@ -1532,7 +1539,64 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
             </div>
           </div>
         </div>
+
+        {/* Insights Summary Section */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Insights Summary</h2>
+          <a href="#" className="text-[#0ea5e9] text-sm font-medium flex items-center hover:underline">
+            View All Insights
+            <svg className="w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </a>
+        </div>
         
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Youth Momentum Insight Card */}
+          <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden">
+            <div className="flex items-start mb-3">
+              <div className="bg-[#0ea5e9] p-2 rounded-md mr-3">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-[#0c4a6e]">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
+              </div>
+            </div>
+            <p className="text-sm text-[#0c4a6e] mb-4">
+              Campaign "NextGen Focus: Amplify Impact" is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.
+            </p>
+            <div className="flex justify-end">
+              <button className="bg-[#0ea5e9] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90">Read</button>
+            </div>
+          </div>
+          
+          {/* Low Engagement Alert Card */}
+          <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-1">
+              <button className="text-gray-400 hover:text-gray-600">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex items-start mb-3">
+              <div className="bg-gray-300 p-2 rounded-md mr-3">
+                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-700">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Engagement rate is 15% below average. Consider revising the call-to-action.
+            </p>
+          </div>
+        </div>
+
         {/* Latest Campaigns List */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -1564,73 +1628,144 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                         <p className="mt-2 text-sm text-gray-500">Loading campaigns...</p>
                       </td>
                     </tr>
-                  ) : campaignsData?.campaigns && campaignsData.campaigns.length > 0 ? (
-                    campaignsData.campaigns.slice(0, 5).map((campaign) => (
-                      <tr 
-                        key={campaign.id}
-                        className="hover:bg-gray-50 cursor-pointer"
-                        onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                      >
-                        <td className="py-4 px-4">
+                  ) : (
+                    <>
+                      <tr className="hover:bg-gray-50 cursor-pointer">
+                        <td className="py-3 px-4">
                           <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">{campaign.campaignName}</div>
+                            <div className="text-sm font-medium text-gray-900">Clicks & Connections</div>
                           </div>
                         </td>
-                        <td className="py-4 px-4">
-                          <StatusBadge 
-                            status={
-                              campaign.status ||
-                              (new Date(campaign.startDate) > new Date() ? 'Upcoming' :
-                              !campaign.endDate || new Date(campaign.endDate) >= new Date() ? 'Live' :
-                              'Completed')
-                            } 
-                            size="sm" 
-                          />
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Live
+                          </span>
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-3 px-4">
                           <div className="flex flex-col">
-                            <div className="text-sm font-medium text-gray-900">Budget</div>
-                            <div className="mt-1">
-                              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                <div 
-                                  className="bg-[#0ea5e9] h-1.5 rounded-full" 
-                                  style={{ 
-                                    width: `${Math.min(100, ((campaign.performance?.engagement || 0) / 100) * 100)}%` 
-                                  }}
-                                ></div>
+                            <div className="text-xs font-medium text-gray-600">Budget</div>
+                            <div className="flex items-center">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
+                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '75%' }}></div>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">${campaign.totalBudget.toLocaleString()}</div>
+                              <span className="text-xs font-medium">12,314$</span>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-4">
-                          <div className="text-sm text-gray-900">
-                            {campaign.usersEngaged ? 
-                              `${campaign.usersEngaged.current} of ${campaign.usersEngaged.total} Users` : 
-                              `${Math.floor(Math.random() * 100)} of ${Math.floor(Math.random() * 500 + 100)} Users`}
-                          </div>
+                        <td className="py-3 px-4">
+                          <div className="text-sm font-medium">12 of 100 Users</div>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="py-8 text-center">
-                        <p className="text-sm text-gray-500">No campaigns found</p>
-                        <button
-                          onClick={handleNewCampaign}
-                          className="mt-3 px-3 py-1.5 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors"
-                        >
-                          Create Your First Campaign
-                        </button>
-                      </td>
-                    </tr>
+                      <tr className="hover:bg-gray-50 cursor-pointer">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <div className="text-sm font-medium text-gray-900">Beyond the Horizon</div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Live
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <div className="text-xs font-medium text-gray-600">Budget</div>
+                            <div className="flex items-center">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
+                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '60%' }}></div>
+                              </div>
+                              <span className="text-xs font-medium">10,461$</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm font-medium">46 of 413 Users</div>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50 cursor-pointer">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <div className="text-sm font-medium text-gray-900">Engage 360</div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Paused
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <div className="text-xs font-medium text-gray-600">Budget</div>
+                            <div className="flex items-center">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
+                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '40%' }}></div>
+                              </div>
+                              <span className="text-xs font-medium">1,134$</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm font-medium">31 of 450 Users</div>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50 cursor-pointer">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <div className="text-sm font-medium text-gray-900">The Interaction Initiative</div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Paused
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <div className="text-xs font-medium text-gray-600">Budget</div>
+                            <div className="flex items-center">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
+                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '20%' }}></div>
+                              </div>
+                              <span className="text-xs font-medium">5,014$</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm font-medium">46 of 314 Users</div>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50 cursor-pointer">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <div className="text-sm font-medium text-gray-900">Join the Pulse</div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            Completed
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <div className="text-xs font-medium text-gray-600">Budget</div>
+                            <div className="flex items-center">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
+                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{ width: '100%' }}></div>
+                              </div>
+                              <span className="text-xs font-medium">234$</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm font-medium">405 of 500 Users</div>
+                        </td>
+                      </tr>
+                    </>
                   )}
                 </tbody>
               </table>
             </div>
-
           </div>
-
         </div>
         
         {/* Brand Health Snapshot */}
@@ -1650,11 +1785,16 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left side - Sentiment Score */}
               <div>
-                <div className="mb-3">
-                  <h3 className="text-sm text-gray-500 mb-1">Sentiment Score</h3>
-                  <div className="flex items-baseline">
-                    <span className="text-2xl font-bold">76% Positive Score</span>
-                    <span className="ml-2 text-xs px-2 py-1 bg-gray-100 rounded">90D 3M</span>
+                <div className="mb-3 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-sm text-gray-500 mb-1">Sentiment Score</h3>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold">76% Positive Score</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
+                    <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
                   </div>
                 </div>
                 
@@ -1665,11 +1805,11 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                     <div className="relative w-full h-full">
                       {/* Y-axis labels */}
                       <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
-                        <span>20%</span>
-                        <span>15%</span>
-                        <span>10%</span>
-                        <span>5%</span>
-                        <span>1%</span>
+                        <span>20k</span>
+                        <span>15k</span>
+                        <span>10k</span>
+                        <span>5k</span>
+                        <span>1k</span>
                         <span>0</span>
                       </div>
                       
@@ -1684,39 +1824,23 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                       
                       {/* Line chart with actual data */}
                       <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
+                            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
                         <path
-                          d={generateChartPath(brandHealth.sentiment && [
-                            { type: 'positive', value: brandHealth.sentiment.positive },
-                            { type: 'neutral', value: brandHealth.sentiment.neutral },
-                            { type: 'negative', value: brandHealth.sentiment.negative }
-                          ])}
+                          d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15"
                           stroke="#0ea5e9"
                           strokeWidth="2"
                           fill="none"
                         />
                         <path
-                          d={generateAreaPath(generateChartPath(brandHealth.sentiment && [
-                            { type: 'positive', value: brandHealth.sentiment.positive },
-                            { type: 'neutral', value: brandHealth.sentiment.neutral },
-                            { type: 'negative', value: brandHealth.sentiment.negative }
-                          ]))}
+                          d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z"
                           fill="url(#blue-gradient)"
-                          fillOpacity="0.2"
                         />
                       </svg>
-                      
-                      {/* Gradient definition - MOVING THIS INSIDE THE SVG */}
-                      <svg width="0" height="0" style={{ position: 'absolute' }}>
-                        <defs>
-                          <linearGradient id="blue-gradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
-                            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      
-                      {/* Highlight marker */}
-                      <div className="absolute right-1/4 top-2/5 w-3 h-3 bg-white border-2 border-[#0ea5e9] rounded-full"></div>
                       
                       {/* X-axis labels */}
                       <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
@@ -1743,11 +1867,17 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
               
               {/* Right side - Latest mentions */}
               <div>
-                <div className="mb-3">
-                  <h3 className="text-sm text-gray-500 mb-1">Latest Mentions</h3>
-                  <div className="flex items-baseline">
-                    <span className="text-2xl font-bold">1,561 Mentions</span>
-                    <span className="ml-2 text-xs text-green-600">+47% More than last week</span>
+                <div className="mb-3 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-sm text-gray-500 mb-1">Latest Mentions</h3>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold">1,561 Mentions</span>
+                      <span className="ml-2 text-xs text-green-600 font-medium">+47% More than last week</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
+                    <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
                   </div>
                 </div>
                 
@@ -1779,12 +1909,12 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                       <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
                         <defs>
                           <linearGradient id="blue-gradient-2" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#0ea5e9" />
+                            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
                             <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
                           </linearGradient>
                         </defs>
                         <path
-                          d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z"
+                          d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15"
                           stroke="#0ea5e9"
                           strokeWidth="2"
                           fill="none"
@@ -1792,7 +1922,6 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                         <path
                           d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z"
                           fill="url(#blue-gradient-2)"
-                          fillOpacity="0.2"
                         />
                       </svg>
                       
