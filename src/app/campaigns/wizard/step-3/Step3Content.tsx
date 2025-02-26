@@ -82,478 +82,6 @@ const AudienceSchema = Yup.object().shape({
 });
 
 // =============================================================================
-// COMPONENT: LocationSelector
-// =============================================================================
-
-interface LocationSelectorProps {
-  selectedLocations: string[];
-  onChange: (locations: string[]) => void;
-}
-const LocationSelector: React.FC<LocationSelectorProps> = ({ selectedLocations, onChange }) => {
-  const [query, setQuery] = useState("");
-  const allLocations = [
-    "London",
-    "Manchester",
-    "Birmingham",
-    "Glasgow",
-    "Liverpool",
-    "Leeds",
-    "Sheffield",
-    "Bristol",
-  ];
-  const filtered = allLocations.filter(
-    (loc) =>
-      loc.toLowerCase().includes(query.toLowerCase()) &&
-      !selectedLocations.includes(loc)
-  );
-  return (
-    <div className="mb-4 relative">
-      <label className="block font-semibold mb-1">Location</label>
-      <input
-        type="text"
-        placeholder="Search by City, State, Region or Country"
-        className="w-full p-2 border rounded"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Location search"
-      />
-      {query && filtered.length > 0 && (
-        <ul className="absolute z-10 bg-white border w-full mt-1 list-none">
-          {filtered.map((loc) => (
-            <li
-              key={loc}
-              onClick={() => {
-                onChange([...selectedLocations, loc]);
-                setQuery("");
-              }}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-              role="option"
-            >
-              {loc}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-2 flex flex-wrap gap-2">
-        {selectedLocations.map((loc) => (
-          <span key={loc} className="bg-gray-200 px-3 py-1 rounded-full flex items-center">
-            {loc}
-            <button
-              type="button"
-              onClick={() =>
-                onChange(selectedLocations.filter((l) => l !== loc))
-              }
-              className="ml-2 text-red-500"
-              aria-label={`Remove ${loc}`}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// =============================================================================
-// COMPONENT: AgeDistributionSlider
-// =============================================================================
-
-interface AgeDistributionSliderProps {
-  values: number[];
-  onChange: (newValues: number[]) => void;
-}
-const AgeDistributionSlider: React.FC<AgeDistributionSliderProps> = ({
-  values,
-  onChange,
-}) => {
-  const ageGroups = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
-  
-  const handleSliderChange = (index: number, newValue: number) => {
-    let newValues = [...values];
-    const oldValue = newValues[index];
-    
-    // Ensure newValue is between 0 and 100
-    newValue = Math.max(0, Math.min(100, newValue));
-    
-    // Calculate the difference to distribute
-    const diff = newValue - oldValue;
-    
-    // If increasing one value, decrease others proportionally
-    if (diff > 0) {
-      const availableToDecrease = newValues.reduce((sum, val, i) => 
-        i !== index ? sum + val : sum, 0);
-      
-      if (availableToDecrease > 0) {
-        newValues = newValues.map((val, i) => {
-          if (i === index) return newValue;
-          const decrease = (val / availableToDecrease) * diff;
-          return Math.max(0, val - decrease);
-        });
-      }
-    } 
-    // If decreasing one value, increase others proportionally
-    else if (diff < 0) {
-      const availableToIncrease = 100 - newValues.reduce((sum, val, i) => 
-        i !== index ? sum + val : sum, 0);
-      
-      if (availableToIncrease > 0) {
-        const totalOthers = newValues.reduce((sum, val, i) => 
-          i !== index ? sum + val : sum, 0);
-        
-        newValues = newValues.map((val, i) => {
-          if (i === index) return newValue;
-          const increase = (val / totalOthers) * Math.abs(diff);
-          return val + increase;
-        });
-      }
-    }
-
-    // Round all values and ensure they sum to 100
-    newValues = newValues.map(v => Math.round(v));
-    const total = newValues.reduce((sum, v) => sum + v, 0);
-    
-    if (total !== 100) {
-      const difference = 100 - total;
-      // Find largest value that's not the current index
-      const maxIndex = newValues
-        .map((v, i) => i !== index ? v : -1)
-        .reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
-      
-      if (maxIndex >= 0) {
-        newValues[maxIndex] += difference;
-      }
-    }
-
-    onChange(newValues);
-  };
-
-  return (
-    <div className="mb-6">
-      <p className="text-sm text-gray-600 mb-4">
-        Adjust the sliders to allocate percentages across age groups. The total must equal 100%.
-      </p>
-      
-      <div className="space-y-4">
-        {ageGroups.map((group, index) => (
-          <div key={group} className="flex items-center gap-4">
-            <span className="w-16 text-sm font-medium">{group}</span>
-            <div className="flex-grow">
-              <Slider
-                min={0}
-                max={100}
-                step={1}
-                value={values[index]}
-                onChange={(value) => handleSliderChange(index, typeof value === 'number' ? value : value[0])}
-                className="slider-blue"
-                trackStyle={{ 
-                  backgroundColor: '#2563EB', 
-                  height: 4,
-                  transition: 'all 0.3s ease' 
-                }}
-                handleStyle={{
-                  borderColor: '#2563EB',
-                  backgroundColor: '#2563EB',
-                  opacity: 1,
-                  boxShadow: '0 0 0 5px rgba(37, 99, 235, 0.1)',
-                  width: 16,
-                  height: 16,
-                  marginTop: -6,
-                  transition: 'all 0.3s ease'
-                }}
-                railStyle={{ 
-                  backgroundColor: '#E5E7EB',
-                  height: 4 
-                }}
-              />
-            </div>
-            <span className="w-12 text-right text-sm font-medium">
-              {Math.round(values[index])}%
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// =============================================================================
-// COMPONENT: GenderSelection
-// =============================================================================
-
-interface GenderSelectionProps {
-  selected: string[];
-  otherGender: string;
-  onChange: (genders: string[]) => void;
-  onOtherChange: (val: string) => void;
-}
-const GenderSelection: React.FC<GenderSelectionProps> = ({
-  selected,
-  otherGender,
-  onChange,
-  onOtherChange,
-}) => (
-  <div className="mb-4">
-    <label className="block font-semibold mb-1">
-      Choose one or more gender identities
-    </label>
-    <div role="group" className="flex items-center space-x-4">
-      {["Male", "Female", "Other"].map((g) => (
-        <label key={g} className="inline-flex items-center">
-          <input
-            type="checkbox"
-            name="gender"
-            value={g}
-            checked={selected.includes(g)}
-            onChange={(e) => {
-              if (e.target.checked) {
-                onChange([...selected, g]);
-              } else {
-                onChange(selected.filter((val) => val !== g));
-              }
-            }}
-            className="mr-1"
-          />
-          {g}
-        </label>
-      ))}
-    </div>
-    {selected.includes("Other") && (
-      <div className="mt-2">
-        <input
-          type="text"
-          value={otherGender}
-          onChange={(e) => onOtherChange(e.target.value)}
-          placeholder="Please specify"
-          className="w-full p-2 border rounded"
-          aria-label="Specify other gender"
-        />
-      </div>
-    )}
-  </div>
-);
-
-// =============================================================================
-// COMPONENT: ScreeningQuestions
-// =============================================================================
-
-interface ScreeningQuestionsProps {
-  selectedTags: string[];
-  onChange: (tags: string[]) => void;
-}
-const ScreeningQuestions: React.FC<ScreeningQuestionsProps> = ({
-  selectedTags,
-  onChange,
-}) => {
-  const [query, setQuery] = useState("");
-  const tagSuggestions = ["Tag Suggestion 1", "Tag Suggestion 2", "Other"];
-  const filtered = tagSuggestions.filter(
-    (tag) =>
-      tag.toLowerCase().includes(query.toLowerCase()) &&
-      !selectedTags.includes(tag)
-  );
-  return (
-    <div className="mb-4 relative">
-      <label className="block font-semibold mb-1">
-        Search Screening Questions
-      </label>
-      <input
-        type="text"
-        placeholder="Type to search screening questions"
-        className="w-full p-2 border rounded"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Screening questions search"
-      />
-      {query && filtered.length > 0 && (
-        <ul className="absolute z-10 bg-white border w-full mt-1 list-none">
-          {filtered.map((tag) => (
-            <li
-              key={tag}
-              onClick={() => {
-                onChange([...selectedTags, tag]);
-                setQuery("");
-              }}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-            >
-              {tag}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-2 flex flex-wrap gap-2">
-        {selectedTags.map((tag) => (
-          <span key={tag} className="bg-gray-200 px-3 py-1 rounded-full flex items-center">
-            {tag}
-            <button
-              type="button"
-              onClick={() => onChange(selectedTags.filter((t) => t !== tag))}
-              className="ml-2 text-red-500"
-              aria-label={`Remove ${tag}`}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// =============================================================================
-// COMPONENT: LanguagesSelector
-// =============================================================================
-
-interface LanguagesSelectorProps {
-  selected: string[];
-  onChange: (langs: string[]) => void;
-}
-const LanguagesSelector: React.FC<LanguagesSelectorProps> = ({ selected, onChange }) => {
-  const languages = ["English", "Spanish", "French", "German", "Mandarin"];
-  return (
-    <div className="mb-4">
-      <label className="block font-semibold mb-1">Select language</label>
-      <select
-        multiple
-        value={selected}
-        onChange={(e) => {
-          const selectedOptions = Array.from(e.target.selectedOptions).map(
-            (o) => o.value
-          );
-          onChange(selectedOptions);
-        }}
-        className="w-full p-2 border rounded"
-        aria-label="Select languages"
-      >
-        {languages.map((lang) => (
-          <option key={lang} value={lang}>
-            {lang}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
-// =============================================================================
-// COMPONENT: AdvancedTargeting
-// =============================================================================
-
-const AdvancedTargeting: React.FC = () => (
-  <div className="border p-4 rounded mb-4">
-    <h2 className="text-xl font-bold mb-2">Advanced Targeting</h2>
-    <div className="mb-4">
-      <label htmlFor="educationLevel" className="block font-semibold mb-1">
-        Education Level
-      </label>
-      <Field
-        as="select"
-        id="educationLevel"
-        name="educationLevel"
-        className="w-full p-2 border rounded"
-      >
-        <option value="">Select Education Level</option>
-        <option value="High School">High School</option>
-        <option value="College">College</option>
-        <option value="University">University</option>
-        <option value="Postgraduate">Postgraduate</option>
-      </Field>
-      <ErrorMessage name="educationLevel" component="div" className="text-red-600 text-sm" />
-    </div>
-    <div className="mb-4">
-      <label htmlFor="jobTitles" className="block font-semibold mb-1">
-        Job Titles
-      </label>
-      <Field
-        id="jobTitles"
-        name="jobTitles"
-        placeholder="Type to search job titles"
-        className="w-full p-2 border rounded"
-      />
-      <ErrorMessage name="jobTitles" component="div" className="text-red-600 text-sm" />
-    </div>
-    <div className="mb-4">
-      <label className="block font-semibold mb-1">Income Level</label>
-      <div role="group" className="flex items-center space-x-4">
-        {["$10,000", "$20,000", "$30,000"].map((inc) => (
-          <label key={inc} className="inline-flex items-center">
-            <Field type="radio" name="incomeLevel" value={inc} />
-            <span className="ml-2">{inc}</span>
-          </label>
-        ))}
-      </div>
-      <ErrorMessage name="incomeLevel" component="div" className="text-red-600 text-sm" />
-    </div>
-  </div>
-);
-
-// =============================================================================
-// COMPONENT: CompetitorTracking
-// =============================================================================
-
-interface CompetitorTrackingProps {
-  selected: string[];
-  onChange: (companies: string[]) => void;
-}
-const CompetitorTracking: React.FC<CompetitorTrackingProps> = ({ selected, onChange }) => {
-  const [query, setQuery] = useState("");
-  const allCompanies = [
-    "Company Name 1",
-    "Company Name 2",
-    "Company Name 3",
-    "Company Name 4",
-  ];
-  const filtered = allCompanies.filter(
-    (comp) =>
-      comp.toLowerCase().includes(query.toLowerCase()) && !selected.includes(comp)
-  );
-  return (
-    <div className="mb-4 relative">
-      <label className="block font-semibold mb-1">Search Companies</label>
-      <input
-        type="text"
-        placeholder="Type to search companies (comma separated)"
-        className="w-full p-2 border rounded"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Competitor search"
-      />
-      {query && filtered.length > 0 && (
-        <ul className="absolute z-10 bg-white border w-full mt-1 list-none">
-          {filtered.map((comp) => (
-            <li
-              key={comp}
-              onClick={() => {
-                onChange([...selected, comp]);
-                setQuery("");
-              }}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-            >
-              {comp}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-2 flex flex-wrap gap-2">
-        {selected.map((comp) => (
-          <span key={comp} className="bg-gray-200 px-3 py-1 rounded-full flex items-center">
-            {comp}
-            <button
-              type="button"
-              onClick={() => onChange(selected.filter((c) => c !== comp))}
-              className="ml-2 text-red-500"
-              aria-label={`Remove ${comp}`}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// =============================================================================
 // MAIN COMPONENT: AUDIENCE TARGETING (STEP 3)
 // =============================================================================
 
@@ -729,7 +257,7 @@ function FormContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 pb-32">
+    <div className="max-w-4xl mx-auto p-4 pb-16 bg-white">
       <Header currentStep={3} totalSteps={5} />
       <Formik
         initialValues={initialValues}
@@ -752,14 +280,14 @@ function FormContent() {
                     Saving...
                   </>
                 ) : (
-                  'Save Draft'
+                  'Save as Draft'
                 )}
               </button>
             </div>
 
             <Form className="space-y-8">
-              <div>
-                <h2 className="text-xl font-bold mb-2">Demographics</h2>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold mb-4">Demographics</h2>
                 <LocationSelector
                   selectedLocations={values.location}
                   onChange={(locs) => {
@@ -803,8 +331,8 @@ function FormContent() {
                 />
               </div>
 
-              <div>
-                <h2 className="text-xl font-bold mb-2">Screening Questions</h2>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold mb-4">Screening Questions</h2>
                 <ScreeningQuestions
                   selectedTags={values.screeningQuestions}
                   onChange={(tags) => {
@@ -813,8 +341,8 @@ function FormContent() {
                 />
               </div>
 
-              <div>
-                <h2 className="text-xl font-bold mb-2">Languages</h2>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold mb-4">Languages</h2>
                 <LanguagesSelector
                   selected={values.languages}
                   onChange={(langs) => {
@@ -823,19 +351,19 @@ function FormContent() {
                 />
               </div>
 
-              <div>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <button
                   type="button"
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="mb-4 text-blue-600 underline"
+                  className="text-blue-600 underline"
                 >
                   {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
                 </button>
                 {showAdvanced && <AdvancedTargeting />}
               </div>
 
-              <div>
-                <h2 className="text-xl font-bold mb-2">Competitors to Monitor</h2>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold mb-4">Competitors to Monitor</h2>
                 <CompetitorTracking
                   selected={values.competitors}
                   onChange={(companies) => {
@@ -843,6 +371,8 @@ function FormContent() {
                   }}
                 />
               </div>
+              
+              <div className="pb-4"></div>
             </Form>
 
             <ProgressBar
