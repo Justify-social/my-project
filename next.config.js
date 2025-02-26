@@ -7,6 +7,9 @@ const nextConfig = {
     };
     return config;
   },
+  images: {
+    domains: ['unavatar.io', 'via.placeholder.com', 'example.com'],
+  },
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if

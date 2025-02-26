@@ -1947,4 +1947,3 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
   );
 }
 
-

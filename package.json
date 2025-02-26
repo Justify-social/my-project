@@ -26,6 +26,7 @@
     "browser-image-compression": "^2.0.2",
     "chart.js": "^4.4.7",
     "compressorjs": "^1.2.1",
+    "effect": "^3.13.2",
     "file-type": "^20.1.0",
     "formik": "^2.4.6",
     "framer-motion": "^10.18.0",
