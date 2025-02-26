@@ -35,6 +35,10 @@ import {
   CogIcon,
   DocumentMagnifyingGlassIcon,
   ChatBubbleLeftRightIcon,
+  CheckIcon,
+  DocumentTextIcon,
+  PresentationChartBarIcon,
+  TableCellsIcon,
 } from '@heroicons/react/24/outline';
 
 // Enhanced data structures for enterprise metrics
@@ -564,7 +568,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300"
+    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100"
   >
     <div className="flex items-start justify-between mb-4">
       <div className="bg-blue-50 p-3 rounded-lg">
@@ -583,14 +587,14 @@ const MetricCard: React.FC<MetricCardProps> = ({
         </span>
       )}
     </div>
-    <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+    <h3 className="text-sm font-semibold text-gray-500 mb-1 font-work-sans">{title}</h3>
     <div className="flex items-baseline">
-      <p className="text-3xl font-bold text-gray-900">
-        {format === "percent" ? `${value}%` : format === "number" ? value.toLocaleString() : value}
+      <p className="text-3xl font-bold text-gray-900 font-sora">
+        {format === "percent" ? `${value}%` : format === "currency" ? `$${value}M` : format === "number" ? value.toLocaleString() : value}
       </p>
     </div>
     {description && (
-      <p className="mt-2 text-sm text-gray-500">{description}</p>
+      <p className="mt-2 text-sm text-gray-500 font-work-sans">{description}</p>
     )}
   </motion.div>
 );
@@ -605,7 +609,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300"
+    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100"
   >
     <div className="flex items-center justify-between mb-6">
       <div className="flex items-center">
@@ -613,9 +617,9 @@ const ChartCard: React.FC<ChartCardProps> = ({
           <Icon className="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 font-sora">{title}</h3>
           {description && (
-            <p className="text-sm text-gray-500">{description}</p>
+            <p className="text-sm text-gray-500 font-work-sans">{description}</p>
           )}
         </div>
       </div>
@@ -697,19 +701,32 @@ const SegmentCard: React.FC<SegmentCardProps> = ({ segment }) => (
 
 // Main Component
 export default function BrandHealthDashboard() {
-  // State for filters
-  const [dateRange, setDateRange] = useState("7d");
-  const [selectedChannels, setSelectedChannels] = useState(["all"]);
+  const [dateRange, setDateRange] = useState('7d');
   const [isExporting, setIsExporting] = useState(false);
-
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedExportFormat, setSelectedExportFormat] = useState('pdf');
+  const [exportComplete, setExportComplete] = useState(false);
+  
   // Handler for exporting data
   const handleExport = async () => {
     setIsExporting(true);
-    // Simulate export delay
+    
+    // Simulate export process with a delay
     await new Promise(resolve => setTimeout(resolve, 1500));
+    
     setIsExporting(false);
-    // In real app, implement actual export functionality
-    alert("Report exported successfully!");
+    setShowExportModal(true);
+  };
+  
+  const handleDownload = (format: string) => {
+    setSelectedExportFormat(format);
+    setExportComplete(true);
+    
+    // Simulate download completion
+    setTimeout(() => {
+      setExportComplete(false);
+      setShowExportModal(false);
+    }, 3000);
   };
 
   // Transform data for radar chart
@@ -721,317 +738,752 @@ export default function BrandHealthDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <motion.h1
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-gray-900 mb-2"
-            >
-              Brand Health Dashboard
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-gray-500"
-            >
-              Real-time insights and analytics for your brand's performance
-            </motion.p>
+    <div className="flex min-h-screen bg-white">
+      {/* Sidebar */}
+      <div className="w-20 md:w-64 bg-white border-r border-gray-100 flex-shrink-0">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center">
+            <img src="/logo.svg" alt="The Write Company" className="h-8" />
+            <span className="ml-2 text-lg font-sora font-semibold hidden md:block">The Write Company</span>
+          </div>
+        </div>
+        <nav className="p-4">
+          <ul className="space-y-2">
+            <li>
+              <a href="/home" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Home</span>
+              </a>
+            </li>
+            <li>
+              <a href="/campaigns" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Campaigns</span>
+              </a>
+            </li>
+            <li>
+              <a href="/content-testing" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Content Testing</span>
+              </a>
+            </li>
+            <li>
+              <a href="/brand-lift" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Brand Lift</span>
+              </a>
+            </li>
+            <li>
+              <a href="/brand-health" className="flex items-center p-2 bg-blue-50 text-blue-600 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Brand Health</span>
+              </a>
+            </li>
+            <li>
+              <a href="/notifications" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Notifications</span>
+              </a>
+            </li>
+            <li>
+              <a href="/social-listening" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Social Listening</span>
+              </a>
+            </li>
+            <li>
+              <a href="/reports" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Reports</span>
+              </a>
+            </li>
+            <li>
+              <a href="/settings" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Settings</span>
+              </a>
+            </li>
+            <li>
+              <a href="/help" className="flex items-center p-2 text-gray-500 rounded-lg hover:bg-gray-50">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span className="ml-3 hidden md:block font-work-sans text-sm">Help</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-grow">
+        {/* Top navigation bar */}
+        <div className="bg-white border-b border-gray-100 p-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <h1 className="text-lg font-sora font-semibold">Brand Health Monitoring</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last Quarter</option>
-              <option value="1y">Last Year</option>
-            </select>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleExport}
-              disabled={isExporting}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {isExporting ? (
-                <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+            <button className="text-gray-500 hover:text-gray-700">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
+            <button className="text-gray-500 hover:text-gray-700">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+            </button>
+            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-sm font-medium">EA</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Export Modal */}
+        {showExportModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+              <button 
+                onClick={() => setShowExportModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+              
+              {exportComplete ? (
+                <div className="text-center py-6">
+                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <CheckIcon className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 font-sora">Export Complete</h3>
+                  <p className="text-gray-600 mb-6 font-work-sans">Your {selectedExportFormat.toUpperCase()} report has been generated successfully.</p>
+                  <button 
+                    className="px-4 py-2 bg-var(--accent-color) text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    Download Report
+                  </button>
+                </div>
               ) : (
-                <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+                <>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 font-sora">Export Brand Health Report</h3>
+                  <p className="text-gray-600 mb-6 font-work-sans">Choose from the available formats below:</p>
+                  
+                  <div className="space-y-3">
+                    <div 
+                      onClick={() => handleDownload('pdf')}
+                      className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                        <DocumentTextIcon className="w-6 h-6 text-red-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Complete Brand Health Analysis</h4>
+                        <p className="text-sm text-gray-500">Comprehensive report with all metrics and insights</p>
+                      </div>
+                      <div className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">PDF</div>
+                    </div>
+                    
+                    <div 
+                      onClick={() => handleDownload('pptx')}
+                      className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <PresentationChartBarIcon className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Executive Summary</h4>
+                        <p className="text-sm text-gray-500">Key highlights for executive stakeholders</p>
+                      </div>
+                      <div className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">PPTX</div>
+                    </div>
+                    
+                    <div 
+                      onClick={() => handleDownload('csv')}
+                      className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <TableCellsIcon className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Raw Data Export</h4>
+                        <p className="text-sm text-gray-500">Raw metrics for custom analysis</p>
+                      </div>
+                      <div className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">CSV</div>
+                    </div>
+                    
+                    <div 
+                      onClick={() => handleDownload('xlsx')}
+                      className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <ChartBarIcon className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">Competitor Analysis</h4>
+                        <p className="text-sm text-gray-500">Detailed competitive benchmarking</p>
+                      </div>
+                      <div className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">XLSX</div>
+                    </div>
+                  </div>
+                </>
               )}
-              Export Report
-            </motion.button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricCard
-            title="Overall Brand Score"
-            value={brandMetrics.currentPeriod.overallScore}
-            trend={brandMetrics.currentPeriod.trend}
-            icon={SparklesIcon}
-            description="Composite score based on sentiment, engagement, and awareness"
-            format="percent"
-          />
-          <MetricCard
-            title="Brand Sentiment"
-            value={brandMetrics.currentPeriod.sentiment.positive}
-            trend={`+${brandMetrics.currentPeriod.sentiment.positive - brandMetrics.historical.weekly[0].sentiment}%`}
-            icon={HeartIcon}
-            description="Percentage of positive brand mentions"
-            format="percent"
-          />
-          <MetricCard
-            title="Market Share"
-            value={brandMetrics.currentPeriod.marketShare}
-            trend={brandMetrics.currentPeriod.marketShareGrowth}
-            icon={ChartPieIcon}
-            description="Your brand's market share in the target segment"
-            format="percent"
-          />
-          <MetricCard
-            title="Brand Value"
-            value={brandMetrics.currentPeriod.brandValue / 1000000}
-            trend={brandMetrics.currentPeriod.brandValueGrowth}
-            icon={CurrencyDollarIcon}
-            description="Estimated brand value in millions"
-            format="currency"
-          />
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Brand Equity Analysis */}
-          <RadarChartCard
-            title="Brand Equity Analysis"
-            description="Key brand perception metrics"
-            icon={ChartPieIcon}
-            data={brandEquityData}
-          />
-
-          {/* Market Performance */}
-          <ChartCard
-            title="Market Performance"
-            description="Revenue and market share trends"
-            icon={CurrencyDollarIcon}
-          >
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={brandMetrics.historical.quarterly}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="period" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <RechartsTooltip />
-                  <RechartsLegend />
-                  <Bar yAxisId="left" dataKey="revenue" fill="#3b82f6" name="Revenue (M)" />
-                  <Line yAxisId="right" type="monotone" dataKey="marketShare" stroke="#10b981" name="Market Share %" />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartCard>
-
-          {/* Customer Segments */}
-          <ChartCard
-            title="Customer Segments"
-            description="Performance across customer segments"
-            icon={UserGroupIcon}
-          >
-            <div className="space-y-4">
-              {brandMetrics.audience.segments.map((segment, index) => (
-                <SegmentCard key={index} segment={segment} />
-              ))}
-            </div>
-          </ChartCard>
-
-          {/* Risk Analysis */}
-          <ChartCard
-            title="Risk Analysis"
-            description="Current risk levels and trends"
-            icon={ShieldCheckIcon}
-          >
-            <div className="space-y-4">
-              {brandMetrics.risks.map((risk, index) => (
-                <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{risk.category}</h4>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      risk.level > 15 ? 'bg-red-100 text-red-800' :
-                      risk.level > 10 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      Risk Level: {risk.level}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{risk.mitigation}</p>
-                  <div className="flex items-center text-sm">
-                    <span className={`font-medium ${
-                      risk.trend.startsWith('+') ? 'text-red-600' : 'text-green-600'
-                    }`}>
-                      {risk.trend}
-                    </span>
-                    <span className="mx-2 text-gray-500">•</span>
-                    <span className="text-gray-500">Impact: {risk.impact}/10</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
-
-          {/* Channel Performance */}
-          <ChartCard
-            title="Channel Performance"
-            description="Engagement and growth across social platforms"
-            icon={DocumentChartBarIcon}
-          >
-            <div className="space-y-4">
-              {brandMetrics.channels.map((channel, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                >
-                  <div>
-                    <h4 className="font-medium text-gray-900">{channel.name}</h4>
-                    <p className="text-sm text-gray-500">
-                      {channel.engagement.toLocaleString()} engagements
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-gray-900">{channel.performance}%</p>
-                    <p className={`text-sm ${
-                      channel.growth.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {channel.growth}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
-
-          {/* Campaign Performance */}
-          <ChartCard
-            title="Campaign Performance"
-            description="Active campaign metrics and ROI"
-            icon={RocketLaunchIcon}
-          >
-            <div className="space-y-4">
-              {brandMetrics.campaigns.map((campaign, index) => (
-                <div
-                  key={index}
-                  className="p-4 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{campaign.name}</h4>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      campaign.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {campaign.status}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500">ROI</p>
-                      <p className="font-medium">{campaign.roi}x</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Conversion</p>
-                      <p className="font-medium">{campaign.conversion}%</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
-        </div>
-
-        {/* Predictive Analytics Section */}
-        <div className="mt-8">
-          <ChartCard
-            title="Predictive Analytics"
-            description="AI-powered forecasts and trends"
-            icon={SparklesIcon}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="h-80">
-                <h4 className="text-lg font-medium mb-4">Brand Health Forecast</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={brandMetrics.predictions.brandHealth}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis domain={[0, 100]} />
-                    <RechartsTooltip />
-                    <RechartsLegend />
-                    <Line type="monotone" dataKey="predicted" stroke="#3b82f6" name="Predicted Score" />
-                    <Line type="monotone" dataKey="confidence" stroke="#10b981" name="Confidence %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-4">
-                <h4 className="text-lg font-medium mb-4">Emerging Risks</h4>
-                {brandMetrics.predictions.risks.map((risk, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h5 className="font-medium text-gray-900">{risk.category}</h5>
-                      <span className="text-sm text-gray-500">{risk.timeframe}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-500">Probability</p>
-                        <p className="font-medium">{risk.probability}%</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Impact</p>
-                        <p className="font-medium">{risk.impact}/10</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </ChartCard>
-        </div>
-
-        {/* AI Insights */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white"
-        >
-          <div className="flex items-start space-x-4">
-            <div className="bg-white/10 p-3 rounded-lg">
-              <SparklesIcon className="w-6 h-6 text-white" />
-            </div>
+        {/* Main content area */}
+        <div className="p-6">
+          {/* Header Section with description and export button */}
+          <div className="flex justify-between items-start mb-8">
             <div>
-              <h3 className="text-lg font-semibold mb-2">AI-Powered Strategic Insights</h3>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <ArrowTrendingUpIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-1" />
-                  <span>Brand value has grown by {brandMetrics.currentPeriod.brandValueGrowth} this quarter, driven by strong performance in enterprise segments.</span>
-                </li>
-                <li className="flex items-start">
-                  <UserGroupIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-1" />
-                  <span>Enterprise segment shows highest LTV at ${brandMetrics.audience.segments[0].lifetime_value.toLocaleString()}, recommend increasing focus on this segment.</span>
-                </li>
-                <li className="flex items-start">
-                  <ShieldCheckIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-1" />
-                  <span>Emerging competitive risk detected in Q3 2024. Consider accelerating innovation pipeline.</span>
-                </li>
-                <li className="flex items-start">
-                  <ChartBarIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-1" />
-                  <span>Digital channels showing highest ROI at {brandMetrics.currentPeriod.roi.byChannel.digital}x. Opportunity to optimize budget allocation.</span>
-                </li>
-              </ul>
+              <p className="text-sm text-gray-500 font-work-sans mb-1">
+                Sentiment across brand activity in your campaigns: measurements prioritize the net positive brand mentions.
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-var(--accent-color) focus:border-transparent font-work-sans text-sm"
+              >
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last Quarter</option>
+                <option value="1y">Last Year</option>
+              </select>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleExport}
+                disabled={isExporting}
+                className="flex items-center px-5 py-2.5 bg-var(--accent-color) text-white rounded-lg hover:bg-blue-600 transition-all shadow-sm hover:shadow-md text-sm font-medium"
+              >
+                {isExporting ? (
+                  <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+                )}
+                Export
+              </motion.button>
             </div>
           </div>
-        </motion.div>
+
+          {/* Main Dashboard Grid - 2 columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - 2/3 width */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Overall Sentiment Score */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 font-sora">Overall Sentiment Score</h3>
+                  <div className="flex space-x-2">
+                    <select className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 bg-white font-work-sans">
+                      <option>Last 7 Days</option>
+                      <option>Last 30 Days</option>
+                      <option>Last Quarter</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold text-gray-900 font-sora">{brandMetrics.currentPeriod.sentiment.positive}</span>
+                      <span className="text-4xl font-bold text-gray-400 font-sora">/100</span>
+                    </div>
+                    <span className="text-sm text-green-600 font-medium mt-1 flex items-center">
+                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+                      +4% from previous period
+                    </span>
+                  </div>
+                  <div className="w-32 h-32">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Positive', value: brandMetrics.currentPeriod.sentiment.positive },
+                            { name: 'Neutral', value: brandMetrics.currentPeriod.sentiment.neutral },
+                            { name: 'Negative', value: brandMetrics.currentPeriod.sentiment.negative },
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={35}
+                          outerRadius={50}
+                          startAngle={90}
+                          endAngle={-270}
+                          dataKey="value"
+                        >
+                          <Cell fill="#4F46E5" />
+                          <Cell fill="#E2E8F0" />
+                          <Cell fill="#EF4444" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-indigo-600 mr-2"></div>
+                      <span className="text-sm font-semibold text-gray-700">Positive</span>
+                    </div>
+                    <span className="text-xl font-bold text-gray-900">{brandMetrics.currentPeriod.sentiment.positive}%</span>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-gray-300 mr-2"></div>
+                      <span className="text-sm font-semibold text-gray-700">Neutral</span>
+                    </div>
+                    <span className="text-xl font-bold text-gray-900">{brandMetrics.currentPeriod.sentiment.neutral}%</span>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                      <span className="text-sm font-semibold text-gray-700">Negative</span>
+                    </div>
+                    <span className="text-xl font-bold text-gray-900">{brandMetrics.currentPeriod.sentiment.negative}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sentiment Over Time */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 font-sora">Sentiment Over Time</h3>
+                  <div className="flex space-x-2">
+                    <button className="text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full font-medium">Daily</button>
+                    <button className="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-medium">Weekly</button>
+                    <button className="text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full font-medium">Monthly</button>
+                  </div>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={brandMetrics.historical.weekly}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} />
+                      <YAxis domain={[0, 100]} axisLine={false} tickLine={false} />
+                      <RechartsTooltip />
+                      <Line 
+                        type="monotone" 
+                        dataKey="sentiment" 
+                        stroke="#4F46E5" 
+                        strokeWidth={3} 
+                        dot={{ r: 4, fill: "#4F46E5" }} 
+                        name="Positive" 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="nps" 
+                        stroke="#9CA3AF" 
+                        strokeWidth={2} 
+                        dot={{ r: 3, fill: "#9CA3AF" }} 
+                        name="Neutral" 
+                        strokeDasharray="5 5"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Top Mentions */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 font-sora">Top Mentions</h3>
+                  <select className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 bg-white font-work-sans">
+                    <option>All Platforms</option>
+                    <option>Twitter</option>
+                    <option>LinkedIn</option>
+                    <option>News</option>
+                  </select>
+                </div>
+                <div className="space-y-4">
+                  {/* Sample mentions */}
+                  <div className="p-4 border border-gray-100 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 mr-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.1 10.1 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="font-medium text-gray-900">@TechAnalyst</span>
+                            <span className="mx-2 text-gray-500">•</span>
+                            <span className="text-sm text-gray-500">2 days ago</span>
+                          </div>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Positive</span>
+                        </div>
+                        <p className="mt-1 text-gray-700">The new Enterprise AI integration from @TheWriteCompany is impressive - finally a tool that genuinely helps content teams be more productive! #productivity #AI</p>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <span className="flex items-center mr-4">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                            256
+                          </span>
+                          <span className="flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            42
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-100 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 mr-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="font-medium text-gray-900">Sarah Johnson, Content Director</span>
+                            <span className="mx-2 text-gray-500">•</span>
+                            <span className="text-sm text-gray-500">3 days ago</span>
+                          </div>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Positive</span>
+                        </div>
+                        <p className="mt-1 text-gray-700">Just implemented @TheWriteCompany's brand health monitoring tools across our marketing department. The insights are helping us pivot our messaging strategy in real-time. Highly recommend for enterprise marketing teams.</p>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <span className="flex items-center mr-4">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                            187
+                          </span>
+                          <span className="flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            32
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button className="w-full py-2 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                    View all mentions
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - 1/3 width */}
+            <div className="space-y-6">
+              {/* Sentiment by Platform */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 font-sora mb-4">Sentiment by Platform</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                      </div>
+                      <span className="font-medium text-gray-900">Twitter</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">75%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: "75%" }}></div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                      </div>
+                      <span className="font-medium text-gray-900">LinkedIn</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">82%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: "82%" }}></div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                      </div>
+                      <span className="font-medium text-gray-900">Facebook</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">68%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: "68%" }}></div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7.826 10.083a.784.784 0 0 0-.468-.175h-.701v4.198h.701a.786.786 0 0 0 .469-.175c.155-.117.233-.292.233-.525v-2.798c.001-.233-.079-.408-.234-.525zM19.4 3H4.6C3.714 3 3 3.714 3 4.6v14.8c0 .884.715 1.6 1.6 1.6h14.8c.884 0 1.6-.715 1.6-1.6V4.6c0-.886-.716-1.6-1.6-1.6zm-9.583 8.583h-1.11v3.758H7.67v-3.758H6.5V10.5h3.317v1.083zm2.15 3.767h-.942v-.525c-.09.34-.374.609-.847.609-.275 0-.492-.09-.642-.258-.225-.225-.308-.617-.308-1.125v-2.983h.941v2.708c0 .406.067.542.367.542.3 0 .434-.208.434-.542V10h.942v5.35h.055zm3.191-1.85c0 .566-.108.967-.333 1.208-.225.25-.567.367-.967.367-.417 0-.75-.125-.25-.25-.333-.642-.333-1.208v-1.85c0-.567.108-.967.333-1.208.225-.242.55-.367.967-.367.4 0 .742.125.967.367.225.25.333.642.333 1.208v1.85zm2.267-2.175c0-.333-.083-.583-.25-.75a.937.937 0 0 0-.65-.25c-.4 0-.733.158-.925.483v-1.95h-.941v6.708h.941v-.391c.192.325.525.483.925.483.284 0 .5-.083.65-.25.167-.167.25-.417.25-.75v-3.333z"/>
+                        </svg>
+                      </div>
+                      <span className="font-medium text-gray-900">YouTube</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">78%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: "78%" }}></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Competitor Benchmarking */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 font-sora mb-4">Competitor Benchmarking</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={brandMetrics.competitors}
+                      margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                      layout="vertical"
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                      <XAxis type="number" domain={[0, 100]} />
+                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={100} />
+                      <RechartsTooltip />
+                      <Bar dataKey="sentiment" fill="#4F46E5" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4">
+                  <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
+                    <div>
+                      <span className="text-xs text-gray-500 block">Overall Position</span>
+                      <span className="text-lg font-bold text-gray-900">#1 in Sentiment</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-gray-500 block">Ahead by</span>
+                      <span className="text-lg font-bold text-green-600">+8%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mentions Count */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 font-sora mb-4">Mentions</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Total Mentions</h4>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold text-gray-900 mr-2">24,521</span>
+                      <span className="text-sm text-green-600 font-medium">+12%</span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Positive</h4>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold text-gray-900 mr-2">18,391</span>
+                      <span className="text-sm text-green-600 font-medium">+15%</span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Neutral</h4>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold text-gray-900 mr-2">4,904</span>
+                      <span className="text-sm text-yellow-600 font-medium">+5%</span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Negative</h4>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-bold text-gray-900 mr-2">1,226</span>
+                      <span className="text-sm text-red-600 font-medium">+2%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Track Competition Section */}
+          <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 font-sora">Track Competition</h3>
+                <p className="text-sm text-gray-500 font-work-sans">Monitor your brand performance against key competitors</p>
+              </div>
+              <div className="flex space-x-4">
+                <select className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 bg-white font-work-sans">
+                  <option>All Regions</option>
+                  <option>North America</option>
+                  <option>Europe</option>
+                  <option>Asia Pacific</option>
+                </select>
+                <select className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 bg-white font-work-sans">
+                  <option>Last Quarter</option>
+                  <option>Last 6 Months</option>
+                  <option>Year to Date</option>
+                  <option>Last Year</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {/* Market Share Trends */}
+              <div>
+                <h4 className="text-base font-medium text-gray-800 mb-4">Market Share Trends</h4>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={brandMetrics.historical.quarterly}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="period" axisLine={false} tickLine={false} />
+                      <YAxis domain={[0, 40]} axisLine={false} tickLine={false} />
+                      <RechartsTooltip />
+                      <RechartsLegend />
+                      <Line 
+                        type="monotone" 
+                        dataKey="marketShare" 
+                        stroke="#4F46E5" 
+                        strokeWidth={3} 
+                        dot={{ r: 4 }} 
+                        name="Your Brand" 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="competitorShare1" 
+                        stroke="#EC4899" 
+                        strokeWidth={2} 
+                        dot={{ r: 3 }} 
+                        name="Competitor A" 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="competitorShare2" 
+                        stroke="#10B981" 
+                        strokeWidth={2} 
+                        dot={{ r: 3 }} 
+                        name="Competitor B" 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              
+              {/* Share of Voice Comparison */}
+              <div>
+                <h4 className="text-base font-medium text-gray-800 mb-4">Share of Voice</h4>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[
+                        { channel: 'Twitter', you: 42, competitorA: 30, competitorB: 25 },
+                        { channel: 'LinkedIn', you: 58, competitorA: 40, competitorB: 28 },
+                        { channel: 'Industry News', you: 45, competitorA: 50, competitorB: 35 },
+                        { channel: 'Forums', you: 30, competitorA: 25, competitorB: 40 },
+                        { channel: 'YouTube', you: 35, competitorA: 30, competitorB: 20 }
+                      ]}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="channel" axisLine={false} tickLine={false} />
+                      <YAxis axisLine={false} tickLine={false} />
+                      <RechartsTooltip />
+                      <RechartsLegend />
+                      <Bar dataKey="you" fill="#4F46E5" name="Your Brand" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="competitorA" fill="#EC4899" name="Competitor A" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="competitorB" fill="#10B981" name="Competitor B" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-indigo-50 rounded-lg p-4">
+                <h5 className="text-sm font-medium text-gray-700 mb-1">Position vs Competitors</h5>
+                <div className="flex items-center">
+                  <span className="text-2xl font-bold text-gray-900 mr-2">#1</span>
+                  <span className="text-sm text-green-600 font-medium">Leader in 3 of 5 channels</span>
+                </div>
+              </div>
+              <div className="bg-indigo-50 rounded-lg p-4">
+                <h5 className="text-sm font-medium text-gray-700 mb-1">Growth Rate Difference</h5>
+                <div className="flex items-center">
+                  <span className="text-2xl font-bold text-gray-900 mr-2">+12%</span>
+                  <span className="text-sm text-green-600 font-medium">vs competitor average</span>
+                </div>
+              </div>
+              <div className="bg-indigo-50 rounded-lg p-4">
+                <h5 className="text-sm font-medium text-gray-700 mb-1">Brand Strength Index</h5>
+                <div className="flex items-center">
+                  <span className="text-2xl font-bold text-gray-900 mr-2">72/100</span>
+                  <span className="text-sm text-green-600 font-medium">+4 pts this quarter</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* AI Insights Section */}
+          <div className="mt-8 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-6 text-white">
+            <div className="flex items-start space-x-4">
+              <div className="bg-white/10 p-3 rounded-lg">
+                <SparklesIcon className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2 font-sora">AI-Powered Strategic Insights</h3>
+                <ul className="space-y-3 font-work-sans">
+                  <li className="flex items-start">
+                    <ArrowTrendingUpIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span>Your brand sentiment is consistently higher on LinkedIn (82%) than other platforms. Consider shifting more resources to this channel for enterprise messaging.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <UserGroupIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span>Product announcements receive 3.2x more positive engagement than industry news. Recommend incorporating more product-focused content in your social media mix.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <ShieldCheckIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span>Competitor B is gaining traction in Forums (40% share of voice). Consider strengthening your presence in developer and technical communities.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <ChartBarIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span>Your recent Enterprise AI campaign drove a 15% increase in positive mentions. This messaging resonates strongly with your target audience.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
