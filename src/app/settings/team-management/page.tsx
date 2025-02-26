@@ -40,8 +40,8 @@ const SectionHeader: React.FC<{
   description?: string;
 }> = memo(({ icon: Icon, title, description }) => (
   <div className="flex items-center mb-6">
-    <div className="bg-blue-50 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-blue-600" />
+    <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg">
+      <Icon className="w-6 h-6 text-[var(--accent-color)]" />
     </div>
     <div className="ml-4">
       <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
@@ -204,7 +204,7 @@ const TeamManagementPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gray-50"
+      className="min-h-screen bg-white"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
@@ -213,7 +213,7 @@ const TeamManagementPage: React.FC = () => {
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-gray-900"
+              className="text-3xl font-bold text-[var(--primary-color)]"
             >
               Team Management
             </motion.h1>
@@ -221,7 +221,7 @@ const TeamManagementPage: React.FC = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-2 text-gray-500"
+              className="mt-2 text-[var(--secondary-color)]"
             >
               Manage your team members and their roles
             </motion.p>
@@ -232,7 +232,7 @@ const TeamManagementPage: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               onClick={handleCancel}
               disabled={isLoading}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+              className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
                 transition-colors duration-200 font-medium flex items-center"
             >
               <XCircleIcon className="w-5 h-5 mr-2" />
@@ -247,7 +247,7 @@ const TeamManagementPage: React.FC = () => {
                 flex items-center ${
                   !isDirty || isLoading
                     ? 'bg-blue-300 cursor-not-allowed text-white'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'
                 }`}
             >
               {isLoading ? (
@@ -301,8 +301,8 @@ const TeamManagementPage: React.FC = () => {
                   placeholder="Search by name or email"
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                  className="pl-10 pr-4 py-2 w-[400px] border border-gray-300 rounded-lg 
-                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 pr-4 py-2 w-[400px] border border-[var(--divider-color)] rounded-lg 
+                    focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                 />
                 <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
               </div>
@@ -310,7 +310,7 @@ const TeamManagementPage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setAddModalOpen(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90
                   transition-colors duration-200 font-medium flex items-center"
               >
                 <PlusIcon className="w-5 h-5 mr-2" />
@@ -319,74 +319,74 @@ const TeamManagementPage: React.FC = () => {
             </div>
 
             {/* Team Members Table */}
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="overflow-hidden rounded-lg border border-[var(--divider-color)]">
+              <table className="min-w-full divide-y divide-[var(--divider-color)]">
+                <thead className="bg-[var(--background-color)]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                       Role
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-[var(--divider-color)]">
                   {currentMembers.map(member => (
                     <motion.tr
                       key={member.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="hover:bg-gray-50"
+                      className="hover:bg-[var(--background-color)]"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                              <span className="text-blue-600 font-medium">
+                              <span className="text-[var(--accent-color)] font-medium">
                                 {member.name.charAt(0)}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-[var(--primary-color)]">
                               {member.name}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{member.email}</div>
+                        <div className="text-sm text-[var(--secondary-color)]">{member.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {member.isEditingRole ? (
                           <select
                             value={member.role}
                             onChange={(e) => handleRoleChange(member.id, e.target.value as "Admin" | "User")}
-                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
-                              focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-[var(--divider-color)] 
+                              focus:outline-none focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] sm:text-sm rounded-md"
                           >
                             <option value="Admin">Admin</option>
                             <option value="User">User</option>
                           </select>
                         ) : (
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            ${member.role === 'Admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                            ${member.role === 'Admin' ? 'bg-blue-100 text-[var(--accent-color)]' : 'bg-gray-100 text-[var(--primary-color)]'}`}>
                             {member.role}
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex space-x-3">
                           <button
                             onClick={() => toggleEditingRole(member.id)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-[var(--accent-color)] hover:text-blue-900"
                           >
                             {member.isEditingRole ? 'Save' : 'Edit Role'}
                           </button>
@@ -409,7 +409,7 @@ const TeamManagementPage: React.FC = () => {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-between items-center mt-4">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-[var(--secondary-color)]">
                   Showing {indexOfFirstMember + 1} to {Math.min(indexOfLastMember, filteredMembers.length)} of {filteredMembers.length} results
                 </div>
                 <div className="flex space-x-2">
@@ -418,8 +418,8 @@ const TeamManagementPage: React.FC = () => {
                     disabled={currentPage === 1}
                     className={`px-3 py-1 rounded ${
                       currentPage === 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-[var(--background-color)] text-[var(--secondary-color)] cursor-not-allowed'
+                        : 'bg-white text-[var(--primary-color)] hover:bg-[var(--background-color)]'
                     }`}
                   >
                     Previous
@@ -429,8 +429,8 @@ const TeamManagementPage: React.FC = () => {
                     disabled={currentPage === totalPages}
                     className={`px-3 py-1 rounded ${
                       currentPage === totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-[var(--background-color)] text-[var(--secondary-color)] cursor-not-allowed'
+                        : 'bg-white text-[var(--primary-color)] hover:bg-[var(--background-color)]'
                     }`}
                   >
                     Next
@@ -452,40 +452,40 @@ const TeamManagementPage: React.FC = () => {
               <h3 className="text-lg font-semibold mb-4">Add Team Member</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Name
                   </label>
                   <input
                     type="text"
                     value={newMemberName}
                     onChange={(e) => setNewMemberName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="Enter name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Email
                   </label>
                   <input
                     type="email"
                     value={newMemberEmail}
                     onChange={(e) => setNewMemberEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="Enter email"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Role
                   </label>
                   <select
                     value={newMemberRole}
                     onChange={(e) => setNewMemberRole(e.target.value as "Admin" | "User")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                   >
                     <option value="User">User</option>
                     <option value="Admin">Admin</option>
@@ -504,15 +504,15 @@ const TeamManagementPage: React.FC = () => {
                     setNewMemberRole("User");
                     setAddMemberError("");
                   }}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg 
+                  className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg 
                     hover:bg-gray-200 transition-colors duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddMember}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg 
-                    hover:bg-blue-700 transition-colors duration-200"
+                  className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg 
+                    hover:bg-opacity-90 transition-colors duration-200"
                 >
                   Add Member
                 </button>
@@ -530,14 +530,14 @@ const TeamManagementPage: React.FC = () => {
               className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
             >
               <h3 className="text-lg font-semibold mb-4">Remove Team Member</h3>
-              <p className="text-gray-600">
+              <p className="text-[var(--secondary-color)]">
                 Are you sure you want to remove {memberToRemove.name} from the team?
                 This action cannot be undone.
               </p>
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   onClick={cancelRemove}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg 
+                  className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg 
                     hover:bg-gray-200 transition-colors duration-200"
                 >
                   Cancel

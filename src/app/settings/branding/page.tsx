@@ -25,13 +25,13 @@ const SectionHeader: React.FC<{
   description?: string;
 }> = memo(({ icon: Icon, title, description }) => (
   <div className="flex items-center mb-6">
-    <div className="bg-blue-50 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-blue-600" />
+    <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg">
+      <Icon className="w-6 h-6 text-[var(--accent-color)]" />
     </div>
     <div className="ml-4">
-      <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+      <h2 className="text-xl font-semibold text-[var(--primary-color)]">{title}</h2>
       {description && (
-        <p className="mt-1 text-sm text-gray-500">{description}</p>
+        <p className="mt-1 text-sm text-[var(--secondary-color)]">{description}</p>
       )}
     </div>
   </div>
@@ -229,7 +229,7 @@ const BrandingSettingsPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gray-50"
+      className="min-h-screen bg-white"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
@@ -238,7 +238,7 @@ const BrandingSettingsPage: React.FC = () => {
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-gray-900"
+              className="text-3xl font-bold text-[var(--primary-color)]"
             >
               Branding Settings
             </motion.h1>
@@ -246,7 +246,7 @@ const BrandingSettingsPage: React.FC = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-2 text-gray-500"
+              className="mt-2 text-[var(--secondary-color)]"
             >
               Customize your brand appearance and identity
             </motion.p>
@@ -257,7 +257,7 @@ const BrandingSettingsPage: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               onClick={handleCancel}
               disabled={isLoading}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+              className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
                 transition-colors duration-200 font-medium flex items-center"
             >
               <XCircleIcon className="w-5 h-5 mr-2" />
@@ -272,7 +272,7 @@ const BrandingSettingsPage: React.FC = () => {
                 flex items-center ${
                   !isDirty || isLoading
                     ? 'bg-blue-300 cursor-not-allowed text-white'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'
                 }`}
             >
               {isLoading ? (
@@ -339,8 +339,8 @@ const BrandingSettingsPage: React.FC = () => {
                     </motion.button>
                   </div>
                 ) : (
-                  <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <PhotoIcon className="w-12 h-12 text-gray-400" />
+                  <div className="w-32 h-32 bg-[var(--background-color)] rounded-lg flex items-center justify-center">
+                    <PhotoIcon className="w-12 h-12 text-[var(--secondary-color)]" />
                   </div>
                 )}
               </div>
@@ -350,7 +350,7 @@ const BrandingSettingsPage: React.FC = () => {
                     <label
                       htmlFor="logo"
                       className="relative cursor-pointer inline-flex items-center px-4 py-2 
-                        bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                        bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 
                         transition-colors duration-200 font-medium group"
                     >
                       <PhotoIcon className="w-5 h-5 mr-2" />
@@ -364,7 +364,7 @@ const BrandingSettingsPage: React.FC = () => {
                       />
                     </label>
                   </div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-[var(--secondary-color)]">
                     Supported formats: JPG, PNG. Maximum file size: 5MB
                   </p>
                   {logoError && (
@@ -391,7 +391,7 @@ const BrandingSettingsPage: React.FC = () => {
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                   Primary Color
                 </label>
                 <div className="flex items-center space-x-4">
@@ -405,8 +405,8 @@ const BrandingSettingsPage: React.FC = () => {
                     type="text"
                     value={primaryColour}
                     onChange={handlePrimaryColourChange}
-                    className="flex-grow px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="#000000"
                   />
                 </div>
@@ -415,7 +415,7 @@ const BrandingSettingsPage: React.FC = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                   Secondary Color
                 </label>
                 <div className="flex items-center space-x-4">
@@ -429,8 +429,8 @@ const BrandingSettingsPage: React.FC = () => {
                     type="text"
                     value={secondaryColour}
                     onChange={handleSecondaryColourChange}
-                    className="flex-grow px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="#000000"
                   />
                 </div>
@@ -451,14 +451,14 @@ const BrandingSettingsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Header Font
                   </label>
                   <select
                     value={headerFont}
                     onChange={handleHeaderFontChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                   >
                     <option value="Work Sans">Work Sans</option>
                     <option value="Inter">Inter</option>
@@ -467,15 +467,15 @@ const BrandingSettingsPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Header Font Size
                   </label>
                   <input
                     type="text"
                     value={headerFontSize}
                     onChange={handleHeaderFontSizeChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="18px"
                   />
                   {headerFontSizeError && (
@@ -485,14 +485,14 @@ const BrandingSettingsPage: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Body Font
                   </label>
                   <select
                     value={bodyFont}
                     onChange={handleBodyFontChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                   >
                     <option value="Work Sans">Work Sans</option>
                     <option value="Inter">Inter</option>
@@ -501,15 +501,15 @@ const BrandingSettingsPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
                     Body Font Size
                   </label>
                   <input
                     type="text"
                     value={bodyFontSize}
                     onChange={handleBodyFontSizeChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                      focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="14px"
                   />
                   {bodyFontSizeError && (

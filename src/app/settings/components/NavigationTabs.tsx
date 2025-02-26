@@ -50,7 +50,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = memo(({ activeTab, isSuper
   ];
 
   return (
-    <div className="mb-8 border-b border-gray-200">
+    <div className="mb-8 border-b border-[var(--divider-color)]">
       <nav className="flex space-x-1" aria-label="Settings navigation">
         {tabs.map((tab) => {
           if (tab.requiresAdmin && !isSuperAdmin) return null;
@@ -65,8 +65,8 @@ const NavigationTabs: React.FC<NavigationTabsProps> = memo(({ activeTab, isSuper
               className={`
                 relative py-4 px-6 flex items-center transition-all duration-200
                 ${isActive 
-                  ? 'text-blue-600 bg-blue-50/50' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}
+                  ? 'text-[var(--accent-color)] bg-[var(--background-color)] bg-opacity-50' 
+                  : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:bg-[var(--background-color)]'}
                 rounded-t-lg
               `}
               aria-current={isActive ? 'page' : undefined}
@@ -76,7 +76,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = memo(({ activeTab, isSuper
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-color)]"
                 />
               )}
             </button>
