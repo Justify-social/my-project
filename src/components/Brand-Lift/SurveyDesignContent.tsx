@@ -287,6 +287,7 @@ export default function SurveyDesignContent() {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const dragItemOption = useRef<DragItem | null>(null);
   const dragOverItemOption = useRef<DragItem | null>(null);
+  const [selectedKpi, setSelectedKpi] = useState('');
   
   // Function to toggle question expansion
   const toggleQuestionExpansion = (questionId: string) => {
@@ -931,7 +932,7 @@ export default function SurveyDesignContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {showKpiTooltip === 'kpi-builder-tooltip' && (
-                  <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 top-6">
+                  <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                     <div className="font-semibold mb-1">Key Performance Indicators</div>
                     <div className="mb-1">Metrics used to measure the effectiveness of your brand lift campaign.</div>
                     <div className="text-[var(--secondary-color)]">Select the most relevant KPI for this question to help measure the campaign's impact.</div>
@@ -985,9 +986,8 @@ export default function SurveyDesignContent() {
                     </svg>
                   </span>
                 </span>
-                {/* Moved tooltip outside span */}
                 {showKpiTooltip === 'randomise-tooltip' && (
-                  <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 -bottom-24">
+                  <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                     <div className="font-semibold mb-1">Randomise Options</div>
                     <div className="mb-1">Presents answer options in a random order for each respondent to prevent bias.</div>
                     <div className="text-[var(--secondary-color)]">This helps ensure more accurate results by eliminating order bias.</div>
@@ -1017,9 +1017,8 @@ export default function SurveyDesignContent() {
                     </svg>
                   </span>
                 </span>
-                {/* Moved tooltip outside span */}
                 {showKpiTooltip === 'mandatory-tooltip' && (
-                  <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 -bottom-24">
+                  <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                     <div className="font-semibold mb-1">Non-forced Choice</div>
                     <div className="mb-1">Allows respondents to skip questions without providing an answer.</div>
                     <div className="text-[var(--secondary-color)]">Useful for sensitive questions or when "None of the above" is a valid response.</div>
@@ -1065,7 +1064,7 @@ export default function SurveyDesignContent() {
                 Boost Brand Awareness
               </span>
               {showKpiTooltip === 'brand-awareness' && (
-                <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 -bottom-24">
+                <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                   <div className="font-semibold mb-1">Brand Awareness</div>
                   <div className="mb-1">{getKpiInfo('Brand Awareness')?.definition || "The increase in recognition of your brand."}</div>
                   <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Brand Awareness')?.example || "Your brand name is recognised by 30% more people after the campaign."}</div>
@@ -1081,7 +1080,7 @@ export default function SurveyDesignContent() {
                 Maximize Ad Recall
               </span>
               {showKpiTooltip === 'ad-recall' && (
-                <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 -bottom-24">
+                <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                   <div className="font-semibold mb-1">Ad Recall</div>
                   <div className="mb-1">{getKpiInfo('Ad Recall')?.definition || "The percentage of people who remember seeing your advertisement."}</div>
                   <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Ad Recall')?.example || "After a week, 60% of viewers can recall your ad's main message."}</div>
@@ -1098,7 +1097,7 @@ export default function SurveyDesignContent() {
               </span>
             </span>
             {showKpiTooltip === 'brand-preference' && (
-              <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 mt-1">
+              <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                 <div className="font-semibold mb-1">Brand Preference</div>
                 <div className="mb-1">{getKpiInfo('Brand Preference')?.definition || "Preference for your brand over competitors."}</div>
                 <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Brand Preference')?.example || "40% of customers prefer your brand when choosing between similar products."}</div>
@@ -1115,7 +1114,7 @@ export default function SurveyDesignContent() {
               </span>
             </span>
             {showKpiTooltip === 'action-intent' && (
-              <div className="absolute z-10 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs left-0 mt-1">
+              <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
                 <div className="font-semibold mb-1">Action Intent</div>
                 <div className="mb-1">{getKpiInfo('Action Intent')?.definition || "The likelihood of taking a specific action after seeing your ad."}</div>
                 <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Action Intent')?.example || "25% of viewers intend to visit your website after viewing the ad."}</div>
