@@ -248,14 +248,14 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
+      className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
       onClick={() => onClick ? onClick() : router.push(`/campaigns/${campaign.id}`)}
     >
       <div className="p-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-base font-medium text-gray-900">{campaign.campaignName}</h3>
-            <p className="text-xs text-gray-500 mt-1">
+            <h3 className="text-base font-medium text-[var(--primary-color)]">{campaign.campaignName}</h3>
+            <p className="text-xs text-[var(--secondary-color)] mt-1">
               {new Date(campaign.startDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
               {campaign.endDate && ` - ${new Date(campaign.endDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`}
             </p>
@@ -278,8 +278,8 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
         
         <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
           <div>
-            <p className="text-gray-500">Budget</p>
-            <p className="font-medium text-gray-900">
+            <p className="text-[var(--secondary-color)]">Budget</p>
+            <p className="font-medium text-[var(--primary-color)]">
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
@@ -288,8 +288,8 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Primary KPI</p>
-            <p className="font-medium text-gray-900">{campaign.primaryKPI}</p>
+            <p className="text-[var(--secondary-color)]">Primary KPI</p>
+            <p className="font-medium text-[var(--primary-color)]">{campaign.primaryKPI}</p>
           </div>
         </div>
       </div>
@@ -307,21 +307,21 @@ interface MetricCardProps {
   format?: "number" | "currency" | "percent";
 }
 
-// Update the MetricCard component for better mobile responsiveness
+// Update the MetricCard component for better mobile responsiveness and to use CSS variables
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, icon: Icon, description, format = "number" }) => (
-  <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+  <div className="bg-white p-4 rounded-lg border border-[var(--divider-color)] hover:shadow-md transition-shadow">
     <div className="flex justify-between items-start">
       <div>
-        <h3 className="text-sm sm:text-base font-medium text-gray-700 mb-1">{title}</h3>
-        <p className="text-xl sm:text-2xl font-bold text-gray-900">
+        <h3 className="text-sm sm:text-base font-medium text-[var(--secondary-color)] mb-1">{title}</h3>
+        <p className="text-xl sm:text-2xl font-bold text-[var(--primary-color)]">
           {format === "number" && typeof value === "number" && value.toLocaleString()}
           {format === "currency" && typeof value === "number" && `$${value.toLocaleString()}`}
           {format === "percent" && typeof value === "number" && `${value}%`}
           {typeof value === "string" && value}
         </p>
       </div>
-      <div className="p-2 bg-blue-50 rounded-lg">
-        <Icon className="w-5 h-5 text-blue-500" />
+      <div className="p-2 bg-[var(--accent-color)] bg-opacity-10 rounded-lg">
+        <Icon className="w-5 h-5 text-[var(--accent-color)]" />
       </div>
     </div>
     <div className="mt-3 flex items-center text-xs">
@@ -335,7 +335,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, icon: Icon
           {Math.abs(trend)}%
         </span>
       )}
-      <span className="text-gray-500">{description}</span>
+      <span className="text-[var(--secondary-color)]">{description}</span>
     </div>
   </div>
 );
@@ -866,34 +866,36 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
   }
   
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="p-4 flex items-center justify-between border-b border-gray-200">
-        <h3 className="text-base font-medium text-gray-800">{monthName} {year}</h3>
+    <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full">
+      <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)]">
+        <h3 className="text-base font-medium text-[var(--primary-color)]">{monthName} {year}</h3>
         <div className="flex space-x-2">
-          <button onClick={prevMonth} className="p-1 rounded-md hover:bg-gray-100">
-            <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+          <button onClick={prevMonth} className="p-1 rounded-md hover:bg-[var(--background-color)]">
+            <ChevronLeftIcon className="w-5 h-5 text-[var(--secondary-color)]" />
           </button>
-          <button onClick={nextMonth} className="p-1 rounded-md hover:bg-gray-100">
-            <ChevronRightIcon className="w-5 h-5 text-gray-600" />
+          <button onClick={nextMonth} className="p-1 rounded-md hover:bg-[var(--background-color)]">
+            <ChevronRightIcon className="w-5 h-5 text-[var(--secondary-color)]" />
           </button>
         </div>
       </div>
       
       <div className="overflow-x-auto">
-        <div className="min-w-full grid grid-cols-7 text-center p-2 text-xs font-medium text-gray-500">
-          <div className="py-1">Mo</div>
-          <div className="py-1">Tu</div>
-          <div className="py-1">We</div>
-          <div className="py-1">Th</div>
-          <div className="py-1">Fr</div>
-          <div className="py-1">Sa</div>
-          <div className="py-1">Su</div>
+        {/* Day headers with consistent width */}
+        <div className="min-w-full grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)]">
+          <div className="py-1 w-full">Mo</div>
+          <div className="py-1 w-full">Tu</div>
+          <div className="py-1 w-full">We</div>
+          <div className="py-1 w-full">Th</div>
+          <div className="py-1 w-full">Fr</div>
+          <div className="py-1 w-full">Sa</div>
+          <div className="py-1 w-full">Su</div>
         </div>
         
-        <div className="min-w-full grid grid-cols-7 gap-1 p-2">
+        {/* Calendar grid with fixed size cells for consistent spacing */}
+        <div className="min-w-full grid grid-cols-7 gap-1 px-1 pb-2">
           {/* Placeholder cells for days before the 1st of the month */}
           {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() === 0 ? 6 : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() - 1 }).map((_, index) => (
-            <div key={`empty-${index}`} className="aspect-square"></div>
+            <div key={`empty-${index}`} className="aspect-square w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px]"></div>
           ))}
           
           {/* Actual days of the month */}
@@ -903,23 +905,27 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
             return (
               <div 
                 key={day} 
-                className={`relative p-1 text-center ${isToday ? 'bg-blue-50 rounded-md' : ''}`}
+                className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center justify-start
+                ${isToday ? 'bg-[var(--accent-color)] bg-opacity-10 rounded-md' : ''}`}
               >
-                <div className={`text-xs ${isToday ? 'font-bold text-blue-600' : 'text-gray-700'}`}>
+                <div className={`text-xs ${isToday ? 'font-bold text-[var(--accent-color)]' : 'text-[var(--primary-color)]'}`}>
                   {day}
                 </div>
                 
                 {events.length > 0 && (
-                  <div className="mt-1 space-y-1">
-                    {events.map(event => (
+                  <div className="mt-0.5 w-full space-y-0.5 overflow-hidden">
+                    {events.slice(0, 2).map(event => (
                       <div 
                         key={event.id}
-                        className="text-[9px] sm:text-[10px] truncate rounded px-1 py-0.5 bg-blue-100 text-blue-800"
+                        className="text-[8px] sm:text-[9px] truncate rounded px-0.5 py-px bg-[var(--accent-color)] bg-opacity-10 text-[var(--accent-color)]"
                         title={event.title}
                       >
-                        {event.title.length > 10 ? `${event.title.substring(0, 8)}...` : event.title}
+                        {event.title.length > 8 ? `${event.title.substring(0, 6)}...` : event.title}
                       </div>
                     ))}
+                    {events.length > 2 && (
+                      <div className="text-[8px] text-[var(--secondary-color)]">+{events.length - 2} more</div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1156,10 +1162,10 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
         {/* Campaigns Overview Section */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-5">
-            <h2 className="text-xl font-semibold text-gray-900">Campaigns Overview</h2>
+            <h2 className="text-xl font-semibold text-[var(--primary-color)]">Campaigns Overview</h2>
             <button 
               onClick={() => router.push('/campaigns/wizard/step-1')}
-              className="px-3 sm:px-4 py-2 bg-[#0ea5e9] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
+              className="px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
             >
               <PlusIcon className="w-4 h-4" />
               <span>Create New Campaign</span>
@@ -1169,41 +1175,45 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
           {/* Calendar and Campaign Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Calendar */}
-            <div className="col-span-12 lg:col-span-6 overflow-x-auto">
+            <div className="col-span-12 lg:col-span-6">
               <CalendarMonthView month={currentDate} events={calendarEvents} />
             </div>
             
-            {/* Campaign Cards */}
+            {/* Campaign Cards - Align with calendar */}
             <div className="lg:col-span-6">
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-gray-700">Upcoming</h3>
+              <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden">
+                <div className="p-4 border-b border-[var(--divider-color)]">
+                  <h3 className="text-sm font-medium text-[var(--secondary-color)]">Upcoming</h3>
+                </div>
                 
-                {isLoadingCampaigns ? (
-                  <div className="text-center py-8">
-                    <Spinner />
-                    <p className="mt-2 text-sm text-gray-500">Loading campaigns...</p>
-                  </div>
-                ) : upcomingCampaigns.length === 0 ? (
-                  <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
-                    <p className="text-sm text-gray-500">No upcoming campaigns</p>
-                    <button
-                      onClick={handleNewCampaign}
-                      className="mt-3 px-3 py-1.5 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors"
-                    >
-                      Create Your First Campaign
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {upcomingCampaigns.map((campaign) => (
-                      <CampaignCard
-                        key={campaign.id}
-                        campaign={campaign}
-                        onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className="p-4">
+                  {isLoadingCampaigns ? (
+                    <div className="text-center py-6">
+                      <Spinner />
+                      <p className="mt-2 text-sm text-[var(--secondary-color)]">Loading campaigns...</p>
+                    </div>
+                  ) : upcomingCampaigns.length === 0 ? (
+                    <div className="text-center py-6 border border-dashed border-[var(--divider-color)] rounded-lg">
+                      <p className="text-sm text-[var(--secondary-color)]">No upcoming campaigns</p>
+                      <button
+                        onClick={handleNewCampaign}
+                        className="mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors"
+                      >
+                        Create Your First Campaign
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 overflow-y-auto">
+                      {upcomingCampaigns.map((campaign) => (
+                        <CampaignCard
+                          key={campaign.id}
+                          campaign={campaign}
+                          onClick={() => router.push(`/campaigns/${campaign.id}`)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1212,7 +1222,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
         {/* Performance Metrics Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Performance</h2>
+            <h2 className="text-xl font-semibold text-[var(--primary-color)]">Performance</h2>
           </div>
           
           {/* Performance Cards */}
