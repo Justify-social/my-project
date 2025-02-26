@@ -65,99 +65,73 @@ export async function GET(
     
     console.log(`Fetching campaign data for ID: ${campaignId}`);
     
-    // Always return mock data regardless of ID
-    // This ensures the page always has data to display
-    const mockCampaign = {
-      id: id || 123,
-      campaignName: "Sample Marketing Campaign",
-      description: "This campaign aims to showcase brand values, highlight product benefits, and drive conversions.",
-      startDate: "2023-07-01",
-      endDate: "2023-09-30",
-      timeZone: "UTC",
-      currency: "USD",
-      totalBudget: 100000,
-      socialMediaBudget: 45000,
-      platform: "Instagram",
-      influencerHandle: "sampleinfluencer",
-      website: "https://example.com",
-      primaryContact: {
-        id: 1,
-        firstName: "John",
-        surname: "Doe",
-        email: "john.doe@example.com",
-        position: "Manager",
-        phone: "+1 (555) 123-4567"
-      },
-      secondaryContact: {
-        id: 2,
-        firstName: "Jane",
-        surname: "Smith",
-        email: "jane.smith@example.com",
-        position: "Coordinator",
-        phone: "+1 (555) 987-6543"
-      },
-      brandName: "Sample Brand",
-      category: "Technology",
-      product: "Software",
-      targetMarket: "Global",
-      submissionStatus: "draft",
-      primaryKPI: "brandAwareness",
-      secondaryKPIs: ["adRecall", "consideration"],
-      mainMessage: "Experience the future of technology",
-      hashtags: "#SampleTech #Innovation",
-      memorability: "High",
-      keyBenefits: "Increased productivity, time savings",
-      expectedAchievements: "Market penetration and brand awareness",
-      purchaseIntent: "Increase by 15%",
-      brandPerception: "Innovation leader",
-      features: ["BRAND_LIFT", "CREATIVE_ASSET_TESTING"],
-      audience: {
-        id: 1,
+    // Connect to database
+    await connectToDatabase();
+    
+    // Fetch the actual campaign from the database
+    const campaign = await prisma.campaignWizardSubmission.findUnique({
+      where: { id },
+      include: {
+        primaryContact: true,
+        secondaryContact: true,
+        audience: {
+          include: {
+            locations: true,
+            genders: true,
+            screeningQuestions: true,
+            languages: true,
+            competitors: true
+          }
+        },
+        creativeAssets: true,
+        creativeRequirements: true
+      }
+    });
+    
+    // If campaign not found, return 404
+    if (!campaign) {
+      console.log(`Campaign with ID ${id} not found`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Campaign not found',
+          message: `No campaign found with ID ${id}`
+        }), 
+        { 
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    // Format the audience data to match the expected structure
+    const formattedCampaign = {
+      ...campaign,
+      audience: campaign.audience ? {
         demographics: {
-          ageRange: ["25", "35", "20", "15", "5", "0"],
-          gender: ["Male", "Female"],
-          education: ["College", "Graduate"],
-          income: ["Middle", "Upper-middle"],
-          interests: ["Technology", "Innovation", "Digital products"],
-          locations: ["United States", "Europe", "Asia"],
-          languages: ["English", "Spanish", "French"]
+          ageRange: [
+            campaign.audience.age1824.toString(),
+            campaign.audience.age2534.toString(),
+            campaign.audience.age3544.toString(),
+            campaign.audience.age4554.toString(),
+            campaign.audience.age5564.toString(),
+            campaign.audience.age65plus.toString()
+          ],
+          gender: campaign.audience.genders.map(g => g.gender),
+          education: [campaign.audience.educationLevel],
+          income: [campaign.audience.incomeLevel],
+          interests: campaign.audience.screeningQuestions?.map(q => q.question) || [],
+          locations: campaign.audience.locations?.map(l => l.location) || [],
+          languages: campaign.audience.languages?.map(l => l.language) || []
         }
-      },
-      creativeAssets: [
-        {
-          id: 1,
-          name: "Product Demo",
-          type: "video",
-          url: "https://example.com/demo.mp4",
-          size: 5000,
-          duration: 45
-        },
-        {
-          id: 2,
-          name: "Marketing Image",
-          type: "image",
-          url: "https://via.placeholder.com/800x600",
-          size: 250
-        }
-      ],
-      creativeRequirements: [
-        {
-          id: 1,
-          requirement: "All videos must be under 60 seconds",
-          description: "Keep videos concise for social media"
-        },
-        {
-          id: 2,
-          requirement: "Brand logo must be clearly visible",
-          description: "Ensure brand recognition"
-        }
-      ],
-      createdAt: "2023-06-15T10:00:00Z",
-      updatedAt: "2023-06-20T15:30:00Z"
+      } : null,
+      secondaryKPIs: Array.isArray(campaign.secondaryKPIs) ? campaign.secondaryKPIs : [],
+      features: Array.isArray(campaign.features) ? campaign.features : []
     };
-
+    
+    console.log(`Successfully fetched campaign with ID ${id}`);
+    
     return new Response(
-      JSON.stringify(mockCampaign), 
+      JSON.stringify(formattedCampaign), 
       { 
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -166,33 +140,14 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching campaign:', error);
     
-    // Even on error, return mock data to prevent UI issues
-    const mockCampaign = {
-      id: parseInt(params.id) || 123,
-      campaignName: "Backup Campaign Data",
-      description: "This is fallback data shown when there's an error fetching the real campaign.",
-      startDate: "2023-07-01",
-      endDate: "2023-09-30",
-      timeZone: "UTC",
-      currency: "USD",
-      totalBudget: 100000,
-      platform: "Instagram",
-      submissionStatus: "draft",
-      // Add minimal required fields
-      primaryContact: {
-        firstName: "Contact",
-        surname: "Person",
-        email: "contact@example.com",
-        position: "Manager"
-      },
-      createdAt: "2023-06-15T10:00:00Z",
-      updatedAt: "2023-06-20T15:30:00Z"
-    };
-    
+    // Return proper error response
     return new Response(
-      JSON.stringify(mockCampaign), 
+      JSON.stringify({ 
+        error: 'Error fetching campaign', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      }), 
       { 
-        status: 200,
+        status: 500,
         headers: { 'Content-Type': 'application/json' }
       }
     );
@@ -280,64 +235,72 @@ export async function DELETE(
 
     // Delete everything in the correct order within a transaction
     await prisma.$transaction(async (tx) => {
-      // 1. First, find the campaign to get related IDs
+      // First, check if the campaign exists
       const campaign = await tx.campaignWizardSubmission.findUnique({
         where: { id: campaignId },
         include: {
           audience: true,
+          creativeAssets: true,
+          creativeRequirements: true,
         }
       });
 
       if (!campaign) {
-        throw new Error('Campaign not found');
+        throw new Error(`Campaign with ID ${campaignId} not found`);
       }
 
-      // 2. Delete audience-related records if they exist
+      // Delete audience-related records if audience exists
       if (campaign.audience) {
+        // Delete audience relations first
         await tx.audienceLocation.deleteMany({
           where: { audienceId: campaign.audience.id }
         });
+        
         await tx.audienceGender.deleteMany({
           where: { audienceId: campaign.audience.id }
         });
-        await tx.audienceScreeningQuestion.deleteMany({
-          where: { audienceId: campaign.audience.id }
-        });
+        
         await tx.audienceLanguage.deleteMany({
           where: { audienceId: campaign.audience.id }
         });
+        
+        await tx.audienceScreeningQuestion.deleteMany({
+          where: { audienceId: campaign.audience.id }
+        });
+        
         await tx.audienceCompetitor.deleteMany({
           where: { audienceId: campaign.audience.id }
         });
+        
+        // Then delete the audience
         await tx.audience.delete({
           where: { id: campaign.audience.id }
         });
       }
 
-      // 3. Delete creative assets and requirements
-      await tx.creativeAsset.deleteMany({
-        where: { submissionId: campaignId }
-      });
+      // Delete creative requirements
       await tx.creativeRequirement.deleteMany({
         where: { submissionId: campaignId }
       });
 
-      // 4. Delete the main campaign record first (this will cascade to contacts)
+      // Delete creative assets
+      await tx.creativeAsset.deleteMany({
+        where: { submissionId: campaignId }
+      });
+
+      // Delete the campaign itself
       await tx.campaignWizardSubmission.delete({
         where: { id: campaignId }
       });
     });
 
     return new NextResponse(
-      JSON.stringify({ 
-        message: 'Campaign deleted successfully'
-      }),
+      JSON.stringify({ message: 'Campaign deleted successfully' }),
       { 
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       }
     );
-
   } catch (error) {
     console.error('Server error deleting campaign:', error);
     return new NextResponse(

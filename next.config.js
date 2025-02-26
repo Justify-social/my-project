@@ -8,7 +8,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['unavatar.io', 'via.placeholder.com', 'example.com'],
+    domains: ['unavatar.io', 'via.placeholder.com', 'example.com', 'images.unsplash.com'],
   },
   typescript: {
     // !! WARN !!

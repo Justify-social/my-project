@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary'
 import { Analytics } from '@/lib/analytics/analytics'
 import ErrorFallback from '@/components/ErrorFallback'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
+import { useSidebar } from '@/providers/SidebarProvider'
 import { 
   CalendarIcon, 
   CurrencyDollarIcon,
@@ -43,7 +44,8 @@ import {
   PaperAirplaneIcon,
   PauseIcon,
   CheckBadgeIcon,
-  PlayIcon
+  PlayIcon,
+  CogIcon
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Image from 'next/image';
@@ -296,33 +298,25 @@ const DataCard: React.FC<DataCardProps> = ({
   className,
   actions
 }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    className={`bg-white shadow-sm rounded-xl p-5 hover:shadow-md transition-all duration-300 border border-gray-200 ${className || ''}`}
-  >
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
+  <div className={`shadow-sm rounded-xl p-5 hover:shadow-md transition-all duration-300 border border-gray-200 ${className || ''}`}>
+    <div className="flex justify-between items-start mb-4">
       <div className="flex items-center">
-        <div className="bg-blue-50 p-3 rounded-lg mr-3">
-          <Icon className="w-5 h-5 text-blue-500" />
+        <div className="bg-blue-50 p-2 rounded-full mr-3">
+          <Icon className="h-5 w-5 text-blue-500" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-          {description && (
-            <p className="text-sm text-gray-500 mt-0.5">{description}</p>
-          )}
+          <h3 className="font-semibold text-gray-900 text-base">{title}</h3>
+          {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
         </div>
       </div>
       {actions && (
-        <div className="flex space-x-2 ml-auto sm:ml-0">
+        <div>
           {actions}
         </div>
       )}
     </div>
-    <div className="space-y-4">
-      {children}
-    </div>
-  </motion.div>
+    {children}
+  </div>
 );
 
 // Add DataRow component before the main CampaignDetail component
@@ -1109,6 +1103,7 @@ function stressTestWithNullValues(data: CampaignDetail, formatDate: (date: strin
 export default function CampaignDetail() {
   const params = useParams();
   const router = useRouter();
+  const { isOpen } = useSidebar(); // Access sidebar state
   const [data, setData] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1254,7 +1249,102 @@ export default function CampaignDetail() {
           return;
         }
 
-        setData(result);
+        // Process the data to match expected format
+        const processedData: CampaignDetail = {
+          id: result.id.toString(),
+          campaignName: result.campaignName,
+          description: result.description,
+          startDate: result.startDate,
+          endDate: result.endDate,
+          timeZone: result.timeZone,
+          currency: result.currency,
+          totalBudget: result.totalBudget,
+          socialMediaBudget: result.socialMediaBudget,
+          platform: result.platform,
+          influencerHandle: result.influencerHandle,
+          website: result.website || "",
+          
+          // Format the primary contact data
+          primaryContact: {
+            firstName: result.primaryContact.firstName,
+            surname: result.primaryContact.surname,
+            email: result.primaryContact.email,
+            position: result.primaryContact.position,
+            phone: result.primaryContact.phone || "N/A"
+          },
+          
+          // Format secondary contact if available
+          secondaryContact: result.secondaryContact ? {
+            firstName: result.secondaryContact.firstName,
+            surname: result.secondaryContact.surname,
+            email: result.secondaryContact.email,
+            position: result.secondaryContact.position,
+            phone: result.secondaryContact.phone || "N/A"
+          } : undefined,
+          
+          // Campaign Details
+          brandName: result.brandName || result.campaignName,
+          category: result.category || "Not specified",
+          product: result.product || "Not specified",
+          targetMarket: result.targetMarket || "Global",
+          submissionStatus: result.submissionStatus,
+          primaryKPI: result.primaryKPI,
+          secondaryKPIs: result.secondaryKPIs || [],
+          
+          // Campaign Objectives
+          mainMessage: result.mainMessage || "",
+          hashtags: result.hashtags || "",
+          memorability: result.memorability || "",
+          keyBenefits: result.keyBenefits || "",
+          expectedAchievements: result.expectedAchievements || "",
+          purchaseIntent: result.purchaseIntent || "",
+          brandPerception: result.brandPerception || "",
+          features: result.features || [],
+          
+          // Format audience data if available
+          audience: result.audience ? {
+            demographics: {
+              ageRange: result.audience.demographics.ageRange || ["0", "0", "0", "0", "0", "0"],
+              gender: result.audience.demographics.gender || ["Not specified"],
+              education: result.audience.demographics.education || ["Not specified"],
+              income: result.audience.demographics.income || ["Not specified"],
+              interests: result.audience.demographics.interests || ["Not specified"],
+              locations: result.audience.demographics.locations || ["Not specified"],
+              languages: result.audience.demographics.languages || ["Not specified"]
+            }
+          } : {
+            demographics: {
+              ageRange: ["0", "0", "0", "0", "0", "0"],
+              gender: ["Not specified"],
+              education: ["Not specified"],
+              income: ["Not specified"],
+              interests: ["Not specified"],
+              locations: ["Not specified"],
+              languages: ["Not specified"]
+            }
+          },
+          
+          // Format creative assets
+          creativeAssets: result.creativeAssets ? result.creativeAssets.map((asset: any) => ({
+            name: asset.assetName || asset.fileName,
+            type: asset.type.toLowerCase() === 'video' ? 'video' : 'image',
+            url: asset.url,
+            size: asset.fileSize,
+            duration: asset.duration || null
+          })) : [],
+          
+          // Format creative requirements
+          creativeRequirements: result.creativeRequirements ? result.creativeRequirements.map((req: any) => ({
+            requirement: req.requirement,
+            description: req.description || ""
+          })) : [],
+          
+          // Timestamps
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt
+        };
+
+        setData(processedData);
         setError(null);
       } catch (err) {
         console.error('Error fetching campaign data:', err);
@@ -1458,7 +1548,7 @@ export default function CampaignDetail() {
   if (error && !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full">
+        <div className="p-8 rounded-xl shadow-md max-w-md w-full">
           <XCircleIcon className="h-12 w-12 text-red-500 mx-auto" />
           <h2 className="text-xl font-semibold text-center mt-4">Error Loading Campaign</h2>
           <p className="text-gray-600 text-center mt-2">{error || 'Failed to load campaign data'}</p>
@@ -1480,9 +1570,9 @@ export default function CampaignDetail() {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen">
       {/* Campaign Header - Styled to match Figma */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+      <div className="border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -1899,24 +1989,41 @@ export default function CampaignDetail() {
 
       </div>
 
-      {/* Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 sm:px-6 z-10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <button
+      {/* Footer actions */}
+      <div className={`
+        fixed
+        bottom-0
+        left-0
+        w-full
+        border-t
+        border-gray-300
+        shadow
+        z-40
+        bg-white
+        flex
+        justify-between
+        items-center
+        transition-all
+        duration-300
+        ease-in-out
+        ${isOpen ? 'md:w-[calc(100%-12rem)] md:left-[12rem] lg:w-[calc(100%-16rem)] lg:left-[16rem]' : ''}
+      `}
+      style={{
+        height: '65px',
+      }}
+      >
+        <div className="flex justify-between items-center max-w-7xl mx-auto w-full px-4 sm:px-6">
+          <button 
             onClick={() => router.push('/campaigns')}
-            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
             Back to Campaigns
           </button>
-          <div className="flex gap-2">
-            <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Manage Page
-            </button>
-            <button className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-              Add Note
-            </button>
-          </div>
+          <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">
+            <CogIcon className="h-4 w-4 mr-1.5" />
+            View Settings
+          </button>
         </div>
       </div>
     </div>
