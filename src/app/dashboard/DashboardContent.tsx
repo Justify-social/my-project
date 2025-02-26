@@ -241,8 +241,27 @@ interface CampaignCardProps {
   onClick?: () => void;
 }
 
+// KPI mapping for display purposes
+const kpiMapping = {
+  adRecall: { title: "Ad Recall", icon: "/KPIs/Ad_Recall.svg" },
+  brandAwareness: { title: "Brand Awareness", icon: "/KPIs/Brand_Awareness.svg" },
+  consideration: { title: "Consideration", icon: "/KPIs/Consideration.svg" },
+  messageAssociation: { title: "Message Association", icon: "/KPIs/Message_Association.svg" },
+  brandPreference: { title: "Brand Preference", icon: "/KPIs/Brand_Preference.svg" },
+  purchaseIntent: { title: "Purchase Intent", icon: "/KPIs/Purchase_Intent.svg" },
+  actionIntent: { title: "Action Intent", icon: "/KPIs/Action_Intent.svg" },
+  recommendationIntent: { title: "Recommendation Intent", icon: "/KPIs/Brand_Preference.svg" },
+  advocacy: { title: "Advocacy", icon: "/KPIs/Advocacy.svg" }
+};
+
 const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
   const router = useRouter();
+  
+  // Get the KPI display info or use fallback if not found
+  const kpiInfo = kpiMapping[campaign.primaryKPI as keyof typeof kpiMapping] || { 
+    title: campaign.primaryKPI, 
+    icon: "/KPIs/Brand_Awareness.svg" 
+  };
   
   return (
     <motion.div
@@ -289,7 +308,14 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
           </div>
           <div>
             <p className="text-[var(--secondary-color)]">Primary KPI</p>
-            <p className="font-medium text-[var(--primary-color)]">{campaign.primaryKPI}</p>
+            <div className="flex items-center gap-1.5">
+              <img 
+                src={kpiInfo.icon} 
+                alt={kpiInfo.title} 
+                className="w-4 h-4"
+              />
+              <p className="font-medium text-[var(--primary-color)]">{kpiInfo.title}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -901,11 +927,12 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
             return (
               <div 
                 key={day} 
-                className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center 
+                className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center justify-center
                 ${isToday ? 'bg-[var(--accent-color)] bg-opacity-5 rounded-md' : ''}`}
               >
                 <div className="flex justify-center items-center">
-                  <div className={`text-xs w-5 h-5 flex items-center justify-center rounded-full ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'}`}>
+                  <div className={`text-xs w-7 h-7 flex items-center justify-center rounded-full 
+                    ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'}`}>
                     {day}
                   </div>
                 </div>
@@ -1159,14 +1186,18 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
 
         {/* Campaigns Overview Section */}
         <div className="mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3 sm:mb-5">
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)]">Campaigns Overview</h2>
+          <div className="flex justify-between items-center mb-3 sm:mb-5">
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)]">
+              <span className="block sm:hidden">Overview</span>
+              <span className="hidden sm:block">Campaigns Overview</span>
+            </h2>
             <button 
               onClick={() => router.push('/campaigns/wizard/step-1')}
-              className="self-start sm:self-auto px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
+              className="px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
             >
               <PlusIcon className="w-4 h-4" />
-              <span>Create New Campaign</span>
+              <span className="hidden sm:inline">Create New Campaign</span>
+              <span className="inline sm:hidden">Campaign</span>
             </button>
           </div>
           
