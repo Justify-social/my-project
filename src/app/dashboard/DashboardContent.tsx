@@ -882,13 +882,9 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
       <div className="overflow-x-auto">
         {/* Day headers with consistent width */}
         <div className="min-w-full grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)]">
-          <div className="py-1 w-full">Mo</div>
-          <div className="py-1 w-full">Tu</div>
-          <div className="py-1 w-full">We</div>
-          <div className="py-1 w-full">Th</div>
-          <div className="py-1 w-full">Fr</div>
-          <div className="py-1 w-full">Sa</div>
-          <div className="py-1 w-full">Su</div>
+          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => (
+            <div key={day} className="flex justify-center items-center py-1">{day}</div>
+          ))}
         </div>
         
         {/* Calendar grid with fixed size cells for consistent spacing */}
@@ -905,11 +901,13 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
             return (
               <div 
                 key={day} 
-                className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center justify-start
+                className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center 
                 ${isToday ? 'bg-[var(--accent-color)] bg-opacity-5 rounded-md' : ''}`}
               >
-                <div className={`text-xs w-5 h-5 flex items-center justify-center rounded-full ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'}`}>
-                  {day}
+                <div className="flex justify-center items-center">
+                  <div className={`text-xs w-5 h-5 flex items-center justify-center rounded-full ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'}`}>
+                    {day}
+                  </div>
                 </div>
                 
                 {events.length > 0 && (
@@ -1155,7 +1153,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
 
   // Return the JSX for the dashboard
   return (
-    <div className="min-h-screen bg-[var(--background-color)]">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6">
         {toastMessage && <Toast message={toastMessage} type="info" />}
 
@@ -1180,7 +1178,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
             </div>
             
             {/* Campaign Cards - Align with calendar */}
-            <div className="lg:col-span-6">
+            <div className="col-span-12 lg:col-span-6">
               <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden">
                 <div className="p-3 sm:p-4 border-b border-[var(--divider-color)]">
                   <h3 className="text-sm font-medium text-[var(--secondary-color)]">Upcoming</h3>
