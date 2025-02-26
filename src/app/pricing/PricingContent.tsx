@@ -183,7 +183,7 @@ const tiers: Tier[] = [
   },
 ];
 
-// Feature categories in the order they should appear in the table
+// Feature categories in the order they should appear in the table - matching the screenshot
 const featureCategories: FeatureCategory[] = [
   "Studies / Month",
   "Creative Testing",
@@ -220,7 +220,7 @@ const featureValueTooltips: Record<string, Record<string, string>> = {
   }
 };
 
-// Function to render feature value with tooltips
+// Function to render feature value with tooltips - better match screenshot style with color
 const renderFeatureValue = (category: FeatureCategory, value: string | number | boolean, tierName: string) => {
   // Convert the value to string for lookup in the tooltip object
   const valueKey = String(value);
@@ -242,10 +242,10 @@ const renderFeatureValue = (category: FeatureCategory, value: string | number | 
         {value ? (
           <div className="relative group">
             <div className="flex items-center justify-center">
-              <CheckIcon className="h-6 w-6 text-[var(--accent-color)] mx-auto" />
-              {isHighlightedFeature && (
-                <SparklesIcon className="h-4 w-4 text-[var(--accent-color)] absolute -top-1 -right-1" />
-              )}
+              {/* Circular checkmark icon - light blue color to match screenshot */}
+              <div className="h-6 w-6 rounded-full bg-[#50b5ff] flex items-center justify-center">
+                <CheckIcon className="h-4 w-4 text-white" />
+              </div>
             </div>
             {tooltipText && (
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
@@ -256,7 +256,10 @@ const renderFeatureValue = (category: FeatureCategory, value: string | number | 
           </div>
         ) : (
           <div className="relative group">
-            <XMarkIcon className="h-6 w-6 text-gray-400 mx-auto" />
+            {/* Circular X mark icon - light gray color to match screenshot */}
+            <div className="h-6 w-6 rounded-full bg-[#d1d5db] flex items-center justify-center">
+              <XMarkIcon className="h-4 w-4 text-white" />
+            </div>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
               Not included in this plan
               <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
@@ -267,14 +270,10 @@ const renderFeatureValue = (category: FeatureCategory, value: string | number | 
     );
   }
   
+  // For non-boolean values (like "Email" or numbers)
   return (
-    <div className="relative group">
-      <div className="flex items-center justify-center">
-        <span>{value}</span>
-        {isHighlightedFeature && (
-          <SparklesIcon className="h-4 w-4 text-[var(--accent-color)] ml-1" />
-        )}
-      </div>
+    <div className="relative group text-center font-normal">
+      <span>{value}</span>
       {tooltipText && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
           {tooltipText}
@@ -291,7 +290,7 @@ export default function PricingContent() {
   const [selectedTier, setSelectedTier] = useState<string>("professional");
   const [selectedMobileTier, setSelectedMobileTier] = useState<string>("professional");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeMobileTab, setActiveMobileTab] = useState<string>("essential");
+  const [activeMobileTab, setActiveMobileTab] = useState<string>("professional");
   
   // Create refs for scrolling to sections
   const pricingRef = useRef<HTMLDivElement>(null);
@@ -301,7 +300,7 @@ export default function PricingContent() {
   // Function to scroll to section
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     if (ref.current) {
-      const yOffset = -20; 
+      const yOffset = -100; // Increased offset to account for fixed header
       const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({top: y, behavior: 'smooth'});
     }
@@ -341,345 +340,332 @@ export default function PricingContent() {
   };
 
   return (
-    <div className="pt-8 pb-16 sm:pt-12 sm:pb-16 lg:pt-12 lg:pb-20 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
-      {/* Mini Navigation Bar */}
-      <div className="sticky top-20 z-10 bg-white py-3 border-b border-gray-200 mb-8">
-        <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-sm">
-          <button 
-            onClick={() => scrollToSection(pricingRef)}
-            className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-          >
-            Pricing
-          </button>
-          <button 
-            onClick={() => scrollToSection(whyJustifyRef)}
-            className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-          >
-            Why Justify?
-          </button>
-          <button 
-            onClick={() => scrollToSection(faqRef)}
-            className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-          >
-            FAQ
-          </button>
-          <Link 
-            href="https://www.justify.social/case-study" 
-            target="_blank"
-            className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-          >
-            Case Study →
-          </Link>
-        </div>
-      </div>
-
-      {/* Pricing Header */}
-      <div ref={pricingRef} className="text-center">
-        <h1 className="text-4xl md:text-5xl font-bold font-sora mb-4">Choose the Right Plan for Your Business</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
-          Transparent pricing options designed to scale with your marketing needs.
-        </p>
-      </div>
-
-      {/* Comparison Legend */}
-      <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-8">
-        <div className="flex items-center gap-2">
-          <div className="relative group">
-            <InformationCircleIcon className="h-5 w-5 text-gray-500" />
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
-              Hover for more details
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
-            </div>
+    <div className="pb-16 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+      {/* Add padding to account for proper spacing */}
+      <div className="pt-6">
+        {/* Mini Navigation Bar - Sticky below header (not fixed at very top) */}
+        <div className="sticky top-[72px] z-40 bg-white py-3 border-b border-gray-200 shadow-sm mb-8">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-sm">
+            <button 
+              onClick={() => scrollToSection(pricingRef)}
+              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
+            >
+              Pricing
+            </button>
+            <button 
+              onClick={() => scrollToSection(whyJustifyRef)}
+              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
+            >
+              Why Justify?
+            </button>
+            <button 
+              onClick={() => scrollToSection(faqRef)}
+              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
+            >
+              FAQ
+            </button>
+            <Link 
+              href="https://www.justify.social/case-study" 
+              target="_blank"
+              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
+            >
+              Case Study →
+            </Link>
           </div>
-          <span className="text-sm text-gray-600">Hover for details</span>
         </div>
-        <div className="flex items-center gap-2">
-          <SparklesIcon className="h-5 w-5 text-[var(--accent-color)]" />
-          <span className="text-sm text-gray-600">Key feature</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <XMarkIcon className="h-5 w-5 text-gray-400" />
-          <span className="text-sm text-gray-600">Not included</span>
-        </div>
-      </div>
 
-      {/* Mobile Plan Selection Tabs - Visible on small screens only */}
-      <div className="md:hidden mb-6 px-1">
-        <div className="flex rounded-md shadow-sm overflow-x-auto">
+        {/* Pricing Header */}
+        <div ref={pricingRef} className="text-center">
+          <h1 className="text-4xl md:text-5xl font-bold font-sora mb-4">Choose your plan</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
+            Select the perfect package for your brand marketing needs
+          </p>
+        </div>
+
+        {/* Comparison Legend */}
+        <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-8">
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
+                Hover for more details
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+              </div>
+            </div>
+            <span className="text-sm text-gray-600">Hover for details</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 rounded-full bg-[#50b5ff] flex items-center justify-center">
+              <CheckIcon className="h-3 w-3 text-white" />
+            </div>
+            <span className="text-sm text-gray-600">Included</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 rounded-full bg-[#d1d5db] flex items-center justify-center">
+              <XMarkIcon className="h-3 w-3 text-white" />
+            </div>
+            <span className="text-sm text-gray-600">Not included</span>
+          </div>
+        </div>
+
+        {/* Mobile Plan Selection Tabs - Visible on small screens only */}
+        <div className="md:hidden mb-8 px-1">
+          <div className="flex rounded-md shadow-sm overflow-x-auto relative">
+            {tiers.map((tier) => (
+              <button
+                key={tier.id}
+                type="button"
+                onClick={() => setActiveMobileTab(tier.id)}
+                className={`relative flex-1 min-w-[120px] py-2 text-sm font-medium ${
+                  activeMobileTab === tier.id 
+                    ? 'bg-[var(--accent-color)] text-white' 
+                    : 'bg-white text-[var(--primary-color)] hover:bg-gray-50'
+                } border border-[var(--divider-color)] ${
+                  tier.id === "pay-as-you-go" ? "rounded-l-md" : ""
+                } ${
+                  tier.id === "advanced" ? "rounded-r-md" : ""
+                } ${
+                  tier.popular ? "pt-5" : ""
+                }`}
+              >
+                {tier.popular && (
+                  <span className="absolute -top-3 inset-x-0 flex justify-center" style={{ zIndex: 30 }}>
+                    <span className="inline-flex items-center rounded-full bg-[var(--accent-color)] px-2 py-0.5 text-xs font-medium text-white shadow-md">
+                      Most Popular
+                    </span>
+                  </span>
+                )}
+                {tier.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile Plan Card - Visible on small screens only */}
+        <div className="md:hidden mb-8">
           {tiers.map((tier) => (
-            <button
+            <div 
               key={tier.id}
-              type="button"
-              onClick={() => setActiveMobileTab(tier.id)}
-              className={`relative flex-1 min-w-[120px] py-2 text-sm font-medium ${
-                activeMobileTab === tier.id 
-                  ? 'bg-[var(--accent-color)] text-white' 
-                  : 'bg-white text-[var(--primary-color)] hover:bg-gray-50'
-              } border border-[var(--divider-color)] ${
-                tier.id === "pay-as-you-go" ? "rounded-l-md" : ""
-              } ${
-                tier.id === "advanced" ? "rounded-r-md" : ""
-              }`}
+              className={`${activeMobileTab === tier.id ? 'block' : 'hidden'} bg-white rounded-lg shadow-md border border-[var(--divider-color)] p-6 relative`}
             >
               {tier.popular && (
-                <span className="absolute -top-3 inset-x-0 flex justify-center" style={{ zIndex: 5 }}>
-                  <span className="inline-flex items-center rounded-full bg-[var(--accent-color)] px-1.5 py-0.5 text-xs font-medium text-white">
-                    Popular
+                <div className="absolute -top-4 inset-x-0 flex justify-center z-30">
+                  <span className="inline-flex items-center rounded-full bg-[var(--accent-color)] px-3 py-1 text-xs font-medium text-white shadow-md">
+                    Most Popular
                   </span>
-                </span>
-              )}
-              {tier.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile Plan Card - Visible on small screens only */}
-      <div className="md:hidden mb-8">
-        {tiers.map((tier) => (
-          <div 
-            key={tier.id}
-            className={`${activeMobileTab === tier.id ? 'block' : 'hidden'} bg-white rounded-lg shadow-md border border-[var(--divider-color)] p-6`}
-          >
-            <div className="text-center mb-6">
-              <div className="relative inline-block">
-                <h3 className="text-xl font-bold text-[var(--primary-color)] font-sora">{tier.name}</h3>
-                {tier.tooltip && (
-                  <div className="absolute top-0 -right-6 group">
-                    <InformationCircleIcon className="h-4 w-4 text-gray-400" />
-                    <div className="absolute bottom-full right-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-56 font-normal shadow-lg">
-                      {tier.tooltip}
-                      <div className="absolute top-full right-1 transform border-4 border-transparent border-t-black"></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="mt-2 flex justify-center items-baseline">
-                <span className="text-2xl sm:text-3xl font-light tracking-tight text-[var(--primary-color)] font-['Work_Sans']">£{tier.price}</span>
-                <span className="ml-1 text-sm font-medium text-[var(--secondary-color)]">/month</span>
-              </div>
-              <p className="mt-2 text-sm text-[var(--secondary-color)]">{tier.description}</p>
-            </div>
-            
-            <div className="space-y-4">
-              {featureCategories.map((category) => (
-                <div key={category} className="flex justify-between pb-2 border-b border-gray-100">
-                  <div className="font-medium text-[var(--primary-color)] flex items-center">
-                    <span className="font-sora">{category}</span>
-                    {featureDefinitions[category] && (
-                      <div className="relative ml-1 group cursor-help">
-                        <InformationCircleIcon className="h-4 w-4 text-gray-400" />
-                        <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-56 font-normal shadow-lg">
-                          {featureDefinitions[category].description}
-                          <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-[var(--secondary-color)]">
-                    {renderFeatureValue(category, tier.features[category] ?? false, tier.id)}
-                  </div>
                 </div>
-              ))}
-            </div>
-            
-            <div className="mt-8">
-              <button
-                onClick={() => handleCheckout(tier.priceId)}
-                disabled={isLoading && selectedTier === tier.priceId}
-                className={`w-full rounded-md py-3 px-4 text-center text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
-                  ${
-                    tier.popular
-                      ? "bg-[var(--accent-color)] text-white hover:opacity-90 focus-visible:outline-[var(--accent-color)]"
-                      : "bg-white border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-gray-50"
-                  }
-                  ${isLoading && selectedTier === tier.priceId ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-              >
-                {isLoading && selectedTier === tier.priceId ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  <span>Get Started</span>
-                )}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Desktop: Pricing Table */}
-      <div className="hidden md:block overflow-x-auto pb-2">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="text-left p-4 bg-gray-50 rounded-tl-lg w-1/4">
-                <span className="font-sora text-sm sm:text-base lg:text-lg">Plan / Month</span>
-              </th>
-              {tiers.map((tier) => (
-                <th key={tier.id} className={`p-4 w-1/4 ${tier.id === "professional" ? "bg-blue-50" : "bg-gray-50"} ${tier.id === "advanced" ? "rounded-tr-lg" : ""}`}>
-                  <div className="text-center relative">
-                    {tier.popular && (
-                      <div className="inline-block px-3 py-1 text-xs font-medium text-[var(--accent-color)] bg-[var(--accent-color-light)] rounded-full mb-2" style={{ zIndex: 5 }}>
-                        Most Popular
-                      </div>
-                    )}
-                    <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 font-sora">{tier.name}</h3>
-                    <div className="mt-2">
-                      <span className="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 font-['Work_Sans']">£{tier.price}</span>
-                      <span className="text-xs sm:text-sm text-gray-500 ml-1 font-normal">GBP</span>
-                    </div>
-                    <p className="mt-2 text-xs sm:text-sm text-gray-500 h-12 lg:h-auto">{tier.description}</p>
+              )}
+              <div className={`text-center mb-6 relative ${tier.popular ? 'pt-3' : ''}`}>
+                <div className="flex flex-col items-center space-y-3">
+                  <h3 className="text-xl font-bold text-[var(--primary-color)] font-sora">{tier.name}</h3>
+                  <div className="flex items-baseline">
+                    <span className="text-2xl sm:text-3xl font-light tracking-tight text-[var(--primary-color)] font-['Work_Sans']">£{tier.price}</span>
+                    <span className="ml-1 text-sm font-medium text-[var(--secondary-color)]">/month</span>
                   </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {/* Feature Categories */}
-            {Object.keys(featureDefinitions).map((category) => (
-              <React.Fragment key={category}>
-                <tr className="bg-gray-50">
-                  <th colSpan={5} className="text-left px-4 py-3 font-medium text-gray-800">
-                    <div className="flex items-center">
-                      <span className="font-sora">{category}</span>
-                      <div className="relative ml-2 group">
-                        <InformationCircleIcon className="h-5 w-5 text-gray-400" />
-                        <div className="absolute bottom-full left-0 transform -translate-y-2 z-10 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-60 font-normal shadow-lg">
-                          {featureDefinitions[category].description}
-                          <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </th>
-                </tr>
-                {/* Features within this category */}
-                {Object.keys(featureDefinitions[category].features).map((feature) => (
-                  <tr key={feature}>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <span className="font-sora">{feature}</span>
-                        <div className="relative ml-2 group">
+                  {tier.description && (
+                    <p className="text-sm text-[var(--secondary-color)]">{tier.description}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {featureCategories.map((category) => (
+                  <div key={category} className="flex justify-between pb-2 border-b border-gray-100">
+                    <div className="font-medium text-[var(--primary-color)] flex items-center">
+                      <span className="font-sora text-sm">{category}</span>
+                      {featureDefinitions[category] && (
+                        <div className="relative ml-1 group cursor-help">
                           <InformationCircleIcon className="h-4 w-4 text-gray-400" />
-                          <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-60 font-normal shadow-lg">
-                            {featureDefinitions[category].features[feature]}
+                          <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-56 font-normal shadow-lg">
+                            {featureDefinitions[category].description}
                             <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    {tiers.map((tier) => {
-                      // Access feature safely with type checking
-                      const featureValue = tier.features[category] && 
-                        typeof tier.features[category] === 'object' ? 
-                        tier.features[category][feature] : false;
-                      
-                      return (
-                        <td key={`${tier.id}-${feature}`} className="px-4 py-3 text-center">
-                          {renderFeatureValue(
-                            category as FeatureCategory, 
-                            featureValue, 
-                            tier.id
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
+                      )}
+                    </div>
+                    <div className="text-[var(--secondary-color)]">
+                      {renderFeatureValue(category, tier.features[category] ?? false, tier.id)}
+                    </div>
+                  </div>
                 ))}
-              </React.Fragment>
-            ))}
-            
-            {/* Call to Action */}
-            <tr>
-              <td className="px-4 py-6 text-sm text-gray-600"></td>
-              {tiers.map((tier) => (
-                <td key={`${tier.id}-cta`} className="px-6 py-6 text-center">
-                  <button
-                    onClick={() => handleCheckout(tier.priceId)}
-                    disabled={isLoading && selectedTier === tier.priceId}
-                    className={`w-full rounded-md px-3 py-2 text-center text-sm font-medium leading-6 
-                      ${tier.id === "professional" 
-                        ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-color-dark)]" 
-                        : "bg-white text-[var(--primary-color)] ring-1 ring-inset ring-[var(--divider-color)] hover:ring-[var(--accent-color)]"
-                      } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]`}
-                  >
-                    {isLoading && selectedTier === tier.priceId ? (
-                      <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Processing...
-                      </span>
-                    ) : (
-                      <span>Get started</span>
-                    )}
-                  </button>
-                </td>
+              </div>
+              
+              <div className="mt-8">
+                <button
+                  onClick={() => handleCheckout(tier.priceId)}
+                  disabled={isLoading && selectedTier === tier.priceId}
+                  className={`w-full rounded-md py-3 px-4 text-center text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+                    ${
+                      tier.popular
+                        ? "bg-[var(--accent-color)] text-white hover:opacity-90 focus-visible:outline-[var(--accent-color)]"
+                        : "bg-white border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-gray-50"
+                    }
+                    ${isLoading && selectedTier === tier.priceId ? "opacity-50 cursor-not-allowed" : ""}
+                  `}
+                >
+                  {isLoading && selectedTier === tier.priceId ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    <span>Get Started</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Pricing Table */}
+        <div className="hidden md:block overflow-x-auto pb-2">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-white border-b border-gray-200">
+                <th className="text-left p-4 bg-white w-1/5">
+                  <span className="font-sora text-base">Plan / Month</span>
+                </th>
+                {tiers.map((tier) => (
+                  <th key={tier.id} className="p-4 w-1/5 bg-white relative">
+                    <div className="pt-5 min-h-[130px] flex flex-col items-center justify-between">
+                      {tier.popular && (
+                        <div className="absolute left-1/2 transform -translate-x-1/2 -top-3 z-30">
+                          <div className="px-3 py-1 text-xs font-medium text-[var(--accent-color)] bg-[var(--accent-color-light)] rounded-full shadow-sm whitespace-nowrap">
+                            Most Popular
+                          </div>
+                        </div>
+                      )}
+                      <h3 className="text-base lg:text-lg font-bold text-gray-900 font-sora w-full text-center mb-2">{tier.name}</h3>
+                      <div className="flex items-baseline justify-center w-full mb-2">
+                        <span className="text-xl lg:text-2xl font-light text-gray-900 font-['Work_Sans']">£{tier.price}</span>
+                        <span className="ml-1 text-xs lg:text-sm font-medium text-gray-500">/month</span>
+                      </div>
+                      {tier.description && (
+                        <p className="text-xs text-gray-600 max-w-[15ch] text-center leading-tight">{tier.description}</p>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Feature rows - ensure consistent text size */}
+              {featureCategories.map((category, idx) => (
+                <tr key={category} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-4 text-gray-700">
+                    <div className="flex items-center">
+                      <span className="font-sora text-sm">{category}</span>
+                      <div className="relative ml-2 group">
+                        <InformationCircleIcon className="h-4 w-4 text-gray-400" />
+                        <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-60 font-normal shadow-lg">
+                          {featureTooltips[category]}
+                          <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  {tiers.map((tier) => (
+                    <td key={`${tier.id}-${category}`} className="px-4 py-4 text-center text-sm">
+                      {renderFeatureValue(
+                        category as FeatureCategory, 
+                        tier.features[category], 
+                        tier.id
+                      )}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              
+              {/* Call to Action */}
+              <tr className="bg-white">
+                <td className="px-4 py-6 text-sm text-gray-600"></td>
+                {tiers.map((tier) => (
+                  <td key={`${tier.id}-cta`} className="px-6 py-6 text-center">
+                    <button
+                      onClick={() => handleCheckout(tier.priceId)}
+                      disabled={isLoading && selectedTier === tier.priceId}
+                      className={`w-full rounded-md px-3 py-2 text-center text-sm font-medium leading-6 
+                        ${tier.id === "professional" 
+                          ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-color-dark)]" 
+                          : "bg-white text-[var(--primary-color)] ring-1 ring-inset ring-[var(--divider-color)] hover:ring-[var(--accent-color)]"
+                        } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]`}
+                    >
+                      {isLoading && selectedTier === tier.priceId ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Processing...
+                        </span>
+                      ) : (
+                        <span>Get started</span>
+                      )}
+                    </button>
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      {/* Why Justify Section */}
-      <div ref={whyJustifyRef} className="mt-24 mb-16">
-        <h2 className="text-3xl font-bold font-sora text-center mb-8">Why Choose Justify?</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <h3 className="text-xl font-bold mb-3 font-sora">Data-Driven Approach</h3>
-            <p className="text-gray-600">Make informed decisions with our comprehensive analytics and reporting tools. Understand what works and why.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <h3 className="text-xl font-bold mb-3 font-sora">Seamless Integration</h3>
-            <p className="text-gray-600">Connect easily with your existing tools and platforms. Our solution works with your current workflow.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <h3 className="text-xl font-bold mb-3 font-sora">Expert Support</h3>
-            <p className="text-gray-600">Our team of marketing specialists is always ready to help you get the most out of your campaigns.</p>
+        {/* Why Justify Section */}
+        <div ref={whyJustifyRef} className="mt-24 mb-16">
+          <h2 className="text-3xl font-bold font-sora text-center mb-8">Why Choose Justify?</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="text-xl font-bold mb-3 font-sora">Data-Driven Approach</h3>
+              <p className="text-gray-600">Make informed decisions with our comprehensive analytics and reporting tools. Understand what works and why.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="text-xl font-bold mb-3 font-sora">Seamless Integration</h3>
+              <p className="text-gray-600">Connect easily with your existing tools and platforms. Our solution works with your current workflow.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="text-xl font-bold mb-3 font-sora">Expert Support</h3>
+              <p className="text-gray-600">Our team of marketing specialists is always ready to help you get the most out of your campaigns.</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* FAQ Section */}
-      <div ref={faqRef} className="mt-20">
-        <h2 className="text-2xl sm:text-3xl font-bold font-sora text-center mb-8">Frequently Asked Questions</h2>
-        <div className="max-w-3xl mx-auto">
-          <div className="border-b border-[var(--divider-color)] pb-4 mb-4">
-            <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">Can I upgrade my plan later?</h3>
-            <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">Yes, you can upgrade at any time. The price difference will be prorated for your current billing period.</p>
-          </div>
-          <div className="border-b border-[var(--divider-color)] pb-4 mb-4">
-            <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">Do you offer custom enterprise plans?</h3>
-            <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">Yes, please contact our sales team for custom solutions tailored to your specific business needs.</p>
-          </div>
-          <div className="border-b border-[var(--divider-color)] pb-4 mb-4">
-            <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">What payment methods do you accept?</h3>
-            <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">We accept all major credit cards, and we can also arrange for bank transfers for annual subscriptions.</p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">How do the studies work?</h3>
-            <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">Each study provides comprehensive analysis of a marketing campaign, including audience response, engagement metrics, conversion data, and actionable recommendations.</p>
+        {/* FAQ Section */}
+        <div ref={faqRef} className="mt-20">
+          <h2 className="text-2xl sm:text-3xl font-bold font-sora text-center mb-8">Frequently Asked Questions</h2>
+          <div className="max-w-3xl mx-auto">
+            <div className="border-b border-[var(--divider-color)] pb-4 mb-4">
+              <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">Can I upgrade my plan later?</h3>
+              <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">Yes, you can upgrade at any time. The price difference will be prorated for your current billing period.</p>
+            </div>
+            <div className="border-b border-[var(--divider-color)] pb-4 mb-4">
+              <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">Do you offer custom enterprise plans?</h3>
+              <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">Yes, please contact our sales team for custom solutions tailored to your specific business needs.</p>
+            </div>
+            <div className="border-b border-[var(--divider-color)] pb-4 mb-4">
+              <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">What payment methods do you accept?</h3>
+              <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">We accept all major credit cards, and we can also arrange for bank transfers for annual subscriptions.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[var(--primary-color)] mb-2 font-sora text-sm sm:text-base lg:text-lg">How do the studies work?</h3>
+              <p className="text-[var(--secondary-color)] text-xs sm:text-sm lg:text-base">Each study provides comprehensive analysis of a marketing campaign, including audience response, engagement metrics, conversion data, and actionable recommendations.</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Link to Billing Page */}
-      <div className="mt-12 text-center pb-2">
-        <p className="text-[var(--secondary-color)] mb-4">
-          Already subscribed to a plan?
-        </p>
-        <Link
-          href="/billing"
-          className="inline-flex items-center rounded-md bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-        >
-          View your subscription & billing
-        </Link>
+        {/* Link to Billing Page */}
+        <div className="mt-12 text-center pb-2">
+          <p className="text-[var(--secondary-color)] mb-4">
+            Already subscribed to a plan?
+          </p>
+          <Link
+            href="/billing"
+            className="inline-flex items-center rounded-md bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+          >
+            View your subscription & billing
+          </Link>
+        </div>
       </div>
     </div>
   );
