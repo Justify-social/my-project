@@ -479,7 +479,7 @@ function FormContent() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-6 py-8">
+    <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
         <p className="text-gray-500">Complete all required fields to create your campaign</p>
