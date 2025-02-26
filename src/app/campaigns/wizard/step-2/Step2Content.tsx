@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import Image from "next/image";
 import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
@@ -30,54 +31,63 @@ const kpis = [
     title: "Ad Recall",
     definition: "The percentage of people who remember seeing your advertisement.",
     example: "After a week, 60% of viewers can recall your ad's main message.",
+    icon: "/KPIs/Ad_Recall.svg"
   },
   {
     key: "brandAwareness",
     title: "Brand Awareness",
     definition: "The increase in recognition of your brand.",
     example: "Your brand name is recognised by 30% more people after the campaign.",
+    icon: "/KPIs/Brand_Awareness.svg"
   },
   {
     key: "consideration",
     title: "Consideration",
     definition: "The percentage of people considering purchasing from your brand.",
     example: "25% of your audience considers buying your product after seeing your campaign.",
+    icon: "/KPIs/Consideration.svg"
   },
   {
     key: "messageAssociation",
     title: "Message Association",
     definition: "How well people link your key messages to your brand.",
     example: "When hearing your slogan, 70% of people associate it directly with your brand.",
+    icon: "/KPIs/Message_Association.svg"
   },
   {
     key: "brandPreference",
     title: "Brand Preference",
     definition: "Preference for your brand over competitors.",
     example: "40% of customers prefer your brand when choosing between similar products.",
+    icon: "/KPIs/Brand_Preference.svg"
   },
   {
     key: "purchaseIntent",
     title: "Purchase Intent",
     definition: "Likelihood of purchasing your product or service.",
     example: "50% of viewers intend to buy your product after seeing the ad.",
+    icon: "/KPIs/Purchase_Intent.svg"
   },
   {
     key: "actionIntent",
     title: "Action Intent",
     definition: "Likelihood of taking a specific action related to your brand (e.g., visiting your website).",
     example: "35% of people are motivated to visit your website after the campaign.",
+    icon: "/KPIs/Action_Intent.svg"
   },
   {
     key: "recommendationIntent",
     title: "Recommendation Intent",
     definition: "Likelihood of recommending your brand to others.",
     example: "45% of customers are willing to recommend your brand to friends and family.",
+    icon: "/KPIs/Brand_Preference.svg"
   },
   {
     key: "advocacy",
     title: "Advocacy",
     definition: "Willingness to actively promote your brand.",
     example: "20% of your customers regularly share your brand on social media or write positive reviews.",
+    icon: "/KPIs/Advocacy.svg"
   },
 ];
 
@@ -100,6 +110,30 @@ enum Feature {
   BRAND_HEALTH = "BRAND_HEALTH",
   MIXED_MEDIA_MODELLING = "MIXED_MEDIA_MODELLING"
 }
+
+// Features mapping with their icons
+const features = [
+  { 
+    key: Feature.CREATIVE_ASSET_TESTING, 
+    title: "Creative Asset Testing",
+    icon: "/Creative_Asset_Testing.svg"
+  },
+  { 
+    key: Feature.BRAND_LIFT, 
+    title: "Brand Lift",
+    icon: "/Brand_Lift.svg"
+  },
+  { 
+    key: Feature.BRAND_HEALTH, 
+    title: "Brand Health",
+    icon: "/Brand_Health.svg"
+  },
+  { 
+    key: Feature.MIXED_MEDIA_MODELLING, 
+    title: "Mixed Media Modelling",
+    icon: "/MMM.svg"
+  }
+];
 
 // Update the validation schema
 const ObjectivesSchema = Yup.object().shape({
@@ -345,7 +379,7 @@ function FormContent() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 pb-32 bg-white">
+    <div className="max-w-5xl mx-auto p-4 pb-16 bg-white">
       <h1 className="text-2xl font-bold mb-6">Campaign Creation</h1>
       
       <Formik
@@ -388,7 +422,17 @@ function FormContent() {
                     {kpis.map((kpi) => (
                       <tr key={kpi.key} className="hover:bg-gray-50">
                         <td className="border p-2 font-medium">
-                          {kpi.title}
+                          <div className="flex items-center">
+                            <div className="w-6 h-6 mr-2 flex-shrink-0">
+                              <Image 
+                                src={kpi.icon}
+                                alt={kpi.title}
+                                width={24}
+                                height={24}
+                              />
+                            </div>
+                            {kpi.title}
+                          </div>
                         </td>
                         <td className="border p-2">
                           <div className="text-sm text-gray-600">{kpi.definition}</div>
@@ -439,7 +483,14 @@ function FormContent() {
                     <div className="grid grid-cols-1 gap-2">
                       {values.primaryKPI && (
                         <div className="bg-blue-50 p-2 rounded border border-blue-200 flex items-center">
-                          <CheckBadgeIcon className="w-5 h-5 text-blue-600 mr-2" />
+                          <div className="w-5 h-5 mr-2">
+                            <Image 
+                              src={kpis.find(k => k.key === values.primaryKPI)?.icon || "/KPIs/Ad_Recall.svg"} 
+                              alt="Primary KPI" 
+                              width={20} 
+                              height={20}
+                            />
+                          </div>
                           <span className="font-medium">
                             {kpis.find(k => k.key === values.primaryKPI)?.title || values.primaryKPI}
                           </span>
@@ -453,7 +504,14 @@ function FormContent() {
                     <div className="grid grid-cols-1 gap-2">
                       {values.secondaryKPIs.map((kpiKey: KPI) => (
                         <div key={kpiKey} className="bg-gray-50 p-2 rounded border border-gray-200 flex items-center">
-                          <CheckBadgeIcon className="w-5 h-5 text-gray-500 mr-2" />
+                          <div className="w-5 h-5 mr-2">
+                            <Image 
+                              src={kpis.find(k => k.key === kpiKey)?.icon || "/KPIs/Ad_Recall.svg"} 
+                              alt="Secondary KPI" 
+                              width={20} 
+                              height={20}
+                            />
+                          </div>
                           <span className="font-medium">
                             {kpis.find(k => k.key === kpiKey)?.title || kpiKey}
                           </span>
@@ -620,59 +678,32 @@ function FormContent() {
                   Features to Include
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <Field 
-                      type="checkbox" 
-                      name="features" 
-                      value={Feature.CREATIVE_ASSET_TESTING}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
-                    />
-                    <div className="flex items-center">
-                      <DocumentTextIcon className="w-5 h-5 text-gray-500 mr-2" />
-                      <span>Creative Asset Testing</span>
-                    </div>
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <Field 
-                      type="checkbox" 
-                      name="features" 
-                      value={Feature.BRAND_LIFT}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
-                    />
-                    <div className="flex items-center">
-                      <PresentationChartBarIcon className="w-5 h-5 text-gray-500 mr-2" />
-                      <span>Brand Lift</span>
-                    </div>
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <Field 
-                      type="checkbox" 
-                      name="features" 
-                      value={Feature.BRAND_HEALTH}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
-                    />
-                    <div className="flex items-center">
-                      <CheckBadgeIcon className="w-5 h-5 text-gray-500 mr-2" />
-                      <span>Brand Health</span>
-                    </div>
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <Field 
-                      type="checkbox" 
-                      name="features" 
-                      value={Feature.MIXED_MEDIA_MODELLING}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
-                    />
-                    <div className="flex items-center">
-                      <PresentationChartBarIcon className="w-5 h-5 text-gray-500 mr-2" />
-                      <span>Mixed Media Modelling</span>
-                    </div>
-                  </label>
+                  {features.map(feature => (
+                    <label key={feature.key} className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                      <Field 
+                        type="checkbox" 
+                        name="features" 
+                        value={feature.key}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
+                      />
+                      <div className="flex items-center">
+                        <div className="w-5 h-5 mr-2">
+                          <Image 
+                            src={feature.icon} 
+                            alt={feature.title} 
+                            width={20} 
+                            height={20}
+                          />
+                        </div>
+                        <span>{feature.title}</span>
+                      </div>
+                    </label>
+                  ))}
                 </div>
               </div>
               
-              {/* Add bottom padding to prevent progress bar overlap */}
-              <div className="pb-24"></div>
+              {/* Add bottom padding to prevent progress bar overlap - reduced from pb-24 to pb-16 */}
+              <div className="pb-16"></div>
               
               <ProgressBar
                 currentStep={2}
