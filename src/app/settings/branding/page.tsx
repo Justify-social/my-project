@@ -283,7 +283,7 @@ const BrandingSettingsPage: React.FC = () => {
               ) : (
                 <>
                   <CheckCircleIcon className="w-5 h-5 mr-2" />
-                  Save Changes
+                  Save
                 </>
               )}
             </motion.button>
