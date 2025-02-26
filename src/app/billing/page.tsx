@@ -3,6 +3,7 @@
 import React, { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import {
   CreditCardIcon,
   ArrowPathIcon,
@@ -15,6 +16,7 @@ import {
   PlusIcon,
   ArrowDownTrayIcon,
   ArrowPathRoundedSquareIcon,
+  ArrowUpRightIcon
 } from '@heroicons/react/24/outline';
 
 interface PaymentMethod {
@@ -39,7 +41,7 @@ const Card = memo(({ children }: { children: React.ReactNode }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3 }}
-    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-[var(--divider-color)]"
   >
     {children}
   </motion.div>
@@ -51,13 +53,13 @@ const SectionHeader: React.FC<{
   description?: string;
 }> = memo(({ icon: Icon, title, description }) => (
   <div className="flex items-center mb-6">
-    <div className="bg-blue-50 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-blue-600" />
+    <div className="bg-[var(--background-color)] p-3 rounded-lg">
+      <Icon className="w-6 h-6 text-[var(--accent-color)]" />
     </div>
     <div className="ml-4">
-      <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+      <h2 className="text-xl font-semibold text-[var(--primary-color)]">{title}</h2>
       {description && (
-        <p className="mt-1 text-sm text-gray-500">{description}</p>
+        <p className="mt-1 text-sm text-[var(--secondary-color)]">{description}</p>
       )}
     </div>
   </div>
@@ -73,22 +75,22 @@ const PlanCard: React.FC<{
   <motion.div
     whileHover={{ scale: 1.02 }}
     className={`p-6 rounded-xl border-2 ${
-      isRecommended ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+      isRecommended ? 'border-[var(--accent-color)] bg-[var(--background-color)]' : 'border-[var(--divider-color)]'
     }`}
   >
     {isRecommended && (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-4">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--background-color)] text-[var(--accent-color)] mb-4 border border-[var(--accent-color)]">
         Recommended
       </span>
     )}
-    <h3 className="text-xl font-bold text-gray-900">{title}</h3>
-    <p className="mt-2 text-3xl font-bold text-gray-900">{price}</p>
-    <p className="mt-1 text-sm text-gray-500">per month</p>
+    <h3 className="text-xl font-bold text-[var(--primary-color)]">{title}</h3>
+    <p className="mt-2 text-3xl font-bold text-[var(--primary-color)]">{price}</p>
+    <p className="mt-1 text-sm text-[var(--secondary-color)]">per month</p>
     <ul className="mt-6 space-y-4">
       {features.map((feature, idx) => (
         <li key={idx} className="flex items-start">
           <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
-          <span className="text-gray-600">{feature}</span>
+          <span className="text-[var(--secondary-color)]">{feature}</span>
         </li>
       ))}
     </ul>
@@ -98,8 +100,8 @@ const PlanCard: React.FC<{
       onClick={onUpgrade}
       className={`mt-8 w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center ${
         isRecommended
-          ? 'bg-blue-600 text-white hover:bg-blue-700'
-          : 'bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-50'
+          ? 'bg-[var(--accent-color)] text-white hover:opacity-90'
+          : 'bg-white text-[var(--accent-color)] border-2 border-[var(--accent-color)] hover:bg-[var(--background-color)]'
       }`}
     >
       <SparklesIcon className="w-5 h-5 mr-2" />
@@ -118,15 +120,15 @@ const CreditPackageCard: React.FC<{
     whileHover={{ scale: 1.02 }}
     onClick={onSelect}
     className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-      isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'
+      isSelected ? 'border-[var(--accent-color)] bg-[var(--background-color)]' : 'border-[var(--divider-color)] hover:border-[var(--accent-color)]'
     }`}
   >
     <div className="flex items-center justify-between">
       <div>
-        <h4 className="font-semibold text-gray-900">{credits} Credits</h4>
-        <p className="text-sm text-gray-500">Best value</p>
+        <h4 className="font-semibold text-[var(--primary-color)]">{credits} Credits</h4>
+        <p className="text-sm text-[var(--secondary-color)]">Best value</p>
       </div>
-      <p className="text-xl font-bold text-gray-900">{price}</p>
+      <p className="text-xl font-bold text-[var(--primary-color)]">{price}</p>
     </div>
   </motion.div>
 ));
@@ -148,7 +150,7 @@ const Modal: React.FC<{
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
+          className="absolute top-4 right-4 text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
         >
           <XCircleIcon className="w-6 h-6" />
         </button>
@@ -284,7 +286,7 @@ const SubscriptionBillingPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gray-50"
+      className="min-h-screen bg-[var(--background-color)]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
@@ -293,7 +295,7 @@ const SubscriptionBillingPage: React.FC = () => {
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-gray-900"
+              className="text-3xl font-bold text-[var(--primary-color)]"
             >
               Subscription & Billing
             </motion.h1>
@@ -301,27 +303,28 @@ const SubscriptionBillingPage: React.FC = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-2 text-gray-500"
+              className="mt-2 text-[var(--secondary-color)]"
             >
               Manage your subscription, billing, and credits
             </motion.p>
           </div>
           <div className="flex items-center space-x-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleViewBillingHistory}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
-                transition-colors duration-200 font-medium flex items-center"
-            >
-              <DocumentTextIcon className="w-5 h-5 mr-2" />
-              Billing History
-            </motion.button>
+            <Link href="/pricing">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 py-2 bg-white text-[var(--accent-color)] rounded-lg border border-[var(--accent-color)] 
+                  transition-colors duration-200 font-medium flex items-center"
+              >
+                <ArrowUpRightIcon className="w-5 h-5 mr-2" />
+                View Pricing
+              </motion.button>
+            </Link>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleUpdatePaymentMethod}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 
                 transition-colors duration-200 font-medium flex items-center"
             >
               <CreditCardIcon className="w-5 h-5 mr-2" />
@@ -331,7 +334,7 @@ const SubscriptionBillingPage: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mb-8 border-b border-gray-200">
+        <div className="mb-8 border-b border-[var(--divider-color)]">
           <nav className="flex space-x-1" aria-label="Billing navigation">
             {['overview', 'credits'].map((tab) => {
               const isActive = activeTab === tab;
@@ -344,8 +347,8 @@ const SubscriptionBillingPage: React.FC = () => {
                   className={`
                     relative py-4 px-6 flex items-center transition-all duration-200
                     ${isActive 
-                      ? 'text-blue-600 bg-blue-50/50' 
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}
+                      ? 'text-[var(--accent-color)] bg-[var(--background-color)]/50' 
+                      : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:bg-[var(--background-color)]'}
                     rounded-t-lg
                   `}
                   aria-current={isActive ? 'page' : undefined}
@@ -357,7 +360,7 @@ const SubscriptionBillingPage: React.FC = () => {
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-color)]"
                     />
                   )}
                 </button>
@@ -377,11 +380,11 @@ const SubscriptionBillingPage: React.FC = () => {
                   title="Current Plan"
                   description="Your current subscription plan and features"
                 />
-                <div className="bg-blue-50 rounded-lg p-6">
+                <div className="bg-[var(--background-color)] rounded-lg p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">{subscriptionPlan}</h3>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <h3 className="text-xl font-bold text-[var(--primary-color)]">{subscriptionPlan}</h3>
+                      <p className="mt-1 text-sm text-[var(--secondary-color)]">
                         Next payment: {nextPaymentAmount} on {renewalDate}
                       </p>
                     </div>
@@ -389,7 +392,7 @@ const SubscriptionBillingPage: React.FC = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleChangePlan}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                      className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 
                         transition-colors duration-200 font-medium flex items-center"
                     >
                       <ArrowPathIcon className="w-5 h-5 mr-2" />
@@ -400,7 +403,7 @@ const SubscriptionBillingPage: React.FC = () => {
                     {subscriptionFeatures.map((feature, idx) => (
                       <div key={idx} className="flex items-center">
                         <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
-                        <span className="text-gray-700">{feature}</span>
+                        <span className="text-[var(--secondary-color)]">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -418,17 +421,17 @@ const SubscriptionBillingPage: React.FC = () => {
                   {paymentMethods.map(method => (
                     <div
                       key={method.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-gray-200"
+                      className="flex items-center justify-between p-4 rounded-lg border border-[var(--divider-color)]"
                     >
                       <div className="flex items-center">
-                        <div className="bg-gray-100 p-2 rounded-lg">
-                          <CreditCardIcon className="w-6 h-6 text-gray-600" />
+                        <div className="bg-[var(--background-color)] p-2 rounded-lg">
+                          <CreditCardIcon className="w-6 h-6 text-[var(--accent-color)]" />
                         </div>
                         <div className="ml-4">
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-[var(--primary-color)]">
                             {method.cardType} •••• {method.last4}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-[var(--secondary-color)]">
                             Expires {method.expiry}
                           </p>
                         </div>
@@ -438,7 +441,7 @@ const SubscriptionBillingPage: React.FC = () => {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => setUpdatePaymentModalOpen(true)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                          className="p-2 text-[var(--accent-color)] hover:bg-[var(--background-color)] rounded-lg"
                         >
                           <ArrowPathIcon className="w-5 h-5" />
                         </motion.button>
@@ -465,8 +468,8 @@ const SubscriptionBillingPage: React.FC = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setAddPaymentModalOpen(true)}
-                    className="mt-4 px-4 py-2 border-2 border-dashed border-gray-300 
-                      text-gray-600 rounded-lg hover:border-blue-500 hover:text-blue-500 
+                    className="mt-4 px-4 py-2 border-2 border-dashed border-[var(--divider-color)] 
+                      text-[var(--secondary-color)] rounded-lg hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] 
                       transition-colors duration-200 w-full flex items-center justify-center"
                   >
                     <PlusIcon className="w-5 h-5 mr-2" />
@@ -482,48 +485,48 @@ const SubscriptionBillingPage: React.FC = () => {
                   title="Billing History"
                   description="View and download your past invoices"
                 />
-                <div className="overflow-hidden rounded-lg border border-gray-200">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <div className="overflow-hidden rounded-lg border border-[var(--divider-color)]">
+                  <table className="min-w-full divide-y divide-[var(--divider-color)]">
+                    <thead className="bg-[var(--background-color)]">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                           Invoice
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-[var(--divider-color)]">
                       {transactions.map(tx => (
                         <motion.tr
                           key={tx.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="hover:bg-gray-50"
+                          className="hover:bg-[var(--background-color)]"
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-[var(--primary-color)]">
                               {tx.billNumber}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-[var(--secondary-color)]">
                               {tx.description}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tx.date}</div>
+                            <div className="text-sm text-[var(--primary-color)]">{tx.date}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-[var(--primary-color)]">
                               {tx.amount}
                             </div>
                           </td>
@@ -542,13 +545,13 @@ const SubscriptionBillingPage: React.FC = () => {
                               {tx.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--secondary-color)]">
                             <div className="flex space-x-2">
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => alert("Downloading invoice...")}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                className="p-2 text-[var(--accent-color)] hover:bg-[var(--background-color)] rounded-lg"
                                 title="Download Invoice"
                               >
                                 <ArrowDownTrayIcon className="w-5 h-5" />
@@ -582,7 +585,7 @@ const SubscriptionBillingPage: React.FC = () => {
                   title="Credits Balance"
                   description="View and manage your credits"
                 />
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                <div className="bg-gradient-to-r from-[var(--accent-color)] to-[#0099cc] rounded-lg p-6 text-white">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm opacity-90">Available Credits</p>
@@ -592,8 +595,8 @@ const SubscriptionBillingPage: React.FC = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setBuyCreditsModalOpen(true)}
-                      className="px-4 py-2 bg-white text-blue-600 rounded-lg 
-                        hover:bg-blue-50 transition-colors duration-200 font-medium 
+                      className="px-4 py-2 bg-white text-[var(--accent-color)] rounded-lg 
+                        hover:bg-[var(--background-color)] transition-colors duration-200 font-medium 
                         flex items-center"
                     >
                       <PlusIcon className="w-5 h-5 mr-2" />
@@ -633,8 +636,8 @@ const SubscriptionBillingPage: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setBuyCreditsModalOpen(true)}
-                  className="mt-6 w-full px-4 py-3 bg-blue-600 text-white rounded-lg 
-                    hover:bg-blue-700 transition-colors duration-200 font-medium 
+                  className="mt-6 w-full px-4 py-3 bg-[var(--accent-color)] text-white rounded-lg 
+                    hover:opacity-90 transition-colors duration-200 font-medium 
                     flex items-center justify-center"
                 >
                   <CurrencyDollarIcon className="w-5 h-5 mr-2" />
@@ -653,45 +656,45 @@ const SubscriptionBillingPage: React.FC = () => {
             setPaymentMethodError("");
           }}
         >
-          <h3 className="text-lg font-semibold mb-4">Update Payment Method</h3>
+          <h3 className="text-lg font-semibold mb-4 text-[var(--primary-color)]">Update Payment Method</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--secondary-color)] mb-1">
                 Card Number
               </label>
               <input
                 type="text"
                 value={newCardNumber}
                 onChange={(e) => setNewCardNumber(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                  focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                  focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                 placeholder="1234 5678 9012 3456"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--secondary-color)] mb-1">
                   Expiry Date
                 </label>
                 <input
                   type="text"
                   value={newExpiry}
                   onChange={(e) => setNewExpiry(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                    focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                    focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                   placeholder="MM/YY"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--secondary-color)] mb-1">
                   CVV
                 </label>
                 <input
                   type="text"
                   value={newCVV}
                   onChange={(e) => setNewCVV(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                    focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
+                    focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                   placeholder="123"
                 />
               </div>
@@ -711,7 +714,7 @@ const SubscriptionBillingPage: React.FC = () => {
                 setUpdatePaymentModalOpen(false);
                 setPaymentMethodError("");
               }}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+              className="px-4 py-2 text-[var(--secondary-color)] bg-[var(--background-color)] rounded-lg hover:bg-[var(--divider-color)] 
                 transition-colors duration-200"
             >
               Cancel
@@ -720,7 +723,7 @@ const SubscriptionBillingPage: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleAddPaymentMethod}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90
                 transition-colors duration-200"
             >
               Update Payment Method
@@ -732,24 +735,24 @@ const SubscriptionBillingPage: React.FC = () => {
           isOpen={buyCreditsModalOpen}
           onClose={() => setBuyCreditsModalOpen(false)}
         >
-          <h3 className="text-lg font-semibold mb-4">Purchase Credits</h3>
+          <h3 className="text-lg font-semibold mb-4 text-[var(--primary-color)]">Purchase Credits</h3>
           <div className="space-y-4">
             {creditPackages.map(pkg => (
               <div
                 key={pkg.credits}
                 className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                   selectedCreditPackage === pkg.credits
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-200'
+                    ? 'border-[var(--accent-color)] bg-[var(--background-color)]'
+                    : 'border-[var(--divider-color)] hover:border-[var(--accent-color)]'
                 }`}
                 onClick={() => setSelectedCreditPackage(pkg.credits)}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-semibold text-gray-900">{pkg.credits} Credits</h4>
-                    <p className="text-sm text-gray-500">Best value</p>
+                    <h4 className="font-semibold text-[var(--primary-color)]">{pkg.credits} Credits</h4>
+                    <p className="text-sm text-[var(--secondary-color)]">Best value</p>
                   </div>
-                  <p className="text-xl font-bold text-gray-900">{pkg.price}</p>
+                  <p className="text-xl font-bold text-[var(--primary-color)]">{pkg.price}</p>
                 </div>
               </div>
             ))}
@@ -759,7 +762,7 @@ const SubscriptionBillingPage: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setBuyCreditsModalOpen(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 
+              className="px-4 py-2 text-[var(--secondary-color)] bg-[var(--background-color)] rounded-lg hover:bg-[var(--divider-color)] 
                 transition-colors duration-200"
             >
               Cancel
@@ -768,7 +771,7 @@ const SubscriptionBillingPage: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleConfirmBuyCredits}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 
                 transition-colors duration-200"
             >
               Confirm Purchase

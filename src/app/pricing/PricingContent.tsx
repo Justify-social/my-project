@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 const tiers = [
   {
@@ -104,13 +105,13 @@ export default function PricingContent() {
     <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <h1 className="text-base font-semibold leading-7 text-blue-600">
+          <h1 className="text-base font-semibold leading-7 text-[var(--accent-color)]">
             Pricing
           </h1>
-          <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          <p className="mt-2 text-4xl font-bold tracking-tight text-[var(--primary-color)] sm:text-5xl">
             Choose your campaign package
           </p>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
+          <p className="mt-6 text-lg leading-8 text-[var(--secondary-color)]">
             Select the perfect plan for your influencer marketing needs
           </p>
         </div>
@@ -122,40 +123,40 @@ export default function PricingContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`flex flex-col justify-between rounded-3xl bg-white p-8 ring-1 ring-gray-200 xl:p-10 ${
+              className={`flex flex-col justify-between rounded-3xl bg-white p-8 ring-1 ring-[var(--divider-color)] xl:p-10 ${
                 tier.id === "professional" ? "lg:z-10 lg:rounded-b-none" : ""
               }`}
             >
               <div>
                 <div className="flex items-center justify-between gap-x-4">
-                  <h2 className="text-lg font-semibold leading-8 text-gray-900">
+                  <h2 className="text-lg font-semibold leading-8 text-[var(--primary-color)]">
                     {tier.name}
                   </h2>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-gray-600">
+                <p className="mt-4 text-sm leading-6 text-[var(--secondary-color)]">
                   {tier.description}
                 </p>
                 <p className="mt-6 flex items-baseline gap-x-1">
                   {tier.price === "Custom" ? (
-                    <span className="text-4xl font-bold tracking-tight text-gray-900">
+                    <span className="text-4xl font-bold tracking-tight text-[var(--primary-color)]">
                       Custom
                     </span>
                   ) : (
                     <>
-                      <span className="text-4xl font-bold tracking-tight text-gray-900">
+                      <span className="text-4xl font-bold tracking-tight text-[var(--primary-color)]">
                         ${tier.price}
                       </span>
-                      <span className="text-sm font-semibold leading-6 text-gray-600">
+                      <span className="text-sm font-semibold leading-6 text-[var(--secondary-color)]">
                         /campaign
                       </span>
                     </>
                   )}
                 </p>
-                <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-600">
+                <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-[var(--secondary-color)]">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex gap-x-3">
                       <CheckIcon
-                        className="h-6 w-5 flex-none text-blue-600"
+                        className="h-6 w-5 flex-none text-[var(--accent-color)]"
                         aria-hidden="true"
                       />
                       {feature}
@@ -171,8 +172,8 @@ export default function PricingContent() {
                 className={`mt-8 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
                   ${
                     tier.id === "professional"
-                      ? "bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus-visible:outline-blue-600"
-                      : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                      ? "bg-[var(--accent-color)] text-white shadow-sm hover:opacity-90 focus-visible:outline-[var(--accent-color)]"
+                      : "bg-[var(--background-color)] text-[var(--accent-color)] hover:bg-opacity-80"
                   }
                   ${isLoading && selectedTier === tier.priceId ? "opacity-50 cursor-not-allowed" : ""}
                 `}
@@ -185,6 +186,19 @@ export default function PricingContent() {
               </motion.button>
             </motion.div>
           ))}
+        </div>
+
+        {/* Link to Billing Page */}
+        <div className="mt-16 text-center">
+          <p className="text-[var(--secondary-color)] mb-4">
+            Already subscribed to a plan?
+          </p>
+          <Link
+            href="/billing"
+            className="inline-flex items-center rounded-md bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+          >
+            View your subscription & billing
+          </Link>
         </div>
       </div>
     </div>
