@@ -45,7 +45,7 @@ interface MetricCardProps {
 
 const MetricCard = ({ icon: Icon, title, value, change, trend, color }: MetricCardProps) => {
   const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
+    blue: 'from-[var(--accent-color)] to-[#0099cc]',
     green: 'from-green-500 to-green-600',
     purple: 'from-purple-500 to-purple-600',
     orange: 'from-orange-500 to-orange-600'
@@ -54,11 +54,11 @@ const MetricCard = ({ icon: Icon, title, value, change, trend, color }: MetricCa
   const trendColors = {
     up: 'text-green-500',
     down: 'text-red-500',
-    neutral: 'text-gray-500'
+    neutral: 'text-[var(--secondary-color)]'
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-xl p-6 text-white shadow-lg`}>
+    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-xl p-6 text-white shadow-sm hover:shadow-md transition-all duration-300`}>
       <div className="flex items-center justify-between mb-4">
         <Icon className="w-8 h-8 text-white/80" />
         <div className={`text-sm font-medium ${trend ? trendColors[trend] : ''}`}>
@@ -87,31 +87,31 @@ interface ActivityLogProps {
 
 const ActivityLog = ({ activities }: ActivityLogProps) => {
   const typeStyles = {
-    auth: 'bg-blue-100 text-blue-800',
+    auth: 'bg-blue-100 text-[var(--accent-color)]',
     system: 'bg-purple-100 text-purple-800',
     user: 'bg-green-100 text-green-800',
     error: 'bg-red-100 text-red-800'
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h3 className="text-xl font-semibold mb-6 flex items-center">
-        <ClockIcon className="w-6 h-6 mr-2 text-gray-500" />
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-[var(--divider-color)]">
+      <h3 className="text-xl font-semibold mb-6 flex items-center text-[var(--primary-color)]">
+        <ClockIcon className="w-6 h-6 mr-2 text-[var(--accent-color)]" />
         Recent Activity
       </h3>
       <div className="space-y-4">
         {activities.map((activity) => (
-          <div key={activity.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+          <div key={activity.id} className="flex items-center justify-between py-3 border-b border-[var(--divider-color)] last:border-0">
             <div className="flex items-center space-x-4">
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${typeStyles[activity.type]}`}>
                 {activity.type.toUpperCase()}
               </span>
               <div>
-                <p className="text-sm font-medium text-gray-900">{activity.user}</p>
-                <p className="text-sm text-gray-500">{activity.action}</p>
+                <p className="text-sm font-medium text-[var(--primary-color)]">{activity.user}</p>
+                <p className="text-sm text-[var(--secondary-color)]">{activity.action}</p>
               </div>
             </div>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-[var(--secondary-color)]">
               {new Date(activity.timestamp).toLocaleTimeString()}
             </span>
           </div>
@@ -138,17 +138,17 @@ const SystemStatus = ({ services }: SystemStatusProps) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h3 className="text-xl font-semibold mb-6 flex items-center">
-        <ServerIcon className="w-6 h-6 mr-2 text-gray-500" />
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-[var(--divider-color)]">
+      <h3 className="text-xl font-semibold mb-6 flex items-center text-[var(--primary-color)]">
+        <ServerIcon className="w-6 h-6 mr-2 text-[var(--accent-color)]" />
         System Status
       </h3>
       <div className="space-y-4">
         {services.map((service) => (
-          <div key={service.name} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+          <div key={service.name} className="flex items-center justify-between py-3 border-b border-[var(--divider-color)] last:border-0">
             <div>
-              <p className="text-sm font-medium text-gray-900">{service.name}</p>
-              <p className="text-sm text-gray-500">Uptime: {service.uptime}</p>
+              <p className="text-sm font-medium text-[var(--primary-color)]">{service.name}</p>
+              <p className="text-sm text-[var(--secondary-color)]">Uptime: {service.uptime}</p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[service.status]}`}>
               {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[var(--accent-color)]"></div>
       </div>
     );
   }
@@ -250,16 +250,16 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-[var(--primary-color)]">Admin Dashboard</h1>
+          <p className="text-[var(--secondary-color)] mt-1">
             Welcome back, {user.name}
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-gray-400 hover:text-gray-500">
+          <button className="p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
             <BellIcon className="w-6 h-6" />
           </button>
-          <button className="p-2 text-gray-400 hover:text-gray-500">
+          <button className="p-2 text-[var(--secondary-color)] hover:text-[var(--primary-color)]">
             <CogIcon className="w-6 h-6" />
           </button>
         </div>
@@ -308,12 +308,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Debug Information */}
-      <details className="bg-white rounded-lg shadow-sm mt-8">
-        <summary className="cursor-pointer bg-gray-50 px-6 py-3 text-lg font-medium text-gray-700 hover:bg-gray-100">
+      <details className="bg-white rounded-lg shadow-sm mt-8 border border-[var(--divider-color)]">
+        <summary className="cursor-pointer bg-[var(--background-color)] px-6 py-3 text-lg font-medium text-[var(--primary-color)] hover:bg-opacity-80">
           Debug Information
         </summary>
         <div className="p-6">
-          <pre className="bg-gray-50 p-4 rounded-md overflow-auto text-sm">
+          <pre className="bg-[var(--background-color)] p-4 rounded-md overflow-auto text-sm text-[var(--primary-color)]">
             {JSON.stringify({
               user: {
                 email: user.email,
