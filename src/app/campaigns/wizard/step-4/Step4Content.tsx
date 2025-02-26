@@ -1,17 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent, Component, ReactNode, Suspense, useRef, useCallback } from "react";
+import React, { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
-import { useWizard } from "../../../../context/WizardContext";
-import Header from "../../../../components/Wizard/Header";
-import ProgressBar from "../../../../components/Wizard/ProgressBar";
+import { useWizard } from "@/context/WizardContext";
+import Header from "@/components/Wizard/Header";
+import ProgressBar from "@/components/Wizard/ProgressBar";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
-import { Section } from '@/components/ui/section';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { 
+  MagnifyingGlassIcon,
+  PlusIcon,
+  XMarkIcon,
+  ArrowUpTrayIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  InformationCircleIcon,
+  DocumentIcon
+} from "@heroicons/react/24/outline";
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -31,54 +38,38 @@ interface Asset {
   };
 }
 
-interface CreativeAsset {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-  title: string;
-  description?: string;
-}
-
 export interface CreativeValues {
-  assets: CreativeAsset[];
+  assets: Asset[];
 }
 
 // =============================================================================
-// CONSTANTS & VALIDATION
+// VALIDATION SCHEMA
 // =============================================================================
 
-const campaignBudget = 1000000; // Example total campaign budget
-const mockInfluencers = [
-  {
-    id: 1,
-    name: 'Influencer Name',
-    avatar: '/placeholder.jpg',  // Update this path
-    // ... other properties
-  },
-  // ... other influencers
-];
-const PLACEHOLDER_AVATAR = '/placeholder.jpg';
-
-const assetDetailsSchema = Yup.object().shape({
+const AssetDetailsSchema = Yup.object().shape({
   assetName: Yup.string().required("Asset name is required"),
+  influencer: Yup.string().required("Influencer handle is required"),
+  whyInfluencer: Yup.string().required("Please explain why you chose this influencer"),
   budget: Yup.number()
     .typeError("Budget must be a valid number.")
     .positive("Budget cannot be negative.")
-    .max(campaignBudget, "Budget cannot exceed total campaign budget.")
-    .required("Budget is required."),
+    .required("Budget is required.")
 });
 
 const CreativeSchema = Yup.object().shape({
   assets: Yup.array().of(
     Yup.object().shape({
       id: Yup.string().required(),
-      type: Yup.string().oneOf(['image', 'video']).required(),
-      url: Yup.string().required('Asset URL is required'),
-      title: Yup.string().required('Asset title is required'),
-      description: Yup.string(),
+      file: Yup.mixed().required(),
+      progress: Yup.number().min(100, "Upload must be complete"),
+      details: AssetDetailsSchema
     })
   )
 });
+
+// =============================================================================
+// CONSTANTS
+// =============================================================================
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 const ALLOWED_FILE_TYPES = {
@@ -90,45 +81,20 @@ const ALLOWED_FILE_TYPES = {
 };
 
 // =============================================================================
-// ERROR BOUNDARY COMPONENT
-// =============================================================================
-
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true };
-  }
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div>Something went wrong. Please try again later.</div>;
-    }
-    return this.props.children;
-  }
-}
-
-// =============================================================================
 // UPLOAD AREA (Drag & Drop Zone)
 // =============================================================================
 
 interface UploadAreaProps {
   onFilesAdded: (files: FileList) => void;
 }
+
 const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div
-      className="relative w-full h-[180px] p-6 flex flex-col items-center justify-center transition-all duration-300"
-      style={{
-        border: dragOver ? "2px solid #007BFF" : "2px dashed #E0E0E0",
-      }}
+      className="relative w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -153,7 +119,10 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
         }
       }}
     >
-      <p className="text-gray-600">Drag and drop files here or click to upload</p>
+      <div className="mb-4 p-3 rounded-full bg-gray-100">
+        <ArrowUpTrayIcon className="h-7 w-7 text-gray-500" />
+      </div>
+      <p className="text-gray-600 mb-1">Drag and drop files here or click to upload.</p>
       <input
         ref={fileInputRef}
         type="file"
@@ -170,53 +139,49 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
 };
 
 // =============================================================================
-// ASSET ROW (Display File Info + Inline Editing)
+// UPLOADED FILE COMPONENT
 // =============================================================================
 
-interface AssetRowProps {
+interface UploadedFileProps {
   asset: Asset;
-  onPreview: (asset: Asset) => void;
   onDelete: (asset: Asset) => void;
+  onPreview: (asset: Asset) => void;
   onUpdate: (updatedAsset: Asset) => void;
-  autoEdit?: boolean;
+  currency?: string;
 }
-const AssetRow: React.FC<AssetRowProps> = ({
+
+const UploadedFile: React.FC<UploadedFileProps> = ({
   asset,
-  onPreview,
   onDelete,
+  onPreview,
   onUpdate,
-  autoEdit = false,
+  currency = "$"
 }) => {
-  const [isEditing, setIsEditing] = useState(autoEdit);
   const [editAssetName, setEditAssetName] = useState(asset.details.assetName);
-  const [influencerQuery, setInfluencerQuery] = useState("");
-  const [selectedInfluencer, setSelectedInfluencer] = useState(asset.details.influencer || "");
+  const [influencerQuery, setInfluencerQuery] = useState(asset.details.influencer || "");
   const [whyInfluencer, setWhyInfluencer] = useState(asset.details.whyInfluencer || "");
   const [budget, setBudget] = useState(asset.details.budget?.toString() || "");
 
-  // Update the influencer options with more realistic data
-  const influencerOptions = [
-    { 
-      name: "Olivia Bennett", 
-      handle: "@oliviabennett", 
-      followers: "7k",
-      avatar: "/placeholder.jpg"
-    },
-    { 
-      name: "James Wilson", 
-      handle: "@jameswilson", 
-      followers: "12k",
-      avatar: "/placeholder.jpg"
-    },
-    // Add more as needed
-  ];
+  // Save changes to the asset
+  const saveChanges = () => {
+    onUpdate({
+      ...asset,
+      details: {
+        assetName: editAssetName,
+        influencer: influencerQuery,
+        whyInfluencer: whyInfluencer,
+        budget: parseFloat(budget) || 0,
+        description: asset.details.description
+      }
+    });
+  };
 
   return (
-    <div className="border rounded-lg p-6 mb-4 bg-white">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">📁</span>
-          <span className="font-medium">{asset.file.name}</span>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="flex p-4 items-center justify-between border-b border-gray-200">
+        <div className="flex items-center">
+          <DocumentIcon className="h-6 w-6 text-gray-400 mr-3" />
+          <span className="font-medium text-gray-700">{asset.file.name}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -234,23 +199,24 @@ const AssetRow: React.FC<AssetRowProps> = ({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="p-6 space-y-4">
         {/* Asset Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
             Asset Name
-            <span className="text-blue-500 ml-1 cursor-help" title="Give your asset a descriptive name">ⓘ</span>
+            <InformationCircleIcon className="h-4 w-4 text-blue-500 ml-1 cursor-help" title="Give your asset a descriptive name" />
           </label>
           <input
             type="text"
             value={editAssetName}
             onChange={(e) => setEditAssetName(e.target.value)}
-            className="w-full p-2 border rounded-md"
-            placeholder="Enter asset name"
+            onBlur={saveChanges}
+            className="w-full p-2.5 border border-gray-300 rounded-md"
+            placeholder="File.MP4"
           />
         </div>
 
-        {/* Influencer Selection */}
+        {/* Influencer */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Start typing influencer's handle
@@ -261,9 +227,7 @@ const AssetRow: React.FC<AssetRowProps> = ({
               value={influencerQuery}
               onChange={(e) => {
                 setInfluencerQuery(e.target.value);
-                // When typing, update the selected influencer
                 if (e.target.value.startsWith('@')) {
-                  setSelectedInfluencer(e.target.value);
                   onUpdate({
                     ...asset,
                     details: {
@@ -273,82 +237,101 @@ const AssetRow: React.FC<AssetRowProps> = ({
                   });
                 }
               }}
-              onKeyPress={(e) => {
-                // Ensure handle starts with @
-                if (e.key === '@' && influencerQuery === '') {
-                  return;
-                }
-                if (!influencerQuery.startsWith('@') && influencerQuery === '') {
-                  setInfluencerQuery('@' + e.key);
-                  e.preventDefault();
-                }
-              }}
-              className="w-full p-2 border rounded-md"
+              onBlur={saveChanges}
+              className="w-full p-2.5 pl-10 border border-gray-300 rounded-md"
               placeholder="@username"
             />
-            {selectedInfluencer && (
-              <div className="mt-2 p-2 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">Selected: {selectedInfluencer}</p>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => {
+                if (influencerQuery.trim()) {
+                  saveChanges();
+                }
+              }}
+            >
+              <div className="bg-blue-500 rounded-full p-1">
+                <PlusIcon className="h-3 w-3 text-white" />
               </div>
-            )}
+            </button>
           </div>
+          {asset.details.influencer && (
+            <div className="mt-2 p-2 bg-gray-50 rounded-md">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 mr-2">
+                  <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
+                    <span className="text-xs text-white">{asset.details.influencer.substring(1, 3).toUpperCase()}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700">{asset.details.influencer}</p>
+                <span className="ml-2 text-xs text-gray-500">7k</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Why this influencer */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
             Why this influencer?
-            <span className="text-blue-500 ml-1 cursor-help" title="Explain why you chose this influencer">ⓘ</span>
+            <InformationCircleIcon className="h-4 w-4 text-blue-500 ml-1 cursor-help" title="Explain why you chose this influencer" />
           </label>
           <textarea
             value={whyInfluencer}
             onChange={(e) => setWhyInfluencer(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            onBlur={saveChanges}
+            className="w-full p-2.5 border border-gray-300 rounded-md"
             rows={3}
-            placeholder="Explain why you chose this influencer..."
+            placeholder="High engagement rate with our target audience and strong presence on Instagram."
           />
+          {whyInfluencer && (
+            <div className="text-right text-xs text-gray-500 mt-1">
+              {whyInfluencer.length}/3000
+            </div>
+          )}
         </div>
 
         {/* Budget */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
             Budget for Influencer
-            <span className="text-blue-500 ml-1 cursor-help" title="Set the budget for this influencer">ⓘ</span>
+            <InformationCircleIcon className="h-4 w-4 text-blue-500 ml-1 cursor-help" title="Set the budget for this influencer" />
           </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2">£</span>
+          <div className="relative flex items-center">
+            <div className="absolute left-3 inset-y-0 flex items-center pointer-events-none">
+              <span className="text-gray-500">{currency}</span>
+            </div>
             <input
               type="number"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
-              className="w-full pl-8 p-2 border rounded-md"
-              placeholder="Enter budget per post"
+              onBlur={saveChanges}
+              className="w-full pl-8 p-2.5 border border-gray-300 rounded-md"
+              placeholder="500"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-2 mt-4">
+        <div className="flex gap-2 mt-6">
           <button
-            onClick={() => onUpdate({
-              ...asset,
-              details: {
-                assetName: editAssetName,
-                influencer: selectedInfluencer,
-                whyInfluencer: whyInfluencer,
-                budget: parseFloat(budget) || 0,
-                description: asset.details.description
-              }
-            })}
-            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800"
+            type="button"
+            onClick={() => onDelete(asset)}
+            className="flex-1 p-2.5 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center justify-center"
           >
-            Save
+            <TrashIcon className="h-5 w-5 mr-2" />
+            Delete
           </button>
           <button
-            onClick={() => onDelete(asset)}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            type="button"
+            onClick={() => saveChanges()}
+            className="flex-1 p-2.5 bg-gray-800 text-white rounded-md hover:bg-gray-900 flex items-center justify-center"
           >
-            Delete
+            <PencilSquareIcon className="h-5 w-5 mr-2" />
+            Edit
           </button>
         </div>
       </div>
@@ -357,39 +340,31 @@ const AssetRow: React.FC<AssetRowProps> = ({
 };
 
 // =============================================================================
-// MODAL COMPONENT (for Preview and Delete Confirmation)
+// PREVIEW MODAL
 // =============================================================================
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  children: ReactNode;
+  children: React.ReactNode;
 }
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape") {
-      onClose();
-    }
-  };
 
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
+  
   return (
-    <div
+    <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
-      onKeyDown={handleKeyDown}
     >
-      <div
-        className="bg-white p-6 rounded max-w-3xl w-full"
+      <div 
+        className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
         <button
           onClick={onClose}
-          className="mt-4 px-4 py-2 bg-gray-500 text-white rounded transition hover:bg-gray-600"
+          className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
         >
           Close
         </button>
@@ -399,10 +374,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 };
 
 // =============================================================================
-// MAIN COMPONENT: CREATIVE ASSETS (STEP 4)
+// MAIN COMPONENT
 // =============================================================================
 
-function CampaignStep4Content() {
+function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
@@ -410,17 +385,69 @@ function CampaignStep4Content() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [confirmDeleteAsset, setConfirmDeleteAsset] = useState<Asset | null>(null);
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [campaignData, setCampaignData] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Get currency from wizard data
+  const currency = data?.overview?.currency || "$";
 
   const initialValues: CreativeValues = {
-    assets: data.creativeAssets?.assets || [],
+    assets: [],
   };
 
-  // Improved file upload handling
+  // Load campaign data
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCampaignData = async () => {
+      if (!campaignId || isInitialized) return;
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(`/api/campaigns/${campaignId}`);
+        const result = await response.json();
+        
+        if (!isMounted) return;
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to load campaign');
+        }
+
+        if (result.success) {
+          updateData(result.campaign, result);
+          
+          // Transform any existing assets to our format
+          if (result.campaign.creativeAssets && Array.isArray(result.campaign.creativeAssets.assets)) {
+            // In a real implementation, you would convert the stored assets back to File objects
+            // For now, we'll just initialize with empty assets
+          }
+          
+          toast.success('Campaign data loaded');
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        const message = error instanceof Error ? error.message : 'Failed to load campaign';
+        setError(message);
+        toast.error(message);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+          setIsInitialized(true);
+        }
+      }
+    };
+
+    loadCampaignData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [campaignId, updateData, isInitialized]);
+
+  // Handle file uploads
   const handleFilesAdded = useCallback((files: FileList) => {
     const newAssets: Asset[] = [];
     const errors: string[] = [];
@@ -476,7 +503,7 @@ function CampaignStep4Content() {
     }
   }, [assets]);
 
-  // Improved upload simulation with progress tracking
+  // Simulate upload progress
   const simulateUpload = useCallback((assetId: string) => {
     let progress = 0;
     const interval = setInterval(() => {
@@ -496,6 +523,7 @@ function CampaignStep4Content() {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle form submission
   const handleSubmit = async (values: CreativeValues) => {
     try {
       setIsSaving(true);
@@ -510,7 +538,7 @@ function CampaignStep4Content() {
         throw new Error('Please wait for all uploads to complete');
       }
 
-      // Updated validation to check all required fields
+      // Validate all required fields
       const invalidAssets = assets.filter(a => {
         const details = a.details;
         return !details.assetName || 
@@ -521,23 +549,21 @@ function CampaignStep4Content() {
       });
 
       if (invalidAssets.length > 0) {
-        console.log('Invalid assets:', invalidAssets); // For debugging
+        console.log('Invalid assets:', invalidAssets);
         throw new Error('Please complete all required fields for each asset');
       }
 
-      // Process assets
-      const processedAssets = await Promise.all(
-        assets.map(async (asset) => ({
-          type: asset.file.type.includes('video') ? 'video' : 'image',
-          url: URL.createObjectURL(asset.file),
-          fileName: asset.file.name,
-          fileSize: asset.file.size,
-          assetName: asset.details.assetName,
-          influencerHandle: asset.details.influencer,
-          whyInfluencer: asset.details.whyInfluencer,
-          budget: parseFloat(asset.details.budget?.toString() || '0'),
-        }))
-      );
+      // Process assets for API submission
+      const processedAssets = assets.map(asset => ({
+        type: asset.file.type.includes('video') ? 'video' : 'image',
+        url: URL.createObjectURL(asset.file),
+        fileName: asset.file.name,
+        fileSize: asset.file.size,
+        assetName: asset.details.assetName,
+        influencerHandle: asset.details.influencer,
+        whyInfluencer: asset.details.whyInfluencer,
+        budget: parseFloat(asset.details.budget?.toString() || '0'),
+      }));
 
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
@@ -560,7 +586,7 @@ function CampaignStep4Content() {
     }
   };
 
-  // ---------- Delete Asset ----------
+  // Handle asset deletion
   const handleDeleteAsset = (asset: Asset) => {
     setConfirmDeleteAsset(asset);
   };
@@ -572,26 +598,15 @@ function CampaignStep4Content() {
     }
   };
 
-  // ---------- Next Button Validation ----------
-  const areAssetsValid = () =>
-    assets
-      .filter((a) => a.progress === 100 && !a.error)
-      .every((asset) => {
-        try {
-          assetDetailsSchema.validateSync(asset.details);
-          return true;
-        } catch (err) {
-          return false;
-        }
-      });
-
-  const isNextDisabled = assets.filter((a) => a.progress === 100 && !a.error).length === 0 || !areAssetsValid();
-
-  // ---------- Save as Draft ----------
+  // Save as draft
   const handleSaveDraft = async (values: CreativeValues) => {
     try {
       setIsSaving(true);
       setError(null);
+
+      if (!campaignId) {
+        throw new Error('Campaign ID is required');
+      }
 
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
@@ -599,78 +614,35 @@ function CampaignStep4Content() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          creativeAssets: {
-            create: assets.map(asset => ({
-              type: asset.file.type.includes('video') ? 'video' : 'image',
-              url: URL.createObjectURL(asset.file),
-              fileName: asset.file.name,
-              fileSize: asset.file.size,
-              assetName: asset.details.assetName || asset.file.name,
-              influencerHandle: asset.details.influencer || '',
-              whyInfluencer: asset.details.whyInfluencer || '',
-              budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
-            }))
-          }
-        })
+          creativeAssets: assets.map(asset => ({
+            type: asset.file.type.includes('video') ? 'video' : 'image',
+            url: URL.createObjectURL(asset.file),
+            fileName: asset.file.name,
+            fileSize: asset.file.size,
+            assetName: asset.details.assetName || asset.file.name,
+            influencerHandle: asset.details.influencer || '',
+            whyInfluencer: asset.details.whyInfluencer || '',
+            budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
+          })),
+          submissionStatus: 'draft'
+        }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to save draft');
+        throw new Error(result.error || 'Failed to save draft');
       }
 
       toast.success('Draft saved successfully');
     } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save draft');
+      const message = error instanceof Error ? error.message : 'Failed to save draft';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
   };
-
-  // ---------- Keyboard: Close preview on Escape ----------
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && previewAsset) {
-        setPreviewAsset(null);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [previewAsset]);
-
-  // Load campaign data
-  useEffect(() => {
-    const loadCampaignData = async () => {
-      if (campaignId) {
-        try {
-          setIsLoading(true);
-          setError(null);
-          const response = await fetch(`/api/campaigns/${campaignId}`);
-          const data = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to load campaign');
-          }
-
-          if (data.success) {
-            setCampaignData(data.campaign);
-            updateData(data.campaign);
-            toast.success('Campaign data loaded');
-          }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Failed to load campaign';
-          setError(message);
-          toast.error(message);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadCampaignData();
-  }, [campaignId]);
 
   if (isLoading) {
     return (
@@ -697,141 +669,196 @@ function CampaignStep4Content() {
   }
 
   return (
-    <ErrorBoundary>
+    <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white min-h-screen">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
+        <p className="text-gray-500">Complete all required fields to create your campaign</p>
+      </div>
+      
       <Formik
         initialValues={initialValues}
         validationSchema={CreativeSchema}
         onSubmit={handleSubmit}
+        enableReinitialize={true}
       >
-        {({ values, setFieldValue, isValid, submitForm }) => (
-          <>
-            <div className="max-w-4xl mx-auto p-4 pb-32">
-              <Header currentStep={4} totalSteps={5} />
-              
-              <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">Step 4: Creative Assets</h1>
-                <button 
-                  type="button"
-                  onClick={() => handleSaveDraft(values)}
-                  className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : 'Save as Draft'}
-                </button>
-              </div>
-
-              <Form className="space-y-8">
-                {/* Upload Area */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Upload Assets</h2>
+        {({ values, setFieldValue, submitForm, isValid, dirty }) => {
+          return (
+            <>
+              <Form className="space-y-6">
+                {/* Asset Upload Section */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Asset Upload</h2>
                   <UploadArea onFilesAdded={handleFilesAdded} />
+                  
+                  {/* Uploaded Files Area */}
+                  {assets.length > 0 && (
+                    <div className="mt-6 space-y-2">
+                      {assets.map((asset) => (
+                        <div key={asset.id} className="mb-2">
+                          {asset.progress < 100 ? (
+                            <div className="bg-white rounded-lg border border-gray-200 p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center">
+                                  <DocumentIcon className="h-6 w-6 text-gray-400 mr-3" />
+                                  <span className="font-medium text-gray-700">{asset.file.name}</span>
+                                </div>
+                                <span className="text-sm text-gray-500">{asset.progress}%</span>
+                              </div>
+                              <div className="w-full h-2 bg-gray-200 rounded-full">
+                                <div 
+                                  className="h-2 bg-blue-600 rounded-full" 
+                                  style={{ width: `${asset.progress}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          ) : (
+                            <UploadedFile
+                              asset={asset}
+                              onPreview={() => setPreviewAsset(asset)}
+                              onDelete={() => handleDeleteAsset(asset)}
+                              onUpdate={(updatedAsset) => {
+                                setAssets(assets.map(a => 
+                                  a.id === updatedAsset.id ? updatedAsset : a
+                                ));
+                              }}
+                              currency={currency}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                {/* Asset List */}
-                <div className="space-y-4">
-                  {assets.map((asset) => (
-                    <AssetRow
-                      key={asset.id}
-                      asset={asset}
-                      onPreview={() => setPreviewAsset(asset)}
-                      onDelete={() => handleDeleteAsset(asset)}
-                      onUpdate={(updatedAsset) => {
-                        setAssets(assets.map(a => 
-                          a.id === updatedAsset.id ? updatedAsset : a
-                        ));
-                      }}
-                    />
-                  ))}
-                </div>
+                
+                {/* Asset Details Section */}
+                {assets.length > 0 && (
+                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Asset Details</h2>
+                    
+                    {/* File Tabs */}
+                    <div className="border-b border-gray-200">
+                      <div className="flex space-x-8">
+                        {assets.map((asset, index) => (
+                          <div 
+                            key={asset.id}
+                            className={`pb-3 ${index === 0 ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+                          >
+                            <span>{asset.details.assetName || asset.file.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Preview Section */}
+                    {assets.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">Preview</h3>
+                        <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center">
+                          <DocumentIcon className="h-10 w-10 text-gray-400" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Add bottom padding to prevent progress bar overlap */}
+                <div className="pb-24"></div>
               </Form>
-            </div>
-
-            <ProgressBar
-              currentStep={4}
-              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-              onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)}
-              onNext={submitForm}
-              disableNext={!isValid || isSubmitting || assets.some(asset => 
-                !asset.details.assetName || 
-                !asset.details.influencer || 
-                !asset.details.whyInfluencer || 
-                !asset.details.budget ||
-                asset.details.budget <= 0
-              )}
-            />
-          </>
-        )}
+              
+              <ProgressBar
+                currentStep={4}
+                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+                onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)}
+                onNext={submitForm}
+                onSaveDraft={() => handleSaveDraft(values)}
+                disableNext={
+                  assets.length === 0 || 
+                  assets.some(a => a.progress < 100) ||
+                  assets.some(a => !a.details.assetName || !a.details.influencer || !a.details.whyInfluencer || !a.details.budget || a.details.budget <= 0)
+                }
+                isFormValid={isValid}
+                isDirty={dirty}
+                isSaving={isSaving}
+              />
+            </>
+          );
+        }}
       </Formik>
-
-      {/* Modals */}
-      {previewAsset && (
-        <Modal
-          isOpen={!!previewAsset}
-          onClose={() => setPreviewAsset(null)}
-        >
-          {previewAsset && (
-            <div>
-              <h2 className="font-bold mb-4">Preview: {previewAsset.file.name}</h2>
-              {previewAsset.file.type.includes("video") ? (
-                <video controls className="w-full">
-                  <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
-                  Your browser does not support the video tag.
-                </video>
-              ) : previewAsset.file.type.includes("image") ? (
-                <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full" />
-              ) : previewAsset.file.type.includes("pdf") ? (
-                <embed
-                  src={URL.createObjectURL(previewAsset.file)}
-                  type="application/pdf"
-                  width="100%"
-                  height="600px"
-                />
-              ) : (
-                <p>Preview not available for this file type.</p>
-              )}
-            </div>
-          )}
-        </Modal>
-      )}
-
-      {/* Modal for Delete Confirmation */}
-      <Modal isOpen={!!confirmDeleteAsset} onClose={() => setConfirmDeleteAsset(null)}>
+      
+      {/* Preview Modal */}
+      <Modal
+        isOpen={!!previewAsset}
+        onClose={() => setPreviewAsset(null)}
+      >
+        {previewAsset && (
+          <div>
+            <h2 className="text-xl font-bold mb-4">Preview: {previewAsset.file.name}</h2>
+            {previewAsset.file.type.includes("video") ? (
+              <video controls className="w-full mb-4">
+                <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
+                Your browser does not support the video tag.
+              </video>
+            ) : previewAsset.file.type.includes("image") ? (
+              <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full mb-4" />
+            ) : previewAsset.file.type.includes("pdf") ? (
+              <embed
+                src={URL.createObjectURL(previewAsset.file)}
+                type="application/pdf"
+                width="100%"
+                height="600px"
+                className="mb-4"
+              />
+            ) : (
+              <p className="mb-4">Preview not available for this file type.</p>
+            )}
+          </div>
+        )}
+      </Modal>
+      
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        isOpen={!!confirmDeleteAsset} 
+        onClose={() => setConfirmDeleteAsset(null)}
+      >
         <div>
-          <h2 className="font-bold mb-4">Confirm Delete</h2>
-          <p>Are you sure you want to delete this asset? This action cannot be undone.</p>
-          <div className="mt-4 flex space-x-4">
+          <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
+          <p className="mb-4">Are you sure you want to delete this asset? This action cannot be undone.</p>
+          <div className="flex space-x-4">
             <button
               onClick={() => setConfirmDeleteAsset(null)}
-              className="px-4 py-2 border rounded hover:bg-gray-100 transition"
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
             >
               Cancel
             </button>
             <button
               onClick={confirmDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
             >
-              Delete Permanently
+              Delete
             </button>
           </div>
         </div>
       </Modal>
-    </ErrorBoundary>
+    </div>
   );
 }
 
-export default function CampaignStep4() {
+export default function Step4Content() {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <LoadingSpinner />;
+  }
+
   return (
-    <ErrorBoundary>
-      <Suspense 
-        fallback={
-          <div className="flex items-center justify-center min-h-screen">
-            <LoadingSpinner />
-            <p className="ml-2">Loading...</p>
-          </div>
-        }
-      >
-        <CampaignStep4Content />
+    <div className="min-h-screen bg-white">
+      <Suspense fallback={<LoadingSpinner />}>
+        <FormContent />
       </Suspense>
-    </ErrorBoundary>
+    </div>
   );
 }
