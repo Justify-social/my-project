@@ -1,14 +1,26 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { connectToDatabase } from '@/lib/db';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('Debug: Checking campaign existence:', params.id);
+    
     const campaignId = parseInt(params.id);
-    console.log('Debug: Checking campaign existence:', campaignId);
+    if (isNaN(campaignId)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid campaign ID',
+        message: `The provided ID '${params.id}' is not a valid number`
+      }, { status: 400 });
+    }
 
+    // Connect to the database
+    await connectToDatabase();
+    
     // First check if campaign exists
     const exists = await prisma.campaignWizardSubmission.count({
       where: { id: campaignId }
@@ -17,9 +29,10 @@ export async function GET(
     if (!exists) {
       return NextResponse.json({
         success: false,
+        exists: false,
         error: 'Campaign not found',
         message: `No campaign found with ID ${campaignId}`
-      });
+      }, { status: 404 });
     }
 
     // If it exists, get full details
@@ -33,6 +46,8 @@ export async function GET(
             locations: true,
             genders: true,
             languages: true,
+            screeningQuestions: true,
+            competitors: true
           }
         },
         creativeAssets: true,
@@ -40,10 +55,14 @@ export async function GET(
       }
     });
 
+    // Check DB connection
+    const dbStatus = await prisma.$queryRaw`SELECT 1 as connected`;
+    
     return NextResponse.json({
       success: true,
       exists: true,
       campaign: campaign,
+      dbStatus: dbStatus,
       message: `Campaign ${campaignId} found`
     });
 
