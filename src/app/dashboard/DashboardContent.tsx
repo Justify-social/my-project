@@ -57,6 +57,16 @@ import {
   XCircleIcon,
   ClockIcon,
   PlusIcon,
+  DocumentTextIcon,
+  BoltIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline';
 import useSWR from 'swr';
 
@@ -238,100 +248,51 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01 }}
-      className="bg-white rounded-lg border border-[var(--divider-color)] p-4 hover:shadow-md transition-all duration-300 cursor-pointer"
-      onClick={() => router.push(`/campaigns/${campaign.id}`)}
+      className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer"
+      onClick={() => onClick ? onClick() : router.push(`/campaigns/${campaign.id}`)}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center">
-          <div className="w-12 h-12 bg-gray-50 rounded-lg mr-3 flex items-center justify-center overflow-hidden">
-            {campaign.platform === "Instagram" && (
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M17.5 6.5H17.51" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-            {campaign.platform === "YouTube" && (
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.54 6.42C22.4212 5.94541 22.1793 5.51057 21.8387 5.15941C21.498 4.80824 21.0708 4.55318 20.6 4.42C18.88 4 12 4 12 4C12 4 5.12 4 3.4 4.46C2.92925 4.59318 2.50198 4.84824 2.16135 5.19941C1.82072 5.55057 1.57879 5.98541 1.46 6.46C1.14521 8.20556 0.991235 9.97631 1 11.75C0.988687 13.537 1.14266 15.3213 1.46 17.08C1.59096 17.5398 1.83831 17.9581 2.17814 18.2945C2.51798 18.6308 2.93882 18.8738 3.4 19C5.12 19.46 12 19.46 12 19.46C12 19.46 18.88 19.46 20.6 19C21.0708 18.8668 21.498 18.6118 21.8387 18.2606C22.1793 17.9094 22.4212 17.4746 22.54 17C22.8524 15.2676 22.9965 13.5103 23 11.75C23.0113 9.96295 22.8573 8.1787 22.54 6.42Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M9.75 15.02L15.5 11.75L9.75 8.48001V15.02Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-            {campaign.platform === "TikTok" && (
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 8V16C21 18.7614 18.7614 21 16 21H8C5.23858 21 3 18.7614 3 16V8C3 5.23858 5.23858 3 8 3H16C18.7614 3 21 5.23858 21 8Z" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M10 12C8.34315 12 7 13.3431 7 15C7 16.6569 8.34315 18 10 18C11.6569 18 13 16.6569 13 15V6C13.3333 7 14.6 9 17 9" stroke="var(--accent-color)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-          </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-semibold text-[var(--primary-color)]">{campaign.campaignName}</h4>
-              <StatusBadge status={campaign.status || "scheduled"} size="sm" />
-            </div>
-            <div className="flex items-center mt-1">
-              <svg className="w-3 h-3 text-[var(--secondary-color)] mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M3 9H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <p className="text-xs text-[var(--secondary-color)]">
-                {new Date(campaign.startDate).toLocaleDateString()} - {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'Ongoing'}
-              </p>
-            </div>
+            <h3 className="text-base font-medium text-gray-900">{campaign.campaignName}</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {new Date(campaign.startDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+              {campaign.endDate && ` - ${new Date(campaign.endDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`}
+            </p>
+          </div>
+          <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
+            campaign.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 to-pink-500' :
+            campaign.platform === 'TikTok' ? 'bg-black' : 'bg-red-600'
+          }`}>
+            {campaign.platform === 'Instagram' && (
+              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            )}
+            {campaign.platform === 'TikTok' && (
+              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg>
+            )}
+            {campaign.platform === 'YouTube' && (
+              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg>
+            )}
           </div>
         </div>
-        <div className="flex flex-col items-end">
-          <p className="text-sm font-medium text-[var(--primary-color)]">
-            ${campaign.totalBudget?.toLocaleString()}
-          </p>
-          <div className="flex space-x-1 mt-2">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/campaigns/${campaign.id}/edit`);
-              }}
-              className="p-1.5 rounded-full hover:bg-gray-100"
-            >
-              <svg className="w-4 h-4 text-[var(--secondary-color)]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/campaigns/${campaign.id}`);
-              }}
-              className="p-1.5 rounded-full hover:bg-gray-100"
-            >
-              <svg className="w-4 h-4 text-[var(--secondary-color)]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2.45825 12C3.73253 7.94288 7.52281 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+        
+        <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
+          <div>
+            <p className="text-gray-500">Budget</p>
+            <p className="font-medium text-gray-900">
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0
+              }).format(campaign.totalBudget)}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-500">Primary KPI</p>
+            <p className="font-medium text-gray-900">{campaign.primaryKPI}</p>
           </div>
         </div>
       </div>
-      
-      {campaign.performance && (
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-[var(--secondary-color)]">Engagement</p>
-            <p className="text-sm font-semibold text-[var(--primary-color)]">{campaign.performance.engagement}%</p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-[var(--secondary-color)]">Reach</p>
-            <p className="text-sm font-semibold text-[var(--primary-color)]">{campaign.performance.reach}K</p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-xs text-[var(--secondary-color)]">Conversion</p>
-            <p className="text-sm font-semibold text-[var(--primary-color)]">{campaign.performance.conversion}%</p>
-          </div>
-        </div>
-      )}
     </motion.div>
   );
 };
@@ -346,41 +307,37 @@ interface MetricCardProps {
   format?: "number" | "currency" | "percent";
 }
 
+// Update the MetricCard component for better mobile responsiveness
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, icon: Icon, description, format = "number" }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-4 sm:p-6 border border-[var(--divider-color)]"
-  >
-    <div className="flex items-start justify-between mb-4">
-      <div className="bg-[var(--accent-color)] bg-opacity-10 p-3 rounded-lg">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-color)]" />
+  <div className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+    <div className="flex justify-between items-start">
+      <div>
+        <h3 className="text-sm sm:text-base font-medium text-gray-700 mb-1">{title}</h3>
+        <p className="text-xl sm:text-2xl font-bold text-gray-900">
+          {format === "number" && typeof value === "number" && value.toLocaleString()}
+          {format === "currency" && typeof value === "number" && `$${value.toLocaleString()}`}
+          {format === "percent" && typeof value === "number" && `${value}%`}
+          {typeof value === "string" && value}
+        </p>
       </div>
+      <div className="p-2 bg-blue-50 rounded-lg">
+        <Icon className="w-5 h-5 text-blue-500" />
+      </div>
+    </div>
+    <div className="mt-3 flex items-center text-xs">
       {trend !== undefined && (
-        <span className={`flex items-center text-xs sm:text-sm font-medium ${
-          trend >= 0 ? 'text-green-600' : 'text-red-600'
-        }`}>
+        <span className={`inline-flex items-center mr-2 ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           {trend >= 0 ? (
-            <ArrowTrendingUpIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+            <ArrowUpIcon className="w-3 h-3 mr-1" />
           ) : (
-            <ArrowTrendingDownIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+            <ArrowDownIcon className="w-3 h-3 mr-1" />
           )}
           {Math.abs(trend)}%
         </span>
       )}
+      <span className="text-gray-500">{description}</span>
     </div>
-    <h3 className="text-sm text-[var(--secondary-color)] mb-1 font-medium">{title}</h3>
-    <div className="flex items-baseline">
-      <p className="text-2xl sm:text-3xl font-bold text-[var(--primary-color)]">
-        {format === "currency" && "$"}
-        {typeof value === "number" ? value.toLocaleString() : value}
-        {format === "percent" && "%"}
-      </p>
-    </div>
-    {description && (
-      <p className="mt-2 text-xs sm:text-sm text-[var(--secondary-color)]">{description}</p>
-    )}
-  </motion.div>
+  </div>
 );
 
 // -----------------------
@@ -880,10 +837,6 @@ const mockMetrics = {
 // Calendar component with month view
 const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['events'] }> = ({ month, events }) => {
   const [currentMonth, setCurrentMonth] = useState(month);
-  const router = useRouter();
-  
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
   
   const prevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -893,110 +846,85 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
   
-  const monthName = currentMonth.toLocaleString('default', { month: 'long' });
-  const year = currentMonth.getFullYear();
+  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+  const monthName = monthStart.toLocaleString('default', { month: 'long' });
+  const year = monthStart.getFullYear();
   
+  // Generate calendar days
   const days = [];
-  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   
-  // Add empty cells for days before the first day of the month
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    days.push(<div key={`empty-${i}`} className="h-8 text-center text-[var(--secondary-color)]"></div>);
-  }
-  
-  // Add cells for each day of the month
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    const eventsOnDay = events.filter(event => {
-      const eventDate = new Date(event.start);
-      return eventDate.getDate() === day && 
-             eventDate.getMonth() === currentMonth.getMonth() && 
-             eventDate.getFullYear() === currentMonth.getFullYear();
-    });
-    
-    const hasEvent = eventsOnDay.length > 0;
-    const isToday = new Date().getDate() === day && 
-                    new Date().getMonth() === currentMonth.getMonth() && 
-                    new Date().getFullYear() === currentMonth.getFullYear();
-    
-    days.push(
-      <div 
-        key={`day-${day}`}
-        onClick={() => hasEvent && router.push('/calendar')}
-        className={`relative h-8 flex items-center justify-center rounded-full w-8 mx-auto cursor-pointer
-          ${isToday ? 'border border-[var(--accent-color)]' : ''}
-          ${hasEvent 
-            ? 'bg-[var(--accent-color)] bg-opacity-10 text-[var(--accent-color)] font-medium hover:bg-opacity-20' 
-            : 'text-[var(--primary-color)] hover:bg-gray-50'
-          }`}
-      >
-        {day}
-        {hasEvent && eventsOnDay.length > 1 && (
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent-color)] text-[10px] text-white">
-            {eventsOnDay.length}
-          </span>
-        )}
-      </div>
+  for (let i = 1; i <= daysInMonth; i++) {
+    const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
+    const dayEvents = events.filter(event => 
+      new Date(event.start).getDate() === i && 
+      new Date(event.start).getMonth() === currentMonth.getMonth() &&
+      new Date(event.start).getFullYear() === currentMonth.getFullYear()
     );
+    
+    days.push({ day: i, events: dayEvents, date: currentDate });
   }
   
   return (
-    <div className="bg-white rounded-lg p-3 sm:p-4 border border-[var(--divider-color)]">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2">
-        <div className="flex items-center space-x-2">
-          <button 
-            onClick={prevMonth}
-            className="p-1 rounded-full hover:bg-[var(--divider-color)] transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--secondary-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="p-4 flex items-center justify-between border-b border-gray-200">
+        <h3 className="text-base font-medium text-gray-800">{monthName} {year}</h3>
+        <div className="flex space-x-2">
+          <button onClick={prevMonth} className="p-1 rounded-md hover:bg-gray-100">
+            <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
           </button>
-          <h3 className="text-base sm:text-lg font-medium text-[var(--primary-color)]">{monthName} {year}</h3>
-          <button 
-            onClick={nextMonth}
-            className="p-1 rounded-full hover:bg-[var(--divider-color)] transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--secondary-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+          <button onClick={nextMonth} className="p-1 rounded-md hover:bg-gray-100">
+            <ChevronRightIcon className="w-5 h-5 text-gray-600" />
           </button>
         </div>
-        <button 
-          onClick={() => router.push('/calendar')}
-          className="text-xs sm:text-sm text-[var(--accent-color)] hover:underline font-medium"
-        >
-          Switch to Timeline
-        </button>
       </div>
       
-      <div className="grid grid-cols-7 gap-1 mb-2">
-        {dayNames.map(day => (
-          <div key={day} className="text-xs text-center text-[var(--secondary-color)] font-medium">
-            {day}
-          </div>
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-7 gap-1">
-        {days}
-      </div>
-      
-      <div className="mt-4 pt-3 border-t border-[var(--divider-color)]">
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-[var(--secondary-color)]">Upcoming events</span>
-          <span className="text-xs text-[var(--accent-color)] cursor-pointer hover:underline" onClick={() => router.push('/calendar')}>View all</span>
+      <div className="overflow-x-auto">
+        <div className="min-w-full grid grid-cols-7 text-center p-2 text-xs font-medium text-gray-500">
+          <div className="py-1">Mo</div>
+          <div className="py-1">Tu</div>
+          <div className="py-1">We</div>
+          <div className="py-1">Th</div>
+          <div className="py-1">Fr</div>
+          <div className="py-1">Sa</div>
+          <div className="py-1">Su</div>
         </div>
-        <div className="mt-2 space-y-2">
-          {events.slice(0, 2).map((event, idx) => (
-            <div key={idx} className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => router.push(`/campaigns/${event.id}`)}>
-              <div className="w-2 h-2 rounded-full bg-[var(--accent-color)] mr-2"></div>
-              <div className="flex-1 truncate">
-                <p className="text-xs font-medium text-[var(--primary-color)] truncate">{event.title}</p>
-                <p className="text-xs text-[var(--secondary-color)]">{new Date(event.start).toLocaleDateString()}</p>
-              </div>
-            </div>
+        
+        <div className="min-w-full grid grid-cols-7 gap-1 p-2">
+          {/* Placeholder cells for days before the 1st of the month */}
+          {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() === 0 ? 6 : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() - 1 }).map((_, index) => (
+            <div key={`empty-${index}`} className="aspect-square"></div>
           ))}
+          
+          {/* Actual days of the month */}
+          {days.map(({ day, events, date }) => {
+            const isToday = new Date().toDateString() === date.toDateString();
+            
+            return (
+              <div 
+                key={day} 
+                className={`relative p-1 text-center ${isToday ? 'bg-blue-50 rounded-md' : ''}`}
+              >
+                <div className={`text-xs ${isToday ? 'font-bold text-blue-600' : 'text-gray-700'}`}>
+                  {day}
+                </div>
+                
+                {events.length > 0 && (
+                  <div className="mt-1 space-y-1">
+                    {events.map(event => (
+                      <div 
+                        key={event.id}
+                        className="text-[9px] sm:text-[10px] truncate rounded px-1 py-0.5 bg-blue-100 text-blue-800"
+                        title={event.title}
+                      >
+                        {event.title.length > 10 ? `${event.title.substring(0, 8)}...` : event.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -1227,31 +1155,14 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
 
         {/* Dashboard Header */}
         <div className="flex flex-col mb-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-            <h1 className="text-2xl font-bold text-[var(--primary-color)]">Dashboard</h1>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => router.push('/reports')}
-                className="px-3 sm:px-4 py-2 border border-[var(--divider-color)] bg-white text-[var(--primary-color)] rounded-lg hover:bg-gray-50 transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
-              >
-                <DocumentChartBarIcon className="w-4 h-4" />
-                <span>Generate Report</span>
-              </button>
-              <button 
-                onClick={() => router.push('/campaigns/creative-test')}
-                className="px-3 sm:px-4 py-2 border border-[var(--divider-color)] bg-white text-[var(--primary-color)] rounded-lg hover:bg-gray-50 transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
-              >
-                <SparklesIcon className="w-4 h-4" />
-                <span>Start Creative Test</span>
-              </button>
-              <button 
-                onClick={() => router.push('/campaigns/wizard/step-1')}
-                className="px-3 sm:px-4 py-2 bg-[#0ea5e9] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Create New Campaign</span>
-              </button>
-            </div>
+          <div className="flex justify-end mb-6">
+            <button 
+              onClick={() => router.push('/campaigns/wizard/step-1')}
+              className="px-3 sm:px-4 py-2 bg-[#0ea5e9] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
+            >
+              <PlusIcon className="w-4 h-4" />
+              <span>Create New Campaign</span>
+            </button>
           </div>
         </div>
 
@@ -1259,40 +1170,18 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Campaigns Overview</h2>
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center border border-[var(--divider-color)] rounded-lg overflow-hidden">
-                <button 
-                  onClick={() => setDateRange('7d')}
-                  className={`px-3 py-1.5 text-sm font-medium ${dateRange === '7d' ? 'bg-[#0ea5e9] text-white' : 'bg-white text-[var(--secondary-color)]'}`}
-                >
-                  Last 30 Days
-                </button>
-                <div className="h-6 w-px bg-[var(--divider-color)]"></div>
-                <button
-                  onClick={() => setDateRange('30d')}
-                  className={`px-3 py-1.5 text-sm font-medium ${dateRange === '30d' ? 'bg-[#0ea5e9] text-white' : 'bg-white text-[var(--secondary-color)]'}`}
-                >
-                  All channels
-                </button>
-              </div>
-              <div className="flex items-center border border-[var(--divider-color)] rounded-lg bg-white px-3 py-2">
-                <span className="flex items-center text-sm">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  1 Survey Live
-                </span>
-              </div>
-            </div>
+            {/* Removed filters */}
           </div>
           
           {/* Campaign Tabs */}
           <div className="flex border-b border-[var(--divider-color)] mb-6">
             <button 
-              className="px-6 py-3 border-b-2 border-[#0ea5e9] text-[#0ea5e9] font-medium"
+              className="px-4 sm:px-6 py-3 border-b-2 border-[#0ea5e9] text-[#0ea5e9] font-medium text-sm sm:text-base"
             >
               Upcoming
             </button>
             <button 
-              className="px-6 py-3 text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
+              className="px-4 sm:px-6 py-3 text-[var(--secondary-color)] hover:text-[var(--primary-color)] text-sm sm:text-base"
             >
               Finished
             </button>
@@ -1301,7 +1190,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
           {/* Calendar and Campaign Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Calendar */}
-            <div className="col-span-12 lg:col-span-6">
+            <div className="col-span-12 lg:col-span-6 overflow-x-auto">
               <CalendarMonthView month={currentDate} events={calendarEvents} />
             </div>
             
@@ -1328,43 +1217,11 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                 ) : (
                   <div className="space-y-3">
                     {upcomingCampaigns.map((campaign) => (
-                      <div 
+                      <CampaignCard
                         key={campaign.id}
-                        className="p-3 bg-white border border-gray-100 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                        campaign={campaign}
                         onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center">
-                            <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
-                              campaign.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 to-pink-500' :
-                              campaign.platform === 'TikTok' ? 'bg-black' : 
-                              'bg-red-600'
-                            }`}>
-                              {campaign.platform === 'Instagram' ? (
-                                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                              ) : campaign.platform === 'TikTok' ? (
-                                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg>
-                              ) : (
-                                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg>
-                              )}
-                            </div>
-                            <div className="ml-3">
-                              <h4 className="font-medium text-sm">{campaign.campaignName}</h4>
-                              <p className="text-xs text-gray-500">
-                                {new Date(campaign.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                {campaign.endDate && ` - ${new Date(campaign.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <StatusBadge status="Upcoming" size="sm" />
-                        </div>
-                        
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Budget: ${campaign.totalBudget.toLocaleString()}</span>
-                          <span>KPI: {campaign.primaryKPI}</span>
-                        </div>
-                      </div>
+                      />
                     ))}
                   </div>
                 )}
@@ -1373,6 +1230,51 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
           </div>
         </div>
         
+        {/* Performance Metrics Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Performance</h2>
+          </div>
+          
+          {/* Performance Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard
+              title="Total Campaigns"
+              value={metrics.stats.totalCampaigns}
+              trend={metrics.stats.campaignChange}
+              icon={DocumentTextIcon}
+              description={`+${metrics.stats.campaignChange} campaigns`}
+            />
+            
+            <MetricCard
+              title="Survey Responses"
+              value={metrics.stats.surveyResponses}
+              trend={metrics.stats.surveyChange}
+              icon={ChatBubbleLeftRightIcon}
+              description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`}
+            />
+            
+            <MetricCard
+              title="Live Campaigns"
+              value={metrics.stats.liveCampaigns}
+              trend={metrics.stats.liveChange}
+              icon={BoltIcon}
+              description={`+${metrics.stats.liveChange} more than last month`}
+            />
+            
+            <MetricCard
+              title="Credits Available"
+              value={metrics.stats.creditsAvailable}
+              trend={metrics.stats.creditsChange}
+              icon={CurrencyDollarIcon}
+              description={`${metrics.stats.creditsChange < 0 ? '' : '+'}${metrics.stats.creditsChange} credits`}
+              format="number"
+            />
+          </div>
+          
+          {/* ... Rest of the component ... */}
+        </div>
+
         {/* Influencers Overview */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -1831,7 +1733,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
                           </linearGradient>
                         </defs>
                         <path
-                          d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15"
+                          d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,20 280,25 300,20"
                           stroke="#0ea5e9"
                           strokeWidth="2"
                           fill="none"
