@@ -18,6 +18,20 @@ import ScreeningQuestions from "@/components/Wizard/AudienceTargeting/ScreeningQ
 import LanguagesSelector from "@/components/Wizard/AudienceTargeting/LanguagesSelector";
 import AdvancedTargeting from "@/components/Wizard/AudienceTargeting/AdvancedTargeting";
 import CompetitorTracking from "@/components/Wizard/AudienceTargeting/CompetitorTracking";
+import Image from "next/image";
+import {
+  DocumentTextIcon,
+  ClipboardDocumentListIcon,
+  HashtagIcon,
+  StarIcon,
+  BriefcaseIcon,
+  CheckBadgeIcon,
+  ChatBubbleLeftRightIcon,
+  PresentationChartBarIcon,
+  LightBulbIcon,
+  PlusCircleIcon,
+  TrashIcon
+} from "@heroicons/react/24/outline";
 
 // =============================================================================
 // TYPES & INTERFACES
