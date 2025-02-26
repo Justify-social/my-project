@@ -321,7 +321,9 @@ function FormContent() {
                               }
                             }}
                           >
-                            <PlusIcon className="h-5 w-5 text-blue-500" />
+                            <div className="bg-blue-500 rounded-full p-1">
+                              <PlusIcon className="h-3 w-3 text-white" />
+                            </div>
                           </button>
                         </div>
                         
@@ -330,19 +332,19 @@ function FormContent() {
                             {values.location.map((loc, index) => (
                               <span 
                                 key={index}
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white"
                               >
-                                {loc}
+                                <span>{loc}</span>
                                 <button
                                   type="button"
-                                  className="ml-1 h-4 w-4 rounded-full text-blue-400 hover:text-blue-600 focus:outline-none"
+                                  className="ml-2 text-gray-400 hover:text-gray-500"
                                   onClick={() => {
                                     const newLocations = [...values.location];
                                     newLocations.splice(index, 1);
                                     setFieldValue('location', newLocations);
                                   }}
                                 >
-                                  <XMarkIcon className="h-3 w-3" />
+                                  <XMarkIcon className="h-5 w-5" />
                                 </button>
                               </span>
                             ))}
@@ -354,6 +356,7 @@ function FormContent() {
                   
                   {/* Age Distribution */}
                   <div className="mb-6">
+                    <div className="border-t border-gray-200 pt-6 mt-6"></div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-gray-700">
                         Age Distribution
@@ -471,6 +474,7 @@ function FormContent() {
                   
                   {/* Gender Selection */}
                   <div className="mb-6">
+                    <div className="border-t border-gray-200 pt-6 mt-6"></div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Gender Selection
                     </label>
@@ -536,10 +540,21 @@ function FormContent() {
                         id="screeningQueryInput"
                         placeholder="Search Screening Questions"
                         className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.target as HTMLInputElement;
+                            if (input && input.value.trim()) {
+                              const newQuestions = [...values.screeningQuestions, input.value.trim()];
+                              setFieldValue('screeningQuestions', newQuestions);
+                              input.value = '';
+                            }
+                          }
+                        }}
                       />
                       <button
                         type="button"
-                        className="absolute right-2 p-1 bg-blue-500 text-white rounded-full"
+                        className="absolute right-2 flex items-center"
                         onClick={() => {
                           const input = document.getElementById('screeningQueryInput') as HTMLInputElement;
                           if (input && input.value.trim()) {
@@ -549,7 +564,9 @@ function FormContent() {
                           }
                         }}
                       >
-                        <PlusIcon className="h-4 w-4" />
+                        <div className="bg-blue-500 rounded-full p-1">
+                          <PlusIcon className="h-3 w-3 text-white" />
+                        </div>
                       </button>
                     </div>
                   </div>
@@ -585,26 +602,23 @@ function FormContent() {
                   </div>
                   
                   {values.screeningQuestions.length > 0 && (
-                    <div className="border-t border-gray-200 pt-4 mt-4">
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Questions</h3>
-                      <div className="space-y-2">
-                        {values.screeningQuestions.map((question, index) => (
-                          <div key={index} className="flex justify-between items-center p-2 bg-gray-50 border border-gray-200 rounded-md">
-                            <span className="text-sm">{question}</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newQuestions = [...values.screeningQuestions];
-                                newQuestions.splice(index, 1);
-                                setFieldValue('screeningQuestions', newQuestions);
-                              }}
-                              className="text-gray-400 hover:text-gray-500"
-                            >
-                              <XMarkIcon className="h-5 w-5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="space-y-2">
+                      {values.screeningQuestions.map((question, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
+                          <span>{question}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newQuestions = [...values.screeningQuestions];
+                              newQuestions.splice(index, 1);
+                              setFieldValue('screeningQuestions', newQuestions);
+                            }}
+                            className="text-gray-400 hover:text-gray-500"
+                          >
+                            <XMarkIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -639,20 +653,20 @@ function FormContent() {
                     </div>
                     
                     {values.languages.length > 0 && (
-                      <div className="mt-3 p-2 bg-gray-50 rounded-md">
+                      <div className="mt-3">
                         <div className="flex flex-wrap gap-2">
                           {values.languages.map((lang) => (
-                            <span key={lang} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {lang}
+                            <span key={lang} className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
+                              <span>{lang}</span>
                               <button
                                 type="button"
-                                className="ml-1 h-4 w-4 rounded-full text-blue-400 hover:text-blue-600 focus:outline-none"
+                                className="ml-2 text-gray-400 hover:text-gray-500"
                                 onClick={() => {
                                   const newLanguages = values.languages.filter(l => l !== lang);
                                   setFieldValue('languages', newLanguages);
                                 }}
                               >
-                                <XMarkIcon className="h-3 w-3" />
+                                <XMarkIcon className="h-5 w-5" />
                               </button>
                             </span>
                           ))}
@@ -664,15 +678,14 @@ function FormContent() {
                 
                 {/* Advanced Targeting */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex justify-between items-center">
+                  <div 
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                  >
                     <h2 className="text-lg font-semibold text-gray-900">Advanced Targeting</h2>
-                    <button
-                      type="button"
-                      onClick={() => setShowAdvanced(!showAdvanced)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
+                    <div className="text-blue-500 hover:text-blue-700">
                       <ChevronRightIcon className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} />
-                    </button>
+                    </div>
                   </div>
                   
                   {showAdvanced && (
@@ -689,7 +702,7 @@ function FormContent() {
                           <Field
                             as="select"
                             name="educationLevel"
-                            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            className="block w-full px-3 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md appearance-none"
                           >
                             <option value="">Select Education</option>
                             <option value="high_school">High School</option>
@@ -700,8 +713,10 @@ function FormContent() {
                             <option value="doctorate">Doctorate</option>
                             <option value="professional">Professional Degree</option>
                           </Field>
-                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                            </svg>
                           </div>
                         </div>
                       </div>
@@ -714,13 +729,14 @@ function FormContent() {
                           </label>
                         </div>
                         
-                        <div className="relative">
+                        <div className="relative mb-6">
                           <div className="flex items-center">
+                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3" />
                             <input
                               type="text"
                               id="jobTitleInput"
                               placeholder="Enter job titles (press Enter to add)"
-                              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                              className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   e.preventDefault();
@@ -735,7 +751,7 @@ function FormContent() {
                             />
                             <button
                               type="button"
-                              className="absolute right-2 flex items-center justify-center h-6 w-6 text-blue-500"
+                              className="absolute right-2 flex items-center"
                               onClick={() => {
                                 const input = document.getElementById('jobTitleInput') as HTMLInputElement;
                                 if (input && input.value.trim()) {
@@ -745,7 +761,9 @@ function FormContent() {
                                 }
                               }}
                             >
-                              <PlusIcon className="h-4 w-4" />
+                              <div className="bg-blue-500 rounded-full p-1">
+                                <PlusIcon className="h-3 w-3 text-white" />
+                              </div>
                             </button>
                           </div>
                           <div className="mt-2 text-xs text-gray-500">
@@ -757,19 +775,19 @@ function FormContent() {
                               {values.jobTitles.map((title, index) => (
                                 <span 
                                   key={index}
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                  className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white"
                                 >
-                                  {title}
+                                  <span>{title}</span>
                                   <button
                                     type="button"
-                                    className="ml-1 h-4 w-4 rounded-full text-blue-400 hover:text-blue-600 focus:outline-none"
+                                    className="ml-2 text-gray-400 hover:text-gray-500"
                                     onClick={() => {
                                       const newJobTitles = [...values.jobTitles];
                                       newJobTitles.splice(index, 1);
                                       setFieldValue('jobTitles', newJobTitles);
                                     }}
                                   >
-                                    <XMarkIcon className="h-3 w-3" />
+                                    <XMarkIcon className="h-5 w-5" />
                                   </button>
                                 </span>
                               ))}
@@ -792,51 +810,61 @@ function FormContent() {
                           </div>
                         </div>
                         
-                        <div className="pl-1">
-                          <Slider
-                            value={values.incomeLevel}
-                            onChange={(value) => {
-                              const newValue = typeof value === 'number' ? value : value[0];
-                              setFieldValue('incomeLevel', newValue);
-                            }}
-                            min={0}
-                            max={100000}
-                            step={10000}
-                            marks={{
-                              0: '$0',
-                              20000: '$20k',
-                              50000: '$50k',
-                              100000: '$100k+'
-                            }}
-                            trackStyle={{ backgroundColor: '#3B82F6', height: 4 }}
-                            railStyle={{ backgroundColor: '#E5E7EB', height: 4 }}
-                            handleStyle={{
-                              borderColor: '#3B82F6',
-                              backgroundColor: '#3B82F6',
-                              opacity: 1,
-                              height: 16,
-                              width: 16,
-                              marginTop: -6,
-                              boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)',
-                            }}
-                            dotStyle={{
-                              borderColor: '#E5E7EB',
-                              backgroundColor: '#E5E7EB',
-                              height: 8,
-                              width: 8,
-                              marginBottom: 0,
-                            }}
-                            activeDotStyle={{
-                              borderColor: '#3B82F6',
-                              backgroundColor: '#3B82F6',
-                            }}
-                            className="mt-2 mb-1"
-                          />
-                          <div className="mt-1 text-right font-medium text-sm text-gray-700">
-                            {values.incomeLevel >= 100000 ? 
-                              `$${values.incomeLevel.toLocaleString()}+` : 
-                              `$${values.incomeLevel.toLocaleString()}`
-                            }
+                        <div className="w-full px-0">
+                          <div className="flex flex-col w-full">
+                            <div className="relative w-full max-w-full pt-4 pb-6">
+                              <Slider
+                                value={values.incomeLevel}
+                                onChange={(value) => {
+                                  const newValue = typeof value === 'number' ? value : value[0];
+                                  setFieldValue('incomeLevel', newValue);
+                                }}
+                                min={0}
+                                max={100000}
+                                step={10000}
+                                marks={{
+                                  0: '',
+                                  20000: '',
+                                  50000: '',
+                                  100000: ''
+                                }}
+                                trackStyle={{ backgroundColor: '#3B82F6', height: 4 }}
+                                railStyle={{ backgroundColor: '#E5E7EB', height: 4 }}
+                                handleStyle={{
+                                  borderColor: '#3B82F6',
+                                  backgroundColor: '#3B82F6',
+                                  opacity: 1,
+                                  height: 16,
+                                  width: 16,
+                                  marginTop: -6,
+                                  boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)',
+                                }}
+                                dotStyle={{
+                                  borderColor: '#E5E7EB',
+                                  backgroundColor: '#E5E7EB',
+                                  height: 8,
+                                  width: 8,
+                                  marginBottom: 0,
+                                }}
+                                activeDotStyle={{
+                                  borderColor: '#3B82F6',
+                                  backgroundColor: '#3B82F6',
+                                }}
+                                className="w-full"
+                              />
+                              <div className="absolute inset-x-0 bottom-0 flex justify-between text-xs text-gray-600 px-1">
+                                <span>$0</span>
+                                <span>$20k</span>
+                                <span>$50k</span>
+                                <span>$100k+</span>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-right font-medium text-sm text-gray-700">
+                              {values.incomeLevel >= 100000 ? 
+                                `$${values.incomeLevel.toLocaleString()}+` : 
+                                `$${values.incomeLevel.toLocaleString()}`
+                              }
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -873,7 +901,7 @@ function FormContent() {
                       />
                       <button
                         type="button"
-                        className="absolute right-2 p-1 bg-blue-500 text-white rounded-full"
+                        className="absolute right-2 flex items-center"
                         onClick={() => {
                           const input = document.getElementById('competitorInput') as HTMLInputElement;
                           if (input && input.value.trim()) {
@@ -883,7 +911,9 @@ function FormContent() {
                           }
                         }}
                       >
-                        <PlusIcon className="h-4 w-4" />
+                        <div className="bg-blue-500 rounded-full p-1">
+                          <PlusIcon className="h-3 w-3 text-white" />
+                        </div>
                       </button>
                     </div>
                   </div>
