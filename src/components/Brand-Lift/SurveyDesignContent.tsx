@@ -2,124 +2,410 @@
 
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 interface Question {
   id: string;
-  type: 'multiple_choice' | 'scale' | 'open_ended';
+  title: string;
+  type: 'Multiple Choice' | 'Single Choice';
+  kpi: string;
+  options: Array<{
+    id: string;
+    text: string;
+    image?: string | null;
+  }>;
+}
+
+interface QuestionOption {
+  id: string;
   text: string;
-  options?: string[];
+  image?: string | null;
 }
 
 export default function SurveyDesignContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const surveyId = searchParams.get('survey');
+  const campaignId = searchParams.get('id');
 
+  // Sample questions based on Figma design
   const [questions, setQuestions] = useState<Question[]>([
     {
       id: '1',
-      type: 'multiple_choice',
-      text: 'How familiar are you with our brand?',
-      options: ['Very familiar', 'Somewhat familiar', 'Not familiar'],
+      title: 'How would you rate our brand awareness campaign?',
+      type: 'Multiple Choice',
+      kpi: 'Brand Awareness',
+      options: [
+        { id: '1-1', text: 'Very Effective', image: '/samples/sample1.jpg' },
+        { id: '1-2', text: 'Somewhat Effective', image: '/samples/sample2.jpg' },
+        { id: '1-3', text: 'Not Effective', image: null },
+      ]
     },
     {
       id: '2',
-      type: 'scale',
-      text: 'How likely are you to recommend our product?',
+      title: 'Which of our advertisements do you recall seeing?',
+      type: 'Multiple Choice',
+      kpi: 'Ad Recall',
+      options: [
+        { id: '2-1', text: 'Product Billboard', image: '/samples/sample3.jpg' },
+        { id: '2-2', text: 'Social Media Ad', image: '/samples/sample2.jpg' },
+        { id: '2-3', text: 'TV Commercial', image: '/samples/sample1.jpg' },
+        { id: '2-4', text: 'None of the above', image: null },
+      ]
     },
     {
       id: '3',
-      type: 'open_ended',
-      text: 'What aspects of our brand stand out to you?',
+      title: 'How did the ad make you feel about the brand?',
+      type: 'Single Choice',
+      kpi: 'Boost Brand Awareness',
+      options: [
+        { id: '3-1', text: 'Very positive' },
+        { id: '3-2', text: 'Somewhat positive' },
+        { id: '3-3', text: 'Neutral' },
+        { id: '3-4', text: 'Somewhat negative' },
+        { id: '3-5', text: 'Very negative' },
+      ]
     },
+    {
+      id: '4',
+      title: 'How likely are you to choose this brand over others based on the ad?',
+      type: 'Single Choice',
+      kpi: 'Grow Brand Preference',
+      options: [
+        { id: '4-1', text: 'Very likely' },
+        { id: '4-2', text: 'Somewhat likely' },
+        { id: '4-3', text: 'Neutral' },
+        { id: '4-4', text: 'Somewhat unlikely' },
+        { id: '4-5', text: 'Very unlikely' },
+      ]
+    },
+    {
+      id: '5',
+      title: 'What would be your next step after seeing this ad?',
+      type: 'Single Choice',
+      kpi: 'Motivate Action',
+      options: [
+        { id: '5-1', text: 'Look up more information about the product' },
+        { id: '5-2', text: 'Visit the brand website' },
+        { id: '5-3', text: 'Follow the brand on social media' },
+        { id: '5-4', text: 'Consider purchasing the product' },
+        { id: '5-5', text: 'Nothing/continue browsing' },
+      ]
+    }
   ]);
 
+  const [newQuestion, setNewQuestion] = useState({
+    title: '',
+    type: 'Multiple Choice' as 'Multiple Choice' | 'Single Choice',
+    options: ['']
+  });
+  
+  const [questionKpi, setQuestionKpi] = useState('Boost Brand Awareness');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
   const handlePreview = () => {
-    router.push(`/brand-lift/survey-preview?survey=${surveyId}`);
+    router.push(`/brand-lift/survey-preview?id=${campaignId}`);
   };
 
-  const handleSave = () => {
-    // Save logic here
-    router.push('/brand-lift/survey-approval');
+  const handleAddQuestion = () => {
+    // Add question logic here
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Survey Design</h1>
-          <div className="space-x-4">
-            <button
-              onClick={handlePreview}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Preview
+    <div className="container mx-auto px-4 py-8 bg-[var(--background-color)]">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold font-['Sora'] text-[var(--primary-color)]">Brand Lift</h1>
+        <p className="mt-2 text-[var(--secondary-color)] font-['Work_Sans']">
+          Design your survey questions to measure brand lift metrics
+        </p>
+      </div>
+
+      {/* Question Builder */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4 font-['Sora'] text-[var(--primary-color)]">Question Builder</h2>
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6">
+          {/* Search Bar */}
+          <div className="mb-6 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-[var(--secondary-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              className="w-full pl-10 p-2 border border-[var(--divider-color)] rounded-md font-['Work_Sans'] text-[var(--primary-color)]" 
+              placeholder="Search a design question"
+            />
+          </div>
+          
+          {/* Question Title */}
+          <div className="mb-4">
+            <div className="flex justify-between">
+              <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Question Title</label>
+              <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Question type</label>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-3">
+                <input 
+                  type="text" 
+                  className="w-full p-2 border border-[var(--divider-color)] rounded-md font-['Work_Sans'] text-[var(--primary-color)]" 
+                  placeholder="Type the question title here"
+                  value={newQuestion.title}
+                  onChange={(e) => setNewQuestion({...newQuestion, title: e.target.value})}
+                />
+              </div>
+              <div>
+                <div className="relative">
+                  <select 
+                    className="w-full p-2 border border-[var(--divider-color)] rounded-md appearance-none font-['Work_Sans'] text-[var(--primary-color)]"
+                    value={newQuestion.type}
+                    onChange={(e) => setNewQuestion({...newQuestion, type: e.target.value as 'Multiple Choice' | 'Single Choice'})}
+                  >
+                    <option>Multiple Choice</option>
+                    <option>Single Choice</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="h-5 w-5 text-[var(--secondary-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Answer Option */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Answer Option</label>
+            <div className="flex">
+              <input 
+                type="text" 
+                className="flex-grow p-2 border border-[var(--divider-color)] rounded-l-md font-['Work_Sans'] text-[var(--primary-color)]" 
+                placeholder="Type your answer"
+              />
+              <button 
+                className="bg-gray-200 text-[var(--secondary-color)] px-4 py-2 rounded-r-md hover:bg-gray-300 flex items-center justify-center border-t border-r border-b border-[var(--divider-color)]"
+              >
+                <svg className="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10z" clipRule="evenodd" />
+                </svg>
+                Add Image/GIF
+              </button>
+            </div>
+          </div>
+
+          {/* Predicted KPI */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Predicted KPI</label>
+            <button className="inline-flex items-center justify-center px-4 py-2 bg-blue-100 text-blue-600 rounded-full font-medium font-['Work_Sans'] text-sm hover:bg-blue-200 transition-colors">
+              <svg className="mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Boost Brand Awareness
             </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          </div>
+
+          {/* Answers Added */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Answers added</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative border border-[var(--divider-color)] rounded-md overflow-hidden">
+                <div className="w-full h-24 bg-gray-200 flex items-center justify-center">
+                  <Image 
+                    src="/samples/survey_sample4.jpg" 
+                    alt="Sample answer" 
+                    width={100}
+                    height={100}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-6xl font-bold text-white">?</div>
+                </div>
+                <div className="p-2">
+                  <label className="flex items-center">
+                    <input type="checkbox" className="form-checkbox h-4 w-4 text-[var(--accent-color)]" />
+                    <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">none/other</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 font-['Work_Sans'] text-[var(--primary-color)]">Settings</label>
+            <div className="flex space-x-6">
+              <label className="flex items-center">
+                <input type="checkbox" className="form-checkbox h-4 w-4 text-[var(--accent-color)]" />
+                <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">Randomize</span>
+              </label>
+              <label className="flex items-center">
+                <input type="checkbox" className="form-checkbox h-4 w-4 text-[var(--accent-color)]" />
+                <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">Non-forced choice</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-4 mt-6">
+            <button className="flex-1 py-2 bg-red-500 text-white rounded-md font-medium font-['Work_Sans'] hover:bg-red-600 transition-colors flex items-center justify-center">
+              <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              Delete
+            </button>
+            <button 
+              onClick={handleAddQuestion}
+              className="flex-1 py-2 bg-[var(--accent-color)] text-white rounded-md font-medium font-['Work_Sans'] hover:opacity-90 transition-opacity flex items-center justify-center"
             >
-              Save
+              Add question
             </button>
           </div>
         </div>
+      </div>
 
+      {/* Configure Your Survey */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4 font-['Sora'] text-[var(--primary-color)]">Configure Your Survey</h2>
+        <div className="mb-4">
+          <h3 className="text-md font-medium font-['Work_Sans'] text-[var(--primary-color)]">Recommended survey questions</h3>
+          <p className="text-sm text-[var(--secondary-color)] font-['Work_Sans']">
+            These recommended questions are designed to help you assess the ad's impact on key metrics: <span className="font-medium">Boost Brand Awareness, Maximize Ad Recall, Grow Brand Preference, and Motivate Action</span>.
+          </p>
+        </div>
+        
+        {/* Questions List */}
         <div className="space-y-6">
-          {questions.map((question) => (
-            <div key={question.id} className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex justify-between items-start mb-4">
+          {questions.map((question, index) => (
+            <div key={question.id} className="border border-[var(--divider-color)] rounded-lg overflow-hidden">
+              <div className="flex items-center p-4 border-b border-[var(--divider-color)] bg-gray-50">
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium mb-2">{question.text}</h3>
-                  <span className="text-sm text-gray-500 capitalize">
-                    Type: {question.type.replace('_', ' ')}
-                  </span>
+                  <div className="flex items-center">
+                    <button className="mr-4 text-[var(--secondary-color)]">
+                      <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    </button>
+                    <button className="mr-4 text-[var(--secondary-color)]">
+                      <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <div>
+                      <div className="text-sm text-[var(--accent-color)] font-['Work_Sans']">
+                        {question.kpi} • {question.options.length} Options
+                      </div>
+                      <h4 className="font-medium text-[var(--primary-color)] font-['Work_Sans']">{question.title}</h4>
+                    </div>
+                  </div>
                 </div>
-                <button className="text-gray-400 hover:text-gray-600">
-                  <span className="sr-only">Edit question</span>
-                  ✏️
+                <button className="p-2 text-[var(--secondary-color)]">
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
                 </button>
               </div>
-
-              {question.type === 'multiple_choice' && question.options && (
-                <div className="space-y-2">
-                  {question.options.map((option, index) => (
-                    <div key={index} className="flex items-center">
-                      <input
-                        type="radio"
-                        name={`question_${question.id}`}
-                        className="h-4 w-4 text-blue-600"
-                        disabled
-                      />
-                      <label className="ml-2 text-gray-700">{option}</label>
+              
+              {index === 0 && (
+                <div className="p-4 bg-white">
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-sm font-medium text-[var(--primary-color)] font-['Work_Sans']">Question Title</div>
+                      <div className="text-sm font-medium text-[var(--primary-color)] font-['Work_Sans']">Question type</div>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {question.type === 'scale' && (
-                <div className="flex justify-between items-center mt-4">
-                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                    <button
-                      key={num}
-                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                      disabled
-                    >
-                      {num}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="md:col-span-3">
+                        <input 
+                          type="text" 
+                          className="w-full p-2 border border-[var(--divider-color)] rounded-md font-['Work_Sans'] text-[var(--primary-color)]" 
+                          value={question.title}
+                          readOnly
+                        />
+                      </div>
+                      <div>
+                        <div className="relative">
+                          <select 
+                            className="w-full p-2 border border-[var(--divider-color)] rounded-md appearance-none font-['Work_Sans'] text-[var(--primary-color)]"
+                            value={question.type}
+                            disabled
+                          >
+                            <option>Single Choice</option>
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg className="h-5 w-5 text-[var(--secondary-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Answer Images */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {question.options.map((option) => (
+                      <div key={option.id} className="relative">
+                        {option.image && (
+                          <div className="aspect-w-1 aspect-h-1 mb-2 border border-[var(--divider-color)] rounded-md overflow-hidden">
+                            <Image 
+                              src={option.image} 
+                              alt={option.text} 
+                              width={120}
+                              height={120}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                        )}
+                        <label className="flex items-center">
+                          <input 
+                            type="radio" 
+                            name={`question_${question.id}`} 
+                            className="form-radio h-4 w-4 text-[var(--accent-color)]" 
+                          />
+                          <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">{option.text}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Settings */}
+                  <div className="mt-4">
+                    <div className="text-sm font-medium text-[var(--primary-color)] font-['Work_Sans'] mb-2">Settings</div>
+                    <div className="flex space-x-6">
+                      <label className="flex items-center">
+                        <input type="checkbox" className="form-checkbox h-4 w-4 text-[var(--accent-color)]" checked readOnly />
+                        <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">Randomization</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input type="checkbox" className="form-checkbox h-4 w-4 text-[var(--accent-color)]" checked readOnly />
+                        <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">Mandatory status</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Buttons */}
+                  <div className="flex justify-end mt-4 space-x-2">
+                    <button className="px-4 py-2 border border-[var(--divider-color)] bg-white text-[var(--primary-color)] rounded font-medium font-['Work_Sans'] text-sm hover:bg-gray-50">
+                      Edit
                     </button>
-                  ))}
+                    <button className="px-4 py-2 border border-[var(--divider-color)] bg-white text-[var(--primary-color)] rounded font-medium font-['Work_Sans'] text-sm hover:bg-gray-50">
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              )}
-
-              {question.type === 'open_ended' && (
-                <textarea
-                  className="w-full mt-2 p-2 border border-gray-300 rounded"
-                  rows={3}
-                  placeholder="Enter your answer here..."
-                  disabled
-                />
               )}
             </div>
           ))}
+        </div>
+        
+        {/* Submit Buttons */}
+        <div className="mt-8 flex justify-end">
+          <button 
+            onClick={handlePreview}
+            className="px-6 py-2 bg-[var(--accent-color)] text-white rounded-md font-medium font-['Work_Sans'] hover:opacity-90 transition-opacity"
+          >
+            Preview & Submit
+          </button>
         </div>
       </div>
     </div>
