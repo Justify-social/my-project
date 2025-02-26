@@ -9,14 +9,14 @@
   --primary-color: #333333;      /* Jet */
   --secondary-color: #4A5568;    /* Payne's Grey */
   --accent-color: #00BFFF;       /* Deep Sky Blue */
-  --background-color: #F5F5F5;   /* White Smoke */
+  --background-color: #FFFFFF;   /* White */
   --divider-color: #D1D5DB;      /* French Grey */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-color: #0a0a0a;
-    --primary-color: #ededed;
+    --background-color: #FFFFFF; /* Keep background white even in dark mode */
+    --primary-color: #333333;    /* Keep text dark for readability on white */
   }
 }
 
@@ -45,5 +45,13 @@ a {
 }
 
 html {
+  background-color: white;
+}
+
+/* Ensure all main containers have white background */
+.min-h-screen, 
+main, 
+[class*="container"], 
+[class*="content"] {
   background-color: white;
 }
