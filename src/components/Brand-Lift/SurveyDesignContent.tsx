@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -20,6 +20,21 @@ interface QuestionOption {
   id: string;
   text: string;
   image?: string | null;
+}
+
+interface GiphyResult {
+  id: string;
+  title: string;
+  images: {
+    fixed_height: {
+      url: string;
+      width: string;
+      height: string;
+    };
+    original: {
+      url: string;
+    };
+  };
 }
 
 export default function SurveyDesignContent() {
@@ -96,18 +111,125 @@ export default function SurveyDesignContent() {
   const [newQuestion, setNewQuestion] = useState({
     title: '',
     type: 'Multiple Choice' as 'Multiple Choice' | 'Single Choice',
-    options: ['']
+    options: [{ id: '1', text: '', image: null as string | null }]
   });
   
   const [questionKpi, setQuestionKpi] = useState('Boost Brand Awareness');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [giphySearchTerm, setGiphySearchTerm] = useState('');
+  const [giphyResults, setGiphyResults] = useState<GiphyResult[]>([]);
+  const [showGiphyModal, setShowGiphyModal] = useState(false);
+  const [currentOptionIndex, setCurrentOptionIndex] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // Add a new option to the question
+  const addOption = () => {
+    setNewQuestion({
+      ...newQuestion,
+      options: [
+        ...newQuestion.options,
+        { id: (newQuestion.options.length + 1).toString(), text: '', image: null as string | null }
+      ]
+    });
+  };
+  
+  // Remove an option from the question
+  const removeOption = (id: string) => {
+    setNewQuestion({
+      ...newQuestion,
+      options: newQuestion.options.filter(option => option.id !== id)
+    });
+  };
+  
+  // Update option text
+  const updateOptionText = (id: string, text: string) => {
+    setNewQuestion({
+      ...newQuestion,
+      options: newQuestion.options.map(option => 
+        option.id === id ? { ...option, text } : option
+      )
+    });
+  };
+  
+  // Open Giphy modal for an option
+  const openGiphyModal = (index: number) => {
+    setCurrentOptionIndex(index);
+    setShowGiphyModal(true);
+    if (giphyResults.length === 0) {
+      searchGiphy('happy'); // Default search to show some initial results
+    }
+  };
+  
+  // Search Giphy API
+  const searchGiphy = async (term: string) => {
+    if (!term.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
+      const response = await fetch(
+        `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(term)}&limit=20`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch GIFs');
+      }
+      
+      const data = await response.json();
+      setGiphyResults(data.data);
+    } catch (error) {
+      console.error('Error searching Giphy:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+  
+  // Select a GIF for the current option
+  const selectGif = (gifUrl: string) => {
+    setNewQuestion({
+      ...newQuestion,
+      options: newQuestion.options.map((option, index) => 
+        index === currentOptionIndex ? { ...option, image: gifUrl } : option
+      )
+    });
+    setShowGiphyModal(false);
+  };
   
   const handlePreview = () => {
     router.push(`/brand-lift/survey-preview?id=${campaignId}`);
   };
 
   const handleAddQuestion = () => {
-    // Add question logic here
+    if (!newQuestion.title) {
+      alert('Please add a question title');
+      return;
+    }
+    
+    if (newQuestion.options.length < 2) {
+      alert('Please add at least two answer options');
+      return;
+    }
+    
+    const newQuestionWithId = {
+      id: (questions.length + 1).toString(),
+      title: newQuestion.title,
+      type: newQuestion.type,
+      kpi: questionKpi,
+      options: newQuestion.options.map(option => ({
+        id: option.id,
+        text: option.text || 'Option',
+        image: option.image
+      }))
+    };
+    
+    setQuestions([...questions, newQuestionWithId]);
+    
+    // Reset form
+    setNewQuestion({
+      title: '',
+      type: 'Multiple Choice',
+      options: [{ id: '1', text: '', image: null as string | null }]
+    });
   };
 
   return (
@@ -173,62 +295,82 @@ export default function SurveyDesignContent() {
             </div>
           </div>
 
-          {/* Answer Option */}
+          {/* Answer Options */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Answer Option</label>
-            <div className="flex">
-              <input 
-                type="text" 
-                className="flex-grow p-2 border border-[var(--divider-color)] rounded-l-md font-['Work_Sans'] text-[var(--primary-color)]" 
-                placeholder="Type your answer"
-              />
-              <button 
-                className="bg-gray-200 text-[var(--secondary-color)] px-4 py-2 rounded-r-md hover:bg-gray-300 flex items-center justify-center border-t border-r border-b border-[var(--divider-color)]"
-              >
-                <svg className="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10z" clipRule="evenodd" />
-                </svg>
-                Add Image/GIF
-              </button>
-            </div>
+            <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Answer Options</label>
+            {newQuestion.options.map((option, index) => (
+              <div key={option.id} className="mb-3">
+                <div className="flex mb-2">
+                  <input 
+                    type="text" 
+                    className="flex-grow p-2 border border-[var(--divider-color)] rounded-l-md font-['Work_Sans'] text-[var(--primary-color)]" 
+                    placeholder="Type your answer"
+                    value={option.text}
+                    onChange={(e) => updateOptionText(option.id, e.target.value)}
+                  />
+                  <button 
+                    className="bg-gray-200 text-[var(--secondary-color)] px-4 py-2 border-t border-r border-b border-[var(--divider-color)] hover:bg-gray-300 flex items-center justify-center"
+                    onClick={() => openGiphyModal(index)}
+                  >
+                    <svg className="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10z" clipRule="evenodd" />
+                    </svg>
+                    Add Image/GIF
+                  </button>
+                  <button 
+                    className="bg-red-100 text-red-600 px-4 py-2 rounded-r-md hover:bg-red-200 flex items-center justify-center border-t border-r border-b border-[var(--divider-color)]"
+                    onClick={() => removeOption(option.id)}
+                  >
+                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+                {option.image && (
+                  <div className="relative w-24 h-24 mb-2">
+                    <Image 
+                      src={option.image} 
+                      alt={option.text || 'Answer option'} 
+                      width={96}
+                      height={96}
+                      className="rounded-md object-cover w-full h-full"
+                    />
+                    <button 
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      onClick={() => updateOptionText(option.id, option.text)}
+                    >
+                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            <button 
+              className="px-4 py-2 border border-[var(--divider-color)] rounded-md text-[var(--primary-color)] font-medium font-['Work_Sans'] hover:bg-gray-50 mt-2 flex items-center"
+              onClick={addOption}
+            >
+              <svg className="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              Add Option
+            </button>
           </div>
 
           {/* Predicted KPI */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Predicted KPI</label>
-            <button className="inline-flex items-center justify-center px-4 py-2 bg-blue-100 text-blue-600 rounded-full font-medium font-['Work_Sans'] text-sm hover:bg-blue-200 transition-colors">
-              <svg className="mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Boost Brand Awareness
-            </button>
-          </div>
-
-          {/* Answers Added */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1 font-['Work_Sans'] text-[var(--primary-color)]">Answers added</label>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative border border-[var(--divider-color)] rounded-md overflow-hidden">
-                <div className="w-full h-24 bg-gray-200 flex items-center justify-center">
-                  <Image 
-                    src="/samples/survey_sample4.jpg" 
-                    alt="Sample answer" 
-                    width={100}
-                    height={100}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-6xl font-bold text-white">?</div>
-                </div>
-                <div className="p-2">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="form-checkbox h-4 w-4 text-[var(--accent-color)]" />
-                    <span className="ml-2 text-sm text-[var(--primary-color)] font-['Work_Sans']">none/other</span>
-                  </label>
-                </div>
-              </div>
-            </div>
+            <select 
+              className="w-full p-2 border border-[var(--divider-color)] rounded-md font-['Work_Sans'] text-[var(--primary-color)]"
+              value={questionKpi}
+              onChange={(e) => setQuestionKpi(e.target.value)}
+            >
+              <option>Boost Brand Awareness</option>
+              <option>Maximize Ad Recall</option>
+              <option>Grow Brand Preference</option>
+              <option>Motivate Action</option>
+            </select>
           </div>
 
           {/* Settings */}
@@ -252,7 +394,7 @@ export default function SurveyDesignContent() {
               <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              Delete
+              Clear Form
             </button>
             <button 
               onClick={handleAddQuestion}
@@ -408,6 +550,76 @@ export default function SurveyDesignContent() {
           </button>
         </div>
       </div>
+
+      {/* Giphy Search Modal */}
+      {showGiphyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-[var(--divider-color)]">
+              <h3 className="text-lg font-semibold font-['Sora'] text-[var(--primary-color)]">Select a GIF</h3>
+            </div>
+            
+            <div className="p-4 border-b border-[var(--divider-color)]">
+              <div className="flex">
+                <input 
+                  type="text" 
+                  className="flex-grow p-2 border border-[var(--divider-color)] rounded-l-md font-['Work_Sans'] text-[var(--primary-color)]"
+                  placeholder="Search for GIFs..."
+                  value={giphySearchTerm}
+                  onChange={(e) => setGiphySearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && searchGiphy(giphySearchTerm)}
+                />
+                <button 
+                  className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-r-md font-medium font-['Work_Sans'] hover:opacity-90 transition-opacity"
+                  onClick={() => searchGiphy(giphySearchTerm)}
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
+              {isSearching ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-color)]"></div>
+                </div>
+              ) : giphyResults.length === 0 ? (
+                <div className="text-center py-10 text-[var(--secondary-color)] font-['Work_Sans']">
+                  {giphySearchTerm ? 'No results found. Try a different search term.' : 'Search for GIFs to display results.'}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                  {giphyResults.map((gif) => (
+                    <div 
+                      key={gif.id} 
+                      className="cursor-pointer border border-[var(--divider-color)] rounded-md overflow-hidden hover:border-[var(--accent-color)]"
+                      onClick={() => selectGif(gif.images.original.url)}
+                    >
+                      <img 
+                        src={gif.images.fixed_height.url} 
+                        alt={gif.title}
+                        className="w-full h-24 object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-[var(--divider-color)] flex justify-between">
+              <button 
+                className="px-4 py-2 border border-[var(--divider-color)] bg-white text-[var(--primary-color)] rounded font-medium font-['Work_Sans'] text-sm hover:bg-gray-50"
+                onClick={() => setShowGiphyModal(false)}
+              >
+                Cancel
+              </button>
+              <div className="text-sm text-[var(--secondary-color)] font-['Work_Sans'] flex items-center">
+                Powered by GIPHY
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
