@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, KeyboardEvent, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
@@ -11,26 +11,13 @@ import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
-import LocationSelector from "@/components/Wizard/AudienceTargeting/LocationSelector";
-import AgeDistributionSlider from "@/components/Wizard/AudienceTargeting/AgeDistributionSlider";
-import GenderSelection from "@/components/Wizard/AudienceTargeting/GenderSelection";
-import ScreeningQuestions from "@/components/Wizard/AudienceTargeting/ScreeningQuestions";
-import LanguagesSelector from "@/components/Wizard/AudienceTargeting/LanguagesSelector";
-import AdvancedTargeting from "@/components/Wizard/AudienceTargeting/AdvancedTargeting";
-import CompetitorTracking from "@/components/Wizard/AudienceTargeting/CompetitorTracking";
-import Image from "next/image";
-import {
-  DocumentTextIcon,
-  ClipboardDocumentListIcon,
-  HashtagIcon,
-  StarIcon,
-  BriefcaseIcon,
-  CheckBadgeIcon,
-  ChatBubbleLeftRightIcon,
-  PresentationChartBarIcon,
-  LightBulbIcon,
-  PlusCircleIcon,
-  TrashIcon
+import { 
+  MagnifyingGlassIcon, 
+  PlusIcon, 
+  XMarkIcon, 
+  ChevronRightIcon,
+  PencilSquareIcon,
+  InformationCircleIcon
 } from "@heroicons/react/24/outline";
 
 // =============================================================================
@@ -55,7 +42,7 @@ export interface AudienceValues {
   languages: string[];
   educationLevel: string;
   jobTitles: string;
-  incomeLevel: string;
+  incomeLevel: number;
   competitors: string[];
 }
 
@@ -91,12 +78,12 @@ const AudienceSchema = Yup.object().shape({
   languages: Yup.array().of(Yup.string()),
   educationLevel: Yup.string(),
   jobTitles: Yup.string(),
-  incomeLevel: Yup.string(),
+  incomeLevel: Yup.number(),
   competitors: Yup.array().of(Yup.string()),
 });
 
 // =============================================================================
-// MAIN COMPONENT: AUDIENCE TARGETING (STEP 3)
+// MAIN COMPONENT: AUDIENCE & COMPETITORS (STEP 3)
 // =============================================================================
 
 function FormContent() {
@@ -157,12 +144,12 @@ function FormContent() {
   const initialValues: AudienceValues = {
     location: audienceData.location || [],
     ageDistribution: {
-      age1824: audienceData.ageDistribution?.age1824 ?? 0,
-      age2534: audienceData.ageDistribution?.age2534 ?? 0,
-      age3544: audienceData.ageDistribution?.age3544 ?? 0,
-      age4554: audienceData.ageDistribution?.age4554 ?? 0,
-      age5564: audienceData.ageDistribution?.age5564 ?? 0,
-      age65plus: audienceData.ageDistribution?.age65plus ?? 0,
+      age1824: audienceData.ageDistribution?.age1824 ?? 20,
+      age2534: audienceData.ageDistribution?.age2534 ?? 25,
+      age3544: audienceData.ageDistribution?.age3544 ?? 20,
+      age4554: audienceData.ageDistribution?.age4554 ?? 15,
+      age5564: audienceData.ageDistribution?.age5564 ?? 10,
+      age65plus: audienceData.ageDistribution?.age65plus ?? 10,
     },
     gender: audienceData.gender || [],
     otherGender: audienceData.otherGender || "",
@@ -170,7 +157,7 @@ function FormContent() {
     languages: audienceData.languages || [],
     educationLevel: audienceData.educationLevel || "",
     jobTitles: audienceData.jobTitles || "",
-    incomeLevel: audienceData.incomeLevel || "",
+    incomeLevel: audienceData.incomeLevel ?? 20000,
     competitors: audienceData.competitors || [],
   };
 
@@ -271,133 +258,560 @@ function FormContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 pb-16 bg-white">
-      <Header currentStep={3} totalSteps={5} />
+    <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
+        <p className="text-gray-500">Complete all required fields to create your campaign</p>
+      </div>
+      
       <Formik
         initialValues={initialValues}
         validationSchema={AudienceSchema}
         onSubmit={handleSubmit}
+        enableReinitialize={true}
       >
-        {({ values, setFieldValue, submitForm, isValid }) => (
-          <>
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold">Step 3: Audience Targeting</h1>
-              <button 
-                type="button"
-                onClick={() => handleSaveDraft(values)}
-                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 flex items-center"
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <>
-                    <LoadingSpinner className="w-4 h-4 mr-2" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save as Draft'
-                )}
-              </button>
-            </div>
-
-            <Form className="space-y-8">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4">Demographics</h2>
-                <LocationSelector
-                  selectedLocations={values.location}
-                  onChange={(locs) => {
-                    setFieldValue("location", locs);
-                  }}
-                />
-                <AgeDistributionSlider
-                  values={[
-                    values.ageDistribution.age1824,
-                    values.ageDistribution.age2534,
-                    values.ageDistribution.age3544,
-                    values.ageDistribution.age4554,
-                    values.ageDistribution.age5564,
-                    values.ageDistribution.age65plus,
-                  ]}
-                  onChange={(newValues) => {
-                    setFieldValue('ageDistribution', {
-                      age1824: newValues[0],
-                      age2534: newValues[1],
-                      age3544: newValues[2],
-                      age4554: newValues[3],
-                      age5564: newValues[4],
-                      age65plus: newValues[5],
-                    });
-                  }}
-                />
-                <ErrorMessage
-                  name="ageDistribution"
-                  component="div"
-                  className="text-red-600 text-sm"
-                />
-                <GenderSelection
-                  selected={values.gender}
-                  otherGender={values.otherGender}
-                  onChange={(genders) => {
-                    setFieldValue("gender", genders);
-                  }}
-                  onOtherChange={(val) => {
-                    setFieldValue("otherGender", val);
-                  }}
-                />
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4">Screening Questions</h2>
-                <ScreeningQuestions
-                  selectedTags={values.screeningQuestions}
-                  onChange={(tags) => {
-                    setFieldValue("screeningQuestions", tags);
-                  }}
-                />
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4">Languages</h2>
-                <LanguagesSelector
-                  selected={values.languages}
-                  onChange={(langs) => {
-                    setFieldValue("languages", langs);
-                  }}
-                />
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="text-blue-600 underline"
-                >
-                  {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
-                </button>
-                {showAdvanced && <AdvancedTargeting />}
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4">Competitors to Monitor</h2>
-                <CompetitorTracking
-                  selected={values.competitors}
-                  onChange={(companies) => {
-                    setFieldValue("competitors", companies);
-                  }}
-                />
-              </div>
+        {({ values, setFieldValue, submitForm, isValid, dirty, errors }) => {
+          return (
+            <>
+              <Form className="space-y-6">
+                {/* Demographics Section */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Demographics</h2>
+                  
+                  {/* Location Selector */}
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Location
+                      </label>
+                      {values.location.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setFieldValue("location", [])}
+                          className="text-xs text-blue-500 hover:text-blue-700"
+                        >
+                          Edit Field
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="flex flex-col">
+                        <div className="relative">
+                          <input
+                            type="text" 
+                            placeholder="Search by City, State, Region or Country"
+                            className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          />
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Age Distribution */}
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Age Distribution
+                      </label>
+                      <div className="text-xs text-gray-500">
+                        Allocate percentages to each age range (Total must equal 100%)
+                      </div>
+                    </div>
+                    
+                    {/* Age Distribution Sliders */}
+                    <div className="space-y-4 mb-4">
+                      {[
+                        { key: 'age1824', label: '18-24' },
+                        { key: 'age2534', label: '25-34' },
+                        { key: 'age3544', label: '35-44' },
+                        { key: 'age4554', label: '45-54' },
+                        { key: 'age5564', label: '55-64' },
+                        { key: 'age65plus', label: '65+' },
+                      ].map((age) => (
+                        <div key={age.key} className="flex items-center">
+                          <span className="w-12 text-sm font-medium">{age.label}</span>
+                          <div className="flex-grow mx-4">
+                            <Slider
+                              value={values.ageDistribution[age.key as keyof AgeDistribution]}
+                              onChange={(value) => {
+                                const newValue = typeof value === 'number' ? value : value[0];
+                                
+                                // Adjust other values proportionally to maintain 100% total
+                                const oldValue = values.ageDistribution[age.key as keyof AgeDistribution];
+                                const diff = newValue - oldValue;
+                                const otherKeys = Object.keys(values.ageDistribution).filter(k => k !== age.key);
+                                
+                                const newDistribution = { ...values.ageDistribution };
+                                newDistribution[age.key as keyof AgeDistribution] = newValue;
+                                
+                                const totalOthers = otherKeys.reduce((sum, k) => sum + values.ageDistribution[k as keyof AgeDistribution], 0);
+                                
+                                if (totalOthers > 0 && diff !== 0) {
+                                  otherKeys.forEach(k => {
+                                    const oldOtherValue = values.ageDistribution[k as keyof AgeDistribution];
+                                    const ratio = oldOtherValue / totalOthers;
+                                    newDistribution[k as keyof AgeDistribution] = Math.max(0, oldOtherValue - diff * ratio);
+                                  });
+                                }
+                                
+                                // Round values
+                                Object.keys(newDistribution).forEach(k => {
+                                  newDistribution[k as keyof AgeDistribution] = Math.round(newDistribution[k as keyof AgeDistribution]);
+                                });
+                                
+                                // Ensure total is 100%
+                                const total = Object.values(newDistribution).reduce((sum, val) => sum + val, 0);
+                                if (total !== 100) {
+                                  const diff = 100 - total;
+                                  // Add/subtract from the largest value that's not the current one
+                                  const largestKey = otherKeys.reduce((max, k) => 
+                                    newDistribution[k as keyof AgeDistribution] > newDistribution[max as keyof AgeDistribution] ? k : max, 
+                                    otherKeys[0]
+                                  );
+                                  newDistribution[largestKey as keyof AgeDistribution] += diff;
+                                }
+                                
+                                setFieldValue('ageDistribution', newDistribution);
+                              }}
+                              min={0}
+                              max={100}
+                              step={1}
+                              trackStyle={{ backgroundColor: '#0EA5E9', height: 6 }}
+                              railStyle={{ backgroundColor: '#E5E7EB', height: 6 }}
+                              handleStyle={{
+                                borderColor: '#0EA5E9',
+                                backgroundColor: '#0EA5E9',
+                                opacity: 1,
+                                height: 16,
+                                width: 16,
+                                marginTop: -5,
+                              }}
+                              className="mt-1"
+                            />
+                          </div>
+                          <span className="w-12 text-right text-sm font-medium">
+                            {values.ageDistribution[age.key as keyof AgeDistribution]}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Age Distribution Summary */}
+                    <div className="mt-6">
+                      <h3 className="text-sm font-medium text-gray-700 mb-2">Age Distribution Summary</h3>
+                      <div className="flex items-center w-full h-6">
+                        {Object.entries(values.ageDistribution).map(([key, value], index) => (
+                          <div 
+                            key={key}
+                            className="h-full"
+                            style={{ 
+                              width: `${value}%`, 
+                              backgroundColor: '#0EA5E9',
+                              opacity: 0.7 + (index * 0.05),
+                              borderRadius: index === 0 ? '4px 0 0 4px' : index === 5 ? '0 4px 4px 0' : '0'
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex justify-between mt-1 text-xs text-gray-500">
+                        <span>18-24</span>
+                        <span>25-34</span>
+                        <span>35-44</span>
+                        <span>45-54</span>
+                        <span>55-64</span>
+                        <span>65+</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Gender Selection */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Gender Selection
+                    </label>
+                    <div className="text-xs text-gray-500 mb-3">
+                      Choose one or more gender identities
+                    </div>
+                    <div className="flex space-x-4">
+                      <label className="inline-flex items-center">
+                        <Field 
+                          type="checkbox" 
+                          name="gender" 
+                          value="Male"
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Male</span>
+                      </label>
+                      <label className="inline-flex items-center">
+                        <Field 
+                          type="checkbox" 
+                          name="gender" 
+                          value="Female"
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Female</span>
+                      </label>
+                      <label className="inline-flex items-center">
+                        <Field 
+                          type="checkbox" 
+                          name="gender" 
+                          value="Other"
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Other</span>
+                      </label>
+                    </div>
+                    {values.gender.includes("Other") && (
+                      <div className="mt-2">
+                        <Field 
+                          type="text"
+                          name="otherGender"
+                          placeholder="Please specify"
+                          className="mt-1 p-2 block w-full border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    )}
+                    <ErrorMessage 
+                      name="gender" 
+                      component="div" 
+                      className="mt-1 text-sm text-red-600" 
+                    />
+                  </div>
+                </div>
+                
+                {/* Screening Questions */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Screening Questions</h2>
+                  
+                  <div className="relative mb-4">
+                    <div className="flex items-center mb-2">
+                      <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3" />
+                      <input
+                        type="text"
+                        placeholder="Search Screening Questions"
+                        className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-2 p-1 bg-blue-500 text-white rounded-full"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">Suggested Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {["Tag Suggestion 1", "Tag Suggestion 2", "Other"].map((tag) => (
+                        <label key={tag} className="inline-flex items-center bg-gray-100 rounded-md px-2 py-1">
+                          <Field 
+                            type="checkbox" 
+                            name="screeningQuestions" 
+                            value={tag}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded mr-2"
+                          />
+                          {tag}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <div className="flex flex-wrap gap-2">
+                      {["Tag 1", "Tag 2", "Tag 3"].map((tag) => (
+                        <label key={tag} className="inline-flex items-center bg-gray-100 rounded-md px-2 py-1">
+                          <Field 
+                            type="checkbox" 
+                            name="screeningQuestions" 
+                            value={tag}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded mr-2"
+                          />
+                          {tag}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Languages */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Languages</h2>
+                  
+                  <div className="relative">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Select language
+                      </label>
+                      <button
+                        type="button"
+                        className="text-xs text-blue-500 hover:text-blue-700"
+                      >
+                        Edit Field
+                      </button>
+                    </div>
+                    
+                    <div className="relative">
+                      <Field
+                        as="select"
+                        name="languages"
+                        multiple={true}
+                        className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                      >
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                        <option value="Chinese">Chinese</option>
+                      </Field>
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Advanced Targeting */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-900">Advanced Targeting</h2>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <ChevronRightIcon className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} />
+                    </button>
+                  </div>
+                  
+                  {showAdvanced && (
+                    <div className="mt-4 space-y-6">
+                      {/* Education Level */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Education Level
+                          </label>
+                          <button
+                            type="button"
+                            className="text-xs text-blue-500 hover:text-blue-700"
+                          >
+                            Edit Field
+                          </button>
+                        </div>
+                        
+                        <div className="relative">
+                          <Field
+                            as="select"
+                            name="educationLevel"
+                            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                          >
+                            <option value="">Select Education</option>
+                            <option value="high_school">High School</option>
+                            <option value="bachelors">Bachelor's Degree</option>
+                            <option value="masters">Master's Degree</option>
+                            <option value="phd">PhD</option>
+                          </Field>
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Job Titles */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Job Titles
+                          </label>
+                          <button
+                            type="button"
+                            className="text-xs text-blue-500 hover:text-blue-700"
+                          >
+                            Edit Field
+                          </button>
+                        </div>
+                        
+                        <div className="relative">
+                          <Field
+                            type="text"
+                            name="jobTitles"
+                            placeholder="Select job title"
+                            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                          />
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Income Level */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Income Level
+                          </label>
+                          <InformationCircleIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        
+                        <div className="pl-1">
+                          <Slider
+                            value={values.incomeLevel}
+                            onChange={(value) => {
+                              const newValue = typeof value === 'number' ? value : value[0];
+                              setFieldValue('incomeLevel', newValue);
+                            }}
+                            min={0}
+                            max={30000}
+                            step={5000}
+                            marks={{
+                              0: '$0',
+                              10000: '$10,000',
+                              20000: '$20,000',
+                              30000: '$30,000'
+                            }}
+                            trackStyle={{ backgroundColor: '#0EA5E9', height: 4 }}
+                            railStyle={{ backgroundColor: '#E5E7EB', height: 4 }}
+                            handleStyle={{
+                              borderColor: '#0EA5E9',
+                              backgroundColor: '#0EA5E9',
+                              opacity: 1,
+                              height: 16,
+                              width: 16,
+                              marginTop: -6,
+                            }}
+                            dotStyle={{
+                              borderColor: '#E5E7EB',
+                              backgroundColor: '#E5E7EB',
+                              height: 8,
+                              width: 8,
+                              marginBottom: 0,
+                            }}
+                            activeDotStyle={{
+                              borderColor: '#0EA5E9',
+                              backgroundColor: '#0EA5E9',
+                            }}
+                            className="mt-2 mb-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Competitors */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Competitors to Monitor</h2>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Enter the names of key competitors you're tracking. These will help identify trends, opportunities, and gaps in your market.
+                  </p>
+                  
+                  <div className="relative mb-6">
+                    <div className="flex items-center">
+                      <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3" />
+                      <input
+                        type="text"
+                        placeholder="Search Companies"
+                        className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md"
+                        onChange={(e) => {
+                          // Add competitor logic
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            // Handle enter key
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-2 p-1 bg-blue-500 text-white rounded-full"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {values.competitors.length > 0 ? (
+                      values.competitors.map((competitor, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                          <span>{competitor}</span>
+                          <div className="flex space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                // Remove competitor logic
+                                const newCompetitors = [...values.competitors];
+                                newCompetitors.splice(index, 1);
+                                setFieldValue('competitors', newCompetitors);
+                              }}
+                              className="text-gray-400 hover:text-gray-500"
+                            >
+                              <XMarkIcon className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center p-4 text-gray-500">
+                        No competitors added yet
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Sample competitors for the mockup */}
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <span>Company Name 1</span>
+                      <div className="flex space-x-2">
+                        <button
+                          type="button"
+                          className="text-gray-400 hover:text-gray-500"
+                        >
+                          <PencilSquareIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <span>Company Name 2</span>
+                      <div className="flex space-x-2">
+                        <button
+                          type="button"
+                          className="text-gray-400 hover:text-gray-500"
+                        >
+                          <XMarkIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Add bottom padding to prevent progress bar overlap */}
+                <div className="pb-4"></div>
+              </Form>
               
-              <div className="pb-4"></div>
-            </Form>
-
-            <ProgressBar
-              currentStep={3}
-              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-              onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
-              onNext={submitForm}
-              disableNext={!isValid || isSaving}
-            />
-          </>
-        )}
+              <ProgressBar
+                currentStep={3}
+                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+                onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
+                onNext={submitForm}
+                onSaveDraft={() => handleSaveDraft(values)}
+                disableNext={!isValid || isSaving}
+                isFormValid={isValid}
+                isDirty={dirty}
+                isSaving={isSaving}
+              />
+            </>
+          );
+        }}
       </Formik>
     </div>
   );
@@ -405,7 +819,7 @@ function FormContent() {
 
 export default function Step3Content() {
   const [mounted, setMounted] = useState(false);
-
+  
   useEffect(() => {
     setMounted(true);
   }, []);
