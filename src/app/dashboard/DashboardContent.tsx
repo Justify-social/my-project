@@ -1150,40 +1150,19 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
   // Return the JSX for the dashboard
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
         {toastMessage && <Toast message={toastMessage} type="info" />}
 
-        {/* Dashboard Header */}
-        <div className="flex flex-col mb-6">
-          <div className="flex justify-end mb-6">
+        {/* Campaigns Overview Section */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-xl font-semibold text-gray-900">Campaigns Overview</h2>
             <button 
               onClick={() => router.push('/campaigns/wizard/step-1')}
               className="px-3 sm:px-4 py-2 bg-[#0ea5e9] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
             >
               <PlusIcon className="w-4 h-4" />
               <span>Create New Campaign</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Campaigns Overview Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Campaigns Overview</h2>
-            {/* Removed filters */}
-          </div>
-          
-          {/* Campaign Tabs */}
-          <div className="flex border-b border-[var(--divider-color)] mb-6">
-            <button 
-              className="px-4 sm:px-6 py-3 border-b-2 border-[#0ea5e9] text-[#0ea5e9] font-medium text-sm sm:text-base"
-            >
-              Upcoming
-            </button>
-            <button 
-              className="px-4 sm:px-6 py-3 text-[var(--secondary-color)] hover:text-[var(--primary-color)] text-sm sm:text-base"
-            >
-              Finished
             </button>
           </div>
           
