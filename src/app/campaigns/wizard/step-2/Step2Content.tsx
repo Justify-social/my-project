@@ -9,6 +9,19 @@ import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  DocumentTextIcon,
+  ClipboardDocumentListIcon,
+  HashtagIcon,
+  StarIcon,
+  BriefcaseIcon,
+  CheckBadgeIcon,
+  ChatBubbleLeftRightIcon,
+  PresentationChartBarIcon,
+  LightBulbIcon,
+  PlusCircleIcon,
+  TrashIcon
+} from "@heroicons/react/24/outline";
 
 // Define the available KPIs for the table
 const kpis = [
@@ -131,6 +144,45 @@ const ObjectivesSchema = Yup.object().shape({
       Feature.MIXED_MEDIA_MODELLING
     ], "Invalid feature selected"))
 });
+
+// Custom Field Component for styled inputs
+const StyledField = ({ label, name, type = "text", as, children, required = false, icon, ...props }: any) => {
+  return (
+    <div className="mb-5">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+        {required && <span className="text-blue-500 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-2.5 text-gray-400">
+            {icon}
+          </div>
+        )}
+        {as ? (
+          <Field
+            as={as}
+            id={name}
+            name={name}
+            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white`}
+            {...props}
+          >
+            {children}
+          </Field>
+        ) : (
+          <Field
+            type={type}
+            id={name}
+            name={name}
+            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white`}
+            {...props}
+          />
+        )}
+        <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
+      </div>
+    </div>
+  );
+};
 
 function FormContent() {
   const router = useRouter();
@@ -268,47 +320,6 @@ function FormContent() {
     }
   };
 
-  // Update the Features section in the form
-  const renderFeaturesSection = () => (
-    <div>
-      <h2 className="text-xl font-bold mb-2">Features to Include</h2>
-      <div role="group" className="flex flex-col">
-        <label className="inline-flex items-center">
-          <Field 
-            type="checkbox" 
-            name="features" 
-            value={Feature.CREATIVE_ASSET_TESTING}
-          />
-          <span className="ml-2">Creative Asset Testing</span>
-        </label>
-        <label className="inline-flex items-center">
-          <Field 
-            type="checkbox" 
-            name="features" 
-            value={Feature.BRAND_LIFT}
-          />
-          <span className="ml-2">Brand Lift</span>
-        </label>
-        <label className="inline-flex items-center">
-          <Field 
-            type="checkbox" 
-            name="features" 
-            value={Feature.BRAND_HEALTH}
-          />
-          <span className="ml-2">Brand Health</span>
-        </label>
-        <label className="inline-flex items-center">
-          <Field 
-            type="checkbox" 
-            name="features" 
-            value={Feature.MIXED_MEDIA_MODELLING}
-          />
-          <span className="ml-2">Mixed Media Modelling</span>
-        </label>
-      </div>
-    </div>
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -334,28 +345,9 @@ function FormContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 pb-32">
-      <Header currentStep={2} totalSteps={5} />
+    <div className="max-w-5xl mx-auto p-4 pb-32 bg-gray-50">
+      <h1 className="text-2xl font-bold mb-6">Campaign Creation</h1>
       
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Step 2: Objectives & Messaging</h1>
-        <button 
-          type="button"
-          onClick={() => handleSaveDraft(initialValues)}
-          className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100 flex items-center"
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <>
-              <LoadingSpinner className="w-4 h-4 mr-2" />
-              Saving...
-            </>
-          ) : (
-            'Save Draft'
-          )}
-        </button>
-      </div>
-
       <Formik
         initialValues={initialValues}
         validationSchema={ObjectivesSchema}
@@ -373,174 +365,327 @@ function FormContent() {
           });
           
           return (
-            <>
-              <Form className="space-y-8">
-                {/* Collapsible KPI Table */}
-                <details open className="mb-6 border p-4 rounded">
-                  <summary className="font-bold text-lg mb-2 cursor-pointer">
-                    Key Performance Indicators (KPIs)
-                  </summary>
-                  <p className="mb-4 text-sm text-gray-600">
-                    Select 1 Primary KPI and up to 4 Secondary KPIs. A Primary KPI cannot be selected as a Secondary KPI.
-                  </p>
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr>
-                        <th className="border p-2 text-left">KPI Explanation</th>
-                        <th className="border p-2 text-center">Primary KPI</th>
-                        <th className="border p-2 text-center">Secondary KPI</th>
+            <Form className="space-y-6">
+              {/* KPIs Section */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <PresentationChartBarIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Key Performance Indicators
+                </h2>
+                <p className="mb-4 text-sm text-gray-600">
+                  Select 1 Primary KPI and up to 4 Secondary KPIs. A Primary KPI cannot be selected as a Secondary KPI.
+                </p>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="border p-2 text-left">KPI</th>
+                      <th className="border p-2 text-left">Explanation</th>
+                      <th className="border p-2 text-center">Primary KPI</th>
+                      <th className="border p-2 text-center">Secondary KPI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {kpis.map((kpi) => (
+                      <tr key={kpi.key} className="hover:bg-gray-50">
+                        <td className="border p-2 font-medium">
+                          {kpi.title}
+                        </td>
+                        <td className="border p-2">
+                          <div className="text-sm text-gray-600">{kpi.definition}</div>
+                          <div className="text-xs text-gray-500 mt-1">Example: {kpi.example}</div>
+                        </td>
+                        <td className="border p-2 text-center">
+                          <Field 
+                            type="radio" 
+                            name="primaryKPI" 
+                            value={kpi.key} 
+                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="border p-2 text-center">
+                          <Field
+                            type="checkbox"
+                            name="secondaryKPIs"
+                            value={kpi.key}
+                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                            disabled={
+                              values.primaryKPI === kpi.key ||
+                              (!values.secondaryKPIs.includes(kpi.key) &&
+                                values.secondaryKPIs.length >= 4)
+                            }
+                          />
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {kpis.map((kpi) => (
-                        <tr key={kpi.key}>
-                          <td className="border p-2">
-                            <div className="font-bold">{kpi.title}</div>
-                            <div className="text-sm text-gray-600">{kpi.definition}</div>
-                            <div className="text-xs text-gray-500">Example: {kpi.example}</div>
-                          </td>
-                          <td className="border p-2 text-center">
-                            <Field type="radio" name="primaryKPI" value={kpi.key} />
-                          </td>
-                          <td className="border p-2 text-center">
-                            <Field
-                              type="checkbox"
-                              name="secondaryKPIs"
-                              value={kpi.key}
-                              disabled={
-                                values.primaryKPI === kpi.key ||
-                                (!values.secondaryKPIs.includes(kpi.key) &&
-                                  values.secondaryKPIs.length >= 4)
-                              }
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </details>
+                    ))}
+                  </tbody>
+                </table>
+                <ErrorMessage name="primaryKPI" component="p" className="mt-2 text-sm text-red-600" />
+                <ErrorMessage name="secondaryKPIs" component="p" className="mt-2 text-sm text-red-600" />
+              </div>
 
-                {/* Messaging Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Messaging</h2>
-                  <p className="mb-4 text-gray-600">
-                    Define the key messages and value propositions for your campaign.
-                  </p>
-                  {/* Main Message */}
+              {/* Primary and Secondary KPIs */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <CheckBadgeIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Primary and Secondary KPIs
+                </h2>
+                <p className="mb-4 text-sm text-gray-600">
+                  Pick up to one Primary KPI and up to any Secondary KPIs (max 4).
+                </p>
+                
+                <div className="mt-4 grid grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="mainMessage" className="block font-semibold">
-                      What is the main message of your campaign?
-                    </label>
-                    <div className="flex items-center">
-                      <Field
-                        as="textarea"
-                        id="mainMessage"
-                        name="mainMessage"
-                        placeholder="Discover sustainable living with our eco-friendly products."
-                        className="w-full p-2 border rounded"
-                        maxLength={3000}
-                      />
+                    <h3 className="text-md font-medium mb-2">Primary KPI</h3>
+                    <div className="grid grid-cols-1 gap-2">
+                      {values.primaryKPI && (
+                        <div className="bg-blue-50 p-2 rounded border border-blue-200 flex items-center">
+                          <CheckBadgeIcon className="w-5 h-5 text-blue-600 mr-2" />
+                          <span className="font-medium">
+                            {kpis.find(k => k.key === values.primaryKPI)?.title || values.primaryKPI}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right text-sm text-gray-500">
-                      {String(values.mainMessage).length}/3000
-                    </div>
-                    <ErrorMessage name="mainMessage" component="div" className="text-red-600 text-sm" />
                   </div>
-                  {/* Hashtags */}
+                  
                   <div>
-                    <label htmlFor="hashtags" className="block font-semibold">
-                      Hashtags related to the campaign
-                    </label>
+                    <h3 className="text-md font-medium mb-2">Secondary KPIs {values.secondaryKPIs.length > 0 && `(${values.secondaryKPIs.length})`}</h3>
+                    <div className="grid grid-cols-1 gap-2">
+                      {values.secondaryKPIs.map((kpiKey: KPI) => (
+                        <div key={kpiKey} className="bg-gray-50 p-2 rounded border border-gray-200 flex items-center">
+                          <CheckBadgeIcon className="w-5 h-5 text-gray-500 mr-2" />
+                          <span className="font-medium">
+                            {kpis.find(k => k.key === kpiKey)?.title || kpiKey}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Messaging Section */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Messaging
+                </h2>
+                <p className="mb-4 text-sm text-gray-600">
+                  Define the key messages and value propositions for your campaign.
+                </p>
+                
+                {/* Main Message */}
+                <div className="mb-6">
+                  <label htmlFor="mainMessage" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    What is the main message of your campaign?
+                    <span className="text-blue-500 ml-1">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-3 text-gray-400">
+                      <DocumentTextIcon className="w-5 h-5" />
+                    </div>
+                    <Field
+                      as="textarea"
+                      id="mainMessage"
+                      name="mainMessage"
+                      placeholder="Discover sustainable living with our eco-friendly products."
+                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
+                    />
+                  </div>
+                  <div className="text-right text-sm text-gray-500">
+                    {String(values.mainMessage).length}/3000
+                  </div>
+                  <ErrorMessage name="mainMessage" component="p" className="mt-1 text-sm text-red-600" />
+                </div>
+                
+                {/* Hashtags */}
+                <div className="mb-6">
+                  <label htmlFor="hashtags" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    Hashtags related to the campaign
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-2.5 text-gray-400">
+                      <HashtagIcon className="w-5 h-5" />
+                    </div>
                     <Field
                       id="hashtags"
                       name="hashtags"
                       placeholder="#hashtag"
-                      className="w-full p-2 border rounded"
+                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
-                    <ErrorMessage name="hashtags" component="div" className="text-red-600 text-sm" />
                   </div>
-                  {/* Memorability Statement */}
-                  <div>
-                    <label htmlFor="memorability" className="block font-semibold">
-                      What do you want people to remember after the campaign?
-                    </label>
-                    <div className="flex items-center">
-                      <Field
-                        as="textarea"
-                        id="memorability"
-                        name="memorability"
-                        placeholder="Type the value"
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <ErrorMessage name="memorability" component="div" className="text-red-600 text-sm" />
-                  </div>
-                  {/* Key Benefits */}
-                  <div>
-                    <label htmlFor="keyBenefits" className="block font-semibold">
-                      What are the key benefits your brand offers?
-                    </label>
-                    <div className="flex items-center">
-                      <Field
-                        as="textarea"
-                        id="keyBenefits"
-                        name="keyBenefits"
-                        placeholder="Innovative design, Exceptional quality, Outstanding customer service."
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <ErrorMessage name="keyBenefits" component="div" className="text-red-600 text-sm" />
-                  </div>
+                  <ErrorMessage name="hashtags" component="p" className="mt-1 text-sm text-red-600" />
                 </div>
+                
+                {/* Memorability Statement */}
+                <div className="mb-6">
+                  <label htmlFor="memorability" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    What do you want people to remember after the campaign?
+                    <span className="text-blue-500 ml-1">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-3 text-gray-400">
+                      <StarIcon className="w-5 h-5" />
+                    </div>
+                    <Field
+                      as="textarea"
+                      id="memorability"
+                      name="memorability"
+                      placeholder="Type the value"
+                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
+                    />
+                  </div>
+                  <ErrorMessage name="memorability" component="p" className="mt-1 text-sm text-red-600" />
+                </div>
+                
+                {/* Key Benefits */}
+                <div className="mb-6">
+                  <label htmlFor="keyBenefits" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    What are the key benefits your brand offers?
+                    <span className="text-blue-500 ml-1">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-3 text-gray-400">
+                      <CheckBadgeIcon className="w-5 h-5" />
+                    </div>
+                    <Field
+                      as="textarea"
+                      id="keyBenefits"
+                      name="keyBenefits"
+                      placeholder="Innovative design, Exceptional quality, Outstanding customer service."
+                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
+                    />
+                  </div>
+                  <ErrorMessage name="keyBenefits" component="p" className="mt-1 text-sm text-red-600" />
+                </div>
+              </div>
 
-                {/* Hypotheses Section */}
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Hypotheses</h2>
-                  <p className="mb-4 text-gray-600">
-                    Outline the expected outcomes of your campaign based on your objectives and KPIs.
-                  </p>
-                  <div>
-                    <label htmlFor="expectedAchievements" className="block font-semibold">
-                      What do you expect to achieve with this campaign?
-                    </label>
+              {/* Hypotheses Section */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <LightBulbIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Hypotheses
+                </h2>
+                <p className="mb-4 text-sm text-gray-600">
+                  Outline the expected outcomes of your campaign based on your objectives and KPIs.
+                </p>
+                
+                {/* Expected Achievements */}
+                <div className="mb-6">
+                  <label htmlFor="expectedAchievements" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    What do you expect to achieve with this campaign?
+                    <span className="text-blue-500 ml-1">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-3 text-gray-400">
+                      <ClipboardDocumentListIcon className="w-5 h-5" />
+                    </div>
                     <Field
                       as="textarea"
                       id="expectedAchievements"
                       name="expectedAchievements"
                       placeholder="We expect a 20% increase in brand awareness within three months."
-                      className="w-full p-2 border rounded"
+                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
                     />
-                    <ErrorMessage name="expectedAchievements" component="div" className="text-red-600 text-sm" />
                   </div>
-                  <div>
-                    <label htmlFor="purchaseIntent" className="block font-semibold">
-                      How do you think the campaign will impact Purchase Intent?
-                    </label>
+                  <ErrorMessage name="expectedAchievements" component="p" className="mt-1 text-sm text-red-600" />
+                </div>
+                
+                {/* Purchase Intent */}
+                <div className="mb-6">
+                  <label htmlFor="purchaseIntent" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    How do you think the campaign will impact Purchase Intent?
+                    <span className="text-blue-500 ml-1">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-3 text-gray-400">
+                      <BriefcaseIcon className="w-5 h-5" />
+                    </div>
                     <Field
                       as="textarea"
                       id="purchaseIntent"
                       name="purchaseIntent"
                       placeholder="Purchase intent will rise by 15% due to targeted ads."
-                      className="w-full p-2 border rounded"
+                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
                     />
-                    <ErrorMessage name="purchaseIntent" component="div" className="text-red-600 text-sm" />
                   </div>
+                  <ErrorMessage name="purchaseIntent" component="p" className="mt-1 text-sm text-red-600" />
                 </div>
+              </div>
 
-                {/* Features Section */}
-                {renderFeaturesSection()}
-              </Form>
+              {/* Features Section */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <CheckBadgeIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Features to Include
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <Field 
+                      type="checkbox" 
+                      name="features" 
+                      value={Feature.CREATIVE_ASSET_TESTING}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
+                    />
+                    <div className="flex items-center">
+                      <DocumentTextIcon className="w-5 h-5 text-gray-500 mr-2" />
+                      <span>Creative Asset Testing</span>
+                    </div>
+                  </label>
+                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <Field 
+                      type="checkbox" 
+                      name="features" 
+                      value={Feature.BRAND_LIFT}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
+                    />
+                    <div className="flex items-center">
+                      <PresentationChartBarIcon className="w-5 h-5 text-gray-500 mr-2" />
+                      <span>Brand Lift</span>
+                    </div>
+                  </label>
+                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <Field 
+                      type="checkbox" 
+                      name="features" 
+                      value={Feature.BRAND_HEALTH}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
+                    />
+                    <div className="flex items-center">
+                      <CheckBadgeIcon className="w-5 h-5 text-gray-500 mr-2" />
+                      <span>Brand Health</span>
+                    </div>
+                  </label>
+                  <label className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <Field 
+                      type="checkbox" 
+                      name="features" 
+                      value={Feature.MIXED_MEDIA_MODELLING}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
+                    />
+                    <div className="flex items-center">
+                      <PresentationChartBarIcon className="w-5 h-5 text-gray-500 mr-2" />
+                      <span>Mixed Media Modelling</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              {/* Add bottom padding to prevent progress bar overlap */}
+              <div className="pb-24"></div>
               
               <ProgressBar
                 currentStep={2}
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId || (data as any)?.id}`)}
                 onBack={() => router.push(`/campaigns/wizard/step-1?id=${campaignId || (data as any)?.id}`)}
                 onNext={submitForm}
+                onSaveDraft={() => handleSaveDraft(values)}
                 disableNext={isSubmitting}
                 isFormValid={isValid}
                 isDirty={dirty}
+                isSaving={isSaving}
               />
-            </>
+            </Form>
           );
         }}
       </Formik>
