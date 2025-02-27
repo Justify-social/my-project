@@ -486,7 +486,7 @@ export default function SelectedCampaignContent() {
                       </div>
                     )}
                     {featureInfo ? featureInfo.title : featureKey.replace(/_/g, ' ')}
-                  </span>
+              </span>
                 );
               })}
             </div>
@@ -605,9 +605,9 @@ export default function SelectedCampaignContent() {
                       View Asset →
                     </a>
                   </div>
-                </div>
-              </div>
-            ))}
+            </div>
+          </div>
+        ))}
           </div>
         </SummarySection>
       )}
