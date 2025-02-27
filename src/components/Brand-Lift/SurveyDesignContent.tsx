@@ -646,6 +646,17 @@ export default function SurveyDesignContent() {
     setShowKpiTooltip(kpi === showKpiTooltip ? null : kpi);
   };
   
+  // Add tooltip position state
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  
+  // Function to update tooltip position
+  const updateTooltipPosition = (e: React.MouseEvent) => {
+    setTooltipPosition({ 
+      x: e.clientX + 10, // Offset from cursor
+      y: e.clientY + 10
+    });
+  };
+  
   // Function to get KPI information by name
   const getKpiInfo = (kpiName: string): KpiInfo | undefined => {
     // Convert the displayed KPI name to a key format (e.g., "Brand Awareness" -> "brandAwareness")
@@ -926,13 +937,24 @@ export default function SurveyDesignContent() {
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
-                  onMouseEnter={() => toggleKpiTooltip('kpi-builder-tooltip')}
+                  onMouseEnter={(e) => {
+                    updateTooltipPosition(e);
+                    toggleKpiTooltip('kpi-builder-tooltip');
+                  }}
+                  onMouseMove={updateTooltipPosition}
                   onMouseLeave={() => toggleKpiTooltip(null)}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {showKpiTooltip === 'kpi-builder-tooltip' && (
-                  <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+                  <div 
+                    className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                    style={{ 
+                      left: `${tooltipPosition.x}px`, 
+                      top: `${tooltipPosition.y}px`,
+                      position: 'fixed'
+                    }}
+                  >
                     <div className="font-semibold mb-1">Key Performance Indicators</div>
                     <div className="mb-1">Metrics used to measure the effectiveness of your brand lift campaign.</div>
                     <div className="text-[var(--secondary-color)]">Select the most relevant KPI for this question to help measure the campaign's impact.</div>
@@ -979,7 +1001,11 @@ export default function SurveyDesignContent() {
                       fill="none" 
                       viewBox="0 0 24 24" 
                       stroke="currentColor"
-                      onMouseEnter={() => toggleKpiTooltip('randomise-tooltip')}
+                      onMouseEnter={(e) => {
+                        updateTooltipPosition(e);
+                        toggleKpiTooltip('randomise-tooltip');
+                      }}
+                      onMouseMove={updateTooltipPosition}
                       onMouseLeave={() => toggleKpiTooltip(null)}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -987,7 +1013,14 @@ export default function SurveyDesignContent() {
                   </span>
                 </span>
                 {showKpiTooltip === 'randomise-tooltip' && (
-                  <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+                  <div 
+                    className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                    style={{ 
+                      left: `${tooltipPosition.x}px`, 
+                      top: `${tooltipPosition.y}px`,
+                      position: 'fixed'
+                    }}
+                  >
                     <div className="font-semibold mb-1">Randomise Options</div>
                     <div className="mb-1">Presents answer options in a random order for each respondent to prevent bias.</div>
                     <div className="text-[var(--secondary-color)]">This helps ensure more accurate results by eliminating order bias.</div>
@@ -1010,7 +1043,11 @@ export default function SurveyDesignContent() {
                       fill="none" 
                       viewBox="0 0 24 24" 
                       stroke="currentColor"
-                      onMouseEnter={() => toggleKpiTooltip('mandatory-tooltip')}
+                      onMouseEnter={(e) => {
+                        updateTooltipPosition(e);
+                        toggleKpiTooltip('mandatory-tooltip');
+                      }}
+                      onMouseMove={updateTooltipPosition}
                       onMouseLeave={() => toggleKpiTooltip(null)}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1018,7 +1055,14 @@ export default function SurveyDesignContent() {
                   </span>
                 </span>
                 {showKpiTooltip === 'mandatory-tooltip' && (
-                  <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+                  <div 
+                    className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                    style={{ 
+                      left: `${tooltipPosition.x}px`, 
+                      top: `${tooltipPosition.y}px`,
+                      position: 'fixed'
+                    }}
+                  >
                     <div className="font-semibold mb-1">Non-forced Choice</div>
                     <div className="mb-1">Allows respondents to skip questions without providing an answer.</div>
                     <div className="text-[var(--secondary-color)]">Useful for sensitive questions or when "None of the above" is a valid response.</div>
@@ -1058,13 +1102,24 @@ export default function SurveyDesignContent() {
             <span className="font-medium inline-block ml-1 relative">
               <span 
                 className="cursor-help border-b border-dotted border-[var(--accent-color)]"
-                onMouseEnter={() => toggleKpiTooltip('brand-awareness')}
+                onMouseEnter={(e) => {
+                  updateTooltipPosition(e);
+                  toggleKpiTooltip('brand-awareness');
+                }}
+                onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
                 Boost Brand Awareness
               </span>
               {showKpiTooltip === 'brand-awareness' && (
-                <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+                <div 
+                  className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                  style={{ 
+                    left: `${tooltipPosition.x}px`, 
+                    top: `${tooltipPosition.y}px`,
+                    position: 'fixed'
+                  }}
+                >
                   <div className="font-semibold mb-1">Brand Awareness</div>
                   <div className="mb-1">{getKpiInfo('Brand Awareness')?.definition || "The increase in recognition of your brand."}</div>
                   <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Brand Awareness')?.example || "Your brand name is recognised by 30% more people after the campaign."}</div>
@@ -1074,13 +1129,24 @@ export default function SurveyDesignContent() {
             <span className="font-medium relative inline-block ml-1">
               <span 
                 className="cursor-help border-b border-dotted border-[var(--accent-color)]"
-                onMouseEnter={() => toggleKpiTooltip('ad-recall')}
+                onMouseEnter={(e) => {
+                  updateTooltipPosition(e);
+                  toggleKpiTooltip('ad-recall');
+                }}
+                onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
                 Maximize Ad Recall
               </span>
               {showKpiTooltip === 'ad-recall' && (
-                <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+                <div 
+                  className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                  style={{ 
+                    left: `${tooltipPosition.x}px`, 
+                    top: `${tooltipPosition.y}px`,
+                    position: 'fixed'
+                  }}
+                >
                   <div className="font-semibold mb-1">Ad Recall</div>
                   <div className="mb-1">{getKpiInfo('Ad Recall')?.definition || "The percentage of people who remember seeing your advertisement."}</div>
                   <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Ad Recall')?.example || "After a week, 60% of viewers can recall your ad's main message."}</div>
@@ -1090,14 +1156,25 @@ export default function SurveyDesignContent() {
             <span className="font-medium relative inline-block ml-1">
               <span 
                 className="cursor-help border-b border-dotted border-[var(--accent-color)]"
-                onMouseEnter={() => toggleKpiTooltip('brand-preference')}
+                onMouseEnter={(e) => {
+                  updateTooltipPosition(e);
+                  toggleKpiTooltip('brand-preference');
+                }}
+                onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
                 Grow Brand Preference
               </span>
             </span>
             {showKpiTooltip === 'brand-preference' && (
-              <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+              <div 
+                className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                style={{ 
+                  left: `${tooltipPosition.x}px`, 
+                  top: `${tooltipPosition.y}px`,
+                  position: 'fixed'
+                }}
+              >
                 <div className="font-semibold mb-1">Brand Preference</div>
                 <div className="mb-1">{getKpiInfo('Brand Preference')?.definition || "Preference for your brand over competitors."}</div>
                 <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Brand Preference')?.example || "40% of customers prefer your brand when choosing between similar products."}</div>
@@ -1107,14 +1184,25 @@ export default function SurveyDesignContent() {
             <span className="font-medium relative inline-block ml-1">
               <span 
                 className="cursor-help border-b border-dotted border-[var(--accent-color)]"
-                onMouseEnter={() => toggleKpiTooltip('action-intent')}
+                onMouseEnter={(e) => {
+                  updateTooltipPosition(e);
+                  toggleKpiTooltip('action-intent');
+                }}
+                onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
                 Drive Action Intent
               </span>
             </span>
             {showKpiTooltip === 'action-intent' && (
-              <div className="fixed z-[999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs mt-2">
+              <div 
+                className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                style={{ 
+                  left: `${tooltipPosition.x}px`, 
+                  top: `${tooltipPosition.y}px`,
+                  position: 'fixed'
+                }}
+              >
                 <div className="font-semibold mb-1">Action Intent</div>
                 <div className="mb-1">{getKpiInfo('Action Intent')?.definition || "The likelihood of taking a specific action after seeing your ad."}</div>
                 <div className="text-[var(--secondary-color)]">Example: {getKpiInfo('Action Intent')?.example || "25% of viewers intend to visit your website after viewing the ad."}</div>
@@ -1182,7 +1270,11 @@ export default function SurveyDesignContent() {
                         {/* Restructured to avoid nesting issues */}
                         <span 
                           className="cursor-help inline-block ml-1"
-                          onMouseEnter={() => toggleKpiTooltip(`kpi-${question.id}`)}
+                          onMouseEnter={(e) => {
+                            updateTooltipPosition(e);
+                            toggleKpiTooltip(`kpi-${question.id}`);
+                          }}
+                          onMouseMove={updateTooltipPosition}
                           onMouseLeave={() => toggleKpiTooltip(null)}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -1194,7 +1286,14 @@ export default function SurveyDesignContent() {
                       
                       {/* KPI Tooltip with higher z-index - moved outside the parent elements */}
                       {showKpiTooltip === `kpi-${question.id}` && (
-                        <div className="fixed left-auto mt-2 w-72 p-4 bg-white border border-[var(--divider-color)] rounded-lg shadow-lg z-[999]">
+                        <div 
+                          className="absolute z-[9999] w-72 p-4 bg-white border border-[var(--divider-color)] rounded-lg shadow-lg"
+                          style={{ 
+                            left: `${tooltipPosition.x}px`, 
+                            top: `${tooltipPosition.y}px`,
+                            position: 'fixed'
+                          }}
+                        >
                           <div className="font-medium text-[var(--primary-color)] mb-2">
                             {question.kpi}
                           </div>
@@ -1413,7 +1512,11 @@ export default function SurveyDesignContent() {
                               fill="none" 
                               viewBox="0 0 24 24" 
                               stroke="currentColor"
-                              onMouseEnter={() => toggleKpiTooltip(`randomise-${question.id}`)}
+                              onMouseEnter={(e) => {
+                                updateTooltipPosition(e);
+                                toggleKpiTooltip(`randomise-${question.id}`);
+                              }}
+                              onMouseMove={updateTooltipPosition}
                               onMouseLeave={() => toggleKpiTooltip(null)}
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1421,7 +1524,14 @@ export default function SurveyDesignContent() {
                           </span>
                         </span>
                         {showKpiTooltip === `randomise-${question.id}` && (
-                          <div className="fixed mt-2 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs z-[999]">
+                          <div 
+                            className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                            style={{ 
+                              left: `${tooltipPosition.x}px`, 
+                              top: `${tooltipPosition.y}px`,
+                              position: 'fixed'
+                            }}
+                          >
                             <div className="font-semibold mb-1">Randomise Options</div>
                             <div className="mb-1">Presents answer options in a random order for each respondent to prevent bias.</div>
                             <div className="text-[var(--secondary-color)]">This helps ensure more accurate results by eliminating order bias.</div>
@@ -1444,7 +1554,11 @@ export default function SurveyDesignContent() {
                               fill="none" 
                               viewBox="0 0 24 24" 
                               stroke="currentColor"
-                              onMouseEnter={() => toggleKpiTooltip(`mandatory-${question.id}`)}
+                              onMouseEnter={(e) => {
+                                updateTooltipPosition(e);
+                                toggleKpiTooltip(`mandatory-${question.id}`);
+                              }}
+                              onMouseMove={updateTooltipPosition}
                               onMouseLeave={() => toggleKpiTooltip(null)}
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1452,7 +1566,14 @@ export default function SurveyDesignContent() {
                           </span>
                         </span>
                         {showKpiTooltip === `mandatory-${question.id}` && (
-                          <div className="fixed mt-2 w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs z-[999]">
+                          <div 
+                            className="absolute z-[9999] w-64 p-3 bg-white rounded-md shadow-lg border border-[var(--divider-color)] text-xs"
+                            style={{ 
+                              left: `${tooltipPosition.x}px`, 
+                              top: `${tooltipPosition.y}px`,
+                              position: 'fixed'
+                            }}
+                          >
                             <div className="font-semibold mb-1">Non-forced Choice</div>
                             <div className="mb-1">Allows respondents to skip questions without providing an answer.</div>
                             <div className="text-[var(--secondary-color)]">Useful for sensitive questions or when "None of the above" is a valid response.</div>
@@ -1600,7 +1721,7 @@ export default function SurveyDesignContent() {
       <style jsx global>{`
         /* Global styles for tooltips */
         .tooltip, [role="tooltip"] {
-          z-index: 999 !important;
+          z-index: 9999 !important;
           position: relative;
         }
         
@@ -1611,12 +1732,17 @@ export default function SurveyDesignContent() {
         
         /* Question wrapper tooltip styling */
         .kpi-tooltip {
-          z-index: 999 !important;
+          z-index: 9999 !important;
         }
         
         /* Better transitions for dragging */
         .transition-all {
           transition: all 0.3s ease-in-out;
+        }
+        
+        /* Cursor based tooltips */
+        .cursor-help {
+          cursor: help;
         }
         
         /* Mobile optimization */
@@ -1640,13 +1766,15 @@ export default function SurveyDesignContent() {
         }
 
         /* Improved tooltip visibility */
-        div[class*="absolute"] {
-          z-index: 950 !important;
+        div[class*="absolute"], div[class*="fixed"] {
+          z-index: 9999 !important;
         }
 
         /* Ensure tooltips don't get hidden */
-        div[class*="absolute"][class*="bg-white"][class*="shadow"] {
-          z-index: 995 !important;
+        div[class*="absolute"][class*="bg-white"][class*="shadow"],
+        div[class*="fixed"][class*="bg-white"][class*="shadow"] {
+          z-index: 9999 !important;
+          pointer-events: none;
         }
 
         /* Ensure tooltips appear above all other content */
