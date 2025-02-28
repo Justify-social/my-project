@@ -55,3 +55,237 @@ main,
 [class*="content"] {
   background-color: white;
 }
+
+/* =========================================================================
+   KPI (Key Performance Indicators) Icons and Definitions
+   ========================================================================= */
+
+/* 
+ * This section provides styling and information about all the KPI icons used
+ * in the survey design interface. Each KPI has a specific icon, definition,
+ * example of usage, and related styling to ensure consistent presentation.
+ */
+
+/* Common styling for all KPI icons */
+.kpi-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+  filter: brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%);
+}
+
+.kpi-icon-large {
+  width: 32px;
+  height: 32px;
+}
+
+.kpi-title {
+  color: var(--accent-color);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.kpi-definition {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.kpi-example {
+  color: var(--secondary-color);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* 
+ * KPI: Brand Awareness
+ * SVG: /KPIs/Brand_Awareness.svg
+ * Verb: Boost Brand Awareness
+ * Description: The increase in recognition of your brand.
+ * Example: Your brand name is recognised by 30% more people after the campaign.
+ * Funnel Location: Top Funnel
+ */
+.kpi-brand-awareness {
+  --kpi-color: var(--accent-color);
+}
+.kpi-brand-awareness::before {
+  content: "";
+  background-image: url('/KPIs/Brand_Awareness.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Ad Recall
+ * SVG: /KPIs/Ad_Recall.svg
+ * Verb: Maximise Ad Recall
+ * Description: The percentage of people who remember seeing your advertisement.
+ * Example: After a week, 60% of viewers can recall your ad's main message.
+ * Funnel Location: Top Funnel
+ */
+.kpi-ad-recall {
+  --kpi-color: var(--accent-color);
+}
+.kpi-ad-recall::before {
+  content: "";
+  background-image: url('/KPIs/Ad_Recall.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Consideration
+ * SVG: /KPIs/Consideration.svg
+ * Verb: Drive Consideration
+ * Description: The percentage of people considering purchasing from your brand.
+ * Example: 25% of your audience considers buying your product after seeing your campaign.
+ * Funnel Location: Mid Funnel
+ */
+.kpi-consideration {
+  --kpi-color: var(--accent-color);
+}
+.kpi-consideration::before {
+  content: "";
+  background-image: url('/KPIs/Consideration.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Message Association
+ * SVG: /KPIs/Message_Association.svg
+ * Verb: Strengthen Message Association
+ * Description: How well people link your key messages to your brand.
+ * Example: When hearing your slogan, 70% of people associate it directly with your brand.
+ * Funnel Location: Mid Funnel
+ */
+.kpi-message-association {
+  --kpi-color: var(--accent-color);
+}
+.kpi-message-association::before {
+  content: "";
+  background-image: url('/KPIs/Message_Association.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Brand Preference
+ * SVG: /KPIs/Brand_Preference.svg
+ * Verb: Grow Brand Preference
+ * Description: Preference for your brand over competitors.
+ * Example: 40% of customers prefer your brand when choosing between similar products.
+ * Funnel Location: Mid Funnel
+ */
+.kpi-brand-preference {
+  --kpi-color: var(--accent-color);
+}
+.kpi-brand-preference::before {
+  content: "";
+  background-image: url('/KPIs/Brand_Preference.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Purchase Intent
+ * SVG: /KPIs/Purchase_Intent.svg
+ * Verb: Drive Purchase Intent
+ * Description: Likelihood of purchasing your product or service.
+ * Example: 50% of viewers intend to buy your product after seeing the ad.
+ * Funnel Location: Mid Funnel
+ */
+.kpi-purchase-intent {
+  --kpi-color: var(--accent-color);
+}
+.kpi-purchase-intent::before {
+  content: "";
+  background-image: url('/KPIs/Purchase_Intent.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Action Intent
+ * SVG: /KPIs/Action_Intent.svg
+ * Verb: Motivate Action
+ * Description: Likelihood of taking a specific action related to your brand.
+ * Example: 35% of people are motivated to visit your website after the campaign.
+ * Funnel Location: Bottom Funnel
+ */
+.kpi-action-intent {
+  --kpi-color: var(--accent-color);
+}
+.kpi-action-intent::before {
+  content: "";
+  background-image: url('/KPIs/Action_Intent.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Recommendation Intent
+ * SVG: /KPIs/Recommendation_Intent.svg (fallback to Brand_Preference.svg)
+ * Verb: Generate Recommendations
+ * Description: Likelihood of recommending your brand to others.
+ * Example: 45% of customers are willing to recommend your brand to friends and family.
+ * Funnel Location: Bottom Funnel
+ */
+.kpi-recommendation-intent {
+  --kpi-color: var(--accent-color);
+}
+.kpi-recommendation-intent::before {
+  content: "";
+  background-image: url('/KPIs/Brand_Preference.svg'); /* Using this as fallback per original code */
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* 
+ * KPI: Advocacy
+ * SVG: /KPIs/Advocacy.svg
+ * Verb: Foster Brand Advocacy
+ * Description: Willingness to actively promote your brand.
+ * Example: 20% of your customers regularly share your brand on social media or write positive reviews.
+ * Funnel Location: Bottom Funnel
+ */
+.kpi-advocacy {
+  --kpi-color: var(--accent-color);
+}
+.kpi-advocacy::before {
+  content: "";
+  background-image: url('/KPIs/Advocacy.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Alternative implementation for the KPI icon filter */
+.blue-icon {
+  filter: brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%);
+}
+
+/* KPI tooltip styling */
+.kpi-tooltip {
+  position: absolute;
+  z-index: 9999;
+  background-color: white;
+  border: 1px solid var(--divider-color);
+  border-radius: 8px;
+  padding: 12px;
+  width: 280px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-tooltip-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.kpi-tooltip-title {
+  font-weight: 600;
+  color: var(--accent-color);
+  margin-left: 8px;
+}
