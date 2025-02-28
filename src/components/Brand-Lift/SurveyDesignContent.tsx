@@ -210,7 +210,7 @@ export default function SurveyDesignContent() {
       id: '7',
       title: 'how would you describe our brand to someone else after seeing the ad?',
       type: 'Multiple Choice',
-      kpi: 'Brand Perception',
+      kpi: 'Brand Awareness',
       options: [
         { id: '7-1', text: 'innovative', image: 'https://media1.giphy.com/media/3o7TKr3nzbh5WgCFxe/giphy.gif' },
         { id: '7-2', text: 'trustworthy', image: 'https://media2.giphy.com/media/3o7TKT5Vnr62wFCXxS/giphy.gif' },
@@ -872,7 +872,7 @@ export default function SurveyDesignContent() {
                       onChange={(e) => updateOptionText(option.id, e.target.value)}
                     />
                     {option.text && (
-                      <button
+            <button
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[var(--accent-color)] text-white rounded-full p-1.5 hover:opacity-90 transition-opacity"
                         onClick={() => openGiphyModal(index)}
                         title="Add GIF"
@@ -882,18 +882,18 @@ export default function SurveyDesignContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                      </button>
+            </button>
                     )}
                   </div>
-                  <button
+            <button
                     className="bg-red-100 text-red-600 px-4 py-2 rounded-r-md hover:bg-red-200 flex items-center justify-center border-t border-r border-b border-[var(--divider-color)]"
                     onClick={() => removeOption(option.id)}
-                  >
+            >
                     <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
-                  </button>
-                </div>
+            </button>
+          </div>
                 {option.image ? (
                   <div className="aspect-square relative w-full h-32 sm:h-40">
                     <Image 
@@ -989,7 +989,6 @@ export default function SurveyDesignContent() {
               <option>Purchase Intent</option>
               <option>Action Intent</option>
               <option>Recommendation Intent</option>
-              <option>Brand Perception</option>
               <option>Advocacy</option>
             </select>
           </div>
@@ -1472,8 +1471,8 @@ export default function SurveyDesignContent() {
                                 </svg>
                                 <span className="text-sm">Add GIF</span>
                               </button>
-                            </div>
-                          )}
+                </div>
+              )}
                           <div className="p-2 text-sm text-[var(--primary-color)] font-medium overflow-hidden">
                             <input 
                               type="text"
