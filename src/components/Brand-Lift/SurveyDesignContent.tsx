@@ -12,7 +12,7 @@ interface Question {
   kpi: string;
   options: Array<{
     id: string;
-    text: string;
+  text: string;
     image?: string | null;
   }>;
   isRandomized?: boolean;
@@ -138,12 +138,125 @@ export default function SurveyDesignContent() {
       kpi: 'Brand Awareness',
       options: [
         { id: '1-1', text: 'very effective', image: 'https://media1.giphy.com/media/26xBwdIuRJiAIqHwA/giphy.gif' },
-        { id: '1-2', text: 'somewhat effective', image: null },
-        { id: '1-3', text: 'not very effective', image: null },
-        { id: '1-4', text: 'not at all effective', image: null },
-      ],
-      isRandomized: false,
-      isMandatory: true
+        { id: '1-2', text: 'somewhat effective', image: 'https://media2.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif' },
+        { id: '1-3', text: 'not effective', image: 'https://media3.giphy.com/media/3oAt21Fnr4i54uK8vK/giphy.gif' },
+      ]
+    },
+    {
+      id: '2',
+      title: 'which of our advertisements do you recall seeing?',
+      type: 'Multiple Choice',
+      kpi: 'Ad Recall',
+      options: [
+        { id: '2-1', text: 'product billboard', image: 'https://media1.giphy.com/media/l0HlNaQ6gWfllcjDO/giphy.gif' },
+        { id: '2-2', text: 'social media ad', image: 'https://media2.giphy.com/media/l0K4n42JVSqqUvAQg/giphy.gif' },
+        { id: '2-3', text: 'TV commercial', image: 'https://media0.giphy.com/media/3o7rc0qU6m5hneMsuc/giphy.gif' },
+        { id: '2-4', text: 'none of the above', image: 'https://media3.giphy.com/media/l4pLY0zySvluEvr0c/giphy.gif' },
+      ]
+    },
+    {
+      id: '3',
+      title: 'how did the ad make you feel about the brand?',
+      type: 'Single Choice',
+      kpi: 'Boost Brand Awareness',
+      options: [
+        { id: '3-1', text: 'very positive', image: 'https://media1.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif' },
+        { id: '3-2', text: 'somewhat positive', image: 'https://media2.giphy.com/media/l0MYyDa8S9ghzNebm/giphy.gif' },
+        { id: '3-3', text: 'neutral', image: 'https://media3.giphy.com/media/9G1wY9Ipd8o7u/giphy.gif' },
+        { id: '3-4', text: 'somewhat negative', image: 'https://media1.giphy.com/media/l2JhpjWPccQhsAMfu/giphy.gif' },
+        { id: '3-5', text: 'very negative', image: 'https://media4.giphy.com/media/l1KVaj5UcbHwrBMqI/giphy.gif' },
+      ]
+    },
+    {
+      id: '4',
+      title: 'how likely are you to choose this brand over others based on the ad?',
+      type: 'Single Choice',
+      kpi: 'Grow Brand Preference',
+      options: [
+        { id: '4-1', text: 'very likely', image: 'https://media2.giphy.com/media/3oriO13KTkzPwTykp2/giphy.gif' },
+        { id: '4-2', text: 'somewhat likely', image: 'https://media3.giphy.com/media/l0HlQXkq1fhBYJ7Gg/giphy.gif' },
+        { id: '4-3', text: 'neutral', image: 'https://media0.giphy.com/media/xT1XGVp95GDPgFYmUE/giphy.gif' },
+        { id: '4-4', text: 'somewhat unlikely', image: 'https://media1.giphy.com/media/l0HlR8p1q4oRKUSA0/giphy.gif' },
+        { id: '4-5', text: 'very unlikely', image: 'https://media4.giphy.com/media/l0HlMZrXA2H7nbJm0/giphy.gif' },
+      ]
+    },
+    {
+      id: '5',
+      title: 'what would be your next step after seeing this ad?',
+      type: 'Single Choice',
+      kpi: 'Motivate Action',
+      options: [
+        { id: '5-1', text: 'look up more information about the product', image: 'https://media2.giphy.com/media/l0HlOBZcl7sbV6LnO/giphy.gif' },
+        { id: '5-2', text: 'visit the brand website', image: 'https://media0.giphy.com/media/3oKIPzLXQYb2Bn5PLG/giphy.gif' },
+        { id: '5-3', text: 'follow the brand on social media', image: 'https://media3.giphy.com/media/l0HlPwMAzh13pcZ20/giphy.gif' },
+        { id: '5-4', text: 'consider purchasing the product', image: 'https://media1.giphy.com/media/l0MYyoYPFfVqNEhPO/giphy.gif' },
+        { id: '5-5', text: 'nothing/continue browsing', image: 'https://media4.giphy.com/media/l0HlO3BJ8LALPW4sE/giphy.gif' },
+      ]
+    },
+    {
+      id: '6',
+      title: 'which message from our campaign resonated most with you?',
+      type: 'Single Choice',
+      kpi: 'Message Association',
+      options: [
+        { id: '6-1', text: 'product quality', image: 'https://media2.giphy.com/media/l2SpYDOZm4T0ZvHmU/giphy.gif' },
+        { id: '6-2', text: 'price value', image: 'https://media3.giphy.com/media/d3mlXPjoK1ROfqOA/giphy.gif' },
+        { id: '6-3', text: 'brand story', image: 'https://media1.giphy.com/media/l2SpZulF0wIqUwj5K/giphy.gif' },
+        { id: '6-4', text: 'social responsibility', image: 'https://media4.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif' },
+        { id: '6-5', text: 'innovation', image: 'https://media0.giphy.com/media/3o7TKSha51ATTx9TSU/giphy.gif' },
+      ]
+    },
+    {
+      id: '7',
+      title: 'how would you describe our brand to someone else after seeing the ad?',
+      type: 'Multiple Choice',
+      kpi: 'Brand Perception',
+      options: [
+        { id: '7-1', text: 'innovative', image: 'https://media1.giphy.com/media/3o7TKr3nzbh5WgCFxe/giphy.gif' },
+        { id: '7-2', text: 'trustworthy', image: 'https://media2.giphy.com/media/3o7TKT5Vnr62wFCXxS/giphy.gif' },
+        { id: '7-3', text: 'premium', image: 'https://media3.giphy.com/media/3o7TKN9IUHHFXWyZi0/giphy.gif' },
+        { id: '7-4', text: 'value-focused', image: 'https://media4.giphy.com/media/3o7TKSjpQfVgjgLlwk/giphy.gif' },
+        { id: '7-5', text: 'sustainable', image: 'https://media0.giphy.com/media/3o7TKP9ln2Dr6ze6f6/giphy.gif' },
+      ]
+    },
+    {
+      id: '8',
+      title: 'how likely are you to recommend our brand to friends or family?',
+      type: 'Single Choice',
+      kpi: 'Recommendation Intent',
+      options: [
+        { id: '8-1', text: 'extremely likely', image: 'https://media1.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif' },
+        { id: '8-2', text: 'very likely', image: 'https://media2.giphy.com/media/3o7TKurSpGfaXjxPAA/giphy.gif' },
+        { id: '8-3', text: 'somewhat likely', image: 'https://media3.giphy.com/media/3o7TKzIrYZ0YQfRTBm/giphy.gif' },
+        { id: '8-4', text: 'not very likely', image: 'https://media4.giphy.com/media/l1KcPvDsU6Sje5se4/giphy.gif' },
+        { id: '8-5', text: 'not at all likely', image: 'https://media0.giphy.com/media/26xBI0gFPcbHa4p8c/giphy.gif' },
+      ]
+    },
+    {
+      id: '9',
+      title: 'what aspect of our brand most influences your purchase decision?',
+      type: 'Single Choice',
+      kpi: 'Purchase Intent',
+      options: [
+        { id: '9-1', text: 'product features', image: 'https://media1.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif' },
+        { id: '9-2', text: 'brand reputation', image: 'https://media2.giphy.com/media/l0ExncehJzexFpRHq/giphy.gif' },
+        { id: '9-3', text: 'price', image: 'https://media3.giphy.com/media/xT39D2A6TB8Y05RlHW/giphy.gif' },
+        { id: '9-4', text: 'customer reviews', image: 'https://media4.giphy.com/media/3o7TKMt1HEOdTufTUc/giphy.gif' },
+        { id: '9-5', text: 'friend recommendations', image: 'https://media0.giphy.com/media/l0HlQSwsHpBJ7V5RK/giphy.gif' },
+      ]
+    },
+    {
+      id: '10',
+      title: 'how does our brand compare to competitors you\'ve used?',
+      type: 'Single Choice',
+      kpi: 'Brand Preference',
+      options: [
+        { id: '10-1', text: 'much better', image: 'https://media1.giphy.com/media/l46CimW38a7TFxLVe/giphy.gif' },
+        { id: '10-2', text: 'somewhat better', image: 'https://media2.giphy.com/media/3oKIPsx2VAYAgEHC12/giphy.gif' },
+        { id: '10-3', text: 'about the same', image: 'https://media3.giphy.com/media/xT1XGEyW6Ra9TMA1Fe/giphy.gif' },
+        { id: '10-4', text: 'somewhat worse', image: 'https://media4.giphy.com/media/3o7TKqnN349PBUtGFO/giphy.gif' },
+        { id: '10-5', text: 'much worse', image: 'https://media0.giphy.com/media/l46CiWmS9N5TJsm5O/giphy.gif' },
+      ]
     }
   ]);
 
@@ -176,18 +289,6 @@ export default function SurveyDesignContent() {
   const dragOverItemOption = useRef<DragItem | null>(null);
   const [selectedKpi, setSelectedKpi] = useState('');
   
-  // State for drag and drop
-  const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
-  const [targetItem, setTargetItem] = useState<DragItem | null>(null);
-  const [dragOverStyle, setDragOverStyle] = useState<{elementId?: string, dropPosition?: 'top' | 'bottom'}>({});
-  
-  const optionsMenu = useRef<HTMLDivElement | null>(null);
-  
-  const [previousGif, setPreviousGif] = useState<string | null>(null);
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  
   // Function to toggle question expansion
   const toggleQuestionExpansion = (questionId: string) => {
     setExpandedQuestions(prev => ({
@@ -198,103 +299,45 @@ export default function SurveyDesignContent() {
   
   // Function to handle drag start
   const handleDragStart = (e: React.DragEvent, index: number, id: string) => {
-    // Only allow dragging if the question is collapsed
-    if (expandedQuestions[id]) {
-      e.preventDefault();
-      return;
-    }
+    dragItem.current = { index, id, type: 'question' };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
     
-    // Add a smooth transition class to the dragged element
-    const element = e.currentTarget as HTMLElement;
-    element.classList.add('dragging');
+    // Add opacity and scale effect for visual feedback
+    e.currentTarget.classList.add('opacity-70', 'transition-all', 'duration-200');
     
-    // Store dragged item data
-    setDraggedItem({
-      index,
-      id,
-      type: 'question'
-    });
+    // Add a ghost image that better represents the dragged item
+    const dragImage = e.currentTarget.cloneNode(true) as HTMLElement;
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    dragImage.style.opacity = '0.8';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 20, 20);
     
-    // Set a custom drag image for smoother appearance
-    const dragPreview = element.cloneNode(true) as HTMLElement;
-    dragPreview.style.width = `${element.offsetWidth}px`;
-    dragPreview.style.height = '80px'; // Reduced height for preview
-    dragPreview.style.opacity = '0.6';
-    dragPreview.style.position = 'absolute';
-    dragPreview.style.top = '-1000px';
-    dragPreview.style.backgroundColor = 'var(--accent-color-light)';
-    dragPreview.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-    dragPreview.style.border = '2px solid var(--accent-color)';
-    dragPreview.style.borderRadius = '6px';
-    dragPreview.style.zIndex = '9999';
-    document.body.appendChild(dragPreview);
-    
-    e.dataTransfer.setDragImage(dragPreview, 20, 20);
-    
-    // Clean up after a short delay
+    // Remove the clone after a short delay
     setTimeout(() => {
-      document.body.removeChild(dragPreview);
+      document.body.removeChild(dragImage);
     }, 0);
   };
   
   // Function to handle drag end
   const handleDragEnd = (e: React.DragEvent) => {
-    const element = e.currentTarget as HTMLElement;
-    element.classList.remove('dragging');
-    
-    if (draggedItem && targetItem && draggedItem.id !== targetItem.id) {
-      const updatedQuestions = [...questions];
-      const movedItem = updatedQuestions[draggedItem.index];
-      
-      // Remove the item from its original position
-      updatedQuestions.splice(draggedItem.index, 1);
-      
-      // Calculate the new position, accounting for the shift
-      const newIndex = targetItem.index > draggedItem.index ? targetItem.index - 1 : targetItem.index;
-      
-      // Insert at the new position
-      updatedQuestions.splice(newIndex, 0, movedItem);
-      
-      setQuestions(updatedQuestions);
-    }
-    
-    // Reset state
-    setDraggedItem(null);
-    setTargetItem(null);
-    setDragOverStyle({});
+    e.currentTarget.classList.remove('opacity-70', 'transition-all', 'duration-200');
+    e.currentTarget.classList.add('transition-all', 'duration-300');
+    dragItem.current = null;
+    dragOverItem.current = null;
   };
   
   // Function to handle drag over
   const handleDragOver = (e: React.DragEvent, index: number, id: string) => {
     e.preventDefault();
     
-    // Exit if dragging is not allowed (question expanded)
-    if (draggedItem && expandedQuestions[draggedItem.id]) {
-      return;
+    // Highlight the drop target
+    if (dragOverItem.current?.id !== id) {
+      e.currentTarget.classList.add('bg-gray-50', 'transition-all', 'duration-200');
     }
     
-    if (!draggedItem || draggedItem.id === id) return;
-    
-    // Only show drop indicator if hovering over a different item
-    if (draggedItem.id !== id) {
-      setTargetItem({
-        index,
-        id,
-        type: 'question'
-      });
-      
-      // Calculate if we're hovering on the top or bottom half of the element
-      const element = e.currentTarget as HTMLElement;
-      const rect = element.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      const isTopHalf = y < rect.height / 2;
-      
-      // Set the visual indicator based on position
-      setDragOverStyle({
-        elementId: id,
-        dropPosition: isTopHalf ? 'top' : 'bottom'
-      });
-    }
+    dragOverItem.current = { index, id, type: 'question' };
   };
   
   // Add a new function for drag leave
@@ -603,6 +646,9 @@ export default function SurveyDesignContent() {
     setShowKpiTooltip(kpi === showKpiTooltip ? null : kpi);
   };
   
+  // Add tooltip position state
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  
   // Function to update tooltip position
   const updateTooltipPosition = (e: React.MouseEvent) => {
     setTooltipPosition({ 
@@ -649,111 +695,45 @@ export default function SurveyDesignContent() {
 
   // Function to handle drag start for options
   const handleOptionDragStart = (e: React.DragEvent, questionId: string, index: number, id: string) => {
-    // Add a smooth transition class to the dragged element
-    const element = e.currentTarget as HTMLElement;
-    element.classList.add('option-dragging');
+    dragItemOption.current = { index, id, type: 'option', questionId };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
     
-    // Store dragged item data
-    setDraggedItem({
-      index,
-      id,
-      type: 'option',
-      questionId
-    });
+    // Add opacity and scale effect for visual feedback
+    e.currentTarget.classList.add('opacity-70', 'transition-all', 'duration-200');
     
-    // Set a custom drag image for smoother appearance
-    const dragPreview = element.cloneNode(true) as HTMLElement;
-    dragPreview.style.width = `${element.offsetWidth}px`;
-    dragPreview.style.height = '60px'; // Reduced height for preview
-    dragPreview.style.opacity = '0.6';
-    dragPreview.style.position = 'absolute';
-    dragPreview.style.top = '-1000px';
-    dragPreview.style.backgroundColor = 'var(--accent-color-light)';
-    dragPreview.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-    dragPreview.style.border = '2px solid var(--accent-color)';
-    dragPreview.style.borderRadius = '6px';
-    dragPreview.style.zIndex = '9999';
-    document.body.appendChild(dragPreview);
+    // Add a ghost image that better represents the dragged item
+    const dragImage = e.currentTarget.cloneNode(true) as HTMLElement;
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    dragImage.style.opacity = '0.8';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 20, 20);
     
-    e.dataTransfer.setDragImage(dragPreview, 20, 20);
-    
-    // Clean up after a short delay
+    // Remove the clone after a short delay
     setTimeout(() => {
-      document.body.removeChild(dragPreview);
+      document.body.removeChild(dragImage);
     }, 0);
   };
   
   // Function to handle drag end for options
   const handleOptionDragEnd = (e: React.DragEvent) => {
-    const element = e.currentTarget as HTMLElement;
-    element.classList.remove('option-dragging');
-    
-    if (draggedItem && targetItem && draggedItem.id !== targetItem.id && 
-        draggedItem.type === 'option' && draggedItem.questionId === targetItem.questionId) {
-      
-      const questionIndex = questions.findIndex(q => q.id === draggedItem.questionId);
-      if (questionIndex !== -1) {
-        const updatedQuestions = [...questions];
-        const questionOptions = [...updatedQuestions[questionIndex].options];
-        const movedItem = questionOptions[draggedItem.index];
-        
-        // Remove the item from its original position
-        questionOptions.splice(draggedItem.index, 1);
-        
-        // Calculate the new position
-        const newIndex = targetItem.index > draggedItem.index ? targetItem.index - 1 : targetItem.index;
-        
-        // Insert at the new position
-        questionOptions.splice(newIndex, 0, movedItem);
-        
-        // Update the question with the reordered options
-        updatedQuestions[questionIndex] = {
-          ...updatedQuestions[questionIndex],
-          options: questionOptions
-        };
-        
-        setQuestions(updatedQuestions);
-      }
-    }
-    
-    // Reset state
-    setDraggedItem(null);
-    setTargetItem(null);
-    setDragOverStyle({});
+    e.currentTarget.classList.remove('opacity-70', 'transition-all', 'duration-200');
+    e.currentTarget.classList.add('transition-all', 'duration-300');
+    dragItemOption.current = null;
+    dragOverItemOption.current = null;
   };
   
   // Function to handle drag over for options
   const handleOptionDragOver = (e: React.DragEvent, questionId: string, index: number, id: string) => {
     e.preventDefault();
     
-    // Exit if dragging is not allowed (question expanded)
-    if (draggedItem && expandedQuestions[draggedItem.questionId!]) {
-      return;
+    // Highlight the drop target
+    if (dragOverItemOption.current?.id !== id) {
+      e.currentTarget.classList.add('bg-gray-50', 'transition-all', 'duration-200');
     }
     
-    if (!draggedItem || draggedItem.id === id) return;
-    
-    // Only show drop indicator if hovering over a different item
-    if (draggedItem.id !== id) {
-      setTargetItem({
-        index,
-        id,
-        type: 'option',
-        questionId
-      });
-      
-      // Calculate if we're hovering on the top or bottom half of the element
-      const element = e.currentTarget as HTMLElement;
-      const rect = element.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      const isTopHalf = y < rect.height / 2;
-      
-      // Set the visual indicator based on position
-      setDragOverStyle({
-        elementId: id,
-        dropPosition: isTopHalf ? 'top' : 'bottom'
-      });
-    }
+    dragOverItemOption.current = { index, id, type: 'option', questionId };
   };
   
   // Function to handle drag leave for options
@@ -883,24 +863,29 @@ export default function SurveyDesignContent() {
             {newQuestion.options.map((option, index) => (
               <div key={option.id} className="mb-3">
                 <div className="flex mb-2">
-                  <input 
-                    type="text" 
-                    className="flex-grow p-2 border border-[var(--divider-color)] rounded-l-md font-['Work_Sans'] text-[var(--primary-color)]" 
-                    placeholder="Type your answer"
-                    value={option.text}
-                    onChange={(e) => updateOptionText(option.id, e.target.value)}
-                  />
-                  <button 
-                    className="absolute top-2 left-2 bg-[var(--accent-color)] text-white rounded-full p-1 hover:opacity-90 transition-opacity"
-                    onClick={() => openGiphyModal(index)}
-                    title="Change GIF"
-                  >
-                    <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </button>
-                  <button 
+                  <div className="relative flex-grow">
+                    <input 
+                      type="text" 
+                      className="w-full p-2 border border-[var(--divider-color)] rounded-l-md font-['Work_Sans'] text-[var(--primary-color)]" 
+                      placeholder="Type your answer"
+                      value={option.text}
+                      onChange={(e) => updateOptionText(option.id, e.target.value)}
+                    />
+                    {option.text && (
+                      <button
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[var(--accent-color)] text-white rounded-full p-1.5 hover:opacity-90 transition-opacity"
+                        onClick={() => openGiphyModal(index)}
+                        title="Add GIF"
+                        aria-label="Add GIF"
+                      >
+                        <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  <button
                     className="bg-red-100 text-red-600 px-4 py-2 rounded-r-md hover:bg-red-200 flex items-center justify-center border-t border-r border-b border-[var(--divider-color)]"
                     onClick={() => removeOption(option.id)}
                   >
@@ -929,8 +914,17 @@ export default function SurveyDesignContent() {
                     </button>
                   </div>
                 ) : (
-                  <div className="aspect-square bg-gray-100 flex items-center justify-center w-full h-32 sm:h-40">
-                    <span className="text-[var(--secondary-color)]">No image</span>
+                  <div className="relative aspect-square flex items-center justify-center w-full h-32 sm:h-40 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all duration-200 rounded-md border border-dashed border-gray-300">
+                    <button 
+                      onClick={() => openGiphyModal(index)}
+                      className="flex flex-col items-center justify-center text-[var(--secondary-color)] w-full h-full"
+                    >
+                      <svg className="h-8 w-8 mb-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span className="text-sm">Add GIF</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -944,7 +938,7 @@ export default function SurveyDesignContent() {
               </svg>
               Add Option
             </button>
-          </div>
+        </div>
 
           {/* Predicted KPI */}
           <div className="mb-4">
@@ -1084,7 +1078,7 @@ export default function SurveyDesignContent() {
                     }}
                   >
                     <div className="font-semibold mb-1">Non-forced Choice</div>
-                    <div className="mb-1">Allows respondents to provide an answer like "None of the above".</div>
+                    <div className="mb-1">Allows respondents to skip questions without providing an answer.</div>
                     <div className="text-[var(--secondary-color)]">Useful for sensitive questions or when "None of the above" is a valid response.</div>
                   </div>
                 )}
@@ -1236,16 +1230,13 @@ export default function SurveyDesignContent() {
           {questions.map((question, index) => (
             <div 
               key={question.id} 
+              className="border border-[var(--divider-color)] rounded-lg overflow-hidden transition-all duration-300 hover:shadow-md"
               draggable
               onDragStart={(e) => handleDragStart(e, index, question.id)}
               onDragEnd={handleDragEnd}
               onDragOver={(e) => handleDragOver(e, index, question.id)}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`relative mb-6 p-4 pb-6 bg-white rounded-md shadow-sm border border-[var(--divider-color)] transition-all duration-300
-                ${dragOverStyle.elementId === question.id && dragOverStyle.dropPosition === 'top' ? 'drag-over-top' : ''}
-                ${dragOverStyle.elementId === question.id && dragOverStyle.dropPosition === 'bottom' ? 'drag-over-bottom' : ''}
-              `}
             >
               <div 
                 className="flex items-center p-4 border-b border-[var(--divider-color)] bg-gray-50 cursor-pointer"
@@ -1304,8 +1295,8 @@ export default function SurveyDesignContent() {
                           <svg className="h-4 w-4 text-[var(--secondary-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
                           </svg>
-                        </span>
-                      </div>
+                  </span>
+                </div>
                       
                       {/* KPI Tooltip with higher z-index - moved outside the parent elements */}
                       {showKpiTooltip === `kpi-${question.id}` && (
@@ -1372,7 +1363,7 @@ export default function SurveyDesignContent() {
                           }}
                           aria-label="Edit question title"
                         />
-                      </div>
+                    </div>
                       <div>
                         <div className="relative">
                           <select 
@@ -1408,12 +1399,13 @@ export default function SurveyDesignContent() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {question.options.map((option, optionIndex) => (
                         <div 
-                          key={option.id}
-                          className={`flex items-center border border-[var(--divider-color)] p-3 rounded-md mb-2 bg-white relative group hover:border-[var(--accent-color)] transition-all duration-300
-                            ${dragOverStyle.elementId === option.id && dragOverStyle.dropPosition === 'top' ? 'drag-over-top' : ''}
-                            ${dragOverStyle.elementId === option.id && dragOverStyle.dropPosition === 'bottom' ? 'drag-over-bottom' : ''}
-                            ${isOptionSelected(question.id, option.id) ? 'border-[var(--accent-color)] bg-[var(--accent-color-light)]' : ''}
-                          `}
+                          key={option.id} 
+                          className={`relative cursor-pointer transition-all duration-300 transform hover:scale-105 rounded-lg overflow-hidden ${
+                            isOptionSelected(question.id, option.id) 
+                              ? 'ring-2 ring-[var(--accent-color)] border-transparent shadow-md' 
+                              : 'border border-[var(--divider-color)] hover:shadow-md'
+                          }`}
+                          onClick={() => toggleAnswerSelection(question.id, option.id)}
                           draggable
                           onDragStart={(e) => handleOptionDragStart(e, question.id, optionIndex, option.id)}
                           onDragEnd={handleOptionDragEnd}
@@ -1447,11 +1439,11 @@ export default function SurveyDesignContent() {
                                   <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                   </svg>
-                                </div>
-                              )}
-                              
+                </div>
+              )}
+
                               {/* Improved GIF change button - moved to bottom corner to avoid overlap */}
-                              <button 
+                    <button
                                 className="absolute bottom-2 right-2 bg-[var(--accent-color)] text-white rounded-full p-1.5 hover:opacity-90 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-md"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1464,26 +1456,22 @@ export default function SurveyDesignContent() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                              </button>
+                    </button>
                             </div>
                           ) : (
-                            <div className="aspect-square bg-gray-100 flex items-center justify-center w-full h-32 sm:h-40 hover:bg-gray-200 transition-all duration-300 relative group">
-                              <span className="text-[var(--secondary-color)]">No image</span>
-                              
-                              {/* Add GIF button for empty state */}
+                            <div className="aspect-square flex items-center justify-center w-full h-32 sm:h-40 cursor-pointer hover:bg-gray-100 transition-all duration-300 relative group bg-gray-50 border border-dashed border-gray-300 rounded-md">
                               <button 
-                                className="absolute bottom-2 right-2 bg-[var(--accent-color)] text-white rounded-full p-1.5 hover:opacity-90 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-md"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   changeOptionGif(question.id, option.id);
                                 }}
-                                title="Add GIF"
-                                aria-label="Add GIF"
+                                className="flex flex-col items-center justify-center text-[var(--secondary-color)] w-full h-full"
                               >
-                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <svg className="h-8 w-8 mb-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
+                                <span className="text-sm">Add GIF</span>
                               </button>
                             </div>
                           )}
@@ -1597,7 +1585,7 @@ export default function SurveyDesignContent() {
                             }}
                           >
                             <div className="font-semibold mb-1">Non-forced Choice</div>
-                            <div className="mb-1">Allows respondents to provide an answer like "None of the above".</div>
+                            <div className="mb-1">Allows respondents to skip questions without providing an answer.</div>
                             <div className="text-[var(--secondary-color)]">Useful for sensitive questions or when "None of the above" is a valid response.</div>
                           </div>
                         )}
@@ -1611,19 +1599,14 @@ export default function SurveyDesignContent() {
         </div>
         
         {/* Submit Buttons */}
-        <div className="mt-8 flex justify-end items-center">
-          <div className="mr-4 text-[var(--secondary-color)] font-medium font-['Work_Sans']">
-            <span className="text-[var(--accent-color)]">{questions.length}</span>
-            <span> / 10</span>
-            <span className="ml-2 text-sm">Questions</span>
-          </div>
+        <div className="mt-8 flex justify-end">
           <button 
             onClick={handlePreview}
             className="px-6 py-2 bg-[var(--accent-color)] text-white rounded-md font-medium font-['Work_Sans'] hover:opacity-90 transition-opacity"
           >
             Preview & Submit
           </button>
-        </div>
+      </div>
       </div>
 
       {/* Giphy Search Modal */}
@@ -1810,32 +1793,6 @@ export default function SurveyDesignContent() {
           z-index: 9999 !important;
           pointer-events: none;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        /* Existing styles */
-        
-        .dragging {
-          opacity: 0.5;
-          transform: scale(0.98);
-          transition: transform 0.1s ease;
-        }
-        
-        .option-dragging {
-          opacity: 0.5;
-          transform: scale(0.98);
-          transition: transform 0.1s ease;
-        }
-        
-        .drag-over-top {
-          border-top: 3px solid var(--accent-color);
-          margin-top: -3px;
-          transition: all 0.2s ease;
-        }
-        
-        .drag-over-bottom {
-          border-bottom: 3px solid var(--accent-color);
-          margin-bottom: -3px;
-          transition: all 0.2s ease;
         }
       `}</style>
     </div>
