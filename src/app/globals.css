@@ -289,3 +289,185 @@ main,
   color: var(--accent-color);
   margin-left: 8px;
 }
+
+/* =========================================================================
+   App Icons and Navigation Elements
+   ========================================================================= */
+
+/* 
+ * This section provides styling for application icons used throughout the
+ * interface for navigation, feature indicators, and UI elements.
+ */
+
+/* Common styling for all app icons */
+.app-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.app-icon-large {
+  width: 32px;
+  height: 32px;
+}
+
+.app-icon-active {
+  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%);
+}
+
+/* 
+ * Icon: Home
+ * SVG: /Home.svg
+ * Purpose: Main dashboard/home navigation
+ */
+.icon-home {
+  background-image: url('/Home.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Campaigns
+ * SVG: /Campaigns.svg
+ * Purpose: Campaign management and overview
+ */
+.icon-campaigns {
+  background-image: url('/Campaigns.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Brand Lift
+ * SVG: /Brand_Lift.svg
+ * Purpose: Brand lift studies and metrics
+ */
+.icon-brand-lift {
+  background-image: url('/Brand_Lift.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Brand Health
+ * SVG: /Brand_Health.svg
+ * Purpose: Brand health monitoring and metrics
+ */
+.icon-brand-health {
+  background-image: url('/Brand_Health.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Creative Asset Testing
+ * SVG: /Creative_Asset_Testing.svg
+ * Purpose: Testing and analysis of creative assets
+ */
+.icon-creative-testing {
+  background-image: url('/Creative_Asset_Testing.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: MMM (Marketing Mix Modeling)
+ * SVG: /MMM.svg
+ * Purpose: Marketing mix modeling analytics
+ */
+.icon-mmm {
+  background-image: url('/MMM.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Influencers
+ * SVG: /Influencers.svg
+ * Purpose: Influencer marketing and management
+ */
+.icon-influencers {
+  background-image: url('/Influencers.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Reports
+ * SVG: /Reports.svg
+ * Purpose: Analytics and reporting dashboards
+ */
+.icon-reports {
+  background-image: url('/Reports.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Billing
+ * SVG: /Billing.svg
+ * Purpose: Billing and subscription management
+ */
+.icon-billing {
+  background-image: url('/Billing.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Settings
+ * SVG: /Settings.svg
+ * Purpose: Application and user settings
+ */
+.icon-settings {
+  background-image: url('/Settings.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 
+ * Icon: Help
+ * SVG: /Help.svg
+ * Purpose: Help resources and documentation
+ */
+.icon-help {
+  background-image: url('/Help.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Navigation item styling */
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: rgba(0, 191, 255, 0.1);
+}
+
+.nav-item-active {
+  background-color: rgba(0, 191, 255, 0.15);
+  font-weight: 500;
+}
+
+.nav-item-text {
+  margin-left: 8px;
+}
