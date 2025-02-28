@@ -158,7 +158,7 @@ export default function SurveyDesignContent() {
       id: '3',
       title: 'how did the ad make you feel about the brand?',
       type: 'Single Choice',
-      kpi: 'Boost Brand Awareness',
+      kpi: 'Brand Awareness',
       options: [
         { id: '3-1', text: 'very positive', image: 'https://media1.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif' },
         { id: '3-2', text: 'somewhat positive', image: 'https://media2.giphy.com/media/l0MYyDa8S9ghzNebm/giphy.gif' },
@@ -171,7 +171,7 @@ export default function SurveyDesignContent() {
       id: '4',
       title: 'how likely are you to choose this brand over others based on the ad?',
       type: 'Single Choice',
-      kpi: 'Grow Brand Preference',
+      kpi: 'Brand Preference',
       options: [
         { id: '4-1', text: 'very likely', image: 'https://media2.giphy.com/media/3oriO13KTkzPwTykp2/giphy.gif' },
         { id: '4-2', text: 'somewhat likely', image: 'https://media3.giphy.com/media/l0HlQXkq1fhBYJ7Gg/giphy.gif' },
@@ -184,7 +184,7 @@ export default function SurveyDesignContent() {
       id: '5',
       title: 'what would be your next step after seeing this ad?',
       type: 'Single Choice',
-      kpi: 'Motivate Action',
+      kpi: 'Action Intent',
       options: [
         { id: '5-1', text: 'look up more information about the product', image: 'https://media2.giphy.com/media/l0HlOBZcl7sbV6LnO/giphy.gif' },
         { id: '5-2', text: 'visit the brand website', image: 'https://media0.giphy.com/media/3oKIPzLXQYb2Bn5PLG/giphy.gif' },
@@ -266,7 +266,7 @@ export default function SurveyDesignContent() {
     options: [{ id: '1', text: '', image: null as string | null }]
   });
   
-  const [questionKpi, setQuestionKpi] = useState('Boost Brand Awareness');
+  const [questionKpi, setQuestionKpi] = useState('Brand Awareness');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [giphySearchTerm, setGiphySearchTerm] = useState('');
   const [giphyResults, setGiphyResults] = useState<GiphyResult[]>([]);
@@ -588,7 +588,7 @@ export default function SurveyDesignContent() {
       type: 'Multiple Choice' as 'Multiple Choice' | 'Single Choice',
       options: [{ id: '1', text: '', image: null as string | null }]
     });
-    setQuestionKpi('Boost Brand Awareness');
+    setQuestionKpi('Brand Awareness');
     setEditingQuestion(null);
   };
 
@@ -981,17 +981,16 @@ export default function SurveyDesignContent() {
               value={questionKpi}
               onChange={(e) => setQuestionKpi(e.target.value)}
             >
-              <option>Boost Brand Awareness</option>
-              <option>Maximize Ad Recall</option>
-              <option>Grow Brand Preference</option>
               <option>Brand Awareness</option>
               <option>Ad Recall</option>
+              <option>Consideration</option>
               <option>Message Association</option>
-              <option>Brand Perception</option>
-              <option>Recommendation Intent</option>
-              <option>Purchase Intent</option>
               <option>Brand Preference</option>
-              <option>Motivate Action</option>
+              <option>Purchase Intent</option>
+              <option>Action Intent</option>
+              <option>Recommendation Intent</option>
+              <option>Brand Perception</option>
+              <option>Advocacy</option>
             </select>
           </div>
 
@@ -1123,7 +1122,7 @@ export default function SurveyDesignContent() {
                 onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
-                Boost Brand Awareness
+                Brand Awareness
               </span>
               {showKpiTooltip === 'brand-awareness' && (
                 <div 
@@ -1150,7 +1149,7 @@ export default function SurveyDesignContent() {
                 onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
-                Maximize Ad Recall
+                Ad Recall
               </span>
               {showKpiTooltip === 'ad-recall' && (
                 <div 
@@ -1177,7 +1176,7 @@ export default function SurveyDesignContent() {
                 onMouseMove={updateTooltipPosition}
                 onMouseLeave={() => toggleKpiTooltip(null)}
               >
-                Grow Brand Preference
+                Brand Preference
               </span>
             </span>
             {showKpiTooltip === 'brand-preference' && (
