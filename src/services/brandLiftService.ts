@@ -1,5 +1,6 @@
 import { SurveyPreviewData, SurveyResponses, ValidationErrors } from '@/types/brandLift';
 import { Platform, KPI, CreativeAssetType } from '@prisma/client';
+import { mapCampaignToSurveyData as mapperUtil } from '@/utils/surveyMappers';
 
 /**
  * API Service layer for Brand Lift surveys
@@ -96,33 +97,174 @@ export class BrandLiftService {
   }
 
   /**
-   * Fetch survey preview data for a specific campaign
-   * @param campaignId - The ID of the campaign
+   * Creates survey questions based on campaign KPIs
+   * @param primaryKPI - The primary KPI of the campaign
+   * @param secondaryKPIs - The secondary KPIs of the campaign
+   * @param brandName - The brand name for question text
+   * @returns Array of survey questions
+   */
+  private generateQuestionsFromKPIs(primaryKPI: KPI, secondaryKPIs: KPI[] = [], brandName: string): SurveyPreviewData['questions'] {
+    const questions: SurveyPreviewData['questions'] = [];
+    const allKPIs = [primaryKPI, ...secondaryKPIs];
+    const processedKPIs = new Set<KPI>();
+    
+    // Process each KPI only once
+    allKPIs.forEach(kpi => {
+      if (processedKPIs.has(kpi)) return;
+      processedKPIs.add(kpi);
+      
+      // Generate question based on KPI type
+      switch(kpi) {
+        case KPI.brandAwareness:
+          questions.push({
+            id: `q-${kpi}`,
+            title: `Have you heard of ${brandName} before seeing this ad?`,
+            type: "Single Choice",
+            kpi: kpi,
+            options: [
+              { id: `q-${kpi}-o1`, text: "Yes, I know the brand well", image: "https://placehold.co/400x300/4CAF50/FFFFFF?text=Know+Well" },
+              { id: `q-${kpi}-o2`, text: "Yes, I've heard of it", image: "https://placehold.co/400x300/8BC34A/FFFFFF?text=Heard+Of+It" },
+              { id: `q-${kpi}-o3`, text: "No, I've never heard of it", image: "https://placehold.co/400x300/F44336/FFFFFF?text=Never+Heard" }
+            ],
+            required: true
+          });
+          break;
+        case KPI.adRecall:
+          questions.push({
+            id: `q-${kpi}`,
+            title: "Do you recall seeing this specific ad recently?",
+            type: "Single Choice",
+            kpi: kpi,
+            options: [
+              { id: `q-${kpi}-o1`, text: "Yes, definitely", image: "https://placehold.co/400x300/4CAF50/FFFFFF?text=Definitely" },
+              { id: `q-${kpi}-o2`, text: "Yes, I think so", image: "https://placehold.co/400x300/8BC34A/FFFFFF?text=Think+So" },
+              { id: `q-${kpi}-o3`, text: "No, I don't think so", image: "https://placehold.co/400x300/FFC107/FFFFFF?text=Don't+Think+So" },
+              { id: `q-${kpi}-o4`, text: "No, definitely not", image: "https://placehold.co/400x300/F44336/FFFFFF?text=Definitely+Not" }
+            ],
+            required: true
+          });
+          break;
+        case KPI.consideration:
+          questions.push({
+            id: `q-${kpi}`,
+            title: `After seeing this ad, how likely are you to consider ${brandName} products?`,
+            type: "Single Choice",
+            kpi: kpi,
+            options: [
+              { id: `q-${kpi}-o1`, text: "Very likely", image: "https://placehold.co/400x300/4CAF50/FFFFFF?text=Very+Likely" },
+              { id: `q-${kpi}-o2`, text: "Somewhat likely", image: "https://placehold.co/400x300/8BC34A/FFFFFF?text=Somewhat+Likely" },
+              { id: `q-${kpi}-o3`, text: "Neither likely nor unlikely", image: "https://placehold.co/400x300/9E9E9E/FFFFFF?text=Neutral" },
+              { id: `q-${kpi}-o4`, text: "Somewhat unlikely", image: "https://placehold.co/400x300/FF9800/FFFFFF?text=Somewhat+Unlikely" },
+              { id: `q-${kpi}-o5`, text: "Very unlikely", image: "https://placehold.co/400x300/F44336/FFFFFF?text=Very+Unlikely" }
+            ],
+            required: true
+          });
+          break;
+        case KPI.messageAssociation:
+          questions.push({
+            id: `q-${kpi}`,
+            title: `What message do you associate with ${brandName} after seeing this ad?`,
+            type: "Single Choice",
+            kpi: kpi,
+            options: [
+              { id: `q-${kpi}-o1`, text: "Quality", image: "https://placehold.co/400x300/4CAF50/FFFFFF?text=Quality" },
+              { id: `q-${kpi}-o2`, text: "Innovation", image: "https://placehold.co/400x300/8BC34A/FFFFFF?text=Innovation" },
+              { id: `q-${kpi}-o3`, text: "Value", image: "https://placehold.co/400x300/9E9E9E/FFFFFF?text=Value" },
+              { id: `q-${kpi}-o4`, text: "Sustainability", image: "https://placehold.co/400x300/FF9800/FFFFFF?text=Sustainability" },
+              { id: `q-${kpi}-o5`, text: "Reliability", image: "https://placehold.co/400x300/F44336/FFFFFF?text=Reliability" }
+            ],
+            required: true
+          });
+          break;
+        case KPI.purchaseIntent:
+          questions.push({
+            id: `q-${kpi}`,
+            title: `How likely are you to purchase from ${brandName} in the next month?`,
+            type: "Single Choice",
+            kpi: kpi,
+            options: [
+              { id: `q-${kpi}-o1`, text: "Definitely will purchase", image: "https://placehold.co/400x300/4CAF50/FFFFFF?text=Definitely" },
+              { id: `q-${kpi}-o2`, text: "Probably will purchase", image: "https://placehold.co/400x300/8BC34A/FFFFFF?text=Probably" },
+              { id: `q-${kpi}-o3`, text: "Might or might not purchase", image: "https://placehold.co/400x300/9E9E9E/FFFFFF?text=Maybe" },
+              { id: `q-${kpi}-o4`, text: "Probably will not purchase", image: "https://placehold.co/400x300/FF9800/FFFFFF?text=Probably+Not" },
+              { id: `q-${kpi}-o5`, text: "Definitely will not purchase", image: "https://placehold.co/400x300/F44336/FFFFFF?text=Definitely+Not" }
+            ],
+            required: true
+          });
+          break;
+        // Add other KPI types as needed
+        default:
+          // Default question for other KPIs
+          questions.push({
+            id: `q-${kpi}`,
+            title: `How would you rate ${brandName} based on this ad?`,
+            type: "Single Choice",
+            kpi: kpi,
+            options: [
+              { id: `q-${kpi}-o1`, text: "Excellent", image: "https://placehold.co/400x300/4CAF50/FFFFFF?text=Excellent" },
+              { id: `q-${kpi}-o2`, text: "Good", image: "https://placehold.co/400x300/8BC34A/FFFFFF?text=Good" },
+              { id: `q-${kpi}-o3`, text: "Average", image: "https://placehold.co/400x300/9E9E9E/FFFFFF?text=Average" },
+              { id: `q-${kpi}-o4`, text: "Poor", image: "https://placehold.co/400x300/FF9800/FFFFFF?text=Poor" },
+              { id: `q-${kpi}-o5`, text: "Very Poor", image: "https://placehold.co/400x300/F44336/FFFFFF?text=Very+Poor" }
+            ],
+            required: true
+          });
+      }
+    });
+    
+    return questions;
+  }
+
+  /**
    * @returns Promise with survey preview data
    */
   public async getSurveyPreviewData(campaignId: string): Promise<SurveyPreviewData> {
     try {
-      // In development mode, use mock data to avoid API dependency
-      if (this.useMockData) {
-        console.log('Using mock data for survey preview');
-        return this.getMockSurveyData(campaignId);
-      }
-
-      const response = await fetch(`${this.baseUrl}/survey-preview?id=${campaignId}`);
+      // First, try to get real campaign data from the campaigns API
+      console.log('Fetching campaign data for survey preview:', campaignId);
+      const campaignResponse = await fetch(`/api/campaigns/${campaignId}`);
       
-      if (!response.ok) {
-        console.warn(`API error: ${response.status} ${response.statusText}. Falling back to mock data.`);
-        return this.getMockSurveyData(campaignId);
+      if (campaignResponse.ok) {
+        const campaignData = await campaignResponse.json();
+        console.log('Campaign data received:', JSON.stringify(campaignData, null, 2));
+        console.log('Campaign startDate:', campaignData.startDate, typeof campaignData.startDate);
+        
+        // Map campaign data to survey preview data using utility function
+        const fallbackData = this.getMockSurveyData(campaignId);
+        const surveyData = mapperUtil(campaignData, fallbackData);
+        return this.ensureValidSurveyData(surveyData, campaignId);
       }
       
-      // Parse the response and add safeguards
-      const data = await response.json();
-      return this.ensureValidSurveyData(data, campaignId);
+      console.warn(`Campaign API error: ${campaignResponse.status}. Trying brand-lift specific API.`);
+      
+      // If campaign API fails, try the brand-lift specific API
+      const brandLiftResponse = await fetch(`${this.baseUrl}/survey-preview?id=${campaignId}`);
+      
+      if (brandLiftResponse.ok) {
+        const data = await brandLiftResponse.json();
+        return this.ensureValidSurveyData(data, campaignId);
+      }
+      
+      console.warn(`API error: ${brandLiftResponse.status}. Falling back to mock data.`);
+      return this.getMockSurveyData(campaignId);
     } catch (error) {
       console.error('Error fetching survey preview data:', error);
       console.warn('Falling back to mock data due to API error');
       return this.getMockSurveyData(campaignId);
     }
+  }
+
+  /**
+   * Maps campaign data from the campaigns API to the survey preview format
+   * @param campaignData - The campaign data from the API
+   * @param campaignId - The campaign ID
+   * @returns Mapped survey preview data
+   * @deprecated Use the utility function from @/utils/surveyMappers instead
+   */
+  private mapCampaignToSurveyData(campaignData: any, campaignId: string): SurveyPreviewData {
+    console.warn('Using deprecated mapping function. Use mapCampaignToSurveyData from @/utils/surveyMappers instead.');
+    const fallbackData = this.getMockSurveyData(campaignId);
+    return mapperUtil(campaignData, fallbackData);
   }
 
   /**
