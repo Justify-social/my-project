@@ -134,35 +134,23 @@ export default function CreativePreview({
 }: CreativePreviewProps) {
   const config = platformConfig[platform as keyof typeof platformConfig] || platformConfig.Instagram;
   
-  // Calculate the effective aspect ratio - default to 1:1 if not specified
-  const aspectRatio = creative.aspectRatio || '1:1';
-  const [width, height] = aspectRatio.split(':').map(Number);
-  const aspectRatioClass = width > height 
-    ? 'aspect-[16/9]' 
-    : width === height 
-      ? 'aspect-square' 
-      : 'aspect-[9/16]';
+  const aspectRatioClass = 'aspect-[9/16]'; // Enforce 9:16 for short-form video platforms
 
-  // Handler for platform switching
   const handlePlatformClick = (platformName: string) => {
-    const event = new CustomEvent('platformChange', { 
-      detail: { platform: platformName } 
-    });
+    const event = new CustomEvent('platformChange', { detail: { platform: platformName } });
     window.dispatchEvent(event);
   };
 
-  // Type guard functions to help TypeScript understand the config type
   const isInstagram = (config: any): config is InstagramConfig => platform === 'Instagram';
   const isTikTok = (config: any): config is TikTokConfig => platform === 'TikTok';
+  const isYouTube = (config: any): config is YoutubeConfig => platform === 'YouTube';
   
-  // Render Instagram content with proper type checking
   const renderInstagramContent = () => {
-    // We know we're dealing with Instagram config
     const instagramConfig = config as InstagramConfig;
-    
+    const fallbackImage = '/images/placeholder-video.jpg'; // Ensure this exists in public/images/
+
     return (
       <>
-        {/* Instagram top bar with stories */}
         <div className="px-2 pt-1 border-b border-gray-200">
           <div className="flex justify-between items-center py-2">
             <div className="flex items-center">
@@ -181,7 +169,6 @@ export default function CreativePreview({
             </div>
           </div>
           
-          {/* Stories bar */}
           {instagramConfig.hasStories && (
             <div className="py-2 overflow-x-auto flex space-x-3 scrollbar-hide">
               <div className="flex flex-col items-center">
@@ -189,12 +176,11 @@ export default function CreativePreview({
                   <div className="bg-white p-[2px] rounded-full w-full h-full">
                     <div className="bg-gray-200 rounded-full w-full h-full overflow-hidden">
                       {brandLogo ? (
-                        <Image 
-                          src={brandLogo} 
-                          alt={`${brandName} story`} 
-                          width={56} 
-                          height={56} 
-                          className="w-full h-full object-cover"
+                        <Image
+                          src={brandLogo}
+                          alt={`${brandName} story`}
+                          fill
+                          style={{ objectFit: 'cover' }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
@@ -206,9 +192,7 @@ export default function CreativePreview({
                 </div>
                 <span className="text-xs mt-1 truncate w-14 text-center">{brandName}</span>
               </div>
-              
-              {/* More fake stories */}
-              {Array.from({length: 4}).map((_, i) => (
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex flex-col items-center">
                   <div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 to-pink-600">
                     <div className="bg-white p-[2px] rounded-full w-full h-full">
@@ -222,16 +206,14 @@ export default function CreativePreview({
           )}
         </div>
         
-        {/* Post header */}
         <div className="px-3 py-2 flex items-center space-x-2 border-b border-gray-100">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
             {brandLogo ? (
-              <Image 
-                src={brandLogo} 
-                alt={`${brandName} logo`} 
-                width={32} 
-                height={32} 
-                className="w-full h-full object-cover"
+              <Image
+                src={brandLogo}
+                alt={`${brandName} logo`}
+                fill
+                style={{ objectFit: 'cover' }}
               />
             ) : (
               <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white font-bold">
@@ -253,25 +235,36 @@ export default function CreativePreview({
           </svg>
         </div>
         
-        {/* Creative content */}
         <div className={`flex-1 ${aspectRatioClass} overflow-hidden bg-gray-100 relative`}>
           {creative.type === videoType ? (
-            <video 
-              src={creative.url} 
+            <video
+              src={creative.url}
               controls={false}
               autoPlay
               loop
               muted
               playsInline
               className="w-full h-full object-cover"
-            />
+              onError={(e) => {
+                console.error('Video failed to load:', creative.url);
+                const videoElement = e.target as HTMLVideoElement;
+                videoElement.style.display = 'none';
+                const fallbackImg = document.createElement('img');
+                fallbackImg.src = fallbackImage;
+                fallbackImg.className = 'w-full h-full object-cover';
+                fallbackImg.alt = 'Fallback creative asset';
+                videoElement.parentElement?.appendChild(fallbackImg);
+              }}
+            >
+              <source src={creative.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           ) : creative.type === imageType ? (
-            <Image 
-              src={creative.url} 
-              alt="Creative asset" 
-              width={300} 
-              height={300} 
-              className="w-full h-full object-cover"
+            <Image
+              src={creative.url}
+              alt="Creative asset"
+              fill
+              style={{ objectFit: 'cover' }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
@@ -280,7 +273,6 @@ export default function CreativePreview({
           )}
         </div>
         
-        {/* Action buttons */}
         <div className="px-2 py-2 flex justify-between items-center">
           <div className="flex space-x-4">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -298,14 +290,11 @@ export default function CreativePreview({
           </svg>
         </div>
         
-        {/* Caption section */}
         {(caption || hashtags) && (
           <div className="px-3 py-2 max-h-20 overflow-y-auto">
             <p className="text-xs text-gray-800">
               <span className="font-semibold">{brandName}</span> {caption}
-              {hashtags && (
-                <span className="text-blue-500"> {hashtags}</span>
-              )}
+              {hashtags && <span className="text-blue-500"> {hashtags}</span>}
             </p>
             {music && (
               <p className="text-xs mt-1 text-gray-500">
@@ -320,7 +309,6 @@ export default function CreativePreview({
           </div>
         )}
         
-        {/* Instagram bottom navigation */}
         <div className="px-4 py-3 mt-auto border-t border-gray-200 flex justify-between">
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9.005 16.545a2.997 2.997 0 012.997-2.997h0A2.997 2.997 0 0115 16.545V22h7V11.543L12 2 2 11.543V22h7.005z" />
@@ -342,14 +330,12 @@ export default function CreativePreview({
     );
   };
 
-  // Render TikTok content with proper type checking
   const renderTikTokContent = () => {
-    // We know we're dealing with TikTok config
     const tikTokConfig = config as TikTokConfig;
-    
+    const fallbackImage = '/images/placeholder-video.jpg'; // Ensure this exists in public/images/
+
     return (
       <>
-        {/* TikTok top navigation */}
         <div className="px-2 pt-2 flex justify-center">
           {tikTokConfig.navigationItems && (
             <div className="flex space-x-4">
@@ -363,25 +349,36 @@ export default function CreativePreview({
           )}
         </div>
 
-        {/* Creative content */}
         <div className={`flex-1 ${aspectRatioClass} overflow-hidden relative`}>
           {creative.type === videoType ? (
-            <video 
-              src={creative.url} 
+            <video
+              src={creative.url}
               controls={false}
               autoPlay
               loop
               muted
               playsInline
               className="w-full h-full object-cover"
-            />
+              onError={(e) => {
+                console.error('Video failed to load:', creative.url);
+                const videoElement = e.target as HTMLVideoElement;
+                videoElement.style.display = 'none';
+                const fallbackImg = document.createElement('img');
+                fallbackImg.src = fallbackImage;
+                fallbackImg.className = 'w-full h-full object-cover';
+                fallbackImg.alt = 'Fallback creative asset';
+                videoElement.parentElement?.appendChild(fallbackImg);
+              }}
+            >
+              <source src={creative.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           ) : creative.type === imageType ? (
-            <Image 
-              src={creative.url} 
-              alt="Creative asset" 
-              width={300} 
-              height={300} 
-              className="w-full h-full object-cover"
+            <Image
+              src={creative.url}
+              alt="Creative asset"
+              fill
+              style={{ objectFit: 'cover' }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
@@ -389,96 +386,90 @@ export default function CreativePreview({
             </div>
           )}
 
-          {/* Right side icons for TikTok */}
-          {platform === 'TikTok' && (
-            <div className="absolute right-2 bottom-20 flex flex-col items-center space-y-4">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[0] || '250K'}</span>
+          <div className="absolute right-2 bottom-20 flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                  </svg>
-                </div>
-                <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[1] || '100K'}</span>
-              </div>
-              
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2a1 1 0 0 1 .7.3l9 9a1 1 0 0 1-1.4 1.4L12 4.42l-8.3 8.28a1 1 0 1 1-1.4-1.42l9-9A1 1 0 0 1 12 2z"/>
-                    <path d="M12 2a1 1 0 0 1 1 1v10a1 1 0 0 1-2 0V3a1 1 0 0 1 1-1z" />
-                    <path d="M3 14a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/>
-                  </svg>
-                </div>
-                <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[2] || '85K'}</span>
-              </div>
-              
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
-                  {brandLogo ? (
-                    <Image 
-                      src={brandLogo} 
-                      alt={`${brandName} logo`} 
-                      width={40} 
-                      height={40} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                      {brandName.substring(0, 1)}
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[3] || '132K'}</span>
-              </div>
+              <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[0] || '250K'}</span>
             </div>
-          )}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+              </div>
+              <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[1] || '100K'}</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2a1 1 0 0 1 .7.3l9 9a1 1 0 0 1-1.4 1.4L12 4.42l-8.3 8.28a1 1 0 1 1-1.4-1.42l9-9A1 1 0 0 1 12 2z"/>
+                  <path d="M12 2a1 1 0 0 1 1 1v10a1 1 0 0 1-2 0V3a1 1 0 0 1 1-1z" />
+                  <path d="M3 14a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/>
+                </svg>
+              </div>
+              <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[2] || '85K'}</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+                {brandLogo ? (
+                  <Image
+                    src={brandLogo}
+                    alt={`${brandName} logo`}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                    {brandName.substring(0, 1)}
+                  </div>
+                )}
+              </div>
+              <span className="text-xs font-semibold mt-1 text-white">{tikTokConfig.counterLabels?.[3] || '132K'}</span>
+            </div>
+          </div>
 
-          {/* Caption overlay for TikTok */}
-          {platform === 'TikTok' && (
-            <div className="absolute left-2 right-20 bottom-20 text-white">
-              <p className="text-sm font-semibold mb-1">@{brandName}</p>
-              <p className="text-xs mb-2">{caption} {hashtags && <span className="text-white">{hashtags}</span>}</p>
-              {music && (
-                <div className="flex items-center mt-2">
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                  </svg>
-                  <p className="text-xs">{music}</p>
-                </div>
-              )}
-              {tikTokConfig.showTranslation && (
-                <div className="mt-2 text-xs flex items-center">
+          <div className="absolute left-2 right-20 bottom-20 text-white">
+            <p className="text-sm font-semibold mb-1">@{brandName}</p>
+            <p className="text-xs mb-2">{caption} {hashtags && <span className="text-white">{hashtags}</span>}</p>
+            {music && (
+              <div className="flex items-center mt-2">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+                <p className="text-xs">{music}</p>
+              </div>
+            )}
+            {tikTokConfig.showTranslation && (
+              <div className="mt-2 text-xs flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.4-1.422 17.087 17.087 0 003.13-3.733 17.086 17.086 0 00-3.13-3.733 1 1 0 011.4-1.422 19.098 19.098 0 013.107 3.567c.181-.204.366-.404.554-.6a1 1 0 111.44 1.389 18.87 18.87 0 01-.914 1.026 18.87 18.87 0 011.724 4.78H15a1 1 0 110 2h-3v1a1 1 0 11-2 0v-1H7a1 1 0 110-2h3.422a18.87 18.87 0 01-1.724-4.78c-.29-.354-.596-.696-.914-1.026a1 1 0 111.44-1.389c.188.196.373.396.554.6a19.098 19.098 0 013.107-3.567 1 1 0 111.4 1.422 17.087 17.087 0 00-3.13 3.733 17.086 17.086 0 003.13 3.733 1 1 0 01-1.4 1.422 19.098 19.098 0 01-3.107-3.567c-.181.204-.366.404-.554.6a1 1 0 11-1.44-1.389c.32-.33.624-.672.914-1.026a18.87 18.87 0 01-1.724-4.78H7a1 1 0 01-1-1V3a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Show translation
+              </div>
+            )}
+            {tikTokConfig.songInfo && (
+              <div className="mt-2 bg-black bg-opacity-50 text-xs inline-block py-1 px-2 rounded-md">
+                <p className="flex items-center">
                   <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.4-1.422 17.087 17.087 0 003.13-3.733 17.086 17.086 0 00-3.13-3.733 1 1 0 011.4-1.422 19.098 19.098 0 013.107 3.567c.181-.204.366-.404.554-.6a1 1 0 111.44 1.389 18.87 18.87 0 01-.914 1.026 18.87 18.87 0 011.724 4.78H15a1 1 0 110 2h-3v1a1 1 0 11-2 0v-1H7a1 1 0 110-2h3.422a18.87 18.87 0 01-1.724-4.78c-.29-.354-.596-.696-.914-1.026a1 1 0 111.44-1.389c.188.196.373.396.554.6a19.098 19.098 0 013.107-3.567 1 1 0 111.4 1.422 17.087 17.087 0 00-3.13 3.733 17.086 17.086 0 003.13 3.733 1 1 0 01-1.4 1.422 19.098 19.098 0 01-3.107-3.567c-.181.204-.366.404-.554.6a1 1 0 11-1.44-1.389c.32-.33.624-.672.914-1.026a18.87 18.87 0 01-1.724-4.78H7a1 1 0 01-1-1V3a1 1 0 011-1z" clipRule="evenodd" />
+                    <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
                   </svg>
-                  Show translation
-                </div>
-              )}
-              {tikTokConfig.songInfo && (
-                <div className="mt-2 bg-black bg-opacity-50 text-xs inline-block py-1 px-2 rounded-md">
-                  <p className="flex items-center">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
-                    </svg>
-                    {tikTokConfig.songInfo}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+                  {tikTokConfig.songInfo}
+                </p>
+              </div>
+            )}
+            <button className="mt-2 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M6 4l8 4-8 4V4z" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* TikTok bottom navigation */}
-        {platform === 'TikTok' && tikTokConfig.bottomNavItems && (
+        {tikTokConfig.bottomNavItems && (
           <div className="px-2 py-3 bg-black flex justify-between items-center">
             {tikTokConfig.bottomNavItems.map((item, index) => (
               <div key={index} className={`flex flex-col items-center ${index === 2 ? 'relative' : ''}`}>
@@ -504,16 +495,169 @@ export default function CreativePreview({
     );
   };
 
+  const renderYouTubeContent = () => {
+    const fallbackImage = '/images/placeholder-video.jpg'; // Ensure this exists in public/images/
+
+    return (
+      <>
+        <div className="px-3 py-2 flex justify-between items-center border-b border-gray-200">
+          <div className="flex items-center">
+            <svg className="w-7 h-7 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+            </svg>
+            <span className="text-sm font-bold ml-1">Shorts</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 15c1.66 0 2.99-1.34 2.99-3L15 6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1.2-9.1c0-.66.54-1.2 1.2-1.2.66 0 1.2.54 1.2 1.2l-.01 6.2c0 .66-.53 1.2-1.19 1.2-.66 0-1.2-.54-1.2-1.2V5.9zm6.5 6.1c0 3-2.54 5.1-5.3 5.1-5.1S6.7 15 6.7 12H5c0 3.41 2.72 6.23 6 6.72V22h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex-1 aspect-[9/16] overflow-hidden bg-black relative">
+          {creative.type === videoType ? (
+            <video
+              src={creative.url}
+              controls={false}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error('Video failed to load:', creative.url);
+                const videoElement = e.target as HTMLVideoElement;
+                videoElement.style.display = 'none';
+                const fallbackImg = document.createElement('img');
+                fallbackImg.src = fallbackImage;
+                fallbackImg.className = 'w-full h-full object-cover';
+                fallbackImg.alt = 'Fallback creative asset';
+                videoElement.parentElement?.appendChild(fallbackImg);
+              }}
+            >
+              <source src={creative.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : creative.type === imageType ? (
+            <Image
+              src={creative.url}
+              alt="Creative asset"
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+              No creative asset available
+            </div>
+          )}
+
+          <div className="absolute right-2 bottom-24 flex flex-col items-center space-y-5">
+            <div className="flex flex-col items-center">
+              <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+              <span className="text-xs font-semibold mt-1 text-white">125K</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 9H7V5h3v7zm4 0h-3V5h3v7zm4 0h-3V5h3v7z"/>
+                </svg>
+              </button>
+              <span className="text-xs font-semibold mt-1 text-white">842</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                </svg>
+              </button>
+              <span className="text-xs font-semibold mt-1 text-white">Share</span>
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+            <div className="flex items-start">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-300 flex-shrink-0 border-2 border-white">
+                {brandLogo ? (
+                  <Image
+                    src={brandLogo}
+                    alt={`${brandName} logo`}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-red-600 flex items-center justify-center text-white font-bold">
+                    {brandName.substring(0, 1)}
+                  </div>
+                )}
+              </div>
+              <div className="ml-2 flex-1">
+                <p className="text-white font-medium text-sm">@{brandName.toLowerCase().replace(/\s+/g, '')}</p>
+                <p className="text-white text-xs mt-1 line-clamp-2">{caption}</p>
+                <p className="text-gray-300 text-xs mt-1">
+                  {music && (
+                    <span className="flex items-center">
+                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                      {music}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <button className="ml-2 px-4 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-sm">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-around items-center py-2 border-t border-gray-300 bg-white">
+          <button className="flex flex-col items-center">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span className="text-xs mt-1">Home</span>
+          </button>
+          <button className="flex flex-col items-center">
+            <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.77 10.32c-.77-.32-1.2-.5-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.24-2.53-5.07-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.42.93 2.67 2.22 3.25.03.01 1.2.5 1.2.5L6 14.93c-1.83.97-2.53 3.24-1.56 5.07.97 1.83 3.24 2.53 5.07 1.56l8.5-4.5c1.29-.68 2.06-2.04 1.99-3.49-.07-1.42-.94-2.68-2.23-3.25zM10 14.65v-5.3L15 12l-5 2.65z"/>
+            </svg>
+            <span className="text-xs mt-1 text-red-600">Shorts</span>
+          </button>
+          <button className="flex flex-col items-center p-1 rounded-full bg-gray-100">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+          </button>
+          <button className="flex flex-col items-center">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 9H7V5h3v7zm4 0h-3V5h3v7zm4 0h-3V5h3v7z"/>
+            </svg>
+            <span className="text-xs mt-1">Library</span>
+          </button>
+        </div>
+      </>
+    );
+  };
+
   const renderContent = () => {
     if (platform === 'Instagram') {
       return renderInstagramContent();
     } else if (platform === 'TikTok') {
       return renderTikTokContent();
+    } else if (platform === 'YouTube') {
+      return renderYouTubeContent();
     }
     
     return (
       <>
-        {/* Platform header - Simplified */}
         <div className="p-2 flex justify-between items-center border-b border-gray-200">
           {config.icon}
           <div className="flex space-x-3">
@@ -526,16 +670,14 @@ export default function CreativePreview({
           </div>
         </div>
         
-        {/* User info bar */}
         <div className="px-3 py-2 flex items-center space-x-2">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
             {brandLogo ? (
-              <Image 
-                src={brandLogo} 
-                alt={`${brandName} logo`} 
-                width={32} 
-                height={32} 
-                className="w-full h-full object-cover"
+              <Image
+                src={brandLogo}
+                alt={`${brandName} logo`}
+                fill
+                style={{ objectFit: 'cover' }}
               />
             ) : (
               <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white font-bold">
@@ -552,25 +694,36 @@ export default function CreativePreview({
           </svg>
         </div>
         
-        {/* Creative content */}
         <div className={`flex-1 ${aspectRatioClass} overflow-hidden bg-gray-100 relative`}>
           {creative.type === videoType ? (
-            <video 
-              src={creative.url} 
+            <video
+              src={creative.url}
               controls={false}
               autoPlay
               loop
               muted
               playsInline
               className="w-full h-full object-cover"
-            />
+              onError={(e) => {
+                console.error('Video failed to load:', creative.url);
+                const videoElement = e.target as HTMLVideoElement;
+                videoElement.style.display = 'none';
+                const fallbackImg = document.createElement('img');
+                fallbackImg.src = fallbackImage;
+                fallbackImg.className = 'w-full h-full object-cover';
+                fallbackImg.alt = 'Fallback creative asset';
+                videoElement.parentElement?.appendChild(fallbackImg);
+              }}
+            >
+              <source src={creative.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           ) : creative.type === imageType ? (
-            <Image 
-              src={creative.url} 
-              alt="Creative asset" 
-              width={300} 
-              height={300} 
-              className="w-full h-full object-cover"
+            <Image
+              src={creative.url}
+              alt="Creative asset"
+              fill
+              style={{ objectFit: 'cover' }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
@@ -579,17 +732,16 @@ export default function CreativePreview({
           )}
         </div>
         
-        {/* Action buttons */}
         <div className="p-2 flex justify-between">
           <div className="flex space-x-4">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"></path>
             </svg>
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.949L2 17l1.395-3.72C3.512 12.767 3 11.434 3 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd"></path>
+              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.949L2 17l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd"></path>
             </svg>
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"></path>
+              <path d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"></path>
             </svg>
           </div>
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -598,14 +750,11 @@ export default function CreativePreview({
           </svg>
         </div>
         
-        {/* Caption section */}
         {(caption || hashtags) && (
           <div className="px-3 py-2 max-h-20 overflow-y-auto">
             <p className={`text-xs ${config.captionColor}`}>
               <span className="font-semibold">{brandName}</span> {caption}
-              {hashtags && (
-                <span className="text-blue-500"> {hashtags}</span>
-              )}
+              {hashtags && <span className="text-blue-500"> {hashtags}</span>}
             </p>
             {music && (
               <p className="text-xs mt-1 text-gray-500">
@@ -624,16 +773,13 @@ export default function CreativePreview({
   };
 
   return (
-    <div className="relative flex items-center justify-center">
-      {/* Phone mockup - enhanced realism */}
-      <div className="w-full max-w-[300px] h-[600px] mx-auto border-[14px] border-black rounded-[40px] shadow-xl overflow-hidden bg-gray-100 flex flex-col relative">
-        {/* Notch */}
+    <div className="relative flex items-center justify-center w-full max-w-[320px] h-[640px] mx-auto">
+      <div className="w-full h-full border-[14px] border-black rounded-[40px] shadow-xl overflow-hidden bg-gray-100 flex flex-col relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[40%] h-[25px] bg-black z-20 rounded-b-lg flex items-center justify-center">
           <div className="w-2 h-2 rounded-full bg-gray-600 mr-2"></div>
           <div className="w-12 h-1.5 rounded-full bg-gray-600"></div>
         </div>
         
-        {/* Status bar */}
         <div className={`${config.statusBarBg} ${config.statusBarTextColor} pt-7 pb-1 px-4 flex justify-between items-center text-xs flex-none`}>
           <span className="font-medium">9:41</span>
           <div className="flex items-center space-x-1">
@@ -647,21 +793,19 @@ export default function CreativePreview({
               <path d="M19.071 4.929A9.97 9.97 0 0 0 12 2a9.97 9.97 0 0 0-7.071 2.929A9.97 9.97 0 0 0 2 12a9.97 9.97 0 0 0 2.929 7.071A9.97 9.97 0 0 0 12 22a9.97 9.97 0 0 0 7.071-2.929A9.97 9.97 0 0 0 22 12a9.97 9.97 0 0 0-2.929-7.071zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-5-8a5 5 0 0 0 10 0 .5.5 0 0 0-1 0 4 4 0 0 1-8 0 .5.5 0 0 0-1 0zm7.5-1.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"></path>
             </svg>
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-2h2v2zm0-4h-2V9h2v5z" />
+              <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-2h2v2zm0-4h-2V5h2v7zm4 0h-2V5h2v7zm4 0h-2V5h2v7z"/>
             </svg>
           </div>
         </div>
         
-        {/* Main screen content - platform specific */}
         <div className={`flex-1 ${config.bgColor} flex flex-col overflow-hidden relative`}>
           {renderContent()}
         </div>
         
-        {/* Home indicator */}
         <div className="h-6 flex items-center justify-center pb-1 bg-white">
           <div className="w-[120px] h-1 bg-black rounded-full"></div>
         </div>
       </div>
     </div>
   );
-} 
+}
