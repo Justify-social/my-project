@@ -488,16 +488,154 @@ export class BrandLiftService {
           responses,
         }),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save survey draft');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error saving survey draft:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Share survey for review with team members
+   * @param campaignId Survey ID to share
+   * @param reviewerData Reviewer contact information
+   * @returns Success status
+   */
+  public async shareSurveyForReview(
+    campaignId: string, 
+    reviewerData: { firstname: string, surname: string, email: string, position: string }
+  ): Promise<{ success: boolean }> {
+    try {
+      if (this.useMockData) {
+        console.log('Using mock data for sharing survey', { campaignId, reviewerData });
+        return { success: true };
+      }
+
+      const response = await fetch(`${this.baseUrl}/share-survey`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: campaignId,
+          reviewer: reviewerData,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to share survey for review');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sharing survey for review:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get platform-specific configuration for creative preview
+   * @param platform - The platform to get configuration for
+   * @returns Promise with platform configuration
+   */
+  public async getPlatformConfig(platform: Platform): Promise<any> {
+    try {
+      if (this.useMockData) {
+        console.log(`Using mock data for ${platform} platform config`);
+        // Return mock configuration based on platform
+        switch (platform) {
+          case Platform.Instagram:
+            return {
+              appName: 'Instagram',
+              topBarIcons: ['camera', 'igtv', 'messenger'],
+              bottomNavItems: [
+                { name: 'Home', icon: 'home' },
+                { name: 'Search', icon: 'search' },
+                { name: 'Reels', icon: 'video-play' },
+                { name: 'Shop', icon: 'shopping-bag' },
+                { name: 'Profile', icon: 'user', special: true }
+              ],
+              counterLabels: ['likes', 'comments', 'shares', 'save'],
+              showTranslation: true
+            };
+          case Platform.TikTok:
+            return {
+              appName: 'TikTok',
+              topBarIcons: ['search', 'live'],
+              bottomNavItems: [
+                { name: 'Home', icon: 'home' },
+                { name: 'Friends', icon: 'users' },
+                { name: 'Create', icon: 'plus-circle', special: true },
+                { name: 'Inbox', icon: 'inbox' },
+                { name: 'Profile', icon: 'user' }
+              ],
+              counterLabels: ['likes', 'comments', 'shares', 'bookmarks'],
+              showTranslation: false,
+              songInfo: 'Original Sound - Artist Name'
+            };
+          case Platform.YouTube:
+            return {
+              appName: 'YouTube',
+              topBarIcons: ['cast', 'notifications', 'search'],
+              bottomNavItems: [
+                { name: 'Home', icon: 'home' },
+                { name: 'Shorts', icon: 'play' },
+                { name: 'Create', icon: 'plus-circle', special: true },
+                { name: 'Subscriptions', icon: 'rss' },
+                { name: 'Library', icon: 'collection' }
+              ],
+              counterLabels: ['views', 'likes', 'comments', 'shares'],
+              showTranslation: true
+            };
+          // Check if Facebook exists in the imported Platform enum
+          // If not, this case will be removed by TypeScript
+          case 'Facebook' as any:
+            return {
+              appName: 'Facebook',
+              topBarIcons: ['search', 'messenger'],
+              bottomNavItems: [
+                { name: 'Home', icon: 'home' },
+                { name: 'Friends', icon: 'users' },
+                { name: 'Watch', icon: 'tv' },
+                { name: 'Profile', icon: 'user' },
+                { name: 'Notifications', icon: 'bell' }
+              ],
+              counterLabels: ['likes', 'comments', 'shares'],
+              showTranslation: false
+            };
+          default:
+            throw new Error(`No mock configuration available for platform: ${platform}`);
+        }
+      }
+
+      const response = await fetch(`${this.baseUrl}/platform-config?platform=${platform}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       
       if (!response.ok) {
-        console.warn(`API error: ${response.status} ${response.statusText}. Returning mock success.`);
-        return { success: true };
+        console.warn(`API error: ${response.status} ${response.statusText}. Falling back to mock data.`);
+        // Call this method recursively with useMockData temporarily forced to true
+        const originalMockSetting = this.useMockData;
+        this.useMockData = true;
+        const mockConfig = await this.getPlatformConfig(platform);
+        this.useMockData = originalMockSetting;
+        return mockConfig;
       }
       
       return await response.json();
     } catch (error) {
-      console.error('Error saving survey draft:', error);
-      return { success: true };
+      console.error(`Error fetching platform config for ${platform}:`, error);
+      throw error;
     }
   }
 } 
