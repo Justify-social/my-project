@@ -3,19 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { SurveyPreviewData, SurveyResponses, CreativeAsset } from '@/types/brandLift';
 import PlatformSwitcher from './PlatformSwitcher';
-import { Platform, KPI, CreativeAssetType } from '@prisma/client';
+import { KPI, CreativeAssetType } from '@prisma/client';
 import { BrandLiftService } from '@/services/brandLiftService';
 import SurveyOptionCard from './SurveyOptionCard';
 import SurveyProgressBar from './SurveyProgressBar';
 import CreativePreview from './CreativePreview';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
-// Use string value instead of enum reference to avoid potential issues
-const imageType = 'image' as CreativeAssetType;
-const videoType = 'video' as CreativeAssetType;
+// Platform enum definition
+enum Platform {
+  Instagram = 'Instagram',
+  TikTok = 'TikTok',
+  YouTube = 'YouTube',
+  Facebook = 'Facebook'
+}
 
 // Placeholder data function for development and testing
 const placeholderSurveyData = (id: string): SurveyPreviewData => {
@@ -29,7 +34,7 @@ const placeholderSurveyData = (id: string): SurveyPreviewData => {
     activePlatform: Platform.Instagram,
     adCreative: {
       id: "asset1",
-      type: imageType,
+      type: 'image' as CreativeAssetType,
       url: "/images/ad-creative.jpg",
       aspectRatio: "1:1"
     },
@@ -66,6 +71,36 @@ const placeholderSurveyData = (id: string): SurveyPreviewData => {
   };
 };
 
+// Helper function for platform icons
+const getPlatformIcon = (platform: Platform) => {
+  switch (platform) {
+    case Platform.Instagram:
+      return (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+        </svg>
+      );
+    case Platform.TikTok:
+      return (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
+        </svg>
+      );
+    case Platform.YouTube:
+      return (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
+      );
+    default:
+      return (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+        </svg>
+      );
+  }
+};
+
 export default function SurveyPreviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,6 +111,8 @@ export default function SurveyPreviewContent() {
   const [selectedOptions, setSelectedOptions] = useState<SurveyResponses>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>(Platform.Instagram);
   
   useEffect(() => {
     const loadSurvey = async () => {
@@ -115,21 +152,22 @@ export default function SurveyPreviewContent() {
         ...prev,
         [questionId]: [optionId]
       }));
-      } else {
+    } else {
       // For multiple choice, toggle the option
       setSelectedOptions(prev => {
-        const currentSelections = prev[questionId] || [];
-        const isAlreadySelected = currentSelections.includes(optionId);
+        const currentOptions = [...(prev[questionId] || [])];
         
-        if (isAlreadySelected) {
+        if (currentOptions.includes(optionId)) {
+          // If already selected, remove it
           return {
             ...prev,
-            [questionId]: currentSelections.filter(id => id !== optionId)
+            [questionId]: currentOptions.filter(id => id !== optionId)
           };
         } else {
+          // If not selected, add it
           return {
             ...prev,
-            [questionId]: [...currentSelections, optionId]
+            [questionId]: [...currentOptions, optionId]
           };
         }
       });
@@ -140,13 +178,13 @@ export default function SurveyPreviewContent() {
     if (!survey) return;
     
     if (currentQuestionIndex < survey.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
   
   const handlePrevQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
   
@@ -154,28 +192,52 @@ export default function SurveyPreviewContent() {
     if (!survey) return;
     
     try {
-      await BrandLiftService.getInstance().saveSurveyDraft(surveyId, selectedOptions);
-      alert('Survey draft saved successfully!');
+      // Simulate saving the draft
+      console.log('Saving draft responses:', selectedOptions);
+      
+      // In a real implementation, you would call an API here
+      await BrandLiftService.getInstance().saveSurveyDraft(survey.id, selectedOptions);
+      
+      alert('Draft saved successfully!');
     } catch (err) {
       console.error('Error saving draft:', err);
       alert('Failed to save draft. Please try again.');
     }
   };
   
-  const handlePlatformChange = async (platform: Platform) => {
+  const handlePlatformChange = async (platform: string) => {
     if (!survey || survey.activePlatform === platform) return;
     
     try {
-      setLoading(true);
-      const updatedSurvey = await BrandLiftService.getInstance().changeActivePlatform(surveyId, platform);
+      // Update active platform and reload survey data
+      console.log(`Switching to platform: ${platform}`);
+      
+      // In a real implementation, you would call an API to get platform-specific data
+      await BrandLiftService.getInstance().changeActivePlatform(survey.id, platform as any);
+      
+      // Reload survey data with the new platform
+      const updatedSurvey = await BrandLiftService.getInstance().getSurveyPreviewData(survey.id);
       setSurvey(updatedSurvey);
-      setLoading(false);
     } catch (err) {
       console.error('Error changing platform:', err);
-      setError('Failed to change platform. Please try again.');
-      setLoading(false);
+      toast.error('Failed to change platform. Please try again.');
     }
   };
+  
+  // Listen for platform change events from CreativePreview component
+  useEffect(() => {
+    const onPlatformChange = (event: CustomEvent) => {
+      if (event.detail && event.detail.platform) {
+        handlePlatformChange(event.detail.platform as string);
+      }
+    };
+    
+    window.addEventListener('platformChange', onPlatformChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('platformChange', onPlatformChange as EventListener);
+    };
+  }, []);
   
   // Inside the component, add a function to calculate estimated time remaining
   const calculateEstimatedTimeRemaining = () => {
@@ -188,6 +250,27 @@ export default function SurveyPreviewContent() {
     
     // Convert to minutes and round up
     return Math.ceil(remainingSeconds / 60);
+  };
+  
+  // Handle sharing the survey for initial review
+  const handleShareSurvey = async () => {
+    if (!survey) return;
+    
+    setIsSubmitting(true);
+    try {
+      // In a real implementation, this would send the survey to reviewers
+      // For now, we'll just show a success toast
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      toast.success('Survey shared successfully for review!');
+      
+      // You might navigate to a confirmation page or dashboard
+      // router.push('/campaigns/dashboard');
+    } catch (err) {
+      console.error('Error sharing survey:', err);
+      toast.error('Failed to share survey. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   if (loading) {
@@ -221,126 +304,179 @@ export default function SurveyPreviewContent() {
   }
   
   const currentQuestion = survey.questions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">{survey.campaignName} - Preview</h1>
-        <button 
-          onClick={() => alert('Share for review functionality will be implemented here')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
-        >
-          Share for Review
-          <ChevronRightIcon className="h-5 w-5 ml-1" />
-        </button>
-      </div>
-      
-      {survey.platforms.length > 1 && (
-        <div className="mb-6">
-          <PlatformSwitcher 
-            platforms={survey.platforms}
-            activePlatform={survey.activePlatform}
-            campaignId={survey.id}
-            onPlatformChange={handlePlatformChange}
-          />
-                  </div>
+    <div className="flex h-screen w-full">
+      {/* Phone column - takes up 1/3 of the screen with white background */}
+      <div className="w-1/3 bg-white flex flex-col items-center pt-4 relative">
+        {/* Platform selector buttons stacked vertically on the right side */}
+        <div className="absolute top-20 -right-5">
+          <div className="flex flex-col space-y-4">
+            {survey?.platforms?.map((platformName: string) => (
+              <button 
+                key={platformName}
+                className={`flex items-center justify-center p-2 rounded-full w-10 h-10 shadow-lg
+                  ${survey?.activePlatform === platformName ? 
+                    platformName === 'Instagram' ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-500 text-white' :
+                    platformName === 'TikTok' ? 'bg-black text-white' :
+                    platformName === 'YouTube' ? 'bg-red-600 text-white' :
+                    'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+                onClick={() => {
+                  // Cast string to Platform enum safely
+                  if (platformName === 'Instagram' || 
+                      platformName === 'TikTok' || 
+                      platformName === 'YouTube' || 
+                      platformName === 'Facebook') {
+                    handlePlatformChange(platformName as any);
+                  }
+                }}
+                title={platformName}
+              >
+                {platformName === 'Instagram' && (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+                  </svg>
                 )}
-                
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Creative Preview */}
-        <CreativePreview
-          platform={survey.activePlatform}
-          brandName={survey.brandName || 'Brand Name'}
-          brandLogo={survey.brandLogo}
-          creative={survey.adCreative || {
-            id: 'fallback-asset',
-            type: imageType,
-            url: 'https://placehold.co/600x800/F0F0F0/CCCCCC?text=No+Creative+Asset',
-            aspectRatio: '1:1'
-          }}
-          caption={survey.adCaption || ''}
-          hashtags={survey.adHashtags || ''}
-          music={survey.adMusic}
-        />
+                {platformName === 'TikTok' && (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
+                  </svg>
+                )}
+                {platformName === 'YouTube' && (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
         
-        {/* Survey Questions */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        {/* Phone mockup - positioned higher in the container with minimal top margin */}
+        <div className="pt-2">
+          <CreativePreview
+            platform={survey?.activePlatform || 'Instagram'}
+            brandName={survey?.brandName || 'Brand Name'}
+            brandLogo={survey?.brandLogo}
+            creative={survey?.adCreative || {
+              id: 'fallback-asset',
+              type: 'image' as CreativeAssetType,
+              url: 'https://placehold.co/600x800/F0F0F0/CCCCCC?text=No+Creative+Asset',
+              aspectRatio: '1:1'
+            }}
+            caption={survey?.adCaption || ''}
+            hashtags={survey?.adHashtags || ''}
+            music={survey?.adMusic}
+          />
+        </div>
+      </div>
+
+      {/* Survey content column - takes up 2/3 of the screen, no scrolling */}
+      <div className="w-2/3 p-8">
+        {/* Header with campaign info - only above survey content */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <div className="text-lg font-medium text-gray-700">{survey?.campaignName || 'Campaign Name'}</div>
+            <div className="w-1.5 h-1.5 rounded-full bg-gray-300 mx-2"></div>
+            <div className="text-sm text-gray-500">{survey?.date || ''}</div>
+          </div>
+        </div>
+    
+        {/* Survey content in a card */}
+        <div className="bg-white rounded-lg shadow-md overflow-auto flex-1">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Review & Share Your Survey
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Easily Review and Share Your Survey to Gather Meaningful Insights and Feedback
+            </p>
+          </div>
+
+          {/* Survey question content */}
           <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Survey Questions</h2>
-            
-            <SurveyProgressBar
-              currentStep={currentQuestionIndex}
-              totalSteps={survey.questions.length}
-              onStepClick={(step) => setCurrentQuestionIndex(step)}
-              estimatedTimeRemaining={calculateEstimatedTimeRemaining()}
-            />
-            
-            <div className="mb-4 flex justify-between text-sm text-gray-500">
-              <span>Question {currentQuestionIndex + 1} of {survey.questions.length}</span>
-              <span>KPI: {currentQuestion.kpi}</span>
+            {/* Question navigation */}
+            <div className="mb-6">
+              <div className="relative flex items-center">
+                <button 
+                  className="absolute flex items-center text-gray-500 hover:text-gray-700" 
+                  onClick={handlePrevQuestion}
+                  disabled={currentQuestionIndex === 0}
+                >
+                  <svg className="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                
+                <div className="mx-auto flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                  <span className="text-sm text-gray-600">~{calculateEstimatedTimeRemaining()} min remaining</span>
+                </div>
+              </div>
             </div>
             
-            <motion.div 
-              className="mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              key={currentQuestion.id}
-            >
-              <h3 className="text-lg font-medium mb-3">{currentQuestion.title}</h3>
-              
-              <div className="space-y-3">
-                {currentQuestion.options.map(option => (
-                  <SurveyOptionCard
-                    key={option.id}
-                        id={option.id}
-                    text={option.text}
-                    image={option.image}
-                    isSelected={selectedOptions[currentQuestion.id]?.includes(option.id)}
-                    onSelect={() => handleOptionSelect(currentQuestion.id, option.id)}
-                    selectionType={currentQuestion.type === 'Single Choice' ? 'single' : 'multiple'}
-                  />
-                ))}
-              </div>
-            </motion.div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-500">Question {currentQuestionIndex + 1} of {survey?.questions.length}</span>
+              <span className="text-sm text-gray-500">KPI: {currentQuestion?.kpi}</span>
+            </div>
             
-            <div className="flex justify-between">
-              <motion.button
+            <h3 className="text-xl font-medium text-gray-800 mb-6">
+              {currentQuestion?.title}
+            </h3>
+            
+            {/* Answer options */}
+            <div className="space-y-3 mb-8">
+              {currentQuestion?.options?.map((option) => (
+                <button
+                  key={option.id}
+                  className={`w-full text-left p-4 rounded-lg border transition-colors duration-200 
+                    ${selectedOptions[currentQuestion?.id || '']?.includes(option.id) 
+                      ? 'border-green-500 bg-green-50' 
+                      : 'border-gray-200 hover:bg-gray-50'}`}
+                  onClick={() => handleOptionSelect(currentQuestion?.id || '', option.id)}
+                >
+                  <div className="flex items-center">
+                    <div className={`w-5 h-5 flex items-center justify-center rounded-full border mr-3
+                      ${selectedOptions[currentQuestion?.id || '']?.includes(option.id)
+                        ? 'border-green-500' 
+                        : 'border-gray-300'}`}
+                    >
+                      {selectedOptions[currentQuestion?.id || '']?.includes(option.id) && (
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      )}
+                    </div>
+                    <span className="text-gray-700">{option.text}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Navigation buttons */}
+            <div className="flex justify-between items-center mt-8">
+              <button
+                className="px-6 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50"
                 onClick={handlePrevQuestion}
                 disabled={currentQuestionIndex === 0}
-                className={`px-4 py-2 rounded-md ${
-                  currentQuestionIndex === 0
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                whileHover={currentQuestionIndex !== 0 ? { scale: 1.05 } : {}}
-                whileTap={currentQuestionIndex !== 0 ? { scale: 0.95 } : {}}
               >
                 Previous
-              </motion.button>
-              
-              <motion.button
-                onClick={handleSaveDraft}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              </button>
+              <button
+                className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center min-w-[120px]"
+                onClick={isLastQuestion ? handleShareSurvey : handleNextQuestion}
+                disabled={isSubmitting}
               >
-                Save Draft
-              </motion.button>
-              
-              <motion.button
-                onClick={handleNextQuestion}
-                disabled={currentQuestionIndex === survey.questions.length - 1}
-                className={`px-4 py-2 rounded-md ${
-                  currentQuestionIndex === survey.questions.length - 1
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-                whileHover={currentQuestionIndex !== survey.questions.length - 1 ? { scale: 1.05 } : {}}
-                whileTap={currentQuestionIndex !== survey.questions.length - 1 ? { scale: 0.95 } : {}}
-              >
-                Next
-              </motion.button>
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sharing...
+                  </>
+                ) : isLastQuestion ? 'Share Survey for Initial Review' : 'Next'}
+              </button>
             </div>
           </div>
         </div>
