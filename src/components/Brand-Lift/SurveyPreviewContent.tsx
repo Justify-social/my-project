@@ -179,7 +179,7 @@ export default function SurveyPreviewContent() {
   }
   
   const currentQuestion = survey.questions[currentQuestionIndex];
-  
+
   return (
     <div className="container mx-auto px-4 py-4 max-h-screen overflow-hidden flex flex-col">
       {/* Header - made more compact */}
