@@ -298,7 +298,7 @@ export default function AdminDashboard() {
                 className="px-4 py-2 flex items-center gap-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
               >
                 <BugAntIcon className="h-5 w-5" />
-                Campaign Debug Tools
+                Debug Tools
               </button>
             </div>
           </header>
