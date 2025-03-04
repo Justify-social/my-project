@@ -95,7 +95,7 @@ export default function DebugTools() {
           <div className="mt-4">
             <Link
               href="#campaign-verify"
-              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('campaign-verify')?.scrollIntoView({ behavior: 'smooth' });
@@ -115,41 +115,9 @@ export default function DebugTools() {
           <div className="mt-4">
             <Link
               href="/debug-tools/api-verification"
-              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
             >
               Open API Verification
-            </Link>
-          </div>
-        </div>
-        
-        {/* Debug Step Tool */}
-        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Debug Step</h2>
-          <p className="text-[var(--secondary-color)] mb-4">
-            View and validate step-by-step execution of the wizard including component renders.
-          </p>
-          <div className="mt-4">
-            <Link
-              href="/debug-tools/debug-step"
-              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
-            >
-              Open Debug Step
-            </Link>
-          </div>
-        </div>
-        
-        {/* Documentation */}
-        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Documentation</h2>
-          <p className="text-[var(--secondary-color)] mb-4">
-            Access technical documentation including API references and troubleshooting guides.
-          </p>
-          <div className="mt-4">
-            <Link
-              href="/documentation"
-              className="px-4 py-2 border border-[var(--divider-color)] text-[var(--primary-color)] rounded-md inline-block hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
-            >
-              View Documentation
             </Link>
           </div>
         </div>
@@ -174,7 +142,7 @@ export default function DebugTools() {
           <button
             onClick={fetchCampaignData}
             disabled={loading}
-            className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
+            className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
           >
             {loading ? 'Loading...' : 'Verify Data'}
           </button>
@@ -191,7 +159,7 @@ export default function DebugTools() {
             <button
               key={step}
               onClick={() => navigateToCampaignForm(step)}
-              className="p-3 bg-gray-100 text-[var(--primary-color)] rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+              className="p-3 bg-gray-100 text-[var(--primary-color)] rounded-md hover:bg-white hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
             >
               Go to Step {step}
             </button>
