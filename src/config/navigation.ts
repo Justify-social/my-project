@@ -21,7 +21,7 @@ export const navItems: NavItem[] = [
     href: "/creative-testing",
     icon: "/Creative_Asset_Testing.svg",
     children: [
-      { label: "List", href: "/creative-testing/list" },
+      { label: "List", href: "/creative-testing" },
       { label: "Reports", href: "/creative-testing/reports" },
     ],
   },
@@ -30,7 +30,7 @@ export const navItems: NavItem[] = [
     href: "/brand-lift",
     icon: "/Brand_Lift.svg",
     children: [
-      { label: "List", href: "/brand-lift/list" },
+      { label: "List", href: "/brand-lift" },
       { label: "Reports", href: "/brand-lift/reports" },
     ],
   },
@@ -41,7 +41,7 @@ export const navItems: NavItem[] = [
     icon: "/Influencers.svg",
     children: [
       { label: "Marketplace", href: "/influencers/marketplace" },
-      { label: "List", href: "/influencers" },
+      { label: "List", href: "/influencers/influencer-list" },
     ],
   },
   {

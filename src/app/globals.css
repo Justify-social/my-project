@@ -471,3 +471,22 @@ main,
 .nav-item-text {
   margin-left: 8px;
 }
+
+@media (max-width: 640px) {
+  .survey-preview-container {
+    flex-direction: column;
+  }
+  .creative-preview-wrapper {
+    width: 100% !important;
+    height: auto;
+    min-height: 640px;
+  }
+  .platform-switcher-column {
+    width: 100% !important;
+    border-l: none;
+  }
+  .survey-content-column {
+    width: 100% !important;
+    padding: 1rem;
+  }
+}
