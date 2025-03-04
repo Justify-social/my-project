@@ -13,7 +13,8 @@ import {
   ClockIcon,
   ServerIcon,
   BellIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  XCircleIcon
 } from '@heroicons/react/24/solid';
 
 interface Company {
@@ -25,13 +26,16 @@ interface Company {
   subscription: string;
 }
 
-interface User {
+interface UserData {
   id: string;
   name: string;
   email: string;
   companyId: string;
   role: string;
   lastLogin: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isActive?: boolean;
 }
 
 interface MetricCardProps {
@@ -211,9 +215,23 @@ export default function AdminDashboard() {
   };
   const [activities, setActivities] = useState<ActivityLogProps['activities']>([]);
   const [services, setServices] = useState<SystemStatusProps['services']>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
+  
+  // Track suspended users in local state
+  const [suspendedUserIds, setSuspendedUserIds] = useState<Set<string>>(new Set());
+  
+  // Add state for the user details modal
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [isUserDetailLoading, setIsUserDetailLoading] = useState(false);
+  const [userDetailError, setUserDetailError] = useState<string | null>(null);
+
+  // Add state for suspend confirmation
+  const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
+  const [userToSuspend, setUserToSuspend] = useState<UserData | null>(null);
+  const [isSuspending, setIsSuspending] = useState(false);
 
   useEffect(() => {
     // Mock data - replace with real API calls
@@ -349,6 +367,90 @@ export default function AdminDashboard() {
       console.error('Error updating user role:', error);
       alert(error instanceof Error ? error.message : 'Failed to update user role');
     }
+  };
+
+  // Handler for viewing user details
+  const handleViewUser = async (userData: UserData) => {
+    setSelectedUser(userData);
+    setIsUserModalOpen(true);
+    setIsUserDetailLoading(true);
+    setUserDetailError(null);
+
+    try {
+      const response = await fetch(`/api/admin/users/${userData.id}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch user details');
+      }
+
+      const data = await response.json();
+      setSelectedUser(data.data);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      setUserDetailError(error instanceof Error ? error.message : 'Failed to load user details');
+    } finally {
+      setIsUserDetailLoading(false);
+    }
+  };
+
+  // Handler for suspending a user
+  const handleSuspendUser = async () => {
+    if (!userToSuspend) return;
+    
+    setIsSuspending(true);
+    try {
+      const response = await fetch('/api/admin/users/suspend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userToSuspend.id
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to suspend user');
+      }
+
+      // Add to activity log
+      setActivities([
+        {
+          id: Date.now().toString(),
+          user: user?.email || 'Admin',
+          action: `Suspended user ${userToSuspend.email}`,
+          timestamp: new Date().toISOString(),
+          type: 'auth'
+        },
+        ...activities.slice(0, 9) // Keep only 10 most recent
+      ]);
+
+      // Track suspended users in our local state
+      setSuspendedUserIds(prev => {
+        const newSet = new Set(prev);
+        newSet.add(userToSuspend.id);
+        return newSet;
+      });
+
+      // Close confirmation modal
+      setShowSuspendConfirm(false);
+      setUserToSuspend(null);
+
+      // Show success notification
+      alert('User suspended successfully');
+    } catch (error) {
+      console.error('Error suspending user:', error);
+      alert(error instanceof Error ? error.message : 'Failed to suspend user');
+    } finally {
+      setIsSuspending(false);
+    }
+  };
+
+  // Check if a user is suspended
+  const isUserSuspended = (userId: string) => {
+    return suspendedUserIds.has(userId);
   };
 
   if (isLoading) {
@@ -506,6 +608,7 @@ export default function AdminDashboard() {
                             className="text-sm rounded-md border border-[var(--divider-color)] px-2 py-1"
                             value={user.role}
                             onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                            disabled={isUserSuspended(user.id)}
                           >
                             <option value="OWNER">Owner</option>
                             <option value="ADMIN">Admin</option>
@@ -519,16 +622,24 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                           <button 
                             className="text-[var(--accent-color)] hover:text-blue-800 mr-3"
-                            onClick={() => {/* View user details */}}
+                            onClick={() => handleViewUser(user)}
                           >
                             View
                           </button>
-                          <button 
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => {/* Suspend user */}}
-                          >
-                            Suspend
-                          </button>
+                          {!isUserSuspended(user.id) && (
+                            <button 
+                              className="text-red-600 hover:text-red-800"
+                              onClick={() => {
+                                setUserToSuspend(user);
+                                setShowSuspendConfirm(true);
+                              }}
+                            >
+                              Suspend
+                            </button>
+                          )}
+                          {isUserSuspended(user.id) && (
+                            <span className="text-gray-400">Suspended</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -553,6 +664,157 @@ export default function AdminDashboard() {
         <SystemStatus services={services} />
       </div>
 
+      {/* User Details Modal */}
+      {isUserModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-[var(--divider-color)] flex justify-between items-center">
+              <h3 className="text-lg font-medium">User Details</h3>
+              <button 
+                className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
+                onClick={() => setIsUserModalOpen(false)}
+              >
+                <XCircleIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="px-6 py-4">
+              {isUserDetailLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-[var(--accent-color)] border-t-transparent rounded-full"></div>
+                </div>
+              ) : userDetailError ? (
+                <div className="bg-red-50 text-red-800 p-4 rounded-md">
+                  {userDetailError}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {isUserSuspended(selectedUser.id) && (
+                    <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
+                      This user is currently suspended
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        Name
+                      </label>
+                      <div className="mt-1 text-sm">{selectedUser.name || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        Email
+                      </label>
+                      <div className="mt-1 text-sm">{selectedUser.email}</div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        Company
+                      </label>
+                      <div className="mt-1 text-sm">{selectedUser.companyId || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        Role
+                      </label>
+                      <div className="mt-1 text-sm">{selectedUser.role}</div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        User ID
+                      </label>
+                      <div className="mt-1 text-sm">{selectedUser.id}</div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        Last Login
+                      </label>
+                      <div className="mt-1 text-sm">
+                        {new Date(selectedUser.lastLogin).toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                        Created At
+                      </label>
+                      <div className="mt-1 text-sm">
+                        {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-[var(--divider-color)] pt-4 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[var(--secondary-color)]">
+                          Updated At
+                        </label>
+                        <div className="mt-1 text-sm">
+                          {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString() : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="px-6 py-4 border-t border-[var(--divider-color)] flex justify-end">
+              <button
+                className="px-4 py-2 bg-[var(--background-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-200"
+                onClick={() => setIsUserModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suspend User Confirmation Modal */}
+      {showSuspendConfirm && userToSuspend && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-[var(--divider-color)]">
+              <h3 className="text-lg font-medium text-red-600">Suspend User</h3>
+            </div>
+            
+            <div className="px-6 py-4">
+              <p className="text-sm text-[var(--primary-color)]">
+                Are you sure you want to suspend <strong>{userToSuspend.name}</strong> ({userToSuspend.email})?
+              </p>
+              <p className="mt-2 text-sm text-[var(--secondary-color)]">
+                This action will prevent the user from accessing the system. It can be reversed later.
+              </p>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-[var(--divider-color)] flex justify-end space-x-3">
+              <button
+                className="px-4 py-2 bg-[var(--background-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-200"
+                onClick={() => {
+                  setShowSuspendConfirm(false);
+                  setUserToSuspend(null);
+                }}
+                disabled={isSuspending}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center"
+                onClick={handleSuspendUser}
+                disabled={isSuspending}
+              >
+                {isSuspending && (
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                )}
+                Suspend User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Debug Information */}
       <details className="bg-white rounded-xl shadow-sm border border-[var(--divider-color)]">
         <summary className="cursor-pointer bg-[var(--background-color)] px-6 py-3 text-lg font-medium text-[var(--primary-color)] hover:bg-opacity-80 rounded-t-xl">

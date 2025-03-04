@@ -66,56 +66,15 @@ export async function GET() {
       };
     });
 
-    // Separately fetch team member data if needed
-    // This is a separate query to avoid schema issues
-    try {
-      // Check if TeamMember table exists
-      const teamMembersExist = await prisma.$queryRaw`
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables 
-          WHERE table_schema = 'public' 
-          AND table_name = 'TeamMember'
-        );
-      `;
-      
-      const exists = Array.isArray(teamMembersExist) && 
-                   teamMembersExist.length > 0 && 
-                   (teamMembersExist[0] as any).exists === true;
-      
-      if (exists) {
-        // If table exists, fetch team memberships
-        const teamMemberships = await prisma.$queryRaw`
-          SELECT "memberId", "role" FROM "TeamMember"
-        `;
-        
-        // Add team roles to formatted users
-        if (Array.isArray(teamMemberships)) {
-          const membershipMap = new Map();
-          teamMemberships.forEach((membership: any) => {
-            membershipMap.set(membership.memberId, membership.role);
-          });
-          
-          formattedUsers.forEach(user => {
-            if (membershipMap.has(user.id)) {
-              user.role = membershipMap.get(user.id);
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching team memberships:', error);
-      // Continue without team memberships
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      users: formattedUsers 
+    return NextResponse.json({
+      success: true,
+      users: formattedUsers
     });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json({ 
-      error: 'Failed to fetch users',
-      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      success: false, 
+      error: 'Failed to fetch users' 
     }, { status: 500 });
   }
 } 
