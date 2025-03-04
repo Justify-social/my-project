@@ -2,7 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { verifyGeolocationApi, verifyExchangeRatesApi, verifyPhylloApi, verifyCintExchangeApi, verifyAllApis, ApiVerificationResult, ApiErrorType } from '@/lib/api-verification';
+import { 
+  verifyGeolocationApi, 
+  verifyExchangeRatesApi, 
+  verifyPhylloApi, 
+  verifyCintExchangeApi, 
+  verifyGiphyApi, 
+  verifyStripeApi,
+  verifyAuth0Api,
+  verifyUploadthingApi,
+  verifyDatabaseConnection,
+  verifyAllApis, 
+  ApiVerificationResult, 
+  ApiErrorType 
+} from '@/lib/api-verification';
 
 /**
  * Helper function to check if a host is reachable without triggering CORS issues
@@ -33,163 +46,11 @@ async function isHostReachable(hostname: string): Promise<{ reachable: boolean, 
   }
 }
 
-// Implement proper GIPHY API verification
-async function verifyGiphyApi(): Promise<ApiVerificationResult> {
-  const apiName = 'GIPHY API';
-  const endpoint = 'https://api.giphy.com/v1/gifs/search';
-  const hostname = 'api.giphy.com';
-  
-  try {
-    console.info(`Testing ${apiName}`);
-    
-    // First check if the host is reachable at all to rule out connectivity issues
-    const hostCheck = await isHostReachable(hostname);
-    
-    if (!hostCheck.reachable) {
-      console.error(`${apiName} host is unreachable`);
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        error: {
-          type: ApiErrorType.NETWORK_ERROR,
-          message: `Cannot connect to the API host (${hostname}). The service may be down or blocked by network policies.`,
-          details: { hostname },
-          isRetryable: true
-        }
-      };
-    }
-    
-    // Check if API key exists in environment variables
-    const hasApiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY !== undefined;
-    
-    if (!hasApiKey) {
-      console.warn(`${apiName} verification warning: Missing API key`);
-      
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        latency: hostCheck.latency,
-        error: {
-          type: ApiErrorType.AUTHENTICATION_ERROR,
-          message: 'Missing GIPHY API key. Add NEXT_PUBLIC_GIPHY_API_KEY to environment variables.',
-          details: null,
-          isRetryable: true
-        }
-      };
-    }
-    
-    // Try to do a real API call if we have an API key
-    try {
-      // Construct URL with API key and search term
-      const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY || '';
-      const url = new URL(endpoint);
-      url.searchParams.append('api_key', apiKey);
-      url.searchParams.append('q', 'test');
-      url.searchParams.append('limit', '1');
-      
-      // Make an actual API call to GIPHY
-      const startTime = Date.now();
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      const latency = Date.now() - startTime;
-      const responseData = await response.json().catch(() => ({}));
-      
-      if (response.ok) {
-        console.info(`${apiName} verification successful`, { latency, statusCode: response.status });
-        
-        return {
-          success: true,
-          apiName,
-          endpoint,
-          latency,
-          data: {
-            meta: responseData.meta,
-            pagination: responseData.pagination,
-            resultCount: responseData.data?.length || 0
-          }
-        };
-      } else {
-        let errorType = ApiErrorType.UNKNOWN_ERROR;
-        
-        // Determine error type based on status code
-        if (response.status === 401 || response.status === 403) {
-          errorType = ApiErrorType.AUTHENTICATION_ERROR;
-        } else if (response.status === 404) {
-          errorType = ApiErrorType.NOT_FOUND_ERROR;
-        } else if (response.status === 429) {
-          errorType = ApiErrorType.RATE_LIMIT_ERROR;
-        } else if (response.status >= 500) {
-          errorType = ApiErrorType.SERVER_ERROR;
-        } else if (response.status >= 400) {
-          errorType = ApiErrorType.VALIDATION_ERROR;
-        }
-        
-        console.error(`${apiName} verification failed with HTTP ${response.status}`);
-        
-        return {
-          success: false,
-          apiName,
-          endpoint,
-          latency,
-          error: {
-            type: errorType,
-            message: `API returned error status: ${response.status} ${response.statusText}`,
-            details: responseData,
-            isRetryable: errorType !== ApiErrorType.VALIDATION_ERROR
-          }
-        };
-      }
-    } catch (error) {
-      // If we get a CORS error, return a helpful message
-      console.error(`${apiName} API call failed, likely due to CORS. Using host check result instead.`);
-      
-      return {
-        success: true,
-        apiName,
-        endpoint,
-        latency: hostCheck.latency,
-        data: {
-          status: "API host is reachable",
-          credentials_available: hasApiKey,
-          note: "Due to CORS restrictions, the complete API testing can only be done server-side. The host is reachable, which indicates the API is likely operational."
-        }
-      };
-    }
-  } catch (error) {
-    // Handle unexpected errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    console.error(`${apiName} verification failed with unexpected error: ${errorMessage}`);
-    
-    return {
-      success: false,
-      apiName,
-      endpoint,
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: errorMessage,
-        details: error,
-        isRetryable: false
-      }
-    };
-  }
-}
-
 /**
  * API Verification Debug Tool
  * 
  * This page allows administrators to test and verify external API integrations
- * used in the Campaign Wizard. It provides detailed information about API
+ * used in Justify. It provides detailed information about API
  * response times, status, and any potential issues.
  */
 export default function ApiVerificationPage() {
@@ -202,7 +63,11 @@ export default function ApiVerificationPage() {
     exchange: null,
     phyllo: null,
     giphy: null,
-    cint: null
+    cint: null,
+    stripe: null,
+    auth0: null,
+    uploadthing: null,
+    database: null
   });
 
   // API descriptions shown in the UI
@@ -211,7 +76,11 @@ export default function ApiVerificationPage() {
     exchange: "Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.",
     phyllo: "Integrates with influencer platforms to verify accounts and retrieve metrics. Critical for influencer-based campaigns.",
     giphy: "Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content.",
-    cint: "Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation."
+    cint: "Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.",
+    stripe: "Payment processing platform for subscription and one-time payments. Powers the billing system for premium features.",
+    auth0: "Authentication and user management platform. Handles user sign-up, login, and profile management.",
+    uploadthing: "File upload service for handling media uploads. Used for storing and managing user-generated content.",
+    database: "Database connection using Postgres. Stores all application data including user profiles, campaigns, and analytics."
   };
 
   // Test a specific API
@@ -237,6 +106,18 @@ export default function ApiVerificationPage() {
           break;
         case 'cint':
           result = await verifyCintExchangeApi();
+          break;
+        case 'stripe':
+          result = await verifyStripeApi();
+          break;
+        case 'auth0':
+          result = await verifyAuth0Api();
+          break;
+        case 'uploadthing':
+          result = await verifyUploadthingApi();
+          break;
+        case 'database':
+          result = await verifyDatabaseConnection();
           break;
         default:
           throw new Error(`Unknown API: ${apiName}`);
@@ -265,8 +146,23 @@ export default function ApiVerificationPage() {
       const phylloResult = await verifyPhylloApi();
       const giphyResult = await verifyGiphyApi();
       const cintResult = await verifyCintExchangeApi();
+      const stripeResult = await verifyStripeApi();
+      const auth0Result = await verifyAuth0Api();
+      const uploadthingResult = await verifyUploadthingApi();
+      const databaseResult = await verifyDatabaseConnection();
       
-      const allResults = [geolocationResult, exchangeRatesResult, phylloResult, giphyResult, cintResult];
+      const allResults = [
+        geolocationResult, 
+        exchangeRatesResult, 
+        phylloResult, 
+        giphyResult, 
+        cintResult,
+        stripeResult,
+        auth0Result,
+        uploadthingResult,
+        databaseResult
+      ];
+      
       setResults(allResults);
       setLastTested(prev => ({
         ...prev,
@@ -275,7 +171,11 @@ export default function ApiVerificationPage() {
         exchange: new Date(),
         phyllo: new Date(),
         giphy: new Date(),
-        cint: new Date()
+        cint: new Date(),
+        stripe: new Date(),
+        auth0: new Date(),
+        uploadthing: new Date(),
+        database: new Date()
       }));
     } catch (error) {
       console.error('Error testing all APIs:', error);
@@ -330,6 +230,36 @@ export default function ApiVerificationPage() {
     return date.toLocaleString();
   };
 
+  // Render API badge
+  const renderApiBadge = (apiName: string, lastTestedDate: Date | null, isInResults: boolean = false) => {
+    const hasBeenTested = lastTestedDate !== null;
+    const result = results.find(r => r.apiName.includes(apiName));
+    const isSuccess = result?.success || false;
+    
+    if (!hasBeenTested) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+          Not Tested
+        </span>
+      );
+    }
+    
+    if (isInResults && result) {
+      return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(isSuccess)}`}>
+          {isSuccess ? 'Verified' : 'Failed'}
+        </span>
+      );
+    }
+    
+    // If it's been tested but not in current results
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+        Previously Tested
+      </span>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8">
@@ -337,7 +267,7 @@ export default function ApiVerificationPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">API Verification Debug Tool</h1>
             <p className="mt-1 text-gray-600">
-              Test and verify external API integrations used in the Campaign Wizard
+              Test and verify all external API integrations used in Justify
             </p>
           </div>
           <Link
@@ -359,9 +289,12 @@ export default function ApiVerificationPage() {
 
         <div className="p-6 bg-gray-50 space-y-6">
           {/* API Information Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className="font-medium text-gray-900">IP Geolocation API</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">IP Geolocation API</h3>
+                {renderApiBadge('IP Geolocation API', lastTested.geolocation, results.some(r => r.apiName.includes('IP Geolocation')))}
+              </div>
               <p className="text-sm text-gray-500 mt-1">{apiDescriptions.geolocation}</p>
               <div className="mt-2 text-xs text-gray-500">
                 Last tested: <span className="font-medium">{formatTimestamp(lastTested.geolocation)}</span>
@@ -369,7 +302,10 @@ export default function ApiVerificationPage() {
             </div>
             
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className="font-medium text-gray-900">Exchange Rates API</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Exchange Rates API</h3>
+                {renderApiBadge('Exchange Rates API', lastTested.exchange, results.some(r => r.apiName.includes('Exchange Rates')))}
+              </div>
               <p className="text-sm text-gray-500 mt-1">{apiDescriptions.exchange}</p>
               <div className="mt-2 text-xs text-gray-500">
                 Last tested: <span className="font-medium">{formatTimestamp(lastTested.exchange)}</span>
@@ -377,7 +313,10 @@ export default function ApiVerificationPage() {
             </div>
             
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className="font-medium text-gray-900">Phyllo API</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Phyllo API</h3>
+                {renderApiBadge('Phyllo API', lastTested.phyllo, results.some(r => r.apiName.includes('Phyllo')))}
+              </div>
               <p className="text-sm text-gray-500 mt-1">{apiDescriptions.phyllo}</p>
               <div className="mt-2 text-xs text-gray-500">
                 Last tested: <span className="font-medium">{formatTimestamp(lastTested.phyllo)}</span>
@@ -385,7 +324,10 @@ export default function ApiVerificationPage() {
             </div>
 
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className="font-medium text-gray-900">GIPHY API</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">GIPHY API</h3>
+                {renderApiBadge('GIPHY API', lastTested.giphy, results.some(r => r.apiName.includes('GIPHY')))}
+              </div>
               <p className="text-sm text-gray-500 mt-1">{apiDescriptions.giphy}</p>
               <div className="mt-2 text-xs text-gray-500">
                 Last tested: <span className="font-medium">{formatTimestamp(lastTested.giphy || null)}</span>
@@ -393,10 +335,57 @@ export default function ApiVerificationPage() {
             </div>
 
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className="font-medium text-gray-900">Cint Exchange API</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Cint Exchange API</h3>
+                {renderApiBadge('Cint Exchange API', lastTested.cint, results.some(r => r.apiName.includes('Cint')))}
+              </div>
               <p className="text-sm text-gray-500 mt-1">{apiDescriptions.cint}</p>
               <div className="mt-2 text-xs text-gray-500">
                 Last tested: <span className="font-medium">{formatTimestamp(lastTested.cint || null)}</span>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Stripe API</h3>
+                {renderApiBadge('Stripe API', lastTested.stripe, results.some(r => r.apiName.includes('Stripe')))}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.stripe}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.stripe || null)}</span>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Auth0 API</h3>
+                {renderApiBadge('Auth0 API', lastTested.auth0, results.some(r => r.apiName.includes('Auth0')))}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.auth0}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.auth0 || null)}</span>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Uploadthing API</h3>
+                {renderApiBadge('Uploadthing API', lastTested.uploadthing, results.some(r => r.apiName.includes('Uploadthing')))}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.uploadthing}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.uploadthing || null)}</span>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-start">
+                <h3 className="font-medium text-gray-900">Database Connection</h3>
+                {renderApiBadge('Database Connection', lastTested.database, results.some(r => r.apiName.includes('Database')))}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.database}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.database || null)}</span>
               </div>
             </div>
           </div>
@@ -497,6 +486,82 @@ export default function ApiVerificationPage() {
                   </div>
                 ) : (
                   'Cint Exchange API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('stripe')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'stripe' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'stripe' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Stripe API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('auth0')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'auth0' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'auth0' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Auth0 API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('uploadthing')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'uploadthing' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'uploadthing' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Uploadthing API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('database')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'database' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'database' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Database Connection'
                 )}
               </button>
               
