@@ -133,22 +133,53 @@ export async function POST(request: Request) {
       try {
         // Upload the logo file to uploadthing
         console.log('Attempting to upload logo file...');
-        const upload = await utapi.uploadFiles(logoFile);
-        if (upload.data) {
-          logoUrl = upload.data.url;
-          console.log('Logo uploaded successfully:', logoUrl);
-          // Delete old logo if it exists
-          if (oldSettings?.logoUrl) {
-            const oldFileKey = oldSettings.logoUrl.split('/').pop();
-            if (oldFileKey) {
-              console.log('Deleting old logo file:', oldFileKey);
-              await utapi.deleteFiles(oldFileKey);
+        
+        // Try using the specific logoUploader endpoint
+        try {
+          // Create a FormData with the specific 'files' key that UploadThing expects
+          const logoFormData = new FormData();
+          logoFormData.append('files', logoFile);
+          
+          // Call the uploadthing endpoint directly for logoUploader
+          const uploadResponse = await fetch('/api/uploadthing/logoUploader', {
+            method: 'POST',
+            body: logoFormData,
+          });
+          
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json();
+            if (uploadResult.data?.[0]?.url) {
+              logoUrl = uploadResult.data[0].url;
+              console.log('Logo uploaded successfully via dedicated endpoint:', logoUrl);
             }
+          } else {
+            console.warn('Logo upload failed via dedicated endpoint, falling back to direct method');
           }
-        } else {
-          console.error('Upload failed, no data returned:', upload);
-          skipLogoUpdate = true;
-          console.log('Skipping logo update due to upload failure');
+        } catch (specificUploadError) {
+          console.warn('Error using specific logo endpoint:', specificUploadError);
+          // Continue to fallback method
+        }
+        
+        // Fallback to direct upload method if the specific endpoint didn't work
+        if (!logoUrl) {
+          console.log('Falling back to direct UTApi upload');
+          const upload = await utapi.uploadFiles(logoFile);
+          if (upload.data) {
+            logoUrl = upload.data.url;
+            console.log('Logo uploaded successfully via UTApi:', logoUrl);
+            // Delete old logo if it exists
+            if (oldSettings?.logoUrl) {
+              const oldFileKey = oldSettings.logoUrl.split('/').pop();
+              if (oldFileKey) {
+                console.log('Deleting old logo file:', oldFileKey);
+                await utapi.deleteFiles(oldFileKey);
+              }
+            }
+          } else {
+            console.error('Upload failed, no data returned:', upload);
+            skipLogoUpdate = true;
+            console.log('Skipping logo update due to upload failure');
+          }
         }
       } catch (uploadError) {
         console.error('Logo upload error:', uploadError);
