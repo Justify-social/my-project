@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { verifyGeolocationApi, verifyExchangeRatesApi, verifyPhylloApi, verifyAllApis, ApiVerificationResult, ApiErrorType } from '@/lib/api-verification';
+import { verifyGeolocationApi, verifyExchangeRatesApi, verifyPhylloApi, verifyCintExchangeApi, verifyAllApis, ApiVerificationResult, ApiErrorType } from '@/lib/api-verification';
 
 /**
  * Helper function to check if a host is reachable without triggering CORS issues
@@ -195,21 +195,23 @@ async function verifyGiphyApi(): Promise<ApiVerificationResult> {
 export default function ApiVerificationPage() {
   const [results, setResults] = useState<ApiVerificationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedApi, setSelectedApi] = useState<string | null>(null);
+  const [selectedApi, setSelectedApi] = useState<string>('');
   const [lastTested, setLastTested] = useState<Record<string, Date | null>>({
+    all: null,
     geolocation: null,
     exchange: null,
     phyllo: null,
     giphy: null,
-    all: null
+    cint: null
   });
 
-  // API descriptions
-  const apiDescriptions = {
-    geolocation: "Used for timezone detection and location-based targeting in the Campaign Wizard. Essential for regional campaigns and local time display.",
+  // API descriptions shown in the UI
+  const apiDescriptions: Record<string, string> = {
+    geolocation: "Used to determine user location for targeted campaigns and localized content. Helps optimize campaign delivery to specific regions.",
     exchange: "Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.",
     phyllo: "Integrates with influencer platforms to verify accounts and retrieve metrics. Critical for influencer-based campaigns.",
-    giphy: "Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content."
+    giphy: "Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content.",
+    cint: "Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation."
   };
 
   // Test a specific API
@@ -233,6 +235,9 @@ export default function ApiVerificationPage() {
         case 'giphy':
           result = await verifyGiphyApi();
           break;
+        case 'cint':
+          result = await verifyCintExchangeApi();
+          break;
         default:
           throw new Error(`Unknown API: ${apiName}`);
       }
@@ -243,7 +248,7 @@ export default function ApiVerificationPage() {
         [apiName]: new Date()
       }));
     } catch (error) {
-      console.error('Error testing API:', error);
+      console.error(`Error testing API: ${apiName}`, error);
     } finally {
       setIsLoading(false);
     }
@@ -255,13 +260,13 @@ export default function ApiVerificationPage() {
     setSelectedApi('all');
 
     try {
-      // Get results from all APIs except Phyllo, which might be causing issues
       const geolocationResult = await verifyGeolocationApi();
       const exchangeRatesResult = await verifyExchangeRatesApi();
       const phylloResult = await verifyPhylloApi();
       const giphyResult = await verifyGiphyApi();
+      const cintResult = await verifyCintExchangeApi();
       
-      const allResults = [geolocationResult, exchangeRatesResult, phylloResult, giphyResult];
+      const allResults = [geolocationResult, exchangeRatesResult, phylloResult, giphyResult, cintResult];
       setResults(allResults);
       setLastTested(prev => ({
         ...prev,
@@ -269,7 +274,8 @@ export default function ApiVerificationPage() {
         geolocation: new Date(),
         exchange: new Date(),
         phyllo: new Date(),
-        giphy: new Date()
+        giphy: new Date(),
+        cint: new Date()
       }));
     } catch (error) {
       console.error('Error testing all APIs:', error);
@@ -385,103 +391,140 @@ export default function ApiVerificationPage() {
                 Last tested: <span className="font-medium">{formatTimestamp(lastTested.giphy || null)}</span>
               </div>
             </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="font-medium text-gray-900">Cint Exchange API</h3>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.cint}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.cint || null)}</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => testApi('geolocation')}
-              disabled={isLoading}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                isLoading && selectedApi === 'geolocation'
-                  ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {isLoading && selectedApi === 'geolocation' ? (
-                <>
-                  <span className="inline-block h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2 align-[-0.125em]"></span>
-                  Testing IP Geolocation API...
-                </>
-              ) : (
-                'Test IP Geolocation API'
-              )}
-            </button>
-
-            <button
-              onClick={() => testApi('exchange')}
-              disabled={isLoading}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                isLoading && selectedApi === 'exchange'
-                  ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {isLoading && selectedApi === 'exchange' ? (
-                <>
-                  <span className="inline-block h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2 align-[-0.125em]"></span>
-                  Testing Exchange Rates API...
-                </>
-              ) : (
-                'Test Exchange Rates API'
-              )}
-            </button>
-
-            <button
-              onClick={() => testApi('phyllo')}
-              disabled={isLoading}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                isLoading && selectedApi === 'phyllo'
-                  ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {isLoading && selectedApi === 'phyllo' ? (
-                <>
-                  <span className="inline-block h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2 align-[-0.125em]"></span>
-                  Testing Phyllo API...
-                </>
-              ) : (
-                'Test Phyllo API'
-              )}
-            </button>
-
-            <button
-              onClick={() => testApi('giphy')}
-              disabled={isLoading}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                isLoading && selectedApi === 'giphy'
-                  ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {isLoading && selectedApi === 'giphy' ? (
-                <>
-                  <span className="inline-block h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2 align-[-0.125em]"></span>
-                  Testing GIPHY API...
-                </>
-              ) : (
-                'Test GIPHY API'
-              )}
-            </button>
-
-            <button
-              onClick={testAllApis}
-              disabled={isLoading}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                isLoading && selectedApi === 'all'
-                  ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {isLoading && selectedApi === 'all' ? (
-                <>
-                  <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 align-[-0.125em]"></span>
-                  Testing All APIs...
-                </>
-              ) : (
-                'Test All APIs'
-              )}
-            </button>
+          {/* API Selection */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-primary-color font-sora mb-3">Select API to Test</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <button
+                onClick={() => testApi('geolocation')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'geolocation' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'geolocation' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'IP Geolocation API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('exchange')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'exchange' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'exchange' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Exchange Rates API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('phyllo')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'phyllo' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'phyllo' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Phyllo API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('giphy')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'giphy' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'giphy' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'GIPHY API'
+                )}
+              </button>
+              
+              <button
+                onClick={() => testApi('cint')}
+                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
+                  selectedApi === 'cint' 
+                    ? 'bg-accent-color text-white border-accent-color' 
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'cint' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing...</span>
+                  </div>
+                ) : (
+                  'Cint Exchange API'
+                )}
+              </button>
+              
+              <button
+                onClick={testAllApis}
+                className={`px-4 py-3 rounded-md border font-work-sans font-bold transition-colors ${
+                  selectedApi === 'all' 
+                    ? 'bg-blue-600 text-white border-blue-600' 
+                    : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white'
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'all' ? (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    <span>Testing All...</span>
+                  </div>
+                ) : (
+                  'Test All APIs'
+                )}
+              </button>
+            </div>
+            
+            {isLoading && (
+              <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md">
+                <p className="text-sm font-medium">Testing in progress, please wait...</p>
+              </div>
+            )}
           </div>
         </div>
 
