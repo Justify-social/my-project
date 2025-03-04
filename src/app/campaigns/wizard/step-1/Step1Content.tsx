@@ -167,13 +167,13 @@ const defaultFormValues: FormValues = {
 const StyledField = ({ label, name, type = "text", as, children, required = false, icon, ...props }: any) => {
   return (
     <div className="mb-5">
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+      <label htmlFor={name} className="block text-sm font-medium text-primary-color mb-2 font-work-sans">
         {label}
-        {required && <span className="text-blue-500 ml-1">*</span>}
+        {required && <span className="text-accent-color ml-1">*</span>}
       </label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-2.5 text-gray-400">
+          <div className="absolute left-3 top-2.5 text-secondary-color">
             {icon}
           </div>
         )}
@@ -182,7 +182,7 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
             as={as}
             id={name}
             name={name}
-            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white`}
+            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans`}
             {...props}
           >
             {children}
@@ -192,16 +192,16 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
             type={type}
             id={name}
             name={name}
-            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white`}
+            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans`}
             {...props}
           />
         )}
         {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
         {type === "date" && !icon && (
-          <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+          <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
         )}
         {as === "select" && (
-          <ChevronDownIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
+          <ChevronDownIcon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color pointer-events-none" />
         )}
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
@@ -213,22 +213,19 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
 const DateField = ({ label, name, required = false, ...props }: any) => {
   return (
     <div className="mb-5">
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+      <label htmlFor={name} className="block text-sm font-medium text-primary-color mb-2 font-work-sans">
         {label}
-        {required && <span className="text-blue-500 ml-1">*</span>}
+        {required && <span className="text-accent-color ml-1">*</span>}
       </label>
       <div className="relative">
-        <div className="absolute left-3 top-2.5 text-gray-400">
-          <CalendarIcon className="w-5 h-5" />
-        </div>
         <Field
           type="date"
           id={name}
           name={name}
-          className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:top-0 [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:bottom-0 [&::-webkit-calendar-picker-indicator]:left-0 [&::-webkit-calendar-picker-indicator]:appearance-none"
-          placeholder="dd/mm/yyyy"
+          className="w-full p-2.5 pr-10 border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans"
           {...props}
         />
+        <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
     </div>
@@ -533,12 +530,12 @@ function FormContent() {
 
   if (error) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-red-800 font-semibold">Error</h3>
-        <p className="text-red-600">{error}</p>
+      <div className="p-6 bg-red-50 border border-red-200 rounded-md shadow-sm">
+        <h3 className="text-red-800 font-semibold font-sora">Error</h3>
+        <p className="text-red-600 font-work-sans">{error}</p>
         <button
           onClick={() => router.push('/campaigns')}
-          className="mt-4 btn btn-secondary"
+          className="mt-4 px-4 py-2 bg-accent-color text-white rounded-md hover:bg-accent-color/90 transition-colors duration-200 font-work-sans"
         >
           Return to Campaigns
         </button>
@@ -549,8 +546,8 @@ function FormContent() {
   return (
     <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
-        <p className="text-gray-500">Complete all required fields to create your campaign</p>
+        <h1 className="text-2xl font-semibold text-primary-color mb-2 font-sora">Campaign Creation</h1>
+        <p className="text-secondary-color font-work-sans">Complete all required fields to create your campaign</p>
       </div>
 
       <Formik
@@ -578,9 +575,9 @@ function FormContent() {
             <>
               <Form className="space-y-8">
                 {/* Campaign Details */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <BriefcaseIcon className="w-5 h-5 mr-2 text-blue-500" />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                    <BriefcaseIcon className="w-5 h-5 mr-2 text-accent-color" />
                     Campaign Details
                   </h2>
                   
@@ -628,9 +625,9 @@ function FormContent() {
                 </div>
 
                 {/* Primary Contact */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <UserCircleIcon className="w-5 h-5 mr-2 text-blue-500" />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                    <UserCircleIcon className="w-5 h-5 mr-2 text-accent-color" />
                     Primary Contact
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -674,10 +671,10 @@ function FormContent() {
                 </div>
 
                 {/* Secondary Contact */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <UserCircleIcon className="w-5 h-5 mr-2 text-blue-500" />
-                    Secondary Contact <span className="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                    <UserCircleIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    Secondary Contact <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <StyledField
@@ -716,11 +713,11 @@ function FormContent() {
                 </div>
 
                 {/* Additional Contacts */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <UserGroupIcon className="w-5 h-5 mr-2 text-blue-500" />
-                      Additional Contacts <span className="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <div className="flex justify-between items-center mb-5">
+                    <h2 className="text-lg font-bold font-sora text-primary-color flex items-center">
+                      <UserGroupIcon className="w-5 h-5 mr-2 text-accent-color" />
+                      Additional Contacts <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
                     </h2>
                     <button
                       type="button"
@@ -733,7 +730,7 @@ function FormContent() {
                         }];
                         setFieldValue('additionalContacts', contacts);
                       }}
-                      className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+                      className="flex items-center text-sm font-medium bg-white border border-accent-color text-accent-color hover:bg-accent-color/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans"
                     >
                       <PlusCircleIcon className="w-5 h-5 mr-1" />
                       Add Contact
@@ -742,7 +739,7 @@ function FormContent() {
 
                   {values.additionalContacts && values.additionalContacts.length > 0 ? (
                     values.additionalContacts.map((contact, index) => (
-                      <div key={index} className="mb-6 border border-gray-200 rounded-lg p-4 relative">
+                      <div key={index} className="mb-6 border border-divider-color rounded-lg p-4 relative shadow-sm bg-white">
                         <button
                           type="button"
                           onClick={() => {
@@ -750,13 +747,13 @@ function FormContent() {
                             contacts.splice(index, 1);
                             setFieldValue('additionalContacts', contacts);
                           }}
-                          className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                          className="absolute top-2 right-2 text-secondary-color hover:text-accent-color transition-colors duration-200"
                           aria-label="Remove contact"
                         >
                           <XCircleIcon className="w-5 h-5" />
                         </button>
 
-                        <h3 className="text-md font-medium text-gray-700 mb-3">Contact {index + 3}</h3>
+                        <h3 className="text-md font-medium text-primary-color mb-3 font-sora">Contact {index + 3}</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <StyledField
@@ -795,18 +792,18 @@ function FormContent() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <UserGroupIcon className="w-12 h-12 mx-auto text-gray-300" />
-                      <p className="mt-2">No additional contacts added yet.</p>
-                      <p className="text-sm">Click "Add Contact" to include more team members.</p>
+                    <div className="text-center py-8 border border-dashed border-divider-color rounded-lg bg-gray-50">
+                      <UserGroupIcon className="w-12 h-12 mx-auto text-accent-color opacity-70" />
+                      <p className="mt-2 text-primary-color font-sora">No additional contacts added yet.</p>
+                      <p className="text-sm text-secondary-color font-work-sans">Click "Add Contact" to include more team members.</p>
                     </div>
                   )}
                 </div>
 
                 {/* Budget Section */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <CurrencyDollarIcon className="w-5 h-5 mr-2 text-blue-500" />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                    <CurrencyDollarIcon className="w-5 h-5 mr-2 text-accent-color" />
                     Budget
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -844,9 +841,9 @@ function FormContent() {
                 </div>
 
                 {/* Influencers */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <GlobeAltIcon className="w-5 h-5 mr-2 text-blue-500" />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                    <GlobeAltIcon className="w-5 h-5 mr-2 text-accent-color" />
                     Influencers
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -873,14 +870,16 @@ function FormContent() {
                   </div>
                   
                   {values.influencerHandle && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg mt-4 border border-gray-200">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden flex-shrink-0"></div>
+                    <div className="flex items-center gap-3 p-4 bg-white rounded-lg mt-4 border border-divider-color shadow-sm">
+                      <div className="w-10 h-10 bg-accent-color/20 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        <UserCircleIcon className="w-6 h-6 text-accent-color" />
+                      </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Olivia Bennett</p>
-                        <p className="text-xs text-gray-500">@{values.influencerHandle}</p>
+                        <p className="text-sm font-medium text-primary-color font-work-sans">Olivia Bennett</p>
+                        <p className="text-xs text-secondary-color font-work-sans">@{values.influencerHandle}</p>
                       </div>
                       <div className="ml-auto flex items-center gap-2">
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                        <span className="text-xs bg-accent-color/10 text-accent-color px-2 py-1 rounded-full font-medium">
                           7k Followers
                         </span>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
