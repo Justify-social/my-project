@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface CampaignData {
   id?: string;
@@ -83,7 +84,79 @@ export default function DebugTools() {
     <div className="container mx-auto p-6 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6 text-[var(--primary-color)]">Campaign Wizard Debug Tools</h1>
       
-      <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 mb-6 shadow-sm">
+      {/* Debug Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Campaign Data Verification Tool */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Campaign Data Verification</h2>
+          <p className="text-[var(--secondary-color)] mb-4">
+            Verify campaign data stored in the database and identify issues with form submissions.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="#campaign-verify"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('campaign-verify')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Use Verification Tool
+            </Link>
+          </div>
+        </div>
+        
+        {/* API Verification Tool */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">API Verification</h2>
+          <p className="text-[var(--secondary-color)] mb-4">
+            Test and verify all external API integrations used in the Campaign Wizard.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/debug-tools/api-verification"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+            >
+              Open API Verification
+            </Link>
+          </div>
+        </div>
+        
+        {/* Debug Step Tool */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Debug Step</h2>
+          <p className="text-[var(--secondary-color)] mb-4">
+            View and validate step-by-step execution of the wizard including component renders.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/debug-tools/debug-step"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+            >
+              Open Debug Step
+            </Link>
+          </div>
+        </div>
+        
+        {/* Documentation */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Documentation</h2>
+          <p className="text-[var(--secondary-color)] mb-4">
+            Access technical documentation including API references and troubleshooting guides.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/documentation"
+              className="px-4 py-2 border border-[var(--divider-color)] text-[var(--primary-color)] rounded-md inline-block hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+            >
+              View Documentation
+            </Link>
+          </div>
+        </div>
+      </div>
+      
+      {/* Campaign Verification Tool */}
+      <div id="campaign-verify" className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 mb-6 shadow-sm">
         <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)]">Verify Campaign Data</h2>
         <p className="text-[var(--secondary-color)] mb-4">
           Enter a campaign ID to verify the data stored in the database. This tool helps identify issues
