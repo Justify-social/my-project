@@ -26,8 +26,7 @@ model CampaignWizard {
   primaryContact   Json
   secondaryContact Json?
   budget           Json
-  platform         Platform
-  influencerHandle String
+  influencers      Influencer[]
   step1Complete    Boolean  @default(false)
 
   // Step 2: Objectives
@@ -55,6 +54,20 @@ model CampaignWizard {
   history WizardHistory[]
 
   @@index([status, createdAt])
+}
+
+// New model for influencers
+model Influencer {
+  id          String         @id @default(uuid())
+  platform    Platform
+  handle      String
+  platformId  String?        // Stores the ID from the platform API
+  campaign    CampaignWizard @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId  String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([campaignId])
 }
 
 model WizardHistory {

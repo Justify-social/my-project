@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
             }
           },
           creativeAssets: true,
-          creativeRequirements: true
+          creativeRequirements: true,
+          influencers: true
         },
         orderBy: {
           createdAt: 'desc'
@@ -60,7 +61,8 @@ export async function GET(request: NextRequest) {
           }
         },
         creativeAssets: true,
-        creativeRequirements: true
+        creativeRequirements: true,
+        influencers: true
       }
     });
 
@@ -128,8 +130,9 @@ export async function POST(request: Request) {
       currency: body.currency as Currency,
       totalBudget: parseFloat(body.totalBudget),
       socialMediaBudget: parseFloat(body.socialMediaBudget),
-      platform: body.platform as Platform,
-      influencerHandle: body.influencerHandle,
+      // Removing single platform and influencer handle
+      // platform: body.platform as Platform,
+      // influencerHandle: body.influencerHandle,
       
       // Required fields from schema
       mainMessage: body.businessGoal || "",
@@ -148,21 +151,49 @@ export async function POST(request: Request) {
       secondaryContactId: secondaryContact.id,
       
       submissionStatus: "draft" as SubmissionStatus,
+      
+      // Exchange rate data if available
+      exchangeRateData: body.exchangeRateData ? JSON.stringify(body.exchangeRateData) : null,
     };
 
     console.log('Prepared campaign data:', campaignData);
 
-    const campaign = await prisma.campaignWizardSubmission.create({
-      data: campaignData,
-      include: {
-        primaryContact: true,
-        secondaryContact: true,
-      },
+    // Create the campaign and related influencers in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create the campaign first
+      const campaign = await tx.campaignWizardSubmission.create({
+        data: campaignData,
+        include: {
+          primaryContact: true,
+          secondaryContact: true,
+        },
+      });
+      
+      // Create influencers if provided
+      if (body.influencers && Array.isArray(body.influencers) && body.influencers.length > 0) {
+        console.log(`Creating ${body.influencers.length} influencers for campaign:`, body.influencers);
+        
+        // Create all influencers
+        for (const influencer of body.influencers) {
+          if (influencer.platform && influencer.handle) {
+            await tx.influencer.create({
+              data: {
+                platform: influencer.platform as Platform,
+                handle: influencer.handle,
+                platformId: influencer.id || null, // Store any platform-specific ID if available
+                campaignId: campaign.id
+              }
+            });
+          }
+        }
+      }
+      
+      return campaign;
     });
 
     return NextResponse.json({ 
       success: true, 
-      id: campaign.id 
+      id: result.id 
     });
 
   } catch (error) {
@@ -191,26 +222,58 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const updatedCampaign = await prisma.campaignWizardSubmission.update({
-      where: { id: campaignId },
-      data: {
-        campaignName: body.name,
-        description: body.businessGoal,
-        startDate: new Date(body.startDate),
-        endDate: new Date(body.endDate),
-        timeZone: body.timeZone,
-        currency: body.currency as Currency,
-        totalBudget: parseFloat(body.totalBudget),
-        socialMediaBudget: parseFloat(body.socialMediaBudget),
-        platform: body.platform as Platform,
-        influencerHandle: body.influencerHandle,
-        submissionStatus: "draft" as SubmissionStatus,
-      },
+    // Update campaign and influencers in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Update the main campaign data
+      const updatedCampaign = await tx.campaignWizardSubmission.update({
+        where: { id: campaignId },
+        data: {
+          campaignName: body.name,
+          description: body.businessGoal,
+          startDate: new Date(body.startDate),
+          endDate: new Date(body.endDate),
+          timeZone: body.timeZone,
+          currency: body.currency as Currency,
+          totalBudget: parseFloat(body.totalBudget),
+          socialMediaBudget: parseFloat(body.socialMediaBudget),
+          // Removing single platform and influencer handle
+          // platform: body.platform as Platform,
+          // influencerHandle: body.influencerHandle,
+          submissionStatus: "draft" as SubmissionStatus,
+          
+          // Exchange rate data if available
+          exchangeRateData: body.exchangeRateData ? JSON.stringify(body.exchangeRateData) : null,
+        },
+      });
+
+      // Handle influencers update if provided
+      if (body.influencers && Array.isArray(body.influencers)) {
+        // Delete existing influencers for this campaign
+        await tx.influencer.deleteMany({
+          where: { campaignId }
+        });
+        
+        // Create new influencers
+        for (const influencer of body.influencers) {
+          if (influencer.platform && influencer.handle) {
+            await tx.influencer.create({
+              data: {
+                platform: influencer.platform as Platform,
+                handle: influencer.handle,
+                platformId: influencer.id || null, // Store any platform-specific ID if available
+                campaignId
+              }
+            });
+          }
+        }
+      }
+      
+      return updatedCampaign;
     });
 
     return NextResponse.json({ 
       success: true, 
-      id: updatedCampaign.id 
+      id: result.id 
     });
 
   } catch (error) {
