@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, ChangeEvent, memo } from 'react';
+import React, { useState, ChangeEvent, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XCircleIcon, CheckCircleIcon, PhotoIcon, SwatchIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import NavigationTabs from '../components/NavigationTabs';
+import toast from 'react-hot-toast';
 
 // Enhanced UI Components
 const Card = memo(({ children }: { children: React.ReactNode }) => (
@@ -41,26 +42,27 @@ const BrandingSettingsPage: React.FC = () => {
   const router = useRouter();
 
   // Default values
-  const defaultPrimaryColour = "#00BFFF";
-  const defaultSecondaryColour = "#40404F";
+  const defaultPrimaryColor = "#00BFFF";
+  const defaultSecondaryColor = "#40404F";
   const defaultHeaderFont = "Work Sans";
   const defaultHeaderFontSize = "18px";
   const defaultBodyFont = "Work Sans";
   const defaultBodyFontSize = "14px";
 
   // Form states
-  const [primaryColour, setPrimaryColour] = useState(defaultPrimaryColour);
-  const [secondaryColour, setSecondaryColour] = useState(defaultSecondaryColour);
+  const [primaryColor, setPrimaryColor] = useState(defaultPrimaryColor);
+  const [secondaryColor, setSecondaryColor] = useState(defaultSecondaryColor);
   const [headerFont, setHeaderFont] = useState(defaultHeaderFont);
   const [headerFontSize, setHeaderFontSize] = useState(defaultHeaderFontSize);
   const [bodyFont, setBodyFont] = useState(defaultBodyFont);
   const [bodyFontSize, setBodyFontSize] = useState(defaultBodyFontSize);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [existingLogoUrl, setExistingLogoUrl] = useState<string | null>(null);
 
   // Error messages
-  const [primaryColourError, setPrimaryColourError] = useState("");
-  const [secondaryColourError, setSecondaryColourError] = useState("");
+  const [primaryColorError, setPrimaryColorError] = useState("");
+  const [secondaryColorError, setSecondaryColorError] = useState("");
   const [headerFontSizeError, setHeaderFontSizeError] = useState("");
   const [bodyFontSizeError, setBodyFontSizeError] = useState("");
   const [logoError, setLogoError] = useState("");
@@ -68,7 +70,48 @@ const BrandingSettingsPage: React.FC = () => {
   // Form status
   const [isDirty, setIsDirty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const [isFetching, setIsFetching] = useState(true);
+
+  // Fetch existing branding settings
+  useEffect(() => {
+    async function fetchBrandingSettings() {
+      try {
+        setIsFetching(true);
+        const response = await fetch('/api/settings/branding');
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Error fetching branding settings:', errorData);
+          toast.error('Failed to load branding settings');
+          return;
+        }
+        
+        const { data } = await response.json();
+        
+        if (data) {
+          setPrimaryColor(data.primaryColor || defaultPrimaryColor);
+          setSecondaryColor(data.secondaryColor || defaultSecondaryColor);
+          setHeaderFont(data.headerFont || defaultHeaderFont);
+          setHeaderFontSize(data.headerFontSize || defaultHeaderFontSize);
+          setBodyFont(data.bodyFont || defaultBodyFont);
+          setBodyFontSize(data.bodyFontSize || defaultBodyFontSize);
+          
+          // If there's an existing logo, set it
+          if (data.logoUrl) {
+            setExistingLogoUrl(data.logoUrl);
+            setLogoPreview(data.logoUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching branding settings:', error);
+        toast.error('Failed to load branding settings');
+      } finally {
+        setIsFetching(false);
+      }
+    }
+    
+    fetchBrandingSettings();
+  }, []);
 
   // Helper function to check if a hex code is valid
   const isValidHex = (value: string) => {
@@ -83,30 +126,30 @@ const BrandingSettingsPage: React.FC = () => {
   };
 
   // Handle primary colour input changes
-  const handlePrimaryColourChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handlePrimaryColorChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setPrimaryColour(value);
+    setPrimaryColor(value);
     setIsDirty(true);
     if (!value) {
-      setPrimaryColourError("Error: Colour selection is required.");
+      setPrimaryColorError("Error: Colour selection is required.");
     } else if (!isValidHex(value)) {
-      setPrimaryColourError("Error: Please enter a valid hex colour code.");
+      setPrimaryColorError("Error: Please enter a valid hex colour code.");
     } else {
-      setPrimaryColourError("");
+      setPrimaryColorError("");
     }
   };
 
   // Handle secondary colour input changes
-  const handleSecondaryColourChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSecondaryColorChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setSecondaryColour(value);
+    setSecondaryColor(value);
     setIsDirty(true);
     if (!value) {
-      setSecondaryColourError("Error: Colour selection is required.");
+      setSecondaryColorError("Error: Colour selection is required.");
     } else if (!isValidHex(value)) {
-      setSecondaryColourError("Error: Please enter a valid hex colour code.");
+      setSecondaryColorError("Error: Please enter a valid hex colour code.");
     } else {
-      setSecondaryColourError("");
+      setSecondaryColorError("");
     }
   };
 
@@ -180,50 +223,196 @@ const BrandingSettingsPage: React.FC = () => {
   const handleRemoveLogo = () => {
     setLogoFile(null);
     setLogoPreview(null);
+    setExistingLogoUrl(null);
     setIsDirty(true);
   };
 
   // Revert all changes when Cancel is clicked
   const handleCancel = () => {
-    setPrimaryColour(defaultPrimaryColour);
-    setSecondaryColour(defaultSecondaryColour);
+    setPrimaryColor(defaultPrimaryColor);
+    setSecondaryColor(defaultSecondaryColor);
     setHeaderFont(defaultHeaderFont);
     setHeaderFontSize(defaultHeaderFontSize);
     setBodyFont(defaultBodyFont);
     setBodyFontSize(defaultBodyFontSize);
     setLogoFile(null);
-    setLogoPreview(null);
-    setPrimaryColourError("");
-    setSecondaryColourError("");
+    setLogoPreview(existingLogoUrl);
+    setPrimaryColorError("");
+    setSecondaryColorError("");
     setHeaderFontSizeError("");
     setBodyFontSizeError("");
     setLogoError("");
     setIsDirty(false);
   };
 
-  // Handle Save Changes (simulate an async save)
-  const handleSaveChanges = () => {
+  // Handle Save Changes with actual API call
+  const handleSaveChanges = async () => {
     // Do not proceed if there are errors
     if (
-      primaryColourError ||
-      secondaryColourError ||
+      primaryColorError ||
+      secondaryColorError ||
       headerFontSizeError ||
       bodyFontSizeError ||
       logoError
     ) {
       return;
     }
-    setIsLoading(true);
-    // Simulate a network request
-    setTimeout(() => {
-      setIsLoading(false);
-      setToastMessage("Branding updated successfully!");
+    
+    try {
+      setIsLoading(true);
+      
+      // Create FormData for the request
+      const formData = new FormData();
+      formData.append('primaryColor', primaryColor);
+      formData.append('secondaryColor', secondaryColor);
+      formData.append('headerFont', headerFont);
+      formData.append('headerFontSize', headerFontSize);
+      formData.append('bodyFont', bodyFont);
+      formData.append('bodyFontSize', bodyFontSize);
+      
+      const hasLogoFile = !!logoFile;
+      let isLogoRemoved = false;
+      
+      // If we have a new logo file, append it
+      if (logoFile) {
+        formData.append('logoFile', logoFile);
+      }
+      // If logoPreview is null and existingLogoUrl was set, this means logo was removed
+      else if (existingLogoUrl && !logoPreview) {
+        formData.append('removeExistingLogo', 'true');
+        isLogoRemoved = true;
+      }
+      
+      console.log('Submitting branding form with data:', {
+        primaryColor,
+        secondaryColor,
+        headerFont,
+        headerFontSize,
+        bodyFont,
+        bodyFontSize,
+        logoFile: logoFile ? 'File present' : 'No file',
+        existingLogoUrl,
+        logoPreview: logoPreview ? 'Present' : 'Not present',
+        removeExistingLogo: isLogoRemoved
+      });
+      
+      // Make the API call
+      const response = await fetch('/api/settings/branding', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const responseText = await response.text();
+      console.log('Raw API response:', responseText);
+      
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse API response as JSON:', parseError);
+        throw new Error('Received invalid response from server');
+      }
+      
+      if (!response.ok) {
+        console.error('Error response from API:', result);
+        
+        // Special handling for the Prisma version conflict error with logo uploads
+        if (hasLogoFile && result.details && 
+            (result.details.includes('Cannot execute an Effect') || 
+             result.error === 'Failed to upload logo file')) {
+          
+          // Ask user if they want to continue without uploading the logo
+          if (window.confirm('There was an issue uploading the logo file due to a server configuration. Would you like to save the other branding changes without uploading a new logo?')) {
+            // Try again without the logo
+            const formDataWithoutLogo = new FormData();
+            formDataWithoutLogo.append('primaryColor', primaryColor);
+            formDataWithoutLogo.append('secondaryColor', secondaryColor);
+            formDataWithoutLogo.append('headerFont', headerFont);
+            formDataWithoutLogo.append('headerFontSize', headerFontSize);
+            formDataWithoutLogo.append('bodyFont', bodyFont);
+            formDataWithoutLogo.append('bodyFontSize', bodyFontSize);
+            
+            // If removing logo, still include that instruction
+            if (isLogoRemoved) {
+              formDataWithoutLogo.append('removeExistingLogo', 'true');
+            }
+            
+            console.log('Retrying without logo file');
+            
+            const retryResponse = await fetch('/api/settings/branding', {
+              method: 'POST',
+              body: formDataWithoutLogo,
+            });
+            
+            const retryResponseText = await retryResponse.text();
+            console.log('Retry response:', retryResponseText);
+            
+            try {
+              const retryResult = JSON.parse(retryResponseText);
+              
+              if (!retryResponse.ok) {
+                throw new Error(retryResult.error || retryResult.details || 'Failed to update branding settings');
+              }
+              
+              // If we're not removing the logo, restore the existing logo URL
+              if (!isLogoRemoved && existingLogoUrl) {
+                console.log('Restoring existing logo URL:', existingLogoUrl);
+                setLogoPreview(existingLogoUrl);
+              } else if (isLogoRemoved) {
+                // If we're removing the logo, clear the preview
+                setLogoPreview(null);
+                setExistingLogoUrl(null);
+              }
+              
+              setIsDirty(false);
+              toast.success('Branding updated successfully (without logo update)!');
+              setIsLoading(false);
+              return;
+            } catch (retryError) {
+              console.error('Error in retry:', retryError);
+              throw new Error('Failed to update branding settings even without logo');
+            }
+          }
+        }
+        
+        throw new Error(result.error || result.details || 'Failed to update branding settings');
+      }
+      
+      // Update the existing logo URL if a new one was uploaded
+      if (result.data.logoUrl) {
+        console.log('New logo URL received:', result.data.logoUrl);
+        setExistingLogoUrl(result.data.logoUrl);
+        setLogoPreview(result.data.logoUrl);
+        setLogoFile(null); // Clear the file input since the upload is complete
+      } else if (isLogoRemoved) {
+        // If we successfully removed the logo, make sure UI reflects that
+        console.log('Logo removed successfully');
+        setExistingLogoUrl(null);
+        setLogoPreview(null);
+      } else {
+        // No change to logo
+        console.log('No change to logo URL');
+      }
+      
       setIsDirty(false);
-      setTimeout(() => {
-        setToastMessage("");
-      }, 3000);
-    }, 2000);
+      toast.success('Branding updated successfully!');
+    } catch (error) {
+      console.error('Error saving branding settings:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update branding settings');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // Loading state
+  if (isFetching) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <ArrowPathIcon className="w-8 h-8 text-[var(--accent-color)] animate-spin" />
+        <span className="ml-2 text-[var(--primary-color)]">Loading branding settings...</span>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -397,21 +586,21 @@ const BrandingSettingsPage: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <input
                     type="color"
-                    value={primaryColour}
-                    onChange={handlePrimaryColourChange}
+                    value={primaryColor}
+                    onChange={handlePrimaryColorChange}
                     className="h-10 w-20 rounded cursor-pointer"
                   />
                   <input
                     type="text"
-                    value={primaryColour}
-                    onChange={handlePrimaryColourChange}
+                    value={primaryColor}
+                    onChange={handlePrimaryColorChange}
                     className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md 
                       focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="#000000"
                   />
                 </div>
-                {primaryColourError && (
-                  <p className="mt-1 text-sm text-red-600">{primaryColourError}</p>
+                {primaryColorError && (
+                  <p className="mt-1 text-sm text-red-600">{primaryColorError}</p>
                 )}
               </div>
               <div>
@@ -421,21 +610,21 @@ const BrandingSettingsPage: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <input
                     type="color"
-                    value={secondaryColour}
-                    onChange={handleSecondaryColourChange}
+                    value={secondaryColor}
+                    onChange={handleSecondaryColorChange}
                     className="h-10 w-20 rounded cursor-pointer"
                   />
                   <input
                     type="text"
-                    value={secondaryColour}
-                    onChange={handleSecondaryColourChange}
+                    value={secondaryColor}
+                    onChange={handleSecondaryColorChange}
                     className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md 
                       focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                     placeholder="#000000"
                   />
                 </div>
-                {secondaryColourError && (
-                  <p className="mt-1 text-sm text-red-600">{secondaryColourError}</p>
+                {secondaryColorError && (
+                  <p className="mt-1 text-sm text-red-600">{secondaryColorError}</p>
                 )}
               </div>
             </div>
@@ -520,22 +709,6 @@ const BrandingSettingsPage: React.FC = () => {
             </div>
           </Card>
         </div>
-
-        {/* Toast Message */}
-        <AnimatePresence>
-          {toastMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg 
-                shadow-lg flex items-center"
-            >
-              <CheckCircleIcon className="w-5 h-5 mr-2" />
-              {toastMessage}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </motion.div>
   );
