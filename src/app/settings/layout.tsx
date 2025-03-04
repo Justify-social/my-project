@@ -1,5 +1,6 @@
 import { ToastProvider } from '@/components/ui/toast';
 
+// This is a simplified layout without navigation items (Profile, Account, Team, Billing)
 export const metadata = {
   title: 'Settings',
   description: 'Manage your account settings',
