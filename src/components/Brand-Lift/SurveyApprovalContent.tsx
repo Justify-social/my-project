@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronRightIcon, ChevronDownIcon, PencilIcon, TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 
 // Define types for our component
 interface Reviewer {
@@ -41,6 +42,8 @@ interface Survey {
 
 export default function SurveyApprovalContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const surveyId = searchParams.get('id') || '1';
   
   // State for surveys and reviewers
   const [surveys, setSurveys] = useState<Survey[]>([
@@ -331,7 +334,12 @@ export default function SurveyApprovalContent() {
             
             <button 
               className="w-full py-3 bg-[var(--accent-color)] text-white rounded-md hover:bg-[rgba(0,191,255,0.8)] transition-colors font-medium"
-              onClick={() => console.log('Submit for data collection')}
+              onClick={() => {
+                // Show success message
+                toast.success('Survey submitted for data collection!');
+                // Redirect to the progress page with the same ID
+                router.push(`/brand-lift/progress?id=${surveyId}`);
+              }}
             >
               Submit for Data Collection
             </button>

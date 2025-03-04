@@ -223,6 +223,9 @@ export default function SurveyPreviewContent() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success('Survey shared successfully for review!');
       setIsShareModalOpen(false);
+      
+      // Navigate to the Survey Approval screen with the current survey ID
+      router.push(`/brand-lift/survey-approval?id=${surveyId}`);
     } catch (err) {
       console.error('Error sharing survey:', err);
       toast.error('Failed to share survey. Please try again.');

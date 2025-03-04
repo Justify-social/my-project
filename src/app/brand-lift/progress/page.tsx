@@ -1,9 +1,10 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-// Create a separate component for the content that uses useSearchParams
+// Updated ProgressContent component
 const ProgressContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,6 +25,13 @@ const ProgressContent = () => {
     }
   });
   
+  // Animation state
+  const [displayCount, setDisplayCount] = useState(143);
+  const [showReportButton, setShowReportButton] = useState(false);
+  
+  // Ref for animation
+  const animationFrameRef = useRef<number | null>(null);
+  
   // In a real app, this would fetch data from an API
   const [loading, setLoading] = useState(false);
   
@@ -42,6 +50,9 @@ const ProgressContent = () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         // Keep using the mock data for now
         setLoading(false);
+        
+        // Start the animation after data is loaded
+        startCountAnimation();
       } catch (error) {
         console.error('Error fetching campaign data:', error);
         setLoading(false);
@@ -49,7 +60,52 @@ const ProgressContent = () => {
     };
     
     fetchData();
+    
+    // Cleanup animation on unmount
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, [campaignId, router]);
+  
+  // Animation function
+  const startCountAnimation = () => {
+    let startTime: number | null = null;
+    const duration = 10000; // 10 seconds for animation (slower)
+    const startValue = 143;
+    const endValue = 300;
+    
+    const animateCount = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Calculate current value with easing
+      const currentValue = Math.floor(startValue + (endValue - startValue) * easeOutQuad(progress));
+      setDisplayCount(currentValue);
+      
+      // Update campaign data for progress bar calculation
+      setCampaignData(prev => ({
+        ...prev,
+        completionCount: currentValue
+      }));
+      
+      // Continue animation if not complete
+      if (progress < 1) {
+        animationFrameRef.current = requestAnimationFrame(animateCount);
+      } else {
+        // Show the report button when animation completes
+        setShowReportButton(true);
+      }
+    };
+    
+    // Start animation
+    animationFrameRef.current = requestAnimationFrame(animateCount);
+  };
+  
+  // Easing function for smoother animation
+  const easeOutQuad = (t: number) => t * (2 - t);
   
   const handleRefreshData = async () => {
     setLoading(true);
@@ -67,11 +123,15 @@ const ProgressContent = () => {
     router.push('/brand-lift');
   };
   
+  const handleSeeReport = () => {
+    router.push(`/brand-lift/report?id=${campaignId}`);
+  };
+  
   // Calculate progress percentage
   const progressPercentage = Math.floor((campaignData.completionCount / campaignData.targetCount) * 100);
   
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#f9fafb' }}>
+    <div className="min-h-screen w-full bg-white">
       {/* Header */}
       <div className="p-8 mb-6">
         <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-color)' }}>Brand Lift Progress</h1>
@@ -91,14 +151,18 @@ const ProgressContent = () => {
         
         {/* Study Status */}
         <div className="mb-8">
-          <p style={{ color: 'var(--secondary-color)' }} className="mb-4">your brand lift study is now live, we're collecting responses...</p>
+          <p style={{ color: 'var(--secondary-color)' }} className="mb-4">
+            {showReportButton 
+              ? "your brand lift study is complete! view full report below."
+              : "your brand lift study is now live, we're collecting responses..."}
+          </p>
           
           {/* Completion Summary */}
           <div style={{ backgroundColor: '#f9fafb' }} className="rounded-lg p-6">
             <div className="flex justify-between items-center mb-4">
               <span className="font-medium" style={{ color: 'var(--primary-color)' }}>Completion Summary</span>
               <div className="flex items-center">
-                <span style={{ color: 'var(--accent-color)' }} className="font-medium">{campaignData.completionCount}</span>
+                <span style={{ color: 'var(--accent-color)' }} className="font-medium">{displayCount}</span>
                 <span style={{ color: 'var(--secondary-color)' }} className="ml-1">of {campaignData.targetCount}</span>
               </div>
             </div>
@@ -106,7 +170,7 @@ const ProgressContent = () => {
             {/* Progress Bar */}
             <div className="w-full rounded-full h-2 mb-6" style={{ backgroundColor: 'var(--divider-color)' }}>
               <div 
-                className="rounded-full h-2" 
+                className="rounded-full h-2 transition-all duration-500" 
                 style={{ 
                   backgroundColor: 'var(--accent-color)',
                   width: `${progressPercentage}%` 
@@ -132,28 +196,51 @@ const ProgressContent = () => {
             
             {/* Note */}
             <div className="mt-6 p-3 rounded text-sm" style={{ backgroundColor: '#f1f5f9', color: 'var(--secondary-color)' }}>
-              full results become stable once target completes are reached.
+              {showReportButton 
+                ? "target completions reached. full results are now available."
+                : "full results become stable once target completes are reached."}
             </div>
           </div>
         </div>
         
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <button 
-            onClick={handleRefreshData}
-            disabled={loading}
-            className="px-6 py-3 text-white rounded-lg transition-colors disabled:opacity-70"
-            style={{ backgroundColor: '#4b5563', color: 'white' }}
-          >
-            {loading ? 'Refreshing...' : 'Refresh Data'}
-          </button>
-          <button 
-            onClick={handleReturnToDashboard}
-            className="px-6 py-3 text-white rounded-lg transition-colors"
-            style={{ backgroundColor: 'var(--accent-color)' }}
-          >
-            Return to Dashboard
-          </button>
+          {!showReportButton ? (
+            <>
+              <button 
+                onClick={handleReturnToDashboard}
+                className="px-6 py-3 text-white rounded-lg transition-colors"
+                style={{ backgroundColor: '#4b5563' }}
+              >
+                Return to Dashboard
+              </button>
+              <button 
+                onClick={handleRefreshData}
+                disabled={loading}
+                className="px-6 py-3 text-white rounded-lg transition-colors disabled:opacity-70"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                {loading ? 'Refreshing...' : 'Refresh Data'}
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={handleReturnToDashboard}
+                className="px-6 py-3 text-white rounded-lg transition-colors"
+                style={{ backgroundColor: '#4b5563' }}
+              >
+                Return to Dashboard
+              </button>
+              <button 
+                onClick={handleSeeReport}
+                className="px-6 py-3 text-white rounded-lg transition-colors"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                See Report
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -165,7 +252,7 @@ export default function BrandLiftProgressPage() {
   return (
     <Suspense 
       fallback={
-        <div className="min-h-screen w-full p-8" style={{ backgroundColor: '#f9fafb' }}>
+        <div className="min-h-screen w-full p-8 bg-white">
           <h1 className="text-2xl font-bold" style={{ color: 'var(--primary-color)' }}>Loading Progress...</h1>
         </div>
       }
