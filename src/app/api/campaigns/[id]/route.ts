@@ -163,6 +163,15 @@ export async function PATCH(
     const body = await request.json();
     console.log('Updating campaign:', campaignId, 'with data:', body);
 
+    // Process additional contacts if provided
+    let contactsUpdate = {};
+    if (body.additionalContacts && Array.isArray(body.additionalContacts)) {
+      contactsUpdate = {
+        contacts: JSON.stringify(body.additionalContacts)
+      };
+      console.log('Updating additional contacts:', contactsUpdate);
+    }
+
     // Create the update data object
     const updateData = {
       ...(body.name && { campaignName: body.name }),
@@ -175,6 +184,7 @@ export async function PATCH(
       ...(body.socialMediaBudget && { socialMediaBudget: parseFloat(body.socialMediaBudget) }),
       ...(body.platform && { platform: body.platform as Platform }),
       ...(body.influencerHandle && { influencerHandle: body.influencerHandle }),
+      ...contactsUpdate, // Add the contacts update if it exists
       submissionStatus: "draft" as SubmissionStatus,
     };
 

@@ -14,7 +14,29 @@ export interface ProgressBarProps {
   isFormValid?: boolean;
   isDirty?: boolean;
   isSaving?: boolean;
+  lastSaved?: Date | null;
 }
+
+// Helper function to format the date
+const formatLastSaved = (date: Date | null): string => {
+  if (!date) return 'Not saved yet';
+  
+  // If saved less than a minute ago, show "Just now"
+  const now = new Date();
+  const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (diffSeconds < 60) {
+    return 'Just now';
+  }
+  
+  if (diffSeconds < 3600) {
+    const minutes = Math.floor(diffSeconds / 60);
+    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  }
+  
+  // Format with hours and minutes
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
 
 const STEPS = [
   "Campaign Details",
@@ -34,6 +56,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   isFormValid = true,
   isDirty = true,
   isSaving = false,
+  lastSaved = null,
 }) => {
   const { isOpen } = useSidebar();
   const { position } = useSettingsPosition();
@@ -124,6 +147,23 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         </ul>
 
         <div className="flex space-x-2 px-4 h-full items-center flex-shrink-0">
+          {/* Last saved indicator */}
+          {lastSaved && (
+            <div className="text-xs text-gray-500 mr-3 hidden md:flex items-center">
+              {isSaving ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Saving...</span>
+                </span>
+              ) : (
+                <span>Last saved: {formatLastSaved(lastSaved)}</span>
+              )}
+            </div>
+          )}
+          
           {onBack && currentStep > 1 && (
             <button
               type="button"

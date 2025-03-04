@@ -527,8 +527,9 @@ function FormContent() {
   const handleSubmit = async (values: CreativeValues) => {
     try {
       setIsSaving(true);
+      setError(null);
       
-      // Validate assets
+      // Enhanced validation
       if (assets.length === 0) {
         throw new Error('Please upload at least one asset');
       }
@@ -538,7 +539,7 @@ function FormContent() {
         throw new Error('Please wait for all uploads to complete');
       }
 
-      // Validate all required fields
+      // More detailed validation with specific field errors
       const invalidAssets = assets.filter(a => {
         const details = a.details;
         return !details.assetName || 
@@ -550,37 +551,77 @@ function FormContent() {
 
       if (invalidAssets.length > 0) {
         console.log('Invalid assets:', invalidAssets);
-        throw new Error('Please complete all required fields for each asset');
+        
+        // Create a more detailed error message
+        const assetErrors = invalidAssets.map((asset, index) => {
+          const missing = [];
+          const details = asset.details;
+          
+          if (!details.assetName) missing.push('asset name');
+          if (!details.influencer) missing.push('influencer handle');
+          if (!details.whyInfluencer) missing.push('influencer rationale');
+          if (!details.budget || details.budget <= 0) missing.push('valid budget');
+          
+          return `Asset ${index + 1} (${asset.file.name}): Missing ${missing.join(', ')}`;
+        });
+        
+        throw new Error(`Please complete all required fields for each asset:\n${assetErrors.join('\n')}`);
       }
 
-      // Process assets for API submission
-      const processedAssets = assets.map(asset => ({
-        type: asset.file.type.includes('video') ? 'video' : 'image',
-        url: URL.createObjectURL(asset.file),
-        fileName: asset.file.name,
-        fileSize: asset.file.size,
-        assetName: asset.details.assetName,
-        influencerHandle: asset.details.influencer,
-        whyInfluencer: asset.details.whyInfluencer,
-        budget: parseFloat(asset.details.budget?.toString() || '0'),
+      // Process assets for API submission with additional error handling
+      const processedAssets = await Promise.all(assets.map(async (asset) => {
+        try {
+          // Create more reliable URLs for files
+          const fileURL = asset.file instanceof File 
+            ? URL.createObjectURL(asset.file) 
+            : String(asset.file);
+            
+          return {
+            type: asset.file.type.includes('video') ? 'video' : 'image',
+            url: fileURL,
+            fileName: asset.file.name,
+            fileSize: asset.file.size,
+            assetName: asset.details.assetName,
+            influencerHandle: asset.details.influencer,
+            influencerName: '', // Added for future use
+            influencerFollowers: '', // Added for future use
+            whyInfluencer: asset.details.whyInfluencer,
+            budget: parseFloat(asset.details.budget?.toString() || '0'),
+          };
+        } catch (err: any) {
+          console.error('Error processing asset:', asset, err);
+          throw new Error(`Error processing ${asset.file.name}: ${err.message || 'Unknown error'}`);
+        }
       }));
+
+      console.log('Saving creative assets to campaign:', campaignId);
+      console.log('Processed assets:', processedAssets);
 
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          creativeAssets: processedAssets
+          creativeAssets: processedAssets,
+          step: 4 // Added to track progress
         })
       });
 
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to save assets');
+        throw new Error(responseData.error || responseData.message || 'Failed to save assets');
       }
 
+      console.log('Save response:', responseData);
       toast.success('Assets saved successfully');
+      
+      // Proceed to next step
       router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to save assets');
+      console.error('Error saving assets:', error);
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }

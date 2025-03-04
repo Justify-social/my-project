@@ -21,7 +21,9 @@ import {
   ClockIcon,
   EnvelopeIcon,
   PhoneIcon,
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  UserGroupIcon,
+  XCircleIcon
 } from "@heroicons/react/24/outline";
 
 // Use an env variable to decide whether to disable validations.
@@ -94,6 +96,14 @@ const debugFormData = (values: any, isDraft: boolean) => {
   });
 };
 
+// First, update the FormValues interface to include additional contacts
+interface Contact {
+  firstName: string;
+  surname: string;
+  email: string;
+  position: string;
+}
+
 // Define the form values type
 interface FormValues {
   name: string;
@@ -101,18 +111,9 @@ interface FormValues {
   startDate: string;
   endDate: string;
   timeZone: string;
-  primaryContact: {
-    firstName: string;
-    surname: string;
-    email: string;
-    position: string;
-  };
-  secondaryContact: {
-    firstName: string;
-    surname: string;
-    email: string;
-    position: string;
-  };
+  primaryContact: Contact;
+  secondaryContact: Contact;
+  additionalContacts: Contact[];
   currency: string;
   totalBudget: string | number;
   socialMediaBudget: string | number;
@@ -141,7 +142,7 @@ const defaultFormValues: FormValues = {
   businessGoal: '',
   startDate: '',
   endDate: '',
-  timeZone: 'UTC',
+  timeZone: '',
   primaryContact: {
     firstName: '',
     surname: '',
@@ -154,9 +155,10 @@ const defaultFormValues: FormValues = {
     email: '',
     position: '',
   },
+  additionalContacts: [],
   currency: '',
-  totalBudget: 0,
-  socialMediaBudget: 0,
+  totalBudget: '',
+  socialMediaBudget: '',
   platform: '',
   influencerHandle: '',
 };
@@ -240,6 +242,44 @@ interface WizardData {
     description?: string;
   };
 }
+
+// Replace the ContactSchema and ValidationSchema with corrected versions
+const ContactSchema = Yup.object().shape({
+  firstName: Yup.string().optional(),
+  surname: Yup.string().optional(),
+  email: Yup.string().email('Invalid email').optional(),
+  position: Yup.string().optional(),
+});
+
+const PrimaryContactSchema = Yup.object().shape({
+  firstName: Yup.string().required('First name is required'),
+  surname: Yup.string().required('Last name is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  position: Yup.string().required('Position is required'),
+});
+
+const ValidationSchema = Yup.object().shape({
+  name: Yup.string().required('Campaign name is required'),
+  businessGoal: Yup.string().required('Business goal is required'),
+  startDate: Yup.date().required('Start date is required'),
+  endDate: Yup.date()
+    .required('End date is required')
+    .min(Yup.ref('startDate'), 'End date cannot be before start date'),
+  timeZone: Yup.string().required('Timezone is required'),
+  primaryContact: PrimaryContactSchema,
+  secondaryContact: ContactSchema,
+  additionalContacts: Yup.array().of(ContactSchema).default([]),
+  currency: Yup.string().required('Currency is required'),
+  totalBudget: Yup.number()
+    .required('Total budget is required')
+    .positive('Total budget must be positive'),
+  socialMediaBudget: Yup.number()
+    .required('Social media budget is required')
+    .positive('Social media budget must be positive')
+    .max(Yup.ref('totalBudget'), 'Social media budget cannot exceed total budget'),
+  platform: Yup.string().required('Platform is required'),
+  influencerHandle: Yup.string().required('Influencer handle is required'),
+});
 
 // Separate the search params logic into its own component
 function FormContent() {
@@ -338,39 +378,63 @@ function FormContent() {
     return defaultFormValues;
   }, [isEditing, campaignData, data]);
 
-  // Load campaign data when ID changes
+  // Update the useEffect to prevent infinite loops
   useEffect(() => {
     if (!campaignId) return;
+    
+    // Only load data if we haven't already loaded it
+    if (!isLoading && !campaignData) {
+      loadCampaignData();
+    }
+    // Make sure we only include dependencies that won't change frequently
+  }, [campaignId, isLoading, campaignData]);
 
-    const loadCampaignData = async () => {
-      setIsLoading(true);
-      setError(null);
+  // Update the loadCampaignData function to avoid updating formData in a way that causes loops
+  const loadCampaignData = async () => {
+    if (!campaignId) return;
 
-      try {
-        const response = await fetch(`/api/campaigns/${campaignId}`);
-        const result = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(result.error || 'Failed to load campaign');
-        }
-
-        // Make sure we're setting the complete campaign data
-        if (updateFormData) {
-          updateFormData(result.data || result.campaign);
-          toast.success('Campaign data loaded');
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to load campaign';
-        setError(message);
-        toast.error(message);
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch campaign data');
       }
-    };
 
-    loadCampaignData();
-  }, [campaignId, updateFormData]);
+      const campaignData = await response.json();
+      
+      // Parse contacts field to get additionalContacts if available
+      let additionalContacts = [];
+      if (campaignData.contacts) {
+        try {
+          const parsedContacts = JSON.parse(campaignData.contacts);
+          if (Array.isArray(parsedContacts)) {
+            additionalContacts = parsedContacts;
+          }
+        } catch (e) {
+          console.error('Error parsing additionalContacts:', e);
+        }
+      }
 
+      // We don't need to set initialValues here as it's handled by the useMemo above
+      // Just update the wizard context with the minimal necessary data
+      
+      // This was causing re-renders and potential loops
+      // updateFormData({
+      //   ...formData,
+      //   campaignId
+      // });
+      
+      toast.success('Campaign data loaded');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load campaign';
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Update handleSubmit function to include additionalContacts
   const handleSubmit = async (values: FormValues) => {
     try {
       setIsSubmitting(true);
@@ -396,12 +460,16 @@ function FormContent() {
         throw new Error(result.error || `Failed to ${isEditing ? 'update' : 'create'} campaign`);
       }
 
-      // Update form data with the new values
+      // Update form data correctly
       updateFormData({
-        ...formData,
-        step1: values,
-        campaignId: result.id || campaignId
+        campaignId: result.id || campaignId,
+        // Add any other fields needed in formData
       });
+
+      // Store additionalContacts in localStorage for recovery
+      if (values.additionalContacts && values.additionalContacts.length > 0) {
+        localStorage.setItem('additionalContacts', JSON.stringify(values.additionalContacts));
+      }
 
       toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
       router.push(`/campaigns/wizard/step-2?id=${result.id || campaignId}`);
@@ -487,11 +555,11 @@ function FormContent() {
 
       <Formik
         initialValues={initialValues}
-        validationSchema={OverviewSchema}
+        validationSchema={ValidationSchema}
         onSubmit={handleSubmit}
         enableReinitialize={true}
       >
-        {({ values, isValid, dirty, errors }) => {
+        {({ values, isValid, dirty, errors, setFieldValue }) => {
           // Add debug log for form values
           console.log('Form values:', values);
           
@@ -645,6 +713,94 @@ function FormContent() {
                       <option value={Position.VP}>{Position.VP}</option>
                     </StyledField>
                   </div>
+                </div>
+
+                {/* Additional Contacts */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <UserGroupIcon className="w-5 h-5 mr-2 text-blue-500" />
+                      Additional Contacts <span className="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const contacts = [...values.additionalContacts, {
+                          firstName: '',
+                          surname: '',
+                          email: '',
+                          position: '',
+                        }];
+                        setFieldValue('additionalContacts', contacts);
+                      }}
+                      className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      <PlusCircleIcon className="w-5 h-5 mr-1" />
+                      Add Contact
+                    </button>
+                  </div>
+
+                  {values.additionalContacts && values.additionalContacts.length > 0 ? (
+                    values.additionalContacts.map((contact, index) => (
+                      <div key={index} className="mb-6 border border-gray-200 rounded-lg p-4 relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const contacts = [...values.additionalContacts];
+                            contacts.splice(index, 1);
+                            setFieldValue('additionalContacts', contacts);
+                          }}
+                          className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                          aria-label="Remove contact"
+                        >
+                          <XCircleIcon className="w-5 h-5" />
+                        </button>
+
+                        <h3 className="text-md font-medium text-gray-700 mb-3">Contact {index + 3}</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <StyledField
+                            label="First Name"
+                            name={`additionalContacts.${index}.firstName`}
+                            placeholder="Enter first name"
+                            icon={<UserCircleIcon className="w-5 h-5" />}
+                          />
+                          <StyledField
+                            label="Last Name"
+                            name={`additionalContacts.${index}.surname`}
+                            placeholder="Enter last name"
+                            icon={<UserCircleIcon className="w-5 h-5" />}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                          <StyledField
+                            label="Email"
+                            name={`additionalContacts.${index}.email`}
+                            type="email"
+                            placeholder="email@example.com"
+                            icon={<EnvelopeIcon className="w-5 h-5" />}
+                          />
+                          <StyledField
+                            label="Position"
+                            name={`additionalContacts.${index}.position`}
+                            as="select"
+                            icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                          >
+                            <option value="">Select Position</option>
+                            <option value={Position.Manager}>{Position.Manager}</option>
+                            <option value={Position.Director}>{Position.Director}</option>
+                            <option value={Position.VP}>{Position.VP}</option>
+                          </StyledField>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <UserGroupIcon className="w-12 h-12 mx-auto text-gray-300" />
+                      <p className="mt-2">No additional contacts added yet.</p>
+                      <p className="text-sm">Click "Add Contact" to include more team members.</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Budget Section */}

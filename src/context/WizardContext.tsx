@@ -1,9 +1,10 @@
 // src/context/WizardContext.tsx
 "use client"; // Make sure this file is a client component if you're using Next.js 13 with the App Router.
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import debounce from 'lodash/debounce';
 
 // Define the shape of your wizard data.
 interface WizardData {
@@ -64,6 +65,10 @@ interface WizardContextType {
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
   resetForm: () => void;
+  saveProgress: (data: any) => Promise<boolean>;
+  lastSaved: Date | null;
+  autosaveEnabled: boolean;
+  setAutosaveEnabled: (enabled: boolean) => void;
 }
 
 // Default values for the wizard data.
@@ -130,14 +135,28 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     platform: '',
     influencerHandle: '',
   });
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autosaveEnabled, setAutosaveEnabled] = useState<boolean>(true);
 
   // Add debug log
   console.log('WizardProvider:', { campaignId, loading, campaignData });
 
+  // Load campaign data from API or localStorage
   useEffect(() => {
     async function loadCampaignData() {
       if (!campaignId) {
-        localStorage.removeItem('campaignData');
+        // Try to load from localStorage if no ID in URL
+        const savedData = localStorage.getItem('campaignData');
+        if (savedData) {
+          try {
+            const parsedData = JSON.parse(savedData);
+            setCampaignData(parsedData);
+            setLastSaved(new Date(parsedData.lastSaved || Date.now()));
+            console.log('Loaded campaign data from localStorage:', parsedData);
+          } catch (error) {
+            console.error('Error parsing saved campaign data:', error);
+          }
+        }
         setLoading(false);
         return;
       }
@@ -157,11 +176,31 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         const campaignData = data.campaign || data;
         setCampaignData(campaignData);
         
-        localStorage.setItem('campaignData', JSON.stringify(data));
+        // Save to localStorage for offline access
+        localStorage.setItem('campaignData', JSON.stringify({
+          ...campaignData,
+          lastSaved: new Date().toISOString()
+        }));
+        setLastSaved(new Date());
         
       } catch (error) {
         console.error('Error loading campaign:', error);
         toast.error('Failed to load campaign data');
+        
+        // Try loading from localStorage as a fallback
+        const savedData = localStorage.getItem('campaignData');
+        if (savedData) {
+          try {
+            const parsedData = JSON.parse(savedData);
+            if (parsedData.id === campaignId) {
+              setCampaignData(parsedData);
+              setLastSaved(new Date(parsedData.lastSaved || Date.now()));
+              toast.success('Loaded cached campaign data');
+            }
+          } catch (e) {
+            console.error('Error parsing saved campaign data:', e);
+          }
+        }
       } finally {
         setLoading(false);
       }
@@ -172,21 +211,96 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     }
   }, [campaignId]);
 
+  // Save progress function
+  const saveProgress = async (formData: any): Promise<boolean> => {
+    if (!campaignId) {
+      console.warn('Cannot save progress: No campaign ID available');
+      return false;
+    }
+    
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save progress');
+      }
+      
+      // Update last saved timestamp
+      setLastSaved(new Date());
+      
+      // Update localStorage
+      localStorage.setItem('campaignData', JSON.stringify({
+        ...campaignData,
+        ...formData,
+        lastSaved: new Date().toISOString()
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      return false;
+    }
+  };
+
+  // Debounced version of saveProgress for autosave
+  const debouncedSaveProgress = useCallback(
+    debounce((formData: any) => {
+      if (autosaveEnabled) {
+        saveProgress(formData)
+          .then(success => {
+            if (success) {
+              console.log('Autosaved campaign data:', formData);
+            }
+          })
+          .catch(error => {
+            console.error('Autosave error:', error);
+          });
+      }
+    }, 2000), // 2 second debounce
+    [campaignId, autosaveEnabled]
+  );
+
   const updateData = (
     section: keyof WizardData,
     newData: Partial<WizardData[keyof WizardData]>
   ) => {
-    setData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        ...newData,
-      },
-    }));
+    setData((prev) => {
+      const updatedData = {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          ...newData,
+        },
+      };
+      
+      // Trigger autosave
+      if (autosaveEnabled && campaignId) {
+        debouncedSaveProgress({
+          [section]: updatedData[section]
+        });
+      }
+      
+      return updatedData;
+    });
   };
 
   const updateFormData = (updates: Partial<FormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData(prev => {
+      const updatedFormData = { ...prev, ...updates };
+      
+      // Trigger autosave
+      if (autosaveEnabled && campaignId && Object.keys(updates).length > 0) {
+        debouncedSaveProgress(updatedFormData);
+      }
+      
+      return updatedFormData;
+    });
   };
 
   const resetForm = () => {
@@ -214,6 +328,10 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     formData,
     updateFormData,
     resetForm,
+    saveProgress,
+    lastSaved,
+    autosaveEnabled,
+    setAutosaveEnabled,
   };
 
   return (

@@ -110,6 +110,13 @@ export async function POST(request: Request) {
       },
     });
 
+    // Process additional contacts if any
+    let additionalContactsJSON = "[]";
+    if (body.additionalContacts && Array.isArray(body.additionalContacts) && body.additionalContacts.length > 0) {
+      additionalContactsJSON = JSON.stringify(body.additionalContacts);
+      console.log('Processing additional contacts:', additionalContactsJSON);
+    }
+
     // Prepare the campaign data
     const campaignData = {
       campaignName: body.name,
@@ -117,7 +124,7 @@ export async function POST(request: Request) {
       startDate: new Date(body.startDate),
       endDate: new Date(body.endDate),
       timeZone: body.timeZone,
-      contacts: body.contacts || "",
+      contacts: additionalContactsJSON, // Store additional contacts as JSON
       currency: body.currency as Currency,
       totalBudget: parseFloat(body.totalBudget),
       socialMediaBudget: parseFloat(body.socialMediaBudget),
