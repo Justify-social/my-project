@@ -15,6 +15,19 @@ export default function ApiVerificationPage() {
   const [results, setResults] = useState<ApiVerificationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedApi, setSelectedApi] = useState<string | null>(null);
+  const [lastTested, setLastTested] = useState<Record<string, Date | null>>({
+    geolocation: null,
+    exchange: null,
+    phyllo: null,
+    all: null
+  });
+
+  // API descriptions
+  const apiDescriptions = {
+    geolocation: "Used for timezone detection and location-based targeting in the Campaign Wizard. Essential for regional campaigns and local time display.",
+    exchange: "Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.",
+    phyllo: "Integrates with influencer platforms to verify accounts and retrieve metrics. Critical for influencer-based campaigns."
+  };
 
   // Test a specific API
   const testApi = async (apiName: string) => {
@@ -39,6 +52,10 @@ export default function ApiVerificationPage() {
       }
 
       setResults([result]);
+      setLastTested(prev => ({
+        ...prev,
+        [apiName]: new Date()
+      }));
     } catch (error) {
       console.error('Error testing API:', error);
     } finally {
@@ -54,6 +71,13 @@ export default function ApiVerificationPage() {
     try {
       const allResults = await verifyAllApis();
       setResults(allResults);
+      setLastTested(prev => ({
+        ...prev,
+        all: new Date(),
+        geolocation: new Date(),
+        exchange: new Date(),
+        phyllo: new Date()
+      }));
     } catch (error) {
       console.error('Error testing all APIs:', error);
     } finally {
@@ -101,6 +125,12 @@ export default function ApiVerificationPage() {
     }
   };
 
+  // Format timestamp as local date/time string
+  const formatTimestamp = (date: Date | null) => {
+    if (!date) return 'Never';
+    return date.toLocaleString();
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8">
@@ -128,7 +158,34 @@ export default function ApiVerificationPage() {
           </p>
         </div>
 
-        <div className="p-6 bg-gray-50 space-y-4">
+        <div className="p-6 bg-gray-50 space-y-6">
+          {/* API Information Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="font-medium text-gray-900">IP Geolocation API</h3>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.geolocation}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.geolocation)}</span>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="font-medium text-gray-900">Exchange Rates API</h3>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.exchange}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.exchange)}</span>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="font-medium text-gray-900">Phyllo API</h3>
+              <p className="text-sm text-gray-500 mt-1">{apiDescriptions.phyllo}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Last tested: <span className="font-medium">{formatTimestamp(lastTested.phyllo)}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => testApi('geolocation')}

@@ -224,7 +224,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
     const startTime = Date.now();
     
     // Make a test request to the Exchange Rates API
-    const response = await fetch('https://api.exchangerate.host/latest?base=USD', {
+    const response = await fetch('https://open.er-api.com/v6/latest/USD', {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -280,7 +280,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
       return {
         success: false,
         apiName,
-        endpoint: 'https://api.exchangerate.host/latest',
+        endpoint: 'https://open.er-api.com/v6/latest/USD',
         latency,
         error: {
           type: errorType,
@@ -295,7 +295,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
     const data = await response.json();
     
     // Check if the response has expected fields
-    if (!data.rates || !data.base) {
+    if (!data.rates || !data.base_code || Object.keys(data.rates).length === 0) {
       dbLogger.error(
         'API_VERIFICATION',
         `${apiName} verification failed: Missing expected fields in response`,
@@ -305,7 +305,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
       return {
         success: false,
         apiName,
-        endpoint: 'https://api.exchangerate.host/latest',
+        endpoint: 'https://open.er-api.com/v6/latest/USD',
         latency,
         error: {
           type: ApiErrorType.VALIDATION_ERROR,
@@ -330,7 +330,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
       return {
         success: false,
         apiName,
-        endpoint: 'https://api.exchangerate.host/latest',
+        endpoint: 'https://open.er-api.com/v6/latest/USD',
         latency,
         error: {
           type: ApiErrorType.VALIDATION_ERROR,
@@ -348,8 +348,8 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
       { 
         apiName, 
         latency,
-        base: data.base,
-        date: data.date,
+        base: data.base_code,
+        date: data.time_last_update_utc,
         currencies: Object.keys(data.rates).length
       }
     );
@@ -357,18 +357,12 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
     return {
       success: true,
       apiName,
-      endpoint: 'https://api.exchangerate.host/latest',
+      endpoint: 'https://open.er-api.com/v6/latest/USD',
       latency,
       data: {
-        base: data.base,
-        date: data.date,
-        rates: {
-          EUR: data.rates.EUR,
-          GBP: data.rates.GBP,
-          JPY: data.rates.JPY,
-          CAD: data.rates.CAD,
-          AUD: data.rates.AUD
-        }
+        base: data.base_code,
+        date: data.time_last_update_utc,
+        rates: data.rates
       }
     };
   } catch (error) {
@@ -395,7 +389,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
     return {
       success: false,
       apiName,
-      endpoint: 'https://api.exchangerate.host/latest',
+      endpoint: 'https://open.er-api.com/v6/latest/USD',
       error: {
         type: errorType,
         message: errorMessage,
@@ -423,14 +417,40 @@ export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
     
     const startTime = Date.now();
     
-    // In a real implementation, we would make an actual API call
+    // Check if Phyllo API credentials exist in environment variables
+    // Note: In a real implementation, these would be actual environment variables
+    const hasClientId = process.env.PHYLLO_CLIENT_ID !== undefined;
+    const hasClientSecret = process.env.PHYLLO_CLIENT_SECRET !== undefined;
+    
+    if (!hasClientId || !hasClientSecret) {
+      dbLogger.warn(
+        'API_VERIFICATION',
+        `${apiName} verification skipped: Missing credentials`,
+        { apiName, hasClientId, hasClientSecret }
+      );
+      
+      return {
+        success: false,
+        apiName,
+        endpoint: 'https://api.phyllo.com/v1/sdk-tokens',
+        error: {
+          type: ApiErrorType.AUTHENTICATION_ERROR,
+          message: 'Missing Phyllo API credentials in environment variables',
+          details: { hasClientId, hasClientSecret },
+          isRetryable: false
+        }
+      };
+    }
+    
+    // In a real implementation, we would make an actual API call to verify tokens
     // For now, we'll simulate an API call with a delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
     const latency = Date.now() - startTime;
     
     // For testing purposes, we'll simulate a successful response
-    // In production, this would be an actual API call
+    // In production, this would be an actual API call to:
+    // POST https://api.phyllo.com/v1/sdk-tokens
     
     // Log successful verification
     dbLogger.info(
@@ -446,7 +466,7 @@ export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
     return {
       success: true,
       apiName,
-      endpoint: 'https://api.phyllo.com/v1/test',
+      endpoint: 'https://api.phyllo.com/v1/sdk-tokens',
       latency,
       data: {
         environment: 'simulated',
@@ -470,7 +490,7 @@ export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
     return {
       success: false,
       apiName,
-      endpoint: 'https://api.phyllo.com/v1/test',
+      endpoint: 'https://api.phyllo.com/v1/sdk-tokens',
       error: {
         type: errorType,
         message: errorMessage,
