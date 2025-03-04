@@ -82,7 +82,7 @@ export default function DebugTools() {
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
-      <h1 className="text-3xl font-bold mb-6 text-[var(--primary-color)]">Campaign Wizard Debug Tools</h1>
+      <h1 className="text-3xl font-bold mb-6 text-[var(--primary-color)]">Debug Tools</h1>
       
       {/* Debug Tools Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -110,7 +110,7 @@ export default function DebugTools() {
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">API Verification</h2>
           <p className="text-[var(--secondary-color)] mb-4">
-            Test and verify all external API integrations used in the Campaign Wizard.
+            Test and verify all external API integrations used in Justify.
           </p>
           <div className="mt-4">
             <Link
