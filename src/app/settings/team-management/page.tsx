@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { XCircleIcon, ArrowPathIcon, CheckCircleIcon, PlusIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import NavigationTabs from '../components/NavigationTabs';
 import { toast } from 'react-hot-toast';
-import { useToast } from '@/components/ui/toast';
 import TeamDashboard from './dashboard';
 
 interface TeamMember {
@@ -58,7 +57,6 @@ const SectionHeader: React.FC<{
 
 const TeamManagementPage: React.FC = () => {
   const router = useRouter();
-  const toast = useToast();
 
   // Main states
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -86,7 +84,7 @@ const TeamManagementPage: React.FC = () => {
   const membersPerPage = 10;
 
   // Add this state near the top of your component
-  const [hasAttemptedSetup, setHasAttemptedSetup] = useState(false);
+  const [hasAttemptedSetup, setHasAttemptedSetup] = useState<boolean>(false);
   const [addingMember, setAddingMember] = useState(false);
 
   // New states for invitation
@@ -95,9 +93,47 @@ const TeamManagementPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('MEMBER');
 
+  // Auto setup database tables when component mounts
+  useEffect(() => {
+    const autoSetupTables = async () => {
+      try {
+        console.log('Auto-running setup to ensure team management tables exist...');
+        const response = await fetch('/api/settings/team/setup', {
+          method: 'POST',
+        });
+        
+        const data = await response.json();
+        console.log('Setup API response:', data);
+        
+        if (data.success) {
+          console.log('Team management tables are set up');
+          setHasAttemptedSetup(true);
+          // Fetch team data after successful setup
+          fetchTeamData();
+        } else {
+          console.error('Failed to set up team management tables:', data.error);
+          setHasAttemptedSetup(false);
+          setApiError('Failed to set up team management. Please try again later.');
+        }
+      } catch (error) {
+        console.error('Error setting up team management:', error);
+        setHasAttemptedSetup(false);
+        setApiError('Failed to set up team management. Please try again later.');
+      }
+    };
+    
+    autoSetupTables();
+  }, []);
+
   // Load team data on component mount
   useEffect(() => {
     fetchTeamData();
+  }, []);
+
+  // Ensure tables exist on component mount
+  useEffect(() => {
+    console.log('Auto setting up team management tables...');
+    setupTeamManagement();
   }, []);
 
   // Function to fetch team data from API
@@ -196,38 +232,70 @@ const TeamManagementPage: React.FC = () => {
 
   // Remove the member from the team
   const handleRemoveMember = async () => {
-    if (!memberToRemove && !invitationToRemove) return;
+    console.log('handleRemoveMember called with:', { 
+      memberToRemove: memberToRemove?.id, 
+      invitationToRemove: invitationToRemove?.id 
+    });
+    
+    if (!memberToRemove && !invitationToRemove) {
+      console.log('No member or invitation to remove');
+      return;
+    }
     
     setIsLoading(true);
     try {
-      let url = '/api/settings/team?';
-      
       if (memberToRemove) {
-        url += `memberId=${memberToRemove.id}`;
-      } else if (invitationToRemove) {
-        url += `invitationId=${invitationToRemove.id}`;
-      }
-      
-      const response = await fetch(url, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to remove team member or invitation');
-      }
-      
-      if (memberToRemove) {
+        // Handle team member removal using the original endpoint
+        const url = `/api/settings/team?memberId=${memberToRemove.id}`;
+        console.log('Making member removal request to:', url);
+        
+        const response = await fetch(url, {
+          method: 'DELETE',
+        });
+        
+        console.log('Member removal response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error('Failed to remove team member');
+        }
+        
         setTeamMembers(members => members.filter(m => m.id !== memberToRemove.id));
         setToastMessage(`${memberToRemove.name} has been removed from the team.`);
       } else if (invitationToRemove) {
+        // Handle invitation cancellation using the dedicated endpoint
+        console.log('Cancelling invitation with ID:', invitationToRemove.id);
+        
+        const response = await fetch(`/api/settings/team/invitation/${invitationToRemove.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('Cancel API response status:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Error response:', errorData);
+          throw new Error(`Failed to cancel invitation: ${errorData.error || 'Unknown error'}`);
+        }
+        
+        const data = await response.json();
+        console.log('Cancel API response data:', data);
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to cancel invitation');
+        }
+        
         setInvitations(invites => invites.filter(i => i.id !== invitationToRemove.id));
         setToastMessage(`Invitation to ${invitationToRemove.email} has been cancelled.`);
       }
       
     } catch (error) {
-      console.error('Error removing team member:', error);
-      setApiError("Failed to remove team member. Please try again.");
+      console.error('Error removing team member/cancelling invitation:', error);
+      setApiError(error instanceof Error ? error.message : "Failed to complete operation. Please try again.");
     } finally {
+      console.log('Cleanup after member/invitation removal');
       setIsLoading(false);
       setRemoveModalOpen(false);
       setMemberToRemove(null);
@@ -240,6 +308,7 @@ const TeamManagementPage: React.FC = () => {
   const cancelRemove = () => {
     setRemoveModalOpen(false);
     setMemberToRemove(null);
+    setInvitationToRemove(null);
   };
 
   // Handler to add a new team member
@@ -639,6 +708,7 @@ const TeamManagementPage: React.FC = () => {
                           <button
                             className="text-red-600 hover:text-red-900"
                             onClick={() => {
+                              console.log('Cancel button clicked for invitation:', invitation);
                               setInvitationToRemove(invitation);
                               setRemoveModalOpen(true);
                             }}
@@ -728,18 +798,30 @@ const TeamManagementPage: React.FC = () => {
         )}
 
         {/* Remove Member Modal */}
-        {removeModalOpen && memberToRemove && (
+        {removeModalOpen && (memberToRemove || invitationToRemove) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
             >
-              <h3 className="text-lg font-semibold mb-4">Remove Team Member</h3>
-              <p className="text-[var(--secondary-color)]">
-                Are you sure you want to remove {memberToRemove.name} from the team?
-                This action cannot be undone.
-              </p>
+              {memberToRemove ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">Remove Team Member</h3>
+                  <p className="text-[var(--secondary-color)]">
+                    Are you sure you want to remove {memberToRemove.name} from the team?
+                    This action cannot be undone.
+                  </p>
+                </>
+              ) : invitationToRemove && (
+                <>
+                  <h3 className="text-lg font-semibold mb-4">Cancel Invitation</h3>
+                  <p className="text-[var(--secondary-color)]">
+                    Are you sure you want to cancel the invitation sent to {invitationToRemove.email}?
+                    This action cannot be undone.
+                  </p>
+                </>
+              )}
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   onClick={cancelRemove}
@@ -753,7 +835,7 @@ const TeamManagementPage: React.FC = () => {
                   className="px-4 py-2 bg-red-600 text-white rounded-lg 
                     hover:bg-red-700 transition-colors duration-200"
                 >
-                  Remove
+                  {memberToRemove ? 'Remove' : 'Cancel Invitation'}
                 </button>
               </div>
             </motion.div>

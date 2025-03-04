@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/toast';
+import { toast } from 'react-hot-toast';
 
 interface TeamMember {
   id: string;
@@ -26,7 +26,6 @@ export default function TeamDashboard() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const toast = useToast();
 
   useEffect(() => {
     fetchTeamData();
@@ -37,16 +36,19 @@ export default function TeamDashboard() {
       setIsLoading(true);
       setError(null);
       
+      console.log('Fetching team data...');
       const response = await fetch('/api/settings/team');
+      console.log('API Response status:', response.status);
       const data = await response.json();
+      console.log('API Response data:', data);
       
       if (!data.success) {
         setError(data.error || 'Failed to fetch team data');
         return;
       }
       
-      setMembers(data.members || []);
-      setInvitations(data.invitations || []);
+      setMembers(data.data?.teamMembers || []);
+      setInvitations(data.data?.pendingInvitations || []);
     } catch (error) {
       console.error('Error fetching team data:', error);
       setError('Failed to fetch team data. Please try again later.');
@@ -57,19 +59,37 @@ export default function TeamDashboard() {
 
   const cancelInvitation = async (invitationId: string) => {
     try {
-      const response = await fetch(`/api/settings/team/invitation/${invitationId}`, {
+      console.log('Cancelling invitation with ID:', invitationId);
+      
+      // Make sure we're using the correct URL for the API
+      const apiUrl = `/api/settings/team/invitation/${invitationId}`;
+      console.log('Making DELETE request to:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+      
+      console.log('Cancel API response status:', response.status);
+      
+      // If response is not ok, throw error
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('Cancel API response data:', data);
       
       if (!data.success) {
         toast.error(data.error || 'Failed to cancel invitation');
         return;
       }
       
+      // Success! Show toast and refresh data
       toast.success('Invitation cancelled successfully');
-      // Refresh the team data
-      fetchTeamData();
+      fetchTeamData(); // Refresh the team data
     } catch (error) {
       console.error('Error cancelling invitation:', error);
       toast.error('Failed to cancel invitation. Please try again later.');

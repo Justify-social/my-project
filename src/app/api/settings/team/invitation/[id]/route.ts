@@ -43,7 +43,7 @@ export async function DELETE(
     // Cancel the invitation by updating its status
     await prisma.$executeRaw`
       UPDATE "TeamInvitation"
-      SET "status" = 'CANCELLED'
+      SET "status" = 'REJECTED'
       WHERE "id" = ${id}
     `;
 
