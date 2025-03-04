@@ -39,6 +39,8 @@ model CampaignWizardSubmission {
   secondaryContact     SecondaryContact      @relation("SecondaryContactSubmission", fields: [secondaryContactId], references: [id])
   creativeAssets       CreativeAsset[]
   creativeRequirements CreativeRequirement[]
+  userId               String?
+  user                 User?                 @relation(fields: [userId], references: [id])
 }
 
 model PrimaryContact {
@@ -187,4 +189,76 @@ enum CreativeAssetType {
 enum SubmissionStatus {
   draft
   submitted
+}
+
+model User {
+  id                String             @id @default(cuid())
+  auth0Id           String             @unique
+  email             String             @unique
+  firstName         String?
+  surname           String?
+  companyName       String?
+  profilePictureUrl String?
+  role              UserRole           @default(USER)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  notificationPrefs NotificationPrefs?
+  campaigns         CampaignWizardSubmission[]
+  teamInvitations   TeamInvitation[]   @relation("ReceivedInvitations")
+  sentInvitations   TeamInvitation[]   @relation("SentInvitations")
+  teamMembers       TeamMember[]       @relation("TeamOwner")
+  memberOf          TeamMember[]       @relation("TeamMember")
+}
+
+model NotificationPrefs {
+  id                    Int     @id @default(autoincrement())
+  userId                String  @unique
+  campaignUpdates       Boolean @default(false)
+  brandHealthAlerts     Boolean @default(false)
+  aiInsightNotifications Boolean @default(false)
+  user                  User    @relation(fields: [userId], references: [id])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  ownerId   String
+  memberId  String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation("TeamOwner", fields: [ownerId], references: [id])
+  member    User     @relation("TeamMember", fields: [memberId], references: [id])
+}
+
+model TeamInvitation {
+  id          String                @id @default(cuid())
+  email       String
+  status      InvitationStatus      @default(PENDING)
+  inviterId   String
+  inviteeId   String?
+  role        TeamRole              @default(MEMBER)
+  createdAt   DateTime              @default(now())
+  expiresAt   DateTime
+  inviter     User                  @relation("SentInvitations", fields: [inviterId], references: [id])
+  invitee     User?                 @relation("ReceivedInvitations", fields: [inviteeId], references: [id])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
 }

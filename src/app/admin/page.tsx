@@ -194,10 +194,26 @@ const SystemStatus = ({ services }: SystemStatusProps) => {
   );
 };
 
+// Add type for Auth0 user with extended properties
+interface Auth0User {
+  email?: string;
+  name?: string;
+  picture?: string;
+  sub?: string;
+  [key: string]: any; // Allow for custom Auth0 claims like roles
+}
+
 export default function AdminDashboard() {
-  const { user, isLoading, error } = useUser();
+  const { user, isLoading, error } = useUser() as { 
+    user: Auth0User | undefined;
+    isLoading: boolean;
+    error: Error | undefined;
+  };
   const [activities, setActivities] = useState<ActivityLogProps['activities']>([]);
   const [services, setServices] = useState<SystemStatusProps['services']>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [userError, setUserError] = useState<string | null>(null);
 
   useEffect(() => {
     // Mock data - replace with real API calls
@@ -245,7 +261,95 @@ export default function AdminDashboard() {
         lastIncident: undefined
       }
     ]);
-  }, []);
+
+    // Fetch users data for Super Admins
+    const fetchUsers = async () => {
+      // Check if user exists and has super_admin role
+      const userRoles = user?.['https://justify.social/roles'] as string[] || [];
+      
+      if (user && userRoles.includes('super_admin')) {
+        setIsLoadingUsers(true);
+        setUserError(null);
+        try {
+          const response = await fetch('/api/admin/users');
+          if (!response.ok) {
+            throw new Error('Failed to fetch users');
+          }
+          const data = await response.json();
+          setUsers(data.users || []);
+        } catch (err) {
+          console.error('Error fetching users:', err);
+          setUserError(err instanceof Error ? err.message : 'Failed to load users');
+          // Add some mock data for development
+          if (process.env.NODE_ENV === 'development') {
+            setUsers([
+              {
+                id: '1',
+                name: 'John Doe',
+                email: 'john@example.com',
+                companyId: 'comp1',
+                role: 'MEMBER',
+                lastLogin: '2024-03-10T12:00:00Z'
+              },
+              {
+                id: '2',
+                name: 'Jane Smith',
+                email: 'jane@example.com',
+                companyId: 'comp1',
+                role: 'ADMIN',
+                lastLogin: '2024-03-09T14:30:00Z'
+              }
+            ]);
+          }
+        } finally {
+          setIsLoadingUsers(false);
+        }
+      }
+    };
+
+    fetchUsers();
+  }, [user]);
+
+  // Handler for updating user role
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const response = await fetch('/api/admin/users/update-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          role: newRole
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update user role');
+      }
+
+      // Update local state
+      setUsers(users.map(u => 
+        u.id === userId ? { ...u, role: newRole } : u
+      ));
+
+      // Add to activity log
+      setActivities([
+        {
+          id: Date.now().toString(),
+          user: user?.email || 'Admin',
+          action: `Updated role for user ${userId} to ${newRole}`,
+          timestamp: new Date().toISOString(),
+          type: 'auth'
+        },
+        ...activities.slice(0, 9) // Keep only 10 most recent
+      ]);
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update user role');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -276,7 +380,7 @@ export default function AdminDashboard() {
   }
 
   // Safely access user roles
-  const userRoles = Array.isArray(user.roles) ? user.roles : [];
+  const userRoles = user ? (user['https://justify.social/roles'] as string[] || []) : [];
   const isSuperAdmin = userRoles.includes('super_admin');
 
   return (
@@ -334,6 +438,114 @@ export default function AdminDashboard() {
           color="orange"
         />
       </div>
+
+      {/* Super Admin: User Management Section */}
+      {isSuperAdmin && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-[var(--primary-color)] mb-4">
+            User & Team Management
+          </h2>
+          
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">User Access Management</h3>
+                {isLoadingUsers && (
+                  <div className="animate-spin h-5 w-5 border-2 border-[var(--accent-color)] border-t-transparent rounded-full"></div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {userError && (
+                <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4 text-sm">
+                  {userError}
+                </div>
+              )}
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-[var(--divider-color)]">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
+                        User
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
+                        Company
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
+                        Last Login
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-color)] uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--divider-color)]">
+                    {users.map((user) => (
+                      <tr key={user.id} className="hover:bg-[var(--background-color)]">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="ml-3">
+                              <div className="text-sm font-medium text-[var(--primary-color)]">
+                                {user.name}
+                              </div>
+                              <div className="text-sm text-[var(--secondary-color)]">
+                                {user.email}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--primary-color)]">
+                          {user.companyId}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <select
+                            className="text-sm rounded-md border border-[var(--divider-color)] px-2 py-1"
+                            value={user.role}
+                            onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                          >
+                            <option value="OWNER">Owner</option>
+                            <option value="ADMIN">Admin</option>
+                            <option value="MEMBER">Member</option>
+                            <option value="VIEWER">Viewer</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--primary-color)]">
+                          {new Date(user.lastLogin).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                          <button 
+                            className="text-[var(--accent-color)] hover:text-blue-800 mr-3"
+                            onClick={() => {/* View user details */}}
+                          >
+                            View
+                          </button>
+                          <button 
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => {/* Suspend user */}}
+                          >
+                            Suspend
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {users.length === 0 && !isLoadingUsers && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-[var(--secondary-color)]">
+                          No users found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">

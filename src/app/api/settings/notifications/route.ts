@@ -4,8 +4,21 @@ import { getSession } from '@/lib/session';
 
 export async function GET() {
   const session = await getSession();
-  console.log('Session in /api/settings/notifications:', session);
+  console.log('Session in notifications API:', session);
+  
   if (!session?.user?.sub) {
+    console.warn('No authenticated user found in session');
+    // For development, return mock notification preferences
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.json({
+        success: true,
+        data: {
+          campaignUpdates: false,
+          brandHealthAlerts: false,
+          aiInsightNotifications: false
+        }
+      });
+    }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   

@@ -1,26 +1,30 @@
 "use client";
 
-import React, { useState, ChangeEvent, useCallback, FormEvent, memo } from 'react';
+import React, { useState, ChangeEvent, useCallback, FormEvent, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XCircleIcon, ArrowPathIcon, CheckCircleIcon, PlusIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import NavigationTabs from '../components/NavigationTabs';
+import { toast } from 'react-hot-toast';
+import { useToast } from '@/components/ui/toast';
+import TeamDashboard from './dashboard';
 
 interface TeamMember {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  role: "Admin" | "User";
+  role: string;
   isEditingRole?: boolean;
   isCurrentUser?: boolean;
 }
 
-const initialTeamMembers: TeamMember[] = [
-  { id: 1, name: 'Sarah Johnson', email: 'sarah.johnson@example.com', role: 'Admin', isCurrentUser: false },
-  { id: 2, name: 'John Doe', email: 'john.doe@example.com', role: 'User', isCurrentUser: true },
-  { id: 3, name: 'Alice Smith', email: 'alice.smith@example.com', role: 'User', isCurrentUser: false },
-  // Add more dummy data as needed
-];
+interface Invitation {
+  id: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  expiresAt: string;
+}
 
 // Enhanced UI Components
 const Card = memo(({ children }: { children: React.ReactNode }) => (
@@ -54,28 +58,97 @@ const SectionHeader: React.FC<{
 
 const TeamManagementPage: React.FC = () => {
   const router = useRouter();
+  const toast = useToast();
 
   // Main states
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [apiError, setApiError] = useState("");
 
   // Modal states for removing a member
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
+  const [invitationToRemove, setInvitationToRemove] = useState<Invitation | null>(null);
 
   // Modal states for adding a new member
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState<"Admin" | "User">("User");
+  const [newMemberRole, setNewMemberRole] = useState<string>("MEMBER");
   const [addMemberError, setAddMemberError] = useState("");
 
   // Search and Pagination states
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const membersPerPage = 10;
+
+  // Add this state near the top of your component
+  const [hasAttemptedSetup, setHasAttemptedSetup] = useState(false);
+  const [addingMember, setAddingMember] = useState(false);
+
+  // New states for invitation
+  const [isInviting, setIsInviting] = useState(false);
+  const [isSettingUp, setIsSettingUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('MEMBER');
+
+  // Load team data on component mount
+  useEffect(() => {
+    fetchTeamData();
+  }, []);
+
+  // Function to fetch team data from API
+  const fetchTeamData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/settings/team');
+      if (!response.ok) {
+        throw new Error('Failed to fetch team data');
+      }
+      const data = await response.json();
+      
+      // Handle response with raw query results
+      if (data.data) {
+        // Transform team members data - raw query results won't have nested objects
+        const formattedMembers = data.data.teamMembers.map((member: any) => ({
+          id: member.memberId || member.id,
+          // Raw queries won't have nested member object with name fields
+          name: member.memberName || 'Team Member', // Fallback name
+          email: member.memberEmail || 'No email available',
+          role: member.role,
+          isCurrentUser: false // Set this based on current user info if available
+        }));
+        
+        // Handle raw invitation data
+        const formattedInvitations = data.data.pendingInvitations.map((invitation: any) => ({
+          id: invitation.id,
+          email: invitation.email,
+          role: invitation.role,
+          createdAt: invitation.createdAt,
+          expiresAt: invitation.expiresAt,
+        }));
+        
+        setTeamMembers(formattedMembers);
+        setInvitations(formattedInvitations);
+        setApiError("");
+      } else {
+        // Handle unexpected response format
+        setTeamMembers([]);
+        setInvitations([]);
+      }
+    } catch (error) {
+      console.error('Error fetching team data:', error);
+      setApiError("Failed to load team data. Please try again.");
+      // Set empty arrays to prevent rendering errors
+      setTeamMembers([]);
+      setInvitations([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter team members by search query (name or email)
   const filteredMembers = teamMembers.filter(member =>
@@ -88,29 +161,20 @@ const TeamManagementPage: React.FC = () => {
   const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
 
   // Handler to update a member's role (inline)
-  const handleRoleChange = (id: number, newRole: "Admin" | "User") => {
-    const member = teamMembers.find(m => m.id === id);
-    if (!member) return;
-    if (member.role === "Admin" && newRole === "User") {
-      const adminCount = teamMembers.filter(m => m.role === "Admin").length;
-      if (adminCount <= 1) {
-        alert("Error: At least one Admin is required.");
-        return;
-      }
-    }
-    const updatedMembers = teamMembers.map(m =>
-      m.id === id ? { ...m, role: newRole, isEditingRole: false } : m
+  const handleRoleChange = async (id: string, newRole: string) => {
+    // API implementation would go here
+    // For now, just update the UI
+    setTeamMembers(members => 
+      members.map(m => m.id === id ? { ...m, role: newRole } : m)
     );
-    setTeamMembers(updatedMembers);
     setIsDirty(true);
   };
 
   // Toggle the editing mode for a member's role
-  const toggleEditingRole = (id: number) => {
-    const updatedMembers = teamMembers.map(m =>
-      m.id === id ? { ...m, isEditingRole: !m.isEditingRole } : m
+  const toggleEditingRole = (id: string) => {
+    setTeamMembers(members => 
+      members.map(m => m.id === id ? { ...m, isEditingRole: !m.isEditingRole } : m)
     );
-    setTeamMembers(updatedMembers);
   };
 
   // Confirm removal of a member (open modal)
@@ -131,17 +195,45 @@ const TeamManagementPage: React.FC = () => {
   };
 
   // Remove the member from the team
-  const handleRemoveMember = () => {
-    if (!memberToRemove) return;
-    const updatedMembers = teamMembers.filter(m => m.id !== memberToRemove.id);
-    if (updatedMembers.filter(m => m.role === "Admin").length < 1) {
-      alert("Error: At least one Admin is required.");
-      return;
+  const handleRemoveMember = async () => {
+    if (!memberToRemove && !invitationToRemove) return;
+    
+    setIsLoading(true);
+    try {
+      let url = '/api/settings/team?';
+      
+      if (memberToRemove) {
+        url += `memberId=${memberToRemove.id}`;
+      } else if (invitationToRemove) {
+        url += `invitationId=${invitationToRemove.id}`;
+      }
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to remove team member or invitation');
+      }
+      
+      if (memberToRemove) {
+        setTeamMembers(members => members.filter(m => m.id !== memberToRemove.id));
+        setToastMessage(`${memberToRemove.name} has been removed from the team.`);
+      } else if (invitationToRemove) {
+        setInvitations(invites => invites.filter(i => i.id !== invitationToRemove.id));
+        setToastMessage(`Invitation to ${invitationToRemove.email} has been cancelled.`);
+      }
+      
+    } catch (error) {
+      console.error('Error removing team member:', error);
+      setApiError("Failed to remove team member. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setRemoveModalOpen(false);
+      setMemberToRemove(null);
+      setInvitationToRemove(null);
+      setTimeout(() => setToastMessage(""), 3000);
     }
-    setTeamMembers(updatedMembers);
-    setIsDirty(true);
-    setRemoveModalOpen(false);
-    setMemberToRemove(null);
   };
 
   // Cancel the removal modal
@@ -151,40 +243,40 @@ const TeamManagementPage: React.FC = () => {
   };
 
   // Handler to add a new team member
-  const handleAddMember = () => {
-    if (!newMemberName || !newMemberEmail) {
-      setAddMemberError("Error: Please fill all fields.");
-      return;
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsInviting(true);
+
+    try {
+      const response = await fetch('/api/settings/team', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, role }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        toast.error(data.error || 'Failed to invite team member');
+        return;
+      }
+
+      toast.success('Invitation sent successfully');
+      setEmail('');
+      // Refresh the team data (the dashboard will handle this)
+    } catch (error) {
+      console.error('Error inviting team member:', error);
+      toast.error('Failed to invite team member. Please try again later.');
+    } finally {
+      setIsInviting(false);
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newMemberEmail)) {
-      setAddMemberError("Error: Please enter a valid email address.");
-      return;
-    }
-    if (teamMembers.some(m => m.email.toLowerCase() === newMemberEmail.toLowerCase())) {
-      setAddMemberError("Error: This user is already part of the team.");
-      return;
-    }
-    const newMember: TeamMember = {
-      id: Date.now(),
-      name: newMemberName,
-      email: newMemberEmail,
-      role: newMemberRole,
-      isCurrentUser: false,
-    };
-    setTeamMembers([...teamMembers, newMember]);
-    setIsDirty(true);
-    setAddModalOpen(false);
-    setNewMemberName("");
-    setNewMemberEmail("");
-    setNewMemberRole("User");
-    setAddMemberError("");
-    alert(`${newMember.name} has been added to the team.`);
   };
 
   // Primary action: Cancel reverts changes back to the initial state.
   const handleCancel = () => {
-    setTeamMembers(initialTeamMembers);
+    fetchTeamData();
     setIsDirty(false);
   };
 
@@ -199,6 +291,42 @@ const TeamManagementPage: React.FC = () => {
       setTimeout(() => setToastMessage(""), 3000);
     }, 2000);
   };
+
+  // Add this new function to the component
+  const setupTeamManagement = async () => {
+    setIsLoading(true);
+    setApiError('');
+    
+    try {
+      const response = await fetch('/api/settings/team/setup', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to set up team management');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setToastMessage('Team management setup completed successfully!');
+        // Fetch team data again to see the new tables
+        await fetchTeamData();
+      } else {
+        setApiError(data.error || 'Setup failed for unknown reason');
+      }
+    } catch (error: any) {
+      console.error('Error setting up team management:', error);
+      setApiError(error.message || 'Failed to set up team management');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setToastMessage(''), 3000);
+    }
+  };
+
+  // Display a setup message if there's no team members or invitations
+  const showSetupNotice = teamMembers.length === 0 && invitations.length === 0 && !isLoading && !apiError;
 
   return (
     <motion.div
@@ -368,7 +496,7 @@ const TeamManagementPage: React.FC = () => {
                         {member.isEditingRole ? (
                           <select
                             value={member.role}
-                            onChange={(e) => handleRoleChange(member.id, e.target.value as "Admin" | "User")}
+                            onChange={(e) => handleRoleChange(member.id, e.target.value)}
                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-[var(--divider-color)] 
                               focus:outline-none focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] sm:text-sm rounded-md"
                           >
@@ -439,85 +567,163 @@ const TeamManagementPage: React.FC = () => {
               </div>
             )}
           </Card>
+
+          {showSetupNotice && (
+            <Card>
+              <div className="text-center py-10">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Team Management</h3>
+                <p className="text-gray-500 mb-6">
+                  You haven't added any team members yet. Use the "Add Team Member" button to invite colleagues to your team.
+                </p>
+                <p className="text-sm text-gray-400 mb-4">
+                  Note: This feature requires database tables to be set up.
+                </p>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  onClick={setupTeamManagement}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <ArrowPathIcon className="inline w-4 h-4 mr-2 animate-spin" />
+                      Setting up...
+                    </>
+                  ) : (
+                    'Initialize Team Management'
+                  )}
+                </button>
+              </div>
+            </Card>
+          )}
+
+          {/* Show API errors */}
+          {apiError && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {apiError}
+              <button 
+                className="ml-2 text-red-700" 
+                onClick={() => setApiError("")}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+          
+          {/* Show pending invitations */}
+          {invitations.length > 0 && (
+            <Card>
+              <SectionHeader 
+                icon={UserGroupIcon} 
+                title="Pending Invitations" 
+                description="These users have been invited but haven't joined yet."
+              />
+              <div className="mt-4">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {invitations.map((invitation) => (
+                      <tr key={invitation.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{invitation.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invitation.role}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(invitation.expiresAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => {
+                              setInvitationToRemove(invitation);
+                              setRemoveModalOpen(true);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Add Member Modal */}
         {addModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
-            >
-              <h3 className="text-lg font-semibold mb-4">Add Team Member</h3>
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+            <div className="bg-white p-5 rounded-lg shadow-lg w-full max-w-md mx-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Invite Team Member</h3>
+                <button onClick={() => setAddModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                  <XCircleIcon className="h-6 w-6" />
+                </button>
+              </div>
+              
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={newMemberName}
-                    onChange={(e) => setNewMemberName(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-                    placeholder="Enter name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
-                    Email
-                  </label>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                   <input
                     type="email"
+                    id="email"
                     value={newMemberEmail}
                     onChange={(e) => setNewMemberEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-                    placeholder="Enter email"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="colleague@example.com"
+                    disabled={addingMember}
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
-                    Role
-                  </label>
+                  <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
                   <select
+                    id="role"
                     value={newMemberRole}
-                    onChange={(e) => setNewMemberRole(e.target.value as "Admin" | "User")}
-                    className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
+                    onChange={(e) => setNewMemberRole(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    disabled={addingMember}
                   >
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="MEMBER">Member</option>
+                    <option value="VIEWER">Viewer</option>
                   </select>
                 </div>
+                
                 {addMemberError && (
-                  <p className="text-sm text-red-600">{addMemberError}</p>
+                  <div className="text-red-500 text-sm">{addMemberError}</div>
                 )}
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setAddModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    disabled={addingMember}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddMember}
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center"
+                    disabled={addingMember}
+                  >
+                    {addingMember ? (
+                      <>
+                        <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
+                        Inviting...
+                      </>
+                    ) : (
+                      'Invite Member'
+                    )}
+                  </button>
+                </div>
               </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  onClick={() => {
-                    setAddModalOpen(false);
-                    setNewMemberName("");
-                    setNewMemberEmail("");
-                    setNewMemberRole("User");
-                    setAddMemberError("");
-                  }}
-                  className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg 
-                    hover:bg-gray-200 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddMember}
-                  className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg 
-                    hover:bg-opacity-90 transition-colors duration-200"
-                >
-                  Add Member
-                </button>
-              </div>
-            </motion.div>
+            </div>
           </div>
         )}
 

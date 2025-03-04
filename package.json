@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "create-test-fixtures": "node cypress/fixtures/createTestImage.js",
+    "create-test-fixtures": "node --loader ts-node/esm cypress/fixtures/createTestImage.js",
     "postinstall": "prisma generate",
     "generate:campaign": "prisma generate --schema=./prisma/schemas/campaign-wizard.prisma",
     "migrate:campaign": "prisma migrate dev --schema=./prisma/schemas/campaign-wizard.prisma --name init_campaign_wizard"
@@ -18,6 +18,7 @@
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^4.1.0",
     "@prisma/client": "^6.4.0",
+    "@sendgrid/mail": "^8.1.4",
     "@sentry/nextjs": "^9.1.0",
     "@stripe/stripe-js": "^5.6.0",
     "@tanstack/react-query": "^5.66.9",

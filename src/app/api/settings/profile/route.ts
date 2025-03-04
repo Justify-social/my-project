@@ -1,11 +1,29 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/session';
-import { utapi } from 'uploadthing/server';
+import { UTApi } from 'uploadthing/server';
+
+const utapi = new UTApi();
 
 export async function GET() {
   const session = await getSession();
+  console.log('Session in profile API:', session);
+  
   if (!session?.user?.sub) {
+    console.warn('No authenticated user found in session');
+    // For development, return mock data
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.json({
+        success: true,
+        data: {
+          firstName: 'Development',
+          surname: 'User',
+          companyName: 'Dev Company',
+          email: 'dev@example.com',
+          profilePictureUrl: null
+        }
+      });
+    }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

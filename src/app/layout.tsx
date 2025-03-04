@@ -6,6 +6,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
+import { ToastProvider } from '@/components/ui/toast';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,11 +31,13 @@ export default function RootLayout({
             routerConfig={extractRouterConfig(ourFileRouter)}
           />
           <Toaster />
-          <ClientLayout>
-            <main className="min-h-screen bg-gray-100">
-              {children}
-            </main>
-          </ClientLayout>
+          <ToastProvider>
+            <ClientLayout>
+              <main className="min-h-screen bg-gray-100">
+                {children}
+              </main>
+            </ClientLayout>
+          </ToastProvider>
         </UserProvider>
       </body>
     </html>
