@@ -18,6 +18,7 @@ import {
   ChartData,
   ChartOptions
 } from 'chart.js';
+import { toast } from "react-hot-toast";
 
 // Register ChartJS components
 ChartJS.register(
@@ -131,9 +132,24 @@ const sectionVariants: Variants = {
  * Renders a row of key metric cards, each showing a "points" lift.
  */
 const KeyMetricsAtAGlance: React.FC<{ metrics: KeyMetric[] }> = ({ metrics }) => {
+  // Helper function to get appropriate KPI class based on metric label
+  const getKpiClass = (label: string) => {
+    const labelLower = label.toLowerCase();
+    
+    if (labelLower.includes('awareness')) return 'kpi-brand-awareness';
+    if (labelLower.includes('recall')) return 'kpi-ad-recall';
+    if (labelLower.includes('perception')) return 'kpi-message-association';
+    if (labelLower.includes('purchase intent')) return 'kpi-purchase-intent';
+    if (labelLower.includes('consideration')) return 'kpi-consideration';
+    if (labelLower.includes('preference')) return 'kpi-brand-preference';
+    
+    // Default fallback
+    return 'kpi-brand-awareness';
+  };
+
   return (
     <motion.div
-      className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       variants={sectionVariants}
       initial="hidden"
       whileInView="visible"
@@ -142,14 +158,28 @@ const KeyMetricsAtAGlance: React.FC<{ metrics: KeyMetric[] }> = ({ metrics }) =>
       {metrics.map((metric) => (
         <div
           key={metric.label}
-          className="bg-white rounded-lg shadow p-4 flex flex-col items-start"
+          className="bg-white border border-gray-100 rounded-lg p-5 flex flex-col items-start"
         >
-          <p className="text-sm" style={{ color: 'var(--secondary-color)' }}>{metric.label}</p>
-          <h3 className="text-2xl font-bold" style={{ color: 'var(--primary-color)' }}>
+          <div className="flex items-center justify-between w-full mb-1">
+            <div className="flex items-center">
+              <span className={`kpi-icon ${getKpiClass(metric.label)}`}></span>
+              <p className="text-sm font-medium" style={{ color: 'var(--secondary-color)' }}>{metric.label}</p>
+            </div>
+            {/* Info icon with tooltip */}
+            <div className="relative group">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 right-0 top-6">
+                Additional details about {metric.label.toLowerCase()} measurement and what it means for your brand.
+              </div>
+            </div>
+          </div>
+          <h3 className="text-3xl font-bold" style={{ color: 'var(--accent-color)' }}>
             +{metric.points}pts
           </h3>
           {metric.description && (
-            <p className="text-xs mt-1" style={{ color: 'var(--secondary-color)', opacity: 0.8 }}>{metric.description}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--secondary-color)', opacity: 0.8 }}>{metric.description}</p>
           )}
         </div>
       ))}
@@ -162,7 +192,7 @@ const KeyMetricsAtAGlance: React.FC<{ metrics: KeyMetric[] }> = ({ metrics }) =>
  * Displays a bar chart with a title.
  */
 const BarChartSection = ({ title, data, options }: { title: string; data: ChartData<'bar'>; options: ChartOptions<'bar'> }) => (
-  <div className="bg-white p-6 rounded-lg shadow">
+  <div className="bg-white rounded-lg border border-gray-100 p-6">
     <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--primary-color)' }}>{title}</h3>
     <div className="h-[300px]">
       <Bar data={data} options={options} />
@@ -189,20 +219,690 @@ const LineChartSection = ({ title, data, options }: { title: string; data: Chart
  */
 const WordCloudSection: React.FC = () => {
   return (
-    <motion.div
-      className="bg-white rounded-lg shadow p-4"
-      variants={sectionVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-    >
-      <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
-        Messaging Themes
-      </h2>
+    <div className="bg-white rounded-lg border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <span className="kpi-icon kpi-message-association"></span>
+          <h3 className="text-lg font-medium" style={{ color: 'var(--primary-color)' }}>
+            Messaging Themes
+          </h3>
+        </div>
+        <div className="relative group">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 right-0 top-6">
+            This word cloud shows the most common themes and associations from your brand lift study.
+          </div>
+        </div>
+      </div>
+      
+      <p className="text-sm mb-6" style={{ color: 'var(--secondary-color)' }}>
+        Key themes and associations from your brand lift study responses.
+      </p>
+      
       <div className="w-full h-64">
         <SimpleWordCloud />
       </div>
-    </motion.div>
+    </div>
+  );
+};
+
+// Add this new component for the Funnel Visualisation section
+const FunnelVisualisation: React.FC = () => {
+  // Helper function to get appropriate KPI class based on metric name
+  const getKpiClass = (name: string) => {
+    const nameLower = name.toLowerCase();
+    
+    if (nameLower.includes('awareness')) return 'kpi-brand-awareness';
+    if (nameLower.includes('recall')) return 'kpi-ad-recall';
+    if (nameLower.includes('consideration')) return 'kpi-consideration';
+    
+    // Default fallback
+    return 'kpi-brand-awareness';
+  };
+
+  const metrics = [
+    { 
+      name: 'Brand Awareness', 
+      control: 50, 
+      exposed: 80 
+    },
+    { 
+      name: 'Ad Recall', 
+      control: 60, 
+      exposed: 90 
+    },
+    { 
+      name: 'Consideration', 
+      control: 40, 
+      exposed: 70 
+    }
+  ];
+
+  // Prepare chart data
+  const chartData = {
+    labels: metrics.map(m => m.name),
+    datasets: [
+      {
+        label: 'Control',
+        data: metrics.map(m => m.control),
+        backgroundColor: 'rgba(59, 130, 246, 0.3)',
+        borderColor: 'rgba(59, 130, 246, 0.3)',
+        borderWidth: 1,
+        borderRadius: 4,
+        barPercentage: 0.5,
+      },
+      {
+        label: 'Exposed',
+        data: metrics.map(m => m.exposed),
+        backgroundColor: 'var(--accent-color)',
+        borderColor: 'var(--accent-color)',
+        borderWidth: 1,
+        borderRadius: 4,
+        barPercentage: 0.5,
+      }
+    ]
+  };
+
+  // Chart options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            return context.dataset.label + ': ' + context.raw + '%';
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          callback: function(value: any) {
+            return value + '%';
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        }
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-medium" style={{ color: 'var(--primary-color)' }}>
+          Funnel Visualisation
+        </h3>
+        <div className="relative group">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 right-0 top-6">
+            Compare the performance metrics between control and exposed groups across your marketing funnel.
+          </div>
+        </div>
+      </div>
+      
+      <p className="text-sm mb-6" style={{ color: 'var(--secondary-color)' }}>
+        Track how different KPIs progress through your marketing funnel, comparing control vs exposed groups.
+      </p>
+      
+      {/* Vertical bar chart */}
+      <div className="h-[400px] mt-6">
+        <Bar data={chartData} options={chartOptions as any} />
+      </div>
+      
+      {/* Lift indicators below the chart */}
+      <div className="grid grid-cols-3 gap-4 mt-8">
+        {metrics.map((metric) => (
+          <div key={metric.name} className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex items-center mb-2">
+              <span className={`kpi-icon ${getKpiClass(metric.name)}`}></span>
+              <span className="text-sm font-medium" style={{ color: 'var(--primary-color)' }}>
+                {metric.name}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs" style={{ color: 'var(--secondary-color)' }}>
+                Lift:
+              </span>
+              <span className="text-lg font-bold" style={{ color: 'green' }}>
+                +{metric.exposed - metric.control}%
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Demographic breakdown component
+const DemographicBreakdown: React.FC = () => {
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState('40-45');
+  const [selectedGenders, setSelectedGenders] = useState(['Male', 'Female']);
+  const [selectedPlatform, setSelectedPlatform] = useState('Instagram, TikTok');
+  const [activeMetric, setActiveMetric] = useState('Brand Awareness');
+  
+  // This would be dynamic data in a real implementation
+  const ageGroups = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+  
+  // Helper function to get appropriate KPI class
+  const getKpiClass = (name: string) => {
+    const nameLower = name.toLowerCase();
+    
+    if (nameLower.includes('awareness')) return 'kpi-brand-awareness';
+    if (nameLower.includes('recall')) return 'kpi-ad-recall';
+    if (nameLower.includes('consideration')) return 'kpi-consideration';
+    
+    // Default fallback
+    return 'kpi-brand-awareness';
+  };
+  
+  const toggleGender = (gender: string) => {
+    if (selectedGenders.includes(gender)) {
+      setSelectedGenders(selectedGenders.filter(g => g !== gender));
+    } else {
+      setSelectedGenders([...selectedGenders, gender]);
+    }
+  };
+
+  // Sample data for the demographic breakdown chart
+  const demographicData = {
+    labels: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+    datasets: [
+      {
+        label: 'Control',
+        data: [32, 43, 50, 47, 36, 30],
+        backgroundColor: 'rgba(59, 130, 246, 0.3)',
+        borderColor: 'rgba(59, 130, 246, 0.3)',
+        borderWidth: 1,
+        barPercentage: 0.7,
+        borderRadius: 4,
+      },
+      {
+        label: 'Exposed',
+        data: [55, 65, 72, 65, 58, 47],
+        backgroundColor: 'var(--accent-color)',
+        borderColor: 'var(--accent-color)',
+        borderWidth: 1,
+        barPercentage: 0.7,
+        borderRadius: 4,
+      }
+    ]
+  };
+
+  // Chart options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            return context.dataset.label + ': ' + context.raw + '%';
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          callback: function(value: any) {
+            return value + '%';
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        }
+      }
+    }
+  };
+  
+  return (
+    <div className="bg-white rounded-lg border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-medium" style={{ color: 'var(--primary-color)' }}>
+          Audience Breakdown
+        </h3>
+        <div className="relative group">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 right-0 top-6">
+            See how your brand lift metrics vary across different audience demographics.
+          </div>
+        </div>
+      </div>
+      
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--secondary-color)' }}>
+            Age Group
+          </label>
+          <select 
+            className="w-full p-2 border border-gray-200 rounded-md"
+            value={selectedAgeGroup}
+            onChange={(e) => setSelectedAgeGroup(e.target.value)}
+            aria-label="Select age group"
+          >
+            {ageGroups.map(age => (
+              <option key={age} value={age}>{age}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--secondary-color)' }}>
+            Gender
+          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input 
+                type="checkbox" 
+                checked={selectedGenders.includes('Male')} 
+                onChange={() => toggleGender('Male')}
+                className="mr-2"
+                aria-label="Select male gender"
+              />
+              <span className="text-sm" style={{ color: 'var(--primary-color)' }}>Male</span>
+            </label>
+            <label className="flex items-center">
+              <input 
+                type="checkbox" 
+                checked={selectedGenders.includes('Female')} 
+                onChange={() => toggleGender('Female')}
+                className="mr-2"
+                aria-label="Select female gender"
+              />
+              <span className="text-sm" style={{ color: 'var(--primary-color)' }}>Female</span>
+            </label>
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--secondary-color)' }}>
+            Platform
+          </label>
+          <select 
+            className="w-full p-2 border border-gray-200 rounded-md"
+            value={selectedPlatform}
+            onChange={(e) => setSelectedPlatform(e.target.value)}
+            aria-label="Select platform"
+          >
+            <option value="Instagram">Instagram</option>
+            <option value="TikTok">TikTok</option>
+            <option value="Instagram, TikTok">Instagram, TikTok</option>
+            <option value="Facebook">Facebook</option>
+            <option value="YouTube">YouTube</option>
+          </select>
+        </div>
+      </div>
+      
+      {/* Metric Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        {['Brand Awareness', 'Ad Recall', 'Consideration'].map(metric => (
+          <button
+            key={metric}
+            className={`flex items-center py-2 px-4 border-b-2 ${
+              activeMetric === metric 
+                ? 'border-blue-500 text-blue-600' 
+                : 'border-transparent hover:border-gray-300'
+            } transition-colors`}
+            onClick={() => setActiveMetric(metric)}
+            aria-label={`View ${metric} metrics`}
+          >
+            <span className={`kpi-icon ${getKpiClass(metric)}`}></span>
+            <span className="text-sm font-medium">{metric}</span>
+          </button>
+        ))}
+      </div>
+      
+      {/* Chart with vertical bars */}
+      <div className="h-[300px]">
+        <Bar data={demographicData} options={chartOptions as any} />
+      </div>
+      
+      <div className="mt-4 text-xs text-center" style={{ color: 'var(--secondary-color)' }}>
+        Age Distribution for {selectedGenders.join(' & ')} on {selectedPlatform}
+      </div>
+    </div>
+  );
+};
+
+// Survey questions component
+const SurveyQuestions: React.FC = () => {
+  const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
+  
+  const questions = [
+    {
+      id: 'q1',
+      text: 'How familiar are you with our brand?',
+      type: 'Single Choice',
+      category: 'Brand Awareness'
+    },
+    {
+      id: 'q2',
+      text: 'Which of the following messages do you associate with our brand?',
+      type: 'Multiple Choice',
+      category: 'Message Association'
+    },
+    {
+      id: 'q3',
+      text: 'How likely are you to consider our product for your next purchase?',
+      type: 'Single Choice',
+      category: 'Consideration'
+    }
+  ];
+  
+  const toggleQuestion = (questionId: string) => {
+    if (expandedQuestion === questionId) {
+      setExpandedQuestion(null);
+    } else {
+      setExpandedQuestion(questionId);
+    }
+  };
+  
+  // Helper function to get appropriate KPI class
+  const getKpiClass = (category: string) => {
+    const categoryLower = category.toLowerCase();
+    
+    if (categoryLower.includes('awareness')) return 'kpi-brand-awareness';
+    if (categoryLower.includes('association')) return 'kpi-message-association';
+    if (categoryLower.includes('consideration')) return 'kpi-consideration';
+    
+    // Default fallback
+    return 'kpi-brand-awareness';
+  };
+  
+  return (
+    <div className="bg-white rounded-lg border border-gray-100 p-6">
+      <h3 className="text-lg font-medium mb-6" style={{ color: 'var(--primary-color)' }}>
+        Survey Questions
+      </h3>
+      <p className="text-sm mb-6" style={{ color: 'var(--secondary-color)' }}>
+        Review the questions asked in your brand lift study and their response options.
+      </p>
+      
+      <div className="space-y-4">
+        {questions.map(question => (
+          <div key={question.id} className="border border-gray-100 rounded-lg overflow-hidden">
+            <div 
+              className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+              onClick={() => toggleQuestion(question.id)}
+            >
+              <div className="flex items-center">
+                <span className={`kpi-icon ${getKpiClass(question.category)}`}></span>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--primary-color)' }}>
+                    {question.text}
+                  </p>
+                  <div className="flex items-center mt-1">
+                    <span className="text-xs px-2 py-0.5 rounded-full mr-2" 
+                      style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-color)' }}>
+                      {question.category}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--secondary-color)' }}>
+                      {question.type}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-5 w-5 text-gray-400 transition-transform ${expandedQuestion === question.id ? 'transform rotate-180' : ''}`} 
+                viewBox="0 0 20 20" 
+                fill="currentColor"
+                aria-label={expandedQuestion === question.id ? "Collapse question" : "Expand question"}
+              >
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
+            
+            {expandedQuestion === question.id && (
+              <div className="p-4 bg-gray-50 border-t border-gray-100">
+                <h5 className="text-xs font-medium mb-2" style={{ color: 'var(--secondary-color)' }}>Response Options:</h5>
+                <ul className="space-y-1">
+                  {question.category === 'Brand Awareness' && (
+                    <>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Very familiar</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Somewhat familiar</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Not very familiar</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Not at all familiar</li>
+                    </>
+                  )}
+                  {question.category === 'Message Association' && (
+                    <>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• High quality</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Innovative</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Trustworthy</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Good value</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Environmentally friendly</li>
+                    </>
+                  )}
+                  {question.category === 'Consideration' && (
+                    <>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Very likely</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Somewhat likely</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Neither likely nor unlikely</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Somewhat unlikely</li>
+                      <li className="text-xs" style={{ color: 'var(--primary-color)' }}>• Very unlikely</li>
+                    </>
+                  )}
+                  {question.type === 'Multiple Choice' && (
+                    <li className="text-xs mt-2 italic" style={{ color: 'var(--secondary-color)' }}>
+                      Respondents can select multiple options
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// TimeChart component for tracking awareness over time
+const TimeChart: React.FC = () => {
+  // Sample data for the line chart
+  const data = {
+    labels: ['Day 1', 'Day 5', 'Day 10', 'Day 15', 'Day 20', 'Day 25', 'Day 30'],
+    datasets: [
+      {
+        label: 'Brand Awareness',
+        data: [8, 12, 16, 23, 18, 20, 22],
+        fill: true,
+        borderColor: 'var(--accent-color)',
+        backgroundColor: 'rgba(0, 191, 255, 0.1)',
+        tension: 0.4,
+        pointBackgroundColor: 'white',
+        pointBorderColor: 'var(--accent-color)',
+        pointBorderWidth: 2,
+        pointRadius: 4
+      }
+    ]
+  };
+  
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function(value: any) {
+            return value + '%';
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            return context.raw + '% awareness';
+          }
+        }
+      }
+    }
+  };
+  
+  return (
+    <div className="bg-white rounded-lg border border-gray-100 p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <span className="kpi-icon kpi-brand-awareness"></span>
+          <h3 className="text-lg font-medium" style={{ color: 'var(--primary-color)' }}>
+            Trend Over Time
+          </h3>
+        </div>
+        <div className="relative group">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 right-0 top-6">
+            This chart shows how brand awareness changed throughout your campaign period.
+          </div>
+        </div>
+      </div>
+      
+      <p className="text-sm mb-6" style={{ color: 'var(--secondary-color)' }}>
+        Brand awareness steadily improved across the 4-week campaign.
+      </p>
+      
+      <div className="h-[300px]">
+        <Line data={data} options={options as any} />
+      </div>
+    </div>
+  );
+};
+
+// Recommendations component
+const Recommendations: React.FC = () => {
+  const [recommendations] = useState([
+    {
+      id: 'rec1',
+      text: 'Keep brand logo visible in first 3 seconds for maximum recall',
+      completed: false,
+      category: 'Creative'
+    },
+    {
+      id: 'rec2',
+      text: 'Consider highlighting a unique product feature to boost consideration',
+      completed: true,
+      category: 'Messaging'
+    },
+    {
+      id: 'rec3',
+      text: 'Increase frequency on Instagram to improve awareness amongst 25-34 age group',
+      completed: false,
+      category: 'Media'
+    }
+  ]);
+  
+  return (
+    <div className="bg-blue-50 rounded-lg border border-blue-100 p-6">
+      <div className="flex items-start mb-6">
+        <div className="bg-blue-100 rounded-full p-2 mr-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" style={{ color: 'var(--accent-color)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-lg font-medium mb-1" style={{ color: 'var(--primary-color)' }}>
+            Recommendations
+          </h3>
+          <p className="text-sm" style={{ color: 'var(--secondary-color)' }}>
+            Based on your campaign performance analysis
+          </p>
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        {recommendations.map(rec => (
+          <div key={rec.id} className="flex items-start p-3 bg-white rounded-lg border border-gray-100">
+            <div className="mt-0.5 mr-3">
+              <input 
+                type="checkbox" 
+                checked={rec.completed} 
+                className="rounded text-blue-500 focus:ring-blue-500"
+                readOnly
+                aria-label={`Mark recommendation as completed: ${rec.text}`}
+              />
+            </div>
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--primary-color)' }}>
+                {rec.text}
+              </p>
+              <span className="inline-block px-2 py-0.5 mt-1 text-xs rounded-full" 
+                style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-color)' }}>
+                {rec.category}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <button 
+        className="mt-6 w-full py-2 text-sm font-medium rounded-md text-white"
+        style={{ backgroundColor: 'var(--accent-color)' }}
+      >
+        Apply Recommendations
+      </button>
+    </div>
   );
 };
 
@@ -222,178 +922,34 @@ function BrandLiftReportContent() {
     {
       label: "Brand Awareness",
       points: 20,
-      description: "Measured uplift in brand recognition"
+      description: "Measured uplift in brand recognition amongst your target audience"
     },
     {
       label: "Ad Recall",
       points: 15,
-      description: "Ability to remember our advertisement"
+      description: "Improvement in audience's ability to remember your advertisement"
     },
     {
       label: "Brand Perception",
       points: 12,
-      description: "Overall positivity toward the brand"
+      description: "Enhanced positive sentiment towards your brand"
     },
     {
       label: "Purchase Intent",
       points: 8,
-      description: "Likelihood of making a purchase"
+      description: "Increased likelihood of consumers making a purchase"
     }
   ]);
 
-  // Example bar chart data: "Overall Visualization"
-  const overallBarData: ChartData<"bar"> = {
-    labels: [
-      "Ad Recall",
-      "Brand Awareness",
-      "Brand Perception",
-      "Action Intent",
-      "Recommendation Intent",
-      "Advocacy"
-    ],
-    datasets: [
-      {
-        label: "Lift (Percentage Points)",
-        data: [15, 20, 12, 10, 9, 5],
-        backgroundColor: "var(--accent-color)",
-        borderRadius: 4
-      }
-    ]
-  };
-  const overallBarOptions: ChartOptions<"bar"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        min: 0,
-        ticks: {
-          color: "var(--secondary-color)"
-        },
-        grid: {
-          color: "var(--divider-color)"
-        }
-      },
-      x: {
-        ticks: {
-          color: "var(--secondary-color)"
-        },
-        grid: {
-          display: false
-        }
-      }
-    },
-    plugins: {
-      legend: { display: false },
-      title: {
-        display: false,
-        text: ""
-      }
-    }
-  };
-
-  // Example bar chart data for "Audience Breakdown"
-  const audienceBarData: ChartData<"bar"> = {
-    labels: ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
-    datasets: [
-      {
-        label: "Male",
-        data: [12, 15, 10, 8, 7, 5],
-        backgroundColor: "var(--accent-color)",
-        borderRadius: 4
-      },
-      {
-        label: "Female",
-        data: [14, 18, 11, 9, 8, 6],
-        backgroundColor: "rgba(0, 191, 255, 0.7)",
-        borderRadius: 4
-      }
-    ]
-  };
-  const audienceBarOptions: ChartOptions<"bar"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        min: 0,
-        ticks: {
-          color: "var(--secondary-color)"
-        },
-        grid: {
-          color: "var(--divider-color)"
-        }
-      },
-      x: {
-        ticks: {
-          color: "var(--secondary-color)"
-        },
-        grid: {
-          display: false
-        }
-      }
-    },
-    plugins: {
-      legend: { display: true },
-      title: {
-        display: false,
-        text: ""
-      }
-    }
-  };
-
-  // Example line chart data for "Brand Over Time"
-  const brandOverTimeData: ChartData<"line"> = {
-    labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"],
-    datasets: [
-      {
-        fill: true,
-        label: "Brand Awareness",
-        data: [10, 12, 15, 18, 20, 22],
-        borderColor: "var(--accent-color)",
-        backgroundColor: "rgba(0, 191, 255, 0.1)",
-        tension: 0.3
-      }
-    ]
-  };
-  const brandOverTimeOptions: ChartOptions<"line"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        min: 0,
-        ticks: {
-          color: "var(--secondary-color)"
-        },
-        grid: {
-          color: "var(--divider-color)"
-        }
-      },
-      x: {
-        ticks: {
-          color: "var(--secondary-color)"
-        },
-        grid: {
-          display: false
-        }
-      }
-    },
-    plugins: {
-      legend: { display: false },
-      title: {
-        display: false,
-        text: ""
-      }
-    }
-  };
-
   /**
-   * On mount, load campaignId from sessionStorage or query params
+   * useEffect - Fetch the campaign ID from URL or session storage
    */
   useEffect(() => {
     const savedCampaignId = sessionStorage.getItem("campaignId");
     if (savedCampaignId) {
       setCampaignId(savedCampaignId);
     } else {
-      const paramId = searchParams.get("campaignId");
+      const paramId = searchParams.get("id");
       if (paramId) {
         setCampaignId(paramId);
       }
@@ -401,110 +957,113 @@ function BrandLiftReportContent() {
   }, [searchParams]);
 
   /**
-   * handleExportVisualization
-   * Simulate exporting charts or data as a file.
+   * Handle export of visualisation for a campaign
    */
-  const handleExportVisualization = useCallback(() => {
-    alert("Visualization Exported (simulated)!");
+  const handleExportVisualisation = () => {
+    alert("Visualisation Exported (simulated)!");
     // In real usage, you could export an image or CSV data
-    // e.g., generate a PDF, call an API, or use chart.js methods
-  }, []);
+  };
 
   /**
-   * handleBackToDashboard
-   * Navigates user back to a hypothetical dashboard
+   * Handle navigation back to dashboard
    */
-  const handleBackToDashboard = useCallback(() => {
-    router.push(`/dashboard?campaignId=${campaignId}`);
-  }, [router, campaignId]);
+  const handleBackToDashboard = () => {
+    router.push("/brand-lift");
+  };
 
   return (
-    <main className="min-h-screen w-full bg-white p-4 md:p-8 lg:p-12">
-      {/* Page Title and Actions */}
-      <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--primary-color)' }}>
-            Brand Lift Results
-          </h1>
-          <p className="text-sm" style={{ color: 'var(--secondary-color)' }}>
-            Detailed insights into campaign performance and audience response.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={handleExportVisualization}
-            className="px-4 py-2 text-sm rounded hover:bg-gray-200" 
-            style={{ 
-              backgroundColor: 'var(--divider-color)', 
-              color: 'var(--primary-color)' 
-            }}
-          >
-            Export Visualization
-          </button>
-          <button
-            onClick={handleBackToDashboard}
-            className="px-4 py-2 text-sm rounded text-white" 
-            style={{ 
-              backgroundColor: 'var(--accent-color)',
-              color: 'white' 
-            }}
-          >
-            Back to Dashboard
-          </button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--primary-color)' }}>
+              Brand Lift Report
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--secondary-color)' }}>
+              Campaign ID: {campaignId || "BL-2023-0789"}
+            </p>
+          </div>
+          
+          <div className="flex mt-4 sm:mt-0 space-x-3">
+            <button
+              onClick={handleExportVisualisation}
+              className="px-4 py-2 bg-gray-100 rounded text-sm font-medium transition-colors hover:bg-gray-200"
+              style={{ color: 'var(--primary-color)' }}
+              aria-label="Export visualisation data"
+            >
+              Export Visualisation
+            </button>
+            <button
+              onClick={handleBackToDashboard}
+              className="px-4 py-2 rounded text-sm font-medium text-white transition-colors"
+              style={{ backgroundColor: 'var(--accent-color)' }}
+              aria-label="Return to dashboard"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto space-y-8">
+      
+      {/* Main content sections */}
+      <div className="space-y-8">
         {/* Key Metrics Section */}
-        <section>
-          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--primary-color)' }}>
+        <section aria-labelledby="key-metrics-heading">
+          <h2 id="key-metrics-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
             Key Metrics at a Glance
           </h2>
           <KeyMetricsAtAGlance metrics={keyMetrics} />
         </section>
-
-        {/* Overall Visualization */}
-        <section>
-          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--primary-color)' }}>
-            Overall Visualization
+        
+        {/* Funnel Visualisation */}
+        <section aria-labelledby="funnel-visualisation-heading">
+          <h2 id="funnel-visualisation-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
+            Funnel Performance
           </h2>
-          <BarChartSection
-            title="Overall Brand Lift by Metric"
-            data={overallBarData}
-            options={overallBarOptions}
-          />
+          <FunnelVisualisation />
         </section>
-
-        {/* Audience Breakdown */}
-        <section>
-          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--primary-color)' }}>
-            Audience Breakdown
+        
+        {/* Demographic Breakdown */}
+        <section aria-labelledby="demographic-breakdown-heading">
+          <h2 id="demographic-breakdown-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
+            Audience Insights
           </h2>
-          <BarChartSection
-            title="Demographic Insights"
-            data={audienceBarData}
-            options={audienceBarOptions}
-          />
+          <DemographicBreakdown />
         </section>
-
-        {/* Brand Over Time */}
-        <section>
-          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--primary-color)' }}>
-            Brand Over Time
+        
+        {/* Survey Questions */}
+        <section aria-labelledby="survey-questions-heading">
+          <h2 id="survey-questions-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
+            Survey Details
           </h2>
-          <LineChartSection
-            title="Tracking Awareness Growth"
-            data={brandOverTimeData}
-            options={brandOverTimeOptions}
-          />
+          <SurveyQuestions />
         </section>
-
-        {/* Messaging Themes */}
-        <section>
+        
+        {/* Time Chart */}
+        <section aria-labelledby="time-chart-heading">
+          <h2 id="time-chart-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
+            Performance Over Time
+          </h2>
+          <TimeChart />
+        </section>
+        
+        {/* Word Cloud */}
+        <section aria-labelledby="word-cloud-heading">
+          <h2 id="word-cloud-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
+            Brand Associations
+          </h2>
           <WordCloudSection />
         </section>
+        
+        {/* Recommendations */}
+        <section aria-labelledby="recommendations-heading">
+          <h2 id="recommendations-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
+            Actionable Insights
+          </h2>
+          <Recommendations />
+        </section>
       </div>
-    </main>
+    </div>
   );
 }
 
