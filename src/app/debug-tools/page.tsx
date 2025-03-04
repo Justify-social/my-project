@@ -30,6 +30,11 @@ export default function DebugTools() {
   const [results, setResults] = useState<CampaignData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadthingStatus, setUploadthingStatus] = useState<{loading: boolean, data: any | null, error: string | null}>({
+    loading: false,
+    data: null,
+    error: null
+  });
   const router = useRouter();
 
   const fetchCampaignData = async () => {
@@ -80,6 +85,35 @@ export default function DebugTools() {
     router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`);
   };
 
+  const testUploadthingApi = async () => {
+    setUploadthingStatus({
+      loading: true,
+      data: null,
+      error: null
+    });
+    
+    try {
+      const response = await fetch('/api/uploadthing/test');
+      if (!response.ok) {
+        throw new Error(`Error testing Uploadthing API: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setUploadthingStatus({
+        loading: false,
+        data,
+        error: null
+      });
+    } catch (error) {
+      setUploadthingStatus({
+        loading: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
+      console.error('Uploadthing test error:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6 text-[var(--primary-color)]">Debug Tools</h1>
@@ -120,6 +154,55 @@ export default function DebugTools() {
               Open API Verification
             </Link>
           </div>
+        </div>
+        
+        {/* Uploadthing Test Tool */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Uploadthing Test</h2>
+          <p className="text-[var(--secondary-color)] mb-4">
+            Test the Uploadthing API connection and file management capabilities.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              onClick={testUploadthingApi}
+              disabled={uploadthingStatus.loading}
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
+            >
+              {uploadthingStatus.loading ? 'Testing...' : 'Test Uploadthing API'}
+            </button>
+            <Link
+              href="/settings/test-upload"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+            >
+              File Uploader
+            </Link>
+          </div>
+          
+          {uploadthingStatus.data && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-md overflow-hidden">
+              <div className="flex items-center mb-2">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  uploadthingStatus.data.success && uploadthingStatus.data.apiStatus === 'connected'
+                    ? 'bg-green-100 text-green-800 border border-green-200'
+                    : 'bg-red-100 text-red-800 border border-red-200'
+                }`}>
+                  {uploadthingStatus.data.success && uploadthingStatus.data.apiStatus === 'connected' ? 'Connected' : 'Error'}
+                </span>
+                <span className="text-xs text-[var(--secondary-color)] ml-2">
+                  {uploadthingStatus.data.env?.UPLOADTHING_TOKEN ? 'API Token Present' : 'API Token Missing'}
+                </span>
+              </div>
+              <div className="text-xs overflow-auto max-h-40 bg-white p-2 rounded">
+                <pre>{JSON.stringify(uploadthingStatus.data, null, 2)}</pre>
+              </div>
+            </div>
+          )}
+          
+          {uploadthingStatus.error && (
+            <div className="mt-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-md text-sm">
+              {uploadthingStatus.error}
+            </div>
+          )}
         </div>
       </div>
       
