@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Formik, Form, Field, ErrorMessage, useFormikContext } from "formik";
+import { Formik, Form, Field, ErrorMessage, useFormikContext, FieldArray } from "formik";
 import * as Yup from "yup";
 import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
@@ -23,7 +23,12 @@ import {
   PhoneIcon,
   BuildingOfficeIcon,
   UserGroupIcon,
-  XCircleIcon
+  XCircleIcon,
+  TrashIcon,
+  CheckCircleIcon,
+  ArrowPathIcon,
+  UserIcon,
+  CheckBadgeIcon
 } from "@heroicons/react/24/outline";
 
 // Use an env variable to decide whether to disable validations.
@@ -104,6 +109,13 @@ interface Contact {
   position: string;
 }
 
+// Create an Influencer interface
+interface Influencer {
+  platform: string;
+  handle: string;
+  id?: string; // Optional for storing retrieved influencer ID
+}
+
 // Define the form values type
 interface FormValues {
   name: string;
@@ -117,8 +129,7 @@ interface FormValues {
   currency: string;
   totalBudget: string | number;
   socialMediaBudget: string | number;
-  platform: string;
-  influencerHandle: string;
+  influencers: Influencer[]; // Array of influencers instead of single platform/handle
 }
 
 // Add this FormData interface to match what's defined in the wizard context
@@ -131,8 +142,7 @@ interface FormData {
   currency: string;
   totalBudget: string | number;
   socialMediaBudget: string | number;
-  platform: string;
-  influencerHandle: string;
+  influencers: Influencer[]; // Update this to match FormValues
   campaignId?: string;
   overview?: any;
   id?: string;
@@ -163,8 +173,7 @@ const defaultFormValues: FormValues = {
   currency: '',
   totalBudget: '',
   socialMediaBudget: '',
-  platform: '',
-  influencerHandle: '',
+  influencers: [{ platform: '', handle: '' }] // Default with one empty influencer
 };
 
 // Custom Field Component for styled inputs
@@ -278,8 +287,12 @@ const ValidationSchema = Yup.object().shape({
     .required('Social media budget is required')
     .positive('Social media budget must be positive')
     .max(Yup.ref('totalBudget'), 'Social media budget cannot exceed total budget'),
-  platform: Yup.string().required('Platform is required'),
-  influencerHandle: Yup.string().required('Influencer handle is required'),
+  influencers: Yup.array().of(
+    Yup.object().shape({
+      platform: Yup.string().required('Platform is required'),
+      handle: Yup.string().required('Influencer handle is required')
+    })
+  ).min(1, 'At least one influencer is required'),
 });
 
 /**
@@ -642,108 +655,276 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
   }
 }
 
-// Add this as a component to display influencer data
-const InfluencerPreview = ({ platform, handle }: { platform: string, handle: string }) => {
-  const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
+// Add a debounce utility function
+const debounce = (func: Function, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+// Create a new component for influencer entries
+const InfluencerEntry = ({ index, remove, arrayHelpers }: { index: number, remove: () => void, arrayHelpers: any }) => {
+  const { values, setFieldValue, errors, touched } = useFormikContext<FormValues>();
+  const influencer = values.influencers[index];
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<InfluencerData | null>(null);
+  const [lastValidated, setLastValidated] = useState({ platform: '', handle: '' });
+
+  // Create a debounced validation function
+  const debouncedValidate = useRef(
+    debounce(async (platform: string, handle: string) => {
+      if (!platform || !handle || handle.length < 3) return;
+      
+      // Don't revalidate if nothing changed
+      if (platform === lastValidated.platform && handle === lastValidated.handle) return;
+      
+      setIsValidating(true);
+      try {
+        const result = await validateInfluencerHandle(platform, handle);
+        setValidationResult(result);
+        setLastValidated({ platform, handle });
+        
+        // If validation succeeded, store the influencer ID
+        if (result) {
+          setFieldValue(`influencers[${index}].id`, result.id);
+        }
+      } catch (error) {
+        console.error("Error validating influencer:", error);
+      } finally {
+        setIsValidating(false);
+      }
+    }, 800) // 800ms debounce delay
+  ).current;
+
+  // Trigger validation when platform or handle changes
   useEffect(() => {
-    if (!platform || !handle) {
-      setInfluencerData(null);
-      setError(null);
+    if (influencer.platform && influencer.handle && influencer.handle.length >= 3) {
+      debouncedValidate(influencer.platform, influencer.handle);
+    } else {
+      // Reset validation if handle is cleared
+      if (validationResult && (!influencer.handle || influencer.handle.length < 3)) {
+        setValidationResult(null);
+      }
+    }
+  }, [influencer.platform, influencer.handle, debouncedValidate]);
+
+  const hasError = touched.influencers?.[index] && (
+    (errors.influencers?.[index] as any)?.platform || 
+    (errors.influencers?.[index] as any)?.handle
+  );
+
+  return (
+    <div className="bg-white rounded-lg border border-divider-color p-4 mb-4">
+      <div className="flex justify-between items-center mb-3">
+        <h4 className="text-primary-color font-medium">Influencer #{index + 1}</h4>
+        {index > 0 && (
+          <button
+            type="button"
+            onClick={remove}
+            className="text-red-500 hover:text-red-700"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-primary-color mb-2">
+            Platform <span className="text-accent-color">*</span>
+          </label>
+          <Field
+            name={`influencers[${index}].platform`}
+            as="select"
+            className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color ${
+              (errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform
+                ? 'border-red-500'
+                : 'border-gray-300'
+            }`}
+          >
+            <option value="">Select platform</option>
+            <option value={Platform.Instagram}>Instagram</option>
+            <option value={Platform.YouTube}>YouTube</option>
+            <option value={Platform.TikTok}>TikTok</option>
+          </Field>
+          <ErrorMessage
+            name={`influencers[${index}].platform`}
+            component="div"
+            className="text-red-500 text-sm mt-1"
+          />
+        </div>
+        
+        <div>
+          <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-primary-color mb-2">
+            Influencer Handle <span className="text-accent-color">*</span>
+          </label>
+          <div className="relative">
+            <Field
+              name={`influencers[${index}].handle`}
+              type="text"
+              placeholder="e.g. @username"
+              className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color ${
+                (errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle
+                  ? 'border-red-500'
+                  : 'border-gray-300'
+              }`}
+            />
+            {isValidating && (
+              <div className="absolute right-2 top-2">
+                <ArrowPathIcon className="h-5 w-5 text-primary-color animate-spin" />
+              </div>
+            )}
+          </div>
+          <ErrorMessage
+            name={`influencers[${index}].handle`}
+            component="div"
+            className="text-red-500 text-sm mt-1"
+          />
+          {!isValidating && influencer.handle && influencer.handle.length < 3 && (
+            <div className="text-xs text-gray-500 mt-1">Type at least 3 characters to search</div>
+          )}
+        </div>
+      </div>
+      
+      {isValidating && (
+        <div className="mt-3 text-primary-color flex items-center">
+          <span className="animate-spin mr-2">
+            <ArrowPathIcon className="h-4 w-4" />
+          </span>
+          Validating influencer...
+        </div>
+      )}
+      
+      {validationResult && (
+        <div className="mt-3">
+          <InfluencerPreview 
+            platform={influencer.platform} 
+            handle={influencer.handle} 
+            data={validationResult} 
+          />
+        </div>
+      )}
+      
+      {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && (
+        <div className="mt-3 text-amber-600 text-sm">
+          No data found for this influencer.
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Update the InfluencerPreview component to accept data directly
+const InfluencerPreview = ({ 
+  platform, 
+  handle, 
+  data 
+}: { 
+  platform: string, 
+  handle: string,
+  data?: InfluencerData 
+}) => {
+  const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data) {
+      setInfluencerData(data);
       return;
     }
     
-    setLoading(true);
-    setError(null);
-    
-    validateInfluencerHandle(platform, handle)
-      .then(data => {
-        setInfluencerData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to validate influencer');
-        setInfluencerData(null);
-        setLoading(false);
-      });
-  }, [platform, handle]);
-  
-  if (!platform || !handle) return null;
-  if (loading) return <div className="mt-4 p-3 border border-gray-200 rounded-md bg-gray-50 animate-pulse">Loading influencer data...</div>;
-  if (error) return <div className="mt-4 p-3 border border-red-100 rounded-md bg-red-50 text-red-600">{error}</div>;
-  if (!influencerData) return null;
-  
+    if (!platform || !handle) return;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await validateInfluencerHandle(platform, handle);
+        setInfluencerData(result);
+      } catch (err) {
+        setError("Failed to validate influencer");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [platform, handle, data]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center">
+        <div className="animate-spin mr-2">
+          <ArrowPathIcon className="h-4 w-4 text-primary-color" />
+        </div>
+        <p className="text-sm text-gray-600">Validating influencer...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 rounded-md p-3">
+        <p className="text-sm text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (!influencerData) {
+    return (
+      <div className="bg-amber-50 rounded-md p-3">
+        <p className="text-sm text-amber-600">
+          No data available for this influencer.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-4 p-4 border border-blue-100 rounded-md bg-blue-50">
-      <div className="flex items-center">
-        {influencerData.avatarUrl && (
-          <div className="mr-3">
-            <img 
-              src={influencerData.avatarUrl} 
-              alt={influencerData.handle} 
-              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
-            />
+    <div className="bg-blue-50 rounded-md p-3">
+      <div className="flex items-start">
+        {influencerData.avatarUrl ? (
+          <img
+            src={influencerData.avatarUrl}
+            alt={`${handle}'s avatar`}
+            className="w-12 h-12 rounded-full mr-3 object-cover"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
+            <UserIcon className="h-6 w-6 text-gray-500" />
           </div>
         )}
         <div>
           <div className="flex items-center">
-            <h3 className="font-bold text-primary-color">{influencerData.displayName || influencerData.handle}</h3>
+            <p className="font-medium text-primary-color">
+              {influencerData.displayName || handle}
+            </p>
             {influencerData.verified && (
               <span className="ml-1 text-blue-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
+                <CheckBadgeIcon className="h-4 w-4" />
               </span>
             )}
           </div>
-          <div className="text-sm text-gray-600">@{influencerData.handle}</div>
-        </div>
-      </div>
-      
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-        <div className="p-2 bg-white rounded shadow-sm">
-          <div className="text-sm text-gray-500">Followers</div>
-          <div className="font-bold text-primary-color">
-            {influencerData.followerCount ? (
-              influencerData.followerCount > 1000000 
-                ? `${(influencerData.followerCount / 1000000).toFixed(1)}M` 
-                : influencerData.followerCount > 1000 
-                  ? `${(influencerData.followerCount / 1000).toFixed(1)}K`
-                  : influencerData.followerCount
-            ) : 'N/A'}
-          </div>
-        </div>
-        <div className="p-2 bg-white rounded shadow-sm">
-          <div className="text-sm text-gray-500">Engagement</div>
-          <div className="font-bold text-primary-color">
-            {influencerData.engagementRate 
-              ? `${(influencerData.engagementRate * 100).toFixed(1)}%` 
-              : 'N/A'}
-          </div>
-        </div>
-        <div className="p-2 bg-white rounded shadow-sm">
-          <div className="text-sm text-gray-500">Avg. Likes</div>
-          <div className="font-bold text-primary-color">
-            {influencerData.averageLikes 
-              ? influencerData.averageLikes > 1000 
-                ? `${(influencerData.averageLikes / 1000).toFixed(1)}K` 
-                : influencerData.averageLikes
-              : 'N/A'}
+          <p className="text-sm text-gray-600">@{handle}</p>
+          <div className="mt-1 flex space-x-3 text-xs text-gray-500">
+            <span>{influencerData.followerCount?.toLocaleString() || 'Unknown'} followers</span>
+            {influencerData.engagementRate && (
+              <span>{influencerData.engagementRate.toFixed(2)}% engagement</span>
+            )}
           </div>
         </div>
       </div>
-      
       {influencerData.description && (
-        <div className="mt-3 text-sm text-gray-600 border-t border-blue-200 pt-2">
-          {influencerData.description}
-        </div>
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2">{influencerData.description}</p>
       )}
-      
-      <div className="mt-2 text-xs text-gray-400">
-        Data provided by Phyllo API • Last updated {new Date(influencerData.lastFetched || '').toLocaleString()}
-      </div>
     </div>
   );
 };
@@ -809,8 +990,7 @@ function FormContent() {
         currency: campaignData.currency || defaultFormValues.currency,
         totalBudget: campaignData.totalBudget || defaultFormValues.totalBudget,
         socialMediaBudget: campaignData.socialMediaBudget || defaultFormValues.socialMediaBudget,
-        platform: campaignData.platform || defaultFormValues.platform,
-        influencerHandle: campaignData.influencerHandle || defaultFormValues.influencerHandle,
+        influencers: campaignData.influencers || defaultFormValues.influencers,
       };
     }
 
@@ -838,8 +1018,7 @@ function FormContent() {
         currency: defaultFormValues.currency,
         totalBudget: defaultFormValues.totalBudget,
         socialMediaBudget: defaultFormValues.socialMediaBudget,
-        platform: defaultFormValues.platform,
-        influencerHandle: defaultFormValues.influencerHandle,
+        influencers: defaultFormValues.influencers,
       };
     }
 
@@ -1304,6 +1483,45 @@ function FormContent() {
                   )}
                 </div>
 
+                {/* Influencers */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                    <UserGroupIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    Influencer Details
+                  </h2>
+                  <div className="mb-4">
+                    <p className="text-gray-600 text-sm mb-4">
+                      Add the influencers you want to work with for this campaign. You can add multiple influencers.
+                    </p>
+                    
+                    <FieldArray name="influencers">
+                      {({ push, remove, form }: any) => (
+                        <div>
+                          {values.influencers && values.influencers.length > 0 ? (
+                            values.influencers.map((influencer, index) => (
+                              <InfluencerEntry
+                                key={index}
+                                index={index}
+                                remove={() => remove(index)}
+                                arrayHelpers={{ push, remove }}
+                              />
+                            ))
+                          ) : null}
+                          
+                          <button
+                            type="button"
+                            onClick={() => push({ platform: '', handle: '' })}
+                            className="mt-3 flex items-center text-primary-color hover:text-accent-color"
+                          >
+                            <PlusCircleIcon className="h-5 w-5 mr-2" />
+                            Add Another Influencer
+                          </button>
+                        </div>
+                      )}
+                    </FieldArray>
+                  </div>
+                </div>
+
                 {/* Budget Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
@@ -1352,45 +1570,6 @@ function FormContent() {
                       icon={<CurrencyDollarIcon className="w-5 h-5" />}
                     />
                   </div>
-                </div>
-
-                {/* Influencers */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
-                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <UserGroupIcon className="w-5 h-5 mr-2 text-accent-color" />
-                    Influencer Details
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <StyledField
-                      label="Platform"
-                      name="platform"
-                      as="select"
-                      required
-                      icon={<GlobeAltIcon className="w-5 h-5" />}
-                    >
-                      <option value="">Select platform</option>
-                      <option value={Platform.Instagram}>Instagram</option>
-                      <option value={Platform.YouTube}>YouTube</option>
-                      <option value={Platform.TikTok}>TikTok</option>
-                    </StyledField>
-                    
-                    <StyledField
-                      label="Influencer Handle"
-                      name="influencerHandle"
-                      placeholder="Enter handle without @"
-                      required
-                      icon={<UserGroupIcon className="w-5 h-5" />}
-                    />
-                  </div>
-                  
-                  <Field>
-                    {({ form }: { form: any }) => (
-                      <InfluencerPreview 
-                        platform={form.values.platform}
-                        handle={form.values.influencerHandle}
-                      />
-                    )}
-                  </Field>
                 </div>
               </Form>
 
