@@ -4,10 +4,11 @@ import { getSession } from '@/lib/session';
 
 export async function GET() {
   const session = await getSession();
+  console.log('Session in /api/settings/notifications:', session);
   if (!session?.user?.sub) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
+  
   try {
     const prefs = await prisma.notificationPrefs.findUnique({
       where: { userId: session.user.sub },
