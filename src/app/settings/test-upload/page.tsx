@@ -3,6 +3,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 export default function TestUploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -110,17 +111,26 @@ export default function TestUploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6">UploadThing Test</h1>
+    <div className="min-h-screen bg-[var(--background-color)] p-8">
+      <div className="max-w-2xl mx-auto bg-[var(--background-color)] p-6 rounded-lg border border-[var(--divider-color)] shadow-sm">
+        <h1 className="text-2xl font-bold mb-6 text-[var(--primary-color)]">UploadThing Test</h1>
+        
+        <div className="mb-4">
+          <Link 
+            href="/debug-tools" 
+            className="text-[var(--accent-color)] hover:underline"
+          >
+            ← Back to Debug Tools
+          </Link>
+        </div>
         
         {/* API Status Check */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">API Status</h2>
+          <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)]">API Status</h2>
           <button
             onClick={checkApiStatus}
             disabled={isLoading}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+            className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
           >
             {isLoading ? (
               <span className="flex items-center">
@@ -131,28 +141,28 @@ export default function TestUploadPage() {
           </button>
           
           {apiStatus && (
-            <div className="mt-4 p-4 bg-gray-100 rounded overflow-auto">
-              <pre className="text-sm">{JSON.stringify(apiStatus, null, 2)}</pre>
+            <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
+              <pre className="text-sm text-[var(--secondary-color)]">{JSON.stringify(apiStatus, null, 2)}</pre>
             </div>
           )}
         </div>
         
         {/* File Upload */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Test File Upload</h2>
+          <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)]">Test File Upload</h2>
           
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Select File</label>
+            <label className="block text-sm font-medium text-[var(--secondary-color)]">Select File</label>
             <input
               type="file"
               onChange={handleFileSelect}
-              className="mt-1 block w-full text-sm text-gray-500 border border-gray-300 rounded-md"
+              className="mt-1 block w-full text-sm text-[var(--secondary-color)] border border-[var(--divider-color)] rounded-md"
             />
           </div>
           
           {preview && (
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700">Preview:</p>
+              <p className="text-sm font-medium text-[var(--secondary-color)]">Preview:</p>
               <img src={preview} alt="Preview" className="mt-2 max-h-40 rounded" />
             </div>
           )}
@@ -160,7 +170,7 @@ export default function TestUploadPage() {
           <button
             onClick={uploadFile}
             disabled={isLoading || !file}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400"
+            className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
           >
             {isLoading ? (
               <span className="flex items-center">
@@ -171,9 +181,9 @@ export default function TestUploadPage() {
           </button>
           
           {uploadResult && (
-            <div className="mt-4 p-4 bg-gray-100 rounded overflow-auto">
-              <h3 className="font-medium mb-2">Upload Result:</h3>
-              <pre className="text-sm">{JSON.stringify(uploadResult, null, 2)}</pre>
+            <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
+              <h3 className="font-medium mb-2 text-[var(--primary-color)]">Upload Result:</h3>
+              <pre className="text-sm text-[var(--secondary-color)]">{JSON.stringify(uploadResult, null, 2)}</pre>
             </div>
           )}
         </div>

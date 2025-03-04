@@ -610,7 +610,7 @@ export default function ApiVerificationPage() {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Latency
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-40">
                       Endpoint
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -634,8 +634,10 @@ export default function ApiVerificationPage() {
                           {formatLatency(result.latency)}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {result.endpoint || 'N/A'}
+                      <td className="px-3 py-4 text-sm text-gray-500 w-40 max-w-xs">
+                        <div className="truncate" title={result.endpoint || 'N/A'}>
+                          {result.endpoint || 'N/A'}
+                        </div>
                       </td>
                       <td className="px-3 py-4 text-sm text-gray-500">
                         {result.success ? (

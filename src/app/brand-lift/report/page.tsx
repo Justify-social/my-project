@@ -224,7 +224,7 @@ const WordCloudSection: React.FC = () => {
         <div className="flex items-center">
           <span className="kpi-icon kpi-message-association"></span>
           <h3 className="text-lg font-medium" style={{ color: 'var(--primary-color)' }}>
-            Messaging Themes
+        Messaging Themes
           </h3>
         </div>
         <div className="relative group">
@@ -978,33 +978,33 @@ function BrandLiftReportContent() {
           <div>
             <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--primary-color)' }}>
               Brand Lift Report
-            </h1>
+          </h1>
             <p className="text-sm" style={{ color: 'var(--secondary-color)' }}>
               Campaign ID: {campaignId || "BL-2023-0789"}
-            </p>
-          </div>
+          </p>
+        </div>
           
           <div className="flex mt-4 sm:mt-0 space-x-3">
-            <button
+          <button
               onClick={handleExportVisualisation}
               className="px-4 py-2 bg-gray-100 rounded text-sm font-medium transition-colors hover:bg-gray-200"
               style={{ color: 'var(--primary-color)' }}
               aria-label="Export visualisation data"
             >
               Export Visualisation
-            </button>
-            <button
-              onClick={handleBackToDashboard}
+          </button>
+          <button
+            onClick={handleBackToDashboard}
               className="px-4 py-2 rounded text-sm font-medium text-white transition-colors"
               style={{ backgroundColor: 'var(--accent-color)' }}
               aria-label="Return to dashboard"
-            >
-              Back to Dashboard
-            </button>
+          >
+            Back to Dashboard
+          </button>
           </div>
         </div>
       </div>
-      
+
       {/* Main content sections */}
       <div className="space-y-8">
         {/* Key Metrics Section */}
@@ -1014,7 +1014,7 @@ function BrandLiftReportContent() {
           </h2>
           <KeyMetricsAtAGlance metrics={keyMetrics} />
         </section>
-        
+
         {/* Funnel Visualisation */}
         <section aria-labelledby="funnel-visualisation-heading">
           <h2 id="funnel-visualisation-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
@@ -1030,7 +1030,7 @@ function BrandLiftReportContent() {
           </h2>
           <DemographicBreakdown />
         </section>
-        
+
         {/* Survey Questions */}
         <section aria-labelledby="survey-questions-heading">
           <h2 id="survey-questions-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
@@ -1038,7 +1038,7 @@ function BrandLiftReportContent() {
           </h2>
           <SurveyQuestions />
         </section>
-        
+
         {/* Time Chart */}
         <section aria-labelledby="time-chart-heading">
           <h2 id="time-chart-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
@@ -1046,7 +1046,7 @@ function BrandLiftReportContent() {
           </h2>
           <TimeChart />
         </section>
-        
+
         {/* Word Cloud */}
         <section aria-labelledby="word-cloud-heading">
           <h2 id="word-cloud-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>
