@@ -43,4 +43,5 @@ next-env.d.ts
 # Documentation related directories
 /docs-app/
 /nexdocs/
+/docs-site/
 **/node_modules/
