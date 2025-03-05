@@ -1,4 +1,5 @@
-import { PrismaClient } from '../prisma/generated/campaign-wizard-client'
+// This file provides the Prisma client for campaign-related operations
+import { prisma } from '@/lib/prisma';
 
-const prismaWizard = new PrismaClient()
-export default prismaWizard 
+// Export the main prisma client to ensure consistency
+export { prisma }; 

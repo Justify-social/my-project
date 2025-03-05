@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Campaign Wizard
+
+A comprehensive platform for creating, managing, and analyzing marketing campaigns.
+
+## Overview
+
+Campaign Wizard is an enterprise-grade application that streamlines the process of creating and managing marketing campaigns. It provides a step-by-step wizard interface for campaign creation, robust analytics, and comprehensive reporting.
+
+## Key Features
+
+- **Campaign Creation Wizard**: Step-by-step interface for creating campaigns
+- **Dashboard**: Comprehensive overview of campaign performance
+- **Creative Asset Testing**: Tools for testing and optimizing creative assets
+- **Brand Lift**: Measure brand awareness and perception
+- **Brand Health**: Monitor overall brand health metrics
+- **Influencer Management**: Find and manage influencer partnerships
+- **Mixed Media Modeling**: Analyze performance across channels
+- **Reporting**: Comprehensive reporting and analytics
 
 ## Getting Started
 
-First, run the development server:
+### For Users
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+If you're a user of the Campaign Wizard application, check out our [User Guides](./docs/guides/user/getting-started.md) to get started.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### For Developers
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+If you're a developer working on the Campaign Wizard application, check out our [Developer Setup Guide](./docs/guides/developer/setup.md) to set up your development environment.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Documentation
 
-## Learn More
+Our documentation is organized into the following categories:
 
-To learn more about Next.js, take a look at the following resources:
+### Frontend Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Dashboard](./docs/features-frontend/dashboard/overview.md)
+- [Campaign Wizard](./docs/features-frontend/campaign-wizard/overview.md)
+- [Creative Testing](./docs/features-frontend/creative-testing/overview.md)
+- [Brand Lift](./docs/features-frontend/brand-lift/overview.md)
+- [Brand Health](./docs/features-frontend/brand-health/overview.md)
+- [Influencers](./docs/features-frontend/influencers/overview.md)
+- [Mixed Media Modeling](./docs/features-frontend/mmm/overview.md)
+- [Reports](./docs/features-frontend/reports/overview.md)
+- [Settings](./docs/features-frontend/settings/overview.md)
+- [Admin](./docs/features-frontend/admin/overview.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Backend Features
 
-## Deploy on Vercel
+- [Database](./docs/features-backend/database/overview.md)
+- [Authentication](./docs/features-backend/authentication/overview.md)
+- [APIs](./docs/features-backend/apis/overview.md)
+- [Architecture](./docs/features-backend/architecture/overview.md)
+- [Linting](./docs/features-backend/linting/overview.md)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Guides
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [User Guides](./docs/guides/user/getting-started.md)
+- [Developer Guides](./docs/guides/developer/setup.md)
+
+## Contributing
+
+Please read our [Contributing Guidelines](./docs/CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

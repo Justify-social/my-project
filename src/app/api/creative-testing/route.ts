@@ -1,5 +1,15 @@
+import { NextResponse } from 'next/server';
+import { tryCatch } from '@/middleware/api';
+import { DbOperation } from '@/lib/data-mapping/db-logger';
+
 export async function GET() {
-  return new Response(JSON.stringify({ message: "Creative Testing API" }), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+  return tryCatch(
+    async () => {
+      return NextResponse.json({
+        success: true,
+        data: { message: "Creative Testing API" }
+      });
+    },
+    { entityName: 'CreativeTesting', operation: DbOperation.FETCH }
+  );
 } 

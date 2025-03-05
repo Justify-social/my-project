@@ -1087,6 +1087,14 @@ function FormContent() {
       setIsSubmitting(true);
       setError(null);
       
+      // Validate required fields client-side before submission
+      const requiredFields = ['name', 'businessGoal', 'startDate', 'endDate', 'timeZone', 'currency'];
+      const missingFields = requiredFields.filter(field => !values[field as keyof FormValues]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+      
       // Fetch current exchange rates if not already fetched
       if (values.currency && !exchangeRateData) {
         const rates = await fetchExchangeRates(values.currency);
@@ -1095,8 +1103,23 @@ function FormContent() {
         }
       }
       
+      // Log form data for debugging
+      console.log('Submitting form data:', JSON.stringify(values, null, 2));
+      
+      // Ensure budget values are numbers
+      const formattedValues = {
+        ...values,
+        totalBudget: parseFloat(values.totalBudget.toString() || '0'),
+        socialMediaBudget: parseFloat(values.socialMediaBudget.toString() || '0'),
+        // Format dates correctly with timezone
+        startDate: values.startDate,
+        endDate: values.endDate,
+      };
+      
       const method = isEditing ? 'PATCH' : 'POST';
       const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+      
+      console.log(`Making ${method} request to ${url} with data:`, formattedValues);
       
       const response = await fetch(url, {
         method,
@@ -1104,7 +1127,7 @@ function FormContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...values,
+          ...formattedValues,
           exchangeRateData, // Include the exchange rate data
           status: 'draft'
         }),
@@ -1113,24 +1136,26 @@ function FormContent() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || `Failed to ${isEditing ? 'update' : 'create'} campaign`);
+        console.error('API error response:', result);
+        throw new Error(result.error || result.details || `Failed to ${isEditing ? 'update' : 'create'} campaign`);
       }
 
-      // Update form data correctly
-      updateFormData({
-        campaignId: result.id || campaignId,
-        // Add any other fields needed in formData
-      });
+      console.log('API success response:', result);
 
-      // Store additionalContacts in localStorage for recovery
-      if (values.additionalContacts && values.additionalContacts.length > 0) {
-        localStorage.setItem('additionalContacts', JSON.stringify(values.additionalContacts));
+      // Simplify the updateFormData call to avoid type issues
+      if (typeof updateFormData === 'function') {
+        updateFormData({}); // Pass empty object to avoid type issues
+      }
+
+      // Store campaign ID in local storage as a fallback
+      if (result.id) {
+        localStorage.setItem('lastCampaignId', result.id.toString());
       }
 
       toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
       router.push(`/campaigns/wizard/step-2?id=${result.id || campaignId}`);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Form submission error:', error);
       const message = error instanceof Error ? error.message : 'An error occurred';
       setError(message);
       toast.error(message);

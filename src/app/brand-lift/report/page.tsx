@@ -1022,7 +1022,7 @@ function BrandLiftReportContent() {
           </h2>
           <FunnelVisualisation />
         </section>
-        
+
         {/* Demographic Breakdown */}
         <section aria-labelledby="demographic-breakdown-heading">
           <h2 id="demographic-breakdown-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--primary-color)' }}>

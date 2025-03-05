@@ -12,13 +12,13 @@ declare module 'react-plotly.js' {
     onUnhover?: (event: Plotly.PlotMouseEvent) => void;
     onSelected?: (event: Plotly.PlotSelectionEvent) => void;
     onDeselect?: (event: Plotly.PlotSelectionEvent) => void;
-    onRestyle?: (data: any) => void;
-    onRelayout?: (data: any) => void;
+    onRestyle?: (data: Record<string, unknown>) => void;
+    onRelayout?: (data: Record<string, unknown>) => void;
     onClickAnnotation?: (event: Plotly.ClickAnnotationEvent) => void;
     onAfterExport?: () => void;
     onAfterPlot?: () => void;
     onAnimated?: () => void;
-    onAnimatingFrame?: (event: { name: string; frame: Plotly.Frame; animation: any }) => void;
+    onAnimatingFrame?: (event: { name: string; frame: Plotly.Frame; animation: Record<string, unknown> }) => void;
     onAnimationInterrupted?: () => void;
     onAutoSize?: () => void;
     onBeforeExport?: () => void;
@@ -38,7 +38,7 @@ declare module 'react-plotly.js' {
     revision?: number;
     divId?: string;
     debug?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   const Plot: React.ComponentType<PlotParams>;

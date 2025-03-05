@@ -7,6 +7,72 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model CampaignWizard {
+  id               String          @id
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime
+  currentStep      Int             @default(1)
+  isComplete       Boolean         @default(false)
+  status           Status          @default(DRAFT)
+  name             String          @db.VarChar(255)
+  businessGoal     String
+  startDate        DateTime
+  endDate          DateTime
+  timeZone         String
+  primaryContact   Json
+  secondaryContact Json?
+  budget           Json
+  step1Complete    Boolean         @default(false)
+  primaryKPI       KPI?
+  secondaryKPIs    KPI[]
+  messaging        Json?
+  expectedOutcomes Json?
+  features         Feature[]
+  step2Complete    Boolean         @default(false)
+  demographics     Json?
+  locations        Json[]
+  targeting        Json?
+  competitors      String[]
+  step3Complete    Boolean         @default(false)
+  assets           Json[]
+  guidelines       String?
+  requirements     Json[]
+  notes            String?
+  step4Complete    Boolean         @default(false)
+  userId           String?         @map("userId")
+  user             User?           @relation(fields: [userId], references: [id])
+  Influencer       Influencer[]
+  WizardHistory    WizardHistory[]
+
+  @@index([status, createdAt])
+}
+
+model Influencer {
+  id             String         @id
+  platform       Platform
+  handle         String
+  platformId     String?
+  campaignId     String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime
+  CampaignWizard CampaignWizard @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+}
+
+model WizardHistory {
+  id             String         @id
+  wizardId       String
+  step           Int
+  action         String
+  changes        Json
+  performedBy    String
+  timestamp      DateTime       @default(now())
+  CampaignWizard CampaignWizard @relation(fields: [wizardId], references: [id])
+
+  @@index([wizardId, timestamp])
+}
+
 model CampaignWizardSubmission {
   id                   Int                   @id @default(autoincrement())
   campaignName         String
@@ -21,7 +87,7 @@ model CampaignWizardSubmission {
   platform             Platform
   influencerHandle     String
   primaryContactId     Int                   @unique
-  secondaryContactId   Int                   @unique
+  secondaryContactId   Int?                  @unique
   mainMessage          String                @db.VarChar(3000)
   hashtags             String
   memorability         String
@@ -34,145 +100,211 @@ model CampaignWizardSubmission {
   features             Feature[]
   submissionStatus     SubmissionStatus      @default(draft)
   createdAt            DateTime              @default(now())
-  audience             Audience?
-  primaryContact       PrimaryContact        @relation("PrimaryContactSubmission", fields: [primaryContactId], references: [id])
-  secondaryContact     SecondaryContact      @relation("SecondaryContactSubmission", fields: [secondaryContactId], references: [id])
+  userId               String?
+  audience             Audience[]
+  primaryContact       PrimaryContact        @relation(fields: [primaryContactId], references: [id])
+  secondaryContact     SecondaryContact?     @relation(fields: [secondaryContactId], references: [id])
+  user                 User?                 @relation(fields: [userId], references: [id])
   creativeAssets       CreativeAsset[]
   creativeRequirements CreativeRequirement[]
-  userId               String?
-  user                 User?                 @relation(fields: [userId], references: [id])
 }
 
 model PrimaryContact {
-  id         Int                       @id @default(autoincrement())
-  firstName  String
-  surname    String
-  email      String
-  position   Position
-  submission CampaignWizardSubmission? @relation("PrimaryContactSubmission")
+  id                       Int                       @id @default(autoincrement())
+  firstName                String
+  surname                  String
+  email                    String
+  position                 Position
+  CampaignWizardSubmission CampaignWizardSubmission?
 }
 
 model SecondaryContact {
-  id         Int                       @id @default(autoincrement())
-  firstName  String
-  surname    String
-  email      String
-  position   Position
-  submission CampaignWizardSubmission? @relation("SecondaryContactSubmission")
+  id                       Int                       @id @default(autoincrement())
+  firstName                String
+  surname                  String
+  email                    String
+  position                 Position
+  CampaignWizardSubmission CampaignWizardSubmission?
 }
 
 model Audience {
   id                 Int                         @id @default(autoincrement())
-  campaignId         Int                         @unique
-  age1824            Int
-  age2534            Int
-  age3544            Int
-  age4554            Int
-  age5564            Int
-  age65plus          Int
-  otherGender        String
-  educationLevel     String
-  jobTitles          String
-  incomeLevel        String
+  ageRangeMin        Int
+  ageRangeMax        Int
+  keywords           String[]
+  interests          String[]
+  campaignId         Int
+  age1824            Int                        @default(0)
+  age2534            Int                        @default(0)
+  age3544            Int                        @default(0)
+  age4554            Int                        @default(0)
+  age5564            Int                        @default(0)
+  age65plus          Int                        @default(0)
   campaign           CampaignWizardSubmission    @relation(fields: [campaignId], references: [id])
   competitors        AudienceCompetitor[]
-  genders            AudienceGender[]
+  gender             AudienceGender[]
   languages          AudienceLanguage[]
-  locations          AudienceLocation[]
+  geographicSpread   AudienceLocation[]
   screeningQuestions AudienceScreeningQuestion[]
 }
 
 model AudienceLocation {
   id         Int      @id @default(autoincrement())
+  country    String
+  proportion Float
   audienceId Int
-  location   String
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceGender {
   id         Int      @id @default(autoincrement())
-  audienceId Int
   gender     String
+  proportion Float
+  audienceId Int
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceScreeningQuestion {
   id         Int      @id @default(autoincrement())
-  audienceId Int
   question   String
+  audienceId Int
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceLanguage {
   id         Int      @id @default(autoincrement())
-  audienceId Int
   language   String
+  audienceId Int
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceCompetitor {
   id         Int      @id @default(autoincrement())
+  name       String
   audienceId Int
-  competitor String
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model CreativeAsset {
-  id                  String                   @id @default(cuid())
-  createdAt           DateTime                 @default(now())
-  updatedAt           DateTime                 @updatedAt
-  type                String
-  url                 String
-  fileName            String
-  fileSize            Int?
-  assetName           String
-  influencerHandle    String?
-  influencerName      String?
-  influencerFollowers String?
-  whyInfluencer       String?
-  budget              Float?
-  submissionId        Int
-  submission          CampaignWizardSubmission @relation(fields: [submissionId], references: [id])
-
-  @@index([submissionId])
-}
-
-model CreativeRequirement {
   id           Int                      @id @default(autoincrement())
-  requirement  String
+  name         String
+  description  String
+  url          String
+  type         CreativeAssetType
+  fileSize     Int
+  dimensions   String?
+  duration     Int?
+  format       String
   submissionId Int
   submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id])
 }
 
-enum Currency {
-  GBP
-  USD
-  EUR
+model CreativeRequirement {
+  id           Int                      @id @default(autoincrement())
+  description  String
+  mandatory    Boolean
+  submissionId Int
+  submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id])
+}
+
+model User {
+  id                  String                     @id @default(uuid())
+  email               String                     @unique
+  name                String?
+  role                UserRole                   @default(USER)
+  campaigns           CampaignWizard[]
+  submissions         CampaignWizardSubmission[]
+  notificationPrefs   NotificationPrefs?
+  receivedInvitations TeamInvitation[]           @relation("InvitationReceiver")
+  sentInvitations     TeamInvitation[]           @relation("InvitationSender")
+  memberOfTeams       TeamMember[]               @relation("TeamMember")
+  ownedTeamMembers    TeamMember[]               @relation("TeamOwner")
+}
+
+model NotificationPrefs {
+  id                     Int     @id @default(autoincrement())
+  userId                 String  @unique
+  campaignUpdates        Boolean @default(false)
+  brandHealthAlerts      Boolean @default(false)
+  aiInsightNotifications Boolean @default(false)
+  user                   User    @relation(fields: [userId], references: [id])
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  ownerId   String
+  memberId  String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  member    User     @relation("TeamMember", fields: [memberId], references: [id])
+  owner     User     @relation("TeamOwner", fields: [ownerId], references: [id])
+}
+
+model TeamInvitation {
+  id        String           @id @default(uuid())
+  email     String
+  status    InvitationStatus @default(PENDING)
+  inviterId String
+  inviteeId String?
+  role      TeamRole         @default(MEMBER)
+  createdAt DateTime         @default(now())
+  expiresAt DateTime
+  invitee   User?            @relation("InvitationReceiver", fields: [inviteeId], references: [id])
+  inviter   User             @relation("InvitationSender", fields: [inviterId], references: [id])
+}
+
+model BrandingSettings {
+  id             String   @id @default(uuid())
+  companyId      String   @unique
+  primaryColor   String
+  secondaryColor String
+  headerFont     String
+  headerFontSize String
+  bodyFont       String
+  bodyFontSize   String
+  logoUrl        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 enum Platform {
-  Instagram
-  YouTube
-  TikTok
+  INSTAGRAM
+  YOUTUBE
+  TIKTOK
 }
 
 enum KPI {
-  adRecall
-  brandAwareness
-  consideration
-  messageAssociation
-  brandPreference
-  purchaseIntent
-  actionIntent
-  recommendationIntent
-  advocacy
+  AD_RECALL
+  BRAND_AWARENESS
+  CONSIDERATION
+  MESSAGE_ASSOCIATION
+  BRAND_PREFERENCE
+  PURCHASE_INTENT
+  ACTION_INTENT
+  RECOMMENDATION_INTENT
+  ADVOCACY
 }
 
 enum Feature {
   CREATIVE_ASSET_TESTING
   BRAND_LIFT
   BRAND_HEALTH
-  MIXED_MEDIA_MODELLING
+  MIXED_MEDIA_MODELING
+}
+
+enum Status {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  ACTIVE
+  COMPLETED
+}
+
+enum Currency {
+  GBP
+  USD
+  EUR
 }
 
 enum Position {
@@ -189,58 +321,6 @@ enum CreativeAssetType {
 enum SubmissionStatus {
   draft
   submitted
-}
-
-model User {
-  id                String             @id @default(cuid())
-  auth0Id           String             @unique
-  email             String             @unique
-  firstName         String?
-  surname           String?
-  companyName       String?
-  profilePictureUrl String?
-  role              UserRole           @default(USER)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  notificationPrefs NotificationPrefs?
-  campaigns         CampaignWizardSubmission[]
-  teamInvitations   TeamInvitation[]   @relation("ReceivedInvitations")
-  sentInvitations   TeamInvitation[]   @relation("SentInvitations")
-  teamMembers       TeamMember[]       @relation("TeamOwner")
-  memberOf          TeamMember[]       @relation("TeamMember")
-}
-
-model NotificationPrefs {
-  id                    Int     @id @default(autoincrement())
-  userId                String  @unique
-  campaignUpdates       Boolean @default(false)
-  brandHealthAlerts     Boolean @default(false)
-  aiInsightNotifications Boolean @default(false)
-  user                  User    @relation(fields: [userId], references: [id])
-}
-
-model TeamMember {
-  id        String   @id @default(cuid())
-  ownerId   String
-  memberId  String
-  role      TeamRole @default(MEMBER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  owner     User     @relation("TeamOwner", fields: [ownerId], references: [id])
-  member    User     @relation("TeamMember", fields: [memberId], references: [id])
-}
-
-model TeamInvitation {
-  id          String                @id @default(cuid())
-  email       String
-  status      InvitationStatus      @default(PENDING)
-  inviterId   String
-  inviteeId   String?
-  role        TeamRole              @default(MEMBER)
-  createdAt   DateTime              @default(now())
-  expiresAt   DateTime
-  inviter     User                  @relation("SentInvitations", fields: [inviterId], references: [id])
-  invitee     User?                 @relation("ReceivedInvitations", fields: [inviteeId], references: [id])
 }
 
 enum UserRole {
@@ -261,18 +341,4 @@ enum InvitationStatus {
   ACCEPTED
   REJECTED
   EXPIRED
-}
-
-model BrandingSettings {
-  id              String  @id @default(cuid())
-  companyId       String  @unique
-  primaryColor    String
-  secondaryColor  String
-  headerFont      String
-  headerFontSize  String
-  bodyFont        String
-  bodyFontSize    String
-  logoUrl         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 }

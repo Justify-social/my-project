@@ -156,6 +156,22 @@ export default function DebugTools() {
           </div>
         </div>
         
+        {/* Database Health */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Database Health</h2>
+          <p className="text-[var(--secondary-color)] mb-4">
+            Access system documentation, database schema, and health monitoring dashboards.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/debug-tools/database"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+            >
+              View Database Health
+            </Link>
+          </div>
+        </div>
+        
         {/* Uploadthing Test Tool */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)]">Uploadthing Test</h2>

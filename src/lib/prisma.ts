@@ -1,14 +1,19 @@
 import { PrismaClient } from '@prisma/client';
+import { ExtendedPrismaClient } from '@/types/prisma-extensions';
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: ExtendedPrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+// Create a new PrismaClient instance
+const createPrismaClient = () => {
+  return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : [],
-  });
+  }) as unknown as ExtendedPrismaClient;
+};
+
+// Use the global instance in development to prevent multiple instances during hot reloading
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 

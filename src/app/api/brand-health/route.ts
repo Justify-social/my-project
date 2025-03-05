@@ -1,10 +1,20 @@
 // src/app/api/brand-health/route.ts
 import { NextResponse } from 'next/server';
+import { tryCatch } from '@/middleware/api';
+import { DbOperation } from '@/lib/data-mapping/db-logger';
 
 export async function GET() {
-  return NextResponse.json({
-    sentiment: 'Positive',
-    score: 85,
-    trend: 'up'
-  });
+  return tryCatch(
+    async () => {
+      return NextResponse.json({
+        success: true,
+        data: {
+          sentiment: 'Positive',
+          score: 85,
+          trend: 'up'
+        }
+      });
+    },
+    { entityName: 'BrandHealth', operation: DbOperation.FETCH }
+  );
 }
