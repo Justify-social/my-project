@@ -1,5 +1,12 @@
-/** @type {import('next').NextConfig} */
-const withNextra = require('nextra')({
+import { createRequire } from 'module';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import nextra from 'nextra';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.jsx',
   defaultShowCopyCode: true,
@@ -8,13 +15,14 @@ const withNextra = require('nextra')({
   },
   staticImage: true,
   contentDirRoot: 'docs',
-})
+});
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': require('path').resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, 'src'),
     };
     return config;
   },
@@ -59,6 +67,6 @@ const nextConfig = {
       },
     ]
   },
-}
+};
 
-module.exports = withNextra(nextConfig) 
+export default withNextra(nextConfig); 
