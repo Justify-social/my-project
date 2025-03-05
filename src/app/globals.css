@@ -1,3 +1,37 @@
+/*
+===========================================
+  TABLE OF CONTENTS
+===========================================
+
+1. IMPORTS & VARIABLES (lines 10-28)
+   - Font imports
+   - Root variables
+   - Dark mode settings
+
+2. BASE ELEMENTS & TYPOGRAPHY (lines 29-57)
+   - Body styles
+   - Headings
+   - Links
+   - Layout containers
+
+3. KPI COMPONENTS (lines 58-112)
+   - KPI icons (base styles)
+   - KPI title, definition, example styles
+   - Individual KPI styles (brand awareness, ad recall, etc.)
+   - KPI tooltips
+
+4. ICONS & NAVIGATION (lines 113-158)
+   - App icons
+   - Navigation items
+   - Active states
+
+5. RESPONSIVE STYLES (lines 159-220)
+   - Desktop & Tablet Landscape (max-width: 1024px)
+   - Tablet Portrait (max-width: 768px)
+   - Mobile (max-width: 640px)
+
+*/
+
 /* =========================================
    IMPORTS & VARIABLES
    ========================================= */
