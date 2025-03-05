@@ -1,0 +1,8 @@
+root: ./
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+redirects:
+  features-backend/README: features-backend/index.md
+  features-frontend/README: features-frontend/index.md
+  guides/README: guides/index.md 

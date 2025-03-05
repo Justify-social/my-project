@@ -1,68 +1,42 @@
-# Campaign Wizard Documentation
+# Justify Project Documentation
 
-**Last Updated:** 2025-03-05  
-**Status:** Active  
+**Last Updated:** 2024-03-05   
+**Status:** Active   
 **Owner:** Documentation Team
+
+Welcome to the Justify project documentation. This documentation is maintained using GitBook and is synced with our GitHub repository.
 
 ## Documentation Overview
 
-Welcome to the Campaign Wizard documentation. This comprehensive documentation covers all aspects of the Campaign Wizard application, from user guides to technical implementation details.
+This documentation covers both frontend and backend aspects of the Justify platform, as well as guides for developers and users.
 
-## Documentation Structure
+### For Developers
 
-Our documentation is organized into the following categories:
+If you're a developer working on the Justify platform, you'll find detailed information about the architecture, APIs, and implementation details in the respective sections.
 
-### Frontend Features
+### For Users
 
-Documentation for user-facing features of the application:
-
-- [Dashboard](./features-frontend/dashboard/overview.md) - The central hub for monitoring campaigns
-- [Campaign Wizard](./features-frontend/campaign-wizard/overview.md) - Step-by-step campaign creation
-- [Creative Testing](./features-frontend/creative-testing/overview.md) - Tools for testing creative assets
-- [Brand Lift](./features-frontend/brand-lift/overview.md) - Measure brand awareness metrics
-- [Brand Health](./features-frontend/brand-health/overview.md) - Monitor overall brand health
-- [Influencers](./features-frontend/influencers/overview.md) - Manage influencer partnerships
-- [Mixed Media Modeling](./features-frontend/mmm/overview.md) - Analyze performance across channels
-- [Reports](./features-frontend/reports/overview.md) - Comprehensive reporting tools
-- [Settings](./features-frontend/settings/overview.md) - Application configuration
-- [Admin](./features-frontend/admin/overview.md) - Administrative functions
-
-### Backend Features
-
-Technical documentation for developers:
-
-- [Database](./features-backend/database/schema.md) - Database structure and operations
-- [Authentication](./features-backend/authentication/overview.md) - Authentication system
-- [APIs](./features-backend/apis/overview.md) - API documentation
-- [Architecture](./features-backend/architecture/overview.md) - System architecture
-- [Linting](./features-backend/linting/overview.md) - Code quality standards
-
-### Guides
-
-Step-by-step instructions for users and developers:
-
-- [User Guides](./guides/user/getting-started.md) - For end-users of the application
-- [Developer Guides](./guides/developer/setup.md) - For developers working on the application
-
-## Contributing to Documentation
-
-If you want to contribute to this documentation, please read our [Contributing Guidelines](./CONTRIBUTING.md) for information on our documentation standards and process.
-
-## Templates
-
-When creating new documentation, please use our templates:
-
-- [Feature Documentation Template](./templates/feature.md)
-- [Guide Template](./templates/guide.md)
+If you're a user of the Justify platform, please check the Guides section for information on how to use the various features of the platform.
 
 ## Getting Started
 
-**New to the application?** Start here:
-- [User Getting Started Guide](./guides/user/getting-started.md)
-- [Developer Setup Guide](./guides/developer/setup.md)
+* Check out the [Contributing Guidelines](CONTRIBUTING.md) if you want to contribute to this documentation.
+* Browse the navigation menu on the left to find the information you need.
+* Use the search function to quickly find specific topics.
 
-**Looking for specific feature documentation?** Browse the [Frontend Features](./features-frontend/README.md) or [Backend Features](./features-backend/README.md) sections.
+## Security
 
-## Support
+This documentation is for internal use only and should not be shared outside the organization.
 
-If you have questions that aren't answered in the documentation, please contact the development team. 
+## Structure
+
+The documentation is organized into the following main sections:
+
+* **Backend Features** - Technical documentation for the backend components
+* **Frontend Features** - Technical documentation for the frontend components
+* **Guides** - How-to guides for developers and users
+* **Templates** - Templates for adding new documentation
+
+## Feedback
+
+If you have any feedback or suggestions for improving this documentation, please [open an issue](https://github.com/Justify-social/my-project/issues/new) in our GitHub repository. 
