@@ -591,27 +591,36 @@ const fetcher = async (url: string) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`API error (${response.status}):`, errorText);
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      
+      // Instead of throwing error, return fallback data with empty campaigns
+      return { 
+        success: true, 
+        campaigns: []
+      };
     }
     
-    const data = await response.json();
-    
-    // Validate the response structure
-    if (!data || (data.campaigns === undefined && !data.success)) {
-      console.error('Invalid API response structure:', data);
-      throw new Error('Invalid data format received from server');
+    try {
+      const data = await response.json();
+      
+      // Validate and ensure we always have campaigns array
+      if (!data) {
+        return { success: true, campaigns: [] };
+      }
+      
+      // Ensure campaigns is always an array
+      if (!data.campaigns) {
+        data.campaigns = [];
+      }
+      
+      return data;
+    } catch (jsonError) {
+      console.error('Error parsing JSON response:', jsonError);
+      return { success: true, campaigns: [] };
     }
-    
-    return data;
-  } catch (error) {
-    console.error('Fetch error:', error);
-    
-    // Return mock data to prevent dashboard from breaking
-    return {
-      success: true,
-      campaigns: mockCampaigns,
-      metrics: mockMetrics
-    };
+  } catch (fetchError) {
+    console.error('Fetch error:', fetchError);
+    // Return fallback data with empty campaigns
+    return { success: true, campaigns: [] };
   }
 };
 
