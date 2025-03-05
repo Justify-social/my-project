@@ -13,10 +13,7 @@
     "migrate:campaign": "prisma migrate dev --schema=./prisma/schemas/campaign-wizard.prisma --name init_campaign_wizard",
     "prepare": "husky install",
     "test:api": "node src/scripts/test-api-endpoints.js",
-    "test:api:ci": "NODE_ENV=test node src/scripts/test-api-endpoints.js",
-    "docs:dev": "next dev --config next.config.mjs",
-    "docs:build": "next build --config next.config.mjs",
-    "docs:export": "next export"
+    "test:api:ci": "NODE_ENV=test node src/scripts/test-api-endpoints.js"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.6.0",
