@@ -1,0 +1,9 @@
+{
+  "README": "Overview",
+  "apis": "API Reference",
+  "architecture": "Architecture",
+  "authentication": "Authentication",
+  "database": "Database",
+  "linting": "Linting & Code Quality",
+  "testing": "Testing"
+} 

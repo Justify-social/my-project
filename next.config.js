@@ -1,4 +1,15 @@
 /** @type {import('next').NextConfig} */
+const { withNextra } = require('nextra')({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.jsx',
+  defaultShowCopyCode: true,
+  flexsearch: {
+    codeblock: false
+  },
+  staticImage: true,
+  contentDirRoot: 'docs',
+})
+
 const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
@@ -50,4 +61,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig 
+module.exports = withNextra(nextConfig) 
