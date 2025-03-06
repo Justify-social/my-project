@@ -176,6 +176,57 @@ export async function GET(
         );
       }
       
+      // Process date fields before they get serialized improperly
+      // This fixes the issue with dates being serialized as empty objects
+      if (campaign.startDate) {
+        if (campaign.startDate instanceof Date) {
+          console.log('Converting startDate from Date to ISO string:', campaign.startDate);
+          // Use any type to bypass TypeScript's strict checking
+          (campaign as any).startDate = campaign.startDate.toISOString();
+        } else if (typeof campaign.startDate === 'object' && Object.keys(campaign.startDate).length === 0) {
+          console.log('Empty startDate object detected, setting to null');
+          (campaign as any).startDate = null;
+        }
+      }
+      
+      if (campaign.endDate) {
+        if (campaign.endDate instanceof Date) {
+          console.log('Converting endDate from Date to ISO string:', campaign.endDate);
+          (campaign as any).endDate = campaign.endDate.toISOString();
+        } else if (typeof campaign.endDate === 'object' && Object.keys(campaign.endDate).length === 0) {
+          console.log('Empty endDate object detected, setting to null');
+          (campaign as any).endDate = null;
+        }
+      }
+      
+      // Also handle createdAt and updatedAt
+      if ('createdAt' in campaign && campaign.createdAt instanceof Date) {
+        (campaign as any).createdAt = campaign.createdAt.toISOString();
+      }
+      
+      if ('updatedAt' in campaign && campaign.updatedAt instanceof Date) {
+        (campaign as any).updatedAt = campaign.updatedAt.toISOString();
+      }
+      
+      // Also check for dates in Influencer objects
+      if ('Influencer' in campaign && Array.isArray(campaign.Influencer)) {
+        console.log('Processing dates in Influencer objects:', campaign.Influencer.length);
+        (campaign as any).Influencer = campaign.Influencer.map(influencer => {
+          const processedInfluencer = { ...influencer };
+          
+          // Process createdAt and updatedAt in influencers
+          if (processedInfluencer.createdAt instanceof Date) {
+            processedInfluencer.createdAt = processedInfluencer.createdAt.toISOString();
+          }
+          
+          if (processedInfluencer.updatedAt instanceof Date) {
+            processedInfluencer.updatedAt = processedInfluencer.updatedAt.toISOString();
+          }
+          
+          return processedInfluencer;
+        });
+      }
+      
       // Import the EnumTransformers utility to transform enum values
       const { EnumTransformers } = await import('@/utils/enum-transformers');
       
@@ -190,6 +241,10 @@ export async function GET(
       
       // Log what we're returning to help with debugging
       console.log('Returning campaign data with ID:', campaignId, 'isDraft:', !isSubmittedCampaign);
+      console.log('Date fields in response:', { 
+        startDate: formattedCampaign.startDate, 
+        endDate: formattedCampaign.endDate 
+      });
       
       return NextResponse.json({
         success: true,
