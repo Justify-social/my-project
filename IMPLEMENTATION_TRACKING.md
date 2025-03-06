@@ -71,11 +71,12 @@ This document tracks the implementation of two critical solutions for the Campai
 | Component | Status | Completion % | Priority |
 |-----------|--------|-------------|----------|
 | Core Utilities | ✅ Complete | 100% | Completed |
-| Frontend Components | ⏳ In Progress | ~85% | High |
-| API Route Handlers | ⏳ In Progress | ~95% | Highest |
+| Frontend Components | ✅ Complete | 100% | Completed |
+| API Route Handlers | ✅ Complete | 100% | Completed |
 | Draft Saving Solution | ✅ Complete | 100% | Completed |
-| Testing & Verification | ⏳ In Progress | ~50% | Medium |
+| Testing & Verification | ⏳ In Progress | ~75% | Medium |
 | Data Loading Fix | ✅ Complete | 100% | Completed |
+| Date & Influencer Handling | ✅ Complete | 100% | Completed |
 
 **Key Achievements**:
 - Successfully implemented the `enum-transformers.ts` utility for consistent enum transformation
@@ -92,6 +93,14 @@ This document tracks the implementation of two critical solutions for the Campai
 - Created comprehensive form initialization that handles dates, contact objects, and influencer data 
 - Fixed issues with draft saving and loading, ensuring all form fields are properly populated
 - Enhanced date handling with robust edge case detection and formatting
+- Fixed critical issue with influencer data not being included in API responses by updating Prisma queries
+- Implemented transaction-based campaign creation for proper relational data handling
+- Added detailed diagnostic logging throughout the data flow
+- Fixed critical date serialization issue in API responses, solving the problem with empty date objects `{}` replacing valid Date objects
+- Implemented direct date object to ISO string conversion before API response serialization to prevent data loss
+- Fixed campaign ID validation to properly support both UUID and numeric formats across all API endpoints
+- Created robust schema mapping between frontend data model and Prisma database schema to prevent validation errors
+- Enhanced influencer relationship handling with proper create/update/delete operations
 
 **~~Current Challenges~~ Resolved Issues**:
 - ✅ RESOLVED: Syntax error in API route implementation requiring a revised approach
@@ -99,6 +108,8 @@ This document tracks the implementation of two critical solutions for the Campai
 - ✅ RESOLVED: Type compatibility issues between Prisma.JsonNull and null values
 - ✅ RESOLVED: Fixed infinite data loading loop in Campaign Wizard
 - ✅ RESOLVED: Fixed data loading and display for dates, contacts, and influencer information
+- ✅ RESOLVED: Missing influencer data in API responses - fixed by updating Prisma queries
+- ✅ RESOLVED: Empty date object handling - improved with robust detection and formatting
 
 **Next Critical Steps**:
 1. Complete comprehensive testing across all campaign wizard steps
@@ -106,6 +117,7 @@ This document tracks the implementation of two critical solutions for the Campai
 3. Implement final refinements for error handling and edge cases
 4. Validate with different data combinations and form states
 5. Document the solution patterns for future development references
+6. Create automated tests for critical functionality
 
 ## Overview
 This file tracks the implementation progress of the enum transformation solution outlined in PROGRESS.md.
@@ -117,18 +129,20 @@ This file tracks the implementation progress of the enum transformation solution
 |-----------|--------|----------|----------|------------|
 | Setup & Core Utilities | ✅ Complete | 100% | ✓ Done | All transformer functions verified |
 | Step1Content.tsx Updates | ✅ Complete | 100% | ✓ Done | Draft saving and data loading fixed |
-| Step2Content.tsx Updates | ⏳ In Progress | 85% | ⚠️ High | KPI transformation testing pending |
+| Step2Content.tsx Updates | ✅ Complete | 100% | ✓ Done | KPI transformation implemented and tested |
 | Remaining Wizard Steps | ✅ Complete | 100% | ✓ Done | Data loading fixed, form submissions working |
 | Wizard Core Components | ✅ Complete | 100% | ✓ Done | No enum usage, no changes needed |
 | Wizard Shared Components | ✅ Complete | 100% | ✓ Done | Documentation updated for enum handling |
 | Audience Targeting | ✅ Complete | 100% | ✓ Done | No enum usage, no changes needed |
-| API Route Handlers | ⏳ In Progress | 95% | ✓ Low | Status enum & influencer validation fixed |
-| Data Display Components | ⏳ In Progress | 50% | ⚠️ Medium | Campaign listing updated, others pending |
+| API Route Handlers | ✅ Complete | 100% | ✓ Done | Status enum & influencer validation fixed |
+| Data Display Components | ⏳ In Progress | 75% | ⚠️ Medium | Campaign listing updated, others pending |
 | Brand Lift Components | ⏳ Not Started | 0% | ⚠️ Low | Dependency on core components |
 | Settings Components | ⏳ In Progress | 25% | ⚠️ Low | Team management updated, others pending |
-| Final Testing | ⏳ In Progress | 50% | ⚠️ Medium | Draft save testing successful, other tests in progress |
+| Final Testing | ⏳ In Progress | 75% | ⚠️ Medium | Draft save testing successful, other tests in progress |
 | API Response Formatter | ✅ Complete | 100% | ✓ Done | Enhanced to handle all data types and edge cases |
 | Date Handling | ✅ Complete | 100% | ✓ Done | Robust handling of all date formats and edge cases |
+| Influencer Data Handling | ✅ Complete | 100% | ✓ Done | Fixed Prisma relation queries and data transformation |
+| API Date Serialization | ✅ Complete | 100% | ✓ Done | Fixed date objects converting to empty objects in API responses |
 
 ### Current Critical Path
 1. ✅ COMPLETED: API Route Handler Implementation
@@ -142,6 +156,11 @@ This file tracks the implementation progress of the enum transformation solution
    - ✅ Implemented enhanced API response formatter
    - ✅ Fixed JSON parsing for complex objects
    - ✅ Added comprehensive date handling
+5. ✅ COMPLETED: Campaign Influencer Data Fix
+   - ✅ Updated Prisma queries to include Influencer relation
+   - ✅ Enhanced API response formatter to transform relation data
+   - ✅ Fixed form initialization to properly display influencer data
+   - ✅ Implemented transaction-based creation for proper data relationships
 
 ### Next Steps (Prioritized)
 1. Complete testing of all wizard steps with different data combinations
@@ -188,7 +207,7 @@ This file tracks the implementation progress of the enum transformation solution
   - Backend accepts the transformed enum values without rejection
   - Form loads saved data correctly after page refresh
 
-### Milestone 3: Step2Content.tsx Updates ⏳
+### Milestone 3: Step2Content.tsx Updates ✅
 - [x] Update handleSubmit function
   - [x] Added transformation for primaryKPI
   - [x] Added transformation for secondaryKPIs array
@@ -197,18 +216,18 @@ This file tracks the implementation progress of the enum transformation solution
   - [x] Added transformation for primaryKPI
   - [x] Added transformation for secondaryKPIs array
   - [x] Added transformation for features array
-- [ ] Test KPI and Feature transformation
-  - Use browser DevTools Network tab to capture API requests
-  - Fill out and submit Step 2 form with test data that includes:
-    - primaryKPI selection (verify transforms from "brandAwareness" to "BRAND_AWARENESS")
-    - secondaryKPIs selection (verify array transforms correctly)
-    - features selection (verify array transforms correctly)
-  - Verify request payload format in Network tab shows transformed values
-  - Check response status (should be 200 OK)
-- [ ] ✅ **CHECKPOINT**: Verify Step 2 KPI and Feature data correctly transformed
-  - Success criteria: Form submits without validation errors
-  - Transformed enum values are correctly sent to the API
-  - Backend accepts the transformed enum values without rejection
+- [x] Test KPI and Feature transformation
+  - [x] Use browser DevTools Network tab to capture API requests
+  - [x] Fill out and submit Step 2 form with test data that includes:
+    - [x] primaryKPI selection (verify transforms from "brandAwareness" to "BRAND_AWARENESS")
+    - [x] secondaryKPIs selection (verify array transforms correctly)
+    - [x] features selection (verify array transforms correctly)
+  - [x] Verify request payload format in Network tab shows transformed values
+  - [x] Check response status (should be 200 OK)
+- [x] ✅ **CHECKPOINT**: Verify Step 2 KPI and Feature data correctly transformed
+  - [x] Success criteria: Form submits without validation errors
+  - [x] Transformed enum values are correctly sent to the API
+  - [x] Backend accepts the transformed enum values without rejection
 
 ### Milestone 4: Remaining Wizard Steps ✅
 - [ ] ~~Update Step3Content.tsx~~ (Not needed - no enum transformations required)
@@ -284,7 +303,7 @@ This file tracks the implementation progress of the enum transformation solution
 - [ ] ~~Update any components that handle enums~~ (Not needed - no enum usage found in these components)
 - [x] ✅ **CHECKPOINT**: Verify all audience targeting components handle enums correctly - No transformations needed
 
-### Milestone 8: API Route Handlers ⏳
+### Milestone 8: API Route Handlers ✅
 - [x] Update Zod validation schemas
   - [x] Added comments to clarify enum format expectations in schemas
   - [x] Identified inconsistencies between schemas (some use frontend format, others use backend format)
@@ -293,12 +312,14 @@ This file tracks the implementation progress of the enum transformation solution
 - [x] Update GET campaign handler
   - [x] Added EnumTransformers.transformObjectFromBackend to transform enum values before returning to frontend
   - [x] Updated response format to use 'campaigns' key to match frontend expectations
+  - [x] Enhanced query to include Influencer relation data
 - [x] Update POST campaign handler
   - [x] Added EnumTransformers.transformObjectToBackend to transform data before database insertion
   - [x] Added EnumTransformers.transformObjectFromBackend to transform data before sending API response
   - [x] Added console.log for debugging transformed data
   - [x] Fixed Status enum usage (Status.COMPLETE to Status.COMPLETED)
   - [x] Added special handling for empty/incomplete influencer fields in draft submissions
+  - [x] Implemented transaction-based campaign creation for proper influencer relationships
 - [x] Update wizard/campaign.ts handler
   - [x] Added EnumTransformers.transformObjectToBackend to transform incoming data
   - [x] Added EnumTransformers.transformObjectFromBackend to transform response data
@@ -309,7 +330,9 @@ This file tracks the implementation progress of the enum transformation solution
   - [x] Added EnumTransformers.transformObjectToBackend to transform incoming step data
   - [x] Added EnumTransformers.transformObjectFromBackend to transform response data
   - [x] Updated handler to use transformed data throughout the workflow
-- [ ] ✅ **CHECKPOINT**: Verify API endpoints handle enum formats correctly
+- [x] ✅ **CHECKPOINT**: Verify API endpoints handle enum formats correctly
+  - [x] All endpoints properly transform data between frontend and backend formats
+  - [x] Comprehensive error handling and logging for debugging
 
 ### Milestone 9: Data Display Components ⏳
 - [x] Update campaign listing component
@@ -338,6 +361,9 @@ This file tracks the implementation progress of the enum transformation solution
 
 ### Milestone 12: Final Testing ⏳
 - [x] Initial testing of draft saving with minimal data
+- [x] Testing campaign creation with dates and influencer data
+- [x] Testing loading campaigns with dates and influencer data
+- [x] Verifying that API responses include all necessary data
 - [ ] End-to-end testing of all workflows
 - [ ] Regression testing
 - [ ] Performance validation
@@ -365,6 +391,10 @@ This file tracks the implementation progress of the enum transformation solution
 - ✅ RESOLVED: Improved form initialization to properly handle all field types and data structures
 - ✅ RESOLVED: Fixed issue with date fields not loading correctly in the form
 - ✅ RESOLVED: Fixed issue with influencer data not being correctly populated in the form
+- ✅ RESOLVED: Fixed Prisma query in campaign API to include Influencer relation data
+- ✅ RESOLVED: Enhanced API response formatter to transform Prisma relation data correctly
+- ✅ RESOLVED: Implemented transaction-based creation for campaigns and influencers
+- ✅ RESOLVED: Fixed budget field handling in both form initialization and submission
 
 ## Campaign Wizard Draft Saving Solution
 
@@ -425,7 +455,7 @@ We've implemented a robust, system-wide approach with these key components:
    - Use a separate validation schema for drafts (`draftInfluencerSchema` for influencer fields)
    - Implement more flexible contact field handling
    - Ensure proper type handling for JSON fields
-   - Add additional validation logic in the handler to handle draft vs. complete submissions differently
+   - Add additional validation logic in the handler to handle draft vs. complete submissions
 
 ### 4. Testing Strategy
 
@@ -591,23 +621,262 @@ This revised approach maintains alignment with the overall plan while working wi
 - [x] Updated POST handler to handle draft vs complete submissions differently
 - [x] Completed comprehensive testing of campaign wizard draft save across steps
 - [x] Verified edge cases with empty/incomplete fields in all form sections
+- [x] Fixed Prisma query to include Influencer relation data
+- [x] Enhanced API response formatter to properly transform relation data
+- [x] Implemented transaction-based creation for campaign-influencer relationships
 
 ### Immediate Action Items
+- [x] Fix campaign date handling across the application
+- [x] Fix influencer data loading and display in all wizard steps
+- [x] Update API response formatter to handle all data types and edge cases
+- [x] Enhance the WizardContext to properly load and manage all data types
 - [ ] Complete final testing of all wizard steps end-to-end
 - [ ] Document the solution patterns for future development
 - [ ] Prepare an integration checklist for deploying the changes
 
 ### Recent Progress
-- [x] Enhanced the API response formatter to properly handle all data types
-- [x] Improved date handling with robust edge case detection
+- [x] Fixed campaign creation and updating to properly handle all data types
+- [x] Enhanced API response formatter to handle dates, contacts, and influencer data
+- [x] Fixed Prisma query in campaign API to include Influencer relation
+- [x] Improved WizardContext to centralize data loading and preprocessing
+- [x] Enhanced date handling throughout the application
 - [x] Fixed JSON parsing for complex objects like contacts and influencers
-- [x] Implemented comprehensive form initialization that handles all field types
-- [x] Enhanced the WizardContext to properly track data loading state
-- [x] Fixed the Step1Content form to correctly display saved data
-- [x] Verified that draft campaigns are correctly saved and loaded
-- [x] Integrated improvements for TypeScript type safety throughout the solution
+- [x] Implemented comprehensive form initialization in Step1Content.tsx
+- [x] Added robust type checking and error handling throughout the application
+- [x] Added detailed diagnostic logging for easier troubleshooting
+- [x] Verified that campaigns are correctly saved and loaded with all data
+- [x] Fixed budget field handling to prevent form validation errors
+- [x] Implemented a robust DateService class using date-fns for consistent date handling across the application
+- [x] Fixed the START DATE and END DATE fields in "Save as Draft" mode by improving date object detection and conversion
+- [x] Fixed critical date serialization issue in API response causing empty date objects to be sent to frontend
+- [x] Added explicit date object to ISO string conversion in API routes before response serialization
+- [x] Implemented detailed logging for date transformations to track values through processing pipeline
+- [x] Fixed campaign UUID validation in API PATCH handler to support both modern UUID and legacy numeric IDs
+- [x] Implemented proper schema mapping between frontend data model and Prisma database schema
+- [x] Enhanced influencer relationship handling with transaction-based updates and proper schema validation
+- [x] Added robust error handling and detailed logging for API requests to improve debugging
 
-## Campaign Wizard Data Loading & Form Initialization Fix Details
+### Latest Critical Fixes
+
+#### Implemented Robust DateService for Date Handling
+
+We implemented a comprehensive solution for date handling using the date-fns library:
+
+1. **Root Cause**: 
+   - Date objects were being inconsistently processed across different parts of the application
+   - Specific formats like empty objects `{}` and non-standard date objects weren't properly detected
+   - The way dates were saved differed from how they were loaded, causing display issues
+
+2. **Solution Implementation**:
+   - Created a centralized `DateService` class to handle all date-related operations:
+   ```typescript
+   export class DateService {
+     static toFormDate(value: unknown): string | null {
+       // Robust handling of all date formats (string, Date, object)
+       // Returns YYYY-MM-DD format for forms
+     }
+     
+     static toApiDate(formDate: string | null): string | null {
+       // Converts form date to ISO format for API
+     }
+     
+     static isValidDate(value: unknown): boolean {
+       // Universal date validation
+     }
+     
+     private static extractDateString(obj: any): string | null {
+       // Extract date strings from complex objects
+     }
+   }
+   ```
+   - Updated `standardizeApiResponse` to use DateService for consistent date handling
+   - Modified form initialization in Step1Content.tsx to use DateService
+   - Updated all existing date formatting utilities for consistency
+
+3. **Benefits**:
+   - Strong type safety with TypeScript
+   - Consistent handling of date objects across the entire application
+   - Better error handling and validation
+   - Improved diagnostics through detailed logging
+   - Single point of maintenance for date handling logic
+
+This solution ensures that the START DATE and END DATE fields correctly display after saving a draft campaign, fixing the previously reported issue.
+
+#### API Date Serialization Fix
+
+We fixed a critical issue with date serialization in the campaign API that was causing START DATE and END DATE fields to not display properly when loading draft campaigns:
+
+1. **Root Cause**:
+   - In the API response, Prisma Date objects were being serialized to empty objects `{}` before they reached our formatter
+   - This serialization issue occurred in the NextJS API response pipeline, causing dates to be lost
+   - The frontend received empty objects instead of valid date strings, resulting in blank date fields
+
+2. **Solution Implementation**:
+   ```typescript
+   // In src/app/api/campaigns/[id]/route.ts GET handler
+   
+   // Process date fields before they get serialized improperly
+   if (campaign.startDate) {
+     if (campaign.startDate instanceof Date) {
+       console.log('Converting startDate from Date to ISO string:', campaign.startDate);
+       // Use type assertion to bypass TypeScript's strict checking
+       (campaign as any).startDate = campaign.startDate.toISOString();
+     } else if (typeof campaign.startDate === 'object' && Object.keys(campaign.startDate).length === 0) {
+       console.log('Empty startDate object detected, setting to null');
+       (campaign as any).startDate = null;
+     }
+   }
+   
+   if (campaign.endDate) {
+     if (campaign.endDate instanceof Date) {
+       console.log('Converting endDate from Date to ISO string:', campaign.endDate);
+       (campaign as any).endDate = campaign.endDate.toISOString();
+     } else if (typeof campaign.endDate === 'object' && Object.keys(campaign.endDate).length === 0) {
+       console.log('Empty endDate object detected, setting to null');
+       (campaign as any).endDate = null;
+     }
+   }
+   
+   // Also handle createdAt and updatedAt and any date fields in related objects
+   ```
+
+3. **Key Technical Insights**:
+   - NextJS/Prisma date serialization issue: Prisma Date objects are not properly serialized by NextResponse.json()
+   - The fix intercepts the dates before they can be improperly serialized
+   - We explicitly convert all Date objects to ISO strings
+   - We added robust handling for empty date objects
+   - We extended the solution to handle dates in related objects (like Influencers)
+   - We used detailed logging to track the date values through the process
+
+4. **Technical Debt Considerations**:
+   - Type assertions (`as any`) were necessary to bypass TypeScript's strict typing
+   - A future enhancement could create a type-safe serialization utility
+   - A more comprehensive fix might add a Prisma middleware to handle date serialization at the ORM level
+
+This targeted fix ensures that all date fields are properly serialized in API responses, solving the issue of blank START DATE and END DATE fields when loading draft campaigns, while keeping changes minimal and focused on the exact point of failure.
+
+#### Campaign UUID Validation Fix
+
+We fixed a critical issue with campaign ID validation in the API routes that was causing "Invalid campaign ID" errors when navigating through the Campaign Wizard:
+
+1. **Root Cause**:
+   - The PATCH handler in `/api/campaigns/[id]/route.ts` was trying to parse UUID-format campaign IDs as integers
+   - Modern campaign IDs use UUID format (e.g., `f2527c58-426a-4e6f-9b9d-7fe26a71bab5`)
+   - Legacy campaign IDs used numeric format
+   - The GET handler had proper UUID detection, but the PATCH handler didn't, causing validation failures
+
+2. **Solution Implementation**:
+   ```typescript
+   // Before: Only supported numeric IDs
+   const campaignId = parseInt(params.id);
+      
+   if (isNaN(campaignId)) {
+     return NextResponse.json(
+       { error: 'Invalid campaign ID' },
+       { status: 400 }
+     );
+   }
+   
+   // After: Support for both UUID and numeric IDs
+   const campaignId = params.id;
+   
+   // Check if the ID is a UUID (string format) or a numeric ID
+   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+   const numericId = parseInt(campaignId);
+   
+   if (!isUuid && isNaN(numericId)) {
+     return NextResponse.json(
+       { error: 'Invalid campaign ID' },
+       { status: 400 }
+     );
+   }
+   ```
+
+3. **Database Operation Improvements**:
+   - Updated the database operation to use the appropriate model based on ID format
+   - For UUID IDs: Use `prisma.campaignWizard` model
+   - For numeric IDs: Use `prisma.campaignWizardSubmission` model
+   - Added proper relationship handling in both cases
+   - Implemented consistent date serialization to prevent empty object issues
+
+4. **Technical Debt Reduction**:
+   - Made the ID handling consistent across all API operations (GET, PATCH, DELETE)
+   - Added detailed logging to help with troubleshooting
+   - Transformed response data consistently for frontend consumption
+
+This robust fix ensures the Campaign Wizard can properly handle both modern UUID-format campaign IDs and legacy numeric IDs, allowing users to navigate through all steps of the wizard without ID validation errors.
+
+#### Campaign Prisma Schema Mapping Fix
+
+We fixed a critical validation error in the API that was preventing campaign updates due to schema mismatches:
+
+1. **Root Cause**:
+   - The PATCH handler was passing incoming data directly to Prisma without proper schema mapping
+   - Frontend sends fields like `currency`, `totalBudget`, and `socialMediaBudget` as direct properties
+   - The CampaignWizard Prisma schema actually stores these as a JSON object in a `budget` field
+   - Similar issues with contacts and other complex objects caused validation errors
+   
+   ```
+   Error: Unknown argument `currency`. Available options are marked with ?
+   ```
+
+2. **Solution Implementation**:
+   ```typescript
+   // Before: Direct pass-through of data (causes validation errors)
+   updatedCampaign = await prisma.campaignWizard.update({
+     where: { id: campaignId },
+     data: {
+       ...data,  // Contains fields that don't match the schema
+       updatedAt: new Date()
+     },
+     include: { Influencer: true }
+   });
+   
+   // After: Properly mapped data structure
+   const mappedData: any = {
+     // Map direct fields that match the schema
+     name: data.name,
+     businessGoal: data.businessGoal,
+     updatedAt: new Date(),
+   };
+   
+   // Handle budget as a JSON field
+   if (data.currency || data.totalBudget || data.socialMediaBudget) {
+     mappedData.budget = {
+       currency: data.currency || 'USD',
+       total: data.totalBudget || 0,
+       socialMedia: data.socialMediaBudget || 0
+     };
+   }
+   
+   // Handle primaryContact as a JSON field
+   if (data.primaryContact) {
+     mappedData.primaryContact = data.primaryContact;
+   }
+   
+   updatedCampaign = await prisma.campaignWizard.update({
+     where: { id: campaignId },
+     data: mappedData,
+     include: { Influencer: true }
+   });
+   ```
+
+3. **Advanced Handling for Relationships**:
+   - Implemented separate transaction handling for influencer data
+   - Added deletion of existing influencers before creating new ones to prevent duplicates
+   - Properly mapped influencer fields to match the Influencer model schema
+   - Added re-fetching of the campaign with updated relationships after modifications
+
+4. **Benefits & Improvements**:
+   - Robust adaptation between frontend and database models
+   - Better error handling with detailed logging
+   - Proper handling of complex nested objects and relationships
+   - Support for both draft updates and complete submissions
+   - Schema-aware data transformation for all incoming fields
+
+This comprehensive fix ensures that campaign data can be properly updated through the Campaign Wizard interface, allowing seamless navigation between steps and proper data persistence regardless of the schema complexity.
+
+## Campaign Wizard Data Loading Fix
 
 ### Comprehensive Bug Fix Summary
 
@@ -732,7 +1001,24 @@ We also resolved an issue with date fields not being correctly loaded and displa
        return '';
      }
      
-     // Additional handling for various date formats...
+     try {
+       // Handle Date objects
+       if (date instanceof Date) {
+         return date.toISOString().split('T')[0];
+       }
+       
+       // Handle ISO strings
+       if (typeof date === 'string') {
+         // Extract date part if it's a full ISO string
+         return date.includes('T') ? date.split('T')[0] : date;
+       }
+       
+       console.warn('Unhandled date format:', date);
+       return '';
+     } catch (error) {
+       console.error('Error formatting date:', error, date);
+       return '';
+     }
    };
    ```
 
@@ -852,6 +1138,8 @@ This comprehensive solution has significantly improved the robustness of the Cam
 - [x] Form data initialization
 - [x] Draft saving functionality
 - [x] Data loading fixes
+- [x] Influencer data handling
+- [x] Transaction-based data operations
 - [ ] Complete end-to-end testing
 - [ ] Documentation finalization
 
@@ -859,4 +1147,165 @@ This comprehensive solution has significantly improved the robustness of the Cam
 - [ ] Appendix A: Technical Concepts Reference
 - [ ] Appendix B: Implementation Decision Log
 - [ ] Appendix C: Troubleshooting Guide
-- [ ] Appendix D: Code Snippets Library
+- [x] Appendix D: Code Snippets Library
+
+### Appendix D: Code Snippets Library
+
+#### Robust Date Handling
+```typescript
+// Format date for display or API submission
+const formatDate = (date: any): string => {
+  // Handle null, undefined, or empty values
+  if (!date) return '';
+  
+  // Handle empty objects (common API issue)
+  if (date && typeof date === 'object' && Object.keys(date).length === 0) {
+    console.warn('Empty date object received:', date);
+    return '';
+  }
+  
+  try {
+    // Handle Date objects
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    
+    // Handle ISO strings
+    if (typeof date === 'string') {
+      // Extract date part if it's a full ISO string
+      return date.includes('T') ? date.split('T')[0] : date;
+    }
+    
+    console.warn('Unhandled date format:', date);
+    return '';
+  } catch (error) {
+    console.error('Error formatting date:', error, date);
+    return '';
+  }
+};
+```
+
+#### API Response Standardization
+```typescript
+// Standardize API response for frontend use
+export const standardizeApiResponse = (data: any) => {
+  if (!data) return null;
+  
+  // Clone to avoid mutating the original
+  const result = { ...data };
+  console.log('Standardizing API response:', result);
+  
+  // Process date fields
+  ['startDate', 'endDate', 'createdAt', 'updatedAt'].forEach(dateField => {
+    // Handle empty objects (common API issue)
+    if (
+      result[dateField] && 
+      typeof result[dateField] === 'object' && 
+      Object.keys(result[dateField]).length === 0
+    ) {
+      console.log(`Converting empty ${dateField} object to null`);
+      result[dateField] = null;
+    }
+    
+    // Convert Date objects to ISO strings
+    if (result[dateField] instanceof Date) {
+      result[dateField] = result[dateField].toISOString();
+    }
+  });
+  
+  // Parse JSON strings for complex objects
+  ['primaryContact', 'secondaryContact', 'budget', 'demographics'].forEach(field => {
+    if (typeof result[field] === 'string') {
+      try {
+        result[field] = JSON.parse(result[field]);
+      } catch (e) {
+        console.warn(`Failed to parse ${field} JSON:`, result[field]);
+        result[field] = field === 'budget' ? { currency: 'USD' } : {};
+      }
+    }
+  });
+  
+  // Set default values for certain fields if missing
+  if (!result.budget) result.budget = { currency: 'USD' };
+  
+  // Handle Prisma relation data
+  if (result.Influencer && Array.isArray(result.Influencer)) {
+    result.influencers = result.Influencer.map((inf: any) => ({
+      id: inf.id,
+      platform: inf.platform,
+      handle: inf.handle,
+      platformId: inf.platformId || ''
+    }));
+    
+    delete result.Influencer;
+  }
+  
+  // Ensure influencers is always an array
+  if (!result.influencers) {
+    result.influencers = [];
+  } else if (typeof result.influencers === 'string') {
+    try {
+      result.influencers = JSON.parse(result.influencers);
+    } catch (e) {
+      result.influencers = [];
+    }
+  }
+  
+  // Ensure array is properly formed
+  if (!Array.isArray(result.influencers)) {
+    result.influencers = [];
+  }
+  
+  // Ensure at least one empty influencer item
+  if (result.influencers.length === 0) {
+    result.influencers = [{ platform: '', handle: '' }];
+  }
+  
+  console.log('Standardized API response:', result);
+  return result;
+};
+```
+
+#### Transaction-Based Campaign Creation
+```typescript
+// Create campaign with influencers using a transaction
+try {
+  // Use a transaction to ensure data integrity
+  const result = await prisma.$transaction(async (tx) => {
+    // Create the campaign first
+    const campaign = await tx.campaignWizard.create({
+      data: campaignData
+    });
+    
+    // Create influencers with proper relation to the campaign
+    if (data.influencers && data.influencers.length > 0) {
+      for (const inf of data.influencers) {
+        if (!inf.platform || !inf.handle) continue; // Skip incomplete influencers
+        
+        await tx.influencer.create({
+          data: {
+            platform: inf.platform,
+            handle: inf.handle,
+            platformId: inf.platformId || '',
+            campaignId: campaign.id // Link to the campaign
+          }
+        });
+      }
+    }
+    
+    return campaign;
+  });
+  
+  return NextResponse.json({
+    success: true, 
+    campaign: result
+  });
+} catch (error) {
+  console.error('Error creating campaign with influencers:', error);
+  return NextResponse.json({
+    success: false, 
+    error: 'Failed to create campaign with influencers',
+    details: error
+  }, { status: 500 });
+}
+```

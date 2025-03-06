@@ -9,6 +9,7 @@
  * 2. JSON string fields that need parsing before use in components
  * 3. Other inconsistencies in API responses that cause frontend errors
  */
+import { DateService } from './date-service';
 
 /**
  * Standardizes an API response by normalizing data formats
@@ -24,39 +25,23 @@ export function standardizeApiResponse(data: any) {
   
   const result = { ...data };
   
-  // Handle date fields
+  // Handle date fields using DateService
   ['createdAt', 'updatedAt', 'startDate', 'endDate'].forEach(field => {
     if (field in result) {
       console.log(`Processing date field ${field}:`, result[field]);
       
-      // If it's a valid date, convert to ISO string
-      if (result[field] instanceof Date) {
-        result[field] = result[field].toISOString();
-        console.log(`Converted Date object to ISO string: ${result[field]}`);
-      } 
-      // If it's an empty object or null-like, convert to null
-      else if (
-        (typeof result[field] === 'object' && 
-         result[field] !== null &&
-         Object.keys(result[field]).length === 0) ||
-        result[field] === null ||
-        result[field] === undefined ||
-        result[field] === ''
-      ) {
-        console.log(`Converting empty/null value to null for ${field}`);
-        result[field] = null;
-      }
-      // Handle date strings by ensuring they're in ISO format
-      else if (typeof result[field] === 'string' && result[field].trim()) {
-        try {
-          const dateObj = new Date(result[field]);
-          if (!isNaN(dateObj.getTime())) {
-            result[field] = dateObj.toISOString();
-            console.log(`Parsed date string to ISO: ${result[field]}`);
-          }
-        } catch (e) {
-          console.warn(`Failed to parse date string for ${field}:`, result[field]);
-        }
+      // Use DateService to standardize dates
+      const standardized = DateService.standardizeDate(result[field]);
+      
+      // Use the ISO format for API data, but preserve the specific format that startDate/endDate need
+      if (field === 'startDate' || field === 'endDate') {
+        // For form date fields, use formatted (YYYY-MM-DD) 
+        result[field] = standardized.formatted || null;
+        console.log(`Standardized ${field} to form date:`, result[field]);
+      } else {
+        // For other date fields use ISO
+        result[field] = standardized.iso || null;
+        console.log(`Standardized ${field} to ISO date:`, result[field]);
       }
     }
   });
@@ -156,34 +141,5 @@ export function standardizeApiResponseArray(dataArray: any[]) {
  * @returns Properly formatted date string or null
  */
 export function formatDateForApi(date: string | Date | null | undefined): string | null {
-  if (!date) return null;
-  
-  try {
-    // If it's already a string, check if it's valid
-    if (typeof date === 'string') {
-      if (!date.trim()) return null;
-      
-      // Check if it's a valid date
-      const parsed = new Date(date);
-      if (isNaN(parsed.getTime())) {
-        return null;
-      }
-      
-      // Return ISO string for consistency
-      return parsed.toISOString();
-    }
-    
-    // If it's a Date object, convert to ISO string
-    if (date instanceof Date) {
-      if (isNaN(date.getTime())) {
-        return null;
-      }
-      return date.toISOString();
-    }
-    
-    return null;
-  } catch (e) {
-    console.error('Error formatting date for API:', e, date);
-    return null;
-  }
+  return DateService.toApiDate(date as string);
 } 

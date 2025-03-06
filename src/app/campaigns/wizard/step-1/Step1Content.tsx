@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useMemo, useRef } from "react";
+import React, { useState, useEffect, Suspense, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, useFormikContext, FieldArray } from "formik";
 import * as Yup from "yup";
@@ -33,6 +33,8 @@ import {
 import { EnumTransformers } from '@/utils/enum-transformers';
 // Import the payload sanitizer utilities
 import { sanitizeDraftPayload } from '@/utils/payload-sanitizer';
+// Add this import
+import { DateService } from '@/utils/date-service';
 
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
@@ -962,45 +964,13 @@ function FormContent() {
   // Update the formatDate function to better handle empty date objects
   const formatDate = (date: any) => {
     console.log('Formatting date:', date);
-    // Handle empty objects
-    if (date && typeof date === 'object' && Object.keys(date).length === 0) {
-      console.warn('Empty date object received:', date);
-      return '';
-    }
     
-    // Handle null or undefined
-    if (!date) return '';
+    // Use DateService instead of custom logic
+    const formattedDate = DateService.toFormDate(date);
+    console.log('DateService formatted date:', formattedDate);
     
-    try {
-      // Handle string dates
-      if (typeof date === 'string') {
-        if (!date.trim()) return '';
-        
-        // For simplicity, if we have an ISO string, extract the date part
-        if (date.includes('T')) {
-          return date.split('T')[0];
-        }
-        
-        // Otherwise return as is
-        return date;
-      }
-      
-      // Handle Date objects
-      if (date instanceof Date) {
-        if (isNaN(date.getTime())) {
-          console.warn('Invalid Date object:', date);
-          return '';
-        }
-        return date.toISOString().split('T')[0];
-      }
-      
-      // If we get here, we don't know how to format this date
-      console.warn('Unhandled date format:', date);
-      return '';
-    } catch (e) {
-      console.error('Error formatting date:', e);
-      return '';
-    }
+    // Return empty string instead of null for form fields
+    return formattedDate || '';
   };
 
   // Helper function to safely access nested properties

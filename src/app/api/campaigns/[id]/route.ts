@@ -264,17 +264,26 @@ export async function PATCH(
 ) {
   return tryCatch(
     async () => {
-      const campaignId = parseInt(params.id);
+      const campaignId = params.id;
       
-      if (isNaN(campaignId)) {
+      // Check if the ID is a UUID (string format) or a numeric ID
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+      const numericId = parseInt(campaignId);
+      
+      if (!isUuid && isNaN(numericId)) {
         return NextResponse.json(
           { error: 'Invalid campaign ID' },
           { status: 400 }
         );
       }
       
+      // Connect to database
+      await connectToDatabase();
+      
       // Parse and validate request body
       const body = await request.json();
+      console.log('Received PATCH request body:', JSON.stringify(body, null, 2));
+      
       const validationResult = campaignUpdateSchema.safeParse(body);
       
       if (!validationResult.success) {
@@ -289,39 +298,171 @@ export async function PATCH(
       
       const data = validationResult.data;
       
-      // Process additional contacts if provided
-      let contactsUpdate = {};
-      if (data.additionalContacts && Array.isArray(data.additionalContacts)) {
-        contactsUpdate = {
-          contacts: JSON.stringify(data.additionalContacts)
+      // Import the EnumTransformers utility if needed for transforms
+      const { EnumTransformers } = await import('@/utils/enum-transformers');
+     
+      let updatedCampaign;
+      
+      if (isUuid) {
+        // Update the campaign in CampaignWizard table if it's a UUID
+        console.log('Updating campaign with UUID:', campaignId);
+        
+        // Map the incoming data to match the CampaignWizard schema
+        const mappedData: any = {
+          // Map direct fields that match the schema
+          name: data.name,
+          businessGoal: data.businessGoal,
+          updatedAt: new Date(),
         };
+        
+        // Handle date fields with proper conversion to Date objects
+        if (data.startDate) {
+          mappedData.startDate = new Date(data.startDate);
+        }
+        
+        if (data.endDate) {
+          mappedData.endDate = new Date(data.endDate);
+        }
+        
+        if (data.timeZone) {
+          mappedData.timeZone = data.timeZone;
+        }
+        
+        // Handle budget as a JSON field
+        if (data.currency || data.totalBudget || data.socialMediaBudget) {
+          mappedData.budget = {
+            currency: data.currency || 'USD',
+            total: data.totalBudget || 0,
+            socialMedia: data.socialMediaBudget || 0
+          };
+        }
+        
+        // Handle primaryContact as a JSON field
+        if (data.primaryContact) {
+          mappedData.primaryContact = data.primaryContact;
+        }
+        
+        // Handle secondaryContact as a JSON field
+        if (data.secondaryContact) {
+          mappedData.secondaryContact = data.secondaryContact;
+        }
+        
+        // Handle step status if present
+        if (data.step) {
+          mappedData.currentStep = data.step;
+          
+          // Set step completion flag based on current step
+          switch (data.step) {
+            case 1:
+              mappedData.step1Complete = true;
+              break;
+            case 2:
+              mappedData.step2Complete = true;
+              break;
+            case 3:
+              mappedData.step3Complete = true;
+              break;
+            case 4:
+              mappedData.step4Complete = true;
+              break;
+          }
+        }
+        
+        // Handle status if present
+        if (data.status) {
+          mappedData.status = data.status.toUpperCase();
+        }
+        
+        console.log('Mapped data for CampaignWizard update:', JSON.stringify(mappedData, null, 2));
+        
+        // Update the campaign with the properly mapped data
+        updatedCampaign = await prisma.campaignWizard.update({
+          where: { id: campaignId },
+          data: mappedData,
+          include: {
+            Influencer: true
+          }
+        });
+        
+        // Separately handle influencers if present
+        if (data.influencers && Array.isArray(data.influencers) && data.influencers.length > 0) {
+          console.log('Updating influencers for campaign:', campaignId);
+          
+          // First delete existing influencers to avoid duplicates
+          await prisma.influencer.deleteMany({
+            where: { campaignId }
+          });
+          
+          // Then create new influencers for the campaign
+          const influencerPromises = data.influencers
+            .filter(inf => inf.handle && inf.platform) // Only include valid influencers
+            .map(inf => {
+              return prisma.influencer.create({
+                data: {
+                  id: inf.id || `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
+                  platform: inf.platform,
+                  handle: inf.handle,
+                  platformId: inf.platformId || '',
+                  campaignId: campaignId,
+                  updatedAt: new Date()
+                }
+              });
+            });
+          
+          await Promise.all(influencerPromises);
+          
+          // Refetch the campaign with updated influencers
+          updatedCampaign = await prisma.campaignWizard.findUnique({
+            where: { id: campaignId },
+            include: {
+              Influencer: true
+            }
+          });
+        }
+      } else {
+        // Update the submitted campaign if it's a numeric ID
+        console.log('Updating submitted campaign with numeric ID:', numericId);
+        
+        // Create a properly mapped update object for CampaignWizardSubmission
+        // This would need to be adapted based on the CampaignWizardSubmission schema
+        const submissionData = {
+          ...(data.name && { campaignName: data.name }),
+          ...(data.businessGoal && { description: data.businessGoal }),
+          ...(data.startDate && { startDate: new Date(data.startDate) }),
+          ...(data.endDate && { endDate: new Date(data.endDate) }),
+          ...(data.timeZone && { timeZone: data.timeZone }),
+          updatedAt: new Date()
+        };
+        
+        // Ensure we use the numeric ID for the where clause
+        updatedCampaign = await prisma.campaignWizardSubmission.update({
+          where: { id: numericId },
+          data: submissionData,
+          include: {
+            primaryContact: true,
+            secondaryContact: true,
+            audience: true,
+            creativeAssets: true,
+            creativeRequirements: true
+          }
+        });
       }
-  
-      // Create the update data object
-      const updateData = {
-        ...(data.campaignName && { campaignName: data.campaignName }),
-        ...(data.businessGoal && { description: data.businessGoal }),
-        ...(data.description && { description: data.description }),
-        ...(data.startDate && { startDate: data.startDate }),
-        ...(data.endDate && { endDate: data.endDate }),
-        ...(data.timeZone && { timeZone: data.timeZone }),
-        ...(data.currency && { currency: data.currency }),
-        ...(data.totalBudget && { totalBudget: data.totalBudget }),
-        ...(data.socialMediaBudget && { socialMediaBudget: data.socialMediaBudget }),
-        ...(data.platform && { platform: data.platform }),
-        ...(data.influencerHandle && { influencerHandle: data.influencerHandle }),
-        ...contactsUpdate,
-        ...(data.submissionStatus && { submissionStatus: data.submissionStatus }),
-      };
-  
-      const updatedCampaign = await prisma.campaignWizardSubmission.update({
-        where: { id: campaignId },
-        data: updateData,
-      });
-  
-      return NextResponse.json({ 
-        success: true, 
-        id: updatedCampaign.id 
+      
+      // Process date fields before they get serialized improperly
+      if (updatedCampaign && updatedCampaign.startDate instanceof Date) {
+        (updatedCampaign as any).startDate = updatedCampaign.startDate.toISOString();
+      }
+      
+      if (updatedCampaign && updatedCampaign.endDate instanceof Date) {
+        (updatedCampaign as any).endDate = updatedCampaign.endDate.toISOString();
+      }
+      
+      // Transform response data for frontend
+      const transformedCampaign = EnumTransformers.transformObjectFromBackend(updatedCampaign);
+      
+      return NextResponse.json({
+        success: true,
+        data: transformedCampaign
       });
     },
     { 

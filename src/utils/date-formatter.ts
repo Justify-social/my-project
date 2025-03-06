@@ -3,7 +3,10 @@
  * 
  * This utility provides standardized date formatting functions to handle
  * the various date formats and edge cases in the application.
+ * 
+ * This file is maintained for backward compatibility - new code should use DateService directly.
  */
+import { DateService } from './date-service';
 
 /**
  * Formats a date value for display in form fields
@@ -11,46 +14,10 @@
  * 
  * @param date Any date representation (string, Date object, empty object, etc.)
  * @returns A formatted date string or empty string for invalid inputs
+ * @deprecated Use DateService.toFormDate() instead
  */
 export function formatDate(date: any): string {
-  // Handle empty values
-  if (!date) return '';
-  
-  // Handle empty objects
-  if (typeof date === 'object' && Object.keys(date).length === 0) {
-    console.warn('Empty date object received:', date);
-    return '';
-  }
-  
-  try {
-    // If it's already a string, check if it's valid
-    if (typeof date === 'string') {
-      if (!date.trim()) return '';
-      
-      const parsed = new Date(date);
-      if (isNaN(parsed.getTime())) {
-        console.warn('Invalid date string:', date);
-        return '';
-      }
-      // Extract just the date part if it's an ISO string
-      return date.includes('T') ? date.split('T')[0] : date;
-    }
-    
-    // If it's a Date object
-    if (date instanceof Date) {
-      if (isNaN(date.getTime())) {
-        console.warn('Invalid Date object:', date);
-        return '';
-      }
-      return date.toISOString().split('T')[0];
-    }
-    
-    console.warn('Unhandled date format:', date);
-    return '';
-  } catch (e) {
-    console.error('Error formatting date:', e, date);
-    return '';
-  }
+  return DateService.toFormDate(date) || '';
 }
 
 /**
@@ -59,39 +26,10 @@ export function formatDate(date: any): string {
  * 
  * @param date Any date representation
  * @returns A properly formatted date string or null for invalid inputs
+ * @deprecated Use DateService.toApiDate() instead
  */
 export function formatDateForApi(date: any): string | null {
-  // Handle empty values
-  if (!date) return null;
-  
-  // Handle empty objects
-  if (typeof date === 'object' && Object.keys(date).length === 0) {
-    return null;
-  }
-  
-  try {
-    // If it's a string, check if it's valid
-    if (typeof date === 'string') {
-      if (!date.trim()) return null;
-      
-      const parsed = new Date(date);
-      if (isNaN(parsed.getTime())) return null;
-      
-      // Return ISO string for API
-      return parsed.toISOString();
-    }
-    
-    // If it's a Date object
-    if (date instanceof Date) {
-      if (isNaN(date.getTime())) return null;
-      return date.toISOString();
-    }
-    
-    return null;
-  } catch (e) {
-    console.error('Error formatting date for API:', e, date);
-    return null;
-  }
+  return DateService.toApiDate(date);
 }
 
 /**
@@ -103,26 +41,12 @@ export function formatDateForApi(date: any): string | null {
  * @returns A user-friendly formatted date string or empty string for invalid inputs
  */
 export function formatDateForDisplay(date: any, format: 'short' | 'medium' | 'long' | 'full' = 'medium'): string {
-  // Handle empty values
-  if (!date) return '';
-  
-  // Handle empty objects
-  if (typeof date === 'object' && Object.keys(date).length === 0) {
-    return '';
-  }
+  // Get a standardized date
+  const dateString = DateService.toApiDate(date);
+  if (!dateString) return '';
   
   try {
-    let dateObj: Date;
-    
-    // Parse string to Date if needed
-    if (typeof date === 'string') {
-      if (!date.trim()) return '';
-      dateObj = new Date(date);
-    } else if (date instanceof Date) {
-      dateObj = date;
-    } else {
-      return '';
-    }
+    const dateObj = new Date(dateString);
     
     // Check if valid date
     if (isNaN(dateObj.getTime())) {
