@@ -7,7 +7,6 @@ import * as Yup from "yup";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { useWizard } from "@/context/WizardContext";
-import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
@@ -16,7 +15,6 @@ import {
   PlusIcon, 
   XMarkIcon, 
   ChevronRightIcon,
-  PencilSquareIcon,
   InformationCircleIcon
 } from "@heroicons/react/24/outline";
 
@@ -90,56 +88,14 @@ function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
-  const { data, updateData } = useWizard();
+  const { 
+    data, 
+    loading 
+  } = useWizard();
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadCampaignData = async () => {
-      if (!campaignId || isInitialized) return;
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await fetch(`/api/campaigns/${campaignId}`);
-        const result = await response.json();
-        
-        if (!isMounted) return;
-
-        if (!response.ok) {
-          throw new Error(result.error || 'Failed to load campaign');
-        }
-
-        if (result.success) {
-          updateData(result.campaign, result);
-          toast.success('Campaign data loaded');
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        const message = error instanceof Error ? error.message : 'Failed to load campaign';
-        setError(message);
-        toast.error(message);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-          setIsInitialized(true);
-        }
-      }
-    };
-
-    loadCampaignData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [campaignId, updateData, isInitialized]);
-
-  // Update initialValues to use type assertion
+  
   const audienceData = (data as any)?.audience || {};
   const initialValues: AudienceValues = {
     location: audienceData.location || [],
@@ -233,7 +189,7 @@ function FormContent() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner />
@@ -411,7 +367,7 @@ function FormContent() {
                                 const total = Object.values(newDistribution).reduce((sum, val) => sum + val, 0);
                                 if (total !== 100) {
                                   const diff = 100 - total;
-                                  // Add/subtract from the largest value that's not the current one
+                                  // Add/subtract from the largest value that&apos;s not the current one
                                   const largestKey = otherKeys.reduce((max, k) => 
                                     newDistribution[k as keyof AgeDistribution] > newDistribution[max as keyof AgeDistribution] ? k : max, 
                                     otherKeys[0]
@@ -707,9 +663,9 @@ function FormContent() {
                             <option value="">Select Education</option>
                             <option value="high_school">High School</option>
                             <option value="some_college">Some College</option>
-                            <option value="associates">Associate's Degree</option>
-                            <option value="bachelors">Bachelor's Degree</option>
-                            <option value="masters">Master's Degree</option>
+                            <option value="associates">Associate&apos;s Degree</option>
+                            <option value="bachelors">Bachelor&apos;s Degree</option>
+                            <option value="masters">Master&apos;s Degree</option>
                             <option value="doctorate">Doctorate</option>
                             <option value="professional">Professional Degree</option>
                           </Field>

@@ -53,6 +53,9 @@ interface WizardData {
   };
 }
 
+// Define a more specific type for campaign data
+type CampaignData = Record<string, unknown>;
+
 interface WizardContextType {
   data: WizardData;
   updateData: (
@@ -60,15 +63,17 @@ interface WizardContextType {
     newData: Partial<WizardData[keyof WizardData]>
   ) => void;
   isEditing: boolean;
-  campaignData: any | null;
+  campaignData: CampaignData | null;
   loading: boolean;
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
   resetForm: () => void;
-  saveProgress: (data: any) => Promise<boolean>;
+  saveProgress: (data: Record<string, unknown>) => Promise<boolean>;
   lastSaved: Date | null;
   autosaveEnabled: boolean;
   setAutosaveEnabled: (enabled: boolean) => void;
+  reloadCampaignData: () => void;
+  updateCampaignData: (updates: Record<string, unknown>) => void;
 }
 
 // Default values for the wizard data.
@@ -137,13 +142,36 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   });
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autosaveEnabled, setAutosaveEnabled] = useState<boolean>(true);
+  // Add hasLoadedData state to prevent redundant loading
+  const [hasLoadedData, setHasLoadedData] = useState<boolean>(false);
 
   // Add debug log
-  console.log('WizardProvider:', { campaignId, loading, campaignData });
+  console.log('WizardProvider:', { campaignId, loading, campaignData, hasLoadedData });
+
+  // Memoized function to reload campaign data when needed
+  const reloadCampaignData = useCallback(() => {
+    setHasLoadedData(false);
+  }, []);
+
+  // Memoized function to update campaign data directly
+  const updateCampaignData = useCallback((updates: Record<string, unknown>) => {
+    setCampaignData(current => ({
+      ...current,
+      ...updates
+    }));
+    // Update lastSaved
+    setLastSaved(new Date());
+  }, []);
 
   // Load campaign data from API or localStorage
   useEffect(() => {
     async function loadCampaignData() {
+      // Skip loading if we already have data or there's no campaignId
+      if (!campaignId || hasLoadedData) {
+        setLoading(false);
+        return;
+      }
+
       if (!campaignId) {
         // Try to load from localStorage if no ID in URL
         const savedData = localStorage.getItem('campaignData');
@@ -169,11 +197,15 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
           throw new Error('Failed to fetch campaign');
         }
         
-        const data = await response.json();
-        console.log('Fetched campaign data:', data);
+        const result = await response.json();
+        console.log('Fetched campaign data:', result);
         
-        // If data is wrapped in a response object, extract it
-        const campaignData = data.campaign || data;
+        // Extract data from the response, handling both old and new API formats
+        const campaignData = result.data || result.campaign || result;
+        
+        // Log the extracted data to help with debugging
+        console.log('Extracted campaign data:', campaignData);
+        
         setCampaignData(campaignData);
         
         // Save to localStorage for offline access
@@ -182,6 +214,12 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
           lastSaved: new Date().toISOString()
         }));
         setLastSaved(new Date());
+        
+        // Set hasLoadedData to prevent redundant loading
+        setHasLoadedData(true);
+        
+        // Show a one-time toast notification
+        toast.success('Campaign data loaded');
         
       } catch (error) {
         console.error('Error loading campaign:', error);
@@ -196,6 +234,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
               setCampaignData(parsedData);
               setLastSaved(new Date(parsedData.lastSaved || Date.now()));
               toast.success('Loaded cached campaign data');
+              
+              // Even with localStorage fallback, mark as loaded
+              setHasLoadedData(true);
             }
           } catch (e) {
             console.error('Error parsing saved campaign data:', e);
@@ -206,13 +247,17 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    if (campaignId) {
+    // Only load data if we have a campaignId and haven't loaded data yet
+    if (campaignId && !hasLoadedData) {
       loadCampaignData();
+    } else if (!campaignId) {
+      // Reset loading state if there's no campaign ID
+      setLoading(false);
     }
-  }, [campaignId]);
+  }, [campaignId, hasLoadedData]);
 
   // Save progress function
-  const saveProgress = async (formData: any): Promise<boolean> => {
+  const saveProgress = useCallback(async (data: Record<string, unknown>) => {
     if (!campaignId) {
       console.warn('Cannot save progress: No campaign ID available');
       return false;
@@ -224,7 +269,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data)
       });
       
       if (!response.ok) {
@@ -237,7 +282,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       // Update localStorage
       localStorage.setItem('campaignData', JSON.stringify({
         ...campaignData,
-        ...formData,
+        ...data,
         lastSaved: new Date().toISOString()
       }));
       
@@ -246,7 +291,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       console.error('Error saving progress:', error);
       return false;
     }
-  };
+  }, [campaignId, campaignData]);
 
   // Debounced version of saveProgress for autosave
   const debouncedSaveProgress = useCallback(
@@ -263,7 +308,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
           });
       }
     }, 2000), // 2 second debounce
-    [campaignId, autosaveEnabled]
+    [campaignId, autosaveEnabled, saveProgress]
   );
 
   const updateData = (
@@ -332,6 +377,8 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     lastSaved,
     autosaveEnabled,
     setAutosaveEnabled,
+    reloadCampaignData,
+    updateCampaignData,
   };
 
   return (

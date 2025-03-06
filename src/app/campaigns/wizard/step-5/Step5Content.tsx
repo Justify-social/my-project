@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/Wizard/ProgressBar";
@@ -10,12 +10,12 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import ErrorFallback from '@/components/ErrorFallback';
 import { 
   CheckCircleIcon, 
-  XCircleIcon, 
   ChevronRightIcon,
   PencilIcon,
   DocumentIcon
 } from '@heroicons/react/24/outline';
 import Link from "next/link";
+import { EnumTransformers } from '@/utils/enum-transformers';
 
 // Type Definitions
 interface CreativeAsset {
@@ -190,17 +190,21 @@ function Step5Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
-  const { data, updateData } = useWizard();
-
-  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    data, 
+    loading: wizardLoading,
+    reloadCampaignData 
+  } = useWizard();
+  
+  const [isLoading, setIsLoading] = useState(wizardLoading);
   const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [campaignData, setCampaignData] = useState<Record<string, any>>(null);
+  const [validationState, setValidationState] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [validationMessages, setValidationMessages] = useState<string[]>([]);
   const [showAssets, setShowAssets] = useState(false);
-  const [campaignData, setCampaignData] = useState<any>(null);
-  // Add a ref to track if we've attempted to fetch data
-  const hasFetchedRef = React.useRef(false);
+  const hasFetchedRef = useRef(false);
   
   // useMemo for displayData
   const displayData = useMemo(() => {
@@ -255,93 +259,34 @@ function Step5Content() {
     (displayData.campaignName || (displayData.overview && displayData.overview.name))
   );
 
+  // Use data from WizardContext if available
+  useEffect(() => {
+    if (campaignData && !campaignData) {
+      setCampaignData(campaignData);
+      validateCampaignData(campaignData);
+    }
+    setIsLoading(wizardLoading);
+  }, [campaignData, wizardLoading]);
+  
   // Load campaign data if needed
   useEffect(() => {
-    // Skip if we've already attempted to fetch
-    if (hasFetchedRef.current) {
-      console.log("Skipping fetch - already attempted");
+    // Skip if we've already attempted to fetch or if data is already available from WizardContext
+    if (hasFetchedRef.current || campaignData) {
+      console.log("Skipping fetch - already attempted or data available from context");
       return;
     }
     
     // Mark that we've attempted to fetch
     hasFetchedRef.current = true;
 
-    const fetchCampaignData = async () => {
-      if (!campaignId) {
-        setError("Campaign ID not found");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        console.log("Fetching campaign data for ID:", campaignId);
-        
-        const apiEndpoint = `/api/campaigns?id=${campaignId}`;
-        console.log(`Making API request to: ${apiEndpoint}`);
-        
-        const response = await fetch(apiEndpoint);
-        console.log(`API response status: ${response.status} ${response.statusText}`);
-
-        if (!response.ok) {
-          throw new Error(`Failed to load campaign data: ${response.status} ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        console.log("Raw API response received");
-        
-        if (!result) {
-          throw new Error("API returned empty data");
-        }
-        
-        // Handle the response data
-        if (result.success && result.campaign) {
-          console.log("Found campaign data in standard format");
-          updateData(result.campaign, result.campaign);
-          setCampaignData(result.campaign);
-        } else if (result.campaign) {
-          console.log("Found campaign data without success flag");
-          updateData(result.campaign, result.campaign);
-          setCampaignData(result.campaign);
-        } else if (result.success && result.data) {
-          console.log("Found campaign data in data property");
-          updateData(result.data, result.data);
-          setCampaignData(result.data);
-        } else if (result.data) {
-          console.log("Found campaign data in data property without success flag");
-          updateData(result.data, result.data);
-          setCampaignData(result.data);
-        } else if (typeof result === 'object' && !Array.isArray(result) && Object.keys(result).length > 0) {
-          console.log("Using entire response as campaign data");
-          updateData(result, result);
-          setCampaignData(result);
-        } else {
-          console.error("Could not identify campaign data in response");
-          throw new Error("Failed to load campaign data: Campaign data not found in expected format");
-        }
-      } catch (error) {
-        console.error("Error loading campaign:", error);
-        
-        let errorMessage = "Unknown error occurred";
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        
-        setError(`Error: ${errorMessage}. Please check the console for more details or try again.`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Fetch data if we have a campaign ID
+    // Use reloadCampaignData from WizardContext instead of implementing our own fetch
     if (campaignId) {
-      console.log("Fetching fresh data from API for campaign ID:", campaignId);
-      fetchCampaignData();
+      reloadCampaignData();
     } else {
-      console.log("No campaign ID provided");
+      setError("Campaign ID is missing");
       setIsLoading(false);
     }
-  }, [campaignId, updateData]); // Only depends on campaignId and updateData
+  }, [campaignId, campaignData, reloadCampaignData]);
 
   // Check for valid data
   useEffect(() => {
@@ -355,26 +300,11 @@ function Step5Content() {
       if (data.assets) console.log("Assets data:", data.assets);
       
       // Reset validation messages to avoid duplicates
-      setValidationMessages([]);
-      
-      // Check for missing critical sections
-      const missingKeys: string[] = [];
-      if (!data.overview || Object.keys(data.overview).length === 0) missingKeys.push('overview');
-      if (!data.objectives || Object.keys(data.objectives).length === 0) missingKeys.push('objectives');
-      if (!data.audience || Object.keys(data.audience).length === 0) missingKeys.push('audience');
-      if (!data.assets || Object.keys(data.assets).length === 0) missingKeys.push('assets');
-      
-      if (missingKeys.length > 0) {
-        console.warn(`Missing data sections: ${missingKeys.join(', ')}`);
-        setValidationMessages(prev => [
-          ...prev, 
-          `Some campaign data is missing (${missingKeys.join(', ')}). Please complete all steps before submission.`
-        ]);
-      }
+      setValidationState({});
     }
   }, [data]);
 
-  // Additional check after data is loaded to ensure we have data
+  // Check for empty data after loading
   useEffect(() => {
     // Only run this check once loading is complete and there's no error already set
     if (!isLoading && !error) {
@@ -400,6 +330,8 @@ function Step5Content() {
         headers: {
           'Content-Type': 'application/json',
         },
+        // No request body needed, but if any is added in the future:
+        // body: JSON.stringify(EnumTransformers.transformObjectToBackend(requestBody)),
       });
 
       if (!response.ok) {
@@ -431,12 +363,13 @@ function Step5Content() {
         }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save draft");
+        throw new Error(result.error || 'Failed to save draft');
       }
 
-      toast.success("Campaign saved as draft");
+      toast.success('Draft saved successfully');
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error(error instanceof Error ? error.message : "Failed to save draft");
@@ -467,6 +400,32 @@ function Step5Content() {
     
     // Force hard reload after a short delay
     setTimeout(() => window.location.reload(), 500);
+  };
+
+  // Define a simple validation function in the file
+  const validateCampaignData = (data: any): void => {
+    // Reset validation messages to avoid duplicates
+    setValidationMessages([]);
+    
+    // Check for missing critical sections
+    const missingKeys: string[] = [];
+    if (!data.overview || Object.keys(data.overview).length === 0) missingKeys.push('overview');
+    if (!data.objectives || Object.keys(data.objectives).length === 0) missingKeys.push('objectives');
+    if (!data.audience || Object.keys(data.audience).length === 0) missingKeys.push('audience');
+    if (!data.assets || Object.keys(data.assets).length === 0) missingKeys.push('assets');
+    
+    // Basic validation checks
+    if (!data) {
+      setValidationMessages(['Campaign data is empty or invalid']);
+      return;
+    }
+    
+    // Add any missing sections to validation messages
+    if (missingKeys.length > 0) {
+      setValidationMessages([
+        `Some campaign data is missing (${missingKeys.join(', ')}). Please complete all steps before submission.`
+      ]);
+    }
   };
 
   if (isLoading) {
@@ -839,8 +798,8 @@ function Step5Content() {
                     ) : (
                       <span className="text-gray-500">No features specified</span>
                     )}
-          </div>
-        </div>
+                  </div>
+                </div>
 
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Main Message</h4>
@@ -902,8 +861,8 @@ function Step5Content() {
                         displayData.audience.genders.map((g: any) => g.gender).join(', ')
                       : 'Not specified'
                     } 
-          />
-        </div>
+                  />
+                </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                   <h3 className="font-medium text-gray-700 mb-4">Location</h3>
@@ -926,7 +885,7 @@ function Step5Content() {
                     } 
                   />
                 </div>
-        </div>
+              </div>
 
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
                 <h3 className="font-medium text-gray-700 mb-4">Advanced Targeting</h3>
@@ -949,8 +908,8 @@ function Step5Content() {
                   <DataItem 
                     label="Job Titles" 
                     value={displayData.audience?.jobTitles || 'Not specified'} 
-          />
-        </div>
+                  />
+                </div>
               </div>
             </div>
           ) : (
@@ -1015,7 +974,7 @@ function Step5Content() {
                 className={`h-5 w-5 ml-1 transition-transform duration-200 ${showAssets ? 'rotate-90' : ''}`} 
               />
             </button>
-        </div>
+          </div>
 
           {showAssets && displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 && (
             <div className="space-y-4">

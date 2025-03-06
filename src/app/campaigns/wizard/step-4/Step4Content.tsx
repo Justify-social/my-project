@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
@@ -92,6 +92,14 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      onFilesAdded(Array.from(e.dataTransfer.files));
+    }
+  }, [onFilesAdded]);
+
   return (
     <div
       className="relative w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
@@ -103,13 +111,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
         e.preventDefault();
         setDragOver(false);
       }}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragOver(false);
-        if (e.dataTransfer.files) {
-          onFilesAdded(e.dataTransfer.files);
-        }
-      }}
+      onDrop={handleDrop}
       role="button"
       tabIndex={0}
       onClick={() => fileInputRef.current?.click()}
@@ -219,7 +221,7 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
         {/* Influencer */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Start typing influencer's handle
+            Start typing influencer&apos;s handle
           </label>
           <div className="relative">
             <input
@@ -381,71 +383,20 @@ function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
-  const { data, updateData } = useWizard();
+  const { 
+    data, 
+    loading 
+  } = useWizard();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [confirmDeleteAsset, setConfirmDeleteAsset] = useState<Asset | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Get currency from wizard data
+  const [error, setError] = useState<string | null>(null);
   const currency = data?.overview?.currency || "$";
-
+  
   const initialValues: CreativeValues = {
     assets: [],
   };
-
-  // Load campaign data
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadCampaignData = async () => {
-      if (!campaignId || isInitialized) return;
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await fetch(`/api/campaigns/${campaignId}`);
-        const result = await response.json();
-        
-        if (!isMounted) return;
-
-        if (!response.ok) {
-          throw new Error(result.error || 'Failed to load campaign');
-        }
-
-        if (result.success) {
-          updateData(result.campaign, result);
-          
-          // Transform any existing assets to our format
-          if (result.campaign.creativeAssets && Array.isArray(result.campaign.creativeAssets.assets)) {
-            // In a real implementation, you would convert the stored assets back to File objects
-            // For now, we'll just initialize with empty assets
-          }
-          
-          toast.success('Campaign data loaded');
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        const message = error instanceof Error ? error.message : 'Failed to load campaign';
-        setError(message);
-        toast.error(message);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-          setIsInitialized(true);
-        }
-      }
-    };
-
-    loadCampaignData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [campaignId, updateData, isInitialized]);
 
   // Handle file uploads
   const handleFilesAdded = useCallback((files: FileList) => {
@@ -685,7 +636,7 @@ function FormContent() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner />
