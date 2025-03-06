@@ -88,6 +88,43 @@ export function standardizeApiResponse(data: any) {
     }
   });
   
+  // Transform audience data from demographics, locations, targeting, competitors fields
+  // into a consolidated audience structure
+  const demographics = result.demographics || {};
+  const locations = Array.isArray(result.locations) ? result.locations : [];
+  const targeting = result.targeting || {};
+  const competitors = Array.isArray(result.competitors) ? result.competitors : [];
+  
+  // Create or update audience field with transformed data
+  result.audience = {
+    ...(result.audience || {}),
+    location: locations.map((loc: any) => loc.location || '').filter(Boolean),
+    ageDistribution: {
+      age1824: demographics.ageDistribution?.age1824 ?? 20,
+      age2534: demographics.ageDistribution?.age2534 ?? 25,
+      age3544: demographics.ageDistribution?.age3544 ?? 20,
+      age4554: demographics.ageDistribution?.age4554 ?? 15,
+      age5564: demographics.ageDistribution?.age5564 ?? 10,
+      age65plus: demographics.ageDistribution?.age65plus ?? 10,
+    },
+    gender: Array.isArray(demographics.gender) ? demographics.gender : [],
+    otherGender: demographics.otherGender || "",
+    screeningQuestions: Array.isArray(targeting.screeningQuestions) 
+      ? targeting.screeningQuestions.map((q: any) => q.question || '').filter(Boolean)
+      : [],
+    languages: Array.isArray(targeting.languages) 
+      ? targeting.languages.map((l: any) => l.language || '').filter(Boolean)
+      : [],
+    educationLevel: demographics.educationLevel || "",
+    jobTitles: Array.isArray(demographics.jobTitles) ? demographics.jobTitles : [],
+    incomeLevel: demographics.incomeLevel ?? 20000,
+    competitors: Array.isArray(competitors) 
+      ? competitors.map((c: any) => typeof c === 'string' ? c : c.name || '').filter(Boolean)
+      : [],
+  };
+  
+  console.log('Normalized audience data:', result.audience);
+  
   // Handle special case for budget object
   if (typeof result.budget === 'object' && result.budget !== null) {
     // Extract budget fields if they don't already exist

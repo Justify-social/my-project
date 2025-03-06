@@ -90,32 +90,93 @@ function FormContent() {
   const campaignId = searchParams.get('id');
   const { 
     data, 
-    loading 
+    loading,
+    campaignData 
   } = useWizard();
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const audienceData = (data as any)?.audience || {};
-  const initialValues: AudienceValues = {
-    location: audienceData.location || [],
-    ageDistribution: {
-      age1824: audienceData.ageDistribution?.age1824 ?? 20,
-      age2534: audienceData.ageDistribution?.age2534 ?? 25,
-      age3544: audienceData.ageDistribution?.age3544 ?? 20,
-      age4554: audienceData.ageDistribution?.age4554 ?? 15,
-      age5564: audienceData.ageDistribution?.age5564 ?? 10,
-      age65plus: audienceData.ageDistribution?.age65plus ?? 10,
-    },
-    gender: audienceData.gender || [],
-    otherGender: audienceData.otherGender || "",
-    screeningQuestions: audienceData.screeningQuestions || [],
-    languages: audienceData.languages || [],
-    educationLevel: audienceData.educationLevel || "",
-    jobTitles: audienceData.jobTitles || [],
-    incomeLevel: audienceData.incomeLevel ?? 20000,
-    competitors: audienceData.competitors || [],
+  console.log('Step3Content: Full campaign data:', data);
+  console.log('Step3Content: Raw campaignData:', campaignData);
+  console.log('Step3Content: data.demographics:', (data as Record<string, unknown>)?.demographics);
+  console.log('Step3Content: data.audience:', (data as Record<string, unknown>)?.audience);
+  console.log('Step3Content: data.locations:', (data as Record<string, unknown>)?.locations);
+  console.log('Step3Content: data.targeting:', (data as Record<string, unknown>)?.targeting);
+  console.log('Step3Content: data.competitors:', (data as Record<string, unknown>)?.competitors);
+  console.log('Step3Content: campaignData.audience:', campaignData?.audience);
+  
+  // First look for data in the normalized audience structure from the API response formatter
+  const audienceData = (campaignData?.audience || {}) as Partial<AudienceValues>;
+  
+  // Then fall back to extracting from other data fields if needed
+  const demographics = (campaignData as Record<string, unknown>)?.demographics || {};
+  const locations = Array.isArray((campaignData as Record<string, unknown>)?.locations) ? (campaignData as Record<string, unknown>)?.locations : [];
+  const targeting = (campaignData as Record<string, unknown>)?.targeting || {};
+  const competitors = Array.isArray((campaignData as Record<string, unknown>)?.competitors) ? (campaignData as Record<string, unknown>)?.competitors : [];
+  
+  console.log('Step3Content: Audience data from API formatter:', audienceData);
+  console.log('Step3Content: Extracted demographics:', demographics);
+  console.log('Step3Content: Extracted locations:', locations);
+  console.log('Step3Content: Extracted targeting:', targeting);
+  console.log('Step3Content: Extracted competitors:', competitors);
+  
+  // Ensure audience arrays are properly handled
+  const ensureStringArray = (value: unknown): string[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+      return value.map(item => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          // Try to extract common field names
+          const typedItem = item as Record<string, unknown>;
+          if (typeof typedItem.location === 'string') return typedItem.location;
+          if (typeof typedItem.question === 'string') return typedItem.question;
+          if (typeof typedItem.language === 'string') return typedItem.language;
+          if (typeof typedItem.name === 'string') return typedItem.name;
+          if (typeof typedItem.competitor === 'string') return typedItem.competitor;
+        }
+        return String(item);
+      }).filter(Boolean);
+    }
+    return typeof value === 'string' ? [value] : [];
   };
+  
+  // Extract array fields with guaranteed string array result
+  const locationArray = ensureStringArray(audienceData.location || locations);
+  const screeningQuestionsArray = ensureStringArray(audienceData.screeningQuestions || targeting.screeningQuestions);
+  const languagesArray = ensureStringArray(audienceData.languages || targeting.languages);
+  const jobTitlesArray = ensureStringArray(audienceData.jobTitles || demographics.jobTitles);
+  const competitorsArray = ensureStringArray(audienceData.competitors || competitors);
+  
+  console.log('Step3Content: Extracted location array:', locationArray);
+  console.log('Step3Content: Extracted screening questions array:', screeningQuestionsArray);
+  console.log('Step3Content: Extracted languages array:', languagesArray);
+  console.log('Step3Content: Extracted job titles array:', jobTitlesArray);
+  console.log('Step3Content: Extracted competitors array:', competitorsArray);
+  
+  const initialValues: AudienceValues = {
+    // Prefer the normalized audience data first, then fall back to separate fields
+    location: locationArray,
+    ageDistribution: audienceData.ageDistribution || {
+      age1824: demographics.ageDistribution?.age1824 ?? 20,
+      age2534: demographics.ageDistribution?.age2534 ?? 25,
+      age3544: demographics.ageDistribution?.age3544 ?? 20,
+      age4554: demographics.ageDistribution?.age4554 ?? 15,
+      age5564: demographics.ageDistribution?.age5564 ?? 10,
+      age65plus: demographics.ageDistribution?.age65plus ?? 10,
+    },
+    gender: ensureStringArray(audienceData.gender || demographics.gender),
+    otherGender: audienceData.otherGender || demographics.otherGender || "",
+    screeningQuestions: screeningQuestionsArray,
+    languages: languagesArray,
+    educationLevel: audienceData.educationLevel || demographics.educationLevel || "",
+    jobTitles: jobTitlesArray,
+    incomeLevel: audienceData.incomeLevel ?? demographics.incomeLevel ?? 20000,
+    competitors: competitorsArray,
+  };
+
+  console.log('Step3Content: Initialized form values:', initialValues);
 
   const handleSubmit = async (values: AudienceValues) => {
     try {
@@ -125,6 +186,8 @@ function FormContent() {
       if (!campaignId) {
         throw new Error('Campaign ID is required');
       }
+
+      console.log('Submitting audience data:', JSON.stringify(values, null, 2));
 
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
@@ -139,12 +202,15 @@ function FormContent() {
       const result = await response.json();
 
       if (!response.ok) {
+        console.error('Error response from API:', result);
         throw new Error(result.error || 'Failed to update campaign');
       }
 
+      console.log('API response:', result);
       toast.success('Campaign updated successfully');
       router.push(`/campaigns/wizard/step-4?id=${campaignId}`);
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       const message = error instanceof Error ? error.message : 'Failed to update campaign';
       setError(message);
       toast.error(message);
@@ -155,37 +221,39 @@ function FormContent() {
 
   const handleSaveDraft = async (values: AudienceValues) => {
     try {
-      setIsSaving(true);
-      setError(null);
-
       if (!campaignId) {
-        throw new Error('Campaign ID is required');
+        console.error('No campaign ID available');
+        toast.error('Cannot save draft: No campaign ID found');
+        return;
       }
+
+      console.log('Saving draft with data:', JSON.stringify(values, null, 2));
 
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           audience: values,
           submissionStatus: 'draft'
-        }),
+        })
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to save draft');
+        console.error('Error response from API:', result);
+        toast.error(result.error || 'Failed to save draft');
+        return;
       }
 
+      console.log('Draft save API response:', result);
       toast.success('Draft saved successfully');
+      
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save draft';
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
+      console.error('Error saving draft:', error);
+      toast.error('Failed to save draft: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -214,7 +282,7 @@ function FormContent() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white">
+    <div className="w-full max-w-5xl mx-auto px-6 py-8 bg-white">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
         <p className="text-gray-500">Complete all required fields to create your campaign</p>
@@ -226,7 +294,7 @@ function FormContent() {
         onSubmit={handleSubmit}
         enableReinitialize={true}
       >
-        {({ values, setFieldValue, submitForm, isValid, dirty, errors }) => {
+        {({ values, setFieldValue, submitForm, isValid, dirty }) => {
           return (
             <>
               <Form className="space-y-6">
@@ -283,7 +351,7 @@ function FormContent() {
               </button>
             </div>
 
-                        {values.location.length > 0 && (
+                        {Array.isArray(values.location) && values.location.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-2">
                             {values.location.map((loc, index) => (
                               <span 
@@ -557,7 +625,7 @@ function FormContent() {
                     </div>
                   </div>
                   
-                  {values.screeningQuestions.length > 0 && (
+                  {Array.isArray(values.screeningQuestions) && values.screeningQuestions.length > 0 && (
                     <div className="space-y-2">
                       {values.screeningQuestions.map((question, index) => (
                         <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
@@ -608,7 +676,7 @@ function FormContent() {
                       </div>
               </div>
 
-                    {values.languages.length > 0 && (
+                    {Array.isArray(values.languages) && values.languages.length > 0 && (
                       <div className="mt-3">
                         <div className="flex flex-wrap gap-2">
                           {values.languages.map((lang) => (
@@ -726,7 +794,7 @@ function FormContent() {
                             <p>Examples: Marketing Manager, Software Engineer, Financial Analyst</p>
               </div>
 
-                          {values.jobTitles.length > 0 && (
+                          {Array.isArray(values.jobTitles) && values.jobTitles.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               {values.jobTitles.map((title, index) => (
                                 <span 
@@ -831,22 +899,22 @@ function FormContent() {
                 {/* Competitors */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">Competitors to Monitor</h2>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Enter the names of key competitors you're tracking. These will help identify trends, opportunities, and gaps in your market.
+                  <p className="text-gray-600 mb-4">
+                    Enter the names of key competitors you&apos;re tracking. These will help identify trends, opportunities, and gaps in your market.
                   </p>
                   
-                  <div className="relative mb-6">
-                    <div className="flex items-center">
-                      <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3" />
+                  {/* Competitor Input */}
+                  <div className="mb-6">
+                    <div className="relative">
                       <input
                         type="text"
                         id="competitorInput"
                         placeholder="Enter competitor name"
-                        className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md"
+                        className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
-                            const input = document.getElementById('competitorInput') as HTMLInputElement;
+                            const input = e.target as HTMLInputElement;
                             if (input && input.value.trim()) {
                               const newCompetitors = [...values.competitors, input.value.trim()];
                               setFieldValue('competitors', newCompetitors);
@@ -855,9 +923,12 @@ function FormContent() {
                           }
                         }}
                       />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                      </div>
                       <button
                         type="button"
-                        className="absolute right-2 flex items-center"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
                         onClick={() => {
                           const input = document.getElementById('competitorInput') as HTMLInputElement;
                           if (input && input.value.trim()) {
@@ -872,52 +943,49 @@ function FormContent() {
                         </div>
                       </button>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {values.competitors.length > 0 ? (
-                      values.competitors.map((competitor, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                          <span>{competitor}</span>
-                          <div className="flex space-x-2">
+                    
+                    {Array.isArray(values.competitors) && values.competitors.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {values.competitors.map((competitor, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center justify-between px-3 py-2 border border-gray-200 rounded-lg bg-white"
+                          >
+                            <span>{competitor}</span>
                             <button
                               type="button"
+                              className="ml-2 text-gray-400 hover:text-gray-500"
                               onClick={() => {
-                                const newCompetitors = [...values.competitors];
-                                newCompetitors.splice(index, 1);
-                                setFieldValue('competitors', newCompetitors);
+                                const updatedCompetitors = [...values.competitors];
+                                updatedCompetitors.splice(index, 1);
+                                setFieldValue('competitors', updatedCompetitors);
                               }}
-                              className="text-gray-400 hover:text-gray-500"
                             >
-                              <XMarkIcon className="h-5 w-5" />
+                              <XMarkIcon className="h-4 w-4" />
                             </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center p-4 text-gray-500">
-                        No competitors added yet
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
                 </div>
-                
-                {/* Add bottom padding to prevent progress bar overlap */}
-                <div className="pb-4"></div>
-            </Form>
+              </Form>
 
-            <ProgressBar
-              currentStep={3}
-              onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-              onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
-              onNext={submitForm}
+              <ProgressBar
+                currentStep={3}
+                onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+                onBack={() => router.push(`/campaigns/wizard/step-2?id=${campaignId}`)}
+                onNext={submitForm}
                 onSaveDraft={() => handleSaveDraft(values)}
-              disableNext={!isValid || isSaving}
+                disableNext={!isValid || isSaving}
                 isFormValid={isValid}
                 isDirty={dirty}
                 isSaving={isSaving}
-            />
-          </>
+              />
+
+              {/* Add substantial bottom padding to prevent progress bar overlap */}
+              <div className="pb-16"></div>
+            </>
           );
         }}
       </Formik>
