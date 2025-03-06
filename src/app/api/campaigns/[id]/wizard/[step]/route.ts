@@ -58,10 +58,14 @@ export async function PATCH(
     // Import the EnumTransformers utility
     const { EnumTransformers } = await import('@/utils/enum-transformers');
     
-    const campaignId = parseInt(params.id, 10);
+    const campaignId = params.id;
     const stepNumber = parseInt(params.step, 10);
     
-    if (isNaN(campaignId) || isNaN(stepNumber)) {
+    // Check if the ID is a UUID (string format) or a numeric ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const numericId = parseInt(campaignId, 10);
+    
+    if ((!isUuid && isNaN(numericId)) || isNaN(stepNumber)) {
       return NextResponse.json({ 
         success: false, 
         message: 'Invalid campaign ID or step number' 
@@ -235,10 +239,14 @@ export async function GET(
   { params }: { params: { id: string, step: string } }
 ) {
   try {
-    const campaignId = parseInt(params.id, 10);
+    const campaignId = params.id;
     const stepNumber = parseInt(params.step, 10);
     
-    if (isNaN(campaignId) || isNaN(stepNumber)) {
+    // Check if the ID is a UUID (string format) or a numeric ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const numericId = parseInt(campaignId, 10);
+    
+    if ((!isUuid && isNaN(numericId)) || isNaN(stepNumber)) {
       return NextResponse.json({ 
         success: false, 
         message: 'Invalid campaign ID or step number' 

@@ -87,9 +87,24 @@ const campaignUpdateSchema = z.object({
     'RECOMMENDATION_INTENT', 
     'ADVOCACY'
   ]).optional(),
-  creativeGuidelines: z.string().optional(),
-  creativeNotes: z.string().optional(),
-  submissionStatus: z.enum(['draft', 'submitted']).optional(),
+  // Step 2 specific fields
+  secondaryKPIs: z.array(z.string()).optional(),
+  features: z.array(z.string()).optional(),
+  // Allow messaging as a nested object
+  messaging: z.object({
+    mainMessage: z.string().optional(),
+    hashtags: z.string().optional(),
+    memorability: z.string().optional(),
+    keyBenefits: z.string().optional(),
+    expectedAchievements: z.string().optional(),
+    purchaseIntent: z.string().optional(),
+    brandPerception: z.string().optional()
+  }).optional(),
+  // Step metadata
+  step: z.number().optional(),
+  status: z.enum(['draft', 'submitted']).optional(),
+  name: z.string().optional(),
+  // Other fields
   contacts: z.string().optional(),
   additionalContacts: z.array(z.record(z.string(), z.any())).optional(),
   primaryContact: z.object({
@@ -310,10 +325,17 @@ export async function PATCH(
         // Map the incoming data to match the CampaignWizard schema
         const mappedData: any = {
           // Map direct fields that match the schema
-          name: data.name,
-          businessGoal: data.businessGoal,
           updatedAt: new Date(),
         };
+        
+        // Add name and business goal if available
+        if (data.name || data.campaignName) {
+          mappedData.name = data.name || data.campaignName;
+        }
+        
+        if (data.businessGoal || data.description) {
+          mappedData.businessGoal = data.businessGoal || data.description;
+        }
         
         // Handle date fields with proper conversion to Date objects
         if (data.startDate) {
@@ -345,6 +367,51 @@ export async function PATCH(
         // Handle secondaryContact as a JSON field
         if (data.secondaryContact) {
           mappedData.secondaryContact = data.secondaryContact;
+        }
+        
+        // Handle Step 2 specific fields - using type assertions to bypass TypeScript errors
+        if (data.primaryKPI) {
+          console.log('Saving primaryKPI:', data.primaryKPI);
+          mappedData.primaryKPI = data.primaryKPI;
+        }
+        
+        if (data.secondaryKPIs) {
+          console.log('Saving secondaryKPIs:', JSON.stringify(data.secondaryKPIs));
+          // Make sure secondaryKPIs is an array
+          mappedData.secondaryKPIs = Array.isArray(data.secondaryKPIs) 
+            ? data.secondaryKPIs 
+            : [data.secondaryKPIs];
+        }
+        
+        if (data.features) {
+          console.log('Saving features:', JSON.stringify(data.features));
+          // Make sure features is an array
+          mappedData.features = Array.isArray(data.features) 
+            ? data.features 
+            : [data.features];
+        }
+        
+        // Additional Step 2 text fields
+        if (data.messaging || data.mainMessage || data.hashtags || data.memorability || 
+            data.keyBenefits || data.expectedAchievements || 
+            data.purchaseIntent || data.brandPerception) {
+          
+          console.log('Saving messaging fields:', {
+            mainMessage: data.mainMessage || data.messaging?.mainMessage,
+            hashtags: data.hashtags || data.messaging?.hashtags,
+            memorability: data.memorability || data.messaging?.memorability
+          });
+          
+          // Construct messaging from either direct fields or the messaging object
+          mappedData.messaging = {
+            mainMessage: data.mainMessage || data.messaging?.mainMessage || '',
+            hashtags: data.hashtags || data.messaging?.hashtags || '',
+            memorability: data.memorability || data.messaging?.memorability || '',
+            keyBenefits: data.keyBenefits || data.messaging?.keyBenefits || '',
+            expectedAchievements: data.expectedAchievements || data.messaging?.expectedAchievements || '',
+            purchaseIntent: data.purchaseIntent || data.messaging?.purchaseIntent || '',
+            brandPerception: data.brandPerception || data.messaging?.brandPerception || ''
+          };
         }
         
         // Handle step status if present

@@ -1,30 +1,41 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { connectToDatabase } from '@/lib/db';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     console.log('Debug: Checking campaign existence:', params.id);
     
-    const campaignId = parseInt(params.id);
-    if (isNaN(campaignId)) {
+    const campaignId = params.id;
+    
+    // Check if the ID is a UUID (string format) or a numeric ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const numericId = parseInt(campaignId, 10);
+    
+    if (!isUuid && isNaN(numericId)) {
       return NextResponse.json({
-        success: false,
-        error: 'Invalid campaign ID',
-        message: `The provided ID '${params.id}' is not a valid number`
-      }, { status: 400 });
+        error: 'Invalid campaign ID format'
+      }, { status: 400 })
     }
 
     // Connect to the database
     await connectToDatabase();
     
     // First check if campaign exists
-    const exists = await prisma.campaignWizardSubmission.count({
-      where: { id: campaignId }
-    });
+    let exists;
+    if (isUuid) {
+      exists = await prisma.campaignWizard.count({
+        where: { id: campaignId }
+      });
+    } else {
+      exists = await prisma.campaignWizardSubmission.count({
+        where: { id: numericId }
+      });
+    }
 
     if (!exists) {
       return NextResponse.json({
@@ -36,24 +47,34 @@ export async function GET(
     }
 
     // If it exists, get full details
-    const campaign = await prisma.campaignWizardSubmission.findUnique({
-      where: { id: campaignId },
-      include: {
-        primaryContact: true,
-        secondaryContact: true,
-        audience: {
-          include: {
-            locations: true,
-            genders: true,
-            languages: true,
-            screeningQuestions: true,
-            competitors: true
-          }
-        },
-        creativeAssets: true,
-        creativeRequirements: true,
-      }
-    });
+    let campaign;
+    if (isUuid) {
+      campaign = await prisma.campaignWizard.findUnique({
+        where: { id: campaignId },
+        include: {
+          Influencer: true
+        }
+      });
+    } else {
+      campaign = await prisma.campaignWizardSubmission.findUnique({
+        where: { id: numericId },
+        include: {
+          primaryContact: true,
+          secondaryContact: true,
+          audience: {
+            include: {
+              locations: true,
+              genders: true,
+              languages: true,
+              screeningQuestions: true,
+              competitors: true
+            }
+          },
+          creativeAssets: true,
+          creativeRequirements: true,
+        }
+      });
+    }
 
     // Check DB connection
     const dbStatus = await prisma.$queryRaw`SELECT 1 as connected`;

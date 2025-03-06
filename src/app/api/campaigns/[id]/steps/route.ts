@@ -7,7 +7,17 @@ export async function PATCH(
 ) {
   try {
     const { step, data } = await request.json()
-    const campaignId = parseInt(params.id)
+    const campaignId = params.id
+    
+    // Check if the ID is a UUID (string format) or a numeric ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const numericId = parseInt(campaignId, 10);
+    
+    if (!isUuid && isNaN(numericId)) {
+      return NextResponse.json({
+        error: 'Invalid campaign ID format'
+      }, { status: 400 })
+    }
 
     let updateData = {}
 

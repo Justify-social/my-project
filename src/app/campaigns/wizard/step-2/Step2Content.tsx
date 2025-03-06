@@ -227,31 +227,47 @@ function FormContent() {
   const campaignId = searchParams.get('id');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialValues, setInitialValues] = useState({});
+  const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [disableNext, setDisableNext] = useState(false);
 
   console.log('Campaign Data:', campaignData); // Debug log
 
-  const initialValues = {
-    mainMessage: isEditing ? campaignData?.mainMessage || "" : "",
-    hashtags: isEditing ? campaignData?.hashtags || "" : "",
-    memorability: isEditing ? campaignData?.memorability || "" : "",
-    keyBenefits: isEditing ? campaignData?.keyBenefits || "" : "",
-    expectedAchievements: isEditing ? campaignData?.expectedAchievements || "" : "",
-    purchaseIntent: isEditing ? campaignData?.purchaseIntent || "" : "",
-    brandPerception: isEditing ? campaignData?.brandPerception || "" : "",
-    primaryKPI: isEditing ? campaignData?.primaryKPI as KPI : "" as KPI,
-    secondaryKPIs: isEditing ? (campaignData?.secondaryKPIs || []) : [] as KPI[],
-    features: isEditing ? (campaignData?.features || []) : [] as Feature[],
-  };
+  useEffect(() => {
+    // Update the hasLoadedData flag when campaignData becomes available
+    if (campaignData) {
+      console.log('Setting hasLoadedData to true for campaign with ID:', campaignData.id);
+      setHasLoadedData(true);
+    }
+  }, [campaignData]);
 
   useEffect(() => {
-    // Debug log to verify data mapping
-    console.log('Form Initial Values:', {
-      mainMessage: campaignData?.mainMessage,
-      primaryKPI: campaignData?.primaryKPI,
-      secondaryKPIs: campaignData?.secondaryKPIs,
-      features: campaignData?.features
-    });
-  }, [campaignData]);
+    if (campaignData && hasLoadedData) {
+      console.log('Campaign Data for Form Initialization:', JSON.stringify(campaignData, null, 2));
+      console.log('Messaging data if available:', campaignData.messaging ? 
+        JSON.stringify(campaignData.messaging, null, 2) : 'No messaging data found');
+      
+      // Initialize form with campaign data
+      const formInitialValues = {
+        // ALWAYS initialize arrays - key fix here
+        primaryKPI: campaignData.primaryKPI || null,
+        secondaryKPIs: Array.isArray(campaignData.secondaryKPIs) ? campaignData.secondaryKPIs : [],
+        features: Array.isArray(campaignData.features) ? campaignData.features : [],
+        
+        // Extract messaging fields from nested object
+        mainMessage: campaignData.messaging?.mainMessage || '',
+        hashtags: campaignData.messaging?.hashtags || '',
+        memorability: campaignData.messaging?.memorability || '',
+        keyBenefits: campaignData.messaging?.keyBenefits || '',
+        expectedAchievements: campaignData.messaging?.expectedAchievements || '',
+        purchaseIntent: campaignData.messaging?.purchaseIntent || '',
+        brandPerception: campaignData.messaging?.brandPerception || ''
+      };
+      
+      console.log('Form Initial Values to be set:', JSON.stringify(formInitialValues, null, 2));
+      setInitialValues(formInitialValues);
+    }
+  }, [campaignData, hasLoadedData]);
 
   const handleSubmit = async (values: any) => {
     try {
@@ -343,15 +359,48 @@ function FormContent() {
         throw new Error('Campaign ID is required');
       }
 
-      console.log('Original form values:', values);
+      console.log('Original form values:', JSON.stringify(values, null, 2));
+      
+      // Ensure KPI and features are properly formatted
+      if (values.primaryKPI) {
+        console.log('Primary KPI before sanitization:', values.primaryKPI);
+      }
+      
+      if (values.secondaryKPIs) {
+        console.log('Secondary KPIs before sanitization:', 
+          Array.isArray(values.secondaryKPIs) ? values.secondaryKPIs.join(', ') : values.secondaryKPIs);
+      }
+      
+      if (values.features) {
+        console.log('Features before sanitization:', 
+          Array.isArray(values.features) ? values.features.join(', ') : values.features);  
+      }
+      
+      // Extract all messaging fields from the form 
+      const messagingData = {
+        mainMessage: values.mainMessage || '',
+        hashtags: values.hashtags || '',
+        memorability: values.memorability || '',
+        keyBenefits: values.keyBenefits || '',
+        expectedAchievements: values.expectedAchievements || '',
+        purchaseIntent: values.purchaseIntent || '',
+        brandPerception: values.brandPerception || ''
+      };
+      
+      console.log('Messaging data extracted from form:', JSON.stringify(messagingData, null, 2));
 
       // Step 1: Apply step-specific sanitization
-      const sanitizedValues = sanitizeStepPayload(values, 2);
-      console.log('After sanitization:', sanitizedValues);
+      const sanitizedValues = sanitizeStepPayload({
+        ...values,
+        // Ensure these fields are included explicitly
+        messaging: messagingData
+      }, 2);
+      
+      console.log('After sanitization:', JSON.stringify(sanitizedValues, null, 2));
       
       // Step 2: Transform enum values
       const transformedValues = EnumTransformers.transformObjectToBackend(sanitizedValues);
-      console.log('After enum transformation:', transformedValues);
+      console.log('After enum transformation:', JSON.stringify(transformedValues, null, 2));
       
       // Always include status and step
       const requestPayload = {
@@ -360,9 +409,13 @@ function FormContent() {
         step: 2
       };
       
-      console.log('Final request payload:', requestPayload);
+      console.log('Final request payload:', JSON.stringify(requestPayload, null, 2));
 
-      const response = await fetch(`/api/campaigns/${campaignId}/wizard/2`, {
+      // Using the same endpoint pattern as Step1Content.tsx
+      const url = `/api/campaigns/${campaignId}`;
+      console.log(`Making PATCH request to ${url} with transformed data:`, JSON.stringify(requestPayload, null, 2));
+      
+      const response = await fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -373,13 +426,43 @@ function FormContent() {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('API error response:', result);
+        console.error('API error response status:', response.status);
+        console.error('API error response body:', JSON.stringify(result, null, 2));
+        
+        if (result.details) {
+          console.error('Validation error details:', JSON.stringify(result.details, null, 2));
+        }
+        
         throw new Error(result.error || 'Failed to save draft');
+      }
+
+      console.log('API success response for draft save:', JSON.stringify(result, null, 2));
+      
+      // Update the campaign data in context directly instead of reloading
+      if (typeof updateData === 'function' && result.data) {
+        updateData({
+          ...data,
+          ...result.data,
+          id: campaignId,
+          step: 2,
+          primaryKPI: transformedValues.primaryKPI,
+          secondaryKPIs: transformedValues.secondaryKPIs || [],
+          features: transformedValues.features || [],
+          // Explicitly add all messaging fields too
+          mainMessage: messagingData.mainMessage,
+          hashtags: messagingData.hashtags,
+          memorability: messagingData.memorability,
+          keyBenefits: messagingData.keyBenefits,
+          expectedAchievements: messagingData.expectedAchievements,
+          purchaseIntent: messagingData.purchaseIntent,
+          brandPerception: messagingData.brandPerception
+        }, result.data);
       }
 
       toast.success('Draft saved successfully');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to save draft';
+      console.error('Form submission error:', error);
       setError(message);
       toast.error(message);
     } finally {
@@ -416,23 +499,47 @@ function FormContent() {
       <h1 className="text-2xl font-bold mb-6">Campaign Creation</h1>
       
       <Formik
-        initialValues={initialValues}
-        validationSchema={ObjectivesSchema}
+        enableReinitialize
+        initialValues={{
+          primaryKPI: null,
+          secondaryKPIs: [],
+          features: [],
+          mainMessage: '',
+          hashtags: '',
+          memorability: '',
+          keyBenefits: '',
+          expectedAchievements: '',
+          purchaseIntent: '',
+          brandPerception: '',
+          ...initialValues as any
+        }}
+        validationSchema={Yup.object({
+          primaryKPI: Yup.string().required('A primary KPI is required')
+        })}
         onSubmit={handleSubmit}
-        enableReinitialize={true}
       >
-        {({ values, submitForm, isValid, dirty, errors, isSubmitting }) => {
+        {({ values, errors, touched, isValid, dirty, setFieldValue, handleChange }) => {
           console.log('Form State:', { 
             isValid, 
             dirty, 
             hasErrors: Object.keys(errors).length > 0,
             errors,
             values,
-            isSubmitting 
+            isSubmitting: false 
+          });
+          
+          // Add detailed logging of specific form fields
+          console.log('Messaging fields in form:', {
+            mainMessage: values.mainMessage,
+            hashtags: values.hashtags,
+            memorability: values.memorability,
+            keyBenefits: values.keyBenefits,
+            expectedAchievements: values.expectedAchievements,
+            purchaseIntent: values.purchaseIntent
           });
           
           return (
-            <Form className="space-y-6">
+            <Form className="space-y-8">
               {/* KPIs Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -487,7 +594,8 @@ function FormContent() {
                             className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                             disabled={
                               values.primaryKPI === kpi.key ||
-                              (!values.secondaryKPIs.includes(kpi.key) &&
+                              (Array.isArray(values.secondaryKPIs) && 
+                                !values.secondaryKPIs.includes(kpi.key) &&
                                 values.secondaryKPIs.length >= 4)
                             }
                           />
@@ -533,21 +641,29 @@ function FormContent() {
                   </div>
                   
                   <div>
-                    <h3 className="text-md font-medium mb-2">Secondary KPIs {values.secondaryKPIs.length > 0 && `(${values.secondaryKPIs.length})`}</h3>
+                    <h3 className="text-md font-medium mb-2">Secondary KPIs {Array.isArray(values.secondaryKPIs) && values.secondaryKPIs.length > 0 && `(${values.secondaryKPIs.length})`}</h3>
                     <div className="grid grid-cols-1 gap-2">
-                      {values.secondaryKPIs.map((kpiKey: KPI) => (
+                      {Array.isArray(values.secondaryKPIs) && values.secondaryKPIs.map((kpiKey: KPI) => (
                         <div key={kpiKey} className="bg-gray-50 p-2 rounded border border-gray-200 flex items-center">
                           <div className="w-5 h-5 mr-2">
                             <Image 
-                              src={kpis.find(k => k.key === kpiKey)?.icon || "/KPIs/Ad_Recall.svg"} 
-                              alt="Secondary KPI" 
-                              width={20} 
+                              src={kpis.find(k => k.key === kpiKey)?.icon || ''}
+                              alt={kpiKey}
+                              width={20}
                               height={20}
                             />
                           </div>
-                          <span className="font-medium">
-                            {kpis.find(k => k.key === kpiKey)?.title || kpiKey}
-                          </span>
+                          <span className="flex-grow">{kpis.find(k => k.key === kpiKey)?.title || kpiKey}</span>
+                          <button
+                            type="button"
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() => {
+                              const updatedKpis = values.secondaryKPIs.filter((k: KPI) => k !== kpiKey);
+                              setFieldValue('secondaryKPIs', updatedKpis);
+                            }}
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -557,150 +673,83 @@ function FormContent() {
 
               {/* Messaging Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2 text-blue-500" />
-                  Messaging
-                </h2>
-                <p className="mb-4 text-sm text-gray-600">
+                <h2 className="text-xl font-semibold mb-4">Messaging</h2>
+                <p className="text-gray-600 mb-6">
                   Define the key messages and value propositions for your campaign.
                 </p>
                 
-                {/* Main Message */}
-                <div className="mb-6">
-                  <label htmlFor="mainMessage" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    What is the main message of your campaign?
-                    <span className="text-blue-500 ml-1">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-3 text-gray-400">
-                      <DocumentTextIcon className="w-5 h-5" />
-                    </div>
-                    <Field
-                      as="textarea"
-                      id="mainMessage"
-                      name="mainMessage"
-                      placeholder="Discover sustainable living with our eco-friendly products."
-                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
-                    />
-                  </div>
-                  <div className="text-right text-sm text-gray-500">
-                    {String(values.mainMessage).length}/3000
-                  </div>
-                  <ErrorMessage name="mainMessage" component="p" className="mt-1 text-sm text-red-600" />
-                </div>
-                
-                {/* Hashtags */}
-                <div className="mb-6">
-                  <label htmlFor="hashtags" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    Hashtags related to the campaign
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-2.5 text-gray-400">
-                      <HashtagIcon className="w-5 h-5" />
-                    </div>
-                    <Field
-                      id="hashtags"
-                      name="hashtags"
-                      placeholder="#hashtag"
-                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-                    />
-                  </div>
-                  <ErrorMessage name="hashtags" component="p" className="mt-1 text-sm text-red-600" />
-                </div>
-                
-                {/* Memorability Statement */}
-                <div className="mb-6">
-                  <label htmlFor="memorability" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    What do you want people to remember after the campaign?
-                    <span className="text-blue-500 ml-1">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-3 text-gray-400">
-                      <StarIcon className="w-5 h-5" />
-                    </div>
-                    <Field
-                      as="textarea"
-                      id="memorability"
-                      name="memorability"
-                      placeholder="Type the value"
-                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
-                    />
-                  </div>
-                  <ErrorMessage name="memorability" component="p" className="mt-1 text-sm text-red-600" />
-                </div>
-                
-                {/* Key Benefits */}
-                <div className="mb-6">
-                  <label htmlFor="keyBenefits" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    What are the key benefits your brand offers?
-                    <span className="text-blue-500 ml-1">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-3 text-gray-400">
-                      <CheckBadgeIcon className="w-5 h-5" />
-                    </div>
-                    <Field
-                      as="textarea"
-                      id="keyBenefits"
-                      name="keyBenefits"
-                      placeholder="Innovative design, Exceptional quality, Outstanding customer service."
-                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
-                    />
-                  </div>
-                  <ErrorMessage name="keyBenefits" component="p" className="mt-1 text-sm text-red-600" />
+                <div className="space-y-4">
+                  <StyledField
+                    label="What is the main message of your campaign?"
+                    name="mainMessage"
+                    as="textarea"
+                    rows={3}
+                    required
+                    icon={<DocumentTextIcon className="h-5 w-5" />}
+                    placeholder="Discover sustainable living with our eco-friendly products."
+                  />
+                  
+                  <StyledField
+                    label="Hashtags related to the campaign"
+                    name="hashtags"
+                    icon={<HashtagIcon className="h-5 w-5" />}
+                    placeholder="#hashtag"
+                  />
+                  
+                  <StyledField
+                    label="What do you want people to remember after the campaign?"
+                    name="memorability"
+                    required
+                    icon={<StarIcon className="h-5 w-5" />}
+                    placeholder="Type the value"
+                  />
+                  
+                  <StyledField
+                    label="What are the key benefits your brand offers?"
+                    name="keyBenefits"
+                    required
+                    icon={<BriefcaseIcon className="h-5 w-5" />}
+                    placeholder="Innovative design, Exceptional quality, Outstanding customer service."
+                  />
                 </div>
               </div>
 
               {/* Hypotheses Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <LightBulbIcon className="w-5 h-5 mr-2 text-blue-500" />
-                  Hypotheses
-                </h2>
-                <p className="mb-4 text-sm text-gray-600">
+                <h2 className="text-xl font-semibold mb-4">Hypotheses</h2>
+                <p className="text-gray-600 mb-6">
                   Outline the expected outcomes of your campaign based on your objectives and KPIs.
                 </p>
                 
-                {/* Expected Achievements */}
-                <div className="mb-6">
-                  <label htmlFor="expectedAchievements" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    What do you expect to achieve with this campaign?
-                    <span className="text-blue-500 ml-1">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-3 text-gray-400">
-                      <ClipboardDocumentListIcon className="w-5 h-5" />
-                    </div>
-                    <Field
-                      as="textarea"
-                      id="expectedAchievements"
-                      name="expectedAchievements"
-                      placeholder="We expect a 20% increase in brand awareness within three months."
-                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
-                    />
-                  </div>
-                  <ErrorMessage name="expectedAchievements" component="p" className="mt-1 text-sm text-red-600" />
-                </div>
-                
-                {/* Purchase Intent */}
-                <div className="mb-6">
-                  <label htmlFor="purchaseIntent" className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    How do you think the campaign will impact Purchase Intent?
-                    <span className="text-blue-500 ml-1">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-3 text-gray-400">
-                      <BriefcaseIcon className="w-5 h-5" />
-                    </div>
-                    <Field
-                      as="textarea"
-                      id="purchaseIntent"
-                      name="purchaseIntent"
-                      placeholder="Purchase intent will rise by 15% due to targeted ads."
-                      className="w-full p-2.5 pl-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm min-h-[100px]"
-                    />
-                  </div>
-                  <ErrorMessage name="purchaseIntent" component="p" className="mt-1 text-sm text-red-600" />
+                <div className="space-y-4">
+                  <StyledField
+                    label="What do you expect to achieve with this campaign?"
+                    name="expectedAchievements"
+                    as="textarea"
+                    rows={2}
+                    required
+                    icon={<CheckBadgeIcon className="h-5 w-5" />}
+                    placeholder="We expect a 20% increase in brand awareness within three months."
+                  />
+                  
+                  <StyledField
+                    label="How do you think the campaign will impact Purchase Intent?"
+                    name="purchaseIntent"
+                    as="textarea"
+                    rows={2}
+                    required
+                    icon={<LightBulbIcon className="h-5 w-5" />}
+                    placeholder="Purchase intent will rise by 15% due to targeted ads."
+                  />
+                  
+                  <StyledField
+                    label="How will it change people's perception of your brand?"
+                    name="brandPerception"
+                    as="textarea"
+                    rows={2}
+                    icon={<ChatBubbleLeftRightIcon className="h-5 w-5" />}
+                    placeholder="Our brand will be seen as more innovative and customer-focused."
+                  />
                 </div>
               </div>
 
@@ -712,13 +761,27 @@ function FormContent() {
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {features.map(feature => (
-                    <label key={feature.key} className="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                      <Field 
-                        type="checkbox" 
-                        name="features" 
-                        value={feature.key}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
-                      />
+                    <div key={feature.key} className="flex items-start space-x-2">
+                      <div className="pt-0.5">
+                        <Field
+                          type="checkbox"
+                          name="features"
+                          value={feature.key}
+                          checked={Array.isArray(values.features) && values.features.includes(feature.key)}
+                          onChange={() => {
+                            if (!Array.isArray(values.features)) {
+                              setFieldValue('features', [feature.key]);
+                              return;
+                            }
+                            
+                            const updatedFeatures = values.features.includes(feature.key)
+                              ? values.features.filter((f: Feature) => f !== feature.key)
+                              : [...values.features, feature.key];
+                            setFieldValue('features', updatedFeatures);
+                          }}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </div>
                       <div className="flex items-center">
                         <div className="w-5 h-5 mr-2">
                           <Image 
@@ -730,7 +793,7 @@ function FormContent() {
                         </div>
                         <span>{feature.title}</span>
                       </div>
-                    </label>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -742,9 +805,9 @@ function FormContent() {
                 currentStep={2}
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId || (data as any)?.id}`)}
                 onBack={() => router.push(`/campaigns/wizard/step-1?id=${campaignId || (data as any)?.id}`)}
-                onNext={submitForm}
+                onNext={() => handleSubmit(values)}
                 onSaveDraft={() => handleSaveDraft(values)}
-                disableNext={isSubmitting}
+                disableNext={disableNext}
                 isFormValid={isValid}
                 isDirty={dirty}
                 isSaving={isSaving}
