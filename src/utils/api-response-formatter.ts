@@ -95,10 +95,57 @@ export function standardizeApiResponse(data: any) {
   const targeting = result.targeting || {};
   const competitors = Array.isArray(result.competitors) ? result.competitors : [];
   
+  // Debug logs for array fields
+  console.log('API formatter - demographics:', demographics);
+  console.log('API formatter - locations:', locations);
+  console.log('API formatter - targeting:', targeting);
+  console.log('API formatter - competitors:', competitors);
+  
+  // Extract location strings
+  const locationStrings = locations.map((loc: any) => {
+    // Handle different location formats
+    if (typeof loc === 'string') return loc;
+    if (loc && typeof loc.location === 'string') return loc.location;
+    return '';
+  }).filter(Boolean);
+  console.log('API formatter - extracted locationStrings:', locationStrings);
+  
+  // Extract screening questions
+  const screeningQuestions = Array.isArray(targeting.screeningQuestions) 
+    ? targeting.screeningQuestions.map((q: any) => {
+        if (typeof q === 'string') return q;
+        if (q && typeof q.question === 'string') return q.question;
+        return '';
+      }).filter(Boolean)
+    : [];
+  console.log('API formatter - extracted screeningQuestions:', screeningQuestions);
+  
+  // Extract languages
+  const languages = Array.isArray(targeting.languages)
+    ? targeting.languages.map((l: any) => {
+        if (typeof l === 'string') return l;
+        if (l && typeof l.language === 'string') return l.language;
+        return '';
+      }).filter(Boolean)
+    : [];
+  console.log('API formatter - extracted languages:', languages);
+  
+  // Extract job titles
+  const jobTitles = Array.isArray(demographics.jobTitles)
+    ? demographics.jobTitles
+    : [];
+  console.log('API formatter - jobTitles:', jobTitles);
+  
+  // Extract competitors
+  const competitorStrings = Array.isArray(competitors) 
+    ? competitors
+    : [];
+  console.log('API formatter - extracted competitorStrings:', competitorStrings);
+  
   // Create or update audience field with transformed data
   result.audience = {
     ...(result.audience || {}),
-    location: locations.map((loc: any) => loc.location || '').filter(Boolean),
+    location: locationStrings,
     ageDistribution: {
       age1824: demographics.ageDistribution?.age1824 ?? 20,
       age2534: demographics.ageDistribution?.age2534 ?? 25,
@@ -109,18 +156,12 @@ export function standardizeApiResponse(data: any) {
     },
     gender: Array.isArray(demographics.gender) ? demographics.gender : [],
     otherGender: demographics.otherGender || "",
-    screeningQuestions: Array.isArray(targeting.screeningQuestions) 
-      ? targeting.screeningQuestions.map((q: any) => q.question || '').filter(Boolean)
-      : [],
-    languages: Array.isArray(targeting.languages) 
-      ? targeting.languages.map((l: any) => l.language || '').filter(Boolean)
-      : [],
+    screeningQuestions: screeningQuestions,
+    languages: languages,
     educationLevel: demographics.educationLevel || "",
-    jobTitles: Array.isArray(demographics.jobTitles) ? demographics.jobTitles : [],
+    jobTitles: jobTitles,
     incomeLevel: demographics.incomeLevel ?? 20000,
-    competitors: Array.isArray(competitors) 
-      ? competitors.map((c: any) => typeof c === 'string' ? c : c.name || '').filter(Boolean)
-      : [],
+    competitors: competitorStrings,
   };
   
   console.log('Normalized audience data:', result.audience);

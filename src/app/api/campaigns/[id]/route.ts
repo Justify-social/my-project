@@ -100,6 +100,26 @@ const campaignUpdateSchema = z.object({
     purchaseIntent: z.string().optional(),
     brandPerception: z.string().optional()
   }).optional(),
+  // Step 3 audience data - add comprehensive schema
+  audience: z.object({
+    location: z.array(z.string()).optional(),
+    ageDistribution: z.object({
+      age1824: z.number().optional(),
+      age2534: z.number().optional(),
+      age3544: z.number().optional(),
+      age4554: z.number().optional(),
+      age5564: z.number().optional(),
+      age65plus: z.number().optional(),
+    }).optional(),
+    gender: z.array(z.string()).optional(),
+    otherGender: z.string().optional(),
+    screeningQuestions: z.array(z.string()).optional(),
+    languages: z.array(z.string()).optional(),
+    educationLevel: z.string().optional(),
+    jobTitles: z.array(z.string()).optional(),
+    incomeLevel: z.number().optional(),
+    competitors: z.array(z.string()).optional(),
+  }).optional(),
   // Step metadata
   step: z.number().optional(),
   status: z.enum(['draft', 'submitted']).optional(),
@@ -124,7 +144,10 @@ const campaignUpdateSchema = z.object({
   })).optional(),
   brandGuidelines: z.array(z.object({
     guideline: z.string()
-  })).optional()
+  })).optional(),
+  // For backward compatibility
+  submissionStatus: z.enum(['draft', 'submitted']).optional(),
+  influencers: z.array(z.any()).optional(),
 });
 
 export async function GET(
@@ -169,14 +192,14 @@ export async function GET(
         // Look for submitted campaign in CampaignWizardSubmission table with numeric ID
         campaign = await prisma.campaignWizardSubmission.findUnique({
           where: { id: numericId },
-          include: {
-            primaryContact: true,
-            secondaryContact: true,
+        include: {
+          primaryContact: true,
+          secondaryContact: true,
             audience: true,  // Simplified include to avoid type errors
-            creativeAssets: true,
-            creativeRequirements: true
-          }
-        });
+          creativeAssets: true,
+          creativeRequirements: true
+        }
+      });
         isSubmittedCampaign = true;
       }
       
@@ -391,7 +414,7 @@ export async function PATCH(
             : [data.features];
         }
         
-        // Additional Step 2 text fields
+        // Handle messaging if present
         if (data.messaging || data.mainMessage || data.hashtags || data.memorability || 
             data.keyBenefits || data.expectedAchievements || 
             data.purchaseIntent || data.brandPerception) {
@@ -412,6 +435,76 @@ export async function PATCH(
             purchaseIntent: data.purchaseIntent || data.messaging?.purchaseIntent || '',
             brandPerception: data.brandPerception || data.messaging?.brandPerception || ''
           };
+        }
+        
+        // Handle audience data if present
+        if (data.audience) {
+          console.log('Audience data received:', JSON.stringify(data.audience, null, 2));
+          
+          if (!mappedData.demographics) mappedData.demographics = {};
+          
+          // Map age distribution
+          if (data.audience.ageDistribution) {
+            mappedData.demographics.ageDistribution = data.audience.ageDistribution;
+          }
+          
+          // Map gender and otherGender
+          if (Array.isArray(data.audience.gender)) {
+            mappedData.demographics.gender = data.audience.gender;
+          }
+          
+          if (data.audience.otherGender) {
+            mappedData.demographics.otherGender = data.audience.otherGender;
+          }
+
+          // Map educationLevel and incomeLevel
+          if (data.audience.educationLevel) {
+            mappedData.demographics.educationLevel = data.audience.educationLevel;
+          }
+          
+          if (data.audience.incomeLevel) {
+            mappedData.demographics.incomeLevel = data.audience.incomeLevel;
+          }
+          
+          // Map jobTitles
+          if (Array.isArray(data.audience.jobTitles)) {
+            mappedData.demographics.jobTitles = data.audience.jobTitles;
+          }
+          
+          // Map location
+          if (Array.isArray(data.audience.location)) {
+            console.log('Location array:', data.audience.location);
+            mappedData.locations = data.audience.location.map(loc => ({ location: loc }));
+          }
+          
+          // Initialize targeting if not present
+          if (!mappedData.targeting) mappedData.targeting = {};
+          
+          // Map screeningQuestions
+          if (Array.isArray(data.audience.screeningQuestions)) {
+            console.log('Screening questions array:', data.audience.screeningQuestions);
+            mappedData.targeting.screeningQuestions = data.audience.screeningQuestions.map(q => ({ question: q }));
+          }
+          
+          // Map languages
+          if (Array.isArray(data.audience.languages)) {
+            console.log('Languages array:', data.audience.languages);
+            mappedData.targeting.languages = data.audience.languages.map(lang => ({ language: lang }));
+          }
+          
+          // Map competitors - Fix: Store as string array, not objects with competitor property
+          if (Array.isArray(data.audience.competitors)) {
+            console.log('Competitors array:', data.audience.competitors);
+            // Store competitors as a string array, which is what Prisma expects
+            mappedData.competitors = data.audience.competitors;
+          }
+          
+          console.log('Mapped audience data:', {
+            demographics: mappedData.demographics,
+            locations: mappedData.locations,
+            targeting: mappedData.targeting,
+            competitors: mappedData.competitors
+          });
         }
         
         // Handle step status if present
@@ -494,10 +587,10 @@ export async function PATCH(
         // This would need to be adapted based on the CampaignWizardSubmission schema
         const submissionData = {
           ...(data.name && { campaignName: data.name }),
-          ...(data.businessGoal && { description: data.businessGoal }),
+        ...(data.businessGoal && { description: data.businessGoal }),
           ...(data.startDate && { startDate: new Date(data.startDate) }),
           ...(data.endDate && { endDate: new Date(data.endDate) }),
-          ...(data.timeZone && { timeZone: data.timeZone }),
+        ...(data.timeZone && { timeZone: data.timeZone }),
           updatedAt: new Date()
         };
         
@@ -526,9 +619,9 @@ export async function PATCH(
       
       // Transform response data for frontend
       const transformedCampaign = EnumTransformers.transformObjectFromBackend(updatedCampaign);
-      
-      return NextResponse.json({
-        success: true,
+  
+      return NextResponse.json({ 
+        success: true, 
         data: transformedCampaign
       });
     },
