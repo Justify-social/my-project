@@ -952,50 +952,35 @@ function FormContent() {
     updateFormData,
     data, 
     isEditing, 
-    campaignData,
-    updateCampaignData
+    campaignData
   } = wizardContext;
 
   // Get campaign ID from search params
   const campaignId = searchParams?.get('id');
 
-  // Update the formatDate function to better handle empty date objects
+  // Helper function to format dates - Define this BEFORE useMemo
   const formatDate = (date: any) => {
-    console.log('Formatting date:', date);
-    // Handle empty objects
-    if (date && typeof date === 'object' && Object.keys(date).length === 0) {
-      console.warn('Empty date object received:', date);
-      return '';
-    }
-    
-    // Handle null or undefined
     if (!date) return '';
-    
     try {
+      // Handle case where date is an empty object
+      if (typeof date === 'object' && !Array.isArray(date) && Object.keys(date).length === 0) {
+        console.warn('Received empty object as date value');
+        return '';
+      }
+      
       // Handle string dates
       if (typeof date === 'string') {
-        if (!date.trim()) return '';
-        
-        // For simplicity, if we have an ISO string, extract the date part
-        if (date.includes('T')) {
-          return date.split('T')[0];
-        }
-        
-        // Otherwise return as is
-        return date;
-      }
-      
-      // Handle Date objects
-      if (date instanceof Date) {
-        if (isNaN(date.getTime())) {
-          console.warn('Invalid Date object:', date);
+        const dateObj = new Date(date);
+        // Check if date is valid before calling toISOString()
+        if (isNaN(dateObj.getTime())) {
+          console.warn('Invalid date format:', date);
           return '';
         }
-        return date.toISOString().split('T')[0];
+        return dateObj.toISOString().split('T')[0];
       }
       
-      // If we get here, we don't know how to format this date
-      console.warn('Unhandled date format:', date);
+      // If we get here, it's an object but not empty or not a string
+      console.warn('Invalid date format:', date);
       return '';
     } catch (e) {
       console.error('Error formatting date:', e);
@@ -1003,53 +988,32 @@ function FormContent() {
     }
   };
 
-  // Helper function to safely access nested properties
-  const safeGet = (obj: any, path: string, defaultValue: any = '') => {
-    if (!obj) return defaultValue;
-    
-    const parts = path.split('.');
-    let current = obj;
-    
-    for (const part of parts) {
-      if (current === null || current === undefined || typeof current !== 'object') {
-        return defaultValue;
-      }
-      current = current[part];
-    }
-    
-    return current !== null && current !== undefined ? current : defaultValue;
-  };
-
   // Create initial values using the defaultValues and existing data
   const initialValues = useMemo(() => {
     if (isEditing && campaignData) {
       return {
-        name: safeGet(campaignData, 'campaignName', defaultFormValues.name),
-        businessGoal: safeGet(campaignData, 'description', defaultFormValues.businessGoal),
+        name: campaignData.campaignName || defaultFormValues.name,
+        businessGoal: campaignData.description || defaultFormValues.businessGoal,
         startDate: formatDate(campaignData.startDate) || defaultFormValues.startDate,
         endDate: formatDate(campaignData.endDate) || defaultFormValues.endDate,
-        timeZone: safeGet(campaignData, 'timeZone', defaultFormValues.timeZone),
+        timeZone: campaignData.timeZone || defaultFormValues.timeZone,
         primaryContact: {
-          firstName: safeGet(campaignData, 'primaryContact.firstName', defaultFormValues.primaryContact.firstName),
-          surname: safeGet(campaignData, 'primaryContact.surname', defaultFormValues.primaryContact.surname),
-          email: safeGet(campaignData, 'primaryContact.email', defaultFormValues.primaryContact.email),
-          position: safeGet(campaignData, 'primaryContact.position', defaultFormValues.primaryContact.position),
+          firstName: campaignData.primaryContact?.firstName || defaultFormValues.primaryContact.firstName,
+          surname: campaignData.primaryContact?.surname || defaultFormValues.primaryContact.surname,
+          email: campaignData.primaryContact?.email || defaultFormValues.primaryContact.email,
+          position: campaignData.primaryContact?.position || defaultFormValues.primaryContact.position,
         },
         secondaryContact: {
-          firstName: safeGet(campaignData, 'secondaryContact.firstName', defaultFormValues.secondaryContact.firstName),
-          surname: safeGet(campaignData, 'secondaryContact.surname', defaultFormValues.secondaryContact.surname),
-          email: safeGet(campaignData, 'secondaryContact.email', defaultFormValues.secondaryContact.email),
-          position: safeGet(campaignData, 'secondaryContact.position', defaultFormValues.secondaryContact.position),
+          firstName: campaignData.secondaryContact?.firstName || defaultFormValues.secondaryContact.firstName,
+          surname: campaignData.secondaryContact?.surname || defaultFormValues.secondaryContact.surname,
+          email: campaignData.secondaryContact?.email || defaultFormValues.secondaryContact.email,
+          position: campaignData.secondaryContact?.position || defaultFormValues.secondaryContact.position,
         },
-        currency: safeGet(campaignData, 'currency', defaultFormValues.currency),
-        totalBudget: safeGet(campaignData, 'totalBudget', defaultFormValues.totalBudget),
-        socialMediaBudget: safeGet(campaignData, 'socialMediaBudget', defaultFormValues.socialMediaBudget),
-        influencers: Array.isArray(campaignData.influencers) 
-          ? campaignData.influencers 
-          : defaultFormValues.influencers,
-        additionalContacts: campaignData.contacts && typeof campaignData.contacts === 'string'
-          ? JSON.parse(campaignData.contacts)
-          : [],
+        currency: campaignData.currency || defaultFormValues.currency,
+        totalBudget: campaignData.totalBudget || defaultFormValues.totalBudget,
+        socialMediaBudget: campaignData.socialMediaBudget || defaultFormValues.socialMediaBudget,
+        influencers: campaignData.influencers || defaultFormValues.influencers,
+        additionalContacts: campaignData.contacts ? JSON.parse(campaignData.contacts) : [],
       };
     }
 
@@ -1084,6 +1048,66 @@ function FormContent() {
 
     return defaultFormValues;
   }, [isEditing, campaignData, data]);
+
+  // Update the useEffect to prevent infinite loops
+  useEffect(() => {
+    if (!campaignId) return;
+    
+    // Only load data if we haven't already loaded it
+    if (!isLoading && !campaignData) {
+      loadCampaignData();
+    }
+    // Make sure we only include dependencies that won't change frequently
+  }, [campaignId, isLoading, campaignData]);
+
+  // Update the loadCampaignData function to avoid updating formData in a way that causes loops
+  const loadCampaignData = async () => {
+    if (!campaignId) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch campaign data');
+      }
+
+      const result = await response.json();
+      console.log('Fetched campaign data in Step1Content:', result);
+      
+      // Extract the campaign data from the response, handling both old and new API formats
+      const campaignData = result.data || result.campaign || result;
+      
+      // Parse contacts field to get additionalContacts if available
+      let additionalContacts = [];
+      if (campaignData.contacts) {
+        try {
+          const parsedContacts = JSON.parse(campaignData.contacts);
+          if (Array.isArray(parsedContacts)) {
+            additionalContacts = parsedContacts;
+          }
+        } catch (e) {
+          console.error('Error parsing additionalContacts:', e);
+        }
+      }
+
+      // We don't need to set initialValues here as it's handled by the useMemo above
+      // Just update the wizard context with the minimal necessary data
+      
+      // This was causing re-renders and potential loops
+      // updateFormData({
+      //   ...formData,
+      //   campaignId
+      // });
+      
+      toast.success('Campaign data loaded');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load campaign';
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Modify the handleSubmit function to use EnumTransformers
   const handleSubmit = async (values: FormValues) => {
@@ -1304,27 +1328,20 @@ function FormContent() {
 
       console.log('API success response:', JSON.stringify(result, null, 2));
 
-      // Update the campaign ID in the URL if this is a new campaign
-      if (result.id || result.data?.id) {
-        const newCampaignId = result.id || result.data?.id;
-        localStorage.setItem('lastCampaignId', newCampaignId.toString());
-        
-        // Only update URL if needed - avoid full page refresh
-        const currentId = searchParams.get('id');
-        if (!currentId && typeof router.replace === 'function') {
-          // Simple URL update, Next.js App Router has no shallow option
-          router.replace(`/campaigns/wizard/step-1?id=${newCampaignId}`);
-        }
-      }
-
-      // Update the campaign data in context directly instead of reloading
-      if (typeof updateCampaignData === 'function' && (result.data || result)) {
-        updateCampaignData(result.data || result);
-      }
-
       // Simplify the updateFormData call to avoid type issues
       if (typeof updateFormData === 'function') {
         updateFormData({}); // Pass empty object to avoid type issues
+      }
+
+      // Store campaign ID in local storage as a fallback
+      if (result.id || result.data?.id) {
+        const newCampaignId = result.id || result.data?.id;
+        localStorage.setItem('lastCampaignId', newCampaignId.toString());
+        // If this is a new campaign, we need to update the campaignId in the URL
+        if (!isEditing && typeof router.replace === 'function') {
+          // Use the router to navigate to the same page with the ID included
+          router.replace(`/campaigns/wizard/step-1?id=${newCampaignId}`);
+        }
       }
 
       toast.success(`Campaign ${isEditing ? 'updated' : 'created'} successfully`);
@@ -1339,32 +1356,105 @@ function FormContent() {
     }
   };
 
-  // Update handleSaveDraft function with defensive programming
+  // Modify the handleSaveDraft function to use the sanitizeDraftPayload utility
   const handleSaveDraft = async (values: FormValues) => {
-    // Prevent multiple submissions
-    if (isSubmitting) {
-      console.log('Submission already in progress, ignoring duplicate request');
-      return;
-    }
-    
     try {
       setIsSubmitting(true);
       setError(null);
+
+      // Log form data for debugging
+      console.log('Saving draft form data:', JSON.stringify(values, null, 2));
       
-      // Create a draft-friendly payload using the sanitization utility
-      const sanitizedPayload = sanitizeDraftPayload({
-        ...values,
+      // Transform enum values and ensure budget values are numbers
+      console.log('Before transformation - currency:', values.currency);
+      console.log('Before transformation - platform:', values.influencers?.[0]?.platform);
+      console.log('Before transformation - position:', values.primaryContact?.position);
+      
+      // Create a clean version of the form data - keep the conditional spread pattern for contacts
+      const cleanValues = {
+        name: values.name || '',
+        businessGoal: values.businessGoal || '',
+        startDate: values.startDate || '',
+        endDate: values.endDate || '',
+        timeZone: values.timeZone || '',
+        // Use spread operator pattern for contacts to ensure they're either complete or omitted
+        ...(values.primaryContact?.firstName || values.primaryContact?.email ? {
+          primaryContact: {
+            firstName: values.primaryContact.firstName || '',
+            surname: values.primaryContact.surname || '',
+            email: values.primaryContact.email || '',
+            position: values.primaryContact.position || 'Manager'
+          }
+        } : {}),
+        // Only include secondaryContact if it has actual data
+        ...(values.secondaryContact?.firstName || values.secondaryContact?.email ? {
+          secondaryContact: {
+            firstName: values.secondaryContact.firstName || '',
+            surname: values.secondaryContact.surname || '',
+            email: values.secondaryContact.email || '',
+            position: values.secondaryContact.position || 'Manager'
+          }
+        } : {}),
+        additionalContacts: values.additionalContacts || [],
+        currency: values.currency || 'USD',
+        totalBudget: parseFloat(values.totalBudget?.toString() || '0'),
+        socialMediaBudget: parseFloat(values.socialMediaBudget?.toString() || '0'),
+        influencers: (values.influencers || []).filter(i => i.handle) || []
+      };
+      
+      const transformedValues = {
+        ...cleanValues,
+        currency: values.currency ? EnumTransformers.currencyToBackend(values.currency) : 'USD',
+        // Transform influencers if they exist
+        influencers: (cleanValues.influencers || []).map(influencer => ({
+          ...influencer,
+          platform: EnumTransformers.platformToBackend(influencer.platform)
+        })),
+        // Transform contact positions if needed
+        ...(cleanValues.primaryContact ? {
+          primaryContact: {
+            ...cleanValues.primaryContact,
+            position: cleanValues.primaryContact.position ? 
+              EnumTransformers.positionToBackend(cleanValues.primaryContact.position) : 
+              'Manager'
+          }
+        } : {}),
+        // Only include secondaryContact in transformedValues if it exists in cleanValues
+        ...(cleanValues.secondaryContact ? {
+          secondaryContact: {
+            ...cleanValues.secondaryContact,
+            position: cleanValues.secondaryContact.position ? 
+              EnumTransformers.positionToBackend(cleanValues.secondaryContact.position) : 
+              'Manager'
+          }
+        } : {})
+      };
+      
+      console.log('After transformation - currency:', transformedValues.currency);
+      console.log('After transformation - platform:', transformedValues.influencers?.[0]?.platform);
+      console.log('After transformation - position:', transformedValues.primaryContact?.position);
+
+      console.log('Saving draft with transformed values:', JSON.stringify(transformedValues, null, 2));
+
+      const method = isEditing ? 'PATCH' : 'POST';
+      const url = isEditing ? `/api/campaigns/${campaignId}` : '/api/campaigns';
+
+      // Prepare the request payload
+      const requestPayload = {
+        ...transformedValues,
         step: 1,
-        status: 'draft'
-      });
+        status: 'draft',
+        exchangeRateData: exchangeRateData // Include exchange rate data
+      };
+      
+      console.log('Pre-sanitized draft payload:', JSON.stringify(requestPayload, null, 2));
+      
+      // Apply our new sanitization utility to create a draft-friendly payload
+      // This will handle all incomplete fields consistently
+      const sanitizedPayload = sanitizeDraftPayload(requestPayload);
       
       console.log('Sanitized draft payload:', JSON.stringify(sanitizedPayload, null, 2));
       
-      const method = campaignId ? 'PATCH' : 'POST';
-      const url = campaignId 
-        ? `/api/campaigns/${campaignId}/wizard/1` 
-        : '/api/campaigns';
-        
       const response = await fetch(url, {
         method,
         headers: {
@@ -1372,40 +1462,94 @@ function FormContent() {
         },
         body: JSON.stringify(sanitizedPayload),
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API error response:', errorData);
-        throw new Error(errorData.error || `Failed to save draft: ${response.status}`);
-      }
-      
+
       const result = await response.json();
+
+      if (!response.ok) {
+        console.error('API error response status for draft save:', response.status);
+        console.error('API error response body for draft save:', JSON.stringify(result, null, 2));
+        
+        // Check if there's validation error details
+        if (result.details) {
+          console.error('Validation error details for draft save:', JSON.stringify(result.details, null, 2));
+          
+          // Enhanced error parsing for validation errors
+          const parseValidationError = (details: any) => {
+            if (!details) return null;
+            
+            const errors: string[] = [];
+            
+            // Handle the common _errors array
+            if (details._errors && details._errors.length > 0) {
+              errors.push(...details._errors);
+            }
+            
+            // Process nested field errors
+            Object.entries(details).forEach(([field, error]) => {
+              if (field === '_errors') return;
+              
+              if (error && typeof error === 'object' && (error as any)._errors) {
+                const fieldErrors = (error as any)._errors;
+                if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+                  errors.push(`${field}: ${fieldErrors.join(', ')}`);
+                }
+              }
+            });
+            
+            return errors.length > 0 ? errors.join('; ') : null;
+          };
+          
+          const errorDetails = parseValidationError(result.details);
+          if (errorDetails) {
+            console.error('Parsed validation errors:', errorDetails);
+          }
+        }
+        
+        let errorMessage = result.error || 'An error occurred';
+        
+        // If the error is a validation error, try to provide more details
+        if (result.details && typeof result.details === 'object') {
+          const errorDetails = Object.entries(result.details)
+            .filter(([key, value]) => {
+              // Skip the top-level _errors field
+              if (key === '_errors') return false;
+              
+              // Check if the value has _errors array
+              const val = value as any;
+              return val && val._errors && Array.isArray(val._errors) && val._errors.length > 0;
+            })
+            .map(([key, value]) => {
+              const val = value as any;
+              return `${key}: ${val._errors.join(', ')}`;
+            })
+            .join('; ');
+          
+          if (errorDetails) {
+            errorMessage += ` - ${errorDetails}`;
+          }
+        }
+        
+        throw new Error(errorMessage);
+      }
+
       console.log('API success response for draft save:', JSON.stringify(result, null, 2));
-      
-      // Update the campaign ID in the URL if this is a new campaign
+
+      // Store campaign ID in local storage as a fallback
       if (result.id || result.data?.id) {
         const newCampaignId = result.id || result.data?.id;
         localStorage.setItem('lastCampaignId', newCampaignId.toString());
-        
-        // Only update URL if needed - avoid full page refresh
-        const currentId = searchParams.get('id');
-        if (!currentId && typeof router.replace === 'function') {
-          // Simple URL update, Next.js App Router has no shallow option
+        // If this is a new campaign, we need to update the campaignId in the URL
+        if (!isEditing && typeof router.replace === 'function') {
+          // Use the router to navigate to the same page with the ID included
           router.replace(`/campaigns/wizard/step-1?id=${newCampaignId}`);
         }
       }
-      
-      // Update the campaign data in context directly instead of reloading
-      if (typeof updateCampaignData === 'function' && (result.data || result)) {
-        updateCampaignData(result.data || result);
-      }
-      
+
       // Simplify the updateFormData call to avoid type issues
       if (typeof updateFormData === 'function') {
         updateFormData({}); // Pass empty object to avoid type issues
       }
-      
-      // Only show toast once
+
       toast.success('Draft saved successfully');
     } catch (error) {
       console.error('Draft save error:', error);
@@ -1417,139 +1561,25 @@ function FormContent() {
     }
   };
 
+  // Add this in the useEffect section that loads campaign data (around line ~390)
+  useEffect(() => {
+    // Only attempt to detect timezone for new campaigns
+    if (!isEditing) {
+      detectUserTimezone().then(timezone => {
+        // We need to access setFieldValue from formik
+        if (formikRef.current) {
+          formikRef.current.setFieldValue('timeZone', timezone);
+        }
+      });
+    }
+    
+    if (isEditing && campaignId) {
+      loadCampaignData();
+    }
+  }, [isEditing, campaignId, loadCampaignData]);
+
   // Add formikRef at the top of the component where other refs are defined
   const formikRef = useRef<any>(null);
-
-  // Update useEffect for form initialization
-  useEffect(() => {
-    // Only proceed if we have loaded data and a formik instance
-    if (!formikRef.current || !wizardContext.hasLoadedData || !wizardContext.campaignData) return;
-    
-    console.log('Updating form with WizardContext data:', wizardContext.campaignData);
-    
-    // Get the campaign data
-    const campaignData = wizardContext.campaignData;
-    
-    // Debug logs to see what we're working with  
-    console.log('Start Date:', campaignData.startDate);
-    console.log('End Date:', campaignData.endDate);
-    console.log('Influencers:', campaignData.influencers);
-    
-    // Get primary and secondary contacts
-    let primaryContact = campaignData.primaryContact || {};
-    let secondaryContact = campaignData.secondaryContact || {};
-    
-    // Parse JSON strings if needed
-    if (typeof primaryContact === 'string') {
-      try {
-        primaryContact = JSON.parse(primaryContact);
-      } catch (e) {
-        console.warn('Failed to parse primaryContact JSON', primaryContact);
-        primaryContact = {};
-      }
-    }
-    
-    if (typeof secondaryContact === 'string') {
-      try {
-        secondaryContact = JSON.parse(secondaryContact);
-      } catch (e) {
-        console.warn('Failed to parse secondaryContact JSON', secondaryContact);
-        secondaryContact = {};
-      }
-    }
-    
-    // Handle influencers data
-    let influencers = campaignData.influencers || [];
-    
-    // If influencers is a string, try to parse it
-    if (typeof influencers === 'string') {
-      try {
-        influencers = JSON.parse(influencers);
-      } catch (e) {
-        console.warn('Failed to parse influencers JSON', influencers);
-        influencers = [];
-      }
-    }
-    
-    // Ensure influencers is an array
-    if (!Array.isArray(influencers) || influencers.length === 0) {
-      influencers = [{ platform: '', handle: '' }];
-    }
-    
-    // Make sure startDate and endDate are properly formatted
-    let startDate = '';
-    if (campaignData.startDate) {
-      if (typeof campaignData.startDate === 'string') {
-        startDate = campaignData.startDate.includes('T') 
-          ? campaignData.startDate.split('T')[0] 
-          : campaignData.startDate;
-      } else if (campaignData.startDate instanceof Date) {
-        startDate = campaignData.startDate.toISOString().split('T')[0];
-      }
-    }
-    
-    let endDate = '';
-    if (campaignData.endDate) {
-      if (typeof campaignData.endDate === 'string') {
-        endDate = campaignData.endDate.includes('T') 
-          ? campaignData.endDate.split('T')[0] 
-          : campaignData.endDate;
-      } else if (campaignData.endDate instanceof Date) {
-        endDate = campaignData.endDate.toISOString().split('T')[0];
-      }
-    }
-    
-    // Create a properly formatted form data object from the campaign data
-    const formattedData = {
-      name: campaignData.name || '',
-      businessGoal: campaignData.businessGoal || '',
-      startDate: startDate,
-      endDate: endDate,
-      timeZone: campaignData.timeZone || '',
-      
-      // Handle contact data objects
-      primaryContact: {
-        firstName: safeGet(primaryContact, 'firstName', ''),
-        surname: safeGet(primaryContact, 'surname', ''),
-        email: safeGet(primaryContact, 'email', ''),
-        position: safeGet(primaryContact, 'position', ''),
-      },
-      
-      secondaryContact: {
-        firstName: safeGet(secondaryContact, 'firstName', ''),
-        surname: safeGet(secondaryContact, 'surname', ''),
-        email: safeGet(secondaryContact, 'email', ''),
-        position: safeGet(secondaryContact, 'position', ''),
-      },
-      
-      // Handle additional contacts array
-      additionalContacts: Array.isArray(campaignData.additionalContacts) 
-        ? campaignData.additionalContacts 
-        : [],
-      
-      // Handle currency and budget, with budget possibly stored in budget JSON field
-      currency: campaignData.currency || '',
-      totalBudget: campaignData.totalBudget || 
-                  (campaignData.budget && typeof campaignData.budget === 'object' && 
-                   campaignData.budget !== null && 'total' in campaignData.budget ? 
-                   (campaignData.budget as any).total : '') || '',
-      socialMediaBudget: campaignData.socialMediaBudget || 
-                        (campaignData.budget && typeof campaignData.budget === 'object' && 
-                         campaignData.budget !== null && 'socialMedia' in campaignData.budget ? 
-                         (campaignData.budget as any).socialMedia : '') || '',
-      
-      // Handle influencers array with proper defaults
-      influencers: influencers,
-    };
-    
-    console.log('Resetting form with formatted data:', formattedData);
-    
-    // Reset the form with the formatted data
-    formikRef.current.resetForm({ values: formattedData });
-    
-    // This is to prevent re-initialization
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wizardContext.hasLoadedData, wizardContext.campaignData]);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -1589,13 +1619,21 @@ function FormContent() {
           console.log('Form values:', values);
           
           const handleNextStep = async () => {
-            if (!isValid) {
+            // Check if this is a draft save - allow proceeding even with validation errors
+            const isDraft = values.status === 'draft' || !isValid;
+            
+            if (!isValid && !isDraft) {
               const errorKeys = Object.keys(errors);
               console.log('Validation errors:', errors);
               toast.error(`Please fix the following: ${errorKeys.join(', ')}`);
               return;
             }
 
+            // If it's a draft with errors, save it as draft first
+            if (isDraft && !isValid) {
+              console.log('Proceeding with draft save before navigation...');
+              await handleSaveDraft(values);
+              
             await handleSubmit(values);
           };
 

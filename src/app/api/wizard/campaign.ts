@@ -21,14 +21,21 @@ const campaignSchema = z.object({
 export const POST = withValidation(
   campaignSchema,
   async (data, request) => {
+    // Import the EnumTransformers utility
+    const { EnumTransformers } = await import('@/utils/enum-transformers');
+    
+    // Transform any enum values from frontend to backend format
+    const transformedData = EnumTransformers.transformObjectToBackend(data);
+    console.log('Transformed wizard data for API:', transformedData);
+    
     const campaign = await prisma.campaignWizard.create({
       data: {
         id: uuidv4(),
-        name: data.name,
-        businessGoal: data.businessGoal || '',
-        startDate: data.startDate || new Date(),
-        endDate: data.endDate || new Date(),
-        timeZone: data.timeZone,
+        name: transformedData.name,
+        businessGoal: transformedData.businessGoal || '',
+        startDate: transformedData.startDate || new Date(),
+        endDate: transformedData.endDate || new Date(),
+        timeZone: transformedData.timeZone,
         primaryContact: {},
         secondaryContact: Prisma.JsonNull,
         budget: {},
@@ -45,9 +52,13 @@ export const POST = withValidation(
         requirements: []
       },
     });
+    
+    // Transform campaign data back to frontend format before returning
+    const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
+    
     return NextResponse.json({
       success: true,
-      data: campaign
+      data: transformedCampaign
     }, { status: 201 });
   },
   { entityName: 'Campaign', logValidationErrors: true }

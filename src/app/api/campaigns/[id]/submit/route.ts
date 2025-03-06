@@ -6,16 +6,23 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Import the EnumTransformers utility
+    const { EnumTransformers } = await import('@/utils/enum-transformers');
+    
+    // Update the campaign submission status
     const campaign = await prisma.campaignWizardSubmission.update({
       where: { id: parseInt(params.id) },
       data: {
         submissionStatus: 'submitted'
       }
     });
+    
+    // Transform campaign data to frontend format before returning
+    const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
     return NextResponse.json({
       success: true,
-      campaign,
+      campaign: transformedCampaign,
       message: 'Campaign submitted successfully'
     });
   } catch (error) {

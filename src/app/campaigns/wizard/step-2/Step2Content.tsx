@@ -23,6 +23,8 @@ import {
   PlusCircleIcon,
   TrashIcon
 } from "@heroicons/react/24/outline";
+import { EnumTransformers } from '@/utils/enum-transformers';
+import { sanitizeStepPayload } from '@/utils/payload-sanitizer';
 
 // Define the available KPIs for the table
 const kpis = [
@@ -261,22 +263,36 @@ function FormContent() {
         throw new Error('Campaign ID is required');
       }
 
+      // Transform enum values to match backend format
+      const transformedValues = {
+        ...values,
+        primaryKPI: EnumTransformers.kpiToBackend(values.primaryKPI),
+        secondaryKPIs: values.secondaryKPIs?.map((kpi: string) => 
+          EnumTransformers.kpiToBackend(kpi)
+        ) || [],
+        features: values.features?.map((feature: string) => 
+          EnumTransformers.featureToBackend(feature)
+        ) || [],
+      };
+
+      console.log('Submitting with transformed values:', transformedValues);
+
       const response = await fetch(`/api/campaigns/${currentCampaignId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mainMessage: values.mainMessage,
-          hashtags: values.hashtags,
-          memorability: values.memorability,
-          keyBenefits: values.keyBenefits,
-          expectedAchievements: values.expectedAchievements,
-          purchaseIntent: values.purchaseIntent,
-          brandPerception: values.brandPerception,
-          primaryKPI: values.primaryKPI,
-          secondaryKPIs: values.secondaryKPIs || [],
-          features: values.features || [],
+          mainMessage: transformedValues.mainMessage,
+          hashtags: transformedValues.hashtags,
+          memorability: transformedValues.memorability,
+          keyBenefits: transformedValues.keyBenefits,
+          expectedAchievements: transformedValues.expectedAchievements,
+          purchaseIntent: transformedValues.purchaseIntent,
+          brandPerception: transformedValues.brandPerception,
+          primaryKPI: transformedValues.primaryKPI,
+          secondaryKPIs: transformedValues.secondaryKPIs,
+          features: transformedValues.features,
           step: 2,
           submissionStatus: 'draft'
         }),
@@ -294,16 +310,16 @@ function FormContent() {
         ...result,
         id: currentCampaignId,
         step: 2,
-        mainMessage: values.mainMessage,
-        hashtags: values.hashtags,
-        memorability: values.memorability,
-        keyBenefits: values.keyBenefits,
-        expectedAchievements: values.expectedAchievements,
-        purchaseIntent: values.purchaseIntent,
-        brandPerception: values.brandPerception,
-        primaryKPI: values.primaryKPI,
-        secondaryKPIs: values.secondaryKPIs || [],
-        features: values.features || []
+        mainMessage: transformedValues.mainMessage,
+        hashtags: transformedValues.hashtags,
+        memorability: transformedValues.memorability,
+        keyBenefits: transformedValues.keyBenefits,
+        expectedAchievements: transformedValues.expectedAchievements,
+        purchaseIntent: transformedValues.purchaseIntent,
+        brandPerception: transformedValues.brandPerception,
+        primaryKPI: transformedValues.primaryKPI,
+        secondaryKPIs: transformedValues.secondaryKPIs,
+        features: transformedValues.features
       }, result);
 
       toast.success('Campaign updated successfully');
@@ -327,20 +343,37 @@ function FormContent() {
         throw new Error('Campaign ID is required');
       }
 
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
+      console.log('Original form values:', values);
+
+      // Step 1: Apply step-specific sanitization
+      const sanitizedValues = sanitizeStepPayload(values, 2);
+      console.log('After sanitization:', sanitizedValues);
+      
+      // Step 2: Transform enum values
+      const transformedValues = EnumTransformers.transformObjectToBackend(sanitizedValues);
+      console.log('After enum transformation:', transformedValues);
+      
+      // Always include status and step
+      const requestPayload = {
+        ...transformedValues,
+        status: 'draft',
+        step: 2
+      };
+      
+      console.log('Final request payload:', requestPayload);
+
+      const response = await fetch(`/api/campaigns/${campaignId}/wizard/2`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...values,
-          submissionStatus: 'draft'
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
+        console.error('API error response:', result);
         throw new Error(result.error || 'Failed to save draft');
       }
 

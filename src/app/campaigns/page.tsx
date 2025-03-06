@@ -117,15 +117,53 @@ const CampaignList: React.FC = () => {
   const uniqueDates = useMemo(() => {
     if (!campaigns || campaigns.length === 0) return { startDates: [], endDates: [] };
     
-    const startDatesSet = new Set(campaigns
-      .filter(campaign => campaign.startDate)
-      .map(campaign => new Date(campaign.startDate).toISOString().split('T')[0])
-    );
+    // Helper function to safely parse dates
+    const safelyFormatDate = (dateValue: any): string | undefined => {
+      if (!dateValue) return undefined;
+      
+      try {
+        // If it's already a Date object
+        if (dateValue instanceof Date) {
+          return dateValue.toISOString().split('T')[0];
+        }
+        
+        // Handle string dates
+        if (typeof dateValue === 'string') {
+          // For ISO strings and other standard formats
+          const date = new Date(dateValue);
+          // Check if date is valid
+          if (!isNaN(date.getTime())) {
+            return date.toISOString().split('T')[0];
+          }
+        }
+        
+        // Handle cases where the date might be a timestamp
+        if (typeof dateValue === 'number') {
+          const date = new Date(dateValue);
+          if (!isNaN(date.getTime())) {
+            return date.toISOString().split('T')[0];
+          }
+        }
+        
+        return undefined;
+      } catch (error) {
+        console.error('Error parsing date:', error, dateValue);
+        return undefined;
+      }
+    };
     
-    const endDatesSet = new Set(campaigns
+    const startDatesArray = campaigns
+      .filter(campaign => campaign.startDate)
+      .map(campaign => safelyFormatDate(campaign.startDate))
+      .filter((date): date is string => !!date); // Type guard to ensure we only have strings
+    
+    const endDatesArray = campaigns
       .filter(campaign => campaign.endDate)
-      .map(campaign => new Date(campaign.endDate).toISOString().split('T')[0])
-    );
+      .map(campaign => safelyFormatDate(campaign.endDate))
+      .filter((date): date is string => !!date); // Type guard to ensure we only have strings
+    
+    const startDatesSet = new Set(startDatesArray);
+    const endDatesSet = new Set(endDatesArray);
     
     // Convert Sets to Arrays and sort
     const startDates = Array.from(startDatesSet).sort();

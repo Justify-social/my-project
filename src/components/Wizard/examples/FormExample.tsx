@@ -5,10 +5,11 @@ import { useFormSubmission } from '@/hooks/useFormSubmission';
 import { transformCampaignFormData, CampaignFormValues, EnumUtils } from '@/utils/form-transformers';
 import { KPI, Platform, Position, Currency } from '@prisma/client';
 import { useRouter } from 'next/navigation';
+import { EnumTransformers } from '@/utils/enum-transformers';
 
 /**
  * Example campaign wizard form demonstrating the use of 
- * form submission hooks and data transformers
+ * form submission hooks and data transformers with proper enum handling
  */
 export default function CampaignFormExample() {
   const router = useRouter();
@@ -32,11 +33,11 @@ export default function CampaignFormExample() {
         { category: 'Media Spend', percentage: 50 },
       ],
     },
-    primaryKPI: 'BRAND_AWARENESS' as KPI,
+    primaryKPI: 'brandAwareness',
     influencers: [
       { 
         handle: '', 
-        platform: 'INSTAGRAM' as Platform, 
+        platform: 'Instagram',
         name: '',
         url: '',
         posts: 0,
@@ -57,7 +58,13 @@ export default function CampaignFormExample() {
     endpoint: '/api/campaigns',
     method: 'POST',
     successMessage: 'Campaign created successfully!',
-    transformData: transformCampaignFormData,
+    transformData: (data) => {
+      // First transform using the standard transformers
+      const standardTransformed = transformCampaignFormData(data);
+      
+      // Then apply enum transformations
+      return EnumTransformers.transformObjectToBackend(standardTransformed);
+    },
     onSuccess: (response) => {
       // Navigate to next step or show success state
       if (response.data?.id) {
@@ -88,6 +95,13 @@ export default function CampaignFormExample() {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting form values:', formValues);
+    
+    // Log the transformed values for debugging
+    const standardTransformed = transformCampaignFormData(formValues);
+    const finalTransformed = EnumTransformers.transformObjectToBackend(standardTransformed);
+    console.log('Transformed values for API submission:', finalTransformed);
+    
     await submit(formValues);
   };
 

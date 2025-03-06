@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
+import { z } from 'zod';
 import { 
   validateCampaignData, 
   validateAudienceData, 
@@ -7,6 +8,39 @@ import {
   ValidationResult,
   ValidationError
 } from '@/lib/data-mapping/validation';
+
+// Define flexible schemas for each step
+const step1FlexibleSchema = z.object({
+  name: z.string().min(1, "Campaign name is required"),
+  businessGoal: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  timeZone: z.string().optional(),
+  primaryContact: z.any().optional(),
+  secondaryContact: z.any().optional(),
+  additionalContacts: z.array(z.any()).optional(),
+  currency: z.string().optional(),
+  totalBudget: z.union([z.string(), z.number()]).optional(),
+  socialMediaBudget: z.union([z.string(), z.number()]).optional(),
+  status: z.enum(['draft', 'complete']).optional()
+});
+
+const step2FlexibleSchema = z.object({
+  primaryKPI: z.string().optional(),
+  secondaryKPIs: z.array(z.string()).optional(),
+  features: z.array(z.string()).optional(),
+  status: z.enum(['draft', 'complete']).optional()
+});
+
+const step3FlexibleSchema = z.object({
+  audience: z.any().optional(),
+  status: z.enum(['draft', 'complete']).optional()
+});
+
+const step4FlexibleSchema = z.object({
+  assets: z.array(z.any()).optional(),
+  status: z.enum(['draft', 'complete']).optional()
+});
 
 /**
  * PATCH handler for updating campaign data by wizard step
@@ -21,6 +55,9 @@ export async function PATCH(
   { params }: { params: { id: string, step: string } }
 ) {
   try {
+    // Import the EnumTransformers utility
+    const { EnumTransformers } = await import('@/utils/enum-transformers');
+    
     const campaignId = parseInt(params.id, 10);
     const stepNumber = parseInt(params.step, 10);
     
@@ -33,179 +70,155 @@ export async function PATCH(
     
     // Parse request body
     const body = await request.json();
-    const { data, autosave = false } = body;
+    console.log(`Raw request data for step ${stepNumber}:`, JSON.stringify(body, null, 2));
     
-    if (!data) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'No data provided' 
+    // Check if this is a draft submission
+    const isDraft = body.status === 'draft';
+    console.log(`Processing ${isDraft ? 'DRAFT' : 'COMPLETE'} submission for step ${stepNumber}`);
+    
+    // Validate the request data using the appropriate schema
+    let validationResult: { success: boolean, data?: any, error?: any } = { success: true };
+    
+    try {
+      // Select the appropriate schema based on step
+      let schema;
+      switch (stepNumber) {
+        case 1:
+          schema = step1FlexibleSchema;
+          break;
+        case 2:
+          schema = step2FlexibleSchema;
+          break;
+        case 3:
+          schema = step3FlexibleSchema;
+          break;
+        case 4:
+          schema = step4FlexibleSchema;
+          break;
+        default:
+          return NextResponse.json({
+            success: false,
+            message: `Invalid step number: ${stepNumber}`
+          }, { status: 400 });
+      }
+      
+      // Validate the data
+      validationResult.data = schema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        validationResult = {
+          success: false,
+          error: {
+            message: 'Validation failed',
+            details: error.format()
+          }
+        };
+      } else {
+        throw error;
+      }
+    }
+    
+    // If validation fails, return errors
+    if (!validationResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: validationResult.error.message,
+        details: validationResult.error.details
       }, { status: 400 });
     }
     
+    // Transform the incoming data to backend format
+    const transformedData = EnumTransformers.transformObjectToBackend(validationResult.data);
+    console.log(`Transformed step ${stepNumber} data:`, JSON.stringify(transformedData, null, 2));
+    
     dbLogger.info(
       DbOperation.UPDATE,
-      `Processing ${autosave ? 'autosave' : 'submission'} for campaign ${campaignId} step ${stepNumber}`,
-      { campaignId, step: stepNumber, autosave }
+      `Processing ${isDraft ? 'draft' : 'submission'} for campaign ${campaignId} step ${stepNumber}`,
+      { campaignId, step: stepNumber, isDraft }
     );
     
-    // Different handling based on step
-    let validationResult: ValidationResult = { valid: true, errors: [] };
-    let updateData: any = {};
-    
-    // Determine what data to validate and update based on step number
-    switch (stepNumber) {
-      case 1: // Overview
-        // For step 1, we validate and update campaign overview data
-        const campaignData = {
-          name: data.name || '',
-          status: data.status || 'draft',
-          startDate: data.startDate,
-          endDate: data.endDate,
-          budget: data.budget,
-          description: data.description,
-          brandId: data.brandId
-        };
-        
-        // For autosave, we skip validation to allow partial data
-        if (!autosave) {
-          validationResult = validateCampaignData({
-            id: campaignId,
-            ...campaignData
-          });
-          
-          if (!validationResult.valid) {
-            return NextResponse.json({
-              success: false,
-              message: 'Validation failed',
-              errors: validationResult.errors
-            }, { status: 400 });
-          }
-        }
-        
-        updateData = campaignData;
-        break;
-        
-      case 2: // Objectives
-        // For step 2, we validate and update campaign objectives
-        const objectivesData = {
-          objectives: data.objectives || []
-        };
-        
-        updateData = objectivesData;
-        break;
-        
-      case 3: // Audience
-        // For step 3, we validate and update audience data
-        const audienceData = {
-          targetLocations: data.locations || [],
-          targetGenders: data.genders || [],
-          targetAgeRanges: data.ageRanges || [],
-          screeningQuestions: data.screeningQuestions || [],
-          languages: data.languages || [],
-          competitors: data.competitors || []
-        };
-        
-        // For autosave, we skip validation to allow partial data
-        if (!autosave) {
-          validationResult = validateAudienceData({
-            campaignId,
-            ...audienceData
-          });
-          
-          if (!validationResult.valid) {
-            return NextResponse.json({
-              success: false,
-              message: 'Validation failed',
-              errors: validationResult.errors
-            }, { status: 400 });
-          }
-        }
-        
-        updateData = {
-          audience: audienceData
-        };
-        break;
-        
-      case 4: // Assets
-        // For step 4, we validate and update assets data
-        const assetsData = data.assets || [];
-        
-        // For autosave, we skip validation to allow partial data
-        if (!autosave && assetsData.length > 0) {
-          // Validate each asset
-          for (const asset of assetsData) {
-            const assetValidation = validateAssetData({
-              campaignId,
-              ...asset
-            });
-            
-            if (!assetValidation.valid) {
-              return NextResponse.json({
-                success: false,
-                message: 'Asset validation failed',
-                errors: assetValidation.errors
-              }, { status: 400 });
-            }
-          }
-        }
-        
-        updateData = {
-          assets: assetsData
-        };
-        break;
-        
-      default:
-        return NextResponse.json({ 
-          success: false, 
-          message: `Invalid step number: ${stepNumber}` 
+    // For non-drafts, apply stricter validation
+    if (!isDraft) {
+      // Different handling based on step
+      let legacyValidationResult: ValidationResult = { valid: true, errors: [] };
+      
+      // Process data based on step
+      switch (stepNumber) {
+        case 1:
+          // Basic campaign info
+          legacyValidationResult = validateCampaignData(transformedData);
+          break;
+        case 2:
+          // Campaign objectives
+          // Validate and prepare update data
+          // ...
+          break;
+        case 3:
+          // Audience targeting
+          legacyValidationResult = validateAudienceData(transformedData);
+          break;
+        case 4:
+          // Creative assets
+          legacyValidationResult = validateAssetData(transformedData);
+          break;
+      }
+      
+      // If validation fails, return errors
+      if (!legacyValidationResult.valid) {
+        return NextResponse.json({
+          success: false,
+          errors: legacyValidationResult.errors,
+          message: 'Validation failed'
         }, { status: 400 });
+      }
     }
     
-    // In a real implementation, we'd update the database here
-    // For now, we'll simulate a successful update
+    // Prepare update data based on step
+    let updateData: any = {
+      ...transformedData,
+      updatedAt: new Date()
+    };
     
-    // For autosave, we include the autosave flag in the response
-    if (autosave) {
-      dbLogger.debug(
-        DbOperation.UPDATE,
-        `Auto-save successful for campaign ${campaignId} step ${stepNumber}`,
-        { campaignId, step: stepNumber }
-      );
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Data auto-saved successfully',
-        autosave: true,
-        step: stepNumber,
-        campaignId,
-        data: updateData
-      });
-    } else {
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Step ${stepNumber} submission successful for campaign ${campaignId}`,
-        { campaignId, step: stepNumber }
-      );
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Step data saved successfully',
-        step: stepNumber,
-        campaignId,
-        data: updateData
-      });
+    // Set step completion flag if not a draft
+    if (!isDraft) {
+      switch (stepNumber) {
+        case 1:
+          updateData.step1Complete = true;
+          break;
+        case 2:
+          updateData.step2Complete = true;
+          break;
+        case 3:
+          updateData.step3Complete = true;
+          break;
+        case 4:
+          updateData.step4Complete = true;
+          break;
+      }
     }
-  } catch (error) {
-    dbLogger.error(
-      DbOperation.UPDATE,
-      `Error processing campaign wizard step`,
-      { id: params.id, step: params.step },
-      error
-    );
+    
+    // Update the campaign
+    // ...
+    // Mock successful response for now
+    const updatedCampaign = { 
+      id: campaignId,
+      ...updateData
+    };
+    
+    // Transform response data back to frontend format
+    const responseData = EnumTransformers.transformObjectFromBackend(updatedCampaign);
     
     return NextResponse.json({
+      success: true,
+      data: responseData,
+      message: `Campaign step ${stepNumber} ${isDraft ? 'saved as draft' : 'updated'} successfully`
+    });
+    
+  } catch (error) {
+    console.error('Error updating campaign step:', error);
+    return NextResponse.json({
       success: false,
-      message: error instanceof Error ? error.message : 'Internal server error'
+      message: `Failed to update campaign step: ${error instanceof Error ? error.message : 'Unknown error'}`
     }, { status: 500 });
   }
 }

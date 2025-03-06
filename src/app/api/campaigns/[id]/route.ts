@@ -121,73 +121,75 @@ export async function GET(
     async () => {
       // Get campaign ID from params
       const campaignId = params.id;
-      const id = parseInt(campaignId);
       
-      if (isNaN(id)) {
-        return NextResponse.json(
-          { error: 'Invalid campaign ID' },
-          { status: 400 }
-        );
-      }
+      // Check if the ID is a UUID (string format) or a numeric ID
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
       
       // Connect to database
       await connectToDatabase();
       
-      // Fetch the actual campaign from the database
-      const campaign = await prisma.campaignWizardSubmission.findUnique({
-        where: { id },
-        include: {
-          primaryContact: true,
-          secondaryContact: true,
-          audience: {
-            include: {
-              locations: true,
-              genders: true,
-              screeningQuestions: true,
-              languages: true,
-              competitors: true
-            }
-          },
-          creativeAssets: true,
-          creativeRequirements: true
+      let campaign = null;
+      let isSubmittedCampaign = false;
+      
+      // Try to find the campaign based on ID format
+      if (isUuid) {
+        console.log('Using UUID format for campaign ID:', campaignId);
+        // Look for draft in CampaignWizard table with string ID
+        campaign = await prisma.campaignWizard.findUnique({
+          where: { id: campaignId },
+          include: {
+            Influencer: true // Include the Influencer relation
+          }
+        });
+      } else {
+        // Handle legacy numeric IDs
+        const numericId = parseInt(campaignId);
+        if (isNaN(numericId)) {
+          return NextResponse.json(
+            { error: 'Invalid campaign ID format' },
+            { status: 400 }
+          );
         }
-      });
+        console.log('Using numeric format for campaign ID:', numericId);
+        // Look for submitted campaign in CampaignWizardSubmission table with numeric ID
+        campaign = await prisma.campaignWizardSubmission.findUnique({
+          where: { id: numericId },
+          include: {
+            primaryContact: true,
+            secondaryContact: true,
+            audience: true,  // Simplified include to avoid type errors
+            creativeAssets: true,
+            creativeRequirements: true
+          }
+        });
+        isSubmittedCampaign = true;
+      }
       
       // If campaign not found, return 404
       if (!campaign) {
         return NextResponse.json(
           { 
             error: 'Campaign not found',
-            message: `No campaign found with ID ${id}`
+            message: `No campaign found with ID ${campaignId}`
           }, 
           { status: 404 }
         );
       }
       
-      // Format the audience data to match the expected structure
+      // Import the EnumTransformers utility to transform enum values
+      const { EnumTransformers } = await import('@/utils/enum-transformers');
+      
+      // Transform the campaign data for frontend consumption
+      const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
+
+      // Add draft status to the response
       const formattedCampaign = {
-        ...campaign,
-        audience: campaign.audience ? {
-          demographics: {
-            ageRange: [
-              campaign.audience.age1824.toString(),
-              campaign.audience.age2534.toString(),
-              campaign.audience.age3544.toString(),
-              campaign.audience.age4554.toString(),
-              campaign.audience.age5564.toString(),
-              campaign.audience.age65plus.toString()
-            ],
-            gender: campaign.audience.genders.map(g => g.gender),
-            education: [campaign.audience.educationLevel],
-            income: [campaign.audience.incomeLevel],
-            interests: campaign.audience.screeningQuestions?.map(q => q.question) || [],
-            locations: campaign.audience.locations?.map(l => l.location) || [],
-            languages: campaign.audience.languages?.map(l => l.language) || []
-          }
-        } : null,
-        secondaryKPIs: Array.isArray(campaign.secondaryKPIs) ? campaign.secondaryKPIs : [],
-        features: Array.isArray(campaign.features) ? campaign.features : []
+        ...transformedCampaign,
+        isDraft: !isSubmittedCampaign
       };
+      
+      // Log what we're returning to help with debugging
+      console.log('Returning campaign data with ID:', campaignId, 'isDraft:', !isSubmittedCampaign);
       
       return NextResponse.json({
         success: true,

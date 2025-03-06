@@ -20,18 +20,33 @@ export interface Contact {
   position: Position;
 }
 
+/**
+ * Currency enum - Frontend uses the same format as backend (uppercase)
+ * No transformation needed between frontend and backend
+ */
 export enum Currency {
   GBP = "GBP",
   USD = "USD",
   EUR = "EUR"
 }
 
+/**
+ * Platform enum - Frontend uses Title Case while backend uses UPPERCASE
+ * Transformation required:
+ * - Frontend to Backend: "Instagram" -> "INSTAGRAM"
+ * - Backend to Frontend: "INSTAGRAM" -> "Instagram"
+ * Use EnumTransformers.platformToBackend() and EnumTransformers.platformFromBackend()
+ */
 export enum Platform {
-  Instagram = "Instagram",
-  YouTube = "YouTube",
-  TikTok = "TikTok"
+  Instagram = "Instagram", // Backend expects: "INSTAGRAM"
+  YouTube = "YouTube",     // Backend expects: "YOUTUBE"
+  TikTok = "TikTok"        // Backend expects: "TIKTOK"
 }
 
+/**
+ * Position enum - Same format in frontend and backend
+ * No transformation needed
+ */
 export enum Position {
   Manager = "Manager",
   Director = "Director",

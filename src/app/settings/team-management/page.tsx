@@ -7,6 +7,7 @@ import { XCircleIcon, ArrowPathIcon, CheckCircleIcon, PlusIcon, MagnifyingGlassI
 import NavigationTabs from '../components/NavigationTabs';
 import { toast } from 'react-hot-toast';
 import TeamDashboard from './dashboard';
+import { EnumTransformers } from '@/utils/enum-transformers';
 
 interface TeamMember {
   id: string;
@@ -146,35 +147,21 @@ const TeamManagementPage: React.FC = () => {
       }
       const data = await response.json();
       
-      // Handle response with raw query results
-      if (data.data) {
-        // Transform team members data - raw query results won't have nested objects
-        const formattedMembers = data.data.teamMembers.map((member: any) => ({
-          id: member.memberId || member.id,
-          // Raw queries won't have nested member object with name fields
-          name: member.memberName || 'Team Member', // Fallback name
-          email: member.memberEmail || 'No email available',
-          role: member.role,
-          isCurrentUser: false // Set this based on current user info if available
-        }));
-        
-        // Handle raw invitation data
-        const formattedInvitations = data.data.pendingInvitations.map((invitation: any) => ({
-          id: invitation.id,
-          email: invitation.email,
-          role: invitation.role,
-          createdAt: invitation.createdAt,
-          expiresAt: invitation.expiresAt,
-        }));
-        
-        setTeamMembers(formattedMembers);
-        setInvitations(formattedInvitations);
-        setApiError("");
-      } else {
-        // Handle unexpected response format
-        setTeamMembers([]);
-        setInvitations([]);
-      }
+      // Transform team member roles and invitation statuses for display
+      const transformedMembers = data.members.map((member: any) => ({
+        ...member,
+        role: EnumTransformers.teamRoleFromBackend(member.role)
+      }));
+      
+      const transformedInvitations = data.invitations.map((invitation: any) => ({
+        ...invitation,
+        role: EnumTransformers.teamRoleFromBackend(invitation.role),
+        status: EnumTransformers.invitationStatusFromBackend(invitation.status)
+      }));
+      
+      setTeamMembers(transformedMembers);
+      setInvitations(transformedInvitations);
+      setApiError("");
     } catch (error) {
       console.error('Error fetching team data:', error);
       setApiError("Failed to load team data. Please try again.");
@@ -312,32 +299,50 @@ const TeamManagementPage: React.FC = () => {
   };
 
   // Handler to add a new team member
-  const handleAddMember = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInvite = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsInviting(true);
-
+    setAddMemberError('');
+    
     try {
+      // Transform role to backend format
+      const transformedRole = EnumTransformers.teamRoleToBackend(role);
+      
       const response = await fetch('/api/settings/team', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({
+          email,
+          role: transformedRole
+        }),
       });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        toast.error(data.error || 'Failed to invite team member');
-        return;
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to invite team member');
       }
-
-      toast.success('Invitation sent successfully');
+      
+      // Clear form and show success message
       setEmail('');
-      // Refresh the team data (the dashboard will handle this)
+      setRole('MEMBER');
+      setToastMessage('Invitation sent successfully');
+      
+      // Add the new invitation to the state
+      setInvitations([
+        ...invitations, 
+        {
+          ...result.invitation,
+          // Transform the role and status for display if needed
+          role: EnumTransformers.teamRoleFromBackend(result.invitation.role),
+          status: EnumTransformers.invitationStatusFromBackend(result.invitation.status)
+        }
+      ]);
+      
     } catch (error) {
-      console.error('Error inviting team member:', error);
-      toast.error('Failed to invite team member. Please try again later.');
+      setAddMemberError(error instanceof Error ? error.message : 'Failed to invite team member');
     } finally {
       setIsInviting(false);
     }
@@ -778,7 +783,7 @@ const TeamManagementPage: React.FC = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={handleAddMember}
+                    onClick={handleInvite}
                     className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center"
                     disabled={addingMember}
                   >

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import debounce from 'lodash/debounce';
+import { standardizeApiResponse } from "@/utils/api-response-formatter";
 
 // Define the shape of your wizard data.
 interface WizardData {
@@ -65,6 +66,7 @@ interface WizardContextType {
   isEditing: boolean;
   campaignData: CampaignData | null;
   loading: boolean;
+  hasLoadedData: boolean;
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
   resetForm: () => void;
@@ -74,6 +76,7 @@ interface WizardContextType {
   setAutosaveEnabled: (enabled: boolean) => void;
   reloadCampaignData: () => void;
   updateCampaignData: (updates: Record<string, unknown>) => void;
+  campaignId: string | null;
 }
 
 // Default values for the wizard data.
@@ -165,83 +168,69 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
   // Load campaign data from API or localStorage
   useEffect(() => {
-    async function loadCampaignData() {
-      // Skip loading if we already have data or there's no campaignId
-      if (!campaignId || hasLoadedData) {
-        setLoading(false);
-        return;
-      }
-
+    async function loadCampaignData(campaignId: string) {
       if (!campaignId) {
-        // Try to load from localStorage if no ID in URL
-        const savedData = localStorage.getItem('campaignData');
-        if (savedData) {
-          try {
-            const parsedData = JSON.parse(savedData);
-            setCampaignData(parsedData);
-            setLastSaved(new Date(parsedData.lastSaved || Date.now()));
-            console.log('Loaded campaign data from localStorage:', parsedData);
-          } catch (error) {
-            console.error('Error parsing saved campaign data:', error);
-          }
-        }
-        setLoading(false);
-        return;
+        console.warn("Cannot load campaign data without campaign ID");
+        return null;
       }
-
+      
+      setLoading(true);
+      
       try {
-        console.log('Fetching campaign data for ID:', campaignId);
+        console.log(`Fetching campaign data for ID: ${campaignId}`);
         const response = await fetch(`/api/campaigns/${campaignId}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch campaign');
+          throw new Error(`Failed to fetch campaign data: ${response.status}`);
         }
         
         const result = await response.json();
-        console.log('Fetched campaign data:', result);
+        console.log("Fetched campaign data:", result);
         
-        // Extract data from the response, handling both old and new API formats
-        const campaignData = result.data || result.campaign || result;
-        
-        // Log the extracted data to help with debugging
-        console.log('Extracted campaign data:', campaignData);
-        
-        setCampaignData(campaignData);
-        
-        // Save to localStorage for offline access
-        localStorage.setItem('campaignData', JSON.stringify({
-          ...campaignData,
-          lastSaved: new Date().toISOString()
-        }));
-        setLastSaved(new Date());
-        
-        // Set hasLoadedData to prevent redundant loading
-        setHasLoadedData(true);
-        
-        // Show a one-time toast notification
-        toast.success('Campaign data loaded');
-        
-      } catch (error) {
-        console.error('Error loading campaign:', error);
-        toast.error('Failed to load campaign data');
-        
-        // Try loading from localStorage as a fallback
-        const savedData = localStorage.getItem('campaignData');
-        if (savedData) {
+        if (result.success && result.data) {
+          // Extract the campaign data from the response
+          const extractedData = result.data;
+          console.log("Extracted campaign data:", extractedData);
+          
+          // Transform and normalize the data using our standardizeApiResponse utility
+          const normalizedData = standardizeApiResponse(extractedData);
+          
+          console.log("Standardized campaign data:", normalizedData);
+          
+          // Debugging: Log key fields to verify they're being properly processed
+          console.log("Dates after normalization:", {
+            startDate: normalizedData.startDate,
+            endDate: normalizedData.endDate
+          });
+          
+          console.log("Influencers after normalization:", normalizedData.influencers);
+          
+          // Update state with normalized data
+          setCampaignData(normalizedData);
+          setHasLoadedData(true);
+          
+          // Show success toast when data is loaded
+          toast.success("Campaign data loaded");
+          
+          // Save to localStorage for offline access
           try {
-            const parsedData = JSON.parse(savedData);
-            if (parsedData.id === campaignId) {
-              setCampaignData(parsedData);
-              setLastSaved(new Date(parsedData.lastSaved || Date.now()));
-              toast.success('Loaded cached campaign data');
-              
-              // Even with localStorage fallback, mark as loaded
-              setHasLoadedData(true);
-            }
+            localStorage.setItem('campaignData', JSON.stringify(normalizedData));
+            localStorage.setItem('lastLoadedCampaignId', campaignId);
+            setLastSaved(new Date());
           } catch (e) {
-            console.error('Error parsing saved campaign data:', e);
+            console.warn('Failed to save campaign data to localStorage:', e);
           }
+          
+          return normalizedData;
+        } else {
+          console.error("Failed to fetch campaign data:", result);
+          toast.error("Failed to load campaign data");
+          return null;
         }
+      } catch (error) {
+        console.error("Error fetching campaign data:", error);
+        toast.error("Error loading campaign data");
+        return null;
       } finally {
         setLoading(false);
       }
@@ -249,7 +238,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
     // Only load data if we have a campaignId and haven't loaded data yet
     if (campaignId && !hasLoadedData) {
-      loadCampaignData();
+      loadCampaignData(campaignId);
     } else if (!campaignId) {
       // Reset loading state if there's no campaign ID
       setLoading(false);
@@ -370,6 +359,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     isEditing: !!campaignId,
     campaignData,
     loading,
+    hasLoadedData,
     formData,
     updateFormData,
     resetForm,
@@ -379,6 +369,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     setAutosaveEnabled,
     reloadCampaignData,
     updateCampaignData,
+    campaignId,
   };
 
   return (

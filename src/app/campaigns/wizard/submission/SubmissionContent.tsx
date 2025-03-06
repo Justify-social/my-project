@@ -12,6 +12,7 @@ import {
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 import ErrorFallback from '@/components/ErrorFallback';
+import { EnumTransformers } from '@/utils/enum-transformers';
 
 function SubmissionContent() {
   const router = useRouter();
@@ -39,13 +40,20 @@ function SubmissionContent() {
         const data = await response.json();
         console.log("API Response:", data);
 
+        let campaignData;
         if (data.campaign) {
-          setCampaign(data.campaign);
+          campaignData = data.campaign;
         } else if (data.data) {
-          setCampaign(data.data);
+          campaignData = data.data;
         } else {
-          setCampaign(data);
+          campaignData = data;
         }
+        
+        // Transform enum values from backend format to frontend format for display
+        const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaignData);
+        console.log("Transformed campaign data:", transformedCampaign);
+        
+        setCampaign(transformedCampaign);
       } catch (err) {
         console.error("Error fetching campaign:", err);
         setError(err instanceof Error ? err.message : 'An error occurred');
