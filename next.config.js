@@ -39,7 +39,13 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000'],
     },
+    // Exclude specific routes from static generation/prerendering
+    excludeDefaultMomentLocales: true,
+    // Use the newer app directory pattern
+    appDir: true
   },
+  // Specifically exclude problematic paths from being prerendered
+  output: 'standalone',
   async rewrites() {
     return [
       {

@@ -1,9 +1,5 @@
 "use client";
 
-// Ensure real-time data by disabling caching for this page
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
@@ -159,7 +155,7 @@ interface Campaign {
 
 type SortDirection = "ascending" | "descending";
 
-const CampaignList: React.FC = () => {
+const ClientCampaignList: React.FC = () => {
   const { user, isLoading: userLoading, error: userError } = useUser();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [search, setSearch] = useState("");
@@ -1189,5 +1185,5 @@ const CampaignList: React.FC = () => {
   );
 };
 
-export default CampaignList;
+export default ClientCampaignList;
 
