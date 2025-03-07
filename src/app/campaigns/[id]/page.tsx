@@ -44,8 +44,7 @@ import {
   PaperAirplaneIcon,
   PauseIcon,
   CheckBadgeIcon,
-  PlayIcon,
-  CogIcon
+  PlayIcon
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Image from 'next/image';
@@ -229,54 +228,41 @@ interface MetricCardProps {
 }
 
 const MetricCard = ({ title, value, icon: Icon, trend = "none", subtext, format = "text" }: MetricCardProps) => {
-  const trendConfig = {
-    up: { 
-      icon: ArrowTrendingUpIcon, 
-      textColor: 'text-green-600' 
-    },
-    down: { 
-      icon: ArrowTrendingDownIcon, 
-      textColor: 'text-red-600' 
-    },
-    none: { 
-      icon: null, 
-      textColor: '' 
-    }
-  };
-
-  const TrendIcon = trendConfig[trend].icon;
-  const trendColorClass = trendConfig[trend].textColor;
+  let formattedValue = value;
+  
+  if (format === "currency" && typeof value === "number") {
+    formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+  } else if (format === "percent" && typeof value === "number") {
+    formattedValue = `${value}%`;
+  } else if (format === "number" && typeof value === "number") {
+    formattedValue = new Intl.NumberFormat('en-US').format(value);
+  }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-5 border border-gray-200"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="bg-blue-50 p-2.5 rounded-lg">
-          <Icon className="w-5 h-5 text-blue-500" />
-      </div>
+    <div className="bg-white rounded-lg border border-[var(--divider-color)] shadow-sm p-4 transition-all hover:shadow-md">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md">
+            <Icon className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" />
+          </div>
+          <span className="text-[var(--secondary-color)] font-medium text-sm">{title}</span>
+        </div>
         
-        {trend !== "none" && TrendIcon && (
-          <span className={`flex items-center text-sm font-medium ${trendColorClass}`}>
-            <TrendIcon className="w-4 h-4 mr-1" />
-            Rising
-          </span>
+        {trend !== "none" && (
+          <div className={`flex items-center ${trend === "up" ? "text-green-500" : "text-red-500"}`}>
+            {trend === "up" ? 
+              <ArrowTrendingUpIcon className="h-4 w-4" /> : 
+              <ArrowTrendingDownIcon className="h-4 w-4" />
+            }
+          </div>
         )}
       </div>
       
-      <h3 className="text-sm text-gray-500 mb-1 font-medium">{title}</h3>
-      <div className="flex items-baseline">
-        <p className="text-2xl font-bold text-gray-800">
-          {value}
-        </p>
+      <div className="mt-3">
+        <div className="text-[var(--primary-color)] font-bold text-2xl">{formattedValue}</div>
+        {subtext && <div className="text-[var(--secondary-color)] text-xs mt-1">{subtext}</div>}
       </div>
-      
-      {subtext && (
-        <p className="mt-2 text-sm text-gray-500">{subtext}</p>
-      )}
-    </motion.div>
+    </div>
   );
 };
 
@@ -295,28 +281,30 @@ const DataCard: React.FC<DataCardProps> = ({
   description, 
   icon: Icon, 
   children, 
-  className,
+  className = '',
   actions
 }) => (
-  <div className={`shadow-sm rounded-xl p-5 hover:shadow-md transition-all duration-300 border border-gray-200 ${className || ''}`}>
-    <div className="flex justify-between items-start mb-4">
-      <div className="flex items-center">
-        <div className="bg-blue-50 p-2 rounded-full mr-3">
-          <Icon className="h-5 w-5 text-blue-500" />
-    </div>
+  <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden transition-all hover:shadow-md ${className}`}>
+    <div className="flex justify-between items-center border-b border-[var(--divider-color)] px-5 py-4">
+      <div className="flex items-center space-x-3">
+        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md">
+          <Icon className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" />
+        </div>
         <div>
-          <h3 className="font-semibold text-gray-900 text-base">{title}</h3>
-          {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
+          <h3 className="text-[var(--primary-color)] font-semibold text-lg">{title}</h3>
+          {description && <p className="text-[var(--secondary-color)] text-sm mt-0.5">{description}</p>}
         </div>
       </div>
       {actions && (
-        <div>
+        <div className="flex space-x-2">
           {actions}
         </div>
       )}
     </div>
+    <div className="p-5">
       {children}
     </div>
+  </div>
 );
 
 // Add DataRow component before the main CampaignDetail component
@@ -329,208 +317,221 @@ interface DataRowProps {
 }
 
 const DataRow = ({ label, value, icon: Icon, tooltip, featured = false }: DataRowProps) => (
-  <motion.div 
-    className={`flex items-center justify-between py-2.5 px-1 ${featured ? 'bg-blue-50 rounded-lg p-3' : 'border-b border-gray-100 last:border-0'}`}
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.3 }}
-  >
+  <div className={`flex justify-between items-center py-3 ${featured ? 'bg-[rgba(0,191,255,0.05)] px-3 rounded-md' : ''}`}>
     <div className="flex items-center space-x-2">
-      {Icon && (
-        <div className={`rounded-full p-1.5 ${featured ? 'bg-blue-100' : 'bg-gray-100'}`}>
-          <Icon className={`w-3.5 h-3.5 ${featured ? 'text-blue-600' : 'text-gray-500'}`} />
-        </div>
-      )}
-      <span className="text-sm text-gray-600 font-medium">
+      {Icon && <Icon className="h-4 w-4 text-[var(--secondary-color)]" aria-hidden="true" />}
+      <span className="text-[var(--secondary-color)] font-medium text-sm">
         {label}
         {tooltip && (
-          <span className="ml-1 text-gray-400 cursor-help" title={tooltip}>
-            <InformationCircleIcon className="w-4 h-4 inline" />
+          <span className="inline-block ml-1 cursor-help" title={tooltip}>
+            <InformationCircleIcon className="h-4 w-4 text-[var(--secondary-color)] inline opacity-70" />
           </span>
         )}
-    </span>
-  </div>
-    <div className={`text-sm ${featured ? 'font-semibold text-blue-700' : 'font-medium text-gray-800'}`}>
-      {value}
+      </span>
     </div>
-  </motion.div>
+    <div className={`text-[var(--primary-color)] ${featured ? 'font-semibold' : 'font-medium'}`}>
+      {value || 'N/A'}
+    </div>
+  </div>
 );
 
 // Add new components for enhanced sections
 const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }> = ({ audience }) => {
   if (!audience) return null;
 
-  // Convert string values to numbers for chart display
   const getNumericValue = (value: string): number => {
-    // Try to extract a number from the string, default to 0 if not a number
-    const num = parseFloat(value);
-    return isNaN(num) ? 0 : num;
+    if (value.includes('+')) {
+      return parseInt(value.replace('+', ''));
+    }
+    
+    const parts = value.split('-');
+    if (parts.length === 2) {
+      return (parseInt(parts[0]) + parseInt(parts[1])) / 2;
+    }
+    
+    return 0;
   };
 
-  const ageData = [
-    { name: '18-24', value: getNumericValue(audience.demographics.ageRange[0]) },
-    { name: '25-34', value: getNumericValue(audience.demographics.ageRange[1]) },
-    { name: '35-44', value: getNumericValue(audience.demographics.ageRange[2]) },
-    { name: '45-54', value: getNumericValue(audience.demographics.ageRange[3]) },
-    { name: '55-64', value: getNumericValue(audience.demographics.ageRange[4]) },
-    { name: '65+', value: getNumericValue(audience.demographics.ageRange[5]) },
-  ];
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+  // Sorting age ranges by their numeric value
+  const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort(
+    (a, b) => getNumericValue(a) - getNumericValue(b)
+  );
 
   return (
-    <DataCard title="Audience Demographics" icon={UserCircleIcon} className="col-span-2">
-      <div className="grid grid-cols-2 gap-8">
+    <DataCard 
+      title="Target Audience" 
+      icon={UsersIcon}
+      description="Detailed audience targeting information"
+    >
+      <div className="space-y-5">
         <div>
-          <h3 className="text-lg font-medium mb-4">Age Distribution</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={ageData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {ageData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+          <h4 className="text-[var(--primary-color)] font-medium mb-3">Location</h4>
+          <div className="flex flex-wrap gap-2">
+            {audience.demographics.locations.map((location, index) => (
+              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                {location}
+              </span>
+            ))}
+            {audience.demographics.locations.length === 0 && <span className="text-[var(--secondary-color)]">No locations specified</span>}
           </div>
         </div>
-        <div className="space-y-6">
-          {/* Add Gender Distribution */}
+
+        <div>
+          <h4 className="text-[var(--primary-color)] font-medium mb-3">Age Range</h4>
+          <div className="grid grid-cols-6 gap-1 mb-2">
+            {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => (
+              <div 
+                key={range} 
+                className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range) 
+                  ? 'bg-[var(--accent-color)] text-white font-medium' 
+                  : 'bg-gray-100 text-gray-500'}`}
+              >
+                {range}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
           <div>
-            <h3 className="text-lg font-medium mb-2">Gender Distribution</h3>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {audience.demographics.gender.map((gender) => (
-                <span key={gender} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+            <h4 className="text-[var(--primary-color)] font-medium mb-3">Gender</h4>
+            <div className="flex flex-wrap gap-2">
+              {audience.demographics.gender.map((gender, index) => (
+                <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                   {gender}
                 </span>
               ))}
             </div>
-            {audience.demographics.gender.length > 2 && (
-              <p className="text-sm text-gray-600">Other Gender Specifications: {audience.demographics.gender.slice(2).join(', ')}</p>
-            )}
           </div>
-          
-          {/* Keep existing demographics sections */}
+
           <div>
-            <h3 className="text-lg font-medium mb-2">Demographics</h3>
-            <div className="space-y-2">
-              <DataRow label="Education Level" value={audience.demographics.education.join(', ')} />
-              <DataRow label="Income Level" value={audience.demographics.income.join(', ')} />
-              <DataRow label="Interests" value={audience.demographics.interests.join(', ')} />
-            </div>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-2">Locations</h3>
+            <h4 className="text-[var(--primary-color)] font-medium mb-3">Languages</h4>
             <div className="flex flex-wrap gap-2">
-              {audience.demographics.locations.map((loc) => (
-                <span key={loc} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  {loc}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-2">Languages</h3>
-            <div className="flex flex-wrap gap-2">
-              {audience.demographics.languages.map((lang) => (
-                <span key={lang} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                  {lang}
+              {audience.demographics.languages.map((language, index) => (
+                <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                  {language}
                 </span>
               ))}
             </div>
           </div>
         </div>
+
+        <div>
+          <h4 className="text-[var(--primary-color)] font-medium mb-3">Education Level</h4>
+          <div className="flex flex-wrap gap-2">
+            {audience.demographics.education.map((education, index) => (
+              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                {education === 'some_college' ? 'Some College' : 
+                 education === 'professional' ? 'Professional Degree' :
+                 education === 'bachelors' ? 'Bachelor\'s Degree' :
+                 education === 'associates' ? 'Associate\'s Degree' :
+                 education === 'high_school' ? 'High School' :
+                 education === 'graduate' ? 'Graduate Degree' : education}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {audience.demographics.interests.length > 0 && (
+          <div>
+            <h4 className="text-[var(--primary-color)] font-medium mb-3">Interests/Job Titles</h4>
+            <div className="flex flex-wrap gap-2">
+              {audience.demographics.interests.map((interest, index) => (
+                <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                  {interest}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </DataCard>
   );
 };
 
 const CreativeAssetsGallery: React.FC<{ assets: CampaignDetail['creativeAssets'] }> = ({ assets }) => (
-  <DataCard title="Creative Assets" icon={PhotoIcon} className="col-span-2">
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {assets && assets.length > 0 ? (
-        assets.map((asset) => (
-          <div key={asset.name} className="relative group">
-          <div className="aspect-video relative rounded-lg overflow-hidden bg-gray-100">
-            {asset.type === 'image' ? (
-              <Image
-                src={asset.url}
-                  alt={asset.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <video
-                  src={asset.url}
-                  className="w-full h-full object-cover"
-                  controls
-                />
+  <DataCard 
+    title="Creative Assets" 
+    icon={PhotoIcon}
+    description="Campaign creative assets"
+    actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}
+  >
+    {assets.length > 0 ? (
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {assets.slice(0, 6).map((asset, index) => (
+          <div key={index} className="rounded-lg overflow-hidden border border-[var(--divider-color)] bg-gray-50 aspect-square relative group">
+            {asset.type === 'video' ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <PlayIcon className="h-12 w-12 text-white opacity-70" />
+                <div className="absolute inset-0 bg-black opacity-40"></div>
               </div>
-            )}
+            ) : null}
+            <img 
+              src={asset.url || '/placeholder-image.jpg'} 
+              alt={asset.name}
+              className="object-cover w-full h-full"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <p className="text-white text-sm font-medium truncate">{asset.name}</p>
+              {asset.duration && <p className="text-white text-xs">{asset.duration}s</p>}
+            </div>
           </div>
-          <div className="mt-2 space-y-1">
-              <h4 className="font-medium text-gray-900">{asset.name}</h4>
-              {asset.size && (
-                <p className="text-sm text-gray-600">Size: {asset.size} KB</p>
-              )}
-              {asset.duration && (
-                <p className="text-sm text-gray-600">Duration: {asset.duration} seconds</p>
-            )}
-          </div>
-        </div>
-        ))
-      ) : (
-        <div className="col-span-3 p-8 text-center bg-gray-50 rounded-lg">
-          <PhotoIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500">No creative assets uploaded yet</p>
-        </div>
-      )}
-    </div>
+        ))}
+      </div>
+    ) : (
+      <div className="text-center py-10 text-[var(--secondary-color)]">
+        <PhotoIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+        <p>No creative assets available</p>
+      </div>
+    )}
   </DataCard>
 );
 
 // Add new components for missing sections
 const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign }) => (
-  <DataCard title="Objectives & Messaging" icon={SparklesIcon} className="col-span-2">
-    <div className="grid grid-cols-2 gap-6">
-      <div className="space-y-4">
-        <DataRow label="Main Message" value={campaign.mainMessage || 'Not specified'} />
-        <DataRow label="Hashtags" value={campaign.hashtags || 'Not specified'} />
-        <DataRow label="Memorability" value={campaign.memorability || 'Not specified'} />
-        <DataRow label="Key Benefits" value={campaign.keyBenefits || 'Not specified'} />
+  <DataCard 
+    title="Campaign Objectives" 
+    icon={SparklesIcon}
+    description="Key objectives and performance indicators"
+  >
+    <div className="space-y-5">
+      <div>
+        <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
+        <div className={`kpi-${campaign.primaryKPI?.toLowerCase() || 'brand-awareness'} flex items-center text-lg font-medium text-[var(--accent-color)]`}>
+          {campaign.primaryKPI === 'adRecall' && <SparklesIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'brandAwareness' && <LightBulbIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'consideration' && <ChartBarIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'messageAssociation' && <HashtagIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'brandPreference' && <ChartBarIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'purchaseIntent' && <CurrencyDollarIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'actionIntent' && <PaperAirplaneIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'recommendationIntent' && <ShareIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI === 'advocacy' && <UserCircleIcon className="h-5 w-5 mr-2" />}
+          {campaign.primaryKPI ? campaign.primaryKPI.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) : 'Brand Awareness'}
+        </div>
       </div>
-      <div className="space-y-4">
-        <DataRow label="Expected Achievements" value={campaign.expectedAchievements || 'Not specified'} />
-        <DataRow label="Purchase Intent" value={campaign.purchaseIntent || 'Not specified'} />
-        <DataRow label="Brand Perception" value={campaign.brandPerception || 'Not specified'} />
+
+      {campaign.secondaryKPIs.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Selected Features</h4>
+          <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary KPIs</h4>
           <div className="flex flex-wrap gap-2">
-            {campaign.features && campaign.features.length > 0 ? (
-              campaign.features.map((feature, index) => (
-              <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                {feature}
+            {campaign.secondaryKPIs.map((kpi, index) => (
+              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                {kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
               </span>
-              ))
-            ) : (
-              <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                No features
-              </span>
-            )}
+            ))}
           </div>
         </div>
+      )}
+
+      <div className="space-y-3 pt-2">
+        <DataRow label="Main Message" value={campaign.mainMessage} />
+        <DataRow label="Brand Perception" value={campaign.brandPerception} />
+        <DataRow label="Hashtags" value={campaign.hashtags} icon={HashtagIcon} />
+        <DataRow label="Key Benefits" value={campaign.keyBenefits} />
+        <DataRow label="Memorability" value={campaign.memorability} />
+        <DataRow label="Expected Achievements" value={campaign.expectedAchievements} />
+        <DataRow label="Purchase Intent" value={campaign.purchaseIntent} />
       </div>
     </div>
   </DataCard>
@@ -783,65 +784,46 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge = ({ status = "draft", size = "md", className = "" }: StatusBadgeProps) => {
-  // Safely get status string and convert to lowercase
-  const safeStatus = typeof status === 'string' && status ? status.toLowerCase() : 'draft';
-  
-  // Log the status conversion if in debug mode
-  if (ENABLE_SAFETY_MODE && typeof window !== 'undefined') {
-    console.log(`StatusBadge: Converting "${status}" to safe status "${safeStatus}"`);
+  let bgColor = "bg-gray-100";
+  let textColor = "text-gray-700";
+  let icon = null;
+  let statusText = "Draft";
+
+  const safeStatus = status?.toLowerCase() || "draft";
+
+  switch(safeStatus) {
+    case "submitted":
+    case "live":
+      bgColor = "bg-green-100";
+      textColor = "text-green-800";
+      icon = <CheckCircleIcon className="h-4 w-4 mr-1" />;
+      statusText = "Live";
+      break;
+    case "paused":
+      bgColor = "bg-yellow-100";
+      textColor = "text-yellow-800";
+      icon = <PauseIcon className="h-4 w-4 mr-1" />;
+      statusText = "Paused";
+      break;
+    case "completed":
+      bgColor = "bg-blue-100";
+      textColor = "text-blue-800";
+      icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />;
+      statusText = "Completed";
+      break;
+    case "draft":
+    default:
+      bgColor = "bg-gray-100";
+      textColor = "text-gray-700";
+      icon = <PencilSquareIcon className="h-4 w-4 mr-1" />;
+      statusText = "Draft";
+      break;
   }
 
-  // Define configuration for each status type
-  const statusConfig: Record<string, { color: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; label: string }> = {
-    "draft": { 
-      color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
-      icon: ClockIcon,
-      label: 'Draft'
-    },
-    "submitted": { 
-      color: 'bg-blue-100 text-blue-800 border-blue-200', 
-      icon: PaperAirplaneIcon,
-      label: 'Submitted'
-    },
-    "live": { 
-      color: 'bg-green-100 text-green-800 border-green-200', 
-      icon: CheckCircleIcon,
-      label: 'Live'
-    },
-    "paused": { 
-      color: 'bg-orange-100 text-orange-800 border-orange-200', 
-      icon: PauseIcon,
-      label: 'Paused'
-    },
-    "completed": { 
-      color: 'bg-purple-100 text-purple-800 border-purple-200', 
-      icon: CheckBadgeIcon,
-      label: 'Completed'
-    },
-    "scheduled": { 
-      color: 'bg-indigo-100 text-indigo-800 border-indigo-200', 
-      icon: CalendarIcon,
-      label: 'Scheduled'
-    },
-    "rejected": { 
-      color: 'bg-red-100 text-red-800 border-red-200', 
-      icon: XCircleIcon,
-      label: 'Rejected'
-    }
-  };
-
-  // Use the config for the given status, or fall back to draft if not found
-  const config = statusConfig[safeStatus] || statusConfig.draft;
-  const Icon = config.icon;
-  
-  // Set size classes based on the size prop
-  const sizeClasses = size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-0.5 text-sm";
-
   return (
-    <span className={`inline-flex items-center ${sizeClasses} rounded-full font-medium 
-      ${config.color} border shadow-sm ${className}`}>
-      <Icon className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} />
-      {config.label}
+    <span className={`inline-flex items-center rounded-full ${bgColor} ${textColor} ${size === "md" ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"} font-medium ${className}`}>
+      {icon}
+      {statusText}
     </span>
   );
 };
@@ -1224,8 +1206,12 @@ export default function CampaignDetail() {
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
         }
         
-        const result = await response.json();
-        console.log('API response received:', result);
+        const apiResponse = await response.json();
+        console.log('API response received:', apiResponse);
+        
+        // The API returns { success: true, data: { ... } }
+        // Extract the data property from the response
+        const result = apiResponse.data || {};
         
         // Check if the result is empty
         if (!result || Object.keys(result).length === 0) {
@@ -1236,8 +1222,24 @@ export default function CampaignDetail() {
           return;
         }
         
+        // Map API fields to expected format before validation
+        const mappedResult = {
+          id: result.id,
+          campaignName: result.name || result.campaignName,
+          startDate: result.startDate || '',
+          endDate: result.endDate || '',
+          currency: result.budget?.currency || result.currency || 'USD',
+          totalBudget: result.budget?.total || result.totalBudget || 0,
+          platform: (result.influencers && result.influencers[0]?.platform) 
+            ? result.influencers[0].platform 
+            : (result.platform || 'Instagram'),
+          submissionStatus: result.status?.toLowerCase() || result.submissionStatus || 'draft'
+        };
+        
+        console.log('Mapped result for validation:', mappedResult);
+        
         // Validate data
-        const validation = validateCampaignData(result);
+        const validation = validateCampaignData(mappedResult);
         if (!validation.isValid) {
           console.error('Invalid campaign data received', result, validation.errors);
           
@@ -1251,97 +1253,84 @@ export default function CampaignDetail() {
 
         // Process the data to match expected format
         const processedData: CampaignDetail = {
-          id: result.id.toString(),
-          campaignName: result.campaignName,
-          description: result.description,
-          startDate: result.startDate,
-          endDate: result.endDate,
-          timeZone: result.timeZone,
-          currency: result.currency,
-          totalBudget: result.totalBudget,
-          socialMediaBudget: result.socialMediaBudget,
-          platform: result.platform,
-          influencerHandle: result.influencerHandle,
+          id: mappedResult.id.toString(),
+          campaignName: mappedResult.campaignName,
+          description: result.businessGoal || result.description || '',
+          startDate: mappedResult.startDate,
+          endDate: mappedResult.endDate,
+          timeZone: result.timeZone || 'UTC',
+          currency: mappedResult.currency as Currency,
+          totalBudget: Number(mappedResult.totalBudget),
+          socialMediaBudget: result.budget?.socialMedia || result.socialMediaBudget || 0,
+          platform: mappedResult.platform as Platform,
+          influencerHandle: result.influencerHandle || '',
           website: result.website || "",
           
           // Format the primary contact data
           primaryContact: {
-            firstName: result.primaryContact.firstName,
-            surname: result.primaryContact.surname,
-            email: result.primaryContact.email,
-            position: result.primaryContact.position,
-            phone: result.primaryContact.phone || "N/A"
+            firstName: result.primaryContact?.firstName || '',
+            surname: result.primaryContact?.surname || '',
+            email: result.primaryContact?.email || '',
+            position: result.primaryContact?.position || 'Manager',
+            phone: result.primaryContact?.phone || "N/A"
           },
           
           // Format secondary contact if available
           secondaryContact: result.secondaryContact ? {
-            firstName: result.secondaryContact.firstName,
-            surname: result.secondaryContact.surname,
-            email: result.secondaryContact.email,
-            position: result.secondaryContact.position,
+            firstName: result.secondaryContact.firstName || '',
+            surname: result.secondaryContact.surname || '',
+            email: result.secondaryContact.email || '',
+            position: result.secondaryContact.position || 'Manager',
             phone: result.secondaryContact.phone || "N/A"
           } : undefined,
           
           // Campaign Details
-          brandName: result.brandName || result.campaignName,
+          brandName: result.brandName || mappedResult.campaignName,
           category: result.category || "Not specified",
           product: result.product || "Not specified",
           targetMarket: result.targetMarket || "Global",
-          submissionStatus: result.submissionStatus,
-          primaryKPI: result.primaryKPI,
+          submissionStatus: mappedResult.submissionStatus,
+          primaryKPI: result.primaryKPI || '',
           secondaryKPIs: result.secondaryKPIs || [],
           
           // Campaign Objectives
-          mainMessage: result.mainMessage || "",
-          hashtags: result.hashtags || "",
-          memorability: result.memorability || "",
-          keyBenefits: result.keyBenefits || "",
-          expectedAchievements: result.expectedAchievements || "",
-          purchaseIntent: result.purchaseIntent || "",
-          brandPerception: result.brandPerception || "",
+          mainMessage: result.messaging?.mainMessage || result.mainMessage || "",
+          hashtags: result.messaging?.hashtags || result.hashtags || "",
+          memorability: result.messaging?.memorability || result.memorability || "",
+          keyBenefits: result.messaging?.keyBenefits || result.keyBenefits || "",
+          expectedAchievements: result.messaging?.expectedAchievements || result.expectedAchievements || "",
+          purchaseIntent: result.messaging?.purchaseIntent || result.purchaseIntent || "",
+          brandPerception: result.messaging?.brandPerception || result.brandPerception || "",
           features: result.features || [],
           
-          // Format audience data if available
-          audience: result.audience ? {
+          // Audience data
+          audience: {
             demographics: {
-              ageRange: result.audience.demographics.ageRange || ["0", "0", "0", "0", "0", "0"],
-              gender: result.audience.demographics.gender || ["Not specified"],
-              education: result.audience.demographics.education || ["Not specified"],
-              income: result.audience.demographics.income || ["Not specified"],
-              interests: result.audience.demographics.interests || ["Not specified"],
-              locations: result.audience.demographics.locations || ["Not specified"],
-              languages: result.audience.demographics.languages || ["Not specified"]
-            }
-          } : {
-            demographics: {
-              ageRange: ["0", "0", "0", "0", "0", "0"],
-              gender: ["Not specified"],
-              education: ["Not specified"],
-              income: ["Not specified"],
-              interests: ["Not specified"],
-              locations: ["Not specified"],
-              languages: ["Not specified"]
+              ageRange: result.demographics?.ageDistribution 
+                ? Object.entries(result.demographics.ageDistribution)
+                    .filter(([_, value]) => Number(value) > 0)
+                    .map(([key]) => key.replace('age', '').replace('plus', '+'))
+                : ['18-24', '25-34'],
+              gender: result.demographics?.gender || ['All'],
+              education: result.demographics?.educationLevel ? [result.demographics.educationLevel] : ['All'],
+              income: result.demographics?.incomeLevel ? [result.demographics.incomeLevel.toString()] : ['All'],
+              interests: result.demographics?.jobTitles || [],
+              locations: result.locations ? result.locations.map((loc: any) => loc.location || '') : [],
+              languages: result.targeting?.languages 
+                ? result.targeting.languages.map((lang: any) => lang.language || '')
+                : ['English']
             }
           },
           
-          // Format creative assets
-          creativeAssets: result.creativeAssets ? result.creativeAssets.map((asset: any) => ({
-            name: asset.assetName || asset.fileName,
-            type: asset.type.toLowerCase() === 'video' ? 'video' : 'image',
-            url: asset.url,
-            size: asset.fileSize,
-            duration: asset.duration || null
-          })) : [],
+          // Creative Assets (placeholder logic)
+          creativeAssets: result.assets || result.creativeAssets || [],
           
-          // Format creative requirements
-          creativeRequirements: result.creativeRequirements ? result.creativeRequirements.map((req: any) => ({
-            requirement: req.requirement,
-            description: req.description || ""
-          })) : [],
-          
+          // Creative Requirements
+          creativeRequirements: result.requirements || result.creativeRequirements || [],
+
           // Timestamps
-          createdAt: result.createdAt,
-          updatedAt: result.updatedAt
+          createdAt: result.createdAt || new Date().toISOString(),
+          updatedAt: result.updatedAt || new Date().toISOString()
         };
 
         setData(processedData);
@@ -1536,495 +1525,252 @@ export default function CampaignDetail() {
   // Ensure we have data before rendering the component
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading campaign details...</p>
-        </div>
+      <div className="py-10">
+        <LoadingSkeleton />
       </div>
     );
   }
 
   if (error && !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="p-8 rounded-xl shadow-md max-w-md w-full">
-          <XCircleIcon className="h-12 w-12 text-red-500 mx-auto" />
-          <h2 className="text-xl font-semibold text-center mt-4">Error Loading Campaign</h2>
-          <p className="text-gray-600 text-center mt-2">{error || 'Failed to load campaign data'}</p>
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="mt-6 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Back to Campaigns
-          </button>
-          </div>
+      <div className="py-10">
+        <ErrorFallback error={new Error(error)} />
       </div>
     );
   }
 
-  // At this point we know data is not null
-  // This helps TypeScript know that data is definitely defined in the following JSX
-  if (!data) {
-    return null; // This should never happen due to earlier checks, but satisfies TypeScript
-  }
-
   return (
-    <div className="min-h-screen">
-      {/* Campaign Header - Styled to match Figma */}
-      <div className="border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/campaigns')}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
-            >
-                <ArrowLeftIcon className="h-5 w-5" />
-            </button>
-              <h1 className="text-xl font-semibold text-gray-900">
-                Campaign Overview
-              </h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="bg-white border-b border-[var(--divider-color)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => window.history.back()}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Go back"
+              >
+                <ArrowLeftIcon className="h-5 w-5 text-[var(--secondary-color)]" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "Campaign Detail"}</h1>
+                <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1">
+                  <StatusBadge status={data?.submissionStatus} />
+                  <span className="mx-2">•</span>
+                  <span>Created on {formatDate(data?.createdAt || "")}</span>
+                </div>
+              </div>
             </div>
-            <div>
-            <button
-                className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm 
-                font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-                Save all drafts
-            </button>
+            
+            <div className="flex space-x-3 mt-4 md:mt-0">
+              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
+                <PrinterIcon className="h-4 w-4 mr-2" />
+                Print
+              </button>
+              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
+                <ShareIcon className="h-4 w-4 mr-2" />
+                Share
+              </button>
+              <Link 
+                href={`/campaigns/wizard/step-1?id=${data?.id || ''}`} 
+                className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]"
+              >
+                <PencilIcon className="h-4 w-4 mr-2" />
+                Edit
+              </Link>
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
-      {/* Campaign Content - Styled to match Figma */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Campaign Name Section */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex flex-col">
-              <h2 className="text-lg font-medium text-gray-900">
-                {safe(data?.campaignName, 'Campaign Name')}
-              </h2>
-              <StatusBadge status={safe(data?.submissionStatus, 'draft')} size="sm" className="mt-2" />
-            </div>
-            <div className="flex gap-2">
-              <button className="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
-                <PencilIcon className="h-4 w-4" />
-              </button>
-              <button className="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
-                <ShareIcon className="h-4 w-4" />
-              </button>
-              <button className="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          
-          <div className="text-sm text-gray-500 mt-3">
-            <p>{safe(data?.description, 'No description provided')}</p>
-          </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <MetricCard 
+            title="Total Budget" 
+            value={data?.totalBudget || 0} 
+            icon={CurrencyDollarIcon} 
+            format="currency" 
+          />
+          <MetricCard 
+            title="Campaign Duration" 
+            value={calculateDuration(data?.startDate || "", data?.endDate || "")} 
+            icon={CalendarDaysIcon} 
+          />
+          <MetricCard 
+            title="Platform" 
+            value={data?.platform || "Instagram"} 
+            icon={GlobeAltIcon} 
+          />
         </div>
 
-        {/* Two-column layout for key info */}
-        <div className="grid grid-cols-2 gap-8 mb-6">
-          {/* Date information */}
-            <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-2">Start Date</h3>
-            <div className="flex items-center">
-              <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
-              <span className="text-sm font-medium">{data?.startDate ? formatDate(data.startDate) : 'Not set'}</span>
+        {/* Campaign Details & Primary Contact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <DataCard 
+            title="Campaign Details" 
+            icon={DocumentTextIcon}
+            description="Basic campaign information"
+          >
+            <div className="space-y-3">
+              <DataRow label="Campaign Name" value={data?.campaignName} featured={true} />
+              <DataRow label="Description" value={data?.description || 'No description available'} />
+              <DataRow label="Brand Name" value={data?.brandName} />
+              <DataRow label="Start Date" value={formatDate(data?.startDate || "")} icon={CalendarIcon} />
+              <DataRow label="End Date" value={formatDate(data?.endDate || "")} icon={CalendarIcon} />
+              <DataRow label="Time Zone" value={data?.timeZone} icon={ClockIcon} />
+              <DataRow label="Currency" value={safeCurrency(data?.currency)} icon={CurrencyDollarIcon} />
+              <DataRow 
+                label="Total Budget" 
+                value={formatCurrency(data?.totalBudget || 0, data?.currency)} 
+                icon={CurrencyDollarIcon} 
+                featured={true}
+              />
+              <DataRow 
+                label="Social Media Budget" 
+                value={formatCurrency(data?.socialMediaBudget || 0, data?.currency)} 
+                icon={CurrencyDollarIcon}
+              />
+              {data?.website && <DataRow label="Website" value={data.website} icon={GlobeAltIcon} />}
             </div>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-2">End Date</h3>
-            <div className="flex items-center">
-              <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
-              <span className="text-sm font-medium">{data?.endDate ? formatDate(data.endDate) : 'Not set'}</span>
-            </div>
-          </div>
-        </div>
+          </DataCard>
 
-        {/* Time Zone */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Time Zone</h3>
-          <div className="flex items-center">
-            <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
-            <span className="text-sm font-medium">{data?.timeZone || 'GMT (UTC+0)'}</span>
-          </div>
-        </div>
-
-        {/* Currency and Budget */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Currency</h3>
-          <p className="text-sm mb-4 font-medium">{safeCurrency(data?.currency)}</p>
-          
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Total campaign budget</h3>
-          <p className="text-sm font-medium text-gray-900">
-            {data?.totalBudget !== undefined ? formatCurrency(data.totalBudget, data.currency) : 'Not set'}
-          </p>
-          
-          {data?.socialMediaBudget && (
-            <div className="mt-3">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Budget allocated to social media</h3>
-              <p className="text-sm font-medium text-gray-900">
-                {formatCurrency(data.socialMediaBudget, data.currency)}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Influencer Information */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Influencer</h3>
-          {data?.influencerHandle ? (
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden relative">
-                <Image 
-                  src={`https://unavatar.io/${data.influencerHandle}`}
-                  alt={data.influencerHandle}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+          <DataCard 
+            title="Contact" 
+            icon={UserCircleIcon}
+            description="Key internal stakeholders"
+          >
+            <div className="space-y-5">
+              {/* Primary Contact */}
               <div>
-                <p className="text-sm font-medium">{data.influencerHandle}</p>
-                <p className="text-xs text-gray-500">@{data.influencerHandle.toLowerCase()}</p>
-              </div>
-              
-              <div className="ml-auto flex gap-1">
-                <button className="p-1 rounded text-blue-500 hover:bg-blue-50">
-                  <CheckCircleIcon className="h-4 w-4" />
-                </button>
-                <button className="p-1 rounded text-red-500 hover:bg-red-50">
-                  <XCircleIcon className="h-4 w-4" />
-                </button>
+                <div className="space-y-3">
+                  <DataRow 
+                    label="Name" 
+                    value={`${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+                    icon={UserCircleIcon} 
+                  />
+                  
+                  <DataRow 
+                    label="Email" 
+                    value={
+                      <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
+                        {data?.primaryContact?.email}
+                      </a>
+                    } 
+                    icon={EnvelopeIcon} 
+                  />
+                  
+                  <DataRow label="Position" value={data?.primaryContact?.position} icon={BuildingOfficeIcon} />
                 </div>
+              </div>
+
+              {/* Secondary Contact */}
+              {data?.secondaryContact && (
+                <div className="pt-5 border-t border-[var(--divider-color)]">
+                  <h4 className="text-[var(--primary-color)] font-medium mb-4">Secondary Contact</h4>
+                  
+                  <div className="space-y-3">
+                    <DataRow 
+                      label="Name" 
+                      value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} 
+                      icon={UserCircleIcon} 
+                    />
+                    
+                    <DataRow 
+                      label="Email" 
+                      value={
+                        <a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
+                          {data.secondaryContact.email}
+                        </a>
+                      } 
+                      icon={EnvelopeIcon} 
+                    />
+                    
+                    <DataRow label="Position" value={data.secondaryContact.position} icon={BuildingOfficeIcon} />
                   </div>
-          ) : (
-            <p className="text-sm text-gray-500">No influencer selected</p>
-                )}
-              </div>
-
-        {/* Platform */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Platform for Campaign</h3>
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-50 rounded-md mr-3">
-              <GlobeAltIcon className="h-5 w-5 text-blue-500" />
+                </div>
+              )}
             </div>
-            <span className="text-sm font-medium">{data?.platform || 'Not specified'}</span>
-          </div>
-          </div>
-
-        {/* Primary KPI */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Primary KPI</h3>
-          <div className="p-3 bg-blue-50 rounded-lg mb-3">
-            <div className="flex items-center">
-              <div className="p-1.5 bg-blue-100 rounded-md mr-2">
-                <ChartBarIcon className="h-4 w-4 text-blue-600" />
-              </div>
-              <span className="text-sm font-medium text-blue-700">{safe(data?.primaryKPI, 'Not set')}</span>
-              </div>
-            </div>
-
-          {data?.secondaryKPIs && data.secondaryKPIs.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Secondary KPIs</h3>
-              <div className="flex flex-wrap gap-2">
-                {data.secondaryKPIs.map((kpi, index) => (
-                  <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {kpi}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          </DataCard>
         </div>
 
-        {/* Campaign Details Section */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Location</h3>
-          <p className="text-sm mb-4 font-medium">{safe(data?.targetMarket, 'Not specified')}</p>
-          
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Age Range (years)</h3>
-          <div className="flex items-center gap-2 mb-6">
-            {data?.audience?.demographics?.ageRange ? (
-              <div className="w-full">
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '75%' }}></div>
-                </div>
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>18</span>
-                  <span>24</span>
-                  <span>35</span>
-                  <span>44</span>
-                  <span>55</span>
-                  <span>65+</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Not specified</p>
-                )}
-              </div>
-          
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Gender</h3>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {data?.audience?.demographics?.gender ? data.audience.demographics.gender.map((gender, index) => (
-              <span key={index} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                {gender}
-              </span>
-            )) : (
-              <p className="text-sm text-gray-500">Not specified</p>
-            )}
-          </div>
-          
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Language</h3>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {data?.audience?.demographics?.languages ? data.audience.demographics.languages.map((language, index) => (
-              <span key={index} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                {language}
-              </span>
-            )) : (
-              <p className="text-sm text-gray-500">Not specified</p>
-            )}
-          </div>
-        </div>
-
-        {/* Selected Features */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-medium text-gray-900">Key Campaign Features</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700">See all</button>
-          </div>
-              <div className="space-y-2">
-            {data?.features && data.features.length > 0 ? (
-              data.features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                  <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                  <span className="text-sm font-medium">{feature}</span>
-                </div>
-                  ))
-                ) : (
-              <p className="text-sm text-gray-500 italic">No features selected</p>
-            )}
-          </div>
+        {/* Objectives & Audience */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {data && <ObjectivesSection campaign={data} />}
+          {data && <AudienceSection audience={data.audience} />}
         </div>
 
         {/* Creative Assets */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Creative Assets</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
-              <span>See all</span>
-              <ArrowLeftIcon className="h-3 w-3 transform rotate-180" />
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {data?.creativeAssets && data.creativeAssets.length > 0 ? (
-              data.creativeAssets.slice(0, 2).map((asset, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="aspect-w-16 aspect-h-9 bg-gray-100 relative">
-                    {asset.type === 'image' ? (
-                      <div className="h-40 w-full relative">
-                        <Image
-                          src={asset.url}
-                          alt={asset.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-40 bg-gray-50">
-                        <div className="p-3 bg-blue-500 rounded-full">
-                          <PlayIcon className="h-8 w-8 text-white" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-medium">{asset.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
-                      {asset.size && ` • ${asset.size} KB`}
-                      {asset.duration && ` • ${asset.duration}s`}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-2 p-8 text-center bg-gray-50 rounded-lg">
-                <PhotoIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500">No creative assets uploaded yet</p>
-                <button className="mt-3 px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50">
-                  Add Assets
-                </button>
-              </div>
-                )}
-              </div>
-          </div>
-
-        {/* Brand Lift Results - Mocked from Figma */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Brand Lift Results</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700">See all</button>
+        <div className="mb-6">
+          {data && <CreativeAssetsGallery assets={data.creativeAssets} />}
         </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm text-gray-500 mb-2">Brand Awareness Lift</h3>
-              <p className="text-2xl font-bold text-green-600">+19%</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm text-gray-500 mb-2">Brand Consideration Lift</h3>
-              <p className="text-2xl font-bold text-green-600">+24%</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm text-gray-500 mb-2">Message Association Lift</h3>
-              <p className="text-2xl font-bold text-green-600">+8%</p>
-            </div>
-          </div>
-          
-          {/* Mocked Charts Section */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-medium">Performance Graph</h3>
-              <div className="flex gap-2">
-                <span className="px-2.5 py-0.5 text-xs font-medium bg-gray-100 rounded-md">Month</span>
-                <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-md">Week</span>
-              </div>
-            </div>
-            <div className="h-48 bg-gray-50 rounded flex items-center justify-center">
-              <p className="text-gray-400 text-sm">Performance chart visualization would go here</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Information */}
-        <div className="mb-6 pb-5 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h2>
-          
-          {data.primaryContact && (
-            <div className="bg-gray-50 p-4 rounded-lg mb-4">
-              <div className="flex justify-between">
-                <div>
-                  <h3 className="text-sm font-medium mb-1">
-                    {`${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() || 'Primary Contact'}
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-2">{data.primaryContact.position || 'No position specified'}</p>
-                  
-                  <div className="flex items-center text-sm text-gray-600 mb-1">
-                    <EnvelopeIcon className="h-4 w-4 mr-2" />
-                    {data.primaryContact.email || 'No email provided'}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-gray-600">
-                    <PhoneIcon className="h-4 w-4 mr-2" />
-                    {data.primaryContact.phone || 'No phone provided'}
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-end">
-                  <button className="p-1.5 text-gray-500 hover:text-gray-700 mb-auto">
-                    <PencilIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {data.secondaryContact && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex justify-between">
-                <div>
-                  <h3 className="text-sm font-medium mb-1">
-                    {`${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() || 'Secondary Contact'}
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-2">{data.secondaryContact.position || 'No position specified'}</p>
-                  
-                  <div className="flex items-center text-sm text-gray-600 mb-1">
-                    <EnvelopeIcon className="h-4 w-4 mr-2" />
-                    {data.secondaryContact.email || 'No email provided'}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-gray-600">
-                    <PhoneIcon className="h-4 w-4 mr-2" />
-                    {data.secondaryContact.phone || 'No phone provided'}
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-end">
-                  <button className="p-1.5 text-gray-500 hover:text-gray-700 mb-auto">
-                    <PencilIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {data.website && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Website</h3>
-              <a 
-                href={data.website} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-blue-600 hover:underline text-sm"
-              >
-                {(() => {
-                  try {
-                    return new URL(data.website).hostname;
-                  } catch (e) {
-                    return data.website;
-                  }
-                })()}
-              </a>
-            </div>
-          )}
-        </div>
-
-      </div>
-
-      {/* Footer actions */}
-      <div className={`
-        fixed
-        bottom-0
-        left-0
-        w-full
-        border-t
-        border-gray-300
-        shadow
-        z-40
-        bg-white
-        flex
-        justify-between
-        items-center
-        transition-all
-        duration-300
-        ease-in-out
-        ${isOpen ? 'md:w-[calc(100%-12rem)] md:left-[12rem] lg:w-[calc(100%-16rem)] lg:left-[16rem]' : ''}
-      `}
-      style={{
-        height: '65px',
-      }}
-      >
-        <div className="flex justify-between items-center max-w-7xl mx-auto w-full px-4 sm:px-6">
-          <button 
-            onClick={() => router.push('/campaigns')}
-            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+        {/* Creative Requirements */}
+        <div className="mb-6">
+          <DataCard 
+            title="Creative Requirements" 
+            icon={PaintBrushIcon}
+            description="Requirements for creative assets"
           >
-            <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
-            Back to Campaigns
-          </button>
-          <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">
-            <CogIcon className="h-4 w-4 mr-1.5" />
-            View Settings
-          </button>
+            {(data?.creativeRequirements && data.creativeRequirements.length > 0) ? (
+              <div className="space-y-4">
+                {data.creativeRequirements.map((req, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4 border border-[var(--divider-color)]">
+                    <h4 className="text-[var(--primary-color)] font-medium">{req.requirement}</h4>
+                    {req.description && <p className="text-[var(--secondary-color)] text-sm mt-1">{req.description}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-[var(--secondary-color)]">
+                <PaintBrushIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p>No creative requirements specified</p>
+              </div>
+            )}
+          </DataCard>
         </div>
+
+        {/* Campaign Features */}
+        {(data?.features && data.features.length > 0) && (
+          <div className="mb-6">
+            <DataCard 
+              title="Campaign Features" 
+              icon={SparklesIcon}
+              description="Additional features enabled for this campaign"
+            >
+              <div className="flex flex-wrap gap-3">
+                {data.features.map((feature, index) => (
+                  <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
+                    <CheckCircleIcon className="h-5 w-5 mr-2" />
+                    <span>
+                      {feature === Feature.CREATIVE_ASSET_TESTING ? 'Creative Asset Testing' :
+                       feature === Feature.BRAND_LIFT ? 'Brand Lift' :
+                       feature === Feature.BRAND_HEALTH ? 'Brand Health' :
+                       feature === Feature.MIXED_MEDIA_MODELLING ? 'Mixed Media Modeling' : feature}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </DataCard>
+          </div>
+        )}
+
+        {/* Additional Information (if needed) */}
+        {error && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <InformationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  {error}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
