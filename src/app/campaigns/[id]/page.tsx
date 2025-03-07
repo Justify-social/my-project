@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, Suspense, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -46,7 +46,8 @@ import {
   CheckBadgeIcon,
   PlayIcon,
   CogIcon,
-  DocumentMagnifyingGlassIcon
+  DocumentMagnifyingGlassIcon,
+  DocumentIcon
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
@@ -144,6 +145,9 @@ interface CampaignDetail {
     url: string;
     size?: number;
     duration?: number;
+    influencerHandle?: string;
+    description?: string;
+    budget?: number;
   }>;
   
   creativeRequirements: Array<{
@@ -526,43 +530,90 @@ const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }>
   );
 };
 
-const CreativeAssetsGallery: React.FC<{ assets: CampaignDetail['creativeAssets'] }> = ({ assets }) => (
-  <DataCard 
-    title="Creative Assets" 
-    icon={PhotoIcon}
-    description="Campaign creative assets"
-    actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}
-  >
-    {assets.length > 0 ? (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {assets.slice(0, 6).map((asset, index) => (
-          <div key={index} className="rounded-lg overflow-hidden border border-[var(--divider-color)] bg-gray-50 aspect-square relative group">
-            {asset.type === 'video' ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <PlayIcon className="h-12 w-12 text-white opacity-70" />
-                <div className="absolute inset-0 bg-black opacity-40"></div>
-              </div>
-            ) : null}
-            <img 
-              src={asset.url || '/placeholder-image.jpg'} 
-              alt={asset.name}
-              className="object-cover w-full h-full"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p className="text-white text-sm font-medium truncate">{asset.name}</p>
-              {asset.duration && <p className="text-white text-xs">{asset.duration}s</p>}
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div className="text-center py-10 text-[var(--secondary-color)]">
-        <PhotoIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
-        <p>No creative assets available</p>
-      </div>
-    )}
-  </DataCard>
-);
+// Add this Step5-style Asset Preview component 
+const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { url: string, fileName: string, type: string, className?: string }) => {
+  const isVideo = type === 'video' || (typeof type === 'string' && type.includes('video'));
+  const isImage = type === 'image' || (typeof type === 'string' && type.includes('image'));
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Effect to handle video autoplay and looping
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      const video = videoRef.current;
+
+      // Auto-play the video when component mounts
+      const playVideo = () => {
+        video.play().catch(error => {
+          console.warn('Auto-play was prevented:', error);
+        });
+      };
+
+      // Handle video looping - restart after 5 seconds or when ended
+      const handleTimeUpdate = () => {
+        if (video.currentTime >= 5) {
+          video.currentTime = 0;
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
+          });
+        }
+      };
+
+      const handleEnded = () => {
+        video.currentTime = 0;
+        video.play().catch(err => {
+          console.error('Error replaying video:', err);
+        });
+      };
+
+      // Add event listeners
+      video.addEventListener('loadedmetadata', playVideo);
+      video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('ended', handleEnded);
+      
+      // Remove event listeners on cleanup
+      return () => {
+        video.removeEventListener('loadedmetadata', playVideo);
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, [isVideo, url]);
+
+  return (
+    <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+      {/* Image preview */}
+      {isImage && (
+        <img 
+          src={url} 
+          alt={fileName}
+          className="w-full h-full object-cover"
+        />
+      )}
+      
+      {/* Video preview (with autoplay and loop) */}
+      {isVideo && (
+        <div className="relative">
+          <video
+            ref={videoRef}
+            src={url}
+            className="w-full h-full object-cover"
+            muted
+            playsInline
+            loop
+            autoPlay
+          />
+        </div>
+      )}
+      
+      {/* Fallback for unsupported file types */}
+      {!isImage && !isVideo && (
+        <div className="flex items-center justify-center p-8">
+          <DocumentIcon className="h-12 w-12 text-gray-400" />
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Add new components for missing sections
 const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign }) => (
@@ -1850,23 +1901,61 @@ export default function CampaignDetail() {
               </div>
             ) : (
               data && (data.creativeAssets.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {data.creativeAssets.slice(0, 6).map((asset, index) => (
-                    <div key={index} className="rounded-lg overflow-hidden border border-[var(--divider-color)] bg-gray-50 aspect-square relative group">
-                      {asset.type === 'video' ? (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <PlayIcon className="h-12 w-12 text-white opacity-70" />
-                          <div className="absolute inset-0 bg-black opacity-40"></div>
+                    <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                      {/* Asset Preview - Square/Tiled */}
+                      <div className="aspect-square w-full overflow-hidden relative bg-gray-50">
+                        <CampaignDetailAssetPreview
+                          url={asset.url}
+                          fileName={asset.name || 'Asset preview'}
+                          type={asset.type}
+                          className="w-full h-full"
+                        />
+                        
+                        {/* Asset Name Overlay at Top */}
+                        <div className="absolute top-0 left-0 right-0 bg-white bg-opacity-90 py-2 px-3 border-b border-gray-200">
+                          <h3 className="font-medium text-gray-800 truncate text-sm">
+                            {asset.name || 'Untitled Asset'}
+                          </h3>
                         </div>
-                      ) : null}
-                      <img 
-                        src={asset.url || '/placeholder-image.jpg'} 
-                        alt={asset.name}
-                        className="object-cover w-full h-full"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-white text-sm font-medium truncate">{asset.name}</p>
-                        {asset.duration && <p className="text-white text-xs">{asset.duration}s</p>}
+                      </div>
+                      
+                      {/* Asset Details Section */}
+                      <div className="p-4 bg-white flex-grow">
+                        <div className="space-y-4">
+                          {/* Influencer */}
+                          <div className="flex items-start">
+                            <UserCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Influencer</p>
+                              <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Why this influencer */}
+                          <div className="flex items-start">
+                            <InformationCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
+                              <p className="text-sm text-gray-800">{asset.description || 'No details provided'}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Budget */}
+                          <div className="flex items-start">
+                            <CurrencyDollarIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Budget</p>
+                              <p className="text-sm text-gray-800 font-medium">
+                                {asset.budget 
+                                  ? formatCurrency(asset.budget, data.currency) 
+                                  : 'Not specified'
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1877,38 +1966,6 @@ export default function CampaignDetail() {
                   <p>No creative assets available</p>
                 </div>
               ))
-            )}
-          </DataCard>
-        </div>
-
-        {/* Creative Requirements */}
-        <div className="mb-6">
-          <DataCard 
-            title="Creative Requirements" 
-            icon={PaintBrushIcon}
-            description="Requirements for creative assets"
-          >
-            {error ? (
-              <div className="text-center py-8 text-[var(--secondary-color)]">
-                <PaintBrushIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>N/A</p>
-              </div>
-            ) : (
-              (data?.creativeRequirements && data.creativeRequirements.length > 0) ? (
-                <div className="space-y-4">
-                  {data.creativeRequirements.map((req, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-[var(--divider-color)]">
-                      <h4 className="text-[var(--primary-color)] font-medium">{req.requirement}</h4>
-                      {req.description && <p className="text-[var(--secondary-color)] text-sm mt-1">{req.description}</p>}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-[var(--secondary-color)]">
-                  <PaintBrushIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                  <p>No creative requirements specified</p>
-                </div>
-              )
             )}
           </DataCard>
         </div>
