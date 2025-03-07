@@ -31,7 +31,6 @@ import {
   InformationCircleIcon,
   PrinterIcon,
   EnvelopeIcon,
-  PhoneIcon,
   BuildingOfficeIcon,
   TagIcon,
   FolderIcon,
@@ -44,7 +43,8 @@ import {
   PaperAirplaneIcon,
   PauseIcon,
   CheckBadgeIcon,
-  PlayIcon
+  PlayIcon,
+  CogIcon
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Image from 'next/image';
@@ -1572,13 +1572,13 @@ export default function CampaignDetail() {
                 <ShareIcon className="h-4 w-4 mr-2" />
                 Share
               </button>
-              <Link 
-                href={`/campaigns/wizard/step-1?id=${data?.id || ''}`} 
+              <button 
+                onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
                 className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]"
               >
                 <PencilIcon className="h-4 w-4 mr-2" />
                 Edit
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -1637,61 +1637,59 @@ export default function CampaignDetail() {
           </DataCard>
 
           <DataCard 
-            title="Contact" 
+            title="Primary Contact" 
             icon={UserCircleIcon}
-            description="Key internal stakeholders"
+            description="Primary point of contact for this campaign"
           >
-            <div className="space-y-5">
-              {/* Primary Contact */}
-              <div>
+            <div className="space-y-3">
+              <div className="flex items-center mb-4">
+                <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold">
+                  {data?.primaryContact?.firstName?.charAt(0) || ''}
+                  {data?.primaryContact?.surname?.charAt(0) || ''}
+                </div>
+                <div>
+                  <h4 className="text-[var(--primary-color)] font-semibold">
+                    {data?.primaryContact?.firstName || ''} {data?.primaryContact?.surname || ''}
+                  </h4>
+                  <p className="text-[var(--secondary-color)] text-sm">{data?.primaryContact?.position || 'No position'}</p>
+                </div>
+              </div>
+              
+              <DataRow 
+                label="Email" 
+                value={
+                  <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
+                    {data?.primaryContact?.email}
+                  </a>
+                } 
+                icon={EnvelopeIcon} 
+              />
+              
+              <DataRow label="Position" value={data?.primaryContact?.position} icon={BuildingOfficeIcon} />
+            </div>
+
+            {data?.secondaryContact && (
+              <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
+                <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary Contact</h4>
                 <div className="space-y-3">
                   <DataRow 
                     label="Name" 
-                    value={`${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+                    value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} 
                     icon={UserCircleIcon} 
                   />
-                  
                   <DataRow 
                     label="Email" 
                     value={
-                      <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
-                        {data?.primaryContact?.email}
+                      <a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
+                        {data.secondaryContact.email}
                       </a>
                     } 
                     icon={EnvelopeIcon} 
                   />
-                  
-                  <DataRow label="Position" value={data?.primaryContact?.position} icon={BuildingOfficeIcon} />
+                  <DataRow label="Position" value={data.secondaryContact.position} icon={BuildingOfficeIcon} />
                 </div>
               </div>
-
-              {/* Secondary Contact */}
-              {data?.secondaryContact && (
-                <div className="pt-5 border-t border-[var(--divider-color)]">
-                  <h4 className="text-[var(--primary-color)] font-medium mb-4">Secondary Contact</h4>
-                  
-                  <div className="space-y-3">
-                    <DataRow 
-                      label="Name" 
-                      value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} 
-                      icon={UserCircleIcon} 
-                    />
-                    
-                    <DataRow 
-                      label="Email" 
-                      value={
-                        <a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
-                          {data.secondaryContact.email}
-                        </a>
-                      } 
-                      icon={EnvelopeIcon} 
-                    />
-                    
-                    <DataRow label="Position" value={data.secondaryContact.position} icon={BuildingOfficeIcon} />
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </DataCard>
         </div>
 

@@ -636,95 +636,171 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  return tryCatch(
-    async () => {
-      const session = await getSession();
+  console.log(`DELETE request started for campaign ID: ${params.id}`);
   
-      if (!session?.user) {
-        return NextResponse.json(
-          { error: 'Unauthorized - No session' },
-          { status: 401 }
-        );
-      }
-  
-      const campaignId = parseInt(params.id);
+  try {
+    const session = await getSession();
+    
+    // Log authentication status
+    console.log(`Authentication status: ${session ? 'Authenticated' : 'Not authenticated'}`);
+    
+    if (!session?.user) {
+      console.error('Delete failed: No authenticated user session');
+      return NextResponse.json(
+        { error: 'Unauthorized - No session' },
+        { status: 401 }
+      );
+    }
+    
+    // Get the campaign ID
+    const campaignId = params.id;
+    
+    console.log(`Authenticated user: ${session.user.email}, attempting to delete campaign with ID: ${campaignId}`);
+    
+    // The ID differences:
+    // - CampaignWizard uses String UUIDs as IDs
+    // - CampaignWizardSubmission uses auto-increment Int IDs
+    
+    // Try to delete from CampaignWizard first (UUID string ID)
+    let campaignWizardDeleted = false;
+    
+    try {
+      // Check if it exists first
+      const campaignWizard = await prisma.campaignWizard.findUnique({
+        where: { id: campaignId }
+      });
       
-      if (isNaN(campaignId)) {
-        return NextResponse.json(
-          { error: 'Invalid campaign ID' },
-          { status: 400 }
-        );
-      }
-  
-      // Delete everything in the correct order within a transaction
-      await prisma.$transaction(async (tx) => {
-        // First, check if the campaign exists
-        const campaign = await tx.campaignWizardSubmission.findUnique({
-          where: { id: campaignId },
-        });
+      if (campaignWizard) {
+        console.log(`Found campaign in CampaignWizard: ${campaignWizard.name}`);
         
-        if (!campaign) {
-          throw new Error(`Campaign with ID ${campaignId} not found`);
-        }
-        
-        // Delete related audience data
-        if (campaign.audienceId) {
-          const audience = await tx.audience.findUnique({
-            where: { id: campaign.audienceId },
+        // Use a transaction to delete related records
+        await prisma.$transaction(async (tx) => {
+          // Delete related influencers
+          await tx.influencer.deleteMany({
+            where: { campaignId: campaignId }
           });
           
-          if (audience) {
-            // Delete audience related records
-            await tx.audienceLocation.deleteMany({
-              where: { audienceId: audience.id },
+          // Delete the campaign
+          await tx.campaignWizard.delete({
+            where: { id: campaignId }
+          });
+        });
+        
+        console.log(`Successfully deleted campaign from CampaignWizard table: ${campaignId}`);
+        campaignWizardDeleted = true;
+      } else {
+        console.log(`No campaign found in CampaignWizard with ID: ${campaignId}`);
+      }
+    } catch (wizardError) {
+      console.error(`Error deleting from CampaignWizard:`, wizardError);
+    }
+    
+    // Try to delete from CampaignWizardSubmission as fallback (numeric ID)
+    let submissionDeleted = false;
+    
+    if (!campaignWizardDeleted) {
+      try {
+        // Try to parse as number for CampaignWizardSubmission
+        const numericId = parseInt(campaignId);
+        
+        if (!isNaN(numericId)) {
+          // Check if it exists
+          const submission = await prisma.campaignWizardSubmission.findUnique({
+            where: { id: numericId }
+          });
+          
+          if (submission) {
+            console.log(`Found campaign in CampaignWizardSubmission: ${submission.campaignName}`);
+            
+            // Use a transaction to delete related records
+            await prisma.$transaction(async (tx) => {
+              // Find related audiences
+              const relatedAudiences = await tx.audience.findMany({
+                where: { campaignId: numericId },
+              });
+              
+              console.log(`Found ${relatedAudiences.length} related audiences`);
+              
+              // Process each related audience
+              for (const audience of relatedAudiences) {
+                // Delete audience related records
+                await tx.audienceLocation.deleteMany({
+                  where: { audienceId: audience.id },
+                });
+                
+                await tx.audienceGender.deleteMany({
+                  where: { audienceId: audience.id },
+                });
+                
+                await tx.audienceScreeningQuestion.deleteMany({
+                  where: { audienceId: audience.id },
+                });
+                
+                await tx.audienceLanguage.deleteMany({
+                  where: { audienceId: audience.id },
+                });
+                
+                await tx.audienceCompetitor.deleteMany({
+                  where: { audienceId: audience.id },
+                });
+                
+                // Delete audience
+                await tx.audience.delete({
+                  where: { id: audience.id },
+                });
+              }
+              
+              // Delete creative assets and requirements
+              await tx.creativeAsset.deleteMany({
+                where: { submissionId: numericId },
+              });
+              
+              await tx.creativeRequirement.deleteMany({
+                where: { submissionId: numericId },
+              });
+              
+              // Finally delete the campaign
+              await tx.campaignWizardSubmission.delete({
+                where: { id: numericId },
+              });
             });
             
-            await tx.audienceGender.deleteMany({
-              where: { audienceId: audience.id },
-            });
-            
-            await tx.audienceScreeningQuestion.deleteMany({
-              where: { audienceId: audience.id },
-            });
-            
-            await tx.audienceLanguage.deleteMany({
-              where: { audienceId: audience.id },
-            });
-            
-            await tx.audienceCompetitor.deleteMany({
-              where: { audienceId: audience.id },
-            });
-            
-            // Delete audience
-            await tx.audience.delete({
-              where: { id: audience.id },
-            });
+            console.log(`Successfully deleted campaign from CampaignWizardSubmission table: ${numericId}`);
+            submissionDeleted = true;
+          } else {
+            console.log(`No campaign found in CampaignWizardSubmission with ID: ${numericId}`);
           }
+        } else {
+          console.log(`Campaign ID ${campaignId} is not a numeric ID, can't delete from CampaignWizardSubmission`);
         }
-        
-        // Delete creative assets and requirements
-        await tx.creativeAsset.deleteMany({
-          where: { submissionId: campaignId },
-        });
-        
-        await tx.creativeRequirement.deleteMany({
-          where: { submissionId: campaignId },
-        });
-        
-        // Finally delete the campaign
-        await tx.campaignWizardSubmission.delete({
-          where: { id: campaignId },
-        });
-      });
-      
+      } catch (submissionError) {
+        console.error(`Error deleting from CampaignWizardSubmission:`, submissionError);
+      }
+    }
+    
+    // Check if we were able to delete from either table
+    if (campaignWizardDeleted || submissionDeleted) {
       return NextResponse.json({
         success: true,
-        message: `Campaign with ID ${campaignId} has been deleted`
+        message: `Campaign with ID ${campaignId} has been deleted`,
+        source: campaignWizardDeleted ? 'CampaignWizard' : 'CampaignWizardSubmission'
       });
-    },
-    { 
-      entityName: 'Campaign', 
-      operation: DbOperation.DELETE 
+    } else {
+      // We couldn't find or delete the campaign
+      console.error(`Campaign with ID ${campaignId} could not be found in any table`);
+      return NextResponse.json(
+        { error: `Campaign with ID ${campaignId} not found` },
+        { status: 404 }
+      );
     }
-  );
+  } catch (error) {
+    console.error('Unhandled error in DELETE handler:', error);
+    return NextResponse.json(
+      { 
+        error: 'Server error', 
+        details: error instanceof Error ? error.message : 'Unknown server error'
+      },
+      { status: 500 }
+    );
+  }
 }

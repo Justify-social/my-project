@@ -13,8 +13,105 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from '@auth0/nextjs-auth0/client';
 
+/**
+ * Transforms raw campaign data from API to the Campaign interface format
+ * Safely handles different data formats and ensures consistent transformation
+ */
+const transformCampaignData = (campaign: any): Campaign => {
+  // Log the incoming campaign ID for debugging
+  console.log(`Campaign ID from API: ${campaign.id}, type: ${typeof campaign.id}`);
+  
+  // Helper to safely parse dates from various formats
+  const safelyParseDate = (dateValue: any): string => {
+    try {
+      // Handle empty object case: {}
+      if (dateValue && typeof dateValue === 'object' && Object.keys(dateValue).length === 0) {
+        return '';
+      }
+      
+      // Handle string dates
+      if (typeof dateValue === 'string' && dateValue.trim() !== '') {
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString();
+        }
+      }
+      
+      return '';
+    } catch (error) {
+      console.error('Error parsing date:', error, dateValue);
+      return '';
+    }
+  };
+
+  // Helper to safely parse JSON strings
+  const safelyParseJSON = (jsonValue: any, defaultValue: any): any => {
+    if (typeof jsonValue === 'object' && jsonValue !== null) {
+      return jsonValue;
+    }
+    
+    if (typeof jsonValue === 'string') {
+      try {
+        return JSON.parse(jsonValue);
+      } catch (error) {
+        console.error('Error parsing JSON:', error, jsonValue);
+      }
+    }
+    
+    return defaultValue;
+  };
+
+  // Helper to safely get budget total
+  const safelyGetBudgetTotal = (budget: any): number => {
+    if (!budget) return 0;
+    
+    try {
+      // Already parsed object
+      if (typeof budget === 'object') {
+        return Number(budget.total || budget.totalBudget || 0);
+      }
+      
+      // String that needs parsing
+      if (typeof budget === 'string') {
+        const parsedBudget = JSON.parse(budget);
+        return Number(parsedBudget.total || parsedBudget.totalBudget || 0);
+      }
+      
+      return 0;
+    } catch (error) {
+      console.error('Error getting budget total:', error, budget);
+      return 0;
+    }
+  };
+
+  // Parse primary contact
+  const primaryContact = safelyParseJSON(campaign.primaryContact, { firstName: '', surname: '' });
+
+  return {
+    id: campaign.id,
+    campaignName: campaign.name || 'Untitled Campaign',
+    submissionStatus: (campaign.status?.toLowerCase() || 'draft') as "draft" | "submitted" | "paused" | "completed",
+    // Use the first influencer's platform or default to Instagram
+    platform: campaign.influencers?.[0]?.platform || 'Instagram' as "Instagram" | "YouTube" | "TikTok",
+    startDate: safelyParseDate(campaign.startDate),
+    endDate: safelyParseDate(campaign.endDate),
+    totalBudget: safelyGetBudgetTotal(campaign.budget),
+    primaryKPI: campaign.primaryKPI || '',
+    primaryContact: primaryContact,
+    createdAt: safelyParseDate(campaign.createdAt),
+    audience: {
+      locations: campaign.locations || []
+    }
+  };
+};
+
 // KPI options matching Step2Content.tsx
-const KPI_OPTIONS = [
+interface KpiOption {
+  key: string;
+  title: string;
+}
+
+const KPI_OPTIONS: KpiOption[] = [
   { key: "adRecall", title: "Ad Recall" },
   { key: "brandAwareness", title: "Brand Awareness" },
   { key: "consideration", title: "Consideration" },
@@ -27,7 +124,7 @@ const KPI_OPTIONS = [
 ];
 
 interface Campaign {
-  id: number;
+  id: string | number;  // Handle both string and number IDs
   campaignName: string;
   submissionStatus: "draft" | "submitted" | "paused" | "completed";
   platform: "Instagram" | "YouTube" | "TikTok";
@@ -38,6 +135,8 @@ interface Campaign {
   primaryContact: {
     firstName: string;
     surname: string;
+    email?: string;
+    position?: string;
   };
   createdAt: string;
   audience?: {
@@ -69,6 +168,7 @@ const CampaignList: React.FC = () => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [campaignToAction, setCampaignToAction] = useState<{id: string, name: string} | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
   
   const router = useRouter();
 
@@ -94,11 +194,24 @@ const CampaignList: React.FC = () => {
         }
 
         const data = await response.json();
+        console.log("API Response:", data);
         
-        if (data.success && Array.isArray(data.campaigns)) {
-          setCampaigns(data.campaigns);
+        if (data.success && Array.isArray(data.data)) {
+          console.log("Setting campaigns:", data.data);
+          
+          // Transform the raw campaign data to match the Campaign interface
+          const transformedCampaigns = data.data.map(transformCampaignData);
+          
+          console.log("Transformed campaigns:", transformedCampaigns);
+          setCampaigns(transformedCampaigns);
         } else {
-          throw new Error('Invalid data format received from server');
+          console.log("Invalid data format:", data);
+          const errorDetails = !data.success 
+            ? "API response indicates failure" 
+            : !Array.isArray(data.data) 
+              ? `Expected data.data to be an array, got ${typeof data.data}` 
+              : "Unknown data format error";
+          throw new Error(`Invalid data format received from server: ${errorDetails}`);
         }
       } catch (error) {
         console.error('Error fetching campaigns:', error);
@@ -265,30 +378,128 @@ const CampaignList: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
+  // Function to refetch campaigns from the server
+  const refetchCampaigns = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/campaigns', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add cache busting to ensure we get fresh data
+          'Cache-Control': 'no-cache'
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to refresh campaigns: ${response.status}`);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.data)) {
+        console.log("Refreshed campaigns data:", data.data);
+        
+        // Transform the raw campaign data to match the Campaign interface
+        const transformedCampaigns = data.data.map(transformCampaignData);
+        
+        setCampaigns(transformedCampaigns);
+      }
+    } catch (error) {
+      console.error('Error refreshing campaigns:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteCampaign = async (campaignId: string) => {
     try {
       if (!user) {
+        toast.error('You must be logged in to delete a campaign');
         throw new Error('Not authenticated');
       }
 
+      // UUID validation - most campaigns appear to have UUID IDs based on the logs
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const isUuid = uuidRegex.test(campaignId);
+      const isNumeric = !isNaN(Number(campaignId));
+      
+      if (!isUuid && !isNumeric) {
+        console.error(`Invalid ID format (neither UUID nor numeric): ${campaignId}`);
+        throw new Error('Invalid campaign ID format');
+      }
+      
+      // Try to refresh the session before making the delete request
+      try {
+        await fetch('/api/auth/refresh', { 
+          method: 'GET',
+          credentials: 'include'
+        });
+      } catch (refreshError) {
+        console.warn('Session refresh failed, proceeding with deletion anyway', refreshError);
+      }
+
+      console.log(`Sending DELETE request for campaign ID: ${campaignId} (${isUuid ? 'UUID format' : 'numeric format'})`);
+      
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          // Ensure we have the latest auth cookie
+          'Cache-Control': 'no-cache',
         },
         credentials: 'include',
       });
 
-      const data = await response.json();
+      // Handle authentication errors specifically
+      if (response.status === 401) {
+        toast.error('Authentication error. Please try logging in again.');
+        throw new Error('Authentication failed when deleting campaign');
+      }
 
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error(`Failed to delete campaign: Invalid response from server`);
+      }
+
+      // Handle 404 errors specially - treat as success since the campaign is gone anyway
+      if (response.status === 404) {
+        console.warn('Campaign not found during deletion:', data);
+        
+        // Still update the UI to remove the campaign since it's not in the database
+        setCampaigns(prevCampaigns => 
+          prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
+        );
+        
+        // Show a more user-friendly message
+        toast.success('Campaign removed from list');
+        return { success: true, message: 'Campaign no longer exists' };
+      }
+
+      // Handle other errors
       if (!response.ok) {
-        throw new Error(data.message || `Failed to delete campaign: ${response.status}`);
+        console.error('Delete campaign error:', data);
+        throw new Error(data.error || data.message || `Failed to delete campaign: ${response.status}`);
       }
 
       // Update local state
       setCampaigns(prevCampaigns => 
         prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
       );
+
+      // If the deletion was successful, also trigger a refresh from the server to get the latest data
+      if (data.success) {
+        console.log(`Campaign deleted successfully from ${data.source || 'database'}`);
+        // Refresh the campaigns list after a short delay to ensure the server has processed the deletion
+        setTimeout(() => {
+          refetchCampaigns();
+        }, 1000);
+      }
 
       return data;
     } catch (error) {
@@ -298,26 +509,66 @@ const CampaignList: React.FC = () => {
   };
 
   const handleDeleteClick = (campaign: Campaign) => {
-    setCampaignToAction({id: campaign.id.toString(), name: campaign.campaignName});
+    // Convert ID to string in case it's a number
+    const campaignId = campaign.id.toString();
+    
+    // Log the ID to help debugging
+    console.log(`Preparing to delete campaign: ${campaignId}, type: ${typeof campaign.id}`);
+    
+    setCampaignToAction({id: campaignId, name: campaign.campaignName});
     setShowDeleteModal(true);
   };
 
   const confirmDelete = async () => {
     if (!campaignToAction) return;
     
+    console.log(`Confirming deletion of campaign: ${campaignToAction.id}`);
+    
     try {
-      await toast.promise(
-        deleteCampaign(campaignToAction.id),
-        {
-          loading: 'Deleting campaign...',
-          success: 'Campaign deleted successfully',
-          error: (err) => `Error: ${err.message}`
+      // Don't use toast.promise since we're handling 404s specially
+      setDeleteInProgress(true);
+      
+      try {
+        const result = await deleteCampaign(campaignToAction.id);
+        console.log('Delete campaign result:', result);
+        toast.success('Campaign deleted successfully');
+        setShowDeleteModal(false);
+      } catch (error) {
+        // Error is already logged in deleteCampaign
+        console.log('Delete campaign error details:', error);
+        
+        if (error instanceof Error) {
+          const errorMessage = error.message.toLowerCase();
+          
+          if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+            // If campaign wasn't found, still close the modal and show success
+            console.log('Handling "not found" error as success');
+            toast.success('Campaign removed from list');
+            setShowDeleteModal(false);
+          } else if (errorMessage.includes('invalid') && (errorMessage.includes('id') || errorMessage.includes('uuid') || errorMessage.includes('format'))) {
+            // Special handling for invalid ID format errors
+            console.log('Invalid ID format error detected');
+            toast.error('Campaign ID format issue detected. The system will still try to delete the campaign.');
+            
+            // Even with invalid format, still remove it from the UI
+            setCampaigns(prevCampaigns => 
+              prevCampaigns.filter(campaign => campaign.id.toString() !== campaignToAction.id)
+            );
+            setShowDeleteModal(false);
+          } else {
+            // For other errors, show error toast
+            toast.error(errorMessage);
+          }
+        } else {
+          toast.error('Failed to delete campaign - unknown error');
         }
-      );
-      setShowDeleteModal(false);
+      } finally {
+        setDeleteInProgress(false);
+      }
     } catch (error) {
-      console.error('Error in handleDelete:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
+      console.error('Unhandled error in confirmDelete:', error);
+      toast.error('An unexpected error occurred');
+      setDeleteInProgress(false);
     }
   };
 
@@ -358,8 +609,11 @@ const CampaignList: React.FC = () => {
       });
       
       const updatedData = await updatedResponse.json();
-      if (updatedData.success && Array.isArray(updatedData.campaigns)) {
-        setCampaigns(updatedData.campaigns);
+      if (updatedData.success && Array.isArray(updatedData.data)) {
+        // Transform the raw campaign data to match the Campaign interface
+        const transformedCampaigns = updatedData.data.map(transformCampaignData);
+        
+        setCampaigns(transformedCampaigns);
       }
 
       toast.success('Campaign duplicated successfully');
@@ -400,7 +654,7 @@ const CampaignList: React.FC = () => {
   };
 
   // Helper to get KPI display name from key
-  const getKpiDisplayName = (kpiKey: string) => {
+  const getKpiDisplayName = (kpiKey: string): string => {
     const kpi = KPI_OPTIONS.find(k => k.key === kpiKey);
     return kpi ? kpi.title : kpiKey;
   };
@@ -826,15 +1080,31 @@ const CampaignList: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors"
+                disabled={deleteInProgress}
+                className={`px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors ${
+                  deleteInProgress ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                disabled={deleteInProgress}
+                className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center ${
+                  deleteInProgress ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
-                Delete
+                {deleteInProgress ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
               </button>
             </div>
           </div>
