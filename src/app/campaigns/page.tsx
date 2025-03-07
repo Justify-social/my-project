@@ -21,19 +21,31 @@ const transformCampaignData = (campaign: any): Campaign => {
   // Log the incoming campaign ID for debugging
   console.log(`Campaign ID from API: ${campaign.id}, type: ${typeof campaign.id}`);
   
+  // Debug date formats
+  console.log(`Raw startDate from API: ${JSON.stringify(campaign.startDate)}, type: ${typeof campaign.startDate}`);
+  console.log(`Raw endDate from API: ${JSON.stringify(campaign.endDate)}, type: ${typeof campaign.endDate}`);
+  
   // Helper to safely parse dates from various formats
   const safelyParseDate = (dateValue: any): string => {
     try {
+      // Handle null or undefined
+      if (!dateValue) return '';
+      
       // Handle empty object case: {}
       if (dateValue && typeof dateValue === 'object' && Object.keys(dateValue).length === 0) {
         return '';
       }
       
-      // Handle string dates
+      // Handle null values that might come from the API
+      if (dateValue === null) return '';
+      
+      // Handle ISO date strings (which is what the API returns)
       if (typeof dateValue === 'string' && dateValue.trim() !== '') {
+        // Check if it's a valid date without converting format
         const date = new Date(dateValue);
         if (!isNaN(date.getTime())) {
-          return date.toISOString();
+          // Return the original ISO string as is
+          return dateValue;
         }
       }
       
@@ -211,6 +223,15 @@ const ClientCampaignList: React.FC = () => {
           // Transform the raw campaign data to match the Campaign interface
           const transformedCampaigns = data.data.map(transformCampaignData);
           
+          // Debug the first campaign's dates if available
+          if (transformedCampaigns.length > 0) {
+            console.log("Debugging first campaign's dates:");
+            const firstCampaign = transformedCampaigns[0];
+            console.log(`Campaign: ${firstCampaign.campaignName}`);
+            console.log(`Start date: ${firstCampaign.startDate}`);
+            console.log(`End date: ${firstCampaign.endDate}`);
+          }
+          
           console.log("Transformed campaigns:", transformedCampaigns);
           setCampaigns(transformedCampaigns);
         } else {
@@ -297,12 +318,26 @@ const ClientCampaignList: React.FC = () => {
   // Format date for display
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
+    try {
+      // Parse the ISO date string
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn(`Invalid date format: ${dateString}`);
+        return 'Invalid date';
+      }
+      
+      // Format the date for display
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error, dateString);
+      return 'Invalid date';
+    }
   };
 
   // Filter campaigns based on search text and dropdown filters
@@ -341,8 +376,8 @@ const ClientCampaignList: React.FC = () => {
     return [...filteredCampaigns].sort((a, b) => {
       if (!a || !b) return 0;
       
-      let aVal = a[sortConfig.key];
-      let bVal = b[sortConfig.key];
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
       
       // Add null checks
       if (aVal === null || aVal === undefined) return 1;

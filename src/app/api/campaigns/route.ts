@@ -212,9 +212,20 @@ export async function GET(request: NextRequest) {
       const { EnumTransformers } = await import('@/utils/enum-transformers');
       
       // Transform enum values from backend to frontend format
-      const transformedCampaigns = campaigns.map(campaign => 
-        EnumTransformers.transformObjectFromBackend(campaign)
-      );
+      const transformedCampaigns = campaigns.map(campaign => {
+        // First transform the campaign object
+        const transformed = EnumTransformers.transformObjectFromBackend(campaign);
+        
+        // Then ensure date fields are properly formatted as strings
+        // This avoids type errors since we're creating a new object
+        return {
+          ...transformed,
+          startDate: campaign.startDate instanceof Date ? campaign.startDate.toISOString() : null,
+          endDate: campaign.endDate instanceof Date ? campaign.endDate.toISOString() : null,
+          createdAt: campaign.createdAt instanceof Date ? campaign.createdAt.toISOString() : null,
+          updatedAt: campaign.updatedAt instanceof Date ? campaign.updatedAt.toISOString() : null
+        };
+      });
       
       return NextResponse.json({
         success: true,
