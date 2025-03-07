@@ -9,6 +9,7 @@ import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import Image from "next/image";
 import { 
   CalendarIcon, 
   InformationCircleIcon,
@@ -1575,7 +1576,13 @@ function FormContent() {
                 {/* Campaign Details */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <BriefcaseIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Image 
+                      src="/Campaigns.svg" 
+                      alt="Campaigns" 
+                      width={16} 
+                      height={16} 
+                      className="mr-2 text-black" 
+                    />
                     Campaign Details
                   </h2>
                   
