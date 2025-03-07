@@ -341,24 +341,42 @@ const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) =>
   
   // Enhanced completion handler with resilience
   const handleUploadComplete = (results: any[]) => {
-    // Map the results to our asset format
-    const newAssets = results.map(result => ({
-      id: `asset-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: result.url,
-      fileName: result.name,
-      fileSize: result.size,
-      type: result.type,
-      format: result.name.split('.').pop() || 'unknown',
-      progress: 100,
-      details: {
-        assetName: result.name,
-        budget: 0,
-        description: '',
-        influencerHandle: '',
-        platform: ''
-      }
-    }));
-    
+    const correlationId = `complete-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    console.log(`[${correlationId}] Processing upload results:`, results);
+
+    // Ensure results is an array and filter invalid entries
+    const validResults = Array.isArray(results) ? results.filter(Boolean) : [];
+    if (validResults.length === 0) {
+      console.warn(`[${correlationId}] No valid upload results`);
+      toast.error("Upload completed but no valid files were processed");
+      setIsUploading(false);
+      return;
+    }
+
+    const newAssets = validResults.map((result, index) => {
+      // Use explicit checks for properties that might be undefined
+      const resultObj = result as Record<string, any>;
+      const safeName = typeof resultObj.name === 'string' ? resultObj.name : `asset-${index}-${Date.now()}`;
+      const extension = safeName.includes('.') ? safeName.split('.').pop() : 'unknown';
+
+      return {
+        id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        url: String(resultObj.url || ''), // Ensure URL is a string
+        fileName: safeName,
+        fileSize: Number(resultObj.size || 0), // Coerce to number with fallback
+        type: typeof resultObj.type === 'string' ? resultObj.type : detectFileType(safeName), // Use utility fallback
+        format: extension || 'unknown',
+        progress: 100,
+        details: {
+          assetName: safeName,
+          budget: 0,
+          description: '',
+          influencerHandle: '',
+          platform: ''
+        }
+      };
+    });
+
     // Clear state
     setSelectedFiles([]);
     localStorage.removeItem(`pendingUpload_${campaignId}`);
@@ -422,7 +440,11 @@ const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) =>
       <CampaignAssetUploader
         campaignId={campaignId}
         onUploadComplete={handleUploadComplete}
-        onUploadError={handleUpload}
+        onUploadError={(error: Error) => {
+          console.error('Upload error:', error);
+          toast.error(`Upload failed: ${error.message}`);
+          setIsUploading(false);
+        }}
       />
     </div>
   );

@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { UploadDropzone } from "@uploadthing/react";
+import { generateReactHelpers } from "@uploadthing/react";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
 import { 
   ArrowUpTrayIcon, 
@@ -21,12 +24,12 @@ export interface UploadedAsset {
   fileSize: number;
   type: string;
   format: string;
-  details?: {
+  details: {
     assetName: string;
-    budget?: number;
-    description?: string;
-    influencerHandle?: string;
-    platform?: string;
+    budget: number;
+    description: string;
+    influencerHandle: string;
+    platform: string;
   };
 }
 
@@ -35,6 +38,9 @@ interface CampaignAssetUploaderProps {
   onUploadComplete: (assets: UploadedAsset[]) => void;
   onUploadError: (error: Error) => void;
 }
+
+// Generate type-safe helpers
+const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 export function CampaignAssetUploader({ 
   campaignId, 
@@ -74,69 +80,58 @@ export function CampaignAssetUploader({
   
   // Process uploaded file results safely
   const processUploadResults = (res: unknown[]): UploadedAsset[] => {
-    if (!res || !Array.isArray(res) || res.length === 0) {
+    const correlationId = generateCorrelationId('process');
+    console.log(`[${correlationId}] Raw upload response:`, res);
+
+    if (!Array.isArray(res)) {
+      console.error(`[${correlationId}] Invalid response: not an array`, res);
+      toast.error("Upload response invalid");
       return [];
     }
-    
-    const correlationId = generateCorrelationId('process');
-    console.log(`[${correlationId}] Processing ${res.length} upload results`);
-    
-    return res.map(file => {
-      try {
-        // Type assertion for file object
-        const fileObj = file as Record<string, unknown>;
-        
-        // Safely access properties with fallbacks
-        const fileName = sanitizeFileName(fileObj.name as string || 'unnamed-file');
-        const url = (fileObj.ufsUrl as string) || (fileObj.url as string) || '';
-        const fileSize = typeof fileObj.size === 'number' ? fileObj.size : 0;
-        
-        // Safely determine file type
-        let type: string;
-        if (fileObj.type && typeof fileObj.type === 'string') {
-          const typeParts = fileObj.type.split('/');
-          type = typeParts.length > 0 && typeParts[0] ? 
-            (typeParts[0] === 'image' ? 'image' : 'video') : 
-            'image'; // Default to image if we can't determine
-        } else {
-          // Fallback to extension-based detection
-          type = fileName.match(/\.(mp4|mov|avi|wmv|flv|webm)$/i) ? 'video' : 'image';
-        }
-        
-        return {
-          id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          url,
-          fileName,
-          fileSize,
-          type,
-          format: fileObj.type as string || '',
-          details: {
-            assetName: fileName,
-            budget: 0,
-            description: '',
-            influencerHandle: '',
-            platform: '',
+
+    return res
+      .map((file, index) => {
+        try {
+          const fileObj = file as Record<string, unknown>;
+          const url = String(fileObj.url || fileObj.ufsUrl || '');
+          if (!url) {
+            console.warn(`[${correlationId}] Skipping file ${index}: no URL`, file);
+            return null;
           }
-        };
-      } catch (error) {
-        const fileObj = file as Record<string, unknown>;
-        logAndShowError(error, correlationId, `Failed to process file: ${fileObj?.name || 'unknown'}`);
-        // Return a minimal valid asset to avoid breaking the UI
-        return {
-          id: `asset-error-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          url: (fileObj?.ufsUrl as string) || (fileObj?.url as string) || '',
-          fileName: 'error-processing-file',
-          fileSize: 0,
-          type: 'image', // Safe default
-          format: '',
-        };
-      }
-    }).filter(asset => asset.url); // Only include assets with a URL
+
+          const rawName = fileObj.name;
+          const fileName = typeof rawName === 'string' ? sanitizeFileName(rawName) : `file-${index}-${Date.now()}`;
+          const fileSize = Number(fileObj.size || 0);
+          const rawType = fileObj.type;
+          const format = typeof rawType === 'string' ? rawType : '';
+          const type = format && format.includes('/') ? format.split('/')[0] : (fileName.match(/\.(mp4|mov|avi|wmv|flv|webm)$/i) ? 'video' : 'image');
+
+          return {
+            id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            url,
+            fileName,
+            fileSize,
+            type,
+            format,
+            details: {
+              assetName: fileName,
+              budget: 0,
+              description: '',
+              influencerHandle: '',
+              platform: ''
+            }
+          };
+        } catch (error) {
+          logAndShowError(error, correlationId, `Failed to process file: ${index}`);
+          return null;
+        }
+      })
+      .filter((asset): asset is UploadedAsset => !!asset && !!asset.url);
   };
   
   return (
     <div className="w-full">
-      <UploadDropzone
+      <UploadDropzone<OurFileRouter>
         endpoint="campaignAssetUploader"
         onBeforeUploadBegin={(files: File[]) => {
           const correlationId = generateCorrelationId('upload');
