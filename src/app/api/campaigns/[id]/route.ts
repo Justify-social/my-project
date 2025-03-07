@@ -266,9 +266,16 @@ export async function GET(
         });
       }
       
+      // Debug logging for assets
+      if ('assets' in campaign && Array.isArray(campaign.assets)) {
+        console.log('Campaign has assets array with', campaign.assets.length, 'items');
+      } else {
+        console.log('Campaign has no assets array or assets are not in array format');
+      }
+      
       // Import the EnumTransformers utility to transform enum values
       const { EnumTransformers } = await import('@/utils/enum-transformers');
-      
+        
       // Transform the campaign data for frontend consumption
       const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
@@ -280,11 +287,14 @@ export async function GET(
       
       // Log what we're returning to help with debugging
       console.log('Returning campaign data with ID:', campaignId, 'isDraft:', !isSubmittedCampaign);
-      console.log('Date fields in response:', { 
+      
+      // For debugging date formats
+      console.log('Date fields in response:', {
         startDate: formattedCampaign.startDate, 
         endDate: formattedCampaign.endDate 
       });
       
+      // Return the campaign data
       return NextResponse.json({
         success: true,
         data: formattedCampaign

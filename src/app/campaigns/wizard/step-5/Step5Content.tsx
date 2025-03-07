@@ -14,11 +14,21 @@ import {
   PencilIcon,
   DocumentIcon,
   CalendarIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  UserCircleIcon,
+  InformationCircleIcon,
+  PlayIcon,
+  GlobeAltIcon,
+  AcademicCapIcon,
+  CurrencyEuroIcon,
+  BriefcaseIcon,
+  LanguageIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
+import { AssetPreview } from '@/components/upload/AssetPreview';
 
 // Type Definitions
 interface CreativeAsset {
@@ -93,7 +103,7 @@ const KPIDisplay: React.FC<KPIDisplayProps> = ({ kpi }) => {
   const getKpiInfo = (kpiValue: string): { iconPath: string, displayText: string } => {
     const normalizedKpi = kpiValue.toLowerCase();
     let iconPath;
-    let displayText = formatKPI(kpiValue);
+    const displayText = formatKPI(kpiValue);
     
     // Determine which SVG file to use based on the KPI
     if (normalizedKpi.includes('ad_recall') || normalizedKpi.includes('adrecall')) {
@@ -182,148 +192,243 @@ const DataItem: React.FC<DataItemProps> = ({ label, value, icon: Icon, featured 
   );
 };
 
-// Add a type for merged data
-interface MergedData {
-  [key: string]: any;
-  overview?: {
-    name?: string;
-    description?: string;
-    startDate?: string;
-    endDate?: string;
-    timeZone?: string;
-    currency?: string;
-    totalBudget?: number;
-    socialMediaBudget?: number;
-    primaryContact?: {
-      firstName?: string;
-      surname?: string;
-      email?: string;
-      position?: string;
-    };
-    secondaryContact?: {
-      firstName?: string;
-      surname?: string;
-      email?: string;
-      position?: string;
-    };
-    influencerName?: string;
-    influencerHandle?: string;
-  };
-  objectives?: {
-    primaryKPI?: string;
-    secondaryKPIs?: string[];
-    features?: string[];
-    mainMessage?: string;
-    hashtags?: string;
-    keyBenefits?: string;
-    expectedAchievements?: string;
-  };
-  audience?: {
-    age1824?: number;
-    age2534?: number;
-    age3544?: number;
-    age4554?: number;
-    age5564?: number;
-    age65plus?: number;
-    genders?: {gender: string}[];
-    locations?: {location: string}[];
-    languages?: {language: string}[];
-    educationLevel?: string;
-    incomeLevel?: string;
-    jobTitles?: string;
-    screeningQuestions?: {question: string}[];
-    competitors?: {competitor: string}[];
-    brandPerception?: string;
-  };
-  creativeAssets?: CreativeAsset[];
-  creativeRequirements?: {requirement: string}[];
-  campaignName?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  timeZone?: string;
-  currency?: string;
-  totalBudget?: number;
-  socialMediaBudget?: number;
-  primaryContact?: any;
-  secondaryContact?: any;
-  influencerName?: string;
-  influencerHandle?: string;
-  primaryKPI?: string;
-  secondaryKPIs?: string[];
-  features?: string[];
-  mainMessage?: string;
-  hashtags?: string;
-  keyBenefits?: string;
-  expectedAchievements?: string;
+// Update the audience interface to include the properties we're using
+interface AudienceData {
+  demographics?: any;
+  locations?: any[];
+  targeting?: any;
+  competitors?: any[];
+  genders?: any[];
+  jobTitles?: any[] | string;
+  educationLevel?: string;
+  incomeLevel?: string | number;
+  ageDistribution?: Record<string, number>;
+  age1824?: number;
+  age2534?: number;
+  age3544?: number;
+  age4554?: number;
+  age5564?: number;
+  age65plus?: number;
+  location?: any[];
+  languages?: any[];
+  screeningQuestions?: any[];
   brandPerception?: string;
+}
+
+// Update MergedData interface to use the AudienceData type
+interface MergedData {
+  campaignName: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  timeZone: string;
+  currency: string;
+  totalBudget: number;
+  socialMediaBudget: number;
+  platform: string;
+  influencerHandle: string;
+  influencerName?: string;
+  primaryContact: Record<string, any>;
+  secondaryContact: Record<string, any>;
+  primaryKPI: string;
+  secondaryKPIs: any[];
+  features: any[];
+  mainMessage: string;
+  hashtags: string;
+  keyBenefits: string;
+  expectedAchievements: string;
+  brandPerception: string;
+  creativeAssets: CreativeAsset[];
+  creativeRequirements: any[];
+  
+  // Add nested data structures
+  overview: Record<string, any>;
+  objectives: Record<string, any>;
+  audience: AudienceData;
 }
 
 // Add a robust fallback data object
 const fallbackData: MergedData = {
-  campaignName: "Preview Campaign",
-  description: "This is a preview of your campaign with fallback data.",
-  startDate: new Date().toISOString(),
-  endDate: new Date(Date.now() + 30 * 86400000).toISOString(), // 30 days from now
-  timeZone: "UTC",
-  currency: "USD",
+  campaignName: 'Demo Campaign',
+  description: 'This is a demo campaign with fallback data',
+  startDate: '2023-01-01',
+  endDate: '2023-12-31',
+  timeZone: 'UTC',
+  currency: 'USD',
   totalBudget: 10000,
   socialMediaBudget: 5000,
-  primaryContact: { 
-    firstName: "Contact", 
-    surname: "Name", 
-    email: "contact@example.com",
-    position: "Manager"
+  platform: 'Instagram',
+  influencerHandle: '@demoaccount',
+  influencerName: 'Demo Influencer',
+  primaryContact: {
+    firstName: 'John',
+    surname: 'Doe',
+    email: 'john.doe@example.com',
+    position: 'Manager'
   },
-  primaryKPI: "brandAwareness",
-  secondaryKPIs: ["adRecall", "consideration"],
-  features: ["BRAND_LIFT"],
-  mainMessage: "Sample main message for the campaign",
-  hashtags: "#sample #campaign #preview",
-  keyBenefits: "Sample key benefits",
-  expectedAchievements: "Sample expected achievements",
-  overview: {
-    name: "Preview Campaign",
-    description: "This is a preview of your campaign with fallback data.",
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 30 * 86400000).toISOString(),
-    timeZone: "UTC",
-    currency: "USD",
-    totalBudget: 10000,
-    socialMediaBudget: 5000,
-    primaryContact: { 
-      firstName: "Contact", 
-      surname: "Name", 
-      email: "contact@example.com",
-      position: "Manager"
+  secondaryContact: {
+    firstName: 'Jane',
+    surname: 'Smith',
+    email: 'jane.smith@example.com',
+    position: 'Assistant'
+  },
+  primaryKPI: 'brandAwareness',
+  secondaryKPIs: ['adRecall', 'messageAssociation'],
+  features: ['CREATIVE_ASSET_TESTING', 'BRAND_LIFT'],
+  mainMessage: 'This is the main message for the campaign',
+  hashtags: '#demo #campaign',
+  keyBenefits: 'Key benefits of the product',
+  expectedAchievements: 'Expected achievements',
+  brandPerception: 'How the brand is perceived',
+  creativeAssets: [
+    {
+      id: '1',
+      name: 'Demo Asset',
+      assetName: 'Demo Asset',
+      type: 'image',
+      url: '/placeholder.jpg',
+      whyInfluencer: 'Selected for reach and engagement',
+      budget: 1000,
+      description: 'Demo asset description'
     }
+  ],
+  creativeRequirements: [
+    { requirement: 'Must include brand logo' }
+  ],
+  overview: {
+    name: 'Demo Campaign',
+    description: 'This is a demo campaign with fallback data',
+    startDate: '2023-01-01',
+    endDate: '2023-12-31'
   },
   objectives: {
-    primaryKPI: "brandAwareness",
-    secondaryKPIs: ["adRecall", "consideration"],
-    features: ["BRAND_LIFT"],
-    mainMessage: "Sample main message for the campaign",
-    hashtags: "#sample #campaign #preview",
-    keyBenefits: "Sample key benefits",
-    expectedAchievements: "Sample expected achievements"
+    primaryKPI: 'brandAwareness',
+    secondaryKPIs: ['adRecall', 'messageAssociation'],
+    features: ['CREATIVE_ASSET_TESTING', 'BRAND_LIFT']
   },
   audience: {
-    age1824: 20,
-    age2534: 30,
-    age3544: 25,
-    age4554: 15,
-    age5564: 7,
-    age65plus: 3,
-    genders: [{gender: "Male"}, {gender: "Female"}],
-    locations: [{location: "United States"}, {location: "United Kingdom"}],
-    languages: [{language: "English"}],
-    brandPerception: "Sample brand perception"
-  },
-  creativeAssets: [],
-  creativeRequirements: []
+    demographics: {
+      gender: ['Male', 'Female'],
+      educationLevel: 'College',
+      ageDistribution: {
+        age1824: 25,
+        age2534: 40,
+        age3544: 20,
+        age4554: 10,
+        age5564: 5,
+        age65plus: 0
+      }
+    },
+    age1824: 25,
+    age2534: 40,
+    age3544: 20,
+    age4554: 10,
+    age5564: 5,
+    age65plus: 0,
+    genders: [{ gender: 'Male' }, { gender: 'Female' }],
+    locations: [{ location: 'London' }, { location: 'New York' }],
+    languages: [{ language: 'English' }],
+    educationLevel: 'College',
+    incomeLevel: '50000',
+    jobTitles: ['Designer', 'Developer'],
+    screeningQuestions: [{ question: 'Have you used our product before?' }],
+    competitors: [{ competitor: 'Competitor X' }],
+    brandPerception: 'Innovative'
+  }
 };
 
-// Helper function to normalize API data into a consistent format
+// Helper function to safely extract creativeAssets from different data sources
+const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
+  // For debugging
+  console.log("Extracting creative assets:", {
+    isWizardSchema,
+    hasAssets: Array.isArray(data?.assets),
+    assetsLength: Array.isArray(data?.assets) ? data.assets.length : 'n/a',
+    hasCreativeAssets: Array.isArray(data?.creativeAssets),
+    creativeAssetsLength: Array.isArray(data?.creativeAssets) ? data.creativeAssets.length : 'n/a',
+    assets: data?.assets,
+    creativeAssets: data?.creativeAssets
+  });
+
+  if (isWizardSchema && Array.isArray(data.assets) && data.assets.length > 0) {
+    console.log("Processing assets from CampaignWizard.assets");
+    return data.assets.map((asset: any) => {
+      // Extract all possible values for whyInfluencer with fallbacks
+      const whyInfluencerValue = asset.whyInfluencer || 
+                                 asset.description || 
+                                 (typeof asset.details === 'object' && asset.details?.whyInfluencer) || 
+                                 '';
+                                 
+      // Extract budget with proper type handling
+      const budgetValue = typeof asset.budget === 'number' ? asset.budget :
+                         (typeof asset.budget === 'string' ? parseFloat(asset.budget) : 0);
+                         
+      // Extract influencer handle with fallbacks
+      const influencerHandle = asset.influencerHandle || 
+                              (typeof asset.details === 'object' && asset.details?.influencerHandle) || 
+                              '';
+      
+      return {
+        id: asset.id || `asset-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        assetName: asset.name || '',
+        name: asset.name || '',
+        type: asset.type || 'image',
+        url: asset.url || '',
+        fileName: asset.fileName || asset.name || '',
+        fileSize: asset.fileSize || 0,
+        description: asset.description || whyInfluencerValue || '',
+        whyInfluencer: whyInfluencerValue,
+        influencerHandle: influencerHandle,
+        budget: budgetValue,
+        format: asset.format || ''
+      };
+    });
+  } else if (Array.isArray(data.creativeAssets) && data.creativeAssets.length > 0) {
+    console.log("Processing assets from creativeAssets array");
+    return data.creativeAssets.map((asset: any) => {
+      // Extract whyInfluencer with fallbacks
+      const whyInfluencerValue = asset.whyInfluencer || 
+                                asset.description || 
+                                (typeof asset.details === 'object' && asset.details?.whyInfluencer) || 
+                                '';
+      
+      return {
+        ...asset,
+        assetName: asset.assetName || asset.name || '',
+        name: asset.name || asset.assetName || '',
+        description: asset.description || whyInfluencerValue || '',
+        whyInfluencer: whyInfluencerValue,
+        // Ensure budget is a number
+        budget: typeof asset.budget === 'number' ? asset.budget : 
+               (typeof asset.budget === 'string' ? parseFloat(asset.budget) : 0)
+      };
+    });
+  } else if (data.creative && Array.isArray(data.creative.creativeAssets) && data.creative.creativeAssets.length > 0) {
+    console.log("Processing assets from creative.creativeAssets array");
+    return data.creative.creativeAssets.map((asset: any) => {
+      // Extract whyInfluencer with fallbacks
+      const whyInfluencerValue = asset.whyInfluencer || 
+                                asset.description || 
+                                (typeof asset.details === 'object' && asset.details?.whyInfluencer) || 
+                                '';
+      
+      return {
+        ...asset,
+        assetName: asset.assetName || asset.name || '',
+        name: asset.name || asset.assetName || '',
+        description: asset.description || whyInfluencerValue || '',
+        whyInfluencer: whyInfluencerValue,
+        // Ensure budget is a number
+        budget: typeof asset.budget === 'number' ? asset.budget : 
+               (typeof asset.budget === 'string' ? parseFloat(asset.budget) : 0)
+      };
+    });
+  }
+  
+  console.warn("No creative assets found in any expected location");
+  return [];
+};
+
 const normalizeApiData = (data: any): MergedData => {
   // Check which schema type we're dealing with based on field presence
   const isWizardSchema = data.name !== undefined;
@@ -335,21 +440,65 @@ const normalizeApiData = (data: any): MergedData => {
   if (isWizardSchema) console.log('Campaign name from CampaignWizard:', data.name);
   if (isSubmissionSchema) console.log('Campaign name from CampaignWizardSubmission:', data.campaignName);
   
+  // Log creative assets data for debugging
+  if (isWizardSchema) {
+    console.log('CampaignWizard assets field:', data.assets);
+    // Also log budget for debugging
+    console.log('CampaignWizard budget field:', data.budget);
+    // Log demographic data
+    console.log('CampaignWizard demographics field:', data.demographics);
+    console.log('CampaignWizard locations field:', data.locations);
+  } else {
+    console.log('CreativeAssets field:', data.creativeAssets);
+  }
+  
+  // Extract creative assets with our helper function
+  const creativeAssets = extractCreativeAssets(data, isWizardSchema);
+  console.log("Extracted creativeAssets:", creativeAssets);
+  
+  // Extract budget data with proper fallbacks
+  const budgetData = isWizardSchema && data.budget 
+    ? (typeof data.budget === 'object' 
+        ? data.budget 
+        : { currency: 'EUR', totalBudget: 0, socialMediaBudget: 0 })
+    : { 
+        currency: data.currency || 'EUR', 
+        totalBudget: data.totalBudget || 0, 
+        socialMediaBudget: data.socialMediaBudget || 0 
+      };
+  
+  console.log("Extracted budget data:", budgetData);
+  
+  // Extract audience data with proper fallbacks
+  const audienceData = isWizardSchema 
+    ? {
+        demographics: data.demographics || {},
+        locations: Array.isArray(data.locations) ? data.locations : [],
+        targeting: data.targeting || {},
+        competitors: Array.isArray(data.competitors) 
+          ? data.competitors 
+          : data.audience?.competitors || []
+      }
+    : (data.audience || {});
+    
+  console.log("Extracted audience data:", audienceData);
+  console.log("Competitors data:", audienceData.competitors);
+  
   return {
     // Map fields to consistent names, handling both schema types
     campaignName: isWizardSchema ? data.name : data.campaignName,
-    description: data.description || '',
+    description: data.businessGoal || data.description || (data.overview?.description) || '',
     startDate: data.startDate || '',
     endDate: data.endDate || '',
     timeZone: data.timeZone || '',
     currency: isWizardSchema 
-      ? (data.budget?.currency || '') 
-      : (data.currency || ''),
+      ? (budgetData.currency || 'EUR')
+      : (data.currency || 'EUR'),
     totalBudget: isWizardSchema 
-      ? (data.budget?.totalBudget || 0) 
+      ? (budgetData.totalBudget || budgetData.total || 0)
       : (data.totalBudget || 0),
     socialMediaBudget: isWizardSchema 
-      ? (data.budget?.socialMediaBudget || 0) 
+      ? (budgetData.socialMediaBudget || budgetData.socialMedia || 0)
       : (data.socialMediaBudget || 0),
     platform: data.platform || '',
     influencerHandle: data.influencerHandle || '',
@@ -382,7 +531,7 @@ const normalizeApiData = (data: any): MergedData => {
       ? (data.expectedOutcomes?.achievements || '') 
       : (data.expectedAchievements || ''),
     brandPerception: isWizardSchema 
-      ? (data.expectedOutcomes?.brandPerception || '') 
+      ? (data.expectedOutcomes?.brandPerception || data.brandPerception || '') 
       : (data.brandPerception || ''),
     
     // Nested structure for compatibility with the UI
@@ -393,13 +542,13 @@ const normalizeApiData = (data: any): MergedData => {
       endDate: data.endDate || '',
       timeZone: data.timeZone || '',
       currency: isWizardSchema 
-        ? (data.budget?.currency || '') 
-        : (data.currency || ''),
+        ? (budgetData.currency || 'EUR')
+        : (data.currency || 'EUR'),
       totalBudget: isWizardSchema 
-        ? (data.budget?.totalBudget || 0) 
+        ? (budgetData.totalBudget || budgetData.total || 0)
         : (data.totalBudget || 0),
       socialMediaBudget: isWizardSchema 
-        ? (data.budget?.socialMediaBudget || 0) 
+        ? (budgetData.socialMediaBudget || budgetData.socialMedia || 0)
         : (data.socialMediaBudget || 0),
       primaryContact: isWizardSchema 
         ? (typeof data.primaryContact === 'object' ? data.primaryContact : {}) 
@@ -424,22 +573,51 @@ const normalizeApiData = (data: any): MergedData => {
         : (data.expectedAchievements || '')
     },
     
-    audience: data.audience || {
-      demographics: isWizardSchema ? data.demographics : {},
-      locations: isWizardSchema ? data.locations : []
-    },
+    audience: isWizardSchema 
+      ? {
+          demographics: audienceData.demographics || {},
+          locations: audienceData.locations || [],
+          targeting: audienceData.targeting || {},
+          competitors: Array.isArray(audienceData.competitors) 
+            ? audienceData.competitors.map((comp: any) => {
+                if (typeof comp === 'string') return { competitor: comp };
+                return comp;
+              })
+            : [],
+          // Process demographics for better UI compatibility
+          genders: Array.isArray(audienceData.demographics?.gender) 
+            ? audienceData.demographics?.gender.map((g: any) => ({ gender: g }))
+            : [],
+          jobTitles: Array.isArray(audienceData.demographics?.jobTitles) 
+            ? audienceData.demographics?.jobTitles 
+            : (typeof audienceData.demographics?.jobTitles === 'string'
+                ? (audienceData.demographics.jobTitles ? JSON.parse(audienceData.demographics.jobTitles) : [])
+                : []),
+          educationLevel: audienceData.demographics?.educationLevel || '',
+          incomeLevel: audienceData.demographics?.incomeLevel || '',
+          // Store the full age distribution object and also keep individual age values for compatibility
+          ageDistribution: audienceData.demographics?.ageDistribution || {},
+          age1824: audienceData.demographics?.ageDistribution?.age1824 || 0,
+          age2534: audienceData.demographics?.ageDistribution?.age2534 || 0,
+          age3544: audienceData.demographics?.ageDistribution?.age3544 || 0,
+          age4554: audienceData.demographics?.ageDistribution?.age4554 || 0,
+          age5564: audienceData.demographics?.ageDistribution?.age5564 || 0,
+          age65plus: audienceData.demographics?.ageDistribution?.age65plus || 0,
+          location: Array.isArray(audienceData.locations)
+            ? audienceData.locations.map((loc: any) => ({ 
+                location: typeof loc === 'string' ? loc : (loc.name || loc.location || '') 
+              }))
+            : [],
+          languages: Array.isArray(audienceData.targeting?.languages)
+            ? audienceData.targeting.languages.map((lang: any) => ({ 
+                language: typeof lang === 'string' ? lang : (lang.language || '') 
+              }))
+            : []
+        }
+      : (data.audience || {}),
     
-    creativeAssets: Array.isArray(data.creativeAssets) 
-      ? data.creativeAssets 
-      : (isWizardSchema && Array.isArray(data.assets) 
-          ? data.assets.map((asset: any) => ({
-              id: asset.id || '',
-              assetName: asset.name || '',
-              type: asset.type || '',
-              url: asset.url || '',
-              fileName: asset.fileName || ''
-            }))
-          : []),
+    // Using our extracted creativeAssets
+    creativeAssets: creativeAssets,
     
     creativeRequirements: Array.isArray(data.creativeRequirements) 
       ? data.creativeRequirements 
@@ -543,7 +721,7 @@ interface FeatureIconProps {
 const FeatureIcon: React.FC<FeatureIconProps> = ({ feature }) => {
   const normalizedFeature = feature.toLowerCase();
   let iconPath = '';
-  let altText = formatFeature(feature);
+  const altText = formatFeature(feature);
   
   // Map feature to icon path
   if (normalizedFeature.includes('brand_health') || normalizedFeature.includes('brandhealth')) {
@@ -574,6 +752,91 @@ const FeatureIcon: React.FC<FeatureIconProps> = ({ feature }) => {
         />
       </div>
       <span>{altText}</span>
+    </div>
+  );
+};
+
+// Custom Asset Preview component for Step 5 (without play/pause controls)
+const Step5AssetPreview = ({ url, fileName, type, className = '' }: { url: string, fileName: string, type: string, className?: string }) => {
+  const isVideo = type === 'video' || (typeof type === 'string' && type.includes('video'));
+  const isImage = type === 'image' || (typeof type === 'string' && type.includes('image'));
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Effect to handle video autoplay and looping
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      const video = videoRef.current;
+
+      // Auto-play the video when component mounts
+      const playVideo = () => {
+        video.play().catch(error => {
+          console.warn('Auto-play was prevented:', error);
+        });
+      };
+
+      // Handle video looping - restart after 5 seconds or when ended
+      const handleTimeUpdate = () => {
+        if (video.currentTime >= 5) {
+          video.currentTime = 0;
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
+          });
+        }
+      };
+
+      const handleEnded = () => {
+        video.currentTime = 0;
+        video.play().catch(err => {
+          console.error('Error replaying video:', err);
+        });
+      };
+
+      // Add event listeners
+      video.addEventListener('loadedmetadata', playVideo);
+      video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('ended', handleEnded);
+      
+      // Remove event listeners on cleanup
+      return () => {
+        video.removeEventListener('loadedmetadata', playVideo);
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, [isVideo, url]);
+
+  return (
+    <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+      {/* Image preview */}
+      {isImage && (
+        <img 
+          src={url} 
+          alt={fileName}
+          className="w-full h-full object-cover"
+        />
+      )}
+      
+      {/* Video preview (with autoplay and loop) */}
+      {isVideo && (
+        <div className="relative">
+          <video
+            ref={videoRef}
+            src={url}
+            className="w-full h-full object-cover"
+            muted
+            playsInline
+            loop
+            autoPlay
+          />
+        </div>
+      )}
+      
+      {/* Fallback for unsupported file types */}
+      {!isImage && !isVideo && (
+        <div className="flex items-center justify-center p-8">
+          <DocumentIcon className="h-12 w-12 text-gray-400" />
+        </div>
+      )}
     </div>
   );
 };
@@ -716,6 +979,18 @@ function Step5Content() {
     
     // For testing: Allow submission regardless of validation state
     // Only log any validation issues but don't prevent submission
+    
+    // Add more detailed logging for debugging
+    console.log("Validating campaign data:", {
+      hasOverview: !!data?.overview,
+      hasObjectives: !!data?.objectives,
+      hasAudience: !!data?.audience,
+      hasCreativeAssets: !!data?.creativeAssets,
+      creativeAssetsLength: Array.isArray(data?.creativeAssets) ? data.creativeAssets.length : 'not an array',
+      creativeAssets: data?.creativeAssets,
+      rawAssets: data?.assets,
+      fullData: data
+    });
     
     // Check for missing critical sections (logs only)
     const missingKeys: string[] = [];
@@ -861,12 +1136,14 @@ function Step5Content() {
 
   if (error) {
     // Special handling for "not found" errors
-    const isNotFoundError = error.includes("404 Not Found") || error.includes("not found");
+    const isNotFoundError = 
+      typeof error === 'string' && 
+      (error.includes("404 Not Found") || error.includes("not found"));
     
     return (
       <div className="p-6 bg-red-50 border border-red-200 rounded-md">
         <h3 className="text-red-800 font-semibold text-lg mb-2">Error Loading Campaign</h3>
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-600 mb-4">{String(error)}</p>
         
         {/* Add a reset button to clear any cached state */}
         <button 
@@ -1036,140 +1313,61 @@ function Step5Content() {
           stepNumber={1}
           onEdit={() => navigateToStep(1)}
         >
-          <div className="px-4 py-3 border-b border-[var(--divider-color)]">
-            <DataItem 
-              label="Campaign Name" 
-              value={displayData.campaignName || displayData?.overview?.name || 'Not specified'} 
-              featured={true} 
-            />
-          </div>
-
-          <div className="px-4 py-5">
-            <DataItem 
-              label="Description" 
-              value={displayData.description || displayData?.overview?.description || 'No description provided'} 
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 py-3">
-            <DataItem 
-              label="Start Date" 
-              value={displayData.startDate 
-                ? formatDate(displayData.startDate)
-                : displayData?.overview?.startDate 
-                  ? formatDate(displayData?.overview?.startDate)
-                  : 'Not specified'} 
-              icon={CalendarIcon}
-            />
-            <DataItem 
-              label="End Date" 
-              value={displayData.endDate 
-                ? formatDate(displayData.endDate)
-                : displayData?.overview?.endDate
-                  ? formatDate(displayData?.overview?.endDate)
-                  : 'Not specified'} 
-              icon={CalendarIcon}
-            />
-          </div>
-
-          <div className="px-4 py-3">
-            <h3 className="text-sm font-medium text-gray-600">Time Zone</h3>
-            <p className="text-gray-800 mt-1 font-medium">
-              {displayData.timeZone || displayData?.overview?.timeZone || 'Not specified'}
-            </p>
-          </div>
-
-          <div className="px-4 py-4 border-t border-b border-gray-100 bg-gray-50 rounded-md my-3">
-            <div className="mb-5">
-              <h3 className="font-medium text-gray-700 mb-3">Primary Contact</h3>
-              {(displayData.primaryContact || displayData?.overview?.primaryContact) ? (
-                <div>
-                  <p className="font-medium text-gray-800">
-                    {displayData.primaryContact?.firstName || displayData?.overview?.primaryContact?.firstName || ''} 
-                    {' '}
-                    {displayData.primaryContact?.surname || displayData?.overview?.primaryContact?.surname || ''}
-                  </p>
-                  <div className="flex items-center mt-1">
-                    <p className="text-gray-700 text-sm">
-                      {displayData.primaryContact?.email || displayData?.overview?.primaryContact?.email || ''}
-                    </p>
-                    <span className="ml-3 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-md font-medium">
-                      {displayData.primaryContact?.position || displayData?.overview?.primaryContact?.position || ''}
-                    </span>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Basic Information</h3>
+              
+              <div className="space-y-4">
+                <DataItem 
+                  label="Campaign Name" 
+                  value={displayData.campaignName || 'Not specified'} 
+                  featured={true}
+                />
+                
+                <DataItem 
+                  label="Description" 
+                  value={displayData.description || 'Not specified'} 
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <DataItem 
+                    label="Start Date" 
+                    value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} 
+                    icon={CalendarIcon}
+                  />
+                  
+                  <DataItem 
+                    label="End Date" 
+                    value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} 
+                    icon={CalendarIcon}
+                  />
                 </div>
-              ) : (
-                <p className="text-gray-500">No primary contact specified</p>
-              )}
+              </div>
             </div>
-
-            {(displayData.secondaryContact?.email || displayData?.overview?.secondaryContact?.email) && (
-              <div>
-                <h3 className="font-medium text-gray-700 mb-3">Secondary Contact</h3>
-                <div>
-                  <p className="font-medium text-gray-800">
-                    {displayData.secondaryContact?.firstName || displayData?.overview?.secondaryContact?.firstName || ''} 
-                    {' '}
-                    {displayData.secondaryContact?.surname || displayData?.overview?.secondaryContact?.surname || ''}
-                  </p>
-                  <div className="flex items-center mt-1">
-                    <p className="text-gray-700 text-sm">
-                      {displayData.secondaryContact?.email || displayData?.overview?.secondaryContact?.email || ''}
-                    </p>
-                    <span className="ml-3 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-md font-medium">
-                      {displayData.secondaryContact?.position || displayData?.overview?.secondaryContact?.position || ''}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 py-4">
-            <DataItem 
-              label="Currency" 
-              value={displayData.currency || displayData?.overview?.currency || 'Not specified'}
-            />
-            <DataItem 
-              label="Total campaign budget" 
-              value={displayData.currency 
-                ? formatCurrency(displayData.totalBudget || 0, displayData.currency)
-                : (displayData?.overview?.currency 
-                  ? formatCurrency(displayData?.overview?.totalBudget || 0, displayData?.overview?.currency)
-                  : 'Not specified')}
-              icon={CurrencyDollarIcon}
-              featured={true}
-            />
-          </div>
-
-          <div className="px-4 py-3">
-            <DataItem 
-              label="Budget allocated to social media" 
-              value={displayData.socialMediaBudget !== undefined || displayData.currency 
-                ? formatCurrency(displayData.socialMediaBudget || 0, displayData.currency || 'USD')
-                : displayData?.overview?.socialMediaBudget !== undefined
-                  ? formatCurrency(displayData?.overview?.socialMediaBudget || 0, displayData?.overview?.currency || 'USD')
-                  : 'Not specified'}
-              icon={CurrencyDollarIcon}
-            />
-          </div>
-
-          <div className="px-4 py-4 border-t border-[var(--divider-color)] mt-2">
-            <h3 className="text-sm font-medium text-[var(--secondary-color)] mb-2">Influencer</h3>
-            <div className="flex items-center mt-1">
-              <div className="h-10 w-10 rounded-full bg-[rgba(0,191,255,0.1)] flex items-center justify-center overflow-hidden mr-3">
-                {/* Default profile icon if no image */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[var(--accent-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-[var(--primary-color)]">
-                  {displayData.influencerName || displayData?.overview?.influencerName || 'Not specified'}
-                </p>
-                <p className="text-sm text-[var(--secondary-color)]">
-                  {displayData.influencerHandle || displayData?.overview?.influencerHandle || '@influencer'}
-                </p>
+            
+            {/* Budget Information */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Budget Information</h3>
+              
+              <div className="space-y-4">
+                <DataItem 
+                  label="Currency" 
+                  value={displayData.currency || 'EUR'} 
+                  icon={CurrencyDollarIcon}
+                />
+                
+                <DataItem 
+                  label="Total Budget" 
+                  value={displayData.totalBudget ? formatCurrency(displayData.totalBudget, displayData.currency || 'EUR') : 'Not specified'} 
+                  icon={CurrencyDollarIcon}
+                  featured={true}
+                />
+                
+                <DataItem 
+                  label="Social Media Budget" 
+                  value={displayData.socialMediaBudget ? formatCurrency(displayData.socialMediaBudget, displayData.currency || 'EUR') : 'Not specified'} 
+                  icon={CurrencyDollarIcon}
+                />
               </div>
             </div>
           </div>
@@ -1285,122 +1483,199 @@ function Step5Content() {
           onEdit={() => navigateToStep(3)}
         >
           {displayData.audience || displayData?.audience ? (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 mb-6">
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <h3 className="font-medium text-gray-700 mb-4">Demographics</h3>
-                  
-                  <DataItem 
-                    label="Age Distribution" 
-                    value={
-                      displayData.audience?.age1824 !== undefined ? 
-                        `18-24: ${displayData.audience.age1824}%, 25-34: ${displayData.audience.age2534}%, 35-44: ${displayData.audience.age3544}%, 45-54: ${displayData.audience.age4554}%, 55-64: ${displayData.audience.age5564}%, 65+: ${displayData.audience.age65plus}%`
-                      : 'Not specified'
-                    } 
-                  />
-                  
-                  <DataItem 
-                    label="Genders" 
-                    value={
-                      displayData.audience?.genders && Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ?
-                        displayData.audience.genders.map((g: any) => g.gender).join(', ')
-                      : 'Not specified'
-                    } 
-                  />
+            <div className="space-y-6">
+              {/* Demographics Section */}
+              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-center mb-4">
+                  <UserGroupIcon className="h-5 w-5 text-[var(--accent-color)] mr-2" />
+                  <h3 className="font-medium text-gray-800">Demographics</h3>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <h3 className="font-medium text-gray-700 mb-4">Location</h3>
-                  
-                  <DataItem 
-                    label="Locations" 
-                    value={
-                      displayData.audience?.locations && Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ?
-                        displayData.audience.locations.map((l: any) => l.location).join(', ')
-                      : 'Not specified'
-                    } 
-                  />
-                  
-                  <DataItem 
-                    label="Languages" 
-                    value={
-                      displayData.audience?.languages && Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ?
-                        displayData.audience.languages.map((l: any) => l.language).join(', ')
-                      : 'Not specified'
-                    } 
-                  />
+                {/* Age Range */}
+                <div className="mb-5">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
+                  <div className="grid grid-cols-6 gap-1">
+                    {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => {
+                      // Check if this age range is selected
+                      const ageKey = range === '65+' 
+                        ? 'age65plus' 
+                        : `age${range.replace('-', '')}`;
+                      
+                      const isSelected = displayData.audience 
+                        && displayData.audience[ageKey as keyof typeof displayData.audience] 
+                        && Number(displayData.audience[ageKey as keyof typeof displayData.audience]) > 0;
+                      
+                      return (
+                        <div 
+                          key={range} 
+                          className={`text-center py-1.5 text-xs rounded ${isSelected 
+                            ? 'bg-[var(--accent-color)] text-white font-medium' 
+                            : 'bg-gray-100 text-gray-500'}`}
+                        >
+                          {range}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Gender */}
+                <div className="mb-5">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Gender</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.genders && Array.isArray(displayData.audience.genders) && 
+                     displayData.audience.genders.length > 0 ? (
+                      displayData.audience.genders.map((g: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                          {g.gender || g.toString()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
-                <h3 className="font-medium text-gray-700 mb-4">Advanced Targeting</h3>
-                
+              {/* Location Section */}
+              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-center mb-4">
+                  <GlobeAltIcon className="h-5 w-5 text-[var(--accent-color)] mr-2" />
+                  <h3 className="font-medium text-gray-800">Location</h3>
+                </div>
+
+                {/* Locations */}
+                <div className="mb-5">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Locations</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.locations && Array.isArray(displayData.audience.locations) && 
+                     displayData.audience.locations.length > 0 ? (
+                      displayData.audience.locations.map((l: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                          {typeof l === 'string' ? l : (l.location || l.name || '')}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Languages */}
+                <div className="mb-4">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Languages</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.languages && Array.isArray(displayData.audience.languages) && 
+                     displayData.audience.languages.length > 0 ? (
+                      displayData.audience.languages.map((l: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                          {typeof l === 'string' ? l : (l.language || l.toString())}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced Targeting */}
+              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-center mb-4">
+                  <AcademicCapIcon className="h-5 w-5 text-[var(--accent-color)] mr-2" />
+                  <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <DataItem 
-                    label="Education Level" 
-                    value={displayData.audience?.educationLevel || 'Not specified'} 
-                  />
-                  
-                  <DataItem 
-                    label="Income Level" 
-                    value={
-                      displayData.audience?.incomeLevel ? 
-                        `${displayData.currency || '$'}${displayData.audience.incomeLevel}`
-                      : 'Not specified'
-                    } 
-                  />
-                  
-                  <DataItem 
-                    label="Job Titles" 
-                    value={displayData.audience?.jobTitles || 'Not specified'} 
-                  />
+                  {/* Education Level */}
+                  <div>
+                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Education Level</h4>
+                    {displayData.audience?.educationLevel ? (
+                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
+                        {String(displayData.audience.educationLevel)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
+                  </div>
+
+                  {/* Income Level - with proper currency formatting */}
+                  <div>
+                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Income Level</h4>
+                    {displayData.audience?.incomeLevel ? (
+                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
+                        {formatCurrency(
+                          Number(displayData.audience.incomeLevel) || 0, 
+                          displayData.currency || 'EUR'
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
+                  </div>
+
+                  {/* Job Titles */}
+                  <div>
+                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Job Titles</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {displayData.audience?.jobTitles ? (
+                        Array.isArray(displayData.audience.jobTitles) ? (
+                          displayData.audience.jobTitles.map((title: string, idx: number) => (
+                            <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                              {title}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                            {String(displayData.audience.jobTitles)}
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-gray-500 text-sm">Not specified</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Competitors Section (if available) */}
+              {displayData.audience?.competitors && Array.isArray(displayData.audience.competitors) && 
+               displayData.audience.competitors.length > 0 && (
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                  <h3 className="font-medium text-gray-800 mb-3">Competitors</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience.competitors.map((item: any, index: number) => (
+                      <span key={index} className="inline-block px-3 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full text-sm font-medium">
+                        {typeof item === 'string' ? item : (item.competitor || item.name || '')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Brand Perception (if available) */}
+              {(displayData.brandPerception || displayData?.audience?.brandPerception) && (
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                  <h3 className="font-medium text-gray-800 mb-3">Brand Perception</h3>
+                  <p className="text-gray-800">
+                    {displayData.brandPerception || displayData?.audience?.brandPerception}
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="py-4 text-center">
+            <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <UserGroupIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
               <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
+              <button 
+                onClick={() => navigateToStep(3)} 
+                className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto"
+              >
+                <PencilIcon className="h-4 w-4 mr-1" />
+                Add audience targeting
+              </button>
             </div>
           )}
-
-          <div className="space-y-6">
-            {displayData.audience?.screeningQuestions && Array.isArray(displayData.audience.screeningQuestions) && 
-              displayData.audience.screeningQuestions.length > 0 && (
-              <div>
-                <h3 className="font-medium text-gray-700 mb-3">Screening Questions</h3>
-                <ul className="space-y-2">
-                  {displayData.audience.screeningQuestions.map((item: any, index: number) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-sm bg-gray-50 rounded-md p-3 inline-block border border-gray-100">
-                        {item.question}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {displayData.audience?.competitors && Array.isArray(displayData.audience.competitors) && 
-              displayData.audience.competitors.length > 0 && (
-              <div className="mt-6">
-                <h3 className="font-medium text-gray-700 mb-3">Competitors</h3>
-                <div className="flex flex-wrap gap-2">
-                  {displayData.audience.competitors.map((item: any, index: number) => (
-                    <span key={index} className="inline-block px-3 py-1 bg-gray-50 border border-gray-200 rounded-full text-sm font-medium">
-                      {item.competitor}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mt-3">
-              <h3 className="font-medium text-gray-700 mb-2">Brand Perception</h3>
-              <p className="text-gray-800">
-                {displayData.brandPerception || displayData?.audience?.brandPerception || 'Not specified'}
-              </p>
-            </div>
-          </div>
         </SummarySection>
 
         {/* Step 4: Creative Assets */}
@@ -1410,146 +1685,94 @@ function Step5Content() {
           onEdit={() => navigateToStep(4)}
         >
           {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? (
-            <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => (
-                <div key={asset.id || index} className="border border-[var(--divider-color)] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
-                  <div className="bg-[rgba(0,191,255,0.05)] px-4 py-3 flex justify-between items-center border-b border-[var(--divider-color)]">
-                    <h3 className="font-medium text-[var(--primary-color)]">{asset.assetName || asset.name || 'Untitled Asset'}</h3>
-                    <span className="text-xs px-2 py-1 bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] rounded-full font-medium">
-                      {asset.type}
-                    </span>
+                <div key={asset.id || index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                  {/* Asset Preview - Square/Tiled */}
+                  <div className="aspect-square w-full overflow-hidden relative bg-gray-50">
+                    <Step5AssetPreview
+                      url={asset.url}
+                      fileName={asset.assetName || asset.name || 'Asset preview'}
+                      type={asset.type}
+                      className="w-full h-full"
+                    />
+                    
+                    {/* Asset Name Overlay at Top */}
+                    <div className="absolute top-0 left-0 right-0 bg-white bg-opacity-90 py-2 px-3 border-b border-gray-200">
+                      <h3 className="font-medium text-gray-800 truncate text-sm">
+                        {asset.assetName || asset.name || 'Untitled Asset'}
+                      </h3>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                    {/* Asset Preview */}
-                    <div className="flex items-center justify-center bg-gray-50 rounded-md border border-gray-200 overflow-hidden h-48">
-                      {asset.type && asset.type.includes('image') ? (
-                        <div className="relative w-full h-full">
-                          <Image 
-                            src={asset.url} 
-                            alt={asset.assetName || asset.name || 'Asset preview'} 
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                          />
-                        </div>
-                      ) : asset.type && asset.type.includes('video') ? (
-                        <video 
-                          src={asset.url} 
-                          controls 
-                          className="max-h-full max-w-full"
-                          poster="/video-placeholder.png"
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center text-gray-400">
-                          <DocumentIcon className="h-16 w-16 mb-2" />
-                          <p className="text-sm">Preview not available</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Asset Details */}
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm text-[var(--secondary-color)] mb-1">File Name</p>
-                        <div className="flex items-center">
-                          <DocumentIcon className="h-4 w-4 text-[var(--secondary-color)] mr-2" />
-                          <p className="font-medium text-[var(--primary-color)] truncate">{asset.fileName || asset.name || 'Unknown file'}</p>
+                  {/* Asset Details Section */}
+                  <div className="p-4 bg-white flex-grow">
+                    <div className="space-y-4">
+                      {/* Influencer */}
+                      <div className="flex items-start">
+                        <UserCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Influencer</p>
+                          <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-3">
+                      {/* Why this influencer */}
+                      <div className="flex items-start">
+                        <InformationCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-sm text-[var(--secondary-color)] mb-1">Type</p>
-                          <p className="font-medium text-[var(--primary-color)]">{asset.type}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-[var(--secondary-color)] mb-1">Format</p>
-                          <p className="font-medium text-[var(--primary-color)]">{asset.format || 'Unknown'}</p>
+                          <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
+                          <p className="text-sm text-gray-800">{asset.whyInfluencer || 'No details provided'}</p>
                         </div>
                       </div>
                       
-                      {asset.fileSize && (
+                      {/* Budget */}
+                      <div className="flex items-start">
+                        <CurrencyDollarIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-sm text-[var(--secondary-color)] mb-1">File Size</p>
-                          <p className="font-medium text-[var(--primary-color)]">{(asset.fileSize / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                      )}
-                      
-                      {asset.influencerHandle && (
-                        <div>
-                          <p className="text-sm text-[var(--secondary-color)] mb-1">Influencer</p>
-                          <p className="font-medium text-[var(--primary-color)]">{asset.influencerHandle}</p>
-                        </div>
-                      )}
-                      
-                      {asset.budget !== undefined && (
-                        <div>
-                          <p className="text-sm text-[var(--secondary-color)] mb-1">Budget</p>
-                          <p className="font-medium text-[var(--primary-color)]">
-                            {formatCurrency(asset.budget, displayData.currency || 'USD')}
+                          <p className="text-xs text-gray-500 mb-1">Budget</p>
+                          <p className="text-sm text-gray-800 font-medium">
+                            {asset.budget 
+                              ? formatCurrency(asset.budget, displayData.currency || 'EUR')
+                              : 'Not specified'
+                            }
                           </p>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* Description section (full width) */}
-                  {asset.description && (
-                    <div className="px-4 py-3 border-t border-[var(--divider-color)] bg-gray-50">
-                      <p className="text-sm text-[var(--secondary-color)] mb-1">Description</p>
-                      <p className="text-[var(--primary-color)]">{asset.description}</p>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4">
-              <p className="text-yellow-800">No assets have been uploaded yet. Please complete Step 4.</p>
-            </div>
-          )}
-
-          {/* Creative Requirements */}
-          {displayData.creativeRequirements && Array.isArray(displayData.creativeRequirements) && displayData.creativeRequirements.length > 0 && (
-            <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
-              <h3 className="font-medium text-gray-700 mb-3">Creative Requirements</h3>
-              <ul className="list-disc pl-5 space-y-2 text-gray-800">
-                {displayData.creativeRequirements.map((req: any, index: number) => (
-                  <li key={index}>{req.requirement}</li>
-                ))}
-              </ul>
+            <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <DocumentIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500">No creative assets have been added yet.</p>
+              <button 
+                onClick={() => navigateToStep(4)} 
+                className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto"
+              >
+                <PencilIcon className="h-4 w-4 mr-1" />
+                Add creative assets
+              </button>
             </div>
           )}
         </SummarySection>
+      </div>
 
-        {/* Validation Messages */}
-        <div className="mt-8">
-          <div className="bg-green-50 border border-green-100 rounded-md p-5 flex items-start">
-            <CheckCircleIcon className="h-6 w-6 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="font-medium text-green-800 text-lg">All required information has been provided</h3>
-              <p className="text-green-700 mt-1">Your campaign is ready to be submitted. Review all details before final submission.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Add ProgressBar component at the bottom */}
-        <div className="mt-12 mb-8">
-          <ProgressBar
-            currentStep={5}
-            onStepClick={(step) => navigateToStep(step)}
-            onBack={() => navigateToStep(4)}
-            onNext={handleSubmit}
-            onSaveDraft={handleSaveDraft}
-            disableNext={false}
-            isFormValid={true}
-            isDirty={false}
-            isSaving={isSaving || isSubmitting}
-          />
-        </div>
+      {/* Add ProgressBar component at the bottom */}
+      <div className="mt-12 mb-8">
+        <ProgressBar
+          currentStep={5}
+          onStepClick={(step) => navigateToStep(step)}
+          onBack={() => navigateToStep(4)}
+          onNext={handleSubmit}
+          onSaveDraft={handleSaveDraft}
+          disableNext={false}
+          isFormValid={true}
+          isDirty={false}
+          isSaving={isSaving || isSubmitting}
+        />
       </div>
     </div>
   );
