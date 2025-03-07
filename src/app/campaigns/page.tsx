@@ -1,5 +1,9 @@
 "use client";
 
+// Ensure real-time data by disabling caching for this page
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
@@ -87,10 +91,19 @@ const transformCampaignData = (campaign: any): Campaign => {
   // Parse primary contact
   const primaryContact = safelyParseJSON(campaign.primaryContact, { firstName: '', surname: '' });
 
+  // Map the status properly from the database schema (DRAFT, IN_REVIEW, APPROVED, ACTIVE, COMPLETED)
+  // to the frontend statuses
+  let status;
+  if (campaign.status) {
+    status = campaign.status.toLowerCase();
+  } else {
+    status = 'draft';
+  }
+
   return {
     id: campaign.id,
     campaignName: campaign.name || 'Untitled Campaign',
-    submissionStatus: (campaign.status?.toLowerCase() || 'draft') as "draft" | "submitted" | "paused" | "completed",
+    submissionStatus: status as "draft" | "submitted" | "in_review" | "approved" | "active" | "paused" | "completed",
     // Use the first influencer's platform or default to Instagram
     platform: campaign.influencers?.[0]?.platform || 'Instagram' as "Instagram" | "YouTube" | "TikTok",
     startDate: safelyParseDate(campaign.startDate),
@@ -126,7 +139,7 @@ const KPI_OPTIONS: KpiOption[] = [
 interface Campaign {
   id: string | number;  // Handle both string and number IDs
   campaignName: string;
-  submissionStatus: "draft" | "submitted" | "paused" | "completed";
+  submissionStatus: "draft" | "in_review" | "approved" | "active" | "submitted" | "paused" | "completed";
   platform: "Instagram" | "YouTube" | "TikTok";
   startDate: string;
   endDate: string;
@@ -641,13 +654,25 @@ const CampaignList: React.FC = () => {
 
   // Helper to get status color and text
   const getStatusInfo = (status: string) => {
-    switch(status) {
+    // Normalize status to lowercase for case-insensitive matching
+    const normalizedStatus = (status || '').toLowerCase();
+    
+    switch(normalizedStatus) {
+      case 'approved':
+        return { class: 'bg-green-100 text-green-800', text: 'Approved' };
+      case 'active':
+        return { class: 'bg-green-100 text-green-800', text: 'Active' };
       case 'submitted':
-        return { class: 'bg-green-100 text-green-800', text: 'Live' };
+        return { class: 'bg-green-100 text-green-800', text: 'Submitted' };
+      case 'in_review':
+      case 'in-review':
+      case 'inreview':
+        return { class: 'bg-yellow-100 text-yellow-800', text: 'In Review' };
       case 'paused':
         return { class: 'bg-yellow-100 text-yellow-800', text: 'Paused' };
       case 'completed':
         return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
+      case 'draft':
       default:
         return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
     }
@@ -733,7 +758,10 @@ const CampaignList: React.FC = () => {
               className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
             >
               <option value="">Status</option>
-              <option value="submitted">Live</option>
+              <option value="approved">Approved</option>
+              <option value="active">Active</option>
+              <option value="submitted">Submitted</option>
+              <option value="in_review">In Review</option>
               <option value="paused">Paused</option>
               <option value="draft">Draft</option>
               <option value="completed">Completed</option>

@@ -28,16 +28,16 @@ export async function POST(
     
     if (isUuid) {
       // For UUID format, update CampaignWizard table
-      // Using ACTIVE status from Status enum instead of SUBMITTED (which doesn't exist)
+      // Change status to APPROVED instead of ACTIVE
       campaign = await prisma.campaignWizard.update({
         where: { id: campaignId },
         data: {
-          status: 'ACTIVE',
+          status: 'APPROVED',
           isComplete: true
         }
       });
       
-      console.log(`Successfully updated CampaignWizard with ID ${campaignId} to ACTIVE status`);
+      console.log(`Successfully updated CampaignWizard with ID ${campaignId} to APPROVED status`);
     } else {
       // Legacy format - update CampaignWizardSubmission
       campaign = await prisma.campaignWizardSubmission.update({

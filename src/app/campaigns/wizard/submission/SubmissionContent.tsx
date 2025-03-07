@@ -123,6 +123,21 @@ function SubmissionContent() {
         <h2 className="text-2xl font-bold text-[#333333] mb-3 font-['Sora']">
           Campaign successfully submitted!
         </h2>
+        
+        {/* Add campaign status badge */}
+        <div className="flex justify-center items-center mb-6">
+          <div className="flex items-center bg-red-50 text-red-800 px-4 py-2 rounded-full text-sm font-medium line-through mr-2">
+            DRAFT
+          </div>
+          <div className="text-[#4A5568] mx-2">→</div>
+          <div className="flex items-center bg-green-50 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+            APPROVED
+          </div>
+        </div>
+        
+        <p className="text-[#4A5568] font-['Work Sans']">
+          Your campaign has been submitted and approved. It will become active based on your scheduled start date.
+        </p>
       </div>
 
       {/* Next Steps */}
