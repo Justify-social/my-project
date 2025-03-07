@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useRef, useCallback } from "react";
+import React, { useState, useEffect, Suspense, useRef, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -19,23 +19,37 @@ import {
   InformationCircleIcon,
   DocumentIcon
 } from "@heroicons/react/24/outline";
+import { CampaignAssetUploader, UploadedAsset } from "@/components/upload/CampaignAssetUploader";
+import { AssetPreview } from '@/components/upload/AssetPreview';
 
 // =============================================================================
 // TYPES & INTERFACES
 // =============================================================================
 
+interface Influencer {
+  id: string;
+  handle: string;
+  platform: string;
+  followers?: number;
+}
+
+interface AssetDetails {
+  assetName: string;
+  budget: number;
+  description: string;
+  influencerHandle?: string;
+  platform?: string;
+  whyInfluencer?: string;
+}
+
 interface Asset {
   id: string;
-  file: File;
-  progress: number; // 0 to 100
-  error?: string;
-  details: {
-    assetName: string;
-    influencer?: string;
-    description?: string;
-    budget: number;
-    whyInfluencer?: string;
-  };
+  url: string;
+  fileName: string;
+  fileSize: number;
+  type: string;
+  progress: number;
+  details: AssetDetails;
 }
 
 export interface CreativeValues {
@@ -60,7 +74,6 @@ const CreativeSchema = Yup.object().shape({
   assets: Yup.array().of(
     Yup.object().shape({
       id: Yup.string().required(),
-      file: Yup.mixed().required(),
       progress: Yup.number().min(100, "Upload must be complete"),
       details: AssetDetailsSchema
     })
@@ -76,8 +89,15 @@ const ALLOWED_FILE_TYPES = {
   'image/jpeg': ['.jpg', '.jpeg'],
   'image/png': ['.png'],
   'image/gif': ['.gif'],
-  'video/mp4': ['.mp4'],
-  'application/pdf': ['.pdf']
+  'video/mp4': ['.mp4']
+};
+
+// Currency symbol mapping
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  'USD': '$',
+  'EUR': '€',
+  'GBP': '£',
+  // Add more as needed
 };
 
 // =============================================================================
@@ -85,57 +105,186 @@ const ALLOWED_FILE_TYPES = {
 // =============================================================================
 
 interface UploadAreaProps {
-  onFilesAdded: (files: FileList) => void;
+  campaignId: string;
+  onAssetsAdded: (assets: Asset[]) => void;
 }
 
-const UploadArea: React.FC<UploadAreaProps> = ({ onFilesAdded }) => {
-  const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
+const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) => {
+  const handleUploadComplete = useCallback((uploadedAssets: UploadedAsset[]) => {
+    // Convert UploadedAsset to Asset format
+    const newAssets: Asset[] = uploadedAssets.map(upload => ({
+      id: upload.id,
+      url: upload.url,
+      fileName: upload.fileName,
+      fileSize: upload.fileSize,
+      type: upload.type, // Ensure type is included
+      progress: 100, // Already completed upload
+      details: {
+        assetName: upload.fileName,
+        budget: 0,
+        description: '',
+      }
+    }));
     
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onFilesAdded(Array.from(e.dataTransfer.files));
-    }
-  }, [onFilesAdded]);
+    // Add to asset list
+    onAssetsAdded(newAssets);
+  }, [onAssetsAdded]);
+  
+  const handleUploadError = useCallback((error: Error) => {
+    console.error("Upload error:", error);
+    toast.error(`Upload failed: ${error.message}`);
+  }, []);
 
   return (
-    <div
-      className="relative w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragOver(true);
-      }}
-      onDragLeave={(e) => {
-        e.preventDefault();
-        setDragOver(false);
-      }}
-      onDrop={handleDrop}
-      role="button"
-      tabIndex={0}
-      onClick={() => fileInputRef.current?.click()}
-      onKeyPress={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          fileInputRef.current?.click();
-        }
-      }}
-    >
-      <div className="mb-4 p-3 rounded-full bg-gray-100">
-        <ArrowUpTrayIcon className="h-7 w-7 text-gray-500" />
-      </div>
-      <p className="text-gray-600 mb-1">Drag and drop files here or click to upload.</p>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept=".mp4,.png,.jpeg,.jpg,.gif,.pdf"
-        onChange={(e) => {
-          if (e.target.files) onFilesAdded(e.target.files);
-        }}
-        className="hidden"
-        aria-label="File upload"
+    <div className="relative w-full transition-all duration-300">
+      <CampaignAssetUploader
+        campaignId={campaignId}
+        onUploadComplete={handleUploadComplete}
+        onUploadError={handleUploadError}
       />
+    </div>
+  );
+};
+
+// =============================================================================
+// BUDGET INPUT COMPONENT (make smaller)
+// =============================================================================
+
+interface BudgetInputProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: () => void;
+  currencySymbol: string;
+}
+
+const BudgetInput: React.FC<BudgetInputProps> = ({ 
+  value, 
+  onChange, 
+  onBlur, 
+  currencySymbol 
+}) => (
+  <div className="relative flex items-center max-w-[150px]">
+    <div className="absolute left-2 inset-y-0 flex items-center pointer-events-none">
+      <span className="text-gray-500 text-sm">{currencySymbol}</span>
+    </div>
+    <input
+      type="number"
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      className="w-full pl-6 py-1.5 px-2 border border-gray-300 rounded-md text-sm"
+      placeholder="500"
+      min="0"
+      step="10"
+    />
+  </div>
+);
+
+// =============================================================================
+// INFLUENCER SELECTOR COMPONENT
+// =============================================================================
+
+interface InfluencerSelectorProps {
+  assetId: string;
+  influencers: Influencer[];
+  value: string;
+  onChange: (handle: string) => void;
+}
+
+const InfluencerSelector: React.FC<InfluencerSelectorProps> = ({ 
+  assetId, 
+  influencers, 
+  value, 
+  onChange 
+}) => {
+  const [query, setQuery] = useState(value || '');
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Filter influencers based on query
+  const filteredInfluencers = useMemo(() => {
+    if (!query) return influencers;
+    return influencers.filter(inf => 
+      inf.handle.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [influencers, query]);
+  
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Start typing influencer's handle
+      </label>
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => setShowDropdown(true)}
+          onBlur={() => {
+            // Delay hiding to allow clicking
+            setTimeout(() => setShowDropdown(false), 200);
+            
+            // Update if matches an influencer
+            const match = influencers.find(inf => 
+              inf.handle.toLowerCase() === query.toLowerCase()
+            );
+            if (match) {
+              onChange(match.handle);
+            }
+          }}
+          className="w-full p-2.5 pl-10 border border-gray-300 rounded-md"
+          placeholder="@username"
+        />
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+        </div>
+        
+        {/* Show filtered influencers */}
+        {showDropdown && filteredInfluencers.length > 0 && (
+          <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+            {filteredInfluencers.map(inf => (
+              <div 
+                key={inf.id} 
+                className="p-2 hover:bg-gray-50 cursor-pointer"
+                onClick={() => {
+                  setQuery(inf.handle);
+                  onChange(inf.handle);
+                  setShowDropdown(false);
+                }}
+              >
+                <div className="flex items-center">
+                  <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
+                    <span className="text-xs text-white">
+                      {inf.handle.substring(1, 3).toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="ml-2 text-sm text-gray-700">{inf.handle}</p>
+                  <span className="ml-2 text-xs text-gray-500">{inf.followers || '7k'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {/* Display selected influencer */}
+      {value && (
+        <div className="mt-2 p-2 bg-gray-50 rounded-md">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 mr-2">
+              <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
+                <span className="text-xs text-white">{value.substring(1, 3).toUpperCase()}</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-700">{value}</p>
+            <span className="ml-2 text-xs text-gray-500">
+              {influencers.find(inf => inf.handle === value)?.followers || '7k'}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -149,7 +298,8 @@ interface UploadedFileProps {
   onDelete: (asset: Asset) => void;
   onPreview: (asset: Asset) => void;
   onUpdate: (updatedAsset: Asset) => void;
-  currency?: string;
+  currencySymbol: string;
+  influencers: Influencer[];
 }
 
 const UploadedFile: React.FC<UploadedFileProps> = ({
@@ -157,10 +307,10 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
   onDelete,
   onPreview,
   onUpdate,
-  currency = "$"
+  currencySymbol,
+  influencers
 }) => {
   const [editAssetName, setEditAssetName] = useState(asset.details.assetName);
-  const [influencerQuery, setInfluencerQuery] = useState(asset.details.influencer || "");
   const [whyInfluencer, setWhyInfluencer] = useState(asset.details.whyInfluencer || "");
   const [budget, setBudget] = useState(asset.details.budget?.toString() || "");
 
@@ -170,10 +320,20 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
       ...asset,
       details: {
         assetName: editAssetName,
-        influencer: influencerQuery,
+        influencerHandle: asset.details.influencerHandle,
         whyInfluencer: whyInfluencer,
         budget: parseFloat(budget) || 0,
         description: asset.details.description
+      }
+    });
+  };
+
+  const handleInfluencerChange = (influencerHandle: string) => {
+    onUpdate({
+      ...asset,
+      details: {
+        ...asset.details,
+        influencerHandle: influencerHandle,
       }
     });
   };
@@ -183,7 +343,7 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
       <div className="flex p-4 items-center justify-between border-b border-gray-200">
         <div className="flex items-center">
           <DocumentIcon className="h-6 w-6 text-gray-400 mr-3" />
-          <span className="font-medium text-gray-700">{asset.file.name}</span>
+          <span className="font-medium text-gray-700">{asset.fileName || asset.details.assetName}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -218,62 +378,13 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
           />
         </div>
 
-        {/* Influencer */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Start typing influencer&apos;s handle
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={influencerQuery}
-              onChange={(e) => {
-                setInfluencerQuery(e.target.value);
-                if (e.target.value.startsWith('@')) {
-                  onUpdate({
-                    ...asset,
-                    details: {
-                      ...asset.details,
-                      influencer: e.target.value,
-                    }
-                  });
-                }
-              }}
-              onBlur={saveChanges}
-              className="w-full p-2.5 pl-10 border border-gray-300 rounded-md"
-              placeholder="@username"
-            />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <button
-              type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              onClick={() => {
-                if (influencerQuery.trim()) {
-                  saveChanges();
-                }
-              }}
-            >
-              <div className="bg-blue-500 rounded-full p-1">
-                <PlusIcon className="h-3 w-3 text-white" />
-              </div>
-            </button>
-          </div>
-          {asset.details.influencer && (
-            <div className="mt-2 p-2 bg-gray-50 rounded-md">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 mr-2">
-                  <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
-                    <span className="text-xs text-white">{asset.details.influencer.substring(1, 3).toUpperCase()}</span>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-700">{asset.details.influencer}</p>
-                <span className="ml-2 text-xs text-gray-500">7k</span>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Influencer Selector */}
+        <InfluencerSelector
+          assetId={asset.id}
+          influencers={influencers}
+          value={asset.details.influencerHandle || ''}
+          onChange={handleInfluencerChange}
+        />
 
         {/* Why this influencer */}
         <div>
@@ -302,19 +413,12 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
             Budget for Influencer
             <InformationCircleIcon className="h-4 w-4 text-blue-500 ml-1 cursor-help" title="Set the budget for this influencer" />
           </label>
-          <div className="relative flex items-center">
-            <div className="absolute left-3 inset-y-0 flex items-center pointer-events-none">
-              <span className="text-gray-500">{currency}</span>
-            </div>
-            <input
-              type="number"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              onBlur={saveChanges}
-              className="w-full pl-8 p-2.5 border border-gray-300 rounded-md"
-              placeholder="500"
-            />
-          </div>
+          <BudgetInput
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+            onBlur={saveChanges}
+            currencySymbol={currencySymbol}
+          />
         </div>
 
         {/* Action Buttons */}
@@ -384,199 +488,178 @@ function FormContent() {
   const searchParams = useSearchParams();
   const campaignId = searchParams.get('id');
   const { 
-    data, 
-    loading 
+    data: wizardData, 
+    updateData, 
+    campaignData, 
+    loading: wizardLoading,
+    updateCampaignData
   } = useWizard();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [confirmDeleteAsset, setConfirmDeleteAsset] = useState<Asset | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const currency = data?.overview?.currency || "$";
+  
+  // Extract campaign influencers from step 1
+  const campaignInfluencers = useMemo((): Influencer[] => {
+    // Default influencer from the campaign data
+    const defaultInfluencer = wizardData?.overview?.influencerHandle 
+      ? [{
+          id: 'default-influencer',
+          handle: wizardData.overview.influencerHandle,
+          platform: wizardData.overview.platform || 'INSTAGRAM',
+          followers: '10k'
+        }]
+      : [];
+    
+    // Try to get influencers array if it exists in the context
+    // Use optional chaining and type assertion to safely access without errors
+    const contextInfluencers = (wizardData as any)?.influencers || [];
+    
+    // Combine both sources
+    return [...defaultInfluencer, ...contextInfluencers];
+  }, [wizardData?.overview]);
+  
+  // Extract currency from Step 1
+  const currencyCode = useMemo(() => {
+    return wizardData?.overview?.currency || 'USD';
+  }, [wizardData?.overview]);
+  
+  // Get currency symbol for display
+  const currencySymbol = useMemo(() => {
+    return CURRENCY_SYMBOLS[currencyCode] || '$';
+  }, [currencyCode]);
   
   const initialValues: CreativeValues = {
     assets: [],
   };
 
-  // Handle file uploads
-  const handleFilesAdded = useCallback((files: FileList) => {
-    const newAssets: Asset[] = [];
-    const errors: string[] = [];
-
-    Array.from(files).forEach((file) => {
-      // Validate file type
-      if (!Object.keys(ALLOWED_FILE_TYPES).includes(file.type)) {
-        errors.push(`${file.name}: Unsupported file type`);
-        return;
-      }
-
-      // Validate file size
-      if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name}: File size exceeds 500MB limit`);
-        return;
-      }
-
-      // Check for duplicates
-      if (assets.some(asset => asset.file.name === file.name)) {
-        errors.push(`${file.name}: File already exists`);
-        return;
-      }
-
-      newAssets.push({
-        id: `${Date.now()}-${file.name}`,
-        file,
-        progress: 0,
-        details: {
-          assetName: file.name,
-          budget: 0,
-          description: '',
-        }
-      });
+  // Update context with new assets
+  const handleAssetsAdded = useCallback((newAssets: Asset[]) => {
+    // Combine existing and new assets
+    const updatedAssets = [...assets, ...newAssets];
+    setAssets(updatedAssets);
+    
+    // Update wizard context with the correct section name and data structure
+    updateData('assets', { 
+      files: updatedAssets.map(asset => ({
+        url: asset.url,
+        tags: []
+      }))
     });
+    
+    // Show success message with options parameter
+    toast.success(`${newAssets.length} file(s) added successfully`, {
+      duration: 3000,
+      position: 'top-center'
+    });
+  }, [assets, updateData]);
 
-    // Show errors if any
-    if (errors.length > 0) {
-      toast.error(
-        <div>
-          <p>Some files couldn't be uploaded:</p>
-          <ul className="list-disc pl-4">
-            {errors.map((err, i) => <li key={i}>{err}</li>)}
-          </ul>
-        </div>
-      );
-    }
-
-    // Add valid assets
-    if (newAssets.length > 0) {
-      setAssets(prev => [...prev, ...newAssets]);
-      newAssets.forEach(asset => simulateUpload(asset.id));
-      toast.success(`${newAssets.length} file(s) added successfully`);
-    }
-  }, [assets]);
-
-  // Simulate upload progress
-  const simulateUpload = useCallback((assetId: string) => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 30;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
+  // Type-safe asset handling
+  const processAssetsForSubmission = () => {
+    return assets.map(asset => ({
+      id: asset.id,
+      url: asset.url,
+      fileName: asset.fileName,
+      fileSize: asset.fileSize,
+      type: asset.type || 'image', // Ensure type has default value
+      details: {
+        assetName: asset.details.assetName,
+        budget: asset.details.budget,
+        description: asset.details.description || '',
+        influencerHandle: asset.details.influencerHandle || '',
+        platform: asset.details.platform || ''
       }
-      
-      setAssets(prev => prev.map(asset => 
-        asset.id === assetId 
-          ? { ...asset, progress: Math.min(Math.round(progress), 100) }
-          : asset
-      ));
-    }, 500);
+    }));
+  };
 
-    return () => clearInterval(interval);
-  }, []);
-
-  // Handle form submission
-  const handleSubmit = async (values: CreativeValues) => {
+  // When handling form submission
+  const handleSubmit = async (values: any) => {
     try {
       setIsSaving(true);
       setError(null);
-      
-      // Enhanced validation
-      if (assets.length === 0) {
-        throw new Error('Please upload at least one asset');
-      }
 
-      const incompleteAssets = assets.filter(a => a.progress < 100);
-      if (incompleteAssets.length > 0) {
-        throw new Error('Please wait for all uploads to complete');
-      }
+      // Format data for API
+      const formattedData = {
+        assets: processAssetsForSubmission()
+      };
 
-      // More detailed validation with specific field errors
-      const invalidAssets = assets.filter(a => {
-        const details = a.details;
-        return !details.assetName || 
-               !details.influencer || 
-               !details.whyInfluencer ||
-               !details.budget ||
-               details.budget <= 0;
-      });
+      // Add currentStep & step4Complete flags
+      const apiData = {
+        ...formattedData,
+        currentStep: 4,
+        step4Complete: true
+      };
 
-      if (invalidAssets.length > 0) {
-        console.log('Invalid assets:', invalidAssets);
-        
-        // Create a more detailed error message
-        const assetErrors = invalidAssets.map((asset, index) => {
-          const missing = [];
-          const details = asset.details;
-          
-          if (!details.assetName) missing.push('asset name');
-          if (!details.influencer) missing.push('influencer handle');
-          if (!details.whyInfluencer) missing.push('influencer rationale');
-          if (!details.budget || details.budget <= 0) missing.push('valid budget');
-          
-          return `Asset ${index + 1} (${asset.file.name}): Missing ${missing.join(', ')}`;
-        });
-        
-        throw new Error(`Please complete all required fields for each asset:\n${assetErrors.join('\n')}`);
-      }
-
-      // Process assets for API submission with additional error handling
-      const processedAssets = await Promise.all(assets.map(async (asset) => {
-        try {
-          // Create more reliable URLs for files
-          const fileURL = asset.file instanceof File 
-            ? URL.createObjectURL(asset.file) 
-            : String(asset.file);
-            
-          return {
-            type: asset.file.type.includes('video') ? 'video' : 'image',
-            url: fileURL,
-            fileName: asset.file.name,
-            fileSize: asset.file.size,
-            assetName: asset.details.assetName,
-            influencerHandle: asset.details.influencer,
-            influencerName: '', // Added for future use
-            influencerFollowers: '', // Added for future use
-            whyInfluencer: asset.details.whyInfluencer,
-            budget: parseFloat(asset.details.budget?.toString() || '0'),
-          };
-        } catch (err: any) {
-          console.error('Error processing asset:', asset, err);
-          throw new Error(`Error processing ${asset.file.name}: ${err.message || 'Unknown error'}`);
-        }
-      }));
-
-      console.log('Saving creative assets to campaign:', campaignId);
-      console.log('Processed assets:', processedAssets);
-
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
+      // Call API
+      const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          creativeAssets: processedAssets,
-          step: 4 // Added to track progress
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(apiData)
       });
 
-      const responseData = await response.json();
-      
+      // Handle response
       if (!response.ok) {
-        throw new Error(responseData.error || responseData.message || 'Failed to save assets');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save campaign data');
       }
 
-      console.log('Save response:', responseData);
-      toast.success('Assets saved successfully');
-      
-      // Proceed to next step
-      router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
-    } catch (error) {
-      console.error('Error saving assets:', error);
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      // Update context
+      if (updateCampaignData) {
+        updateCampaignData({
+          creative: formattedData,
+          currentStep: 4,
+          step4Complete: true
+        });
+      }
+
+      // Show success message
+      toast.success('Campaign assets saved successfully');
+
+      // Navigate to next step if there is one, or to submission page
+      router.push(`/campaigns/wizard/submission?id=${campaignId}`);
+    } catch (err: any) {
+      const message = err.message || 'An error occurred while saving campaign data';
+      console.error('Save error:', message);
       setError(message);
       toast.error(message);
     } finally {
       setIsSaving(false);
     }
   };
+
+  // Update any initial data loading code
+  useEffect(() => {
+    if (wizardData?.assets?.files && Array.isArray(wizardData.assets.files)) {
+      const existingAssets = wizardData.assets.files.map((file: any) => {
+        // Handle legacy data format
+        let assetDetails: AssetDetails = {
+          assetName: file.details?.assetName || file.fileName || '',
+          budget: Number(file.details?.budget) || 0,
+          description: file.details?.description || '',
+          // Map legacy 'influencer' to 'influencerHandle'
+          influencerHandle: file.details?.influencerHandle || 
+                          (file.details as any)?.influencer || '',
+          platform: file.details?.platform || '',
+          whyInfluencer: file.details?.whyInfluencer || ''
+        };
+        
+        return {
+          id: file.id,
+          url: file.url,
+          fileName: file.fileName,
+          fileSize: file.fileSize || 0,
+          type: file.url?.includes('.mp4') ? 'video' : 'image',
+          progress: 100,
+          details: assetDetails
+        };
+      });
+      
+      setAssets(existingAssets);
+    }
+  }, [wizardData]);
 
   // Handle asset deletion
   const handleDeleteAsset = (asset: Asset) => {
@@ -585,6 +668,8 @@ function FormContent() {
 
   const confirmDelete = () => {
     if (confirmDeleteAsset) {
+      // Here we would ideally also delete the asset from uploadthing
+      // by making a call to the uploadthing delete API
       setAssets((prev) => prev.filter((a) => a.id !== confirmDeleteAsset.id));
       setConfirmDeleteAsset(null);
     }
@@ -600,22 +685,36 @@ function FormContent() {
         throw new Error('Campaign ID is required');
       }
 
+      const processedAssets = assets.map(asset => {
+        // Find the full influencer data if available
+        const influencerData = campaignInfluencers.find(inf => 
+          inf.handle === asset.details.influencerHandle
+        );
+        
+        return {
+          type: asset.url?.includes('/image/') ? 'image' : 'video',
+          url: asset.url,
+          fileName: asset.fileName || asset.details.assetName,
+          fileSize: asset.fileSize || 0,
+          name: asset.details.assetName,
+          description: asset.details.description || '',
+          format: asset.url?.split('.').pop() || 'unknown',
+          influencerHandle: asset.details.influencerHandle || '',
+          influencerId: influencerData?.id,
+          influencerPlatform: influencerData?.platform,
+          whyInfluencer: asset.details.whyInfluencer || '',
+          budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
+          currency: currencyCode,
+        };
+      });
+
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          creativeAssets: assets.map(asset => ({
-            type: asset.file.type.includes('video') ? 'video' : 'image',
-            url: URL.createObjectURL(asset.file),
-            fileName: asset.file.name,
-            fileSize: asset.file.size,
-            assetName: asset.details.assetName || asset.file.name,
-            influencerHandle: asset.details.influencer || '',
-            whyInfluencer: asset.details.whyInfluencer || '',
-            budget: asset.details.budget ? parseFloat(asset.details.budget.toString()) : 0,
-          })),
+          creativeAssets: processedAssets,
           submissionStatus: 'draft'
         }),
       });
@@ -636,7 +735,7 @@ function FormContent() {
     }
   };
 
-  if (loading) {
+  if (wizardLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner />
@@ -680,78 +779,43 @@ function FormContent() {
                 {/* Asset Upload Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">Asset Upload</h2>
-                  <UploadArea onFilesAdded={handleFilesAdded} />
+                  {campaignId ? (
+                    <UploadArea 
+                      campaignId={campaignId} 
+                      onAssetsAdded={handleAssetsAdded} 
+                    />
+                  ) : (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-yellow-800">
+                        Campaign ID is required to upload assets. Please save the campaign first.
+                      </p>
+                    </div>
+                  )}
                   
                   {/* Uploaded Files Area */}
                   {assets.length > 0 && (
                     <div className="mt-6 space-y-2">
                       {assets.map((asset) => (
                         <div key={asset.id} className="mb-2">
-                          {asset.progress < 100 ? (
-                            <div className="bg-white rounded-lg border border-gray-200 p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center">
-                                  <DocumentIcon className="h-6 w-6 text-gray-400 mr-3" />
-                                  <span className="font-medium text-gray-700">{asset.file.name}</span>
-                                </div>
-                                <span className="text-sm text-gray-500">{asset.progress}%</span>
-                              </div>
-                              <div className="w-full h-2 bg-gray-200 rounded-full">
-                                <div 
-                                  className="h-2 bg-blue-600 rounded-full" 
-                                  style={{ width: `${asset.progress}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          ) : (
-                            <UploadedFile
-                              asset={asset}
-                              onPreview={() => setPreviewAsset(asset)}
-                              onDelete={() => handleDeleteAsset(asset)}
-                              onUpdate={(updatedAsset) => {
-                                setAssets(assets.map(a => 
-                                  a.id === updatedAsset.id ? updatedAsset : a
-                                ));
-                              }}
-                              currency={currency}
-                            />
-                          )}
+                          <UploadedFile
+                            asset={asset}
+                            onPreview={() => setPreviewAsset(asset)}
+                            onDelete={() => handleDeleteAsset(asset)}
+                            onUpdate={(updatedAsset) => {
+                              setAssets(assets.map(a => 
+                                a.id === updatedAsset.id ? updatedAsset : a
+                              ));
+                            }}
+                            currencySymbol={currencySymbol}
+                            influencers={campaignInfluencers}
+                          />
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
                 
-                {/* Asset Details Section */}
-                {assets.length > 0 && (
-                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Asset Details</h2>
-                    
-                    {/* File Tabs */}
-                    <div className="border-b border-gray-200">
-                      <div className="flex space-x-8">
-                        {assets.map((asset, index) => (
-                          <div 
-                            key={asset.id}
-                            className={`pb-3 ${index === 0 ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
-                          >
-                            <span>{asset.details.assetName || asset.file.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Preview Section */}
-                    {assets.length > 0 && (
-                      <div className="mt-6">
-                        <h3 className="text-sm font-medium text-gray-700 mb-2">Preview</h3>
-                        <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center">
-                          <DocumentIcon className="h-10 w-10 text-gray-400" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Asset Details Section - removed as per Figma design */}
                 
                 {/* Add bottom padding to prevent progress bar overlap */}
                 <div className="pb-24"></div>
@@ -765,8 +829,7 @@ function FormContent() {
                 onSaveDraft={() => handleSaveDraft(values)}
                 disableNext={
                   assets.length === 0 || 
-                  assets.some(a => a.progress < 100) ||
-                  assets.some(a => !a.details.assetName || !a.details.influencer || !a.details.whyInfluencer || !a.details.budget || a.details.budget <= 0)
+                  assets.some(a => !a.details.assetName || !a.details.influencerHandle || !a.details.whyInfluencer || !a.details.budget || a.details.budget <= 0)
                 }
                 isFormValid={isValid}
                 isDirty={dirty}
@@ -784,24 +847,18 @@ function FormContent() {
       >
         {previewAsset && (
           <div>
-            <h2 className="text-xl font-bold mb-4">Preview: {previewAsset.file.name}</h2>
-            {previewAsset.file.type.includes("video") ? (
-              <video controls className="w-full mb-4">
-                <source src={URL.createObjectURL(previewAsset.file)} type={previewAsset.file.type} />
-                Your browser does not support the video tag.
-              </video>
-            ) : previewAsset.file.type.includes("image") ? (
-              <img src={URL.createObjectURL(previewAsset.file)} alt={previewAsset.file.name} className="w-full mb-4" />
-            ) : previewAsset.file.type.includes("pdf") ? (
-              <embed
-                src={URL.createObjectURL(previewAsset.file)}
-                type="application/pdf"
-                width="100%"
-                height="600px"
-                className="mb-4"
-              />
+            <h2 className="text-xl font-bold mb-4">Preview: {previewAsset.fileName || previewAsset.details.assetName}</h2>
+            {previewAsset.url ? (
+              <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
+                <AssetPreview 
+                  url={previewAsset.url}
+                  fileName={previewAsset.fileName || previewAsset.details.assetName}
+                  type={previewAsset.type}
+                  className="w-full h-full object-contain"
+                />
+              </div>
             ) : (
-              <p className="mb-4">Preview not available for this file type.</p>
+              <p className="mb-4">No preview available.</p>
             )}
           </div>
         )}

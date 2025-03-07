@@ -9,6 +9,7 @@ import { Analytics } from '@/lib/analytics/analytics'
 import ErrorFallback from '@/components/ErrorFallback'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import { useSidebar } from '@/providers/SidebarProvider'
+import Image from 'next/image'
 import { 
   CalendarIcon, 
   CurrencyDollarIcon,
@@ -48,7 +49,6 @@ import {
   DocumentMagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import Image from 'next/image';
 import Link from 'next/link';
 // Import Currency from shared types
 import { Currency, Platform, Position } from '@/components/Wizard/shared/types';
@@ -217,6 +217,82 @@ const slideIn = {
   animate: { x: 0, opacity: 1 },
   exit: { x: 20, opacity: 0 }
 }
+
+// Add a KPI mapping with icons
+const kpiIconsMap = {
+  adRecall: {
+    title: "Ad Recall",
+    icon: "/KPIs/Ad_Recall.svg"
+  },
+  brandAwareness: {
+    title: "Brand Awareness",
+    icon: "/KPIs/Brand_Awareness.svg"
+  },
+  consideration: {
+    title: "Consideration",
+    icon: "/KPIs/Consideration.svg"
+  },
+  messageAssociation: {
+    title: "Message Association",
+    icon: "/KPIs/Message_Association.svg"
+  },
+  brandPreference: {
+    title: "Brand Preference",
+    icon: "/KPIs/Brand_Preference.svg"
+  },
+  purchaseIntent: {
+    title: "Purchase Intent",
+    icon: "/KPIs/Purchase_Intent.svg"
+  },
+  actionIntent: {
+    title: "Action Intent",
+    icon: "/KPIs/Action_Intent.svg"
+  },
+  recommendationIntent: {
+    title: "Recommendation Intent",
+    icon: "/KPIs/Brand_Preference.svg" // Using Brand Preference icon as a fallback
+  },
+  advocacy: {
+    title: "Advocacy",
+    icon: "/KPIs/Advocacy.svg"
+  }
+};
+
+// Feature icons mapping
+const featureIconsMap = {
+  CREATIVE_ASSET_TESTING: {
+    title: "Creative Asset Testing",
+    icon: "/Creative_Asset_Testing.svg"
+  },
+  BRAND_LIFT: {
+    title: "Brand Lift",
+    icon: "/Brand_Lift.svg"
+  },
+  BRAND_HEALTH: {
+    title: "Brand Health",
+    icon: "/Brand_Health.svg"
+  },
+  MIXED_MEDIA_MODELLING: {
+    title: "Mixed Media Modelling",
+    icon: "/MMM.svg"
+  }
+};
+
+// Format feature name for display
+const formatFeatureName = (feature: string): string => {
+  if (!feature) return "N/A";
+  return featureIconsMap[feature as keyof typeof featureIconsMap]?.title || 
+    feature.replace(/_/g, ' ').toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+// Format KPI name for display
+const formatKpiName = (kpi: string): string => {
+  if (!kpi) return "N/A";
+  // Get from map or format manually
+  return kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.title || 
+    kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+};
 
 // Updated MetricCard component
 interface MetricCardProps {
@@ -498,17 +574,21 @@ const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign })
     <div className="space-y-5">
       <div>
         <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
-        <div className={`kpi-${campaign.primaryKPI?.toLowerCase() || 'brand-awareness'} flex items-center text-lg font-medium text-[var(--accent-color)]`}>
-          {campaign.primaryKPI === 'adRecall' && <SparklesIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'brandAwareness' && <LightBulbIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'consideration' && <ChartBarIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'messageAssociation' && <HashtagIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'brandPreference' && <ChartBarIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'purchaseIntent' && <CurrencyDollarIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'actionIntent' && <PaperAirplaneIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'recommendationIntent' && <ShareIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI === 'advocacy' && <UserCircleIcon className="h-5 w-5 mr-2" />}
-          {campaign.primaryKPI ? campaign.primaryKPI.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) : 'Brand Awareness'}
+        <div className="flex items-center text-lg font-medium text-[var(--accent-color)]">
+          {campaign.primaryKPI && (
+            <div className="flex items-center">
+              <div className="w-6 h-6 mr-2" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
+                <Image 
+                  src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} 
+                  alt={formatKpiName(campaign.primaryKPI)}
+                  width={24}
+                  height={24}
+                />
+              </div>
+              {formatKpiName(campaign.primaryKPI)}
+            </div>
+          )}
+          {!campaign.primaryKPI && "N/A"}
         </div>
       </div>
 
@@ -517,8 +597,16 @@ const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign })
           <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary KPIs</h4>
           <div className="flex flex-wrap gap-2">
             {campaign.secondaryKPIs.map((kpi, index) => (
-              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                {kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm flex items-center">
+                <div className="w-4 h-4 mr-1" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
+                  <Image 
+                    src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} 
+                    alt={formatKpiName(kpi)}
+                    width={16}
+                    height={16}
+                  />
+                </div>
+                {formatKpiName(kpi)}
               </span>
             ))}
           </div>
@@ -824,6 +912,11 @@ const StatusBadge = ({ status = "draft", size = "md", className = "" }: StatusBa
       textColor = "text-blue-800";
       statusText = "Completed";
       break;
+    case "error":
+      bgColor = "bg-red-100";
+      textColor = "text-red-800";
+      statusText = "DATA ERROR";
+      break;
     case "draft":
     default:
       bgColor = "bg-gray-100";
@@ -1093,6 +1186,19 @@ function stressTestWithNullValues(data: CampaignDetail, formatDate: (date: strin
   console.groupEnd();
 }
 
+// Format percentage for display
+const formatPercentage = (value: number) => {
+  return `${value > 0 ? '+' : ''}${value}%`;
+};
+
+// Add new error status badge component
+const ErrorStatusBadge = ({ message }: { message: string }) => (
+  <div className="flex items-center bg-red-100 border-l-4 border-red-500 py-3 px-4 rounded-lg">
+    <XCircleIcon className="h-6 w-6 text-red-500 mr-3" />
+    <span className="text-red-700 font-medium">{message}</span>
+  </div>
+);
+
 export default function CampaignDetail() {
   const params = useParams();
   const router = useRouter();
@@ -1104,80 +1210,57 @@ export default function CampaignDetail() {
   const [testMode, setTestMode] = useState(false);
   const [useFallbackData, setUseFallbackData] = useState(false);
 
-  // Create fallback mock data for when API fails
-  const fallbackData: CampaignDetail = {
-    id: "mock-campaign-123",
-    campaignName: "Sample Campaign",
-    description: "This is a sample campaign used when API data cannot be loaded",
-    startDate: "2023-07-01",
-    endDate: "2023-09-30",
-    timeZone: "UTC",
+  // Create an empty data object with N/A values for when API fails
+  const emptyData: CampaignDetail = {
+    id: "N/A",
+    campaignName: "N/A",
+    description: "N/A",
+    startDate: "",
+    endDate: "",
+    timeZone: "N/A",
     currency: Currency.USD,
-    totalBudget: 100000,
-    socialMediaBudget: 45000,
+    totalBudget: 0,
+    socialMediaBudget: 0,
     platform: Platform.Instagram,
-    influencerHandle: "sampleinfluencer",
-    website: "https://example.com",
+    influencerHandle: "N/A",
+    website: "N/A",
     primaryContact: {
-      firstName: "John",
-      surname: "Doe",
-      email: "john.doe@example.com",
+      firstName: "N/A",
+      surname: "N/A",
+      email: "N/A",
       position: Position.Manager,
-      phone: "+1 (555) 123-4567"
+      phone: "N/A"
     },
-    brandName: "Sample Brand",
-    category: "Technology",
-    product: "Software",
-    targetMarket: "Global",
-    submissionStatus: "draft",
-    primaryKPI: "brandAwareness",
-    secondaryKPIs: [KPI.adRecall, KPI.consideration],
-    mainMessage: "Experience the future of technology",
-    hashtags: "#SampleTech #Innovation",
-    memorability: "High",
-    keyBenefits: "Increased productivity, time savings",
-    expectedAchievements: "Market penetration and brand awareness",
-    purchaseIntent: "Increase by 15%",
-    brandPerception: "Innovation leader",
-    features: [Feature.BRAND_LIFT, Feature.CREATIVE_ASSET_TESTING],
+    brandName: "N/A",
+    category: "N/A",
+    product: "N/A",
+    targetMarket: "N/A",
+    submissionStatus: "error", // Special status to indicate error
+    primaryKPI: "N/A",
+    secondaryKPIs: [],
+    mainMessage: "N/A",
+    hashtags: "N/A",
+    memorability: "N/A",
+    keyBenefits: "N/A",
+    expectedAchievements: "N/A",
+    purchaseIntent: "N/A",
+    brandPerception: "N/A",
+    features: [],
     audience: {
       demographics: {
-        ageRange: ["25", "35", "20", "15", "5", "0"],
-        gender: ["Male", "Female"],
-        education: ["College", "Graduate"],
-        income: ["Middle", "Upper-middle"],
-        interests: ["Technology", "Innovation", "Digital products"],
-        locations: ["United States", "Europe", "Asia"],
-        languages: ["English", "Spanish", "French"]
+        ageRange: [],
+        gender: [],
+        education: [],
+        income: [],
+        interests: [],
+        locations: [],
+        languages: []
       }
     },
-    creativeAssets: [
-      {
-        name: "Product Demo",
-        type: "video",
-        url: "https://example.com/demo.mp4",
-        size: 5000,
-        duration: 45
-      },
-      {
-        name: "Marketing Image",
-        type: "image",
-        url: "https://via.placeholder.com/800x600",
-        size: 250
-      }
-    ],
-    creativeRequirements: [
-      {
-        requirement: "All videos must be under 60 seconds",
-        description: "Keep videos concise for social media"
-      },
-      {
-        requirement: "Brand logo must be clearly visible",
-        description: "Ensure brand recognition"
-      }
-    ],
-    createdAt: "2023-06-15T10:00:00Z",
-    updatedAt: "2023-06-20T15:30:00Z"
+    creativeAssets: [],
+    creativeRequirements: [],
+    createdAt: "",
+    updatedAt: ""
   };
 
   useEffect(() => {
@@ -1202,7 +1285,8 @@ export default function CampaignDetail() {
       // If mock data is explicitly requested, use it
       if (useFallbackData) {
         console.log('Using mock data instead of fetching from API');
-        setData(fallbackData);
+        setData(emptyData); // Use empty data instead of fallbackData
+        setError("DEMO MODE: Using placeholder data."); 
         setLoading(false);
         return;
       }
@@ -1226,9 +1310,9 @@ export default function CampaignDetail() {
         
         // Check if the result is empty
         if (!result || Object.keys(result).length === 0) {
-          console.warn('Empty API response received. Using fallback data.');
-          setData(fallbackData);
-          setError('API returned empty data. Using sample data for display purposes.');
+          console.warn('Empty API response received. Using empty data.');
+          setData(emptyData);
+          setError('API ERROR: Empty response received');
           setLoading(false);
           return;
         }
@@ -1254,10 +1338,10 @@ export default function CampaignDetail() {
         if (!validation.isValid) {
           console.error('Invalid campaign data received', result, validation.errors);
           
-          // Use fallback data but display the validation error
-          console.warn('Using fallback data due to validation errors');
-          setData(fallbackData);
-          setError(`Using sample data for display. API validation errors: ${validation.errors.join(', ')}`);
+          // Use empty data instead of fallback data
+          console.warn('Using empty data due to validation errors');
+          setData(emptyData);
+          setError(`API ERROR: Invalid data format - ${validation.errors.join(', ')}`);
           setLoading(false);
           return;
         }
@@ -1333,7 +1417,7 @@ export default function CampaignDetail() {
             }
           },
           
-          // Creative Assets (placeholder logic)
+          // Creative Assets
           creativeAssets: result.assets || result.creativeAssets || [],
           
           // Creative Requirements
@@ -1349,14 +1433,14 @@ export default function CampaignDetail() {
       } catch (err) {
         console.error('Error fetching campaign data:', err);
         
-        // Use fallback data on error
-        console.warn('Using fallback data due to API error');
-        setData(fallbackData);
+        // Use empty data on error
+        console.warn('Using empty data due to API error');
+        setData(emptyData);
         
         if (err instanceof Error) {
-          setError(`API error: ${err.message}. Using sample data for display purposes.`);
+          setError(`API ERROR: ${err.message}`);
         } else {
-          setError('Failed to load campaign data. Using sample data for display purposes.');
+          setError('API ERROR: Failed to load campaign data');
         }
       } finally {
         setLoading(false);
@@ -1465,11 +1549,6 @@ export default function CampaignDetail() {
     }
   };
 
-  // Format percentage for display
-  const formatPercentage = (value: number) => {
-    return `${value > 0 ? '+' : ''}${value}%`;
-  };
-
   // Test all components that will render with data
   if (DEBUG && data) {
     // Reset error state before testing
@@ -1553,8 +1632,13 @@ export default function CampaignDetail() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-white border-b border-[var(--divider-color)]">
+      <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)]`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {error && (
+            <div className="mb-4">
+              <ErrorStatusBadge message={error} />
+            </div>
+          )}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex items-center space-x-3">
               <button 
@@ -1565,11 +1649,11 @@ export default function CampaignDetail() {
                 <ArrowLeftIcon className="h-5 w-5 text-[var(--secondary-color)]" />
               </button>
               <div>
-                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "Campaign Detail"}</h1>
+                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "N/A"}</h1>
                 <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1">
-                  <StatusBadge status={data?.submissionStatus} />
+                  <StatusBadge status={error ? "error" : data?.submissionStatus} />
                   <span className="mx-2">•</span>
-                  <span>Created on {formatDate(data?.createdAt || "")}</span>
+                  <span>Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
                 </div>
               </div>
             </div>
@@ -1586,6 +1670,7 @@ export default function CampaignDetail() {
               <button 
                 onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
                 className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]"
+                disabled={!!error}
               >
                 <PencilIcon className="h-4 w-4 mr-2" />
                 Edit
@@ -1601,18 +1686,18 @@ export default function CampaignDetail() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <MetricCard 
             title="Total Budget" 
-            value={data?.totalBudget || 0} 
+            value={error ? "N/A" : (data?.totalBudget || "N/A")} 
             icon={CurrencyDollarIcon} 
-            format="currency" 
+            format={error ? "text" : "currency"} 
           />
           <MetricCard 
             title="Campaign Duration" 
-            value={calculateDuration(data?.startDate || "", data?.endDate || "")} 
+            value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} 
             icon={CalendarDaysIcon} 
           />
           <MetricCard 
             title="Platform" 
-            value={data?.platform || "Instagram"} 
+            value={error ? "N/A" : (data?.platform || "N/A")} 
             icon={GlobeAltIcon} 
           />
         </div>
@@ -1625,25 +1710,25 @@ export default function CampaignDetail() {
             description="Basic campaign information"
           >
             <div className="space-y-3">
-              <DataRow label="Campaign Name" value={data?.campaignName} featured={true} />
-              <DataRow label="Description" value={data?.description || 'No description available'} />
-              <DataRow label="Brand Name" value={data?.brandName} />
-              <DataRow label="Start Date" value={formatDate(data?.startDate || "")} icon={CalendarIcon} />
-              <DataRow label="End Date" value={formatDate(data?.endDate || "")} icon={CalendarIcon} />
-              <DataRow label="Time Zone" value={data?.timeZone} icon={ClockIcon} />
-              <DataRow label="Currency" value={safeCurrency(data?.currency)} icon={CurrencyDollarIcon} />
+              <DataRow label="Campaign Name" value={error ? "N/A" : (data?.campaignName || "N/A")} featured={true} />
+              <DataRow label="Description" value={error ? "N/A" : (data?.description || "N/A")} />
+              <DataRow label="Brand Name" value={error ? "N/A" : (data?.brandName || "N/A")} />
+              <DataRow label="Start Date" value={error ? "N/A" : (data?.startDate ? formatDate(data.startDate) : "N/A")} icon={CalendarIcon} />
+              <DataRow label="End Date" value={error ? "N/A" : (data?.endDate ? formatDate(data.endDate) : "N/A")} icon={CalendarIcon} />
+              <DataRow label="Time Zone" value={error ? "N/A" : (data?.timeZone || "N/A")} icon={ClockIcon} />
+              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} icon={CurrencyDollarIcon} />
               <DataRow 
                 label="Total Budget" 
-                value={formatCurrency(data?.totalBudget || 0, data?.currency)} 
+                value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} 
                 icon={CurrencyDollarIcon} 
                 featured={true}
               />
               <DataRow 
                 label="Social Media Budget" 
-                value={formatCurrency(data?.socialMediaBudget || 0, data?.currency)} 
+                value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} 
                 icon={CurrencyDollarIcon}
               />
-              {data?.website && <DataRow label="Website" value={data.website} icon={GlobeAltIcon} />}
+              <DataRow label="Website" value={error ? "N/A" : (data?.website || "N/A")} icon={GlobeAltIcon} />
             </div>
           </DataCard>
 
@@ -1655,31 +1740,30 @@ export default function CampaignDetail() {
             <div className="space-y-3">
               <div className="flex items-center mb-4">
                 <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold">
-                  {data?.primaryContact?.firstName?.charAt(0) || ''}
-                  {data?.primaryContact?.surname?.charAt(0) || ''}
+                  {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
                 </div>
                 <div>
                   <h4 className="text-[var(--primary-color)] font-semibold">
-                    {data?.primaryContact?.firstName || ''} {data?.primaryContact?.surname || ''}
+                    {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
                   </h4>
-                  <p className="text-[var(--secondary-color)] text-sm">{data?.primaryContact?.position || 'No position'}</p>
+                  <p className="text-[var(--secondary-color)] text-sm">{error ? "N/A" : (data?.primaryContact?.position || "N/A")}</p>
                 </div>
               </div>
               
               <DataRow 
                 label="Email" 
-                value={
+                value={error ? "N/A" : (
                   <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
-                    {data?.primaryContact?.email}
+                    {data?.primaryContact?.email || "N/A"}
                   </a>
-                } 
+                )} 
                 icon={EnvelopeIcon} 
               />
               
-              <DataRow label="Position" value={data?.primaryContact?.position} icon={BuildingOfficeIcon} />
+              <DataRow label="Position" value={error ? "N/A" : (data?.primaryContact?.position || "N/A")} icon={BuildingOfficeIcon} />
             </div>
 
-            {data?.secondaryContact && (
+            {!error && data?.secondaryContact && (
               <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
                 <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary Contact</h4>
                 <div className="space-y-3">
@@ -1706,13 +1790,95 @@ export default function CampaignDetail() {
 
         {/* Objectives & Audience */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {data && <ObjectivesSection campaign={data} />}
-          {data && <AudienceSection audience={data.audience} />}
+          {error ? (
+            <DataCard 
+              title="Campaign Objectives" 
+              icon={SparklesIcon}
+              description="Key objectives and performance indicators"
+            >
+              <div className="space-y-5">
+                <div>
+                  <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
+                  <div className="text-[var(--secondary-color)]">N/A</div>
+                </div>
+                <div>
+                  <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary KPIs</h4>
+                  <div className="text-[var(--secondary-color)]">N/A</div>
+                </div>
+                <div className="space-y-3 pt-2">
+                  <DataRow label="Main Message" value="N/A" />
+                  <DataRow label="Brand Perception" value="N/A" />
+                  <DataRow label="Hashtags" value="N/A" icon={HashtagIcon} />
+                  <DataRow label="Key Benefits" value="N/A" />
+                  <DataRow label="Memorability" value="N/A" />
+                  <DataRow label="Expected Achievements" value="N/A" />
+                  <DataRow label="Purchase Intent" value="N/A" />
+                </div>
+              </div>
+            </DataCard>
+          ) : (
+            data && <ObjectivesSection campaign={data} />
+          )}
+          
+          {error ? (
+            <DataCard 
+              title="Target Audience" 
+              icon={UsersIcon}
+              description="Detailed audience targeting information"
+            >
+              <div className="text-center py-10 text-[var(--secondary-color)]">
+                <p>N/A</p>
+              </div>
+            </DataCard>
+          ) : (
+            data && <AudienceSection audience={data.audience} />
+          )}
         </div>
 
         {/* Creative Assets */}
         <div className="mb-6">
-          {data && <CreativeAssetsGallery assets={data.creativeAssets} />}
+          <DataCard 
+            title="Creative Assets" 
+            icon={PhotoIcon}
+            description="Campaign creative assets"
+            actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}
+          >
+            {error ? (
+              <div className="text-center py-10 text-[var(--secondary-color)]">
+                <PhotoIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p>N/A</p>
+              </div>
+            ) : (
+              data && (data.creativeAssets.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {data.creativeAssets.slice(0, 6).map((asset, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden border border-[var(--divider-color)] bg-gray-50 aspect-square relative group">
+                      {asset.type === 'video' ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <PlayIcon className="h-12 w-12 text-white opacity-70" />
+                          <div className="absolute inset-0 bg-black opacity-40"></div>
+                        </div>
+                      ) : null}
+                      <img 
+                        src={asset.url || '/placeholder-image.jpg'} 
+                        alt={asset.name}
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-white text-sm font-medium truncate">{asset.name}</p>
+                        {asset.duration && <p className="text-white text-xs">{asset.duration}s</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10 text-[var(--secondary-color)]">
+                  <PhotoIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                  <p>No creative assets available</p>
+                </div>
+              ))
+            )}
+          </DataCard>
         </div>
 
         {/* Creative Requirements */}
@@ -1722,64 +1888,67 @@ export default function CampaignDetail() {
             icon={PaintBrushIcon}
             description="Requirements for creative assets"
           >
-            {(data?.creativeRequirements && data.creativeRequirements.length > 0) ? (
-              <div className="space-y-4">
-                {data.creativeRequirements.map((req, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4 border border-[var(--divider-color)]">
-                    <h4 className="text-[var(--primary-color)] font-medium">{req.requirement}</h4>
-                    {req.description && <p className="text-[var(--secondary-color)] text-sm mt-1">{req.description}</p>}
-                  </div>
-                ))}
-              </div>
-            ) : (
+            {error ? (
               <div className="text-center py-8 text-[var(--secondary-color)]">
                 <PaintBrushIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>No creative requirements specified</p>
+                <p>N/A</p>
               </div>
+            ) : (
+              (data?.creativeRequirements && data.creativeRequirements.length > 0) ? (
+                <div className="space-y-4">
+                  {data.creativeRequirements.map((req, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-[var(--divider-color)]">
+                      <h4 className="text-[var(--primary-color)] font-medium">{req.requirement}</h4>
+                      {req.description && <p className="text-[var(--secondary-color)] text-sm mt-1">{req.description}</p>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--secondary-color)]">
+                  <PaintBrushIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                  <p>No creative requirements specified</p>
+                </div>
+              )
             )}
           </DataCard>
         </div>
 
         {/* Campaign Features */}
-        {(data?.features && data.features.length > 0) && (
-          <div className="mb-6">
-            <DataCard 
-              title="Campaign Features" 
-              icon={SparklesIcon}
-              description="Additional features enabled for this campaign"
-            >
-              <div className="flex flex-wrap gap-3">
-                {data.features.map((feature, index) => (
-                  <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
-                    <CheckCircleIcon className="h-5 w-5 mr-2" />
-                    <span>
-                      {feature === Feature.CREATIVE_ASSET_TESTING ? 'Creative Asset Testing' :
-                       feature === Feature.BRAND_LIFT ? 'Brand Lift' :
-                       feature === Feature.BRAND_HEALTH ? 'Brand Health' :
-                       feature === Feature.MIXED_MEDIA_MODELLING ? 'Mixed Media Modeling' : feature}
-                    </span>
-                  </div>
-                ))}
+        <div className="mb-6">
+          <DataCard 
+            title="Campaign Features" 
+            icon={SparklesIcon}
+            description="Additional features enabled for this campaign"
+          >
+            {error ? (
+              <div className="text-center py-8 text-[var(--secondary-color)]">
+                <p>N/A</p>
               </div>
-            </DataCard>
-          </div>
-        )}
-
-        {/* Additional Information (if needed) */}
-        {error && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <InformationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  {error}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+            ) : (
+              (data?.features && data.features.length > 0) ? (
+                <div className="flex flex-wrap gap-3">
+                  {data.features.map((feature, index) => (
+                    <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
+                      <div className="w-5 h-5 mr-2" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
+                        <Image 
+                          src={featureIconsMap[feature as keyof typeof featureIconsMap]?.icon || "/Brand_Lift.svg"}
+                          alt={formatFeatureName(feature)}
+                          width={20}
+                          height={20}
+                        />
+                      </div>
+                      <span>{formatFeatureName(feature)}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--secondary-color)]">
+                  <p>No features specified</p>
+                </div>
+              )
+            )}
+          </DataCard>
+        </div>
       </div>
     </div>
   );
