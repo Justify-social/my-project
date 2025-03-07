@@ -23,16 +23,19 @@ import Image from "next/image";
 // Type Definitions
 interface CreativeAsset {
   id: string;
-  assetName: string;
+  assetName?: string;
+  name?: string;
   type: string;
   url: string;
-  fileName: string;
+  fileName?: string;
   fileSize?: number;
+  format?: string;
   influencerHandle?: string;
   influencerName?: string;
   influencerFollowers?: string;
   whyInfluencer?: string;
   budget?: number;
+  description?: string;
 }
 
 // Additional type definitions aligned with WizardContext
@@ -1406,65 +1409,106 @@ function Step5Content() {
           stepNumber={4}
           onEdit={() => navigateToStep(4)}
         >
-          <div className="mb-4">
-            <button
-              onClick={() => setShowAssets(!showAssets)}
-              className="flex items-center text-[var(--accent-color)] hover:underline font-medium"
-            >
-              <span>{showAssets ? 'Hide' : 'Show'} uploaded assets</span>
-              <ChevronRightIcon 
-                className={`h-5 w-5 ml-1 transition-transform duration-200 ${showAssets ? 'rotate-90' : ''}`} 
-              />
-            </button>
-          </div>
-
-          {showAssets && displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 && (
-            <div className="space-y-4">
+          {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? (
+            <div className="space-y-5">
               {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => (
                 <div key={asset.id || index} className="border border-[var(--divider-color)] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
                   <div className="bg-[rgba(0,191,255,0.05)] px-4 py-3 flex justify-between items-center border-b border-[var(--divider-color)]">
-                    <h3 className="font-medium text-[var(--primary-color)]">{asset.assetName}</h3>
+                    <h3 className="font-medium text-[var(--primary-color)]">{asset.assetName || asset.name || 'Untitled Asset'}</h3>
                     <span className="text-xs px-2 py-1 bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] rounded-full font-medium">
                       {asset.type}
                     </span>
                   </div>
-                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <p className="text-sm text-[var(--secondary-color)] mb-1">File Name</p>
-                      <div className="flex items-center">
-                        <DocumentIcon className="h-4 w-4 text-[var(--secondary-color)] mr-2" />
-                        <p className="font-medium text-[var(--primary-color)]">{asset.fileName}</p>
-                      </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                    {/* Asset Preview */}
+                    <div className="flex items-center justify-center bg-gray-50 rounded-md border border-gray-200 overflow-hidden h-48">
+                      {asset.type && asset.type.includes('image') ? (
+                        <div className="relative w-full h-full">
+                          <Image 
+                            src={asset.url} 
+                            alt={asset.assetName || asset.name || 'Asset preview'} 
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        </div>
+                      ) : asset.type && asset.type.includes('video') ? (
+                        <video 
+                          src={asset.url} 
+                          controls 
+                          className="max-h-full max-w-full"
+                          poster="/video-placeholder.png"
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-gray-400">
+                          <DocumentIcon className="h-16 w-16 mb-2" />
+                          <p className="text-sm">Preview not available</p>
+                        </div>
+                      )}
                     </div>
-                    {asset.influencerHandle && (
+                    
+                    {/* Asset Details */}
+                    <div className="space-y-3">
                       <div>
-                        <p className="text-sm text-[var(--secondary-color)] mb-1">Influencer</p>
-                        <p className="font-medium text-[var(--primary-color)]">{asset.influencerHandle}</p>
+                        <p className="text-sm text-[var(--secondary-color)] mb-1">File Name</p>
+                        <div className="flex items-center">
+                          <DocumentIcon className="h-4 w-4 text-[var(--secondary-color)] mr-2" />
+                          <p className="font-medium text-[var(--primary-color)] truncate">{asset.fileName || asset.name || 'Unknown file'}</p>
+                        </div>
                       </div>
-                    )}
-                    {asset.budget !== undefined && (
-                      <div>
-                        <p className="text-sm text-[var(--secondary-color)] mb-1">Budget</p>
-                        <p className="font-medium text-[var(--primary-color)]">
-                          {formatCurrency(asset.budget, displayData.currency || 'USD')}
-                        </p>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-sm text-[var(--secondary-color)] mb-1">Type</p>
+                          <p className="font-medium text-[var(--primary-color)]">{asset.type}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-[var(--secondary-color)] mb-1">Format</p>
+                          <p className="font-medium text-[var(--primary-color)]">{asset.format || 'Unknown'}</p>
+                        </div>
                       </div>
-                    )}
-                    {asset.whyInfluencer && (
-                      <div className="col-span-2">
-                        <p className="text-sm text-[var(--secondary-color)] mb-1">Why this influencer?</p>
-                        <p className="text-sm text-[var(--primary-color)] bg-gray-50 p-3 rounded-md">{asset.whyInfluencer}</p>
-                      </div>
-                    )}
+                      
+                      {asset.fileSize && (
+                        <div>
+                          <p className="text-sm text-[var(--secondary-color)] mb-1">File Size</p>
+                          <p className="font-medium text-[var(--primary-color)]">{(asset.fileSize / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      )}
+                      
+                      {asset.influencerHandle && (
+                        <div>
+                          <p className="text-sm text-[var(--secondary-color)] mb-1">Influencer</p>
+                          <p className="font-medium text-[var(--primary-color)]">{asset.influencerHandle}</p>
+                        </div>
+                      )}
+                      
+                      {asset.budget !== undefined && (
+                        <div>
+                          <p className="text-sm text-[var(--secondary-color)] mb-1">Budget</p>
+                          <p className="font-medium text-[var(--primary-color)]">
+                            {formatCurrency(asset.budget, displayData.currency || 'USD')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  
+                  {/* Description section (full width) */}
+                  {asset.description && (
+                    <div className="px-4 py-3 border-t border-[var(--divider-color)] bg-gray-50">
+                      <p className="text-sm text-[var(--secondary-color)] mb-1">Description</p>
+                      <p className="text-[var(--primary-color)]">{asset.description}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-          )}
-
-          {(!displayData.creativeAssets || !Array.isArray(displayData.creativeAssets) || displayData.creativeAssets.length === 0) && (
+          ) : (
             <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4">
-              <p className="text-yellow-800">No assets have been uploaded yet.</p>
+              <p className="text-yellow-800">No assets have been uploaded yet. Please complete Step 4.</p>
             </div>
           )}
 

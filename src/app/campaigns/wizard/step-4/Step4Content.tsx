@@ -261,7 +261,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) =>
   const [isCompressing, setIsCompressing] = useState(false);
   
   // Use UploadThing hook with standard options to avoid type issues
-  const { startUpload } = useUploadThing(ourFileRouter.campaignAssetUploader.name, {
+  const { startUpload } = useUploadThing("campaignAssetUploader", {
     onClientUploadComplete: (res) => {
       if (res) {
         handleUploadComplete(res);
@@ -270,7 +270,10 @@ const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) =>
     onUploadError: (error) => {
       console.error('Upload error:', error);
       toast.error(`Upload failed: ${error.message}`);
-    }
+    },
+    headers: () => ({ 
+      "x-campaign-id": campaignId
+    })
   });
   
   // Helper for compressing image files before upload
@@ -306,10 +309,8 @@ const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) =>
       
       setIsCompressing(false);
       
-      // Start upload with metadata
-      const uploadResult = await startUpload(compressedFiles, {
-        campaignId: campaignId
-      });
+      // Start upload without metadata (the endpoint already has the campaign ID from headers)
+      const uploadResult = await startUpload(compressedFiles);
       
       if (!uploadResult) {
         throw new Error("Upload failed");
@@ -356,7 +357,9 @@ const UploadArea: React.FC<UploadAreaProps> = ({ campaignId, onAssetsAdded }) =>
     const newAssets = validResults.map((result, index) => {
       // Use explicit checks for properties that might be undefined
       const resultObj = result as Record<string, any>;
-      const safeName = typeof resultObj.name === 'string' ? resultObj.name : `asset-${index}-${Date.now()}`;
+      // The UploadThing type definition doesn't include 'name', so let's use a safer approach
+      const fileKey = 'name' in resultObj ? 'name' : 'key';
+      const safeName = typeof resultObj[fileKey] === 'string' ? resultObj[fileKey] : `asset-${index}-${Date.now()}`;
       const extension = safeName.includes('.') ? safeName.split('.').pop() : 'unknown';
 
       return {
@@ -855,9 +858,6 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
           </div>
                   )}
                   </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {(asset.fileSize / (1024 * 1024)).toFixed(2)} MB • This name will be used in the database
-                </p>
                 </div>
               </div>
             <button
@@ -1119,8 +1119,7 @@ function FormContent() {
         format: asset.type,
         influencerHandle: asset.details.influencerHandle || '',
         budget: asset.details.budget || 0,
-        whyInfluencer: asset.details.whyInfluencer || '',
-        platform: asset.details.platform || ''
+        whyInfluencer: asset.details.whyInfluencer || ''
       }))
     });
     
@@ -1150,14 +1149,25 @@ function FormContent() {
         // Get a clean type value with fallbacks
         const detectedType = detectFileType(asset.url, asset.type) || 'image';
         
+        // Safely extract format - avoid split() errors
+        let format = 'unknown';
+        if (asset.type) {
+          if (typeof asset.type === 'string' && asset.type.includes('/')) {
+            format = asset.type.split('/')[1] || 'unknown';
+          } else {
+            // Fallback for non-MIME format types
+            format = detectedType;
+          }
+        }
+        
         // Ensure all required fields are present with proper fallbacks
         return {
-          id: asset.id || `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: asset.id || `generated-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           url: asset.url || '',
           fileName: asset.fileName || asset.details?.assetName || 'Unnamed Asset',
           fileSize: typeof asset.fileSize === 'number' ? asset.fileSize : 0,
           type: detectedType === 'video' ? 'video' : 'image', // For database schema compatibility
-          format: (asset.type?.split('/')[1] || detectedType) || 'unknown', // Preserve format information
+          format: format,
           details: {
             assetName: asset.details?.assetName || asset.fileName || 'Unnamed Asset',
             budget: typeof asset.details?.budget === 'number' ? asset.details.budget : 0,
@@ -1185,8 +1195,8 @@ function FormContent() {
       setIsSaving(true);
       setError(null);
       
-      // Set the redirect destination
-      setRedirect(`/campaigns/wizard/submission?id=${campaignId}`);
+      // Set the redirect destination to step-5 (Review) instead of submission
+      setRedirect(`/campaigns/wizard/step-5?id=${campaignId}`);
       
       // 1. Process and validate assets
       const processedAssets = processAssetsForSubmission();
@@ -1196,21 +1206,19 @@ function FormContent() {
         return;
       }
       
-      // 2. Format data according to API expectations with more consistent structure
+      // 2. Format data for the CampaignWizard model (not CampaignWizardSubmission)
       const formattedData = {
         step: 4,
-        creativeGuidelines: "",
-        creativeNotes: "",
+        // Assets are stored directly in the CampaignWizard model's assets JSON field
         creativeAssets: processedAssets.map(asset => ({
           id: asset.id,
           type: asset.type.includes('video') ? 'video' : 'image',
           url: asset.url,
-          title: asset.fileName || asset.details?.assetName || 'Untitled Asset',  // Ensure title is never empty
+          name: asset.fileName || asset.details?.assetName || 'Untitled Asset',
           description: asset.details?.description || asset.details?.whyInfluencer || "",
-          influencerAssigned: Boolean(asset.details?.influencerHandle),
           influencerHandle: asset.details?.influencerHandle || "",
-          influencerBudget: Number(asset.details?.budget) || 0,
-          format: asset.type.split('/')[1] || "mp4",  // Provide fallback format
+          budget: Number(asset.details?.budget) || 0,
+          format: asset.type && asset.type.includes('/') ? asset.type.split('/')[1] : "unknown",
           fileSize: asset.fileSize || 0
         }))
       };
@@ -1233,11 +1241,7 @@ function FormContent() {
               'Content-Type': 'application/json',
               'X-Correlation-ID': correlationId
             },
-            body: JSON.stringify({
-              ...formattedData,
-              currentStep: 4,
-              step4Complete: true
-            })
+            body: JSON.stringify(formattedData)
           });
           
           console.log(`[${correlationId}] API Response status:`, response.status);
@@ -1265,7 +1269,6 @@ function FormContent() {
           
           // Update wizard context with the correct data
           updateCampaignData({
-            currentStep: 4,
             step4Complete: true,
             creative: {
               creativeAssets: formattedData.creativeAssets
@@ -1309,7 +1312,43 @@ function FormContent() {
   useEffect(() => {
     // First check if we have data in the creative section (new format)
     const wizardDataAny = wizardData as any;
-    if (wizardDataAny?.creative?.creativeAssets && Array.isArray(wizardDataAny.creative.creativeAssets)) {
+    
+    // Check for assets in the CampaignWizard model (stored directly in assets field)
+    if (campaignData?.assets && Array.isArray(campaignData.assets)) {
+      console.log('Loading assets from CampaignWizard.assets:', campaignData.assets);
+      const existingAssets = campaignData.assets.map((asset: any, index: number) => {
+        // Extract the asset name, prioritizing what was previously saved
+        const savedName = asset.name || '';
+        
+        // Map from database format to UI format
+        const assetDetails: AssetDetails = {
+          assetName: savedName, // Use the saved name as the displayed name
+          budget: typeof asset.budget === 'number' ? asset.budget : 0,
+          description: asset.description || '',
+          influencerHandle: asset.influencerHandle || '',
+          platform: asset.platform || '',
+          whyInfluencer: asset.description || '' // Use description as fallback
+        };
+        
+        // Ensure each asset has a unique ID
+        const uniqueId = asset.id || `generated-asset-${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`;
+        
+        return {
+          id: uniqueId,
+          url: asset.url,
+          fileName: savedName, // Use the saved name as the file name for consistency
+          fileSize: asset.fileSize || 0,
+          type: asset.type || 'image', // Default to image if type is missing
+          progress: 100, // Complete progress for loaded assets
+          details: assetDetails
+        } as Asset;
+      });
+      
+      console.log('Loaded existing assets from CampaignWizard.assets:', existingAssets);
+      setAssets(existingAssets);
+    }
+    // Then check if we have data in the creative section (new format)
+    else if (wizardDataAny?.creative?.creativeAssets && Array.isArray(wizardDataAny.creative.creativeAssets)) {
       const existingAssets = wizardDataAny.creative.creativeAssets.map((asset: any, index: number) => {
         // Map from database format to UI format
         const assetDetails: AssetDetails = {
@@ -1352,7 +1391,7 @@ function FormContent() {
             url: file.url,
             fileName: file.fileName || `Asset ${index + 1}`,
             fileSize: file.fileSize || 0,
-            type: file.type || detectFileType(file.url),
+            type: file.type || detectFileType(file.url) || 'image',
             progress: 100,
             details: {
               assetName: file.details?.assetName || file.fileName || `Asset ${index + 1}`,
@@ -1367,8 +1406,10 @@ function FormContent() {
       
       console.log('Loaded existing assets from assets.files:', existingAssets);
       setAssets(existingAssets);
+    } else {
+      console.log('No existing assets found in any data structure');
     }
-  }, [wizardData]);
+  }, [wizardData, campaignData]);
 
   // Add a useEffect to track dirty state when assets change
   useEffect(() => {
@@ -1441,13 +1482,15 @@ function FormContent() {
         
         // The essential creativeAssets data
         creativeAssets: processedAssets.map(asset => ({
+          id: asset.id, // Include ID for tracking
           type: asset.type.includes('video') ? 'video' : 'image',
           url: asset.url,
-          title: asset.details.assetName, // API expects 'title' not 'name'
-          description: asset.details.whyInfluencer || '',
-          influencerAssigned: !!asset.details.influencerHandle,
+          name: asset.details.assetName, // Use 'name' to match backend field
+          description: asset.details.description || asset.details.whyInfluencer || '',
           influencerHandle: asset.details.influencerHandle || '',
-          influencerBudget: parseFloat(asset.details.budget?.toString() || '0')
+          budget: parseFloat(asset.details.budget?.toString() || '0'),
+          fileSize: asset.fileSize || 0,
+          format: asset.type.includes('/') ? asset.type.split('/')[1] : 'unknown'
         }))
       };
       
@@ -1605,7 +1648,12 @@ function FormContent() {
                 currentStep={4}
                 onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
                 onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)}
-                onNext={submitForm}
+                onNext={() => {
+                  // First save the form data
+                  handleSaveDraft(values);
+                  // Then navigate directly to step 5
+                  router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
+                }}
                 onSaveDraft={() => handleSaveDraft(values)}
                 disableNext={
                   assets.length === 0 || 

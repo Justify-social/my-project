@@ -42,6 +42,10 @@ interface CampaignAssetUploaderProps {
 // Generate type-safe helpers
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
+// Type for the UploadDropzone component
+type FileRouter = OurFileRouter;
+type FileRouteEndpoint = keyof FileRouter;
+
 export function CampaignAssetUploader({ 
   campaignId, 
   onUploadComplete, 
@@ -93,7 +97,8 @@ export function CampaignAssetUploader({
       .map((file, index) => {
         try {
           const fileObj = file as Record<string, unknown>;
-          const url = String(fileObj.url || fileObj.ufsUrl || '');
+          // Prioritize ufsUrl over url as per UploadThing's latest API
+          const url = String(fileObj.ufsUrl || fileObj.url || '');
           if (!url) {
             console.warn(`[${correlationId}] Skipping file ${index}: no URL`, file);
             return null;
@@ -102,9 +107,27 @@ export function CampaignAssetUploader({
           const rawName = fileObj.name;
           const fileName = typeof rawName === 'string' ? sanitizeFileName(rawName) : `file-${index}-${Date.now()}`;
           const fileSize = Number(fileObj.size || 0);
+          
+          // Handle type with defensive coding
+          let type = 'image'; // Default to image
+          let format = 'unknown';
+          
           const rawType = fileObj.type;
-          const format = typeof rawType === 'string' ? rawType : '';
-          const type = format && format.includes('/') ? format.split('/')[0] : (fileName.match(/\.(mp4|mov|avi|wmv|flv|webm)$/i) ? 'video' : 'image');
+          if (rawType && typeof rawType === 'string') {
+            // Split MIME type safely
+            if (rawType.includes('/')) {
+              const typeParts = rawType.split('/');
+              type = typeParts[0] === 'video' ? 'video' : 'image';
+              format = typeParts[1] || 'unknown';
+            } else {
+              // Handle non-MIME type values
+              type = rawType.toLowerCase().includes('video') ? 'video' : 'image';
+              format = rawType;
+            }
+          } else {
+            // Fallback to extension-based detection
+            type = fileName.match(/\.(mp4|mov|avi|wmv|flv|webm)$/i) ? 'video' : 'image';
+          }
 
           return {
             id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -131,7 +154,7 @@ export function CampaignAssetUploader({
   
   return (
     <div className="w-full">
-      <UploadDropzone<OurFileRouter>
+      <UploadDropzone<FileRouter, "campaignAssetUploader">
         endpoint="campaignAssetUploader"
         onBeforeUploadBegin={(files: File[]) => {
           const correlationId = generateCorrelationId('upload');
