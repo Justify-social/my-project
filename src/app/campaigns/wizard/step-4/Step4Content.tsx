@@ -543,7 +543,10 @@ function FormContent() {
     // Update wizard context with the correct section name and data structure
     updateData('assets', { 
       files: updatedAssets.map(asset => ({
+        id: asset.id, // Include id in the saved asset data
         url: asset.url,
+        fileName: asset.fileName,
+        details: asset.details,
         tags: []
       }))
     });
@@ -633,7 +636,7 @@ function FormContent() {
   // Update any initial data loading code
   useEffect(() => {
     if (wizardData?.assets?.files && Array.isArray(wizardData.assets.files)) {
-      const existingAssets = wizardData.assets.files.map((file: any) => {
+      const existingAssets = wizardData.assets.files.map((file: any, index) => {
         // Handle legacy data format
         let assetDetails: AssetDetails = {
           assetName: file.details?.assetName || file.fileName || '',
@@ -646,8 +649,11 @@ function FormContent() {
           whyInfluencer: file.details?.whyInfluencer || ''
         };
         
+        // Ensure each asset has a unique ID even if one isn't provided
+        const uniqueId = file.id || `generated-asset-${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`;
+        
         return {
-          id: file.id,
+          id: uniqueId,
           url: file.url,
           fileName: file.fileName,
           fileSize: file.fileSize || 0,
@@ -829,7 +835,7 @@ function FormContent() {
                 onSaveDraft={() => handleSaveDraft(values)}
                 disableNext={
                   assets.length === 0 || 
-                  assets.some(a => !a.details.assetName || !a.details.influencerHandle || !a.details.whyInfluencer || !a.details.budget || a.details.budget <= 0)
+                  assets.some(a => !a.details.assetName || !a.details.influencerHandle || !a.details.budget || a.details.budget <= 0)
                 }
                 isFormValid={isValid}
                 isDirty={dirty}
