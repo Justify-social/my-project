@@ -1,5 +1,7 @@
 import { createUploadthing } from "uploadthing/next";
 import type { FileRouter } from "uploadthing/next";
+import { getServerSession } from "next-auth/next";
+import { prisma } from "@/lib/prisma";
 
 const f = createUploadthing();
 
@@ -42,6 +44,31 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Avatar upload complete:", file.url);
       return { url: file.url, type: "avatar" };
+    }),
+    
+  // Campaign asset uploader for Step 4 of the Campaign Wizard
+  campaignAssetUploader: f({
+    image: { maxFileSize: "8MB", maxFileCount: 10 },
+    video: { maxFileSize: "16MB", maxFileCount: 5 },
+  })
+    .middleware(async ({ req }) => {
+      // Simplify the middleware to reduce potential issues with Effect
+      const campaignId = req.headers.get("x-campaign-id") || "unknown";
+      
+      return { 
+        campaignId,
+        uploadedAt: new Date().toISOString()
+      };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      // Simplify the completion handler
+      return { 
+        url: file.url,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        campaignId: metadata.campaignId
+      };
     })
 } satisfies FileRouter;
 

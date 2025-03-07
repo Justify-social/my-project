@@ -1,15 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { UploadDropzone } from "@uploadthing/react";
-import { generateClientDropzoneAccept } from "uploadthing/client";
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { 
   ArrowUpTrayIcon, 
   DocumentIcon 
 } from "@heroicons/react/24/outline";
-import { OurFileRouter } from "@/app/api/uploadthing/core";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { 
+  generateCorrelationId, 
+  sanitizeFileName, 
+  logAndShowError 
+} from "@/utils/fileUtils";
 
 export interface UploadedAsset {
   id: string;
@@ -18,6 +21,13 @@ export interface UploadedAsset {
   fileSize: number;
   type: string;
   format: string;
+  details?: {
+    assetName: string;
+    budget?: number;
+    description?: string;
+    influencerHandle?: string;
+    platform?: string;
+  };
 }
 
 interface CampaignAssetUploaderProps {
@@ -32,56 +42,184 @@ export function CampaignAssetUploader({
   onUploadError 
 }: CampaignAssetUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  
+  // Validate files before upload
+  const validateFiles = (files: File[]): File[] => {
+    const correlationId = generateCorrelationId('validate');
+    console.log(`[${correlationId}] Validating ${files.length} files`);
+    
+    return files.filter(file => {
+      // Check for null or undefined file
+      if (!file) {
+        logAndShowError(new Error("Invalid file object"), correlationId, "Invalid file detected");
+        return false;
+      }
+      
+      // Check for file name
+      if (!file.name) {
+        logAndShowError(new Error("File missing name"), correlationId, "File missing name");
+        return false;
+      }
+      
+      // Check for file type
+      if (!file.type) {
+        console.warn(`[${correlationId}] File missing type, using fallback detection: ${file.name}`);
+        // Continue with the file, we'll use fallback type detection
+      }
+      
+      return true;
+    });
+  };
+  
+  // Process uploaded file results safely
+  const processUploadResults = (res: unknown[]): UploadedAsset[] => {
+    if (!res || !Array.isArray(res) || res.length === 0) {
+      return [];
+    }
+    
+    const correlationId = generateCorrelationId('process');
+    console.log(`[${correlationId}] Processing ${res.length} upload results`);
+    
+    return res.map(file => {
+      try {
+        // Type assertion for file object
+        const fileObj = file as Record<string, unknown>;
+        
+        // Safely access properties with fallbacks
+        const fileName = sanitizeFileName(fileObj.name as string || 'unnamed-file');
+        const url = (fileObj.ufsUrl as string) || (fileObj.url as string) || '';
+        const fileSize = typeof fileObj.size === 'number' ? fileObj.size : 0;
+        
+        // Safely determine file type
+        let type: string;
+        if (fileObj.type && typeof fileObj.type === 'string') {
+          const typeParts = fileObj.type.split('/');
+          type = typeParts.length > 0 && typeParts[0] ? 
+            (typeParts[0] === 'image' ? 'image' : 'video') : 
+            'image'; // Default to image if we can't determine
+        } else {
+          // Fallback to extension-based detection
+          type = fileName.match(/\.(mp4|mov|avi|wmv|flv|webm)$/i) ? 'video' : 'image';
+        }
+        
+        return {
+          id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          url,
+          fileName,
+          fileSize,
+          type,
+          format: fileObj.type as string || '',
+          details: {
+            assetName: fileName,
+            budget: 0,
+            description: '',
+            influencerHandle: '',
+            platform: '',
+          }
+        };
+      } catch (error) {
+        const fileObj = file as Record<string, unknown>;
+        logAndShowError(error, correlationId, `Failed to process file: ${fileObj?.name || 'unknown'}`);
+        // Return a minimal valid asset to avoid breaking the UI
+        return {
+          id: `asset-error-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          url: (fileObj?.ufsUrl as string) || (fileObj?.url as string) || '',
+          fileName: 'error-processing-file',
+          fileSize: 0,
+          type: 'image', // Safe default
+          format: '',
+        };
+      }
+    }).filter(asset => asset.url); // Only include assets with a URL
+  };
   
   return (
     <div className="w-full">
-      {/* @ts-ignore - We're customizing the component with content prop which TypeScript doesn't fully recognize */}
       <UploadDropzone
         endpoint="campaignAssetUploader"
         onBeforeUploadBegin={(files: File[]) => {
+          const correlationId = generateCorrelationId('upload');
+          console.log(`[${correlationId}] Starting upload for ${files.length} files`);
+          
           setIsUploading(true);
-          setSelectedFiles([]);
-          return files;
+          const validFiles = validateFiles(files);
+          
+          if (validFiles.length === 0) {
+            toast.error("No valid files to upload");
+            setIsUploading(false);
+            throw new Error("No valid files to upload");
+          }
+          
+          // Process files - sanitize file names
+          return validFiles.map(file => {
+            try {
+              const sanitizedName = sanitizeFileName(file.name);
+              if (sanitizedName !== file.name) {
+                console.log(`[${correlationId}] Sanitized file name: ${file.name} -> ${sanitizedName}`);
+                return new File([file], sanitizedName, { type: file.type });
+              }
+              return file;
+            } catch (error) {
+              logAndShowError(error, correlationId, `Failed to sanitize file: ${file.name}`);
+              return file; // Use original file as fallback
+            }
+          });
         }}
         onFileSelect={(files: FileList) => {
           // Track selected files before upload starts
-          setSelectedFiles(Array.from(files));
+          const fileArray = Array.from(files);
+          const validFiles = validateFiles(fileArray);
+          setSelectedFiles(validFiles);
         }}
-        onUploadProgress={(progress: any) => {
-          // @ts-ignore - We know the shape matches our state
-          setUploadProgress(prev => ({ ...prev, ...progress }));
+        onUploadProgress={(progress: Record<string, number>) => {
+          // Progress is tracked but not displayed in this component
+          // Could be used for detailed progress if needed
         }}
-        onClientUploadComplete={(res: any) => {
+        onClientUploadComplete={(res: unknown) => {
+          const correlationId = generateCorrelationId('complete');
+          console.log(`[${correlationId}] Upload completed`, res);
+          
           setIsUploading(false);
           setSelectedFiles([]);
-          if (!res || res.length === 0) {
-            toast.error("No files were uploaded successfully");
-            return;
+          
+          try {
+            if (!res || !Array.isArray(res) || res.length === 0) {
+              toast.error("No files were uploaded successfully");
+              return;
+            }
+            
+            const assets = processUploadResults(res);
+            if (assets.length === 0) {
+              toast.error("Failed to process uploaded files");
+              return;
+            }
+            
+            onUploadComplete(assets);
+            toast.success(`${assets.length} file(s) uploaded successfully`);
+          } catch (error) {
+            logAndShowError(error, correlationId, "Error processing upload results");
           }
-          
-          const assets = res.map((file: any) => ({
-            id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-            url: file.ufsUrl || file.url,
-            fileName: file.name || 'unnamed-file',
-            fileSize: file.size || 0,
-            type: file.type?.startsWith('image/') ? 'image' : 'video',
-            format: file.type || '',
-          }));
-          
-          onUploadComplete(assets);
-          toast.success(`${assets.length} file(s) uploaded successfully`);
         }}
         onUploadError={(error: Error) => {
+          const correlationId = generateCorrelationId('error');
+          console.error(`[${correlationId}] Upload error:`, error);
+          
           setIsUploading(false);
-          setUploadProgress({});
           setSelectedFiles([]);
-          onUploadError(error);
-          toast.error(`Upload error: ${error.message}`);
+          
+          // Handle specific UploadThing errors
+          if (error.message && error.message.includes("Cannot read properties of undefined")) {
+            const betterMessage = "Invalid file format or data. Please check your files and try again.";
+            toast.error(betterMessage);
+            onUploadError(new Error(betterMessage));
+          } else {
+            // Pass the original error
+            onUploadError(error);
+            toast.error(`Upload error: ${error.message}`);
+          }
         }}
         className="w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
-        // @ts-ignore - Using the content prop to customize UI
         content={{
           allowedContent: "Images and videos only",
           label: "Choose a file or drag and drop",
@@ -114,11 +252,11 @@ export function CampaignAssetUploader({
             )
           )
         }}
-        // @ts-ignore - Add custom headers
         config={{
           mode: "auto",
           appendCustomHeaders: () => ({
-            "x-campaign-id": campaignId
+            "x-campaign-id": campaignId,
+            "x-correlation-id": generateCorrelationId('upload')
           })
         }}
       />
@@ -148,4 +286,4 @@ export function CampaignAssetUploader({
       )}
     </div>
   );
-} 
+}
