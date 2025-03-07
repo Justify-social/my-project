@@ -5,6 +5,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useSidebar } from "@/providers/SidebarProvider";
 import MobileMenu from "./MobileMenu";
 import { navItems, settingsNavItem } from "@/config/navigation";
+import SearchBar from "@/components/Search/SearchBar";
 
 interface HeaderProps {
   companyName: string;
@@ -35,15 +36,7 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Center: Search Bar (hidden on mobile) */}
           <div className="hidden md:flex flex-grow justify-center px-4">
-            <div className="w-full max-w-lg bg-gray-200 rounded-md px-4 py-2 flex items-center">
-              <Image src="/magnifying-glass.svg" alt="Search" width={20} height={20} />
-              <input
-                type="text"
-                placeholder="Search campaigns, influencers, or reports."
-                className="flex-grow bg-transparent focus:outline-none px-2 text-sm"
-              />
-              <span className="text-gray-500 text-xs">⌘ K</span>
-            </div>
+            <SearchBar className="w-full max-w-lg" />
           </div>
 
           {/* Right: Icon Group */}
