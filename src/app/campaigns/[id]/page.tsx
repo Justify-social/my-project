@@ -44,7 +44,8 @@ import {
   PauseIcon,
   CheckBadgeIcon,
   PlayIcon,
-  CogIcon
+  CogIcon,
+  DocumentMagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Image from 'next/image';
@@ -785,44 +786,54 @@ interface StatusBadgeProps {
 
 const StatusBadge = ({ status = "draft", size = "md", className = "" }: StatusBadgeProps) => {
   let bgColor = "bg-gray-100";
-  let textColor = "text-gray-700";
-  let icon = null;
+  let textColor = "text-gray-800";
   let statusText = "Draft";
 
   const safeStatus = status?.toLowerCase() || "draft";
 
   switch(safeStatus) {
-    case "submitted":
-    case "live":
+    case "approved":
       bgColor = "bg-green-100";
       textColor = "text-green-800";
-      icon = <CheckCircleIcon className="h-4 w-4 mr-1" />;
-      statusText = "Live";
+      statusText = "Approved";
+      break;
+    case "active":
+      bgColor = "bg-green-100";
+      textColor = "text-green-800";
+      statusText = "Active";
+      break;
+    case "submitted":
+      bgColor = "bg-green-100";
+      textColor = "text-green-800";
+      statusText = "Submitted";
+      break;
+    case "in_review":
+    case "in-review": 
+    case "inreview":
+      bgColor = "bg-yellow-100";
+      textColor = "text-yellow-800";
+      statusText = "In Review";
       break;
     case "paused":
       bgColor = "bg-yellow-100";
       textColor = "text-yellow-800";
-      icon = <PauseIcon className="h-4 w-4 mr-1" />;
       statusText = "Paused";
       break;
     case "completed":
       bgColor = "bg-blue-100";
       textColor = "text-blue-800";
-      icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />;
       statusText = "Completed";
       break;
     case "draft":
     default:
       bgColor = "bg-gray-100";
-      textColor = "text-gray-700";
-      icon = <PencilSquareIcon className="h-4 w-4 mr-1" />;
+      textColor = "text-gray-800";
       statusText = "Draft";
       break;
   }
 
   return (
     <span className={`inline-flex items-center rounded-full ${bgColor} ${textColor} ${size === "md" ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"} font-medium ${className}`}>
-      {icon}
       {statusText}
     </span>
   );
