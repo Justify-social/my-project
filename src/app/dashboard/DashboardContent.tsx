@@ -1047,6 +1047,9 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
 
   const upcomingCampaigns = useMemo(() => {
     return campaignsData?.campaigns?.filter(campaign => 
+      // Include any campaign with a status that is not "DRAFT" (case-insensitive)
+      (campaign.status && campaign.status.toUpperCase() !== "DRAFT") ||
+      // Also keep the existing logic for backward compatibility 
       new Date(campaign.startDate) > new Date()
     ).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
     .slice(0, 3) || [];

@@ -1,6 +1,6 @@
 # Justify.social Brand Guide
 
-**Last Updated:** 2023-07-15  
+**Last Updated:** 2025-03-07  
 **Status:** Active  
 **Owner:** Design Team
 
