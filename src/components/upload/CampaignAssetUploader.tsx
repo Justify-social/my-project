@@ -172,7 +172,7 @@ export function CampaignAssetUploader({
           const validFiles = validateFiles(fileArray);
           setSelectedFiles(validFiles);
         }}
-        onUploadProgress={(progress: Record<string, number>) => {
+        onUploadProgress={(_progress: Record<string, number>) => {
           // Progress is tracked but not displayed in this component
           // Could be used for detailed progress if needed
         }}
