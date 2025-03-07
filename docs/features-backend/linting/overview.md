@@ -6,7 +6,7 @@
 
 ## Overview
 
-The Campaign Wizard application uses a comprehensive linting setup to ensure code quality, consistency, and to catch potential issues early in the development process. This document provides an overview of our linting approach, tools, and configuration.
+The Justify.social platform uses a comprehensive linting setup to ensure code quality, consistency, and to catch potential issues early in the development process. This document provides an overview of our linting approach, tools, and configuration.
 
 ## Key Components
 

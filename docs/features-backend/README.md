@@ -1,52 +1,52 @@
 # Backend Features
 
-**Last Updated:** 2025-03-05  
-**Status:** Active  
-**Owner:** Backend Team
+This section contains technical documentation for the backend components of Justify.social. It's primarily intended for developers and system administrators who need to understand the technical implementation details.
 
-## Overview
+## Architecture
 
-This section contains technical documentation for the backend components of the Campaign Wizard application. It's primarily intended for developers and system administrators who need to understand the technical implementation details.
+The **[Architecture](architecture/README.md)** documentation provides a high-level overview of the backend system design, including:
 
-## Available Documentation
+- System design principles
+- Component interactions
+- Scalability considerations
+- Deployment architecture
 
-### [Database](./database/schema.md)
+## Database
 
-Documentation for the database structure and operations.
+The **[Database](database/README.md)** documentation covers:
 
-- [Schema](./database/schema.md) - Database schema and models
-- [Operations](./database/operations.md) - Common database operations and patterns
+- Schema design
+- Entity relationships
+- Database operations
+- Migration patterns
+- Schema evolution
 
-### [Authentication](./authentication/overview.md)
+## APIs
 
-Documentation for the authentication and authorization system.
+The **[APIs](apis/README.md)** documentation includes:
 
-- [Overview](./authentication/overview.md) - Authentication architecture and flows
-- [Implementation](./authentication/implementation.md) - Implementation details
+- API endpoints
+- Request/response formats
+- Authentication requirements
+- Error handling
+- Rate limiting
 
-### [APIs](./apis/overview.md)
+## Authentication
 
-Documentation for the application's APIs.
+The **[Authentication](authentication/README.md)** documentation details:
 
-- [Overview](./apis/overview.md) - API architecture and design
-- [Endpoints](./apis/endpoints.md) - API endpoint reference
+- Authentication flows
+- Session management
+- JWT implementation
+- Role-based access control
+- Security considerations
 
-### [Architecture](./architecture/overview.md)
+## Technical Overview
 
-Documentation for the system architecture.
+The backend is built with:
 
-- [Overview](./architecture/overview.md) - System architecture summary
-- [Design](./architecture/design.md) - Architecture design decisions
-
-### [Linting](./linting/overview.md)
-
-Documentation for code quality standards and linting.
-
-- [Overview](./linting/overview.md) - Linting setup and approach
-- [Rules](./linting/rules.md) - Linting rules and standards
-
-## Related Documentation
-
-- [Frontend Features](../features-frontend/README.md) - User-facing features
-- [Developer Guides](../guides/developer/setup.md) - Guides for developers
-- [Contributing Guidelines](../CONTRIBUTING.md) - How to contribute to the project 
+- Next.js API routes
+- Prisma ORM
+- PostgreSQL database
+- TypeScript
+- Zod for validation

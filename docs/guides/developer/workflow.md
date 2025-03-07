@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide outlines the recommended development workflow for the Campaign Wizard application. Following these practices will help ensure code quality, maintainability, and collaboration across the team.
+This guide outlines the recommended development workflow for the Justify.social platform. Following these practices will help ensure code quality, maintainability, and collaboration across the team.
 
 ## Development Lifecycle
 

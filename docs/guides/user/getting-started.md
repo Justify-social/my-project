@@ -1,116 +1,131 @@
-# Getting Started Guide
+# Getting Started with Justify.social
 
-**Last Updated:** 2025-03-05  
-**Audience:** All Users  
-**Complexity:** Beginner
+**Last Updated:** 2025-03-07  
+**Status:** Active  
+**Owner:** User Experience Team
 
-## Introduction
+## Welcome to Justify.social!
 
-Welcome to the Campaign Wizard application! This guide will help you set up your account, navigate the interface, and create your first campaign. Within minutes, you'll be on your way to managing successful marketing campaigns.
+Welcome to Justify.social, a platform that captures authentic audience opinions to measure social campaign impact and identify standout influencers for brands. This guide will help you set up your account, navigate the interface, and create your first campaign. Within minutes, you'll be on your way to managing successful marketing campaigns.
 
-## Prerequisites
+## Account Setup
 
-Before you begin:
+### Creating Your Account
 
-- You should have received an invitation email with your account details
-- Have your brand assets (logos, guidelines) ready if possible
-- Have a basic idea of your campaign objectives
+1. Visit [justify.social](https://justify.social) in your web browser
+2. Click the "Sign Up" button in the top-right corner
+3. Enter your email address and create a password
+4. Fill in your profile information:
+   - Name
+   - Company
+   - Role
+   - Industry
+5. Click "Create Account"
+6. Verify your email address by clicking the link sent to your inbox
 
-## Step-by-Step Instructions
+### Logging In
 
-### Step 1: Account Setup
+1. Visit [justify.social](https://justify.social)
+2. Click "Log In" in the top-right corner
+3. Enter your email address and password
+4. Click "Log In"
 
-1. **Access the Application**
-   - Open the invitation email
-   - Click the "Activate Account" link
-   - Set your password following the security guidelines
+## Navigating the Interface
 
-2. **Complete Your Profile**
-   - Upload your profile photo
-   - Verify your contact information
-   - Set notification preferences
+### Dashboard
 
-3. **Set Company Details** (Admin users only)
-   - Add company name and logo
-   - Set brand colors and guidelines
-   - Invite team members (if applicable)
+Upon logging in, you'll land on the Dashboard, which provides:
 
-### Step 2: Exploring the Dashboard
+- Overview of active campaigns
+- Key performance metrics
+- Recent activity
+- Quick access to common actions
 
-1. **Navigation Overview**
-   - Left sidebar: Primary navigation
-   - Top bar: Search, notifications, and account menu
-   - Central area: Dashboard content
+![Dashboard Overview](../../public/images/dashboard-screenshot.png)
 
-2. **Understanding Dashboard Widgets**
-   - Campaign Status: Overview of your campaign statuses
-   - Recent Activity: Latest updates on your campaigns
-   - Performance: Key metrics across your campaigns
-   - Quick Actions: Common tasks you can perform
+### Main Navigation
 
-3. **Customizing Your Dashboard**
-   - Click "Customize" in the top right
-   - Drag and drop widgets to rearrange
-   - Add or remove widgets based on your preferences
-   - Save your layout
+The main navigation menu is located on the left side of the screen and includes:
 
-### Step 3: Creating Your First Campaign
+- **Dashboard**: Return to the main dashboard
+- **Campaigns**: View and manage all campaigns
+- **Brand Lift**: Access brand lift studies
+- **Creative Testing**: Test and analyze creative assets
+- **Brand Health**: Monitor brand health metrics
+- **Influencers**: Discover and manage influencers
+- **Reports**: Generate and view reports
+- **Settings**: Configure account and team settings
 
-1. **Start the Campaign Wizard**
-   - Click "Create Campaign" on the dashboard
-   - Select the campaign type (if applicable)
+## Creating Your First Campaign
 
-2. **Follow the Wizard Steps**
-   - Campaign Details: Enter basic information
-   - Objectives: Define goals and messaging
-   - Audience: Select target audience
-   - Creative: Upload assets and guidelines
-   - Review: Verify all information before submission
+### Quick Start Campaign
 
-3. **Submit or Save as Draft**
-   - Click "Submit Campaign" if complete
-   - Or "Save as Draft" to continue later
+1. From the Dashboard, click the "Create Campaign" button
+2. Select "Quick Start Campaign" 
+3. Follow the 5-step wizard:
+   - **Step 1**: Enter campaign name and basic details
+   - **Step 2**: Define campaign objectives and KPIs
+   - **Step 3**: Set target audience
+   - **Step 4**: Upload creative assets
+   - **Step 5**: Review and submit
 
-## Common Use Cases
+### Using Templates
 
-### Managing Multiple Campaigns
+To save time, you can use campaign templates:
 
-If you need to manage multiple campaigns:
+1. From the Campaigns page, click "Create Campaign"
+2. Select "Use Template"
+3. Choose from available templates:
+   - Brand Awareness
+   - Product Launch
+   - Seasonal Promotion
+   - Influencer Campaign
+4. Customize the template to fit your needs
+5. Review and submit
 
-1. Use the Campaigns section to view all campaigns
-2. Apply filters to find specific campaigns
-3. Use tags to organize campaigns by theme or objective
-4. Set up dashboard widgets to highlight key campaigns
+## Viewing Campaign Results
 
-### Team Collaboration
+Once your campaign is live, you can monitor its performance:
 
-To collaborate with your team:
+1. Go to the "Campaigns" section
+2. Click on your campaign name
+3. View the performance dashboard with metrics such as:
+   - Reach and impressions
+   - Engagement rates
+   - Brand lift metrics
+   - ROI and conversion data
 
-1. Invite team members via Settings > Team
-2. Assign appropriate roles (Admin, Editor, Viewer)
-3. Use comments to communicate within campaigns
-4. Set up notification preferences for team activities
+## Getting Help
 
-## Troubleshooting
+### In-App Support
 
-| Problem | Solution |
-|---------|----------|
-| Can't log in | Use the "Forgot Password" link or contact your administrator |
-| Dashboard not loading | Check your internet connection or refresh the page |
-| Campaign not saving | Ensure all required fields are completed |
-| Can't find a feature | Use the search function or check the help documentation |
+- Click the "?" icon in the top-right corner for context-sensitive help
+- Use the chat feature to speak with support
+
+### Help Center
+
+Visit our comprehensive [Help Center](https://help.justify.social) for:
+
+- Detailed tutorials
+- FAQ articles
+- Video guides
+- Best practices
+
+### Support Contact
+
+For direct assistance, contact our support team:
+
+- Email: support@justify.social
+- Phone: (555) 123-4567
+- Hours: Monday-Friday, 9am-5pm ET
 
 ## Next Steps
 
-Now that you're set up, here are some recommended next steps:
+After getting familiar with the basics, we recommend:
 
-- [Create your first campaign](../../features-frontend/campaign-wizard/usage.md)
-- [Explore analytics features](../../features-frontend/dashboard/usage.md)
-- [Learn about brand lift studies](../../features-frontend/brand-lift/overview.md)
-- [Set up integrations](../../features-frontend/settings/options.md)
+1. [Setting up your team](./team-setup.md)
+2. [Connecting your social media accounts](./connecting-accounts.md)
+3. [Exploring the brand lift capabilities](./brand-lift-studies.md)
+4. [Learning about influencer discovery tools](./influencer-discovery.md)
 
-## Additional Resources
-
-- [Complete User Journey](./journey.md)
-- [Common Tasks Guide](./common-tasks.md)
-- [Video Tutorials](https://example.com/tutorials) 
+Welcome aboard! We're excited to help you measure the impact of your social campaigns with authentic audience insights. 

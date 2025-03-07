@@ -2,7 +2,7 @@
 
 ## 1. Overview & Goals
 
-This implementation plan focuses on ensuring the Campaign Wizard application has:
+This implementation plan focuses on ensuring the Justify.social platform has:
 - Robust database integration with proper schema alignment
 - Reliable autosave functionality
 - Consistent UI styling and component usage
@@ -705,7 +705,7 @@ Check database health.
 
 #### 1. System Overview
 
-The Campaign Wizard application provides a comprehensive platform for managing marketing campaigns. As an administrator, you have access to all features and capabilities of the system, including user management, configuration, and monitoring.
+The Justify.social platform provides a comprehensive platform for managing marketing campaigns. As an administrator, you have access to all features and capabilities of the system, including user management, configuration, and monitoring.
 
 #### 2. Getting Started
 

@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide walks you through using the Influencer Management feature in the Campaign Wizard application. The influencer management tools help you discover, evaluate, and collaborate with social media influencers to amplify your marketing campaigns.
+This guide walks you through using the Influencer Management feature in the Justify.social platform. The influencer management tools help you discover, evaluate, and collaborate with social media influencers to amplify your marketing campaigns.
 
 ## Accessing Influencer Management
 

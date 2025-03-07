@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document details the linting rules enforced in the Campaign Wizard application. These rules help maintain code quality, consistency, and prevent common errors.
+This document details the linting rules enforced in the Justify.social platform. These rules help maintain code quality, consistency, and prevent common errors.
 
 ## ESLint Rules
 

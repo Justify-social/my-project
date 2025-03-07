@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide will help you set up a development environment for the Campaign Wizard application. By following these steps, you'll have a fully functional local environment for development and testing.
+This guide will help you set up a development environment for the Justify.social platform. By following these steps, you'll have a fully functional local environment for development and testing.
 
 ## Prerequisites
 

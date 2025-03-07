@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide provides detailed instructions for using the Mixed Media Modeling (MMM) feature in the Campaign Wizard application. Mixed Media Modeling helps you understand how different marketing channels contribute to your business outcomes, enabling more effective budget allocation and campaign optimization.
+This guide provides detailed instructions for using the Mixed Media Modeling (MMM) feature in the Justify.social platform. Mixed Media Modeling helps you understand how different marketing channels contribute to your business outcomes, enabling more effective budget allocation and campaign optimization.
 
 ## Accessing MMM
 

@@ -1,10 +1,10 @@
 # Campaign Wizard Testing Documentation
 
-This document outlines the testing strategy, tools, and procedures for the Campaign Wizard application.
+This document outlines the testing strategy, tools, and procedures for the Justify.social platform.
 
 ## Testing Strategy
 
-Our testing strategy follows a comprehensive approach to ensure the quality and reliability of the Campaign Wizard application. The strategy includes:
+Our testing strategy follows a comprehensive approach to ensure the quality and reliability of the Justify.social platform. The strategy includes:
 
 1. **Unit Tests**: Testing individual components and functions in isolation
 2. **Integration Tests**: Testing interactions between components

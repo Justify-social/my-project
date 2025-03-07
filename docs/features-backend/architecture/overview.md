@@ -6,7 +6,7 @@
 
 ## Overview
 
-The Campaign Wizard application is built with a modern, scalable architecture designed to ensure robust database integration, reliable autosave functionality, consistent UI styling, and type-safe API routes with comprehensive validation.
+The Justify.social platform is built with a modern, scalable architecture designed to ensure robust database integration, reliable autosave functionality, consistent UI styling, and type-safe API routes with comprehensive validation.
 
 ## System Components
 

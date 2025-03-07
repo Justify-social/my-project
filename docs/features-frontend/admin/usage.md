@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide provides detailed instructions for using the Admin Panel in the Campaign Wizard application. The Admin Panel is a powerful tool designed exclusively for super administrators to manage the entire platform, including users, organizations, system settings, and maintenance operations.
+This guide provides detailed instructions for using the Admin Panel in the Justify.social platform. The Admin Panel is a powerful tool designed exclusively for super administrators to manage the entire platform, including users, organizations, system settings, and maintenance operations.
 
 ## Accessing the Admin Panel
 

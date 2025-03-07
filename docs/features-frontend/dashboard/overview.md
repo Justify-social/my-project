@@ -1,116 +1,140 @@
 # Dashboard Overview
 
-**Last Updated:** 2025-03-05  
+**Last Updated:** 2025-03-07  
 **Status:** Active  
 **Owner:** Frontend Team
 
 ## Overview
 
-The Dashboard is the central hub of the Campaign Wizard application, providing users with a comprehensive overview of their campaigns, performance metrics, and quick access to key features. It serves as the landing page after login and is designed to give users immediate insights into their marketing activities.
+The Dashboard is the central hub of Justify.social, providing users with a comprehensive overview of their campaigns, performance metrics, and quick access to key features. It serves as the landing page after login, designed to help marketers capture authentic audience opinions, measure social campaign impact, and identify standout influencers for their brands.
+
+## Page Goal
+
+The Dashboard aims to:
+- Present critical campaign information at a glance
+- Highlight time-sensitive upcoming activities
+- Surface key performance metrics
+- Provide direct access to frequently used features
+
+## User Interface Design
+
+![Dashboard Wireframe](../../public/images/dashboard-wireframe.png)
+
+The Dashboard follows a card-based layout with a clear information hierarchy:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ HEADER + NAVIGATION                                     │
+├─────────────────┬─────────────────┬─────────────────────┤
+│                 │                 │                     │
+│  CALENDAR       │  UPCOMING       │  QUICK ACTIONS      │
+│  OVERVIEW       │  CAMPAIGNS      │                     │
+│                 │                 │                     │
+├─────────────────┴─────────────────┴─────────────────────┤
+│                                                         │
+│  PRIMARY METRICS ROW                                    │
+│                                                         │
+├─────────────────┬─────────────────┬─────────────────────┤
+│                 │                 │                     │
+│  BRAND HEALTH   │  INFLUENCER     │  RECENT CAMPAIGNS   │
+│  SUMMARY        │  MANAGEMENT     │                     │
+│                 │                 │                     │
+└─────────────────┴─────────────────┴─────────────────────┘
+```
 
 ## Key Components
 
-### Campaign Summary
+### Calendar Overview
 
-The Campaign Summary section displays an overview of all campaigns, categorized by status:
+Interactive calendar displaying:
+- Campaign start and end dates
+- Scheduled activities
+- Important deadlines
+- Color-coded by campaign type
 
-- **Active Campaigns**: Currently running campaigns
-- **Draft Campaigns**: Campaigns in progress
-- **Completed Campaigns**: Finished campaigns
-- **Upcoming Campaigns**: Scheduled campaigns
+Users can click on any date to see detailed activities for that day.
 
-Each campaign card shows key information:
-- Campaign name
-- Status
-- Date range
-- Primary KPI
-- Performance indicator
+### Upcoming Campaigns
 
-### Performance Metrics
+Displays campaigns that:
+- Are scheduled to launch soon
+- Have any status other than "DRAFT"
+- Are sorted by start date (closest first)
 
-The Performance Metrics section provides aggregated data across all campaigns:
-
-- **Brand Awareness**: Overall brand awareness metrics
-- **Engagement**: User engagement statistics
-- **Conversion**: Conversion rates and totals
-- **ROI**: Return on investment calculations
-
-Metrics are visualized using charts and graphs for easy interpretation.
+If no upcoming campaigns exist, the card displays "No upcoming campaigns" with a prominent button to create a first campaign.
 
 ### Quick Actions
 
-The Quick Actions section provides shortcuts to common tasks:
+Contextual shortcuts to common tasks:
+- Create Campaign button
+- View Reports
+- Manage Influencers
+- Monitor Brand Health
+- Run Creative Tests
 
-- **Create Campaign**: Start a new campaign
-- **View Reports**: Access reporting tools
-- **Manage Assets**: View and manage creative assets
-- **Team Collaboration**: Access team features
+Actions adapt based on user's recent activities and role permissions.
 
-### Recent Activity
+### Primary Metrics
 
-The Recent Activity feed shows the latest updates across the application:
+Key performance indicators presented as:
+- Visual trend charts
+- Percentage changes from previous period
+- Color-coded indicators (green for positive, red for negative)
+- Customizable based on user preferences
 
-- Campaign status changes
-- New comments or feedback
-- Team member actions
-- System notifications
+### Brand Health Summary
 
-### Calendar View
+Condensed view of brand health metrics:
+- Sentiment trend
+- Share of voice
+- Audience growth
+- Engagement rate
 
-The Calendar View displays upcoming events and deadlines:
+With a direct link to the full Brand Health dashboard.
 
-- Campaign start and end dates
-- Scheduled reports
-- Team meetings
-- Important milestones
+### Influencer Management
+
+Quick view of:
+- Top-performing influencers
+- Recently added influencers
+- Influencers requiring attention
+- Safety score overview
+
+### Recent Campaigns
+
+Scrollable list of recently modified campaigns showing:
+- Campaign name
+- Status
+- Last edited date
+- Primary KPI performance
+- Quick action buttons (view, edit, duplicate)
 
 ## Technical Implementation
 
-The Dashboard is built using:
+The Dashboard uses:
+- Server components for data fetching
+- Client components for interactivity
+- Context API for state management
+- SWR for data fetching and caching
+- Responsive grid system for layout
 
-- **React Components**: Modular UI components
-- **Context API**: State management for dashboard data
-- **React Query**: Data fetching and caching
-- **Chart.js**: Data visualization
-- **CSS Modules**: Component styling
+Data is refreshed through:
+- Initial page load
+- Polling for real-time updates
+- Manual refresh option
+- Revalidation on focus
 
-## Customization Options
+## Performance Considerations
 
-Users can customize their dashboard experience:
-
-- **Widget Arrangement**: Drag and drop widgets to rearrange
-- **Widget Visibility**: Show/hide specific widgets
-- **Time Range**: Filter data by time period
-- **Favorites**: Pin important campaigns or reports
-
-## Data Refresh
-
-Dashboard data is kept up-to-date through:
-
-- **Initial Load**: Data loaded on page load
-- **Polling**: Regular background updates (every 5 minutes)
-- **Manual Refresh**: User-triggered refresh
-- **Real-time Updates**: WebSocket for critical updates
-
-## Responsive Design
-
-The Dashboard is fully responsive and adapts to different screen sizes:
-
-- **Desktop**: Full layout with all widgets
-- **Tablet**: Reorganized layout with scrollable sections
-- **Mobile**: Simplified view with collapsible sections
-
-## Accessibility
-
-The Dashboard follows accessibility best practices:
-
-- **Keyboard Navigation**: Full keyboard support
-- **Screen Reader Support**: ARIA labels and roles
-- **Color Contrast**: WCAG 2.1 AA compliant
-- **Focus Management**: Clear focus indicators
+The Dashboard optimizes performance through:
+- Lazy loading of secondary content
+- Pagination of campaign lists
+- Image optimization
+- Code splitting
+- Memoization of expensive calculations
 
 ## Related Documentation
 
 - [Dashboard Usage Guide](./usage.md)
 - [Dashboard Components](./components.md)
-- [Campaign Wizard](../campaign-wizard/overview.md) 
+- [Campaign Wizard Overview](../campaign-wizard/overview.md) 

@@ -6,7 +6,7 @@
 
 ## Overview
 
-The Campaign Wizard application provides a comprehensive set of APIs for interacting with the system programmatically. These APIs follow RESTful principles and are designed to be consistent, secure, and performant.
+The Justify.social platform provides a comprehensive set of APIs for interacting with the system programmatically. These APIs follow RESTful principles and are designed to be consistent, secure, and performant.
 
 ## API Architecture
 

@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document provides detailed information about the API endpoints available in the Campaign Wizard application. Each endpoint includes request and response examples, parameters, and error codes.
+This document provides detailed information about the API endpoints available in the Justify.social platform. Each endpoint includes request and response examples, parameters, and error codes.
 
 ## Authentication
 

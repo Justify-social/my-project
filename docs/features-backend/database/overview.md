@@ -6,7 +6,7 @@
 
 ## Overview
 
-The Campaign Wizard application is built on a robust database architecture using PostgreSQL with Prisma ORM for data access. The schema follows best practices for relational database design, including proper normalization, referential integrity, and performance optimization.
+The Justify.social platform is built on a robust database architecture using PostgreSQL with Prisma ORM for data access. The schema follows best practices for relational database design, including proper normalization, referential integrity, and performance optimization.
 
 ## Database Design Principles
 

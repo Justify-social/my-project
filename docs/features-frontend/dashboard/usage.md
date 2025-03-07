@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide explains how to use the Dashboard in the Campaign Wizard application. The Dashboard provides a comprehensive overview of your campaigns, performance metrics, and quick access to key features.
+This guide explains how to use the Dashboard in the Justify.social platform. The Dashboard provides a comprehensive overview of your campaigns, performance metrics, and quick access to key features.
 
 ## Accessing the Dashboard
 

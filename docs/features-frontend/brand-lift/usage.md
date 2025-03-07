@@ -8,7 +8,7 @@
 
 ## Introduction
 
-This guide walks you through the process of setting up, running, and analyzing Brand Lift studies in the Campaign Wizard application. Brand Lift studies help you measure the impact of your advertising campaigns on key brand metrics such as awareness, consideration, and purchase intent.
+This guide walks you through the process of setting up, running, and analyzing Brand Lift studies in the Justify.social platform. Brand Lift studies help you measure the impact of your advertising campaigns on key brand metrics such as awareness, consideration, and purchase intent.
 
 ## Prerequisites
 

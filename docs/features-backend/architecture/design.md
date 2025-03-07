@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document outlines the key architectural design decisions made in the Campaign Wizard application. These decisions guide the development process and provide context for future maintenance and enhancements.
+This document outlines the key architectural design decisions made in the Justify.social platform. These decisions guide the development process and provide context for future maintenance and enhancements.
 
 ## Middleware Architecture
 

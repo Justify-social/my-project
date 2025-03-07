@@ -6,7 +6,7 @@
 
 ## Overview
 
-This guide provides detailed information on managing team members and roles within the Campaign Wizard application. Team management is a critical component of the Settings feature, allowing organization administrators to control access, assign appropriate permissions, and maintain security across the platform.
+This guide provides detailed information on managing team members and roles within the Justify.social platform. Team management is a critical component of the Settings feature, allowing organization administrators to control access, assign appropriate permissions, and maintain security across the platform.
 
 ## Team Roles and Permissions
 

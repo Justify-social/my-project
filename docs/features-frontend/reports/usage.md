@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide provides instructions for using the Reports feature in the Campaign Wizard application. The Reports module offers comprehensive tools for analyzing campaign performance, generating insights, and creating shareable reports for stakeholders.
+This guide provides instructions for using the Reports feature in the Justify.social platform. The Reports module offers comprehensive tools for analyzing campaign performance, generating insights, and creating shareable reports for stakeholders.
 
 ## Accessing Reports
 

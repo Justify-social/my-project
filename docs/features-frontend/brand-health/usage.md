@@ -8,7 +8,7 @@
 
 ## Introduction
 
-This guide walks you through setting up and using the Brand Health tracking system in the Campaign Wizard application. Unlike point-in-time Brand Lift studies, Brand Health provides continuous monitoring of your brand's performance and competitive positioning over time.
+This guide walks you through setting up and using the Brand Health tracking system in the Justify.social platform. Unlike point-in-time Brand Lift studies, Brand Health provides continuous monitoring of your brand's performance and competitive positioning over time.
 
 ## Prerequisites
 

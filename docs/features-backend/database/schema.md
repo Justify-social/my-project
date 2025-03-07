@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides a comprehensive overview of the database schema for the Campaign Wizard application. The database is built using PostgreSQL with Prisma ORM for data access. The schema follows best practices for relational database design, including proper normalization, referential integrity, and performance optimization.
+This document provides a comprehensive overview of the database schema for the Justify.social platform. The database is built using PostgreSQL with Prisma ORM for data access. The schema follows best practices for relational database design, including proper normalization, referential integrity, and performance optimization.
 
 ## Core Subsystems
 
@@ -612,6 +612,6 @@ For schema changes, we follow a structured process:
 
 ## Conclusion
 
-This database schema provides a solid foundation for the Campaign Wizard application, with a clean, normalized structure, proper relationships between models, and performance optimizations for scaling. All models are properly defined, accessible through a type-safe client, and follow consistent patterns.
+This database schema provides a solid foundation for the Justify.social platform, with a clean, normalized structure, proper relationships between models, and performance optimizations for scaling. All models are properly defined, accessible through a type-safe client, and follow consistent patterns.
 
 The schema is designed to support current requirements while allowing for future expansion, making it a robust solution for enterprise-grade applications. 

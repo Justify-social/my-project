@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document provides detailed implementation information for the authentication system in the Campaign Wizard application. It covers the technical implementation of authentication flows, middleware, and security measures.
+This document provides detailed implementation information for the authentication system in the Justify.social platform. It covers the technical implementation of authentication flows, middleware, and security measures.
 
 ## Technology Stack
 

@@ -1,62 +1,31 @@
-# Guides
+# User & Developer Guides
 
-**Last Updated:** 2025-03-05  
-**Status:** Active  
-**Owner:** Documentation Team
-
-## Overview
-
-This section contains step-by-step guides for both users and developers of the Campaign Wizard application. These guides are designed to help you get started quickly and perform common tasks efficiently.
+This section contains step-by-step guides for both users and developers of Justify.social. These guides are designed to help you get started quickly and perform common tasks efficiently.
 
 ## User Guides
 
-Guides for end-users of the Campaign Wizard application:
+Guides for end-users of Justify.social:
 
-### [Getting Started](./user/getting-started.md)
-
-A comprehensive onboarding guide for new users. This guide covers:
-
-- Creating your account
-- Setting up your profile
-- Navigating the interface
-- Getting help and support
-
-### [Common Tasks](./user/common-tasks.md)
-
-Step-by-step instructions for common user tasks:
-
-- Creating a new campaign
-- Managing campaign assets
-- Generating reports
-- Setting up team collaboration
-- Configuring notifications
+- **[Getting Started](user/getting-started.md)**: Account setup and basic navigation
+- **[Creating Your First Campaign](user/first-campaign.md)**: Step-by-step guide to campaign creation
+- **[Analyzing Campaign Results](user/analyzing-results.md)**: How to interpret performance metrics
+- **[Working with Brand Lift Studies](user/brand-lift-studies.md)**: Measuring brand impact
+- **[Managing Influencers](user/managing-influencers.md)**: Finding and working with influencers
 
 ## Developer Guides
 
-Guides for developers working on the Campaign Wizard application:
+Guides for developers working on Justify.social:
 
-### [Development Environment Setup](./developer/setup.md)
+- **[Development Environment Setup](developer/setup.md)**: Setting up your local development environment
+- **[Development Workflow](developer/workflow.md)**: Branching, testing, and deployment processes
+- **[Troubleshooting](developer/troubleshooting.md)**: Common issues and their solutions
+- **[Deployment](developer/deployment.md)**: How to deploy the application
+- **[API Integration](developer/api-integration.md)**: How to integrate with external systems
 
-Instructions for setting up a development environment, including:
+## Journey Maps
 
-- Prerequisites installation
-- Repository setup
-- Environment configuration
-- Running the application locally
-- Setting up development tools
+- **[User Journey](user-journey.md)**: Visual guide to typical user flows and touchpoints
 
-### [Development Workflow](./developer/workflow.md)
+## Roadmap
 
-Guide to the development workflow, including:
-
-- Branch management
-- Code standards
-- Testing procedures
-- Code review process
-- Deployment process
-
-## Related Documentation
-
-- [Frontend Features](../features-frontend/README.md) - User-facing features
-- [Backend Features](../features-backend/README.md) - Technical implementation details
-- [Contributing Guidelines](../CONTRIBUTING.md) - How to contribute to the project 
+- **[Product Roadmap](roadmap.md)**: Future development plans and feature timelines

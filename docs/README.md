@@ -1,42 +1,33 @@
-# Justify Project Documentation
+# Justify.social Documentation
 
-**Last Updated:** 2024-03-05   
-**Status:** Active   
-**Owner:** Documentation Team
+Welcome to the official documentation for Justify.social, a platform that captures authentic audience opinions to measure social campaign impact and identify standout influencers for brands.
 
-Welcome to the Justify project documentation. This documentation is maintained using GitBook and is synced with our GitHub repository.
+## About This Documentation
 
-## Documentation Overview
+This documentation serves as a comprehensive guide for both users and developers. It covers all aspects of the platform, from basic usage to advanced technical details.
 
-This documentation covers both frontend and backend aspects of the Justify platform, as well as guides for developers and users.
+## How to Use This Documentation
 
-### For Developers
+- **Users**: Start with the [Getting Started](guides/user/getting-started.md) guide
+- **Developers**: Begin with the [Setup Guide](guides/developer/setup.md) and [Architecture Overview](features-backend/architecture/overview.md)
 
-If you're a developer working on the Justify platform, you'll find detailed information about the architecture, APIs, and implementation details in the respective sections.
+## Documentation Sections
 
-### For Users
+- **[Frontend Features](features-frontend/README.md)**: User interface components and interactions
+- **[Backend Features](features-backend/README.md)**: Server-side implementation and APIs
+- **[Guides](guides/README.md)**: Step-by-step instructions for common tasks
+- **[Templates](templates/README.md)**: Reference templates for documentation
 
-If you're a user of the Justify platform, please check the Guides section for information on how to use the various features of the platform.
+## Key Features
 
-## Getting Started
+- Campaign Creation and Management
+- Brand Lift Measurement
+- Influencer Discovery and Analysis
+- Creative Asset Testing
+- Brand Health Monitoring
+- Mixed Media Modeling
+- Comprehensive Reporting
 
-* Check out the [Contributing Guidelines](CONTRIBUTING.md) if you want to contribute to this documentation.
-* Browse the navigation menu on the left to find the information you need.
-* Use the search function to quickly find specific topics.
+## Contributing to Documentation
 
-## Security
-
-This documentation is for internal use only and should not be shared outside the organization.
-
-## Structure
-
-The documentation is organized into the following main sections:
-
-* **Backend Features** - Technical documentation for the backend components
-* **Frontend Features** - Technical documentation for the frontend components
-* **Guides** - How-to guides for developers and users
-* **Templates** - Templates for adding new documentation
-
-## Feedback
-
-If you have any feedback or suggestions for improving this documentation, please [open an issue](https://github.com/Justify-social/my-project/issues/new) in our GitHub repository. 
+Please follow our [Contributing Guidelines](CONTRIBUTING.md) if you wish to improve or add to this documentation.

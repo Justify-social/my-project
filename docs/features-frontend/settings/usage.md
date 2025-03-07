@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This guide provides detailed instructions for using the Settings feature in the Campaign Wizard application. The Settings module allows you to customize your experience, manage your team, configure branding, and control security preferences.
+This guide provides detailed instructions for using the Settings feature in the Justify.social platform. The Settings module allows you to customize your experience, manage your team, configure branding, and control security preferences.
 
 ## Accessing Settings
 

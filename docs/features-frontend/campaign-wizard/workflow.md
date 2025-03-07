@@ -1,12 +1,12 @@
 # Campaign Wizard Workflow
 
-**Last Updated:** 2025-03-05  
+**Last Updated:** 2025-03-07  
 **Status:** Active  
 **Owner:** Campaign Team
 
 ## Overview
 
-This document outlines the complete end-to-end workflow for the Campaign Wizard, from initial login to campaign creation, submission, and follow-up activities.
+This document outlines the complete end-to-end workflow for the Campaign Wizard in Justify.social, from initial login to campaign creation, submission, and follow-up activities.
 
 ## User Journey Map
 
@@ -119,6 +119,53 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard,
    - Performance tracking (once campaign is active)
    - Related actions (Brand Lift, Creative Testing, etc.)
 
+## Application Architecture
+
+### Data Management
+
+1. **Global State & Context**:
+   - The wizard uses React Context (`WizardContext`) to maintain state across steps
+   - All form data is centralized through this context
+   - Steps communicate through this shared state layer
+
+2. **Data Loading**:
+   - Campaign data loads once at initialization
+   - Data is transformed from backend to frontend format
+   - The app uses a single data fetch to minimize API calls
+   - Each step references the same data source
+
+3. **Draft Saving System**:
+   - Drafts can be saved at any point in the workflow
+   - The system uses flexible validation for drafts
+   - Incomplete data is preserved without validation errors
+   - Backend recognizes draft status and applies appropriate rules
+
+4. **Data Format Transformation**:
+   - Backend data uses UPPERCASE_SNAKE_CASE for enums
+   - Frontend interfaces use camelCase
+   - A transformer utility handles conversions in both directions
+   - All API responses are standardized before display
+
+### Technical Implementation Patterns
+
+1. **Server/Client Component Pattern**:
+   - Layout files handle server-side directives
+   - Client components use the "use client" directive
+   - Server components handle data fetching
+   - Clear separation ensures proper rendering
+
+2. **Validation Strategy**:
+   - Step-specific validation for immediate feedback
+   - Cross-step validation for related fields
+   - Backend validation as final safeguard
+   - Special validation rules for draft mode
+
+3. **Component Architecture**:
+   - Each step uses composition of smaller components
+   - Form handling is standardized using React Hook Form
+   - Reusable UI components ensure consistency
+   - Error boundaries protect against component failures
+
 ## State Transitions
 
 The Campaign Wizard maintains state throughout the workflow:
@@ -141,6 +188,26 @@ The Campaign Wizard persists data at these key points:
 2. **Step Transition**: When moving between steps
 3. **Manual Save**: When clicking "Save" or "Save as Draft"
 4. **Submission**: When submitting the completed campaign
+
+## Editing Existing Campaigns
+
+When editing an existing campaign:
+
+1. Campaign ID is extracted from the URL
+2. Initial data load fetches all campaign data
+3. Data is transformed to frontend format
+4. Form is pre-populated with existing values
+5. Editing follows the same workflow as creation
+6. Changes are tracked for auditing purposes
+
+## Troubleshooting
+
+Common issues and their solutions:
+
+- **Form validation errors**: Check field format requirements
+- **Data not loading**: Verify network connection and permissions
+- **Changes not saving**: Check for validation issues or server connectivity
+- **State transitions failing**: Ensure required fields are completed
 
 ## Related Features
 

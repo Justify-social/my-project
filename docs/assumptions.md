@@ -77,7 +77,7 @@ Documentation accuracy is crucial for both users and developers. This document a
 |------|--------------|-------|--------|
 | Multiple files | Throughout | Creates comprehensive documentation for features that may not exist or may be different from described | Users and developers will be misled about available functionality |
 | Newly created documentation | Throughout | Creates detailed usage guides without verification of actual user flows | Users may follow instructions that don't match the actual application |
-| Campaign Wizard application | N/A | Documentation assumes this is a marketing campaign management application, which may not be accurate | Misleading information about the application's purpose and functionality |
+| Justify.social platform | N/A | Documentation assumes this is a marketing campaign management application, which may not be accurate | Misleading information about the application's purpose and functionality |
 
 ## Conclusion
 

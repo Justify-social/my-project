@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document details the key components that make up the Dashboard in the Campaign Wizard application. These components are designed to be modular, reusable, and customizable.
+This document details the key components that make up the Dashboard in the Justify.social platform. These components are designed to be modular, reusable, and customizable.
 
 ## Component Architecture
 

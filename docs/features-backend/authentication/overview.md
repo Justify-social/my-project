@@ -6,7 +6,7 @@
 
 ## Overview
 
-The Campaign Wizard application uses a robust authentication system to secure access to the application and its APIs. This document provides an overview of the authentication architecture, flows, and security considerations.
+The Justify.social platform uses a robust authentication system to secure access to the application and its APIs. This document provides an overview of the authentication architecture, flows, and security considerations.
 
 ## Authentication Architecture
 

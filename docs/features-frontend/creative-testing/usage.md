@@ -8,7 +8,7 @@
 
 ## Introduction
 
-This guide walks you through the process of creating, running, and analyzing creative tests in the Campaign Wizard application. Creative testing helps you determine which versions of your marketing assets resonate best with your audience.
+This guide walks you through the process of creating, running, and analyzing creative tests in the Justify.social platform. Creative testing helps you determine which versions of your marketing assets resonate best with your audience.
 
 ## Prerequisites
 

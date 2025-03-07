@@ -1,61 +1,48 @@
-# Campaign Wizard
+# Justify.social
 
-A comprehensive platform for creating, managing, and analyzing marketing campaigns.
+A platform that captures authentic audience opinions to measure social campaign impact and identify standout influencers for brands.
 
 ## Overview
 
-Campaign Wizard is an enterprise-grade application that streamlines the process of creating and managing marketing campaigns. It provides a step-by-step wizard interface for campaign creation, robust analytics, and comprehensive reporting.
+Justify.social is an enterprise-grade platform that streamlines the process of measuring and analyzing social media campaigns. It provides comprehensive tools for capturing authentic audience opinions, identifying top-performing influencers, and measuring campaign impact.
 
 ## Key Features
 
 - **Campaign Creation Wizard**: Step-by-step interface for creating campaigns
-- **Dashboard**: Comprehensive overview of campaign performance
-- **Creative Asset Testing**: Tools for testing and optimizing creative assets
-- **Brand Lift**: Measure brand awareness and perception
-- **Brand Health**: Monitor overall brand health metrics
-- **Influencer Management**: Find and manage influencer partnerships
-- **Mixed Media Modeling**: Analyze performance across channels
-- **Reporting**: Comprehensive reporting and analytics
+- **Brand Lift Measurement**: Measure the impact of campaigns on brand awareness and perception
+- **Creative Asset Testing**: Test and optimize creative assets before campaign launch
+- **Influencer Analytics**: Discover and analyze top-performing influencers
+- **Brand Health Monitoring**: Track brand sentiment and perception over time
+- **Mixed Media Modeling**: Analyze campaign performance across multiple channels
+- **Comprehensive Reporting**: Generate detailed insights and visualizations
+
+## Technical Stack
+
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Database**: PostgreSQL
+- **Authentication**: NextAuth.js
+- **Testing**: Jest, React Testing Library, Cypress
+- **Deployment**: Vercel
 
 ## Getting Started
 
 ### For Users
 
-If you're a user of the Campaign Wizard application, check out our [User Guides](./docs/guides/user/getting-started.md) to get started.
+Visit our [User Documentation](./docs/guides/user/getting-started.md) to learn how to use Justify.social.
 
 ### For Developers
 
-If you're a developer working on the Campaign Wizard application, check out our [Developer Setup Guide](./docs/guides/developer/setup.md) to set up your development environment.
+Check out our [Developer Setup Guide](./docs/guides/developer/setup.md) to set up your local development environment.
 
 ## Documentation
 
-Our documentation is organized into the following categories:
+Our comprehensive documentation is available in the [docs](./docs) directory, with these main sections:
 
-### Frontend Features
-
-- [Dashboard](./docs/features-frontend/dashboard/overview.md)
-- [Campaign Wizard](./docs/features-frontend/campaign-wizard/overview.md)
-- [Creative Testing](./docs/features-frontend/creative-testing/overview.md)
-- [Brand Lift](./docs/features-frontend/brand-lift/overview.md)
-- [Brand Health](./docs/features-frontend/brand-health/overview.md)
-- [Influencers](./docs/features-frontend/influencers/overview.md)
-- [Mixed Media Modeling](./docs/features-frontend/mmm/overview.md)
-- [Reports](./docs/features-frontend/reports/overview.md)
-- [Settings](./docs/features-frontend/settings/overview.md)
-- [Admin](./docs/features-frontend/admin/overview.md)
-
-### Backend Features
-
-- [Database](./docs/features-backend/database/overview.md)
-- [Authentication](./docs/features-backend/authentication/overview.md)
-- [APIs](./docs/features-backend/apis/overview.md)
-- [Architecture](./docs/features-backend/architecture/overview.md)
-- [Linting](./docs/features-backend/linting/overview.md)
-
-### Guides
-
-- [User Guides](./docs/guides/user/getting-started.md)
-- [Developer Guides](./docs/guides/developer/setup.md)
+- [Frontend Features](./docs/features-frontend/README.md)
+- [Backend Features](./docs/features-backend/README.md)
+- [User Guides](./docs/guides/user/README.md)
+- [Developer Guides](./docs/guides/developer/README.md)
 
 ## Contributing
 

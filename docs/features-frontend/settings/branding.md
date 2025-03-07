@@ -6,7 +6,7 @@
 
 ## Overview
 
-This guide provides detailed information on configuring and customizing branding within the Campaign Wizard application. The Branding Settings feature allows organizations to personalize the application's appearance to match their corporate identity, creating a cohesive and branded experience for all users within their organization.
+This guide provides detailed information on configuring and customizing branding within the Justify.social platform. The Branding Settings feature allows organizations to personalize the application's appearance to match their corporate identity, creating a cohesive and branded experience for all users within their organization.
 
 ## Accessing Branding Settings
 
