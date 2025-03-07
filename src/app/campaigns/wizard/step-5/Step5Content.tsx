@@ -198,7 +198,7 @@ function Step5Content() {
   
   const [isLoading, setIsLoading] = useState(wizardLoading);
   const [error, setError] = useState<string | null>(null);
-  const [campaignData, setCampaignData] = useState<Record<string, any>>(null);
+  const [campaignData, setCampaignData] = useState<Record<string, any> | null>(null);
   const [validationState, setValidationState] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -325,6 +325,8 @@ function Step5Content() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+      console.log(`Submitting campaign with ID: ${campaignId}`);
+      
       const response = await fetch(`/api/campaigns/${campaignId}/submit`, {
         method: 'POST',
         headers: {
@@ -334,16 +336,34 @@ function Step5Content() {
         // body: JSON.stringify(EnumTransformers.transformObjectToBackend(requestBody)),
       });
 
+      // Log the response status to help with debugging
+      console.log(`Submission response status: ${response.status}`);
+      
+      // Parse the response JSON regardless of success/failure for debugging
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('Submission response data:', responseData);
+      } catch (jsonError) {
+        console.error('Error parsing response JSON:', jsonError);
+      }
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit campaign");
+        const errorMessage = responseData?.error || `Server returned ${response.status}`;
+        console.error(`Submission failed with status ${response.status}:`, errorMessage);
+        throw new Error(errorMessage);
       }
 
       toast.success("Campaign submitted successfully!");
       router.push(`/campaigns/wizard/submission?id=${campaignId}`);
     } catch (error) {
       console.error("Error submitting campaign:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to submit campaign");
+      // Show a more detailed error message to the user
+      toast.error(
+        error instanceof Error 
+          ? `Failed to submit campaign: ${error.message}` 
+          : "Failed to submit campaign due to an unknown error"
+      );
     } finally {
       setIsSubmitting(false);
     }

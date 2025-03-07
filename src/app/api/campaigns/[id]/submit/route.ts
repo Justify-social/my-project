@@ -21,18 +21,23 @@ export async function POST(
       }, { status: 400 })
     }
     
+    console.log(`Processing submission for campaign ID: ${campaignId}, format: ${isUuid ? 'UUID' : 'numeric'}`);
+    
     // Handle submission differently based on the ID format
     let campaign;
     
     if (isUuid) {
       // For UUID format, update CampaignWizard table
+      // Using ACTIVE status from Status enum instead of SUBMITTED (which doesn't exist)
       campaign = await prisma.campaignWizard.update({
         where: { id: campaignId },
         data: {
-          status: 'SUBMITTED',
+          status: 'ACTIVE',
           isComplete: true
         }
       });
+      
+      console.log(`Successfully updated CampaignWizard with ID ${campaignId} to ACTIVE status`);
     } else {
       // Legacy format - update CampaignWizardSubmission
       campaign = await prisma.campaignWizardSubmission.update({
@@ -41,6 +46,8 @@ export async function POST(
           submissionStatus: 'submitted'
         }
       });
+      
+      console.log(`Successfully updated CampaignWizardSubmission with ID ${numericId} to submitted status`);
     }
     
     // Transform campaign data to frontend format before returning
@@ -53,6 +60,10 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error submitting campaign:', error);
+    // Log more detailed error information
+    if (error instanceof Error) {
+      console.error('Error details:', error.message, error.stack);
+    }
     return NextResponse.json(
       { error: 'Failed to submit campaign' },
       { status: 500 }
