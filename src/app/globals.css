@@ -48,6 +48,7 @@
   --accent-color: #00BFFF;       /* Deep Sky Blue */
   --background-color: #FFFFFF;   /* White */
   --divider-color: #D1D5DB;      /* French Grey */
+  --interactive-color: #3182CE;  /* Medium Blue */
 }
 
 @media (prefers-color-scheme: dark) {

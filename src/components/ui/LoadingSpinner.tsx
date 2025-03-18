@@ -1,7 +1,9 @@
+import { Spinner } from './spinner';
+
+// Backward-compatibility wrapper for the border spinner
 export const LoadingSpinner = () => {
-  return (
-    <div className="flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-    </div>
-  );
-}; 
+  return <Spinner size="lg" variant="current" />;
+};
+
+// This comment indicates that this file is deprecated and will be removed in a future update
+// @deprecated Use the Spinner component instead 
