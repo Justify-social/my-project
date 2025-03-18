@@ -38,6 +38,18 @@
 /* Import fonts from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap');
 
+/* Font Awesome base styles (since we disabled autoAddCss) */
+svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
+  overflow: visible;
+  box-sizing: content-box;
+}
+.svg-inline--fa {
+  display: inline-block;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -576,4 +588,56 @@ div[class*='bg-white'] {
     width: 100%;
     padding: 1rem;
   }
+}
+
+/* =========================================================================
+   Icon hover effects
+   ========================================================================= */
+
+/* Icon hover effects for testing */
+.ui-icon-hover {
+  transition: opacity 0.3s ease;
+}
+
+.ui-icon-hover-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.ui-icon-hover-container .ui-icon-hover-solid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: var(--accent-color);
+}
+
+.ui-icon-hover-container:hover .ui-icon-hover-solid {
+  opacity: 1;
+}
+
+.ui-icon-hover-container:hover .ui-icon-hover-light {
+  opacity: 0;
+}
+
+.kpi-icon-hover, .app-icon-hover {
+  transition: color 0.2s ease;
+}
+
+.kpi-icon-hover:hover, .app-icon-hover:hover {
+  color: var(--accent-color);
+}
+
+.platform-icon-hover {
+  transition: transform 0.2s ease;
+}
+
+.platform-icon-hover:hover {
+  transform: scale(1.1);
 }

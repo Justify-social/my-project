@@ -1,18 +1,33 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Icon, UI_ICON_MAP, KPI_ICON_URLS, APP_ICON_URLS, PLATFORM_ICON_MAP } from './icon';
+import { Icon, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, KPI_ICON_URLS, APP_ICON_URLS, PLATFORM_ICON_MAP } from './icon';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { cn } from '@/lib/utils';
+import { faUser, faHouse, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faUser as farUser, faBell as farBell, faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
+import { faTwitter, faFacebook, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 export const IconTester = () => {
   const [showErrors, setShowErrors] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [showAllIcons, setShowAllIcons] = useState(false);
+
+  // Size classes for the FontAwesome icons
+  const sizeClasses = {
+    xs: 'w-3 h-3',
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6',
+    xl: 'w-8 h-8',
+  };
 
   const testIcons = () => {
     const newErrors: Record<string, string[]> = {};
     let count = 0;
 
-    // Test UI icons
+    // Test UI Solid icons
     const uiIcons = Object.keys(UI_ICON_MAP);
     const uiIconErrors: string[] = [];
     
@@ -29,7 +44,27 @@ export const IconTester = () => {
     });
     
     if (uiIconErrors.length > 0) {
-      newErrors['UI Icons'] = uiIconErrors;
+      newErrors['UI Solid Icons'] = uiIconErrors;
+    }
+    
+    // Test UI Outline/Regular icons
+    const uiOutlineIcons = Object.keys(UI_OUTLINE_ICON_MAP);
+    const uiOutlineIconErrors: string[] = [];
+    
+    uiOutlineIcons.forEach(icon => {
+      try {
+        // Just check if the property exists
+        if (!(icon in UI_OUTLINE_ICON_MAP)) {
+          throw new Error(`Icon ${icon} not found in UI_OUTLINE_ICON_MAP`);
+        }
+      } catch (e) {
+        uiOutlineIconErrors.push(icon);
+        count++;
+      }
+    });
+    
+    if (uiOutlineIconErrors.length > 0) {
+      newErrors['UI Regular Icons'] = uiOutlineIconErrors;
     }
 
     // Test KPI icons
@@ -62,7 +97,7 @@ export const IconTester = () => {
       newErrors['App Icons'] = appIconErrors;
     }
 
-    // Test Platform icons
+    // Test Platform (Brands) icons
     const platformIcons = Object.keys(PLATFORM_ICON_MAP);
     const platformIconErrors: string[] = [];
     
@@ -79,26 +114,28 @@ export const IconTester = () => {
     });
     
     if (platformIconErrors.length > 0) {
-      newErrors['Platform Icons'] = platformIconErrors;
+      newErrors['Platform (Brands) Icons'] = platformIconErrors;
     }
 
     setErrors(newErrors);
     setErrorCount(count);
     setShowErrors(true);
+    setShowAllIcons(true);
   };
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-bold mb-4">Icon Test Suite</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold mb-4">Icon Test Suite</h2>
+          <button 
+            onClick={testIcons}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Run Icon Tests
+          </button>
+        </div>
         <p className="text-gray-600 mb-6">This component renders all available icons to ensure they display correctly after migration.</p>
-        
-        <button 
-          onClick={testIcons}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Run Icon Tests
-        </button>
       </div>
 
       {showErrors && (
@@ -123,137 +160,239 @@ export const IconTester = () => {
       )}
 
       <div className="space-y-8">
+        {/* SOLID ICONS */}
         <section>
-          <h3 className="text-lg font-semibold mb-4">UI Icons</h3>
-          <div className="grid grid-cols-6 gap-4">
-            {Object.keys(UI_ICON_MAP).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
-                <Icon name={name as any} size="md" />
-                <span className="text-xs mt-2 text-center">{name}</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold mb-4">UI Icons (Solid)</h3>
+            <span className="text-sm text-blue-500">{Object.keys(UI_ICON_MAP).length} icons</span>
           </div>
-        </section>
-        
-        <section>
-          <h3 className="text-lg font-semibold mb-4">KPI Icons</h3>
-          <div className="grid grid-cols-6 gap-4">
-            {Object.keys(KPI_ICON_URLS).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
-                <Icon kpiName={name as any} size="md" />
-                <span className="text-xs mt-2 text-center">{name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        <section>
-          <h3 className="text-lg font-semibold mb-4">App Icons</h3>
-          <div className="grid grid-cols-6 gap-4">
-            {Object.keys(APP_ICON_URLS).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
-                <Icon appName={name as any} size="md" />
-                <span className="text-xs mt-2 text-center">{name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        <section>
-          <h3 className="text-lg font-semibold mb-4">Platform Icons</h3>
-          <div className="grid grid-cols-6 gap-4">
-            {Object.keys(PLATFORM_ICON_MAP).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
-                <Icon platformName={name as any} size="md" />
-                <span className="text-xs mt-2 text-center">{name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        <section>
-          <h3 className="text-lg font-semibold mb-4">Solid UI Icons</h3>
-          <div className="grid grid-cols-6 gap-4">
-            {Object.keys(UI_ICON_MAP).map(name => (
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+            {Object.keys(UI_ICON_MAP).slice(0, showAllIcons ? undefined : 24).map(name => (
               <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
                 <Icon name={name as any} size="md" solid />
-                <span className="text-xs mt-2 text-center">{name} (solid)</span>
+                <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
+              </div>
+            ))}
+            {!showAllIcons && Object.keys(UI_ICON_MAP).length > 24 && (
+              <div className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 cursor-pointer"
+                onClick={() => setShowAllIcons(true)}>
+                <div className="h-5 w-5 flex items-center justify-center">
+                  <span className="text-xl">...</span>
+                </div>
+                <span className="text-xs mt-2 text-center text-blue-500">Show all</span>
+              </div>
+            )}
+          </div>
+        </section>
+        
+        {/* REGULAR ICONS WITH HOVER TO SOLID EFFECT */}
+        <section>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold mb-4">UI Icons (Light → Solid on hover)</h3>
+            <span className="text-sm text-blue-500">{Object.keys(UI_ICON_MAP).length} icons</span>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+            {Object.keys(UI_ICON_MAP).slice(0, showAllIcons ? undefined : 24).map(name => (
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                <div className="ui-icon-hover-container">
+                  <Icon name={name as any} size="md" className="ui-icon-hover ui-icon-hover-light" />
+                  <Icon name={name as any} size="md" solid className="ui-icon-hover ui-icon-hover-solid" />
+                </div>
+                <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
+              </div>
+            ))}
+            {!showAllIcons && Object.keys(UI_ICON_MAP).length > 24 && (
+              <div className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 cursor-pointer"
+                onClick={() => setShowAllIcons(true)}>
+                <div className="h-5 w-5 flex items-center justify-center">
+                  <span className="text-xl">...</span>
+                </div>
+                <span className="text-xs mt-2 text-center text-blue-500">Show all</span>
+              </div>
+            )}
+          </div>
+        </section>
+        
+        {/* KPI ICONS WITH HOVER TO ACCENT COLOR */}
+        <section>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold mb-4">KPI Icons (Hover for accent color)</h3>
+            <span className="text-sm text-blue-500">{Object.keys(KPI_ICON_URLS).length} icons</span>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+            {Object.keys(KPI_ICON_URLS).map(name => (
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                <Icon kpiName={name as any} size="md" className="kpi-icon-hover" />
+                <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
               </div>
             ))}
           </div>
         </section>
         
+        {/* APP ICONS WITH HOVER TO ACCENT COLOR */}
+        <section>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold mb-4">App Icons (Hover for accent color)</h3>
+            <span className="text-sm text-blue-500">{Object.keys(APP_ICON_URLS).length} icons</span>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+            {Object.keys(APP_ICON_URLS).map(name => (
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                <Icon appName={name as any} size="md" className="app-icon-hover" />
+                <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+        
+        {/* PLATFORM (BRANDS) ICONS */}
+        <section>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold mb-4">Platform Icons (Brands)</h3>
+            <span className="text-sm text-blue-500">{Object.keys(PLATFORM_ICON_MAP).length} icons</span>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+            {Object.keys(PLATFORM_ICON_MAP).map(name => (
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+                <Icon platformName={name as any} size="md" className="platform-icon-hover" />
+                <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+        
+        {/* DIRECT FONT AWESOME USAGE */}
+        <section>
+          <h3 className="text-lg font-semibold mb-4">Font Awesome Direct Usage</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 border p-4 rounded-lg">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm border-b pb-2">Solid Icons</h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={faUser} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-user</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={faHouse} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-house</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={faGear} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-gear</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm border-b pb-2">Regular Icons</h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={farUser} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-user</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={farBell} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-bell</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={farHeart} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-heart</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm border-b pb-2">Brand Icons</h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={faTwitter} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-twitter (X)</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={faFacebook} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-facebook</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FontAwesomeIcon icon={faGithub} className={cn(sizeClasses.md)} />
+                  <span className="text-xs mt-1 text-center text-gray-600">fa-github</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* SPECIAL CASES & VARIANTS */}
         <section>
           <h3 className="text-lg font-semibold mb-4">Special Cases</h3>
-          <div className="grid grid-cols-4 gap-6">
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Active State</h4>
-              <div className="flex space-x-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="space-y-2 border p-4 rounded-lg">
+              <h4 className="font-medium text-sm border-b pb-2">Active State</h4>
+              <div className="flex space-x-4 justify-center">
                 <div className="flex flex-col items-center">
                   <Icon appName="home" active size="lg" />
-                  <span className="text-xs mt-2">active=true</span>
+                  <span className="text-xs mt-2 text-gray-600">active=true</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon appName="home" size="lg" />
-                  <span className="text-xs mt-2">active=false</span>
+                  <span className="text-xs mt-2 text-gray-600">active=false</span>
                 </div>
               </div>
             </div>
             
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Color Variations</h4>
-              <div className="flex space-x-4">
+            <div className="space-y-2 border p-4 rounded-lg">
+              <h4 className="font-medium text-sm border-b pb-2">Color Variations</h4>
+              <div className="flex space-x-4 justify-center">
                 <div className="flex flex-col items-center">
                   <Icon name="info" color="blue" size="lg" />
-                  <span className="text-xs mt-2">blue</span>
+                  <span className="text-xs mt-2 text-gray-600">blue</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="warning" color="orange" size="lg" />
-                  <span className="text-xs mt-2">orange</span>
+                  <span className="text-xs mt-2 text-gray-600">orange</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="check" color="green" size="lg" />
-                  <span className="text-xs mt-2">green</span>
+                  <span className="text-xs mt-2 text-gray-600">green</span>
                 </div>
               </div>
             </div>
             
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Size Variations</h4>
-              <div className="flex items-end space-x-2">
+            <div className="space-y-2 border p-4 rounded-lg">
+              <h4 className="font-medium text-sm border-b pb-2">Size Variations</h4>
+              <div className="flex items-end space-x-2 justify-center">
                 <div className="flex flex-col items-center">
                   <Icon name="user" size="xs" />
-                  <span className="text-xs mt-2">xs</span>
+                  <span className="text-xs mt-2 text-gray-600">xs</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="user" size="sm" />
-                  <span className="text-xs mt-2">sm</span>
+                  <span className="text-xs mt-2 text-gray-600">sm</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="user" size="md" />
-                  <span className="text-xs mt-2">md</span>
+                  <span className="text-xs mt-2 text-gray-600">md</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="user" size="lg" />
-                  <span className="text-xs mt-2">lg</span>
+                  <span className="text-xs mt-2 text-gray-600">lg</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="user" size="xl" />
-                  <span className="text-xs mt-2">xl</span>
+                  <span className="text-xs mt-2 text-gray-600">xl</span>
                 </div>
               </div>
             </div>
             
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Additional CSS Classes</h4>
-              <div className="flex space-x-4">
+            <div className="space-y-2 border p-4 rounded-lg">
+              <h4 className="font-medium text-sm border-b pb-2">Additional CSS Classes</h4>
+              <div className="flex space-x-4 justify-center">
                 <div className="flex flex-col items-center">
-                  <Icon name="heart" className="animate-pulse" size="lg" />
-                  <span className="text-xs mt-2">animate-pulse</span>
+                  <Icon name="history" className="animate-spin h-6 w-6" />
+                  <span className="text-xs mt-2 text-gray-600">animate-spin</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <Icon name="heart" className="rotate-45" size="lg" />
-                  <span className="text-xs mt-2">rotate-45</span>
+                  <Icon name="chevronRight" className="rotate-45 h-6 w-6" />
+                  <span className="text-xs mt-2 text-gray-600">rotate-45</span>
                 </div>
               </div>
             </div>
