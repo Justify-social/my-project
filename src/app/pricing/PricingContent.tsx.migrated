@@ -1,0 +1,78 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Icon } from "@/components/ui/icon";
+import { migrateHeroIcon } from "@/lib/icon-helpers";
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { toast } from "react-hot-toast";
+import Link from "next/link";
+
+// Define feature structure
+interface FeatureInfo {
+  description: string;
+  features: Record<string, string>;
+}
+
+type FeatureDefinitions = {
+  [category: string]: FeatureInfo;
+};
+
+// Original HeroIcon imports:
+// import { CheckIcon, XMarkIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
+// import { SparklesIcon } from "@heroicons/react/24/solid";
+//
+// These will be replaced with:
+// <Icon name="check" className="..." />
+// <Icon name="close" className="..." />
+// <Icon name="info" className="..." />
+// <Icon name="sparkles" solid className="..." />
+
+// Example of a component using the migrated icons
+const FeatureValue = ({ value, tierName }: { value: string | number | boolean, tierName: string }) => {
+  if (value === true) {
+    return (
+      <div className="flex justify-center">
+        <span className="h-6 w-6 bg-green-500 rounded-full flex items-center justify-center p-1 shadow-sm">
+          <Icon name="check" className="h-4 w-4 text-white" />
+        </span>
+      </div>
+    );
+  }
+  
+  if (value === false) {
+    return (
+      <div className="flex justify-center">
+        <span className="h-6 w-6 bg-red-400 rounded-full flex items-center justify-center p-1 shadow-sm">
+          <Icon name="close" className="h-4 w-4 text-white" />
+        </span>
+      </div>
+    );
+  }
+
+  return <span className="text-center block">{value}</span>;
+};
+
+// This is a helper component used in tooltips
+const InfoButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="ml-1 flex-shrink-0 text-gray-400 hover:text-gray-500"
+  >
+    <Icon 
+      name="info" 
+      className="h-4 w-4 text-gray-400" 
+      aria-hidden="true" 
+    />
+  </button>
+);
+
+// With these changes, we'll need to:
+// 1. Replace all instances of CheckIcon with <Icon name="check" />
+// 2. Replace all instances of XMarkIcon with <Icon name="close" />
+// 3. Replace all instances of InformationCircleIcon with <Icon name="info" />
+// 4. Replace all instances of SparklesIcon with <Icon name="lightning" solid />
+//
+// The complete file would be migrated by replacing all icon usages throughout the component 

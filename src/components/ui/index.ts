@@ -15,6 +15,7 @@ export * from './calendar';
 export * from './progress';
 export * from './tabs';
 export * from './skeleton';
+export * from './colors';
 
 // Export backward-compatibility components
 export * from './loading-spinner';
@@ -27,6 +28,7 @@ export { ToastProvider, useToast } from './toast';
 export { default as NotificationBell } from './NotificationBell';
 export { Button } from './button';
 export { Input } from './input';
+export { colors } from './colors';
 export { 
   Icon, 
   type IconName, 

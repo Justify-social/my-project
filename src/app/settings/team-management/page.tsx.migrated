@@ -1,0 +1,56 @@
+"use client";
+
+import React, { useState, ChangeEvent, useCallback, FormEvent, memo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Icon } from '@/components/ui/icon';
+import { migrateHeroIcon } from '@/lib/icon-helpers';
+import NavigationTabs from '../components/NavigationTabs';
+import { toast } from 'react-hot-toast';
+import TeamDashboard from './dashboard';
+import { EnumTransformers } from '@/utils/enum-transformers';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  isEditingRole?: boolean;
+  isCurrentUser?: boolean;
+}
+
+interface Invitation {
+  id: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+// Enhanced UI Components
+const Card = memo(({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6"
+  >
+    {children}
+  </motion.div>
+));
+
+// Example of using the new Icon component in a function
+const renderIcon = (name: string, className: string = "w-5 h-5") => {
+  return <Icon name={name as any} className={className} />;
+};
+
+// The imports in the original file that need to be migrated:
+// import { XCircleIcon, ArrowPathIcon, CheckCircleIcon, PlusIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+//
+// These would be used as:
+// <Icon name="xCircle" className="w-5 h-5" />
+// <Icon name="arrowPath" className="w-5 h-5" />
+// <Icon name="checkCircle" className="w-5 h-5" />
+// <Icon name="plus" className="w-5 h-5" />
+// <Icon name="search" className="w-5 h-5" />
+// <Icon name="userGroup" className="w-5 h-5" /> 
