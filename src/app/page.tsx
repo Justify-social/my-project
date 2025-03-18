@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import Link from 'next/link';
-import { ArrowRightIcon } from '@heroicons/react/24/solid';
+import { migrateHeroIcon } from '@/lib/icon-helpers';
 
 export default function Home() {
   const router = useRouter();
@@ -37,16 +37,16 @@ const features = [
   {
     name: 'Campaign Creation',
     description: 'Create and manage campaigns with our intuitive wizard interface. Set objectives, target audience, and creative requirements.',
-    icon: ArrowRightIcon,
+    icon: (props: React.SVGProps<SVGSVGElement>) => migrateHeroIcon('ArrowRightIcon', props),
   },
   {
     name: 'Asset Management',
     description: 'Upload, organize, and review creative assets. Collaborate with influencers and team members efficiently.',
-    icon: ArrowRightIcon,
+    icon: (props: React.SVGProps<SVGSVGElement>) => migrateHeroIcon('ArrowRightIcon', props),
   },
   {
     name: 'Analytics & Reporting',
     description: 'Track campaign performance, measure ROI, and generate comprehensive reports for stakeholders.',
-    icon: ArrowRightIcon,
+    icon: (props: React.SVGProps<SVGSVGElement>) => migrateHeroIcon('ArrowRightIcon', props),
   },
 ];

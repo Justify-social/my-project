@@ -2,7 +2,7 @@
 
 import React, { useState, ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { migrateHeroIcon } from '@/lib/icon-helpers';
 import Link from 'next/link';
 
 export default function TestUploadPage() {
@@ -134,10 +134,12 @@ export default function TestUploadPage() {
           >
             {isLoading ? (
               <span className="flex items-center">
-                <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                {migrateHeroIcon('ArrowPathIcon', { className: 'w-5 h-5 mr-2 animate-spin' })}
                 Checking...
               </span>
-            ) : 'Check API Status'}
+            ) : (
+              'Check API Status'
+            )}
           </button>
           
           {apiStatus && (
@@ -174,10 +176,12 @@ export default function TestUploadPage() {
           >
             {isLoading ? (
               <span className="flex items-center">
-                <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                {migrateHeroIcon('ArrowPathIcon', { className: 'w-5 h-5 mr-2 animate-spin' })}
                 Uploading...
               </span>
-            ) : 'Upload File'}
+            ) : (
+              'Upload File'
+            )}
           </button>
           
           {uploadResult && (

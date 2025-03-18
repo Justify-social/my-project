@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { ChevronRightIcon, DocumentTextIcon, DocumentChartBarIcon, ServerIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { migrateHeroIcon } from '@/lib/icon-helpers';
 
 interface DocFile {
   name: string;
@@ -88,63 +88,63 @@ export default function DatabasePage() {
       path: '/docs/DATABASE_SCHEMA.md',
       description: 'Comprehensive documentation of the database schema and entity relationships',
       category: 'database',
-      icon: <ServerIcon className="h-5 w-5 text-blue-600" />
+      icon: migrateHeroIcon('ServerIcon', { className: "h-5 w-5 text-blue-600" })
     },
     {
       name: 'Database Schema Audit',
       path: '/docs/schema-audit-summary.md',
       description: 'Database schema validation and audit results',
       category: 'database',
-      icon: <DocumentChartBarIcon className="h-5 w-5 text-blue-600" />
+      icon: migrateHeroIcon('DocumentChartBarIcon', { className: "h-5 w-5 text-blue-600" })
     },
     {
       name: 'Project Progress',
       path: '/docs/PROGRESS.md',
       description: 'Development progress and roadmap for the application',
       category: 'general',
-      icon: <DocumentTextIcon className="h-5 w-5 text-green-600" />
+      icon: migrateHeroIcon('DocumentTextIcon', { className: "h-5 w-5 text-green-600" })
     },
     {
       name: 'User Flow',
       path: '/docs/User-Flow.md',
       description: 'User journey and application flow documentation',
       category: 'general',
-      icon: <DocumentTextIcon className="h-5 w-5 text-green-600" />
+      icon: migrateHeroIcon('DocumentTextIcon', { className: "h-5 w-5 text-green-600" })
     },
     {
       name: 'Campaign Wizard Validation',
       path: '/docs/campaign-wizard-validation.md',
       description: 'Validation rules and requirements for the campaign wizard',
       category: 'general',
-      icon: <DocumentTextIcon className="h-5 w-5 text-green-600" />
+      icon: migrateHeroIcon('DocumentTextIcon', { className: "h-5 w-5 text-green-600" })
     },
     {
       name: 'Cint API Documentation',
       path: '/docs/Cint_API_info.md',
       description: 'Integration documentation for the Cint API',
       category: 'api',
-      icon: <DocumentTextIcon className="h-5 w-5 text-purple-600" />
+      icon: migrateHeroIcon('DocumentTextIcon', { className: "h-5 w-5 text-purple-600" })
     },
     {
       name: 'Any Type Usage Report',
       path: '/docs/any-type-usage-report.md',
       description: 'ESLint report on any type usage in the codebase',
       category: 'linter',
-      icon: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
+      icon: migrateHeroIcon('ExclamationTriangleIcon', { className: "h-5 w-5 text-yellow-600" })
     },
     {
       name: 'Image Tag Usage Report',
       path: '/docs/img-tag-usage-report.md',
       description: 'Report on <img> tag usage instead of Next.js Image component',
       category: 'linter',
-      icon: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
+      icon: migrateHeroIcon('ExclamationTriangleIcon', { className: "h-5 w-5 text-yellow-600" })
     },
     {
       name: 'Hook Dependency Issues Report',
       path: '/docs/hook-dependency-issues-report.md',
       description: 'Report on React Hook dependency issues in the codebase',
       category: 'linter',
-      icon: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
+      icon: migrateHeroIcon('ExclamationTriangleIcon', { className: "h-5 w-5 text-yellow-600" })
     }
   ];
 
@@ -290,7 +290,7 @@ export default function DatabasePage() {
           href="/debug-tools"
           className="mt-4 md:mt-0 flex items-center text-[var(--accent-color)] hover:underline"
         >
-          <ChevronRightIcon className="h-4 w-4 mr-1 rotate-180" />
+          {migrateHeroIcon('ChevronRightIcon', { className: "h-4 w-4 mr-1 rotate-180" })}
           Back to Debug Tools
         </Link>
       </div>

@@ -27,48 +27,12 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
 } from "recharts";
-import {
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  SparklesIcon,
-  ChartBarIcon,
-  MegaphoneIcon,
-  HeartIcon,
-  HashtagIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  ArrowPathIcon,
-  DocumentChartBarIcon,
-  CalendarDaysIcon,
-  CurrencyDollarIcon,
-  ShieldCheckIcon,
-  UserCircleIcon,
-  BuildingOfficeIcon,
-  RocketLaunchIcon,
-  SignalIcon,
-  BellAlertIcon,
-  ChartPieIcon,
-  MapIcon,
-  CogIcon,
-  DocumentMagnifyingGlassIcon,
-  ChatBubbleLeftRightIcon,
-  ArrowDownTrayIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  PlusIcon,
-  DocumentTextIcon,
-  BoltIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon,
-  ArrowTopRightOnSquareIcon,
-} from '@heroicons/react/24/outline';
+import { Icon, IconName } from '@/components/ui/icon';
+import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers';
 import useSWR from 'swr';
+import Image from 'next/image';
+import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 
 // Import dynamically loaded components and ensure they are exported correctly.
 const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming"), {
@@ -99,15 +63,15 @@ const Toast: React.FC<ToastProps> = ({ message, type = "info" }) => {
   const config = {
     error: {
       bg: "bg-red-600",
-      icon: XCircleIcon
+      icon: iconComponentFactory("xCircle")
     },
     success: {
       bg: "bg-green-600",
-      icon: CheckCircleIcon
+      icon: iconComponentFactory("checkCircle")
     },
     info: {
       bg: "bg-[var(--accent-color)]",
-      icon: BellAlertIcon
+      icon: iconComponentFactory("bellAlert")
     }
   }[type];
 
@@ -130,7 +94,7 @@ const Toast: React.FC<ToastProps> = ({ message, type = "info" }) => {
 const ErrorDisplay: React.FC<{ message: string; onRetry?: () => void }> = ({ message, onRetry }) => (
   <div className="bg-white rounded-lg border border-red-200 p-6 text-center">
     <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
-      <XCircleIcon className="w-8 h-8 text-red-500" />
+      <Icon name="xCircle" className="w-8 h-8 text-red-500" />
     </div>
     <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2">Something went wrong!</h3>
     <p className="text-sm text-[var(--secondary-color)] mb-4">
@@ -141,7 +105,7 @@ const ErrorDisplay: React.FC<{ message: string; onRetry?: () => void }> = ({ mes
         onClick={onRetry}
         className="inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors"
       >
-        <ArrowPathIcon className="w-4 h-4 mr-2" />
+        <Icon name="arrowRight" className="w-4 h-4 mr-2" />
         <span>Try again</span>
       </button>
     )}
@@ -152,12 +116,12 @@ const ErrorDisplay: React.FC<{ message: string; onRetry?: () => void }> = ({ mes
 interface CardProps {
   title: string;
   description?: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName?: IconName; // Changed from icon component to iconName string
   children: React.ReactNode;
   actions?: React.ReactNode;
 }
 
-const Card: React.FC<CardProps> = ({ title, description, icon: Icon, children, actions }) => (
+const Card: React.FC<CardProps> = ({ title, description, iconName, children, actions }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
@@ -165,9 +129,9 @@ const Card: React.FC<CardProps> = ({ title, description, icon: Icon, children, a
   >
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
       <div className="flex items-center">
-        {Icon && (
+        {iconName && (
           <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3">
-            <Icon className="w-5 h-5 text-[var(--accent-color)]" />
+            <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)]" />
           </div>
         )}
         <div>
@@ -184,8 +148,8 @@ const Card: React.FC<CardProps> = ({ title, description, icon: Icon, children, a
       )}
     </div>
     <div className="space-y-4">
-    {children}
-  </div>
+      {children}
+    </div>
   </motion.div>
 );
 
@@ -196,40 +160,45 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = "md" }) => {
+  const sizeClasses = size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-sm";
+  
+  // Map status to config (icon, color, label)
   const config = {
-    live: {
-      color: "bg-green-100 text-green-800 border-green-200",
-      icon: CheckCircleIcon,
-      label: "Live"
+    draft: {
+      iconName: "edit" as IconName,
+      color: "bg-gray-100 text-gray-800",
+      label: "Draft"
+    },
+    active: {
+      iconName: "check" as IconName,
+      color: "bg-green-100 text-green-800",
+      label: "Active"
     },
     paused: {
-      color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      icon: ClockIcon,
+      iconName: "info" as IconName,
+      color: "bg-yellow-100 text-yellow-800",
       label: "Paused"
     },
     completed: {
-      color: "bg-blue-100 text-blue-800 border-blue-200",
-      icon: CheckCircleIcon,
+      iconName: "check" as IconName,
+      color: "bg-blue-100 text-blue-800",
       label: "Completed"
     },
-    scheduled: {
-      color: "bg-purple-100 text-purple-800 border-purple-200",
-      icon: CalendarDaysIcon,
-      label: "Scheduled"
+    error: {
+      iconName: "close" as IconName,
+      color: "bg-red-100 text-red-800",
+      label: "Error"
     }
   }[status.toLowerCase()] || {
-    color: "bg-gray-100 text-[var(--secondary-color)] border-gray-200",
-    icon: ClockIcon,
+    iconName: "info" as IconName,
+    color: "bg-gray-100 text-gray-800",
     label: status
   };
-
-  const Icon = config.icon;
-  const sizeClasses = size === "sm" ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm";
 
   return (
     <span className={`inline-flex items-center ${sizeClasses} rounded-full font-medium 
       ${config.color} border shadow-sm`}>
-      <Icon className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} />
+      <Icon name={config.iconName} className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} />
       {config.label}
     </span>
   );
@@ -328,40 +297,48 @@ interface MetricCardProps {
   title: string;
   value: number | string;
   trend?: number;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName: IconName; // Changed from icon component to iconName string
   description?: string;
   format?: "number" | "currency" | "percent";
 }
 
 // Update the MetricCard component for better mobile responsiveness and to use CSS variables
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, icon: Icon, description, format = "number" }) => (
-  <div className="bg-white p-3 sm:p-4 rounded-lg border border-[var(--divider-color)] hover:shadow-md transition-shadow h-full">
+const MetricCard: React.FC<MetricCardProps> = ({ 
+  title, 
+  value, 
+  trend, 
+  iconName, // Changed from icon
+  description, 
+  format = "number" 
+}) => (
+  <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow p-4">
     <div className="flex justify-between items-start">
-      <div>
-        <h3 className="text-sm font-medium text-[var(--secondary-color)] mb-1">{title}</h3>
-        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--primary-color)]">
-          {format === "number" && typeof value === "number" && value.toLocaleString()}
-          {format === "currency" && typeof value === "number" && `$${value.toLocaleString()}`}
-          {format === "percent" && typeof value === "number" && `${value}%`}
-          {typeof value === "string" && value}
-        </p>
+      <div className="flex items-center">
+        <div className="mr-3 p-2 bg-[var(--accent-color)] bg-opacity-10 rounded-lg">
+          <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)]" />
+        </div>
+        <h3 className="text-sm font-medium text-[var(--secondary-color)]">{title}</h3>
       </div>
-      <div className="p-1.5 sm:p-2 bg-[var(--accent-color)] bg-opacity-10 rounded-lg">
-        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--accent-color)]" />
-      </div>
-    </div>
-    <div className="mt-2 sm:mt-3 flex items-center text-xs">
+      
       {trend !== undefined && (
         <span className={`inline-flex items-center mr-2 ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           {trend >= 0 ? (
-            <ArrowUpIcon className="w-3 h-3 mr-1" />
+            <Icon name="chevronUp" className="w-3 h-3 mr-1" />
           ) : (
-            <ArrowDownIcon className="w-3 h-3 mr-1" />
+            <Icon name="chevronDown" className="w-3 h-3 mr-1" />
           )}
           {Math.abs(trend)}%
         </span>
       )}
-      <span className="text-[var(--secondary-color)]">{description}</span>
+    </div>
+    
+    <div className="mt-1 pl-11">
+      <div className="text-2xl font-bold text-[var(--primary-color)]">
+        {format === "currency" && "$"}
+        {typeof value === "number" ? value.toLocaleString() : value}
+        {format === "percent" && "%"}
+      </div>
+      {description && <div className="text-xs text-[var(--tertiary-color)] mt-1">{description}</div>}
     </div>
   </div>
 );
@@ -511,38 +488,26 @@ interface ChartCardProps {
   title: string;
   description?: string;
   children: React.ReactNode;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName: IconName; // Changed from icon component to iconName string
   actions?: React.ReactNode;
 }
 
-const ChartCard: React.FC<ChartCardProps> = ({ title, description, children, icon: Icon, actions }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-[var(--divider-color)]"
-  >
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
-        <div className="flex items-center">
-          <div className="bg-[var(--accent-color)] bg-opacity-10 p-3 rounded-lg mr-4">
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent-color)]" />
-          </div>
-          <div>
-            <h3 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)]">{title}</h3>
-            {description && (
-              <p className="text-xs sm:text-sm text-[var(--secondary-color)] mt-1">{description}</p>
-            )}
-          </div>
+const ChartCard: React.FC<ChartCardProps> = ({ title, description, children, iconName, actions }) => (
+  <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-3">
+      <div className="flex items-center">
+        <div className="p-2 bg-[var(--light-background)] rounded-lg mr-3">
+          <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)]" />
         </div>
-        {actions && (
-          <div className="flex space-x-2 ml-auto sm:ml-0">
-            {actions}
-          </div>
-        )}
+        <div>
+          <h3 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h3>
+          {description && <p className="text-sm text-[var(--secondary-color)]">{description}</p>}
+        </div>
       </div>
-      {children}
+      {actions && <div className="sm:ml-auto">{actions}</div>}
     </div>
-  </motion.div>
+    {children}
+  </div>
 );
 
 // Add new interfaces for Brand Health and Influencer components
@@ -906,10 +871,10 @@ const CalendarMonthView: React.FC<{ month: Date, events: CalendarUpcomingProps['
         <h3 className="text-base font-medium text-[var(--primary-color)]">{monthName} {year}</h3>
         <div className="flex space-x-2">
           <button onClick={prevMonth} className="p-1 rounded-md hover:bg-[var(--background-color)]">
-            <ChevronLeftIcon className="w-5 h-5 text-[var(--secondary-color)]" />
+            <Icon name="chevronLeft" className="w-5 h-5 text-[var(--secondary-color)]" />
           </button>
           <button onClick={nextMonth} className="p-1 rounded-md hover:bg-[var(--background-color)]">
-            <ChevronRightIcon className="w-5 h-5 text-[var(--secondary-color)]" />
+            <Icon name="chevronRight" className="w-5 h-5 text-[var(--secondary-color)]" />
           </button>
         </div>
       </div>
@@ -1207,7 +1172,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
               onClick={() => router.push('/campaigns/wizard/step-1')}
               className="px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium"
             >
-              <PlusIcon className="w-4 h-4" />
+              <Icon name="plus" className="w-4 h-4" />
               <span className="hidden sm:inline">Create New Campaign</span>
               <span className="inline sm:hidden">Campaign</span>
             </button>
@@ -1272,7 +1237,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
               title="Total Campaigns"
               value={metrics.stats.totalCampaigns}
               trend={metrics.stats.campaignChange}
-              icon={DocumentTextIcon}
+              iconName="info"
               description={`+${metrics.stats.campaignChange} campaigns`}
             />
             
@@ -1280,7 +1245,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
               title="Survey Responses"
               value={metrics.stats.surveyResponses}
               trend={metrics.stats.surveyChange}
-              icon={ChatBubbleLeftRightIcon}
+              iconName="chatBubble"
               description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`}
             />
             
@@ -1288,7 +1253,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
               title="Live Campaigns"
               value={metrics.stats.liveCampaigns}
               trend={metrics.stats.liveChange}
-              icon={BoltIcon}
+              iconName="info"
               description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`}
             />
             
@@ -1296,7 +1261,7 @@ export default function DashboardContent({ user = { id: '', name: 'User', role: 
               title="Credits Available"
               value={metrics.stats.creditsAvailable}
               trend={metrics.stats.creditsChange}
-              icon={CurrencyDollarIcon}
+              iconName="money"
               description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`}
             />
           </div>

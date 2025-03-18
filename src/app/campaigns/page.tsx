@@ -4,13 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { 
-  TrashIcon, 
-  PencilIcon, 
-  DocumentDuplicateIcon, 
-  EyeIcon,
-  XMarkIcon
-} from "@heroicons/react/24/outline";
+import { migrateHeroIcon } from '@/lib/icon-helpers';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
 /**
@@ -957,28 +951,28 @@ const ClientCampaignList: React.FC = () => {
                               className="text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
                               title="View campaign"
                             >
-                              <EyeIcon className="h-5 w-5" />
+                              {migrateHeroIcon('EyeIcon', { className: "h-5 w-5" })}
                             </button>
                             <Link 
                               href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                               className="text-gray-500 hover:text-[var(--accent-color)] transition-colors"
                               title="Edit campaign"
                             >
-                              <PencilIcon className="h-5 w-5" />
+                              {migrateHeroIcon('PencilIcon', { className: "h-5 w-5" })}
                             </Link>
                             <button 
                               onClick={() => handleDuplicateClick(campaign)}
                               className="text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
                               title="Duplicate campaign"
                             >
-                              <DocumentDuplicateIcon className="h-5 w-5" />
+                              {migrateHeroIcon('DocumentDuplicateIcon', { className: "h-5 w-5" })}
                             </button>
                             <button
                               onClick={() => handleDeleteClick(campaign)}
                               className="text-gray-500 hover:text-red-600 transition-colors"
                               title="Delete campaign"
                             >
-                              <TrashIcon className="h-5 w-5" />
+                              {migrateHeroIcon('TrashIcon', { className: "h-5 w-5" })}
                             </button>
                           </div>
                         </td>
@@ -1063,28 +1057,28 @@ const ClientCampaignList: React.FC = () => {
                       className="p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
                       title="View campaign"
                     >
-                      <EyeIcon className="h-5 w-5" />
+                      {migrateHeroIcon('EyeIcon', { className: "h-5 w-5" })}
                     </button>
                     <Link 
                       href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                       className="p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors"
                       title="Edit campaign"
                     >
-                      <PencilIcon className="h-5 w-5" />
+                      {migrateHeroIcon('PencilIcon', { className: "h-5 w-5" })}
                     </Link>
                     <button 
                       onClick={() => handleDuplicateClick(campaign)}
                       className="p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
                       title="Duplicate campaign"
                     >
-                      <DocumentDuplicateIcon className="h-5 w-5" />
+                      {migrateHeroIcon('DocumentDuplicateIcon', { className: "h-5 w-5" })}
                     </button>
                     <button
                       onClick={() => handleDeleteClick(campaign)}
                       className="p-1.5 text-gray-500 hover:text-red-600 transition-colors"
                       title="Delete campaign"
                     >
-                      <TrashIcon className="h-5 w-5" />
+                      {migrateHeroIcon('TrashIcon', { className: "h-5 w-5" })}
                     </button>
                   </div>
                 </div>
@@ -1127,7 +1121,7 @@ const ClientCampaignList: React.FC = () => {
                 onClick={() => setShowDeleteModal(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
-                <XMarkIcon className="h-5 w-5" />
+                {migrateHeroIcon('XMarkIcon', { className: "h-5 w-5" })}
               </button>
             </div>
             
@@ -1180,7 +1174,7 @@ const ClientCampaignList: React.FC = () => {
                 onClick={() => setShowDuplicateModal(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
-                <XMarkIcon className="h-5 w-5" />
+                {migrateHeroIcon('XMarkIcon', { className: "h-5 w-5" })}
               </button>
             </div>
             

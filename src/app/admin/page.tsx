@@ -1,23 +1,15 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { migrateHeroIcon } from '@/lib/icon-helpers';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@auth0/nextjs-auth0';
 import type { UserProfile } from '@auth0/nextjs-auth0/client';
-import {
-  UserGroupIcon,
-  ChartBarIcon,
-  CogIcon,
-  ShieldCheckIcon,
-  ClockIcon,
-  ServerIcon,
-  BellIcon,
-  DocumentTextIcon,
-  XCircleIcon,
-  BugAntIcon
-} from '@heroicons/react/24/solid';
 
 interface Company {
   id: string;
@@ -254,7 +246,7 @@ export default function AdminDashboard() {
           <strong className="font-bold">Error! </strong>
           <span className="block sm:inline">{alertMessage}</span>
           <span className="absolute top-0 bottom-0 right-0 px-4 py-3" onClick={() => setShowAlertError(false)}>
-            <XCircleIcon className="h-6 w-6 text-red-500" />
+            {migrateHeroIcon('XCircleIcon', { className: 'h-6 w-6 text-red-500' })}
           </span>
         </div>
       )}
@@ -265,7 +257,7 @@ export default function AdminDashboard() {
           <strong className="font-bold">Success! </strong>
           <span className="block sm:inline">{alertMessage}</span>
           <span className="absolute top-0 bottom-0 right-0 px-4 py-3" onClick={() => setShowAlertSuccess(false)}>
-            <XCircleIcon className="h-6 w-6 text-green-500" />
+            {migrateHeroIcon('XCircleIcon', { className: 'h-6 w-6 text-green-500' })}
           </span>
         </div>
       )}
@@ -297,7 +289,7 @@ export default function AdminDashboard() {
                 onClick={() => router.push('/debug-tools')}
                 className="px-4 py-2 flex items-center gap-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
               >
-                <BugAntIcon className="h-5 w-5" />
+                {migrateHeroIcon('BugAntIcon', { className: 'h-5 w-5' })}
                 Debug Tools
               </button>
             </div>
@@ -422,7 +414,7 @@ export default function AdminDashboard() {
                     className="text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
                     onClick={() => setUserModalOpen(false)}
                   >
-                    <XCircleIcon className="h-6 w-6" />
+                    {migrateHeroIcon('XCircleIcon', { className: 'h-6 w-6' })}
                   </button>
                 </div>
                 

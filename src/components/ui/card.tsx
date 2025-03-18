@@ -275,7 +275,7 @@ export interface MetricCardProps extends Omit<React.HTMLAttributes<HTMLDivElemen
  *   title="Total Users"
  *   value={1234}
  *   description="+12% from last month"
- *   icon={<UserIcon className="w-5 h-5" />}
+ *   icon={<Icon name="user" className="w-5 h-5" />}
  *   trend={12}
  * />
  * ```
