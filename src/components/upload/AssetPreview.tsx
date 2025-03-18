@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { DocumentIcon, PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
+import { Icon } from '@/components/ui/icon';
 
 interface AssetPreviewProps {
   url: string;
@@ -79,7 +79,7 @@ export function AssetPreview({ url, fileName, type, className = '' }: AssetPrevi
       {!hasLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
           <div className="animate-pulse flex flex-col items-center">
-            <DocumentIcon className="h-8 w-8 text-gray-400" />
+            <Icon name="info" className="h-8 w-8 text-gray-400" />
             <span className="mt-2 text-xs text-gray-500">Loading...</span>
           </div>
         </div>
@@ -117,9 +117,9 @@ export function AssetPreview({ url, fileName, type, className = '' }: AssetPrevi
             {hasLoaded && (
               <div className="p-2 rounded-full bg-white bg-opacity-70">
                 {isPlaying ? (
-                  <PauseIcon className="h-6 w-6 text-gray-800" />
+                  <Icon name="minus" className="h-6 w-6 text-gray-800" />
                 ) : (
-                  <PlayIcon className="h-6 w-6 text-gray-800" />
+                  <Icon name="plus" className="h-6 w-6 text-gray-800" />
                 )}
               </div>
             )}
@@ -130,7 +130,7 @@ export function AssetPreview({ url, fileName, type, className = '' }: AssetPrevi
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <DocumentIcon className="h-12 w-12 text-gray-400" />
+          <Icon name="info" className="h-12 w-12 text-gray-400" />
           <span className="ml-2 text-gray-700">{fileName}</span>
         </div>
       )}

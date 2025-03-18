@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Icon } from '@/components/ui/icon';
 
 interface Question {
   id: string;
@@ -1090,7 +1090,7 @@ export default function SurveyDesignContent() {
               onClick={handleClearForm}
               className="flex-1 py-2 bg-red-500 text-white rounded-md font-medium font-['Work_Sans'] hover:bg-red-600 transition-colors flex items-center justify-center"
             >
-              <TrashIcon className="mr-2 h-5 w-5" />
+              <Icon name="trash" className="mr-2 h-5 w-5" />
               Clear Form
             </button>
             <button
@@ -1327,16 +1327,11 @@ export default function SurveyDesignContent() {
                 
                 <div className="flex items-center space-x-2">
                   <button 
-                    className="p-2 text-gray-500 hover:text-red-600 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteQuestion(question.id);
-                    }}
-                    title="Delete question"
-                    aria-label="Delete question"
+                    onClick={() => handleDeleteQuestion(question.id)}
+                    className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-gray-100"
                   >
-                    <TrashIcon className="h-5 w-5" />
-                </button>
+                    <Icon name="trash" className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 

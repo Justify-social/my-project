@@ -8,42 +8,8 @@ import {
   AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ComposedChart, Scatter,
 } from "recharts";
-import {
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  SparklesIcon,
-  ChartBarIcon,
-  MegaphoneIcon,
-  HeartIcon,
-  HashtagIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  ArrowPathIcon,
-  DocumentChartBarIcon,
-  CalendarDaysIcon,
-  AdjustmentsHorizontalIcon,
-  ArrowDownTrayIcon,
-  CurrencyDollarIcon,
-  ShieldCheckIcon,
-  UserCircleIcon,
-  BuildingOfficeIcon,
-  RocketLaunchIcon,
-  SignalIcon,
-  BellAlertIcon,
-  ChartPieIcon,
-  MapIcon,
-  CogIcon,
-  DocumentMagnifyingGlassIcon,
-  ChatBubbleLeftRightIcon,
-  CheckIcon,
-  DocumentTextIcon,
-  PresentationChartBarIcon,
-  TableCellsIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  MinusIcon,
-  ChevronRightIcon,
-} from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
+import { iconComponentFactory } from '@/lib/icon-helpers';
 
 // Enhanced data structures for enterprise metrics
 interface BrandMetrics {
@@ -508,14 +474,15 @@ const brandMetrics: BrandMetrics = {
   },
 };
 
-type HeroIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+// Remove the conflicting type declaration
+// type IconName = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 interface MetricCardProps {
   title: string;
   value: number;
   change?: number;
   changeType?: 'increase' | 'decrease' | 'none';
-  icon?: HeroIcon;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   format?: 'number' | 'percent' | 'currency';
 }
 
@@ -523,7 +490,8 @@ interface ChartCardProps {
   title: string;
   description?: string;
   children: React.ReactNode;
-  icon: HeroIcon;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName?: IconName;
   actions?: React.ReactNode;
 }
 
@@ -559,46 +527,42 @@ const HashtagMetric: React.FC<HashtagMetricProps> = ({ tag, reach, engagement, s
 );
 
 // Reusable Components
-const MetricCard = ({ title, value, change, changeType, icon: Icon, format }: MetricCardProps) => {
+const MetricCard = ({ title, value, change, changeType, icon, format }: MetricCardProps) => {
   const formattedValue = useMemo(() => {
     if (format === 'percent') return `${value}%`;
     if (format === 'currency') return `$${value.toLocaleString()}`;
     return value.toLocaleString();
   }, [value, format]);
-
+  
   return (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-6 rounded-lg shadow-sm font-work-sans"
-      style={{ border: '1px solid var(--divider-color)' }}
-    >
-      <div className="flex justify-between mb-2">
-        <p className="text-sm font-semibold font-work-sans" style={{ color: 'var(--secondary-color)' }}>{title}</p>
-        {Icon && <Icon className="w-5 h-5 text-gray-400" />}
+    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+      <div className="flex items-center mb-4">
+        <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg">
+          {icon ? icon({ className: "w-6 h-6 text-[var(--accent-color)]" }) : 
+            <Icon name="info" className="w-6 h-6 text-[var(--accent-color)]" />}
+        </div>
+        <h3 className="text-lg font-semibold ml-3 font-sora">{title}</h3>
       </div>
-      <div className="flex items-end space-x-2">
-        <p className="text-2xl font-bold font-sora" style={{ color: 'var(--primary-color)' }}>{formattedValue}</p>
-        {change && (
+      <div className="flex items-baseline justify-between">
+        <span className="text-3xl font-bold font-sora">{formattedValue}</span>
+        {change !== undefined && (
           <div className={`flex items-center ${
             changeType === 'increase' ? 'text-green-500' : 
-            changeType === 'decrease' ? 'text-red-500' : 'text-gray-500'
+            changeType === 'decrease' ? 'text-red-500' :
+            'text-gray-500'
           }`}>
             {changeType === 'increase' ? 
-              <ArrowUpIcon className="w-4 h-4" /> : 
+              <Icon name="arrowUp" className="w-4 h-4" /> : 
               changeType === 'decrease' ? 
-                <ArrowDownIcon className="w-4 h-4" /> : 
-                <MinusIcon className="w-4 h-4" />
+                <Icon name="arrowDown" className="w-4 h-4" /> : 
+                <Icon name="minus" className="w-4 h-4" />
             }
             <span className="text-sm font-medium font-work-sans">{Math.abs(change)}%</span>
           </div>
-      )}
+        )}
+      </div>
     </div>
-      <div className="h-10 mt-4">
-        {/* Simple sparkline chart would go here */}
-    </div>
-  </motion.div>
-);
+  );
 };
 
 const ChartCard: React.FC<ChartCardProps> = ({ 
@@ -606,6 +570,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
   description, 
   children,
   icon: Icon,
+  iconName,
   actions,
 }) => (
   <motion.div
@@ -640,7 +605,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
 interface RadarChartCardProps {
   title: string;
   description?: string;
-  icon: HeroIcon;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   data: Array<{
     subject: string;
     value: number;
@@ -750,15 +715,13 @@ export default function BrandHealthDashboard() {
               onClick={() => setShowExportModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
+              <Icon name="close" className="w-5 h-5" />
             </button>
             
             {exportComplete ? (
               <div className="text-center py-6">
                 <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <CheckIcon className="w-8 h-8 text-green-600" />
+                  <Icon name="check" className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-var(--primary-color) mb-2 font-sora">Export Complete</h3>
                 <p className="text-var(--secondary-color) mb-6 font-work-sans">Your {selectedExportFormat.toUpperCase()} report has been generated successfully.</p>
@@ -768,12 +731,12 @@ export default function BrandHealthDashboard() {
                 >
                   {isExporting ? (
                     <>
-                      <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+                      <Icon name="arrowRight" className="w-4 h-4 mr-2 animate-spin" />
                       Exporting...
                     </>
                   ) : (
                     <>
-                      <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
+                      <Icon name="arrowDown" className="w-4 h-4 mr-2" />
                       Export
                     </>
                   )}
@@ -792,7 +755,7 @@ export default function BrandHealthDashboard() {
                   >
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" 
                       style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                      <DocumentTextIcon className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
+                      <Icon name="documentText" className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium font-sora" style={{ color: 'var(--primary-color)' }}>Complete Brand Health Analysis</h4>
@@ -807,7 +770,7 @@ export default function BrandHealthDashboard() {
                   >
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" 
                       style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                      <PresentationChartBarIcon className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
+                      <Icon name="presentationChartBar" className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium font-sora" style={{ color: 'var(--primary-color)' }}>Executive Summary</h4>
@@ -822,7 +785,7 @@ export default function BrandHealthDashboard() {
                   >
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" 
                       style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                      <TableCellsIcon className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
+                      <Icon name="tableCells" className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium font-sora" style={{ color: 'var(--primary-color)' }}>Raw Data Export</h4>
@@ -837,7 +800,7 @@ export default function BrandHealthDashboard() {
                   >
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" 
                       style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                      <ChartBarIcon className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
+                      <Icon name="chartBar" className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium font-sora" style={{ color: 'var(--primary-color)' }}>Competitor Analysis</h4>
@@ -879,12 +842,12 @@ export default function BrandHealthDashboard() {
               >
                 {isExporting ? (
                   <>
-                    <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+                    <Icon name="arrowRight" className="w-4 h-4 mr-2 animate-spin" />
                     Exporting...
                   </>
                 ) : (
                   <>
-                    <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
+                    <Icon name="arrowDown" className="w-4 h-4 mr-2" />
                     Export
                   </>
                 )}
@@ -918,7 +881,7 @@ export default function BrandHealthDashboard() {
                       <span className="text-4xl font-bold font-sora" style={{ color: 'var(--secondary-color)' }}>/100</span>
                     </div>
                     <span className="text-sm font-medium mt-1 flex items-center" style={{ color: '#22C55E' }}>
-                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+                      <Icon name="arrowUp" className="w-4 h-4 mr-1" />
                       +4% from previous period
                     </span>
                   </div>
@@ -1029,7 +992,7 @@ export default function BrandHealthDashboard() {
                     <h3 className="text-lg font-semibold font-sora" style={{ color: 'var(--primary-color)' }}>Top Mentions</h3>
                     <button className="text-sm font-medium font-work-sans flex items-center" style={{ color: 'var(--accent-color)' }}>
                       View All 
-                      <ChevronRightIcon className="w-4 h-4 ml-1" />
+                      <Icon name="chevronRight" className="w-4 h-4 ml-1" />
                     </button>
                   </div>
             <div className="space-y-4">
@@ -1039,10 +1002,7 @@ export default function BrandHealthDashboard() {
                         <div className="flex-shrink-0 mr-3">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center" 
                             style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" 
-                              style={{ color: 'var(--accent-color)' }}>
-                              <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.1 10.1 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                            </svg>
+                            <Icon name="check" className="w-6 h-6" />
                           </div>
                         </div>
                         <div className="flex-1">
@@ -1061,15 +1021,11 @@ export default function BrandHealthDashboard() {
                           <p className="mt-1 font-work-sans" style={{ color: 'var(--secondary-color)' }}>The new Enterprise AI integration from @TheWriteCompany is impressive - finally a tool that genuinely helps content teams be more productive! #productivity #AI</p>
                           <div className="mt-2 flex items-center text-sm text-gray-500">
                             <span className="flex items-center mr-4">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                              </svg>
+                              <Icon name="check" className="w-4 h-4 mr-1" />
                               256
                     </span>
                             <span className="flex items-center">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                              </svg>
+                              <Icon name="userGroup" className="w-4 h-4 mr-1" />
                               42
                             </span>
                           </div>
@@ -1082,10 +1038,7 @@ export default function BrandHealthDashboard() {
                         <div className="flex-shrink-0 mr-3">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center" 
                             style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" 
-                              style={{ color: 'var(--accent-color)' }}>
-                              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                            </svg>
+                            <Icon name="check" className="w-6 h-6" />
                           </div>
                         </div>
                         <div className="flex-1">
@@ -1104,15 +1057,11 @@ export default function BrandHealthDashboard() {
                           <p className="mt-1 font-work-sans" style={{ color: 'var(--secondary-color)' }}>Just implemented @TheWriteCompany&apos;s brand health monitoring tools across our marketing department. The insights are helping us pivot our messaging strategy in real-time. Highly recommend for enterprise marketing teams.</p>
                           <div className="mt-2 flex items-center text-sm text-gray-500">
                             <span className="flex items-center mr-4">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                              </svg>
+                              <Icon name="check" className="w-4 h-4 mr-1" />
                               187
                             </span>
                             <span className="flex items-center">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                              </svg>
+                              <Icon name="userGroup" className="w-4 h-4 mr-1" />
                               32
                             </span>
             </div>
@@ -1144,10 +1093,7 @@ export default function BrandHealthDashboard() {
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" 
                           style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" 
-                            style={{ color: 'var(--accent-color)' }}>
-                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                          </svg>
+                          <Icon name="lightning" solid className="w-6 h-6 text-white" />
                         </div>
                         <span className="font-medium text-gray-900">X</span>
                       </div>
@@ -1161,10 +1107,7 @@ export default function BrandHealthDashboard() {
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" 
                           style={{ backgroundColor: 'rgba(0, 191, 255, 0.1)' }}>
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" 
-                            style={{ color: 'var(--accent-color)' }}>
-                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                          </svg>
+                          <Icon name="check" className="w-6 h-6" />
                         </div>
                         <span className="font-medium text-gray-900">Instagram</span>
                       </div>
@@ -1177,9 +1120,7 @@ export default function BrandHealthDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                          <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                          </svg>
+                          <Icon name="check" className="w-5 h-5 text-blue-500" />
                         </div>
                         <span className="font-medium text-gray-900">YouTube</span>
                       </div>
@@ -1388,25 +1329,25 @@ export default function BrandHealthDashboard() {
         <div className="mt-8 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-6 text-white">
           <div className="flex items-start space-x-4">
             <div className="bg-white/10 p-3 rounded-lg">
-              <SparklesIcon className="w-6 h-6 text-white" />
+              <Icon name="lightning" solid className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2 font-sora">AI-Powered Strategic Insights</h3>
               <ul className="space-y-3 font-work-sans">
                 <li className="flex items-start">
-                  <ArrowTrendingUpIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <Icon name="arrowUp" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Your brand sentiment is consistently higher on Instagram (82%) than other platforms. Consider shifting more resources to this channel for enterprise messaging.</span>
                 </li>
                 <li className="flex items-start">
-                  <UserGroupIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <Icon name="userGroup" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Product announcements receive 3.2x more positive engagement than industry news. Recommend incorporating more product-focused content in your social media mix.</span>
                 </li>
                 <li className="flex items-start">
-                  <ShieldCheckIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <Icon name="shield" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Competitor B is gaining traction in Forums (40% share of voice). Consider strengthening your presence in developer and technical communities.</span>
                 </li>
                 <li className="flex items-start">
-                  <ChartBarIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                  <Icon name="chartBar" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Your recent Enterprise AI campaign drove a 15% increase in positive mentions. This messaging resonates strongly with your target audience.</span>
                 </li>
               </ul>

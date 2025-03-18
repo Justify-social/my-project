@@ -3,8 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckIcon, XMarkIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
-import { SparklesIcon } from "@heroicons/react/24/solid";
+import { Icon } from "@/components/ui/icon";
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { toast } from "react-hot-toast";
 import Link from "next/link";
@@ -244,7 +243,7 @@ const renderFeatureValue = (category: FeatureCategory, value: string | number | 
             <div className="flex items-center justify-center">
               {/* Circular checkmark icon - light blue color to match screenshot */}
               <div className="h-6 w-6 rounded-full bg-[#50b5ff] flex items-center justify-center">
-                <CheckIcon className="h-4 w-4 text-white" />
+                <Icon name="check" className="h-4 w-4 text-white" />
               </div>
             </div>
             {tooltipText && (
@@ -258,7 +257,7 @@ const renderFeatureValue = (category: FeatureCategory, value: string | number | 
           <div className="relative group">
             {/* Circular X mark icon - light gray color to match screenshot */}
             <div className="h-6 w-6 rounded-full bg-[#d1d5db] flex items-center justify-center">
-              <XMarkIcon className="h-4 w-4 text-white" />
+              <Icon name="close" className="h-4 w-4 text-white" />
             </div>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
               Not included in this plan
@@ -386,7 +385,7 @@ export default function PricingContent() {
         <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-8">
           <div className="flex items-center gap-2">
             <div className="relative group">
-              <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+              <Icon name="info" className="h-5 w-5 text-gray-500" />
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
                 Hover for more details
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
@@ -396,13 +395,13 @@ export default function PricingContent() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-5 w-5 rounded-full bg-[#50b5ff] flex items-center justify-center">
-              <CheckIcon className="h-3 w-3 text-white" />
+              <Icon name="check" className="h-3 w-3 text-white" />
             </div>
             <span className="text-sm text-gray-600">Included</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-5 w-5 rounded-full bg-[#d1d5db] flex items-center justify-center">
-              <XMarkIcon className="h-3 w-3 text-white" />
+              <Icon name="close" className="h-3 w-3 text-white" />
             </div>
             <span className="text-sm text-gray-600">Not included</span>
           </div>
@@ -459,7 +458,7 @@ export default function PricingContent() {
                       <span className="font-sora text-sm">{category}</span>
                       {featureDefinitions[category] && (
                         <div className="relative ml-1 group cursor-help">
-                          <InformationCircleIcon className="h-4 w-4 text-gray-400" />
+                          <Icon name="info" className="h-4 w-4 text-gray-400" />
                           <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-56 font-normal shadow-lg">
                             {featureDefinitions[category].description}
                             <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
@@ -536,7 +535,7 @@ export default function PricingContent() {
                     <div className="flex items-center">
                       <span className="font-sora text-sm">{category}</span>
                       <div className="relative ml-2 group">
-                        <InformationCircleIcon className="h-4 w-4 text-gray-400" />
+                        <Icon name="info" className="h-4 w-4 text-gray-400" />
                         <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-60 font-normal shadow-lg">
                           {featureTooltips[category]}
                           <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>

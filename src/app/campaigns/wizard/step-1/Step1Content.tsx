@@ -10,27 +10,7 @@ import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
-import { 
-  CalendarIcon, 
-  InformationCircleIcon,
-  ChevronDownIcon,
-  UserCircleIcon,
-  CurrencyDollarIcon,
-  GlobeAltIcon,
-  PlusCircleIcon,
-  BriefcaseIcon,
-  ClockIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  BuildingOfficeIcon,
-  UserGroupIcon,
-  XCircleIcon,
-  TrashIcon,
-  CheckCircleIcon,
-  ArrowPathIcon,
-  UserIcon,
-  CheckBadgeIcon
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/icon";
 import { EnumTransformers } from '@/utils/enum-transformers';
 // Import the payload sanitizer utilities
 import { sanitizeDraftPayload } from '@/utils/payload-sanitizer';
@@ -217,10 +197,10 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
         )}
         {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
         {type === "date" && !icon && (
-          <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
+          <Icon name="calendar" className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
         )}
         {as === "select" && (
-          <ChevronDownIcon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color pointer-events-none" />
+          <Icon name="chevronDown" className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color pointer-events-none" />
         )}
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
@@ -244,7 +224,7 @@ const DateField = ({ label, name, required = false, ...props }: any) => {
           className="w-full p-2.5 pr-10 border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans"
           {...props}
         />
-        <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
+        <Icon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
     </div>
@@ -465,7 +445,7 @@ const DateRangePicker = ({
             </label>
             <div className="relative">
               <div className="absolute left-3 top-2.5 text-secondary-color">
-                <CalendarIcon className="w-5 h-5" />
+                <Icon className="w-5 h-5" />
               </div>
               <input
                 type="date"
@@ -494,7 +474,7 @@ const DateRangePicker = ({
             </label>
             <div className="relative">
               <div className="absolute left-3 top-2.5 text-secondary-color">
-                <CalendarIcon className="w-5 h-5" />
+                <Icon className="w-5 h-5" />
               </div>
               <input
                 type="date"
@@ -522,7 +502,7 @@ const DateRangePicker = ({
         {startDate && endDate && (
           <div className="mt-3 text-sm text-primary-color bg-blue-50 p-2 rounded">
             <div className="flex items-center">
-              <ClockIcon className="w-4 h-4 mr-1 text-accent-color" />
+              <Icon className="w-4 h-4 mr-1 text-accent-color" />
               <span>Campaign Duration: {calculateDuration(startDate, endDate)}</span>
             </div>
           </div>
@@ -735,7 +715,7 @@ const InfluencerEntry = ({ index, remove, arrayHelpers }: { index: number, remov
             onClick={remove}
             className="text-red-500 hover:text-red-700"
           >
-            <TrashIcon className="h-5 w-5" />
+            <Icon name="close" className="h-5 w-5" />
           </button>
         )}
       </div>
@@ -783,7 +763,7 @@ const InfluencerEntry = ({ index, remove, arrayHelpers }: { index: number, remov
             />
             {isValidating && (
               <div className="absolute right-2 top-2">
-                <ArrowPathIcon className="h-5 w-5 text-primary-color animate-spin" />
+                <Icon className="h-5 w-5 text-primary-color animate-spin" />
               </div>
             )}
           </div>
@@ -801,7 +781,7 @@ const InfluencerEntry = ({ index, remove, arrayHelpers }: { index: number, remov
       {isValidating && (
         <div className="mt-3 text-primary-color flex items-center">
           <span className="animate-spin mr-2">
-            <ArrowPathIcon className="h-4 w-4" />
+            <Icon className="h-4 w-4" />
           </span>
           Validating influencer...
         </div>
@@ -869,7 +849,7 @@ const InfluencerPreview = ({
     return (
       <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center">
         <div className="animate-spin mr-2">
-          <ArrowPathIcon className="h-4 w-4 text-primary-color" />
+          <Icon className="h-4 w-4 text-primary-color" />
         </div>
         <p className="text-sm text-gray-600">Validating influencer...</p>
       </div>
@@ -905,7 +885,7 @@ const InfluencerPreview = ({
           />
         ) : (
           <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-            <UserIcon className="h-6 w-6 text-gray-500" />
+            <Icon className="h-6 w-6 text-gray-500" />
           </div>
         )}
         <div>
@@ -915,7 +895,7 @@ const InfluencerPreview = ({
             </p>
             {influencerData.verified && (
               <span className="ml-1 text-blue-500">
-                <CheckBadgeIcon className="h-4 w-4" />
+                <Icon className="h-4 w-4" />
               </span>
             )}
           </div>
@@ -1613,7 +1593,7 @@ function FormContent() {
                       name="timeZone"
                       as="select"
                       required
-                      icon={<ClockIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     >
                       <option value="">Select time zone</option>
                       <option value="UTC">UTC (Coordinated Universal Time)</option>
@@ -1635,7 +1615,7 @@ function FormContent() {
                 {/* Primary Contact */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <UserCircleIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon className="w-5 h-5 mr-2 text-accent-color" />
                     Primary Contact
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1644,14 +1624,14 @@ function FormContent() {
                       name="primaryContact.firstName"
                       placeholder="Enter first name"
                       required
-                      icon={<UserCircleIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Last Name"
                       name="primaryContact.surname"
                       placeholder="Enter last name"
                       required
-                      icon={<UserCircleIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -1661,14 +1641,14 @@ function FormContent() {
                       type="email"
                       placeholder="email@example.com"
                       required
-                      icon={<EnvelopeIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Position"
                       name="primaryContact.position"
                       as="select"
                       required
-                      icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     >
                       <option value="">Select Position</option>
                       <option value={Position.Manager}>{Position.Manager}</option>
@@ -1681,7 +1661,7 @@ function FormContent() {
                 {/* Secondary Contact */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <UserCircleIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon className="w-5 h-5 mr-2 text-accent-color" />
                     Secondary Contact <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1689,13 +1669,13 @@ function FormContent() {
                       label="First Name"
                       name="secondaryContact.firstName"
                       placeholder="Enter first name"
-                      icon={<UserCircleIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Last Name"
                       name="secondaryContact.surname"
                       placeholder="Enter last name"
-                      icon={<UserCircleIcon className="w-5 h-5" />}
+                      icon={<Icon className="w-5 h-5" />}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -1704,13 +1684,13 @@ function FormContent() {
                       name="secondaryContact.email"
                       type="email"
                       placeholder="email@example.com"
-                      icon={<EnvelopeIcon className="w-5 h-5" />}
+                      icon={<Icon name="mail" className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Position"
                       name="secondaryContact.position"
                       as="select"
-                      icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                      icon={<Icon name="settings" className="w-5 h-5" />}
                     >
                       <option value="">Select Position</option>
                       <option value={Position.Manager}>{Position.Manager}</option>
@@ -1724,7 +1704,7 @@ function FormContent() {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <div className="flex justify-between items-center mb-5">
                     <h2 className="text-lg font-bold font-sora text-primary-color flex items-center">
-                      <UserGroupIcon className="w-5 h-5 mr-2 text-accent-color" />
+                      <Icon name="user" className="w-5 h-5 mr-2 text-accent-color" />
                       Additional Contacts <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
                     </h2>
                     <button
@@ -1740,7 +1720,7 @@ function FormContent() {
                       }}
                       className="flex items-center text-sm font-medium bg-white border border-accent-color text-accent-color hover:bg-accent-color/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans"
                     >
-                      <PlusCircleIcon className="w-5 h-5 mr-1" />
+                      <Icon name="plus" className="w-5 h-5 mr-1" />
                       Add Contact
                     </button>
                   </div>
@@ -1758,7 +1738,7 @@ function FormContent() {
                           className="absolute top-2 right-2 text-secondary-color hover:text-accent-color transition-colors duration-200"
                           aria-label="Remove contact"
                         >
-                          <XCircleIcon className="w-5 h-5" />
+                          <Icon name="close" className="h-5 w-5" />
                         </button>
 
                         <h3 className="text-md font-medium text-primary-color mb-3 font-sora">Contact {index + 3}</h3>
@@ -1768,13 +1748,13 @@ function FormContent() {
                             label="First Name"
                             name={`additionalContacts.${index}.firstName`}
                             placeholder="Enter first name"
-                            icon={<UserCircleIcon className="w-5 h-5" />}
+                            icon={<Icon name="user" className="w-5 h-5" />}
                           />
                           <StyledField
                             label="Last Name"
                             name={`additionalContacts.${index}.surname`}
                             placeholder="Enter last name"
-                            icon={<UserCircleIcon className="w-5 h-5" />}
+                            icon={<Icon name="user" className="w-5 h-5" />}
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -1783,13 +1763,13 @@ function FormContent() {
                             name={`additionalContacts.${index}.email`}
                             type="email"
                             placeholder="email@example.com"
-                            icon={<EnvelopeIcon className="w-5 h-5" />}
+                            icon={<Icon name="mail" className="w-5 h-5" />}
                           />
                           <StyledField
                             label="Position"
                             name={`additionalContacts.${index}.position`}
                             as="select"
-                            icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                            icon={<Icon name="settings" className="w-5 h-5" />}
                           >
                             <option value="">Select Position</option>
                             <option value={Position.Manager}>{Position.Manager}</option>
@@ -1801,7 +1781,7 @@ function FormContent() {
                     ))
                   ) : (
                     <div className="text-center py-8 border border-dashed border-divider-color rounded-lg bg-gray-50">
-                      <UserGroupIcon className="w-12 h-12 mx-auto text-accent-color opacity-70" />
+                      <Icon name="user" className="w-12 h-12 mx-auto text-accent-color opacity-70" />
                       <p className="mt-2 text-primary-color font-sora">No additional contacts added yet.</p>
                       <p className="text-sm text-secondary-color font-work-sans">Click "Add Contact" to include more team members.</p>
                     </div>
@@ -1811,7 +1791,7 @@ function FormContent() {
                 {/* Influencers */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <UserGroupIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon name="user" className="w-5 h-5 mr-2 text-accent-color" />
                     Influencer Details
                   </h2>
                   <div className="mb-4">
@@ -1838,7 +1818,7 @@ function FormContent() {
                             onClick={() => push({ platform: '', handle: '' })}
                             className="mt-3 flex items-center text-primary-color hover:text-accent-color"
                           >
-                            <PlusCircleIcon className="h-5 w-5 mr-2" />
+                            <Icon name="plus" className="h-5 w-5 mr-2" />
                             Add Another Influencer
                           </button>
                         </div>
@@ -1850,7 +1830,7 @@ function FormContent() {
                 {/* Budget Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <CurrencyDollarIcon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon name="info" className="w-5 h-5 mr-2 text-accent-color" />
                     Budget
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1860,7 +1840,7 @@ function FormContent() {
                         name="currency"
                         as="select"
                         required
-                        icon={<CurrencyDollarIcon className="w-5 h-5" />}
+                        icon={<Icon name="info" className="w-5 h-5" />}
                       >
                         <option value="">Select currency</option>
                         <option value={Currency.GBP}>GBP (£)</option>
@@ -1883,7 +1863,7 @@ function FormContent() {
                       type="number"
                       placeholder="5000"
                       required
-                      icon={<CurrencyDollarIcon className="w-5 h-5" />}
+                      icon={<Icon name="info" className="w-5 h-5" />}
                     />
                     
                     <StyledField
@@ -1892,7 +1872,7 @@ function FormContent() {
                       type="number"
                       placeholder="3000"
                       required
-                      icon={<CurrencyDollarIcon className="w-5 h-5" />}
+                      icon={<Icon name="info" className="w-5 h-5" />}
                     />
                   </div>
                 </div>

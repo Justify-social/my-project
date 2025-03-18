@@ -8,23 +8,8 @@ import { useWizard } from "@/context/WizardContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import ErrorFallback from '@/components/ErrorFallback';
-import { 
-  CheckCircleIcon, 
-  ChevronRightIcon,
-  PencilIcon,
-  DocumentIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  UserCircleIcon,
-  InformationCircleIcon,
-  PlayIcon,
-  GlobeAltIcon,
-  AcademicCapIcon,
-  CurrencyEuroIcon,
-  BriefcaseIcon,
-  LanguageIcon,
-  UserGroupIcon
-} from '@heroicons/react/24/outline';
+import { Icon } from "@/components/ui/icon";
+import { migrateHeroIcon } from "@/lib/icon-helpers";
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
@@ -77,10 +62,10 @@ const SummarySection: React.FC<SummarySectionProps> = ({
         </div>
         <button
           onClick={onEdit}
-          className="text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline flex items-center text-sm font-medium"
+          className="text-[var(--accent-color)] text-sm flex items-center hover:text-[var(--accent-hover)] transition-colors"
           aria-label={`Edit ${title}`}
         >
-          <PencilIcon className="h-4 w-4 mr-1" />
+          <Icon name="edit" className="h-4 w-4 mr-1" />
           <span>Edit</span>
         </button>
       </div>
@@ -155,12 +140,12 @@ const KPIDisplay: React.FC<KPIDisplayProps> = ({ kpi }) => {
 interface DataItemProps {
   label: string;
   value: string | number | null;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: JSX.Element;
   featured?: boolean;
   isKPI?: boolean;
 }
 
-const DataItem: React.FC<DataItemProps> = ({ label, value, icon: Icon, featured = false, isKPI = false }) => {
+const DataItem: React.FC<DataItemProps> = ({ label, value, icon, featured = false, isKPI = false }) => {
   // Convert objects or other non-primitive values to strings
   const displayValue = () => {
     if (value === null || value === undefined) {
@@ -182,7 +167,7 @@ const DataItem: React.FC<DataItemProps> = ({ label, value, icon: Icon, featured 
   return (
     <div className={`mb-4 ${featured ? 'bg-[rgba(0,191,255,0.05)] p-3 rounded-md' : ''}`}>
       <div className="flex items-center">
-        {Icon && <Icon className="h-4 w-4 text-[var(--secondary-color)] mr-2" />}
+        {icon}
         <p className="text-sm text-[var(--secondary-color)] mb-1 font-medium">{label}</p>
       </div>
       <div className={`font-medium text-[var(--primary-color)] ${featured ? 'text-lg' : ''}`}>
@@ -834,7 +819,7 @@ const Step5AssetPreview = ({ url, fileName, type, className = '' }: { url: strin
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <DocumentIcon className="h-12 w-12 text-gray-400" />
+          <Icon name="info" className="h-12 w-12 text-gray-400" />
         </div>
       )}
     </div>
@@ -1333,13 +1318,13 @@ function Step5Content() {
                   <DataItem 
                     label="Start Date" 
                     value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} 
-                    icon={CalendarIcon}
+                    icon={<Icon name="calendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />}
                   />
                   
                   <DataItem 
                     label="End Date" 
                     value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} 
-                    icon={CalendarIcon}
+                    icon={<Icon name="calendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />}
                   />
                 </div>
               </div>
@@ -1352,21 +1337,21 @@ function Step5Content() {
               <div className="space-y-4">
                 <DataItem 
                   label="Currency" 
-                  value={displayData.currency || 'EUR'} 
-                  icon={CurrencyDollarIcon}
+                  value={displayData.currency || 'USD'} 
+                  icon={<Icon name="info" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />}
                 />
                 
                 <DataItem 
                   label="Total Budget" 
-                  value={displayData.totalBudget ? formatCurrency(displayData.totalBudget, displayData.currency || 'EUR') : 'Not specified'} 
-                  icon={CurrencyDollarIcon}
+                  value={formatCurrency(displayData.totalBudget, displayData.currency)} 
+                  icon={<Icon name="info" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />}
                   featured={true}
                 />
                 
                 <DataItem 
                   label="Social Media Budget" 
-                  value={displayData.socialMediaBudget ? formatCurrency(displayData.socialMediaBudget, displayData.currency || 'EUR') : 'Not specified'} 
-                  icon={CurrencyDollarIcon}
+                  value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} 
+                  icon={<Icon name="info" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />}
                 />
               </div>
             </div>
@@ -1487,7 +1472,7 @@ function Step5Content() {
               {/* Demographics Section */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex items-center mb-4">
-                  <UserGroupIcon className="h-5 w-5 text-[var(--accent-color)] mr-2" />
+                  <Icon name="user" className="h-5 w-5 text-[var(--accent-color)] mr-2" />
                   <h3 className="font-medium text-gray-800">Demographics</h3>
                 </div>
 
@@ -1540,7 +1525,7 @@ function Step5Content() {
               {/* Location Section */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex items-center mb-4">
-                  <GlobeAltIcon className="h-5 w-5 text-[var(--accent-color)] mr-2" />
+                  <Icon name="info" className="h-5 w-5 text-[var(--accent-color)] mr-2" />
                   <h3 className="font-medium text-gray-800">Location</h3>
                 </div>
 
@@ -1582,7 +1567,7 @@ function Step5Content() {
               {/* Advanced Targeting */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex items-center mb-4">
-                  <AcademicCapIcon className="h-5 w-5 text-[var(--accent-color)] mr-2" />
+                  <Icon name="info" className="h-5 w-5 text-[var(--accent-color)] mr-2" />
                   <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
                 </div>
 
@@ -1606,7 +1591,7 @@ function Step5Content() {
                       <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
                         {formatCurrency(
                           Number(displayData.audience.incomeLevel) || 0, 
-                          displayData.currency || 'EUR'
+                          displayData.currency || 'USD'
                         )}
                       </span>
                     ) : (
@@ -1665,13 +1650,13 @@ function Step5Content() {
             </div>
           ) : (
             <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <UserGroupIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+              <Icon name="user" className="h-10 w-10 text-gray-400 mx-auto mb-2" />
               <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
               <button 
                 onClick={() => navigateToStep(3)} 
                 className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto"
               >
-                <PencilIcon className="h-4 w-4 mr-1" />
+                <Icon name="edit" className="h-4 w-4 mr-1" />
                 Add audience targeting
               </button>
             </div>
@@ -1710,7 +1695,7 @@ function Step5Content() {
                     <div className="space-y-4">
                       {/* Influencer */}
                       <div className="flex items-start">
-                        <UserCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                        <Icon name="user" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Influencer</p>
                           <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
@@ -1719,7 +1704,7 @@ function Step5Content() {
                       
                       {/* Why this influencer */}
                       <div className="flex items-start">
-                        <InformationCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                        <Icon name="info" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
                           <p className="text-sm text-gray-800">{asset.whyInfluencer || 'No details provided'}</p>
@@ -1728,12 +1713,12 @@ function Step5Content() {
                       
                       {/* Budget */}
                       <div className="flex items-start">
-                        <CurrencyDollarIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                        <Icon name="info" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-xs text-gray-500 mb-1">Budget</p>
                           <p className="text-sm text-gray-800 font-medium">
                             {asset.budget 
-                              ? formatCurrency(asset.budget, displayData.currency || 'EUR')
+                              ? formatCurrency(asset.budget, displayData.currency || 'USD')
                               : 'Not specified'
                             }
                           </p>
@@ -1746,13 +1731,13 @@ function Step5Content() {
             </div>
           ) : (
             <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <DocumentIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+              <Icon name="info" className="h-10 w-10 text-gray-400 mx-auto mb-2" />
               <p className="text-gray-500">No creative assets have been added yet.</p>
               <button 
                 onClick={() => navigateToStep(4)} 
                 className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto"
               >
-                <PencilIcon className="h-4 w-4 mr-1" />
+                <Icon name="edit" className="h-4 w-4 mr-1" />
                 Add creative assets
               </button>
             </div>

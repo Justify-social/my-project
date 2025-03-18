@@ -3,8 +3,8 @@
 import React, { useState, ChangeEvent, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XCircleIcon, CheckCircleIcon, PhotoIcon, SwatchIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
+import { iconComponentFactory } from '@/lib/icon-helpers';
 import NavigationTabs from '../components/NavigationTabs';
 import toast from 'react-hot-toast';
 
@@ -408,7 +408,7 @@ const BrandingSettingsPage: React.FC = () => {
   if (isFetching) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <ArrowPathIcon className="w-8 h-8 text-[var(--accent-color)] animate-spin" />
+        <Icon name="arrowRight" className="w-8 h-8 text-[var(--accent-color)] animate-spin" />
         <span className="ml-2 text-[var(--primary-color)]">Loading branding settings...</span>
       </div>
     );
@@ -449,7 +449,7 @@ const BrandingSettingsPage: React.FC = () => {
               className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
                 transition-colors duration-200 font-medium flex items-center"
             >
-              <XCircleIcon className="w-5 h-5 mr-2" />
+              <Icon name="xCircle" className="w-5 h-5 mr-2" />
               Cancel
             </motion.button>
             <motion.button
@@ -466,12 +466,12 @@ const BrandingSettingsPage: React.FC = () => {
             >
               {isLoading ? (
                 <>
-                  <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                  <Icon name="arrowRight" className="w-5 h-5 mr-2 animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  <Icon name="checkCircle" className="w-5 h-5 mr-2" />
                   Save
                 </>
               )}
@@ -503,7 +503,7 @@ const BrandingSettingsPage: React.FC = () => {
           {/* Logo Section */}
           <Card>
             <SectionHeader
-              icon={PhotoIcon}
+              icon={iconComponentFactory('photo')}
               title="Logo"
               description="Upload and manage your brand logo"
             />
@@ -524,12 +524,12 @@ const BrandingSettingsPage: React.FC = () => {
                         hover:bg-red-600 transition-colors duration-200"
                       aria-label="Remove logo"
                     >
-                      <XCircleIcon className="w-5 h-5" />
+                      <Icon name="xCircle" className="w-5 h-5" />
                     </motion.button>
                   </div>
                 ) : (
                   <div className="w-32 h-32 bg-[var(--background-color)] rounded-lg flex items-center justify-center">
-                    <PhotoIcon className="w-12 h-12 text-[var(--secondary-color)]" />
+                    <Icon name="photo" className="w-12 h-12 text-[var(--secondary-color)]" />
                   </div>
                 )}
               </div>
@@ -542,7 +542,7 @@ const BrandingSettingsPage: React.FC = () => {
                         bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 
                         transition-colors duration-200 font-medium group"
                     >
-                      <PhotoIcon className="w-5 h-5 mr-2" />
+                      <Icon name="photo" className="w-5 h-5 mr-2" />
                       <span>Upload New Logo</span>
                       <input
                         id="logo"
@@ -562,7 +562,7 @@ const BrandingSettingsPage: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       className="text-red-500 text-sm flex items-center"
                     >
-                      <XCircleIcon className="w-5 h-5 mr-1" />
+                      <Icon name="xCircle" className="w-5 h-5 mr-1" />
                       {logoError}
                     </motion.p>
                   )}
@@ -574,7 +574,7 @@ const BrandingSettingsPage: React.FC = () => {
           {/* Colors Section */}
           <Card>
             <SectionHeader
-              icon={SwatchIcon}
+              icon={iconComponentFactory('swatch')}
               title="Brand Colors"
               description="Define your brand's color palette"
             />
@@ -633,7 +633,7 @@ const BrandingSettingsPage: React.FC = () => {
           {/* Typography Section */}
           <Card>
             <SectionHeader
-              icon={DocumentTextIcon}
+              icon={iconComponentFactory('documentText')}
               title="Typography"
               description="Configure your brand's typography settings"
             />

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ChevronRightIcon, ChevronDownIcon, PencilIcon, TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
 import { toast } from 'react-hot-toast';
 
 // Define types for our component
@@ -44,6 +44,10 @@ export default function SurveyApprovalContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const surveyId = searchParams.get('id') || '1';
+  const [surveyData, setSurveyData] = useState<Survey | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("survey");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   
   // State for surveys and reviewers
   const [surveys, setSurveys] = useState<Survey[]>([
@@ -259,9 +263,9 @@ export default function SurveyApprovalContent() {
                     </div>
                   </div>
                   {question.expanded ? (
-                    <ChevronDownIcon className="h-5 w-5 text-[var(--secondary-color)]" />
+                    <Icon name="chevronDown" className="h-5 w-5 text-[var(--secondary-color)]" />
                   ) : (
-                    <ChevronRightIcon className="h-5 w-5 text-[var(--secondary-color)]" />
+                    <Icon name="chevronRight" className="h-5 w-5 text-[var(--secondary-color)]" />
                   )}
                 </div>
                 
@@ -300,11 +304,11 @@ export default function SurveyApprovalContent() {
                         </div>
                         <div className="flex justify-end space-x-2 mt-4">
                           <button className="flex items-center px-3 py-1.5 bg-gray-100 rounded-md text-[var(--secondary-color)] text-sm hover:bg-gray-200">
-                            <PencilIcon className="h-4 w-4 mr-1" />
+                            <Icon name="edit" className="h-4 w-4 mr-1" />
                             Edit
                           </button>
                           <button className="flex items-center px-3 py-1.5 bg-gray-100 rounded-md text-[var(--secondary-color)] text-sm hover:bg-gray-200">
-                            <TrashIcon className="h-4 w-4 mr-1" />
+                            <Icon name="trash" className="h-4 w-4 mr-1" />
                             Delete
                           </button>
                         </div>
@@ -376,7 +380,7 @@ export default function SurveyApprovalContent() {
                       {reviewer.status === 'Need Action' ? (
                         <div className="flex space-x-2">
                           <button className="p-1" onClick={() => console.log('Edit comment')}>
-                            <PencilIcon className="h-4 w-4 text-gray-400" />
+                            <Icon name="edit" className="h-4 w-4 text-gray-400" />
                           </button>
                           <button 
                             className="px-3 py-1 bg-gray-800 text-white text-xs rounded-md hover:bg-gray-700"
@@ -386,7 +390,10 @@ export default function SurveyApprovalContent() {
                           </button>
                         </div>
                       ) : (
-                        <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                        <div className="flex items-center text-sm">
+                          <Icon name="circleCheck" className="h-5 w-5 text-green-500" />
+                          <span className="ml-1.5">All reviewers approved</span>
+                        </div>
                       )}
                     </div>
                   </div>

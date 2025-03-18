@@ -6,10 +6,7 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
-import { 
-  ArrowUpTrayIcon, 
-  DocumentIcon 
-} from "@heroicons/react/24/outline";
+import { Icon } from '@/components/ui/icon';
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { 
   generateCorrelationId, 
@@ -243,7 +240,7 @@ export function CampaignAssetUploader({
           label: "Choose a file or drag and drop",
           uploadIcon: () => (
             <div className="mb-4 p-3 rounded-full bg-blue-50">
-              <ArrowUpTrayIcon className="h-8 w-8 text-blue-500" />
+              <Icon name="upload" className="h-8 w-8 text-blue-500" />
             </div>
           ),
           button: ({ ready }: { ready: boolean }) => (
@@ -286,7 +283,7 @@ export function CampaignAssetUploader({
           {selectedFiles.map((file, index) => (
             <div key={index} className="bg-white rounded-lg border border-gray-200 p-4">
               <div className="flex items-center">
-                <DocumentIcon className="h-6 w-6 text-gray-400 mr-3" />
+                <Icon name="info" className="h-6 w-6 text-gray-400 mr-3" />
                 <span className="font-medium text-gray-700">{file.name}</span>
                 <span className="ml-auto text-sm text-gray-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
               </div>

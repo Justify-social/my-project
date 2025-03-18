@@ -54,8 +54,11 @@ import { Radio, RadioGroup } from './radio';
 import { Table, TableExample } from './table';
 import { List, ListExample } from './list';
 import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './skeleton';
+import { BsCheckCircleFill, BsCheck, BsX } from 'react-icons/bs';
+import { FontAwesomeTest } from './FontAwesomeTest';
 import { heroIconToName } from '@/lib/icon-helpers';
 import { IconTester } from './IconTester';
+import { IconPerformanceTest } from './IconPerformanceTest';
 
 export function ButtonExamples() {
   return (
@@ -652,9 +655,9 @@ export const IconExamples = () => {
               Facebook
             </Button>
             <Button 
-              leftIcon={<Icon platformName="x" size="sm" />}
+              leftIcon={<Icon platformName="twitter" size="sm" />}
             >
-              X
+              Twitter
             </Button>
             <Button 
               leftIcon={<Icon platformName="linkedin" size="sm" />}
@@ -774,8 +777,8 @@ export const IconExamples = () => {
               <span className="text-xs text-gray-500">fa-solid fa-check</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-brands fa-twitter" className="w-8 h-8 mb-2" color="#000000" />
-              <span className="text-xs text-gray-500">fa-brands fa-twitter (X)</span>
+              <Icon fontAwesome="fa-brands fa-twitter" className="w-8 h-8 mb-2" color="#1DA1F2" />
+              <span className="text-xs text-gray-500">fa-brands fa-twitter</span>
             </div>
             <div className="flex flex-col items-center">
               <Icon fontAwesome="fa-brands fa-facebook" className="w-8 h-8 mb-2" color="#1877F2" />
@@ -1366,7 +1369,7 @@ export function AlertExamples() {
               <p className="text-sm text-gray-500 mb-2">Toast (Success)</p>
               <div className="shadow-md rounded-lg p-3 bg-white border border-gray-200 flex items-center gap-2 max-w-sm">
                 <div className="rounded-full bg-green-500 p-1 flex-shrink-0">
-                  <Icon name="circleCheck" solid className="h-3 w-3 text-white" />
+                  <BsCheckCircleFill className="h-3 w-3 text-white" />
                 </div>
                 <span className="text-sm text-gray-800">Campaign data loaded</span>
               </div>
@@ -2741,184 +2744,26 @@ export default function ComponentExamples() {
           <h2 className="text-2xl font-bold mb-6 text-[#00BFFF] pb-2 border-b-2 border-[#D1D5DB]">Form Components</h2>
           <FormComponentsExamples />
         </section>
+
+        {/* Font Awesome Test Section */}
+        <section className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" id="font-awesome-test">
+          <h2 className="text-2xl font-bold mb-6 text-[#00BFFF] pb-2 border-b-2 border-[#D1D5DB]">Font Awesome Migration Test</h2>
+          <FontAwesomeTest />
+        </section>
         
-        <section className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" id="icons">
-          <h2 className="text-2xl font-bold mb-6 text-[#00BFFF] pb-2 border-b-2 border-[#D1D5DB]">Icons</h2>
-          <div className="space-y-12">
-            <div>
-              <h2 className="text-xl font-bold mb-4">Comprehensive Icon Library</h2>
-              <p className="text-gray-600 mb-6">This component displays all available Font Awesome icons in the system. Font Awesome Classic includes Solid, Regular, and Brands icon sets.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-4 border rounded-lg bg-blue-50">
-                  <h3 className="font-bold text-lg mb-2">SOLID Icons</h3>
-                  <p className="text-sm text-gray-600">Default solid weight icons for most UI elements</p>
-                </div>
-                <div className="p-4 border rounded-lg bg-green-50">
-                  <h3 className="font-bold text-lg mb-2">REGULAR Icons</h3>
-                  <p className="text-sm text-gray-600">Outline/light weight versions of common icons</p>
-                </div>
-                <div className="p-4 border rounded-lg bg-purple-50">
-                  <h3 className="font-bold text-lg mb-2">BRANDS Icons</h3>
-                  <p className="text-sm text-gray-600">Official brand/logo icons for platforms</p>
-                </div>
-              </div>
-            </div>
-            
-            <IconTester />
-            
-            <div className="mt-6 space-y-8">
-              <section>
-                <h3 className="text-lg font-semibold mb-4">Icon Usage Examples</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Basic Icon Usage</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Icon name="user" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon name="user" />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon name="user" solid />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon name="user" solid />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon platformName="instagram" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon platformName="instagram" />`}</code>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Direct Font Awesome Usage</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-solid fa-user" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-solid fa-user" />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-regular fa-user" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-regular fa-user" />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-brands fa-twitter" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-brands fa-twitter" />`}</code>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icon Sizes</h4>
-                    <div className="flex items-end space-x-4">
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="xs" className="mb-2" />
-                        <span className="text-xs text-gray-500">xs</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="sm" className="mb-2" />
-                        <span className="text-xs text-gray-500">sm</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="md" className="mb-2" />
-                        <span className="text-xs text-gray-500">md</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">lg</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="xl" className="mb-2" />
-                        <span className="text-xs text-gray-500">xl</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icon Colors</h4>
-                    <div className="flex space-x-4">
-                      <div className="flex flex-col items-center">
-                        <Icon name="star" color="gold" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">gold</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="heart" color="#e91e63" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">#e91e63</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="check" color="rgb(0, 200, 83)" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">rgb(0, 200, 83)</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">CSS Effects</h4>
-                    <div className="flex space-x-6">
-                      <div className="flex flex-col items-center">
-                        <Icon name="history" size="lg" className="mb-2 animate-spin" />
-                        <span className="text-xs text-gray-500">animate-spin</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="bell" size="lg" className="mb-2 animate-bounce" />
-                        <span className="text-xs text-gray-500">animate-bounce</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="arrowUp" size="lg" className="mb-2 rotate-45" />
-                        <span className="text-xs text-gray-500">rotate-45</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              
-              <section>
-                <h3 className="text-lg font-semibold mb-4">Icon Application Examples</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icons with Buttons</h4>
-                    <div className="flex flex-wrap gap-3">
-                      <Button leftIcon={<Icon name="plus" size="sm" />}>Add Item</Button>
-                      <Button rightIcon={<Icon name="arrowRight" size="sm" />}>Next</Button>
-                      <Button variant="outline" leftIcon={<Icon name="download" size="sm" />}>Download</Button>
-                      <Button variant="secondary" leftIcon={<Icon platformName="instagram" size="sm" />}>Share</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icons with Inputs</h4>
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Icon name="search" className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          placeholder="Search..."
-                          className="pl-10"
-                        />
-                      </div>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Icon name="mail" className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          placeholder="Enter your email"
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </div>
+        <section className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" id="icon-tester">
+          <h2 className="text-2xl font-bold mb-6 text-[#00BFFF] pb-2 border-b-2 border-[#D1D5DB]">Icon Tester</h2>
+          <IconTester />
         </section>
         
         <section className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" id="grid">
           <h2 className="text-2xl font-bold mb-6 text-[#00BFFF] pb-2 border-b-2 border-[#D1D5DB]">Grid</h2>
           <GridExamples />
+        </section>
+        
+        <section className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" id="icons">
+          <h2 className="text-2xl font-bold mb-6 text-[#00BFFF] pb-2 border-b-2 border-[#D1D5DB]">Icons</h2>
+          <IconExamples />
         </section>
         
         <section className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" id="inputs">

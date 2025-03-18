@@ -35,8 +35,6 @@ export {
   type KpiIconName,
   type AppIconName,
   type PlatformIconName,
-  type HeroiconSolidName,
-  type HeroiconOutlineName,
   UI_ICON_MAP,
   UI_OUTLINE_ICON_MAP,
   KPI_ICON_URLS,

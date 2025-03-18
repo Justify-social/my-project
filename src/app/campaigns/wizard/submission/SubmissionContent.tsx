@@ -3,12 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  CheckCircleIcon, 
-  ArrowLeftIcon, 
-  DocumentTextIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline';
+import { Icon } from "@/components/ui/icon";
+import { migrateHeroIcon } from "@/lib/icon-helpers";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 import ErrorFallback from '@/components/ErrorFallback';
@@ -84,7 +80,7 @@ function SubmissionContent() {
             onClick={() => router.push('/campaigns')}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center"
           >
-            <ArrowLeftIcon className="w-4 h-4 mr-2" />
+            <Icon name="chevronLeft" className="w-4 h-4 mr-2" />
             Return to Campaigns
           </button>
         </div>
@@ -104,7 +100,7 @@ function SubmissionContent() {
             onClick={() => router.push('/campaigns')}
             className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 flex items-center"
           >
-            <ArrowLeftIcon className="w-4 h-4 mr-2" />
+            <Icon name="chevronLeft" className="w-4 h-4 mr-2" />
             Return to Campaigns
           </button>
         </div>
@@ -117,7 +113,7 @@ function SubmissionContent() {
       {/* Success Message - Simplified */}
       <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm mb-12 text-center">
         <div className="mx-auto w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircleIcon className="h-12 w-12 text-[#00BFFF]" />
+          <Icon name="check" className="h-12 w-12 text-[#00BFFF]" />
         </div>
         
         <h2 className="text-2xl font-bold text-[#333333] mb-3 font-['Sora']">
@@ -158,7 +154,7 @@ function SubmissionContent() {
               className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium"
             >
               <span>Set Up</span>
-              <ChevronRightIcon className="h-4 w-4 ml-1" />
+              <Icon name="chevronRight" className="h-4 w-4 ml-1" />
             </Link>
           </div>
           
@@ -175,7 +171,7 @@ function SubmissionContent() {
               className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium"
             >
               <span>Start Testing</span>
-              <ChevronRightIcon className="h-4 w-4 ml-1" />
+              <Icon name="chevronRight" className="h-4 w-4 ml-1" />
             </Link>
           </div>
           
@@ -192,7 +188,7 @@ function SubmissionContent() {
               className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium"
             >
               <span>View Campaign</span>
-              <ChevronRightIcon className="h-4 w-4 ml-1" />
+              <Icon name="chevronRight" className="h-4 w-4 ml-1" />
             </Link>
           </div>
         </div>
@@ -204,7 +200,7 @@ function SubmissionContent() {
           onClick={() => router.push('/campaigns')}
           className="flex items-center text-[#4A5568] hover:text-[#333333] font-medium font-['Work Sans']"
         >
-          <ArrowLeftIcon className="w-4 h-4 mr-2" />
+          <Icon name="chevronLeft" className="w-4 h-4 mr-2" />
           Back to Campaigns
         </button>
 
@@ -212,7 +208,7 @@ function SubmissionContent() {
           onClick={() => router.push(`/campaigns/${campaignId}`)}
           className="flex items-center bg-[#00BFFF] text-white px-5 py-2 rounded-md hover:bg-blue-600 font-['Work Sans']"
         >
-          <DocumentTextIcon className="w-5 h-5 mr-2" />
+          <Icon name="info" className="w-5 h-5 mr-2" />
           View Full Details
         </button>
       </div>

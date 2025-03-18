@@ -145,7 +145,8 @@ The Icon component provides a unified way to display various types of icons acro
   - **Navigation Icons**: Icons used in the main navigation (home, campaigns, etc.)
   - **Special Icons**: Special-purpose icons (profile, bell, coins, magnifying glass, etc.)
 - **Platform Icons**: Social media platform icons (Instagram, YouTube, TikTok, etc.)
-- **Heroicons**: Support for Heroicons library (both solid and outline variants)
+- **Financial Icons**: Icons for financial elements (money, currency, etc.)
+- **Heroicons**: Support for Heroicons library (both solid and outline variants) - DEPRECATED, use name prop instead
 
 ```tsx
 // UI Icon
@@ -168,11 +169,18 @@ The Icon component provides a unified way to display various types of icons acro
 <Icon platformName="instagram" solid />
 <Icon platformName="youtube" solid />
 
-// Heroicon (solid)
-<Icon heroSolid="UserIcon" />
+// Financial Icon
+<Icon name="money" />
 
-// Heroicon (outline)
+// Heroicon (solid) - DEPRECATED
+<Icon heroSolid="UserIcon" />
+// Use instead:
+<Icon name="user" solid />
+
+// Heroicon (outline) - DEPRECATED
 <Icon heroOutline="PencilIcon" />
+// Use instead:
+<Icon name="edit" />
 
 // With size
 <Icon name="search" size="lg" />

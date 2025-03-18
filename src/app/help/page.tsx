@@ -2,30 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  MagnifyingGlassIcon,
-  QuestionMarkCircleIcon,
-  ChatBubbleLeftRightIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ArrowTopRightOnSquareIcon,
-  SparklesIcon,
-  ShieldCheckIcon,
-  CameraIcon,
-  XMarkIcon,
-  PlusIcon,
-  AcademicCapIcon,
-  BookOpenIcon,
-  RocketLaunchIcon,
-  ChartPieIcon,
-  UserGroupIcon,
-  PresentationChartLineIcon,
-  ArrowPathIcon,
-  DocumentTextIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  ChatBubbleOvalLeftEllipsisIcon,
-} from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
 import Link from 'next/link';
 
 // Types
@@ -86,9 +63,9 @@ const Accordion = ({
         className="flex-shrink-0"
       >
         {isOpen ? (
-          <XMarkIcon className="w-5 h-5 text-gray-500" />
+          <Icon name="close" className="w-5 h-5 text-gray-500" />
         ) : (
-          <PlusIcon className="w-5 h-5 text-gray-500" />
+          <Icon name="plus" className="w-5 h-5 text-gray-500" />
         )}
       </motion.div>
     </button>
@@ -415,7 +392,7 @@ const HelpPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
                 <div className="bg-blue-50 p-3 rounded-full mb-4">
-                  <PhoneIcon className="w-6 h-6 text-[var(--accent-color)]" />
+                  <Icon name="info" className="w-6 h-6 text-[var(--accent-color)]" />
                 </div>
                 <h3 className="font-medium mb-2">Call Us</h3>
                 <p className="text-gray-600 text-sm mb-4">Available Mon-Fri, 9am-6pm ET</p>
@@ -423,7 +400,7 @@ const HelpPage: React.FC = () => {
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
                 <div className="bg-blue-50 p-3 rounded-full mb-4">
-                  <EnvelopeIcon className="w-6 h-6 text-[var(--accent-color)]" />
+                  <Icon name="mail" className="w-6 h-6 text-[var(--accent-color)]" />
                 </div>
                 <h3 className="font-medium mb-2">Email Support</h3>
                 <p className="text-gray-600 text-sm mb-4">We'll respond within 24 hours</p>
@@ -431,7 +408,7 @@ const HelpPage: React.FC = () => {
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
                 <div className="bg-blue-50 p-3 rounded-full mb-4">
-                  <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-[var(--accent-color)]" />
+                  <Icon name="chatBubble" className="w-6 h-6 text-[var(--accent-color)]" />
                 </div>
                 <h3 className="font-medium mb-2">Live Chat</h3>
                 <p className="text-gray-600 text-sm mb-4">Chat with our support team</p>
@@ -473,7 +450,7 @@ const HelpPage: React.FC = () => {
                   : "border-gray-200 text-gray-700"
               }`}
             >
-              <QuestionMarkCircleIcon className="w-5 h-5 mr-2" />
+              <Icon name="info" className="w-5 h-5 mr-2" />
               <span className="text-sm">FAQs</span>
             </button>
             <button
@@ -484,7 +461,7 @@ const HelpPage: React.FC = () => {
                   : "border-gray-200 text-gray-700"
               }`}
             >
-              <AcademicCapIcon className="w-5 h-5 mr-2" />
+              <Icon name="info" className="w-5 h-5 mr-2" />
               <span className="text-sm">Tutorials</span>
             </button>
             <button
@@ -495,7 +472,7 @@ const HelpPage: React.FC = () => {
                   : "border-gray-200 text-gray-700"
               }`}
             >
-              <BookOpenIcon className="w-5 h-5 mr-2" />
+              <Icon name="bookmark" className="w-5 h-5 mr-2" />
               <span className="text-sm">Glossary</span>
             </button>
             <button
@@ -506,7 +483,7 @@ const HelpPage: React.FC = () => {
                   : "border-gray-200 text-gray-700"
               }`}
             >
-              <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
+              <Icon name="chatBubble" className="w-5 h-5 mr-2" />
               <span className="text-sm">Contact</span>
             </button>
           </div>
@@ -520,7 +497,7 @@ const HelpPage: React.FC = () => {
             How can we help?
           </h1>
           <div className="max-w-2xl mx-auto relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Icon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search for help..."
@@ -533,7 +510,7 @@ const HelpPage: React.FC = () => {
                 onClick={clearSearch}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2"
               >
-                <XMarkIcon className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                <Icon name="close" className="w-5 h-5 text-gray-400 hover:text-gray-600" />
               </button>
             )}
           </div>
@@ -562,13 +539,13 @@ const HelpPage: React.FC = () => {
                     <div className="flex items-start">
                       <div className="flex-shrink-0 mt-1">
                         {result.section === "faqs" && (
-                          <QuestionMarkCircleIcon className="w-5 h-5 text-[var(--accent-color)]" />
+                          <Icon name="info" className="w-5 h-5 text-[var(--accent-color)]" />
                         )}
                         {result.section === "glossary" && (
-                          <BookOpenIcon className="w-5 h-5 text-[var(--accent-color)]" />
+                          <Icon name="bookmark" className="w-5 h-5 text-[var(--accent-color)]" />
                         )}
                         {result.section === "tutorials" && (
-                          <AcademicCapIcon className="w-5 h-5 text-[var(--accent-color)]" />
+                          <Icon name="info" className="w-5 h-5 text-[var(--accent-color)]" />
                         )}
                       </div>
                       <div className="ml-3">
@@ -600,7 +577,7 @@ const HelpPage: React.FC = () => {
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <QuestionMarkCircleIcon className="w-5 h-5 mr-3" />
+                  <Icon name="info" className="w-5 h-5 mr-3" />
                   <span className="font-medium text-sm">FAQs</span>
                 </button>
                 <button
@@ -611,7 +588,7 @@ const HelpPage: React.FC = () => {
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <AcademicCapIcon className="w-5 h-5 mr-3" />
+                  <Icon name="info" className="w-5 h-5 mr-3" />
                   <span className="font-medium text-sm">Video Tutorials</span>
                 </button>
                 <button
@@ -622,7 +599,7 @@ const HelpPage: React.FC = () => {
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <BookOpenIcon className="w-5 h-5 mr-3" />
+                  <Icon name="bookmark" className="w-5 h-5 mr-3" />
                   <span className="font-medium text-sm">Glossary</span>
                 </button>
                 <button
@@ -633,7 +610,7 @@ const HelpPage: React.FC = () => {
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <ChatBubbleLeftRightIcon className="w-5 h-5 mr-3" />
+                  <Icon name="chatBubble" className="w-5 h-5 mr-3" />
                   <span className="font-medium text-sm">Contact Support</span>
                 </button>
               </nav>
@@ -646,7 +623,7 @@ const HelpPage: React.FC = () => {
                   className="text-xs font-medium text-[var(--accent-color)] hover:underline flex items-center"
                 >
                   Contact us
-                  <ArrowTopRightOnSquareIcon className="w-3 h-3 ml-1" />
+                  <Icon name="share" className="w-3 h-3 ml-1" />
                 </a>
               </div>
             </div>
@@ -664,42 +641,42 @@ const HelpPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link href="/getting-started">
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <RocketLaunchIcon className="w-6 h-6 text-[var(--accent-color)] mb-2" />
+                    <Icon name="star" className="w-6 h-6 text-[var(--accent-color)] mb-2" />
                     <h3 className="font-medium text-sm mb-1">Getting Started</h3>
                     <p className="text-gray-600 text-xs">Set up your account and first campaign</p>
                   </div>
                 </Link>
                 <Link href="/analytics-guide">
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <ChartPieIcon className="w-6 h-6 text-[var(--accent-color)] mb-2" />
+                    <Icon name="view" className="w-6 h-6 text-[var(--accent-color)] mb-2" />
                     <h3 className="font-medium text-sm mb-1">Analytics Guide</h3>
                     <p className="text-gray-600 text-xs">Understand your campaign performance</p>
                   </div>
                 </Link>
                 <Link href="/creators">
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <UserGroupIcon className="w-6 h-6 text-[var(--accent-color)] mb-2" />
+                    <Icon name="user" className="w-6 h-6 text-[var(--accent-color)] mb-2" />
                     <h3 className="font-medium text-sm mb-1">Creator Management</h3>
                     <p className="text-gray-600 text-xs">Find and manage your influencer partnerships</p>
                   </div>
                 </Link>
                 <Link href="/reports">
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <DocumentTextIcon className="w-6 h-6 text-[var(--accent-color)] mb-2" />
+                    <Icon name="info" className="w-6 h-6 text-[var(--accent-color)] mb-2" />
                     <h3 className="font-medium text-sm mb-1">Report Templates</h3>
                     <p className="text-gray-600 text-xs">Ready-to-use report templates for stakeholders</p>
                   </div>
                 </Link>
                 <Link href="/brand-safety">
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <ShieldCheckIcon className="w-6 h-6 text-[var(--accent-color)] mb-2" />
+                    <Icon name="check" className="w-6 h-6 text-[var(--accent-color)] mb-2" />
                     <h3 className="font-medium text-sm mb-1">Brand Safety</h3>
                     <p className="text-gray-600 text-xs">Protect your brand with creator verification</p>
                   </div>
                 </Link>
                 <Link href="/platform-updates">
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <SparklesIcon className="w-6 h-6 text-[var(--accent-color)] mb-2" />
+                    <Icon name="star" className="w-6 h-6 text-[var(--accent-color)] mb-2" />
                     <h3 className="font-medium text-sm mb-1">What's New</h3>
                     <p className="text-gray-600 text-xs">Latest platform features and updates</p>
                   </div>

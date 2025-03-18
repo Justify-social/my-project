@@ -4,20 +4,8 @@ import React, { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import {
-  CreditCardIcon,
-  ArrowPathIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  CurrencyDollarIcon,
-  DocumentTextIcon,
-  ClockIcon,
-  SparklesIcon,
-  PlusIcon,
-  ArrowDownTrayIcon,
-  ArrowPathRoundedSquareIcon,
-  ArrowUpRightIcon
-} from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
+import { iconComponentFactory } from '@/lib/icon-helpers';
 
 interface PaymentMethod {
   id: number;
@@ -89,7 +77,7 @@ const PlanCard: React.FC<{
     <ul className="mt-6 space-y-4">
       {features.map((feature, idx) => (
         <li key={idx} className="flex items-start">
-          <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
+          <Icon name="checkCircle" className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
           <span className="text-[var(--secondary-color)]">{feature}</span>
         </li>
       ))}
@@ -104,7 +92,7 @@ const PlanCard: React.FC<{
           : 'bg-white text-[var(--accent-color)] border-2 border-[var(--accent-color)] hover:bg-[var(--background-color)]'
       }`}
     >
-      <SparklesIcon className="w-5 h-5 mr-2" />
+      <Icon name="lightning" solid className="w-5 h-5 mr-2" />
       Upgrade Plan
     </motion.button>
   </motion.div>
@@ -152,7 +140,7 @@ const Modal: React.FC<{
           onClick={onClose}
           className="absolute top-4 right-4 text-[var(--secondary-color)] hover:text-[var(--primary-color)]"
         >
-          <XCircleIcon className="w-6 h-6" />
+          <Icon name="xCircle" className="w-5 h-5" />
         </button>
         {children}
       </motion.div>
@@ -316,7 +304,7 @@ const SubscriptionBillingPage: React.FC = () => {
                 className="px-4 py-2 bg-white text-[var(--accent-color)] rounded-lg border border-[var(--accent-color)] 
                   transition-colors duration-200 font-medium flex items-center"
               >
-                <ArrowUpRightIcon className="w-5 h-5 mr-2" />
+                <Icon name="arrowRight" className="w-5 h-5 mr-2" />
                 View Pricing
               </motion.button>
             </Link>
@@ -327,7 +315,7 @@ const SubscriptionBillingPage: React.FC = () => {
               className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 
                 transition-colors duration-200 font-medium flex items-center"
             >
-              <CreditCardIcon className="w-5 h-5 mr-2" />
+              <Icon name="creditCard" className="w-5 h-5 mr-2" />
               Update Payment
             </motion.button>
           </div>
@@ -338,31 +326,29 @@ const SubscriptionBillingPage: React.FC = () => {
           <nav className="flex space-x-1" aria-label="Billing navigation">
             {['overview', 'credits'].map((tab) => {
               const isActive = activeTab === tab;
-              const Icon = tab === 'overview' ? CreditCardIcon : CurrencyDollarIcon;
+              const IconComponent = tab === 'overview' 
+                ? (props: any) => <Icon name="creditCard" {...props} />
+                : (props: any) => <Icon name="money" {...props} />;
               
               return (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as "overview" | "credits")}
                   className={`
-                    relative py-4 px-6 flex items-center transition-all duration-200
+                    relative flex-1 min-w-0 py-3 px-4 text-sm font-medium
                     ${isActive 
-                      ? 'text-[var(--accent-color)] bg-[var(--background-color)]/50' 
-                      : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:bg-[var(--background-color)]'}
-                    rounded-t-lg
+                      ? 'bg-white text-[var(--accent-color)] shadow-sm z-10' 
+                      : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] bg-[var(--background-color)]'
+                    }
+                    border border-[var(--divider-color)]
+                    ${tab === 'overview' ? 'rounded-l-md' : 'rounded-r-md'}
                   `}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className="w-5 h-5 mr-2" />
+                  <IconComponent className="w-5 h-5 mr-2" />
                   <span className="font-medium capitalize">
                     {tab === 'overview' ? 'Subscription Overview' : 'Credits & Purchase'}
                   </span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-color)]"
-                    />
-                  )}
                 </button>
               );
             })}
@@ -376,7 +362,7 @@ const SubscriptionBillingPage: React.FC = () => {
               {/* Current Plan Card */}
               <Card>
                 <SectionHeader
-                  icon={SparklesIcon}
+                  icon={iconComponentFactory('lightning')}
                   title="Current Plan"
                   description="Your current subscription plan and features"
                 />
@@ -395,14 +381,14 @@ const SubscriptionBillingPage: React.FC = () => {
                       className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 
                         transition-colors duration-200 font-medium flex items-center"
                     >
-                      <ArrowPathIcon className="w-5 h-5 mr-2" />
+                      <Icon name="arrowRight" className="w-5 h-5 mr-2" />
                       Change Plan
                     </motion.button>
                   </div>
                   <div className="mt-6 grid grid-cols-2 gap-4">
                     {subscriptionFeatures.map((feature, idx) => (
                       <div key={idx} className="flex items-center">
-                        <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
+                        <Icon name="checkCircle" className="w-5 h-5 text-green-500 mr-2" />
                         <span className="text-[var(--secondary-color)]">{feature}</span>
                       </div>
                     ))}
@@ -413,7 +399,7 @@ const SubscriptionBillingPage: React.FC = () => {
               {/* Payment Methods Card */}
               <Card>
                 <SectionHeader
-                  icon={CreditCardIcon}
+                  icon={iconComponentFactory('creditCard')}
                   title="Payment Methods"
                   description="Manage your payment methods and billing information"
                 />
@@ -425,7 +411,7 @@ const SubscriptionBillingPage: React.FC = () => {
                     >
                       <div className="flex items-center">
                         <div className="bg-[var(--background-color)] p-2 rounded-lg">
-                          <CreditCardIcon className="w-6 h-6 text-[var(--accent-color)]" />
+                          <Icon name="creditCard" className="w-6 h-6 text-[var(--accent-color)]" />
                         </div>
                         <div className="ml-4">
                           <p className="font-medium text-[var(--primary-color)]">
@@ -443,7 +429,7 @@ const SubscriptionBillingPage: React.FC = () => {
                           onClick={() => setUpdatePaymentModalOpen(true)}
                           className="p-2 text-[var(--accent-color)] hover:bg-[var(--background-color)] rounded-lg"
                         >
-                          <ArrowPathIcon className="w-5 h-5" />
+                          <Icon name="arrowRight" className="w-5 h-5" />
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.05 }}
@@ -459,7 +445,7 @@ const SubscriptionBillingPage: React.FC = () => {
                           }}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                         >
-                          <XCircleIcon className="w-5 h-5" />
+                          <Icon name="xCircle" className="w-5 h-5" />
                         </motion.button>
                       </div>
                     </div>
@@ -472,7 +458,7 @@ const SubscriptionBillingPage: React.FC = () => {
                       text-[var(--secondary-color)] rounded-lg hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] 
                       transition-colors duration-200 w-full flex items-center justify-center"
                   >
-                    <PlusIcon className="w-5 h-5 mr-2" />
+                    <Icon name="plus" className="w-5 h-5 mr-2" />
                     Add Payment Method
                   </motion.button>
                 </div>
@@ -481,7 +467,7 @@ const SubscriptionBillingPage: React.FC = () => {
               {/* Billing History Card */}
               <Card>
                 <SectionHeader
-                  icon={DocumentTextIcon}
+                  icon={iconComponentFactory('documentText')}
                   title="Billing History"
                   description="View and download your past invoices"
                 />
@@ -538,9 +524,9 @@ const SubscriptionBillingPage: React.FC = () => {
                               }`}
                             >
                               {tx.status === 'Completed' ? (
-                                <CheckCircleIcon className="w-4 h-4 mr-1" />
+                                <Icon name="checkCircle" className="w-5 h-5 mr-2" />
                               ) : (
-                                <ClockIcon className="w-4 h-4 mr-1" />
+                                <Icon name="clock" className="w-5 h-5 mr-2" />
                               )}
                               {tx.status}
                             </span>
@@ -554,7 +540,7 @@ const SubscriptionBillingPage: React.FC = () => {
                                 className="p-2 text-[var(--accent-color)] hover:bg-[var(--background-color)] rounded-lg"
                                 title="Download Invoice"
                               >
-                                <ArrowDownTrayIcon className="w-5 h-5" />
+                                <Icon name="download" className="w-5 h-5" />
                               </motion.button>
                               {tx.status === 'Pending' && (
                                 <motion.button
@@ -564,7 +550,7 @@ const SubscriptionBillingPage: React.FC = () => {
                                   className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg"
                                   title="Retry Payment"
                                 >
-                                  <ArrowPathRoundedSquareIcon className="w-5 h-5" />
+                                  <Icon name="arrowRight" className="w-5 h-5" />
                                 </motion.button>
                               )}
                             </div>
@@ -581,7 +567,7 @@ const SubscriptionBillingPage: React.FC = () => {
               {/* Credits Balance Card */}
               <Card>
                 <SectionHeader
-                  icon={CurrencyDollarIcon}
+                  icon={iconComponentFactory('money')}
                   title="Credits Balance"
                   description="View and manage your credits"
                 />
@@ -599,13 +585,13 @@ const SubscriptionBillingPage: React.FC = () => {
                         hover:bg-[var(--background-color)] transition-colors duration-200 font-medium 
                         flex items-center"
                     >
-                      <PlusIcon className="w-5 h-5 mr-2" />
+                      <Icon name="plus" className="w-5 h-5 mr-2" />
                       Buy Credits
                     </motion.button>
                   </div>
                   {creditsBalance < 10 && (
                     <div className="mt-4 bg-white bg-opacity-10 rounded-lg p-3 flex items-center">
-                      <XCircleIcon className="w-5 h-5 mr-2" />
+                      <Icon name="xCircle" className="w-5 h-5 mr-2" />
                       <p className="text-sm">
                         Low balance warning! Purchase more credits to avoid service interruption.
                       </p>
@@ -617,7 +603,7 @@ const SubscriptionBillingPage: React.FC = () => {
               {/* Credit Packages Card */}
               <Card>
                 <SectionHeader
-                  icon={SparklesIcon}
+                  icon={iconComponentFactory('lightning')}
                   title="Credit Packages"
                   description="Choose a credit package that suits your needs"
                 />
@@ -640,7 +626,7 @@ const SubscriptionBillingPage: React.FC = () => {
                     hover:opacity-90 transition-colors duration-200 font-medium 
                     flex items-center justify-center"
                 >
-                  <CurrencyDollarIcon className="w-5 h-5 mr-2" />
+                  <Icon name="money" className="w-5 h-5 mr-2" />
                   Purchase Credits
                 </motion.button>
               </Card>
@@ -701,7 +687,7 @@ const SubscriptionBillingPage: React.FC = () => {
             </div>
             {paymentMethodError && (
               <p className="text-sm text-red-600 flex items-center">
-                <XCircleIcon className="w-5 h-5 mr-1" />
+                <Icon name="xCircle" className="w-5 h-5 mr-1" />
                 {paymentMethodError}
               </p>
             )}
@@ -789,7 +775,7 @@ const SubscriptionBillingPage: React.FC = () => {
               className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg 
                 shadow-lg flex items-center"
             >
-              <CheckCircleIcon className="w-5 h-5 mr-2" />
+              <Icon name="checkCircle" className="w-5 h-5 mr-2" />
               {toastMessage}
             </motion.div>
           )}

@@ -9,19 +9,8 @@ import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
-import { 
-  MagnifyingGlassIcon,
-  PlusIcon,
-  XMarkIcon,
-  ArrowUpTrayIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  InformationCircleIcon,
-  DocumentIcon,
-  PlayIcon,
-  EyeIcon,
-  CheckIcon
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/icon";
+import { migrateHeroIcon } from "@/lib/icon-helpers";
 import { CampaignAssetUploader, UploadedAsset } from "@/components/upload/CampaignAssetUploader";
 import { AssetPreview } from '@/components/upload/AssetPreview';
 import { KPI, Feature, Platform } from '@prisma/client';
@@ -545,7 +534,7 @@ const InfluencerSelector: React.FC<InfluencerSelectorProps> = ({
           placeholder="@username"
         />
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          <Icon name="search" className="h-5 w-5 text-gray-400" />
         </div>
         
         {/* Show filtered influencers */}
@@ -643,13 +632,13 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
       
       // 2. Create updated asset with the unified name
       const updatedAsset = {
-      ...asset,
+        ...asset,
         fileName: sanitizedFileName, // For UI consistency
-      details: {
+        details: {
           ...asset.details,
           assetName: sanitizedFileName, // For database consistency
-        whyInfluencer: whyInfluencer,
-        budget: parseFloat(budget) || 0,
+          whyInfluencer: whyInfluencer,
+          budget: parseFloat(budget) || 0,
         }
       };
       
@@ -790,30 +779,28 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
       <div className="flex p-4 items-start gap-4">
         {/* Preview directly in the asset card with enhanced format detection */}
         <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
-          {asset.type.includes('image') ? (
+          {asset.type.startsWith('video') ? (
+            <div className="relative">
+              <video src={asset.url} className="w-full h-full object-cover rounded-md" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20">
+                <Icon name="chevronRight" className="h-8 w-8 text-white" />
+              </div>
+            </div>
+          ) : asset.type.startsWith('application') ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Icon name="info" className="h-10 w-10 text-gray-400" />
+            </div>
+          ) : asset.type.startsWith('image') ? (
             <img 
               src={asset.url} 
-              alt={assetName} 
+              alt={asset.details?.assetName || 'Asset preview'} 
               className="w-full h-full object-cover"
             />
-          ) : asset.type.includes('video') ? (
-            <div className="w-full h-full relative">
-              <video 
-                src={asset.url}
-                className="w-full h-full object-cover"
-                muted
-                loop
-                autoPlay
-                playsInline
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20">
-                <PlayIcon className="h-8 w-8 text-white" />
-        </div>
-        </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <DocumentIcon className="h-10 w-10 text-gray-400" />
-      </div>
+            <div className="flex flex-col items-center justify-center">
+              <Icon name="info" className="h-10 w-10 text-gray-400" />
+              <p className="text-sm text-gray-500 mt-2">Preview not available</p>
+            </div>
           )}
         </div>
 
@@ -822,14 +809,14 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
             <div className="w-full">
               {/* Single unified asset name field that updates both properties */}
               <div className="mb-3">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Asset Name
-          </label>
+                </label>
                 <div className="flex items-center">
                   {isEditingName ? (
                     <div className="flex w-full">
-            <input
-              type="text"
+                      <input
+                        type="text"
                         value={assetName}
                         onChange={(e) => setAssetName(e.target.value)}
                         onBlur={toggleNameEdit}
@@ -837,43 +824,44 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
                         className="w-full p-2 border border-blue-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
                         autoFocus
                       />
-            <button
+                      <button
                         className="px-2 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
                         onClick={toggleNameEdit}
                         title="Save asset name"
                       >
-                        <CheckIcon className="h-5 w-5" />
+                        <Icon name="check" className="h-5 w-5" />
                       </button>
-              </div>
+                    </div>
                   ) : (
                     <div className="flex items-center w-full">
                       <span className="text-gray-700 font-medium truncate max-w-xs">{assetName}</span>
                       <button
                         onClick={toggleNameEdit}
-                        className="ml-2 p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded"
+                        className="text-gray-400 hover:text-indigo-600 transition-colors"
                         title="Edit asset name"
                       >
-                        <PencilSquareIcon className="h-4 w-4" />
-            </button>
-          </div>
+                        <Icon name="edit" className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
-                  </div>
                 </div>
               </div>
+            </div>
+
             <button
               onClick={handleDeleteAsset}
-              className="p-1.5 text-red-600 hover:bg-red-50 rounded-full"
+              className="ml-2 text-gray-400 hover:text-red-600 transition-colors"
               aria-label="Delete asset"
             >
-              <TrashIcon className="h-5 w-5" />
+              <Icon name="trash" className="h-5 w-5" />
             </button>
-        </div>
+          </div>
 
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+            <div>
               <label htmlFor={`influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                 Influencer
-          </label>
+              </label>
               {influencers.length > 0 ? (
                 <select
                   id={`influencer-${asset.id}`}
@@ -891,32 +879,32 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
               ) : (
                 <div className="p-2 bg-yellow-50 text-yellow-700 text-sm rounded-md">
                   No influencers found. Add influencers in Step 1.
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div>
+            <div>
               <label htmlFor={`budget-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                 Budget
-          </label>
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <span className="text-gray-500 sm:text-sm">{currencySymbol}</span>
-            </div>
-            <input
+                </div>
+                <input
                   id={`budget-${asset.id}`}
-              type="number"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              onBlur={saveChanges}
+                  type="number"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  onBlur={saveChanges}
                   className="w-full pl-7 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   placeholder="0.00"
                   min="0"
                   step="0.01"
                 />
               </div>
+            </div>
           </div>
-        </div>
 
           <div className="mt-4">
             <label htmlFor={`why-influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -1488,7 +1476,7 @@ function FormContent() {
           name: asset.details.assetName, // Use 'name' to match backend field
           description: asset.details.description || asset.details.whyInfluencer || '',
           influencerHandle: asset.details.influencerHandle || '',
-          budget: parseFloat(asset.details.budget?.toString() || '0'),
+          budget: Number(asset.details.budget) || 0,
           fileSize: asset.fileSize || 0,
           format: asset.type.includes('/') ? asset.type.split('/')[1] : 'unknown'
         }))
@@ -1762,3 +1750,5 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
     return null;
   }
 }
+
+

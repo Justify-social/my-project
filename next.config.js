@@ -114,4 +114,30 @@ const nextConfig = {
   },
 }
 
+// For Next.js 15 compatibility, we're using webpack-bundle-analyzer directly
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
+// Add webpack configuration for bundle analysis
+nextConfig.webpack = (config, { isServer, dev }) => {
+  // Only run the bundle analyzer when ANALYZE=true
+  if (process.env.ANALYZE === 'true') {
+    config.plugins.push(
+      new BundleAnalyzerPlugin({
+        analyzerMode: 'static',
+        openAnalyzer: true,
+        generateStatsFile: true,
+        statsFilename: isServer 
+          ? './.next/analyze/server-stats.json' 
+          : './.next/analyze/client-stats.json',
+        reportFilename: isServer 
+          ? './.next/analyze/server.html' 
+          : './.next/analyze/client.html',
+      })
+    );
+  }
+  
+  // Return the modified config
+  return config;
+}
+
 module.exports = nextConfig 

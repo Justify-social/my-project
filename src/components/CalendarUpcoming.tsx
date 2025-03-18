@@ -2,14 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  CalendarDaysIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  UserGroupIcon,
-  CurrencyDollarIcon,
-  ChartBarIcon
-} from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
 
 interface CalendarEvent {
   id: number;
@@ -104,20 +97,20 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({ events }) => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button 
-              onClick={prevMonth} 
-              className="p-1 rounded-lg hover:bg-gray-100"
+            <button
+              onClick={prevMonth}
+              className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors"
             >
-              <ChevronLeftIcon className="w-5 h-5" />
+              <Icon name="chevronLeft" className="w-5 h-5" />
             </button>
-            <span className="text-gray-700 font-medium">
-              {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-            </span>
-            <button 
-              onClick={nextMonth} 
-              className="p-1 rounded-lg hover:bg-gray-100"
+            <div className="text-xl font-semibold">
+              {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
+            </div>
+            <button
+              onClick={nextMonth}
+              className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors"
             >
-              <ChevronRightIcon className="w-5 h-5" />
+              <Icon name="chevronRight" className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -162,7 +155,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({ events }) => {
             className="bg-white rounded-lg p-4"
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <CalendarDaysIcon className="w-5 h-5 mr-2 text-blue-600" />
+              <Icon name="calendar" className="w-5 h-5 mr-2 text-blue-600" />
               {monthYear}
             </h3>
             <div className="space-y-3">
@@ -183,7 +176,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({ events }) => {
                           {event.platform}
                         </span>
                         <span className="flex items-center">
-                          <ChartBarIcon className="w-4 h-4 mr-1" />
+                          <Icon name="chatBubble" className="w-4 h-4 mr-1" />
                           {event.kpi}
                         </span>
                       </div>
@@ -191,7 +184,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({ events }) => {
                     <div className="text-right">
                       <div className="flex flex-col space-y-1">
                         <span className="flex items-center justify-end text-sm text-gray-600">
-                          <CurrencyDollarIcon className="w-4 h-4 mr-1" />
+                          <Icon name="money" className="w-4 h-4 mr-1" />
                           ${event.budget.toLocaleString()}
                         </span>
                       </div>

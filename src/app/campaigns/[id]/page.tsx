@@ -10,49 +10,14 @@ import ErrorFallback from '@/components/ErrorFallback'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import { useSidebar } from '@/providers/SidebarProvider'
 import Image from 'next/image'
-import { 
-  CalendarIcon, 
-  CurrencyDollarIcon,
-  UserCircleIcon,
-  ChartBarIcon,
-  GlobeAltIcon,
-  HashtagIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  DocumentTextIcon,
-  PhotoIcon,
-  SparklesIcon,
-  ArrowLeftIcon,
-  PencilIcon,
-  TrashIcon,
-  ShareIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  InformationCircleIcon,
-  PrinterIcon,
-  EnvelopeIcon,
-  BuildingOfficeIcon,
-  TagIcon,
-  FolderIcon,
-  CubeIcon,
-  UsersIcon,
-  LightBulbIcon,
-  PaintBrushIcon,
-  PencilSquareIcon,
-  CalendarDaysIcon,
-  PaperAirplaneIcon,
-  PauseIcon,
-  CheckBadgeIcon,
-  PlayIcon,
-  CogIcon,
-  DocumentMagnifyingGlassIcon,
-  DocumentIcon
-} from '@heroicons/react/24/outline'
+import { Icon } from '@/components/ui/icon'
+import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Import Currency from shared types
 import { Currency, Platform, Position } from '@/components/Wizard/shared/types';
+import { FA_UI_ICON_MAP } from '@/lib/icon-mappings'
+import { IconName } from '@/components/ui/icon'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -302,46 +267,49 @@ const formatKpiName = (kpi: string): string => {
 interface MetricCardProps {
   title: string;
   value: string | number;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName: IconName;
   trend?: "up" | "down" | "none";
   subtext?: string;
   format?: "number" | "currency" | "percent" | "text";
 }
 
-const MetricCard = ({ title, value, icon: Icon, trend = "none", subtext, format = "text" }: MetricCardProps) => {
+const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = "text" }: MetricCardProps) => {
+  // Format the value based on the format prop
   let formattedValue = value;
-  
   if (format === "currency" && typeof value === "number") {
     formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
   } else if (format === "percent" && typeof value === "number") {
-    formattedValue = `${value}%`;
+    formattedValue = formatPercentage(value);
   } else if (format === "number" && typeof value === "number") {
     formattedValue = new Intl.NumberFormat('en-US').format(value);
   }
 
+  // Determine trend arrow and color
+  let trendIcon = null;
+  let trendColor = "text-gray-500";
+  
+  if (trend === "up") {
+    trendIcon = migrateHeroIcon('ArrowTrendingUpIcon', { className: "inline-block h-4 w-4 ml-1" });
+    trendColor = "text-green-600";
+  } else if (trend === "down") {
+    trendIcon = migrateHeroIcon('ArrowTrendingDownIcon', { className: "inline-block h-4 w-4 ml-1" });
+    trendColor = "text-red-600";
+  }
+  
   return (
-    <div className="bg-white rounded-lg border border-[var(--divider-color)] shadow-sm p-4 transition-all hover:shadow-md">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md">
-            <Icon className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" />
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)]">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="text-[var(--secondary-color)] text-sm mb-2">{title}</div>
+          <div className="text-2xl font-semibold text-[var(--primary-color)] flex items-center">
+            {formattedValue}
+            <span className={trendColor}>{trendIcon}</span>
           </div>
-          <span className="text-[var(--secondary-color)] font-medium text-sm">{title}</span>
+          {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1">{subtext}</div>}
         </div>
-        
-        {trend !== "none" && (
-          <div className={`flex items-center ${trend === "up" ? "text-green-500" : "text-red-500"}`}>
-            {trend === "up" ? 
-              <ArrowTrendingUpIcon className="h-4 w-4" /> : 
-              <ArrowTrendingDownIcon className="h-4 w-4" />
-            }
-          </div>
-        )}
-      </div>
-      
-      <div className="mt-3">
-        <div className="text-[var(--primary-color)] font-bold text-2xl">{formattedValue}</div>
-        {subtext && <div className="text-[var(--secondary-color)] text-xs mt-1">{subtext}</div>}
+        <div className="p-3 bg-[var(--accent-light)] rounded-full">
+          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" />
+        </div>
       </div>
     </div>
   );
@@ -351,7 +319,7 @@ const MetricCard = ({ title, value, icon: Icon, trend = "none", subtext, format 
 interface DataCardProps {
   title: string;
   description?: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName: IconName;
   children: React.ReactNode;
   className?: string;
   actions?: React.ReactNode;
@@ -360,20 +328,22 @@ interface DataCardProps {
 const DataCard: React.FC<DataCardProps> = ({ 
   title, 
   description, 
-  icon: Icon, 
+  iconName, 
   children, 
   className = '',
   actions
 }) => (
-  <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden transition-all hover:shadow-md ${className}`}>
-    <div className="flex justify-between items-center border-b border-[var(--divider-color)] px-5 py-4">
-      <div className="flex items-center space-x-3">
-        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md">
-          <Icon className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" />
+  <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden ${className}`}>
+    <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
+      <div className="flex items-center">
+        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
+          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" />
         </div>
         <div>
-          <h3 className="text-[var(--primary-color)] font-semibold text-lg">{title}</h3>
-          {description && <p className="text-[var(--secondary-color)] text-sm mt-0.5">{description}</p>}
+          <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
+          {description && (
+            <p className="text-[var(--secondary-color)] text-sm mt-1">{description}</p>
+          )}
         </div>
       </div>
       {actions && (
@@ -382,7 +352,7 @@ const DataCard: React.FC<DataCardProps> = ({
         </div>
       )}
     </div>
-    <div className="p-5">
+    <div className="px-4 py-5 sm:p-6 bg-white">
       {children}
     </div>
   </div>
@@ -392,26 +362,30 @@ const DataCard: React.FC<DataCardProps> = ({
 interface DataRowProps {
   label: string;
   value: React.ReactNode;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName?: IconName;
   tooltip?: string;
   featured?: boolean;
 }
 
-const DataRow = ({ label, value, icon: Icon, tooltip, featured = false }: DataRowProps) => (
-  <div className={`flex justify-between items-center py-3 ${featured ? 'bg-[rgba(0,191,255,0.05)] px-3 rounded-md' : ''}`}>
-    <div className="flex items-center space-x-2">
-      {Icon && <Icon className="h-4 w-4 text-[var(--secondary-color)]" aria-hidden="true" />}
-      <span className="text-[var(--secondary-color)] font-medium text-sm">
-        {label}
-        {tooltip && (
-          <span className="inline-block ml-1 cursor-help" title={tooltip}>
-            <InformationCircleIcon className="h-4 w-4 text-[var(--secondary-color)] inline opacity-70" />
+const DataRow = ({ label, value, iconName, tooltip, featured = false }: DataRowProps) => (
+  <div className={`flex ${featured ? 'py-3' : 'py-2'}`}>
+    <div className="w-1/3 flex-shrink-0">
+      <div className="flex items-center text-[var(--secondary-color)]">
+        {iconName && (
+          <span className="mr-2">
+            <Icon name={iconName} className="h-4 w-4" />
           </span>
         )}
-      </span>
+        <span className={featured ? 'font-medium' : ''}>{label}</span>
+        {tooltip && (
+          <span className="ml-1" title={tooltip}>
+            {migrateHeroIcon('InformationCircleIcon', { className: "h-4 w-4 text-gray-400" })}
+          </span>
+        )}
+      </div>
     </div>
-    <div className={`text-[var(--primary-color)] ${featured ? 'font-semibold' : 'font-medium'}`}>
-      {value || 'N/A'}
+    <div className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'}`}>
+      {value}
     </div>
   </div>
 );
@@ -440,9 +414,9 @@ const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }>
 
   return (
     <DataCard 
-      title="Target Audience" 
-      icon={UsersIcon}
-      description="Detailed audience targeting information"
+      title="Audience Demographics" 
+      iconName="userGroup"
+      description="Target audience information for this campaign"
     >
       <div className="space-y-5">
         <div>
@@ -608,7 +582,7 @@ const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { u
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <DocumentIcon className="h-12 w-12 text-gray-400" />
+          {migrateHeroIcon('DocumentIcon', { className: 'h-12 w-12 text-gray-400' })}
         </div>
       )}
     </div>
@@ -619,7 +593,7 @@ const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { u
 const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign }) => (
   <DataCard 
     title="Campaign Objectives" 
-    icon={SparklesIcon}
+    iconName="lightning"
     description="Key objectives and performance indicators"
   >
     <div className="space-y-5">
@@ -667,7 +641,7 @@ const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign })
       <div className="space-y-3 pt-2">
         <DataRow label="Main Message" value={campaign.mainMessage} />
         <DataRow label="Brand Perception" value={campaign.brandPerception} />
-        <DataRow label="Hashtags" value={campaign.hashtags} icon={HashtagIcon} />
+        <DataRow label="Hashtags" value={campaign.hashtags} iconName="tag" />
         <DataRow label="Key Benefits" value={campaign.keyBenefits} />
         <DataRow label="Memorability" value={campaign.memorability} />
         <DataRow label="Expected Achievements" value={campaign.expectedAchievements} />
@@ -681,7 +655,7 @@ const AudienceInsightsSection: React.FC<{ audience: CampaignDetail['audience'] |
   if (!audience) return null; // Early return if no audience data
 
   return (
-    <DataCard title="Audience Insights" icon={UserCircleIcon} className="col-span-2">
+    <DataCard title="Audience Insights" iconName="userCircle" className="col-span-2">
       <div className="grid grid-cols-2 gap-8">
         {/* Screening Questions */}
         <div>
@@ -713,14 +687,18 @@ const AudienceInsightsSection: React.FC<{ audience: CampaignDetail['audience'] |
 
 // Add Creative Requirements Section
 const CreativeRequirementsSection: React.FC<{ requirements: CampaignDetail['creativeRequirements'] }> = ({ requirements }) => (
-  <DataCard title="Creative Requirements" icon={DocumentTextIcon} className="col-span-2">
+  <DataCard 
+    title="Creative Requirements" 
+    iconName="documentText"
+    description="Campaign creative specifications"
+  >
     <div className="space-y-2">
       {requirements && requirements.length > 0 ? (
         requirements.map((req) => (
           <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start">
-          <DocumentTextIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
-          <span className="text-gray-700">{req.requirement}</span>
-        </div>
+            {migrateHeroIcon('DocumentTextIcon', { className: 'w-5 h-5 text-gray-400 mr-3 mt-0.5' })}
+            <span className="text-gray-700">{req.requirement}</span>
+          </div>
         ))
       ) : (
         <div className="p-3 bg-gray-50 rounded-lg">
@@ -1024,7 +1002,7 @@ const componentTester = {
 
 // Add DetailSection component
 interface DetailSectionProps {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  iconName: IconName;
   title: string;
   description?: string;
   children: React.ReactNode;
@@ -1033,7 +1011,7 @@ interface DetailSectionProps {
 }
 
 const DetailSection = ({ 
-  icon: Icon, 
+  iconName, 
   title, 
   description,
   children, 
@@ -1049,7 +1027,7 @@ const DetailSection = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div className="flex items-center">
           <div className="bg-blue-50 p-2.5 rounded-lg mr-3">
-            <Icon className="w-5 h-5 text-blue-500" />
+            <Icon name={iconName} className="w-5 h-5 text-blue-500" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
@@ -1244,9 +1222,9 @@ const formatPercentage = (value: number) => {
 
 // Add new error status badge component
 const ErrorStatusBadge = ({ message }: { message: string }) => (
-  <div className="flex items-center bg-red-100 border-l-4 border-red-500 py-3 px-4 rounded-lg">
-    <XCircleIcon className="h-6 w-6 text-red-500 mr-3" />
-    <span className="text-red-700 font-medium">{message}</span>
+  <div className="text-red-600 font-medium p-3 border border-red-300 bg-red-50 rounded-md flex items-center space-x-2">
+    {migrateHeroIcon('XCircleIcon', { className: 'h-5 w-5 text-red-600' })}
+    <span>{message}</span>
   </div>
 );
 
@@ -1697,7 +1675,7 @@ export default function CampaignDetail() {
                 className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="Go back"
               >
-                <ArrowLeftIcon className="h-5 w-5 text-[var(--secondary-color)]" />
+                {migrateHeroIcon('ArrowLeftIcon', { className: 'h-5 w-5 text-[var(--secondary-color)]' })}
               </button>
               <div>
                 <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "N/A"}</h1>
@@ -1711,11 +1689,11 @@ export default function CampaignDetail() {
             
             <div className="flex space-x-3 mt-4 md:mt-0">
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
-                <PrinterIcon className="h-4 w-4 mr-2" />
+                {migrateHeroIcon('PrinterIcon', { className: 'h-4 w-4 mr-2' })}
                 Print
               </button>
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
-                <ShareIcon className="h-4 w-4 mr-2" />
+                {migrateHeroIcon('ShareIcon', { className: 'h-4 w-4 mr-2' })}
                 Share
               </button>
               <button 
@@ -1723,7 +1701,7 @@ export default function CampaignDetail() {
                 className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]"
                 disabled={!!error}
               >
-                <PencilIcon className="h-4 w-4 mr-2" />
+                {migrateHeroIcon('PencilIcon', { className: 'h-4 w-4 mr-2' })}
                 Edit
               </button>
             </div>
@@ -1738,18 +1716,18 @@ export default function CampaignDetail() {
           <MetricCard 
             title="Total Budget" 
             value={error ? "N/A" : (data?.totalBudget || "N/A")} 
-            icon={CurrencyDollarIcon} 
+            iconName="money" 
             format={error ? "text" : "currency"} 
           />
           <MetricCard 
             title="Campaign Duration" 
             value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} 
-            icon={CalendarDaysIcon} 
+            iconName="calendar" 
           />
           <MetricCard 
             title="Platform" 
             value={error ? "N/A" : (data?.platform || "N/A")} 
-            icon={GlobeAltIcon} 
+            iconName="globe" 
           />
         </div>
 
@@ -1757,35 +1735,35 @@ export default function CampaignDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <DataCard 
             title="Campaign Details" 
-            icon={DocumentTextIcon}
+            iconName="documentText"
             description="Basic campaign information"
           >
             <div className="space-y-3">
               <DataRow label="Campaign Name" value={error ? "N/A" : (data?.campaignName || "N/A")} featured={true} />
               <DataRow label="Description" value={error ? "N/A" : (data?.description || "N/A")} />
               <DataRow label="Brand Name" value={error ? "N/A" : (data?.brandName || "N/A")} />
-              <DataRow label="Start Date" value={error ? "N/A" : (data?.startDate ? formatDate(data.startDate) : "N/A")} icon={CalendarIcon} />
-              <DataRow label="End Date" value={error ? "N/A" : (data?.endDate ? formatDate(data.endDate) : "N/A")} icon={CalendarIcon} />
-              <DataRow label="Time Zone" value={error ? "N/A" : (data?.timeZone || "N/A")} icon={ClockIcon} />
-              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} icon={CurrencyDollarIcon} />
+              <DataRow label="Start Date" value={error ? "N/A" : (data?.startDate ? formatDate(data.startDate) : "N/A")} iconName="calendar" />
+              <DataRow label="End Date" value={error ? "N/A" : (data?.endDate ? formatDate(data.endDate) : "N/A")} iconName="calendar" />
+              <DataRow label="Time Zone" value={error ? "N/A" : (data?.timeZone || "N/A")} iconName="clock" />
+              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconName="money" />
               <DataRow 
                 label="Total Budget" 
                 value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} 
-                icon={CurrencyDollarIcon} 
+                iconName="money" 
                 featured={true}
               />
               <DataRow 
                 label="Social Media Budget" 
                 value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} 
-                icon={CurrencyDollarIcon}
+                iconName="money"
               />
-              <DataRow label="Website" value={error ? "N/A" : (data?.website || "N/A")} icon={GlobeAltIcon} />
+              <DataRow label="Website" value={error ? "N/A" : (data?.website || "N/A")} iconName="globe" />
             </div>
           </DataCard>
 
           <DataCard 
             title="Primary Contact" 
-            icon={UserCircleIcon}
+            iconName="userCircle"
             description="Primary point of contact for this campaign"
           >
             <div className="space-y-3">
@@ -1808,10 +1786,10 @@ export default function CampaignDetail() {
                     {data?.primaryContact?.email || "N/A"}
                   </a>
                 )} 
-                icon={EnvelopeIcon} 
+                iconName="mail" 
               />
               
-              <DataRow label="Position" value={error ? "N/A" : (data?.primaryContact?.position || "N/A")} icon={BuildingOfficeIcon} />
+              <DataRow label="Position" value={error ? "N/A" : (data?.primaryContact?.position || "N/A")} iconName="building" />
             </div>
 
             {!error && data?.secondaryContact && (
@@ -1821,7 +1799,7 @@ export default function CampaignDetail() {
                   <DataRow 
                     label="Name" 
                     value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} 
-                    icon={UserCircleIcon} 
+                    iconName="userCircle" 
                   />
                   <DataRow 
                     label="Email" 
@@ -1830,9 +1808,9 @@ export default function CampaignDetail() {
                         {data.secondaryContact.email}
                       </a>
                     } 
-                    icon={EnvelopeIcon} 
+                    iconName="mail" 
                   />
-                  <DataRow label="Position" value={data.secondaryContact.position} icon={BuildingOfficeIcon} />
+                  <DataRow label="Position" value={data.secondaryContact.position} iconName="building" />
                 </div>
               </div>
             )}
@@ -1844,7 +1822,7 @@ export default function CampaignDetail() {
           {error ? (
             <DataCard 
               title="Campaign Objectives" 
-              icon={SparklesIcon}
+              iconName="lightning"
               description="Key objectives and performance indicators"
             >
               <div className="space-y-5">
@@ -1859,7 +1837,7 @@ export default function CampaignDetail() {
                 <div className="space-y-3 pt-2">
                   <DataRow label="Main Message" value="N/A" />
                   <DataRow label="Brand Perception" value="N/A" />
-                  <DataRow label="Hashtags" value="N/A" icon={HashtagIcon} />
+                  <DataRow label="Hashtags" value="N/A" iconName="tag" />
                   <DataRow label="Key Benefits" value="N/A" />
                   <DataRow label="Memorability" value="N/A" />
                   <DataRow label="Expected Achievements" value="N/A" />
@@ -1874,7 +1852,7 @@ export default function CampaignDetail() {
           {error ? (
             <DataCard 
               title="Target Audience" 
-              icon={UsersIcon}
+              iconName="userGroup"
               description="Detailed audience targeting information"
             >
               <div className="text-center py-10 text-[var(--secondary-color)]">
@@ -1890,13 +1868,13 @@ export default function CampaignDetail() {
         <div className="mb-6">
           <DataCard 
             title="Creative Assets" 
-            icon={PhotoIcon}
+            iconName="photo"
             description="Campaign creative assets"
             actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}
           >
             {error ? (
               <div className="text-center py-10 text-[var(--secondary-color)]">
-                <PhotoIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                {migrateHeroIcon('PhotoIcon', { className: 'h-10 w-10 mx-auto mb-2 opacity-50' })}
                 <p>N/A</p>
               </div>
             ) : (
@@ -1926,7 +1904,7 @@ export default function CampaignDetail() {
                         <div className="space-y-4">
                           {/* Influencer */}
                           <div className="flex items-start">
-                            <UserCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                            {migrateHeroIcon('UserCircleIcon', { className: 'h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0' })}
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Influencer</p>
                               <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
@@ -1935,7 +1913,7 @@ export default function CampaignDetail() {
                           
                           {/* Why this influencer */}
                           <div className="flex items-start">
-                            <InformationCircleIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                            {migrateHeroIcon('InformationCircleIcon', { className: 'h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0' })}
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
                               <p className="text-sm text-gray-800">{asset.description || 'No details provided'}</p>
@@ -1944,7 +1922,7 @@ export default function CampaignDetail() {
                           
                           {/* Budget */}
                           <div className="flex items-start">
-                            <CurrencyDollarIcon className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" />
+                            {migrateHeroIcon('CurrencyDollarIcon', { className: 'h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0' })}
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Budget</p>
                               <p className="text-sm text-gray-800 font-medium">
@@ -1962,7 +1940,7 @@ export default function CampaignDetail() {
                 </div>
               ) : (
                 <div className="text-center py-10 text-[var(--secondary-color)]">
-                  <PhotoIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                  {migrateHeroIcon('PhotoIcon', { className: 'h-10 w-10 mx-auto mb-2 opacity-50' })}
                   <p>No creative assets available</p>
                 </div>
               ))
@@ -1974,7 +1952,7 @@ export default function CampaignDetail() {
         <div className="mb-6">
           <DataCard 
             title="Campaign Features" 
-            icon={SparklesIcon}
+            iconName="lightning"
             description="Additional features enabled for this campaign"
           >
             {error ? (

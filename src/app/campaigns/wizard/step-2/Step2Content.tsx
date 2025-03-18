@@ -10,19 +10,7 @@ import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import {
-  DocumentTextIcon,
-  ClipboardDocumentListIcon,
-  HashtagIcon,
-  StarIcon,
-  BriefcaseIcon,
-  CheckBadgeIcon,
-  ChatBubbleLeftRightIcon,
-  PresentationChartBarIcon,
-  LightBulbIcon,
-  PlusCircleIcon,
-  TrashIcon
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/icon";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { sanitizeStepPayload } from '@/utils/payload-sanitizer';
 
@@ -543,7 +531,7 @@ function FormContent() {
               {/* KPIs Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <PresentationChartBarIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  <Icon name="view" className="w-5 h-5 mr-2 text-blue-500" />
                   Key Performance Indicators
                 </h2>
                 <p className="mb-4 text-sm text-gray-600">
@@ -611,7 +599,7 @@ function FormContent() {
               {/* Primary and Secondary KPIs */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <CheckBadgeIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  <Icon name="check" className="w-5 h-5 mr-2 text-blue-500" />
                   Primary and Secondary KPIs
                 </h2>
                 <p className="mb-4 text-sm text-gray-600">
@@ -662,7 +650,7 @@ function FormContent() {
                               setFieldValue('secondaryKPIs', updatedKpis);
                             }}
                           >
-                            <TrashIcon className="w-4 h-4" />
+                            <Icon name="trash" className="w-4 h-4" />
                           </button>
                         </div>
                       ))}
@@ -685,22 +673,22 @@ function FormContent() {
                     as="textarea"
                     rows={3}
                     required
-                    icon={<DocumentTextIcon className="h-5 w-5" />}
+                    icon={<Icon name="info" className="h-5 w-5" />}
                     placeholder="Discover sustainable living with our eco-friendly products."
                   />
                   
                   <StyledField
                     label="Hashtags related to the campaign"
                     name="hashtags"
-                    icon={<HashtagIcon className="h-5 w-5" />}
+                    icon={<Icon name="info" className="h-5 w-5" />}
                     placeholder="#hashtag"
                   />
                   
                   <StyledField
-                    label="What do you want people to remember after the campaign?"
+                    label="Memorability Score (1-10)"
                     name="memorability"
                     required
-                    icon={<StarIcon className="h-5 w-5" />}
+                    icon={<Icon name="star" className="h-5 w-5" />}
                     placeholder="Type the value"
                   />
                   
@@ -708,7 +696,7 @@ function FormContent() {
                     label="What are the key benefits your brand offers?"
                     name="keyBenefits"
                     required
-                    icon={<BriefcaseIcon className="h-5 w-5" />}
+                    icon={<Icon name="info" className="h-5 w-5" />}
                     placeholder="Innovative design, Exceptional quality, Outstanding customer service."
                   />
                 </div>
@@ -728,7 +716,7 @@ function FormContent() {
                     as="textarea"
                     rows={2}
                     required
-                    icon={<CheckBadgeIcon className="h-5 w-5" />}
+                    icon={<Icon name="check" className="h-5 w-5" />}
                     placeholder="We expect a 20% increase in brand awareness within three months."
                   />
                   
@@ -738,7 +726,7 @@ function FormContent() {
                     as="textarea"
                     rows={2}
                     required
-                    icon={<LightBulbIcon className="h-5 w-5" />}
+                    icon={<Icon name="lightBulb" className="h-5 w-5" />}
                     placeholder="Purchase intent will rise by 15% due to targeted ads."
                   />
                   
@@ -747,7 +735,7 @@ function FormContent() {
                     name="brandPerception"
                     as="textarea"
                     rows={2}
-                    icon={<ChatBubbleLeftRightIcon className="h-5 w-5" />}
+                    icon={<Icon name="chatBubble" className="h-5 w-5" />}
                     placeholder="Our brand will be seen as more innovative and customer-focused."
                   />
                 </div>
@@ -756,7 +744,7 @@ function FormContent() {
               {/* Features Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <CheckBadgeIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  <Icon name="check" className="w-5 h-5 mr-2 text-blue-500" />
                   Features to Include
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

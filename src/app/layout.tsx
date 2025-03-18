@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'Justify',
-  description: 'Your AI-powered legal assistant',
+  description: 'Measureing the impact of your social campaigns',
   icons: {
     icon: '/favicon.png',
   },
@@ -25,6 +25,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script src="https://kit.fontawesome.com/3e2951e127.js" crossOrigin="anonymous"></script>
+      </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
           <NextSSRPlugin

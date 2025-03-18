@@ -1,10 +1,7 @@
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
-import {
-  UserCircleIcon,
-  PhotoIcon,
-  KeyIcon,
-} from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
+import { iconComponentFactory } from '@/lib/icon-helpers';
 
 export interface TabConfig {
   id: string;
@@ -26,26 +23,26 @@ const NavigationTabs: React.FC<NavigationTabsProps> = memo(({ activeTab, isSuper
       id: 'profile', 
       label: 'Profile Settings', 
       href: '/settings',
-      icon: UserCircleIcon
+      icon: iconComponentFactory('userCircle')
     },
     { 
       id: 'team', 
       label: 'Team Management', 
       href: '/settings/team-management',
-      icon: UserCircleIcon
+      icon: iconComponentFactory('userCircle')
     },
     { 
       id: 'branding', 
       label: 'Branding', 
       href: '/settings/branding',
-      icon: PhotoIcon
+      icon: iconComponentFactory('photo')
     },
     {
       id: 'admin',
       label: 'Super Admin Console',
       href: '/admin',
       requiresAdmin: true,
-      icon: KeyIcon
+      icon: iconComponentFactory('key')
     },
   ];
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
 import { Dialog, Transition } from '@headlessui/react';
 import { SurveyPreviewData, SurveyResponses, CreativeAsset } from '@/types/brandLift';
 import PlatformSwitcher from './PlatformSwitcher';
@@ -352,7 +352,7 @@ export default function SurveyPreviewContent() {
                   onClick={handlePrevQuestion}
                   disabled={currentQuestionIndex === 0}
                 >
-                  <ChevronLeftIcon className="w-5 h-5 mr-1" />
+                  <Icon name="chevronLeft" className="w-5 h-5 mr-1" />
                 </button>
                 
                 <div className="mx-auto flex items-center">

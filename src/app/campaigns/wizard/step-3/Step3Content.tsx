@@ -10,13 +10,7 @@ import { useWizard } from "@/context/WizardContext";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
-import { 
-  MagnifyingGlassIcon, 
-  PlusIcon, 
-  XMarkIcon, 
-  ChevronRightIcon,
-  InformationCircleIcon
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/icon";
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -331,7 +325,7 @@ function FormContent() {
                             }}
                           />
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                            <Icon name="search" className="h-5 w-5 text-gray-400" />
                           </div>
               <button 
                 type="button"
@@ -346,7 +340,7 @@ function FormContent() {
                             }}
                           >
                             <div className="bg-blue-500 rounded-full p-1">
-                              <PlusIcon className="h-3 w-3 text-white" />
+                              <Icon name="plus" className="h-3 w-3 text-white" />
                             </div>
               </button>
             </div>
@@ -368,7 +362,7 @@ function FormContent() {
                                     setFieldValue('location', newLocations);
                                   }}
                                 >
-                                  <XMarkIcon className="h-5 w-5" />
+                                  <Icon className="h-5 w-5" />
                                 </button>
                               </span>
                             ))}
@@ -558,7 +552,7 @@ function FormContent() {
                   
                   <div className="relative mb-4">
                     <div className="flex items-center">
-                      <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3" />
+                      <Icon name="search" className="h-5 w-5 text-gray-400 absolute left-3" />
                       <input
                         type="text"
                         id="screeningQueryInput"
@@ -589,7 +583,7 @@ function FormContent() {
                         }}
                       >
                         <div className="bg-blue-500 rounded-full p-1">
-                          <PlusIcon className="h-3 w-3 text-white" />
+                          <Icon name="plus" className="h-3 w-3 text-white" />
                         </div>
                       </button>
                     </div>
@@ -639,7 +633,7 @@ function FormContent() {
                             }}
                             className="text-gray-400 hover:text-gray-500"
                           >
-                            <XMarkIcon className="h-5 w-5" />
+                            <Icon className="h-5 w-5" />
                           </button>
                         </div>
                       ))}
@@ -690,7 +684,7 @@ function FormContent() {
                                   setFieldValue('languages', newLanguages);
                                 }}
                               >
-                                <XMarkIcon className="h-5 w-5" />
+                                <Icon className="h-5 w-5" />
                               </button>
                             </span>
                           ))}
@@ -708,7 +702,7 @@ function FormContent() {
                   >
                     <h2 className="text-lg font-semibold text-gray-900">Advanced Targeting</h2>
                     <div className="text-blue-500 hover:text-blue-700">
-                      <ChevronRightIcon className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} />
+                      <Icon name="chevronRight" className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} />
                     </div>
                   </div>
                   
@@ -755,7 +749,7 @@ function FormContent() {
                         
                         <div className="relative mb-6">
                           <div className="flex items-center">
-                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3" />
+                            <Icon name="search" className="h-5 w-5 text-gray-400 absolute left-3" />
                             <input
                               type="text"
                               id="jobTitleInput"
@@ -786,7 +780,7 @@ function FormContent() {
                               }}
                             >
                               <div className="bg-blue-500 rounded-full p-1">
-                                <PlusIcon className="h-3 w-3 text-white" />
+                                <Icon name="plus" className="h-3 w-3 text-white" />
                               </div>
                             </button>
                           </div>
@@ -811,7 +805,7 @@ function FormContent() {
                                       setFieldValue('jobTitles', newJobTitles);
                                     }}
                                   >
-                                    <XMarkIcon className="h-5 w-5" />
+                                    <Icon className="h-5 w-5" />
                 </button>
                                 </span>
                               ))}
@@ -827,7 +821,7 @@ function FormContent() {
                             Income Level
                           </label>
                           <div className="group relative">
-                            <InformationCircleIcon className="h-5 w-5 text-gray-400 cursor-help" />
+                            <Icon name="info" className="h-5 w-5 text-gray-400 cursor-help" />
                             <div className="absolute right-0 bottom-6 w-64 bg-white shadow-lg rounded-md p-2 text-xs text-gray-700 hidden group-hover:block border border-gray-200">
                               Set the minimum income level for your target audience. This helps narrow down your demographic to users with specific purchasing power.
                             </div>
@@ -924,7 +918,7 @@ function FormContent() {
                         }}
                       />
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                        <Icon name="search" className="h-5 w-5 text-gray-400" />
                       </div>
                       <button
                         type="button"
@@ -939,7 +933,7 @@ function FormContent() {
                         }}
                       >
                         <div className="bg-blue-500 rounded-full p-1">
-                          <PlusIcon className="h-3 w-3 text-white" />
+                          <Icon name="plus" className="h-3 w-3 text-white" />
                         </div>
                       </button>
                     </div>
@@ -961,7 +955,7 @@ function FormContent() {
                                 setFieldValue('competitors', updatedCompetitors);
                               }}
                             >
-                              <XMarkIcon className="h-4 w-4" />
+                              <Icon className="h-4 w-4" />
                             </button>
                           </span>
                         ))}

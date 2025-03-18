@@ -3,7 +3,8 @@
 import React, { useState, ChangeEvent, useCallback, FormEvent, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XCircleIcon, ArrowPathIcon, CheckCircleIcon, PlusIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
+import { iconComponentFactory } from '@/lib/icon-helpers';
 import NavigationTabs from '../components/NavigationTabs';
 import { toast } from 'react-hot-toast';
 import TeamDashboard from './dashboard';
@@ -437,7 +438,7 @@ const TeamManagementPage: React.FC = () => {
               className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
                 transition-colors duration-200 font-medium flex items-center"
             >
-              <XCircleIcon className="w-5 h-5 mr-2" />
+              <Icon name="xCircle" className="w-5 h-5 mr-2" />
               Cancel
             </motion.button>
             <motion.button
@@ -454,12 +455,12 @@ const TeamManagementPage: React.FC = () => {
             >
               {isLoading ? (
                 <>
-                  <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                  <Icon name="arrowRight" className="w-5 h-5 mr-2 animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  <Icon name="checkCircle" className="w-5 h-5 mr-2" />
                   Save
                 </>
               )}
@@ -490,7 +491,7 @@ const TeamManagementPage: React.FC = () => {
         <div className="space-y-8">
           <Card>
             <SectionHeader
-              icon={UserGroupIcon}
+              icon={iconComponentFactory('userGroup')}
               title="Team Members"
               description="Manage your team members and their access levels"
             />
@@ -506,7 +507,7 @@ const TeamManagementPage: React.FC = () => {
                   className="pl-10 pr-4 py-2 w-[400px] border border-[var(--divider-color)] rounded-lg 
                     focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
                 />
-                <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                <Icon name="search" className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
               </div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -515,7 +516,7 @@ const TeamManagementPage: React.FC = () => {
                 className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90
                   transition-colors duration-200 font-medium flex items-center"
               >
-                <PlusIcon className="w-5 h-5 mr-2" />
+                <Icon name="plus" className="w-5 h-5 mr-2" />
                 Add Team Member
               </motion.button>
             </div>
@@ -659,7 +660,7 @@ const TeamManagementPage: React.FC = () => {
                 >
                   {isLoading ? (
                     <>
-                      <ArrowPathIcon className="inline w-4 h-4 mr-2 animate-spin" />
+                      <Icon name="arrowRight" className="inline w-4 h-4 mr-2 animate-spin" />
                       Setting up...
                     </>
                   ) : (
@@ -687,7 +688,7 @@ const TeamManagementPage: React.FC = () => {
           {invitations.length > 0 && (
             <Card>
               <SectionHeader 
-                icon={UserGroupIcon} 
+                icon={iconComponentFactory('userGroup')} 
                 title="Pending Invitations" 
                 description="These users have been invited but haven't joined yet."
               />
@@ -737,7 +738,7 @@ const TeamManagementPage: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Invite Team Member</h3>
                 <button onClick={() => setAddModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                  <XCircleIcon className="h-6 w-6" />
+                  <Icon name="xCircle" className="h-6 w-6" />
                 </button>
               </div>
               
@@ -789,7 +790,7 @@ const TeamManagementPage: React.FC = () => {
                   >
                     {addingMember ? (
                       <>
-                        <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
+                        <Icon name="arrowRight" className="h-4 w-4 mr-2 animate-spin" />
                         Inviting...
                       </>
                     ) : (
@@ -857,7 +858,7 @@ const TeamManagementPage: React.FC = () => {
               className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg 
                 shadow-lg flex items-center"
             >
-              <CheckCircleIcon className="w-5 h-5 mr-2" />
+              <Icon name="checkCircle" className="w-5 h-5 mr-2" />
               {toastMessage}
             </motion.div>
           )}

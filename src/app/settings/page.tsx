@@ -11,15 +11,8 @@ import React, {
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  UserCircleIcon,
-  BellIcon,
-  KeyIcon,
-  PhotoIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowPathIcon,
-} from '@heroicons/react/24/outline';
+import { Icon } from '@/components/ui/icon';
+import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers';
 
 /* --------------------------------------------------
    Type Definitions
@@ -114,26 +107,26 @@ const NavigationTabs: React.FC<{
       id: 'profile', 
       label: 'Profile Settings', 
       href: '/settings',
-      icon: UserCircleIcon
+      icon: iconComponentFactory('userCircle')
     },
     { 
       id: 'team', 
       label: 'Team Management', 
       href: '/settings/team-management',
-      icon: UserCircleIcon
+      icon: iconComponentFactory('userCircle')
     },
     { 
       id: 'branding', 
       label: 'Branding', 
       href: '/settings/branding',
-      icon: PhotoIcon
+      icon: iconComponentFactory('photo')
     },
     {
       id: 'admin',
       label: 'Super Admin Console',
       href: '/admin',
       requiresAdmin: true,
-      icon: KeyIcon
+      icon: iconComponentFactory('key')
     },
   ];
 
@@ -194,7 +187,7 @@ const ActionButtons: React.FC<{
       className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
         transition-colors duration-200 font-medium flex items-center"
     >
-      <XCircleIcon className="w-5 h-5 mr-2" />
+      <Icon name="xCircle" className="w-5 h-5 mr-2" />
       Cancel
     </motion.button>
     <motion.button
@@ -211,12 +204,12 @@ const ActionButtons: React.FC<{
     >
       {isSaving ? (
         <>
-          <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+          <Icon name="arrowRight" className="w-5 h-5 mr-2 animate-spin" />
           Saving...
         </>
       ) : (
         <>
-          <CheckCircleIcon className="w-5 h-5 mr-2" />
+          <Icon name="checkCircle" className="w-5 h-5 mr-2" />
           Save
         </>
       )}
@@ -259,9 +252,9 @@ const PersonalInfoSection: React.FC<{
 }> = memo(({ personalInfo, isEditing, onChange, onToggleEdit }) => (
   <Card>
     <SectionHeader
-      icon={UserCircleIcon}
+      icon={iconComponentFactory('userCircle')}
       title="Personal Information"
-      description="Manage your personal details and contact information"
+      description="Update your personal details and company information."
     />
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -340,75 +333,71 @@ const PersonalInfoSection: React.FC<{
 ));
 
 // Profile Picture Section
-const ProfilePictureSection: React.FC<{
-  profilePicturePreview: string;
+const ProfilePicture: React.FC<{
+  profilePicturePreview: string | null;
   onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onRemove: () => void;
   error: string;
 }> = memo(({ profilePicturePreview, onFileChange, onRemove, error }) => (
   <Card>
     <SectionHeader
-      icon={PhotoIcon}
+      icon={iconComponentFactory('photo')}
       title="Profile Picture"
       description="Upload or update your profile picture"
     />
-    <div className="flex items-center space-x-8">
-      <div className="flex-shrink-0">
+    <div className="flex flex-col sm:flex-row items-center gap-4">
+      <div>
         {profilePicturePreview ? (
           <div className="relative">
             <img
               src={profilePicturePreview}
-              alt="Profile preview"
-              className="w-32 h-32 object-cover rounded-full ring-4 ring-[var(--background-color)]"
+              alt="Profile Preview"
+              className="w-32 h-32 rounded-full object-cover"
             />
             <motion.button
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onRemove}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1
-                hover:bg-red-600 transition-colors duration-200"
+              className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow-md"
               aria-label="Remove profile picture"
             >
-              <XCircleIcon className="w-5 h-5" />
+              <Icon name="xCircle" className="w-5 h-5" />
             </motion.button>
           </div>
         ) : (
           <div className="w-32 h-32 rounded-full bg-[var(--background-color)] flex items-center justify-center">
-            <UserCircleIcon className="w-16 h-16 text-[var(--secondary-color)]" />
+            <Icon name="userCircle" className="w-16 h-16 text-[var(--secondary-color)]" />
           </div>
         )}
       </div>
       <div className="flex-grow">
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="profilePicture"
-              className="relative cursor-pointer inline-flex items-center px-4 py-2 
-                bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 
+        <div className="space-y-2 flex flex-col sm:items-start items-center">
+          <label
+            htmlFor="profilePicture"
+            className="bg-blue-50 hover:bg-blue-100 text-[var(--accent-color)]
+                px-4 py-2 rounded-lg cursor-pointer flex items-center
                 transition-colors duration-200 font-medium group"
-            >
-              <PhotoIcon className="w-5 h-5 mr-2" />
-              <span>Upload New Picture</span>
-              <input
-                id="profilePicture"
-                type="file"
-                accept="image/jpeg, image/png"
-                onChange={onFileChange}
-                className="hidden"
-                aria-label="Upload or change profile picture"
-              />
-            </label>
+          >
+            <Icon name="photo" className="w-5 h-5 mr-2" />
+            <span>Upload New Picture</span>
+            <input
+              type="file"
+              id="profilePicture"
+              accept="image/*"
+              className="hidden"
+              onChange={onFileChange}
+            />
+          </label>
+          <div className="text-sm text-[var(--secondary-color)]">
+            Recommended: Square image, at least 500x500 pixels
           </div>
-          <p className="text-sm text-[var(--secondary-color)]">
-            Supported formats: JPG, PNG. Maximum file size: 5MB
-          </p>
           {error && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-red-500 text-sm flex items-center"
             >
-              <XCircleIcon className="w-5 h-5 mr-1" />
+              <Icon name="xCircle" className="w-5 h-5 mr-1" />
               {error}
             </motion.p>
           )}
@@ -428,9 +417,9 @@ const PasswordManagementSection: React.FC<{
 }> = memo(({ passwordState, onChange, onSubmit, error, success }) => (
   <Card>
     <SectionHeader
-      icon={KeyIcon}
-      title="Password Management"
-      description="Update your password and security settings"
+      icon={iconComponentFactory('key')}
+      title="Security"
+      description="Update your password and security settings."
     />
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -486,19 +475,19 @@ const PasswordManagementSection: React.FC<{
         </h4>
         <ul className="space-y-1 text-sm text-[var(--secondary-color)]">
           <li className="flex items-center">
-            <CheckCircleIcon className="w-4 h-4 mr-2 text-green-500" />
+            <Icon name="checkCircle" className="w-4 h-4 mr-2 text-green-500" />
             Minimum 8 characters
           </li>
           <li className="flex items-center">
-            <CheckCircleIcon className="w-4 h-4 mr-2 text-green-500" />
+            <Icon name="checkCircle" className="w-4 h-4 mr-2 text-green-500" />
             At least one uppercase letter
           </li>
           <li className="flex items-center">
-            <CheckCircleIcon className="w-4 h-4 mr-2 text-green-500" />
+            <Icon name="checkCircle" className="w-4 h-4 mr-2 text-green-500" />
             At least one number
           </li>
           <li className="flex items-center">
-            <CheckCircleIcon className="w-4 h-4 mr-2 text-green-500" />
+            <Icon name="checkCircle" className="w-4 h-4 mr-2 text-green-500" />
             At least one special character
           </li>
         </ul>
@@ -510,7 +499,7 @@ const PasswordManagementSection: React.FC<{
           animate={{ opacity: 1, y: 0 }}
           className="bg-red-50 text-red-700 p-4 rounded-lg flex items-start"
         >
-          <XCircleIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+          <Icon name="xCircle" className="w-5 h-5 mr-2 flex-shrink-0" />
           <p>{error}</p>
         </motion.div>
       )}
@@ -521,7 +510,7 @@ const PasswordManagementSection: React.FC<{
           animate={{ opacity: 1, y: 0 }}
           className="bg-green-50 text-green-700 p-4 rounded-lg flex items-start"
         >
-          <CheckCircleIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+          <Icon name="checkCircle" className="w-5 h-5 mr-2 flex-shrink-0" />
           <p>{success}</p>
         </motion.div>
       )}
@@ -545,7 +534,7 @@ const PasswordManagementSection: React.FC<{
                 : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'
             }`}
         >
-          <KeyIcon className="w-5 h-5 mr-2" />
+          <Icon name="key" className="w-5 h-5 mr-2" />
           Update Password
         </button>
       </div>
@@ -560,9 +549,9 @@ const NotificationPreferencesSection: React.FC<{
 }> = memo(({ preferences, onToggle }) => (
   <Card>
     <SectionHeader
-      icon={BellIcon}
+      icon={iconComponentFactory('bell')}
       title="Notification Preferences"
-      description="Manage your notification and alert settings"
+      description="Manage how you receive updates and alerts."
     />
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -854,7 +843,7 @@ const ProfileSettingsPage: React.FC = () => {
           className="bg-red-50 text-red-800 rounded-xl p-6 max-w-md w-full 
             shadow-lg flex items-center"
         >
-          <XCircleIcon className="w-12 h-12 text-red-400 mr-4" />
+          <Icon name="xCircle" className="w-12 h-12 text-red-400 mr-4" />
           <div>
             <h3 className="text-lg font-semibold mb-2">Access Error</h3>
             <p className="text-red-600">
@@ -862,10 +851,11 @@ const ProfileSettingsPage: React.FC = () => {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 text-red-700 hover:text-red-800 font-medium 
-                flex items-center"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg
+                  mt-4 hover:bg-opacity-90 transition-all duration-200
+                  flex items-center"
             >
-              <ArrowPathIcon className="w-5 h-5 mr-2" />
+              <Icon name="arrowRight" className="w-5 h-5 mr-2" />
               Retry
             </button>
           </div>
@@ -925,16 +915,12 @@ const ProfileSettingsPage: React.FC = () => {
             onToggleEdit={toggleEditing}
           />
 
-          <ProfilePictureSection
+          <ProfilePicture
             profilePicturePreview={profilePicturePreview}
-            onFileChange={(e) => {
+            onFileChange={(e: ChangeEvent<HTMLInputElement>) => {
               handleProfilePictureChange(e);
-              markChanges();
             }}
-            onRemove={() => {
-              removeProfilePicture();
-              markChanges();
-            }}
+            onRemove={removeProfilePicture}
             error={profilePictureError}
           />
 
