@@ -7,6 +7,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
+import IconRegistry from '@/lib/icon-registry';
 
 // CRITICAL: Import Font Awesome CSS before config
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -70,6 +71,7 @@ export default function RootLayout({
           <NextSSRPlugin
             routerConfig={extractRouterConfig(ourFileRouter)}
           />
+          <IconRegistry />
           <Toaster />
           <ToastProvider>
             <ClientLayout>
