@@ -1,4 +1,3 @@
-import '@awesome.me/kit-3e2951e127';
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -32,12 +31,167 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 // Configure Font Awesome
 config.autoAddCss = false; // Prevent Font Awesome from automatically injecting CSS
 
-// Initialize with a few essential icons for fallbacks
-import { faUser, faQuestion } from '@fortawesome/pro-solid-svg-icons';
-library.add(faUser, faQuestion);
+// Initialize with essential icons
+import { 
+  faUser, faQuestion, faCheck, faStar, faHeart, 
+  faBell, faGear, faSearch, faPlus, faMinus, faXmark,
+  faChevronDown, faChevronUp, faChevronLeft, faChevronRight,
+  faEnvelope, faCalendarDays, faTrash, faTriangleExclamation,
+  faCircleInfo, faLightbulb, faEye, faPenToSquare, faCopy,
+  faDownload, faUpload, faShare, faBookmark, faFile,
+  faFileLines, faTag, faFilter, faPaperclip, faLock, faUnlock, faKey,
+  faHistory, faArrowUp, faArrowDown, faArrowLeft, faArrowRight,
+  faCircleCheck, faCommentDots, faTrashCan, faHome, faHouse,
+  faChartBar, faChartPie, faMoneyBill, faArrowTrendUp, 
+  faArrowTrendDown, faBolt, faGlobe, faUserGroup, faBuilding,
+  faRocket, faSignal, faBellSlash, faMap, faShield, faClock,
+  faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
+  faClockRotateLeft, faChartLine, faTable, faTableCells, faPlay,
+  faBars, faList
+} from '@fortawesome/pro-solid-svg-icons';
 
-// No need to initialize library - the Pro Kit already includes all icons
-// library.add(...Object.values(FA_UI_ICON_MAP), ...Object.values(FA_UI_OUTLINE_ICON_MAP), ...Object.values(FA_PLATFORM_ICON_MAP));
+import {
+  faUser as falUser, faCheck as falCheck, faStar as falStar,
+  faHeart as falHeart, faBell as falBell, faGear as falGear,
+  faSearch as falSearch, faPlus as falPlus, faMinus as falMinus, 
+  faXmark as falXmark, faChevronDown as falChevronDown,
+  faChevronUp as falChevronUp, faChevronLeft as falChevronLeft,
+  faChevronRight as falChevronRight, faEnvelope as falEnvelope,
+  faCalendarDays as falCalendarDays, faTrash as falTrash,
+  faCircleCheck as falCircleCheck, faCommentDots as falCommentDots,
+  faEye as falEye, faPenToSquare as falPenToSquare, faCopy as falCopy,
+  faDownload as falDownload, faUpload as falUpload, faShare as falShare,
+  faBookmark as falBookmark, faFile as falFile, faFileLines as falFileLines,
+  faTag as falTag, faFilter as falFilter, faPaperclip as falPaperclip, 
+  faLock as falLock, faUnlock as falUnlock, faKey as falKey, 
+  faHome as falHome, faHouse as falHouse,
+  faChartBar as falChartBar, faChartPie as falChartPie, 
+  faMoneyBill as falMoneyBill, faArrowTrendUp as falArrowTrendUp,
+  faArrowTrendDown as falArrowTrendDown, faBolt as falBolt,
+  faGlobe as falGlobe, faUserGroup as falUserGroup, 
+  faBuilding as falBuilding, faRocket as falRocket,
+  faSignal as falSignal, faBellSlash as falBellSlash,
+  faMap as falMap, faShield as falShield, faClock as falClock,
+  faArrowDown as falArrowDown, faArrowUp as falArrowUp,
+  faArrowRight as falArrowRight, faArrowLeft as falArrowLeft,
+  faCircleXmark as falCircleXmark, faMagnifyingGlassPlus as falMagnifyingGlassPlus,
+  faPalette as falPalette, faCreditCard as falCreditCard,
+  faClockRotateLeft as falClockRotateLeft, faChartLine as falChartLine,
+  faTable as falTable, faTableCells as falTableCells, faPlay as falPlay,
+  faBars as falBars, faList as falList, faLightbulb as falLightbulb
+} from '@fortawesome/pro-light-svg-icons';
+
+import {
+  faTwitter, faFacebook, faInstagram, faYoutube,
+  faLinkedin, faTiktok, faReddit, faGithub
+} from '@fortawesome/free-brands-svg-icons';
+
+import {
+  faUser as farUser, faCheck as farCheck, faStar as farStar,
+  faHeart as farHeart, faBell as farBell
+} from '@fortawesome/pro-regular-svg-icons';
+
+// Define aliases for all icon variants
+// Solid icon aliases
+const faClose = faXmark;
+const faMail = faEnvelope;
+const faWarning = faTriangleExclamation;
+const faInfo = faCircleInfo;
+const faView = faEye;
+const faEdit = faPenToSquare;
+const faDocument = faFile;
+const faDocumentText = faFileLines;
+const faChatBubble = faCommentDots;
+const faDelete = faTrashCan;
+const faTrendUp = faArrowTrendUp;
+const faTrendDown = faArrowTrendDown;
+const faLightning = faBolt;
+const faBellAlert = faBellSlash;
+const faXCircle = faCircleXmark;
+const faCheckCircle = faCircleCheck;
+const faSwatch = faPalette;
+const faPresentationChartBar = faChartLine;
+const faGrid = faTableCells;
+const faMenu = faBars;
+const faSettings = faGear;
+const faLightBulb = faLightbulb;
+const faCalendar = faCalendarDays;
+const faChart = faChartBar;
+const faMoney = faMoneyBill;
+const faMagnifyingGlass = faSearch;
+const faXMark = faClose;
+
+// Light icon aliases
+const falClose = falXmark;
+const falMail = falEnvelope;
+const falView = falEye;
+const falEdit = falPenToSquare;
+const falDocument = falFile;
+const falDocumentText = falFileLines;
+const falChatBubble = falCommentDots;
+const falTrendUp = falArrowTrendUp;
+const falTrendDown = falArrowTrendDown;
+const falLightning = falBolt;
+const falBellAlert = falBellSlash;
+const falXCircle = falCircleXmark;
+const falCheckCircle = falCircleCheck;
+const falSwatch = falPalette;
+const falPresentationChartBar = falChartLine;
+const falGrid = falTableCells;
+const falMenu = falBars;
+const falSettings = falGear;
+const falLightBulb = falLightbulb;
+const falCalendar = falCalendarDays;
+const falChart = falChartBar;
+const falMoney = falMoneyBill;
+const falMagnifyingGlass = falSearch;
+const falXMark = falClose;
+
+// Register all essential icons
+library.add(
+  // Solid icons
+  faUser, faQuestion, faCheck, faStar, faHeart, 
+  faBell, faGear, faSearch, faPlus, faMinus, faClose,
+  faChevronDown, faChevronUp, faChevronLeft, faChevronRight,
+  faMail, faCalendarDays, faTrash, faWarning,
+  faInfo, faLightbulb, faView, faEdit, faCopy,
+  faDownload, faUpload, faShare, faBookmark, faDocument,
+  faDocumentText, faTag, faFilter, faPaperclip, faLock, faUnlock, faKey,
+  faHistory, faArrowUp, faArrowDown, faArrowLeft, faArrowRight,
+  faCircleCheck, faChatBubble, faDelete, faHome, faHouse,
+  faChartBar, faChartPie, faMoneyBill, faTrendUp, 
+  faTrendDown, faLightning, faGlobe, faUserGroup, faBuilding,
+  faRocket, faSignal, faBellAlert, faMap, faShield, faClock,
+  faXCircle, faCheckCircle, faMagnifyingGlassPlus, faSwatch, faCreditCard,
+  faClockRotateLeft, faPresentationChartBar, faTable, faGrid, faPlay,
+  faMenu, faList, faSettings, faLightBulb, faCalendar, faChart, faMoney,
+  faMagnifyingGlass, faXMark, faFile, faFileLines, faTableCells,
+  
+  // Light icons
+  falUser, falCheck, falStar, falHeart, falBell, falGear,
+  falSearch, falPlus, falMinus, falClose, falChevronDown,
+  falChevronUp, falChevronLeft, falChevronRight, falMail,
+  falCalendarDays, falTrash, falCircleCheck, falChatBubble,
+  falView, falEdit, falCopy, falDownload, falUpload,
+  falShare, falBookmark, falDocument, falDocumentText, falTag, falFilter,
+  falPaperclip, falLock, falUnlock, falKey, falHome, falHouse,
+  falChartBar, falChartPie, falMoneyBill, falTrendUp,
+  falTrendDown, falLightning, falGlobe, falUserGroup,
+  falBuilding, falRocket, falSignal, falBellAlert,
+  falMap, falShield, falClock, falArrowDown, falArrowUp,
+  falArrowRight, falArrowLeft, falXCircle, falCheckCircle, falMagnifyingGlassPlus,
+  falSwatch, falCreditCard, falClockRotateLeft, falPresentationChartBar,
+  falTable, falGrid, falPlay, falMenu, falList, falSettings, falLightBulb,
+  falCalendar, falChart, falMoney, falMagnifyingGlass, falXMark, falFile,
+  falFileLines, falTableCells,
+  
+  // Regular icons
+  farUser, farCheck, farStar, farHeart, farBell,
+  
+  // Brand icons
+  faTwitter, faFacebook, faInstagram, faYoutube,
+  faLinkedin, faTiktok, faReddit, faGithub
+);
 
 // Re-export for convenience
 export const UI_ICON_MAP = FA_UI_ICON_MAP;
@@ -243,6 +397,12 @@ export const Icon: React.FC<IconProps> = ({
   // Use specified icon through name prop - prioritize ui icons
   if (name) {
     try {
+      // Make sure name is valid and not an empty object
+      if (typeof name !== 'string' || Object.keys(name as any).length === 0) {
+        console.warn(`[Icon] Invalid name type provided: ${typeof name}, value: ${JSON.stringify(name)}`);
+        return <FallbackIcon size={size} className={className} color="red" {...props} />;
+      }
+      
       // Use Font Awesome icons - FIXED: the solid/outline logic was inverted
       let faIcon = solid 
         ? UI_ICON_MAP[name as keyof typeof UI_ICON_MAP]
@@ -386,21 +546,25 @@ export const Icon: React.FC<IconProps> = ({
         iconName = parts[0].replace('fa-', '');
       }
       
-      // Try to use getIcon for safer icon retrieval
-      try {
-        const faIcon = getIcon(iconName, prefix as any);
-        return (
-          <FontAwesomeIcon
-            icon={faIcon}
-            className={cn(sizeClasses[size], className)}
-            color={color}
-            {...props as any}
-          />
-        );
-      } catch (innerError) {
-        console.error(`[Icon] Error getting icon for "${fontAwesome}":`, innerError);
-        return <FallbackIcon size={size} className={className} color="red" {...props} />;
-      }
+      // Map prefixes to the ones used by Font Awesome
+      const prefixMap: Record<string, string> = {
+        'solid': 'fas',
+        'regular': 'far',
+        'light': 'fal',
+        'brands': 'fab'
+      };
+      
+      const mappedPrefix = prefixMap[prefix] || 'fas';
+      
+      // Use array syntax to leverage the library registration
+      return (
+        <FontAwesomeIcon
+          icon={[mappedPrefix as any, iconName]}
+          className={cn(sizeClasses[size], className)}
+          color={color}
+          {...props as any}
+        />
+      );
     } catch (e) {
       console.error(`[Icon] Error rendering Font Awesome icon "${fontAwesome}":`, e);
       return <FallbackIcon size={size} className={className} color="red" {...props} />;

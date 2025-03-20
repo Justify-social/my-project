@@ -130,6 +130,8 @@ export const FA_UI_SOLID_ICON_MAP = {
   play: getIcon('play', 'fas'),
   document: getIcon('file', 'fas'),
   documentText: getIcon('file-lines', 'fas'),
+  xMark: getIcon('xmark', 'fas'),
+  fileLines: getIcon('file-lines', 'fas'),
   home: getIcon('home', 'fas'),
   chart: getIcon('chart-bar', 'fas'),
   chartPie: getIcon('chart-pie', 'fas'),
@@ -242,7 +244,9 @@ export const FA_UI_LIGHT_ICON_MAP = {
   history: getIcon('clock-rotate-left', 'fal'),
   presentationChartBar: getIcon('chart-line', 'fal'),
   tableCells: getIcon('table', 'fal'),
-  chartBar: getIcon('chart-column', 'fal')
+  chartBar: getIcon('chart-column', 'fal'),
+  xMark: getIcon('xmark', 'fal'),
+  fileLines: getIcon('file-lines', 'fal')
 };
 
 // For backwards compatibility

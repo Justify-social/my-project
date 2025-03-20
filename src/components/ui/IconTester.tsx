@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { Icon, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, KPI_ICON_URLS, APP_ICON_URLS, PLATFORM_ICON_MAP } from './icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { cn } from '@/lib/utils';
-// Import from the Pro Kit
-import '@awesome.me/kit-3e2951e127';
 // The kit adds its icons to the global fontawesome library
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { IconPrefix, IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
@@ -28,6 +26,10 @@ export const IconTester = () => {
   // Helper function to get Pro icons directly
   const getProIcon = (iconName: string, style: 'fas' | 'fal' | 'far' | 'fab' = 'fas'): IconProp => {
     try {
+      if (!iconName) {
+        console.warn('Empty or undefined icon name passed to getProIcon');
+        return ['fas' as IconPrefix, 'question' as IconName];
+      }
       return [style as IconPrefix, iconName as IconName];
     } catch (e) {
       console.error(`Error in getProIcon for ${style} ${iconName}:`, e);
@@ -218,7 +220,7 @@ export const IconTester = () => {
               <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
                 {name && (
                   <>
-                    <Icon name={name as any} size="md" solid />
+                    <Icon name={name as keyof typeof UI_ICON_MAP} size="md" solid />
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
@@ -248,8 +250,8 @@ export const IconTester = () => {
                 {name && (
                   <>
                     <div className="ui-icon-hover-container">
-                      <Icon name={name as any} size="md" className="ui-icon-hover ui-icon-hover-light" />
-                      <Icon name={name as any} size="md" solid className="ui-icon-hover ui-icon-hover-solid" />
+                      <Icon name={name as keyof typeof UI_ICON_MAP} size="md" className="ui-icon-hover ui-icon-hover-light" />
+                      <Icon name={name as keyof typeof UI_ICON_MAP} size="md" solid className="ui-icon-hover ui-icon-hover-solid" />
                     </div>
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
@@ -279,7 +281,7 @@ export const IconTester = () => {
               <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
                 {name && KPI_ICON_URLS[name as keyof typeof KPI_ICON_URLS] && (
                   <>
-                    <Icon kpiName={name as any} size="md" className="kpi-icon-hover" />
+                    <Icon kpiName={name as keyof typeof KPI_ICON_URLS} size="md" className="kpi-icon-hover" />
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
@@ -299,7 +301,7 @@ export const IconTester = () => {
               <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
                 {name && APP_ICON_URLS[name as keyof typeof APP_ICON_URLS] && (
                   <>
-                    <Icon appName={name as any} size="md" className="app-icon-hover" />
+                    <Icon appName={name as keyof typeof APP_ICON_URLS} size="md" className="app-icon-hover" />
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
@@ -319,7 +321,7 @@ export const IconTester = () => {
               <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
                 {name && (
                   <>
-                    <Icon platformName={name as any} size="md" className="platform-icon-hover" />
+                    <Icon platformName={name as keyof typeof PLATFORM_ICON_MAP} size="md" className="platform-icon-hover" />
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
