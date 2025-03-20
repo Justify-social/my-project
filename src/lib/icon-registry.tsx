@@ -10,7 +10,7 @@ config.autoAddCss = false; // Prevent Font Awesome from automatically injecting 
 import { 
   faUser, faCheck, faGear, faSearch, faPlus, faMinus, faXmark,
   faChevronDown, faChevronUp, faChevronLeft, faChevronRight,
-  faEnvelope, faCalendarDays, faTrash, faTriangleExclamation,
+  faEnvelope, faCalendarDays, faTriangleExclamation,
   faCircleInfo, faBell, faCircleCheck, faLightbulb, faCommentDots,
   faEye, faPenToSquare, faCopy, faTrashCan, faHeart, faStar,
   faBookmark, faShare, faUpload, faBars, faFilter, faTableCells,
@@ -30,7 +30,7 @@ import {
   faXmark as falXmark, faChevronDown as falChevronDown, 
   faChevronUp as falChevronUp, faChevronLeft as falChevronLeft, 
   faChevronRight as falChevronRight, faEnvelope as falEnvelope, 
-  faCalendarDays as falCalendarDays, faTrash as falTrash, 
+  faCalendarDays as falCalendarDays, 
   faTriangleExclamation as falTriangleExclamation, faCircleInfo as falCircleInfo, 
   faBell as falBell, faCircleCheck as falCircleCheck, faLightbulb as falLightbulb, 
   faCommentDots as falCommentDots, faEye as falEye, faPenToSquare as falPenToSquare, 
@@ -64,7 +64,7 @@ library.add(
   // Solid icons
   faUser, faCheck, faGear, faSearch, faPlus, faMinus, faXmark,
   faChevronDown, faChevronUp, faChevronLeft, faChevronRight,
-  faEnvelope, faCalendarDays, faTrash, faTriangleExclamation,
+  faEnvelope, faCalendarDays, faTriangleExclamation,
   faCircleInfo, faBell, faCircleCheck, faLightbulb, faCommentDots,
   faEye, faPenToSquare, faCopy, faTrashCan, faHeart, faStar,
   faBookmark, faShare, faUpload, faBars, faFilter, faTableCells,
@@ -79,7 +79,7 @@ library.add(
   // Light icons
   falUser, falCheck, falGear, falSearch, falPlus, falMinus, falXmark,
   falChevronDown, falChevronUp, falChevronLeft, falChevronRight,
-  falEnvelope, falCalendarDays, falTrash, falTriangleExclamation,
+  falEnvelope, falCalendarDays, falTriangleExclamation,
   falCircleInfo, falBell, falCircleCheck, falLightbulb, falCommentDots,
   falEye, falPenToSquare, falCopy, falTrashCan, falHeart, falStar,
   falBookmark, falShare, falUpload, falBars, falFilter, falTableCells,

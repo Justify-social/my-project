@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 // Font Awesome imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library, config, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { FA_UI_ICON_MAP, FA_UI_OUTLINE_ICON_MAP, FA_PLATFORM_ICON_MAP, PLATFORM_COLORS, getIcon } from '@/lib/icon-mappings';
+import { FA_UI_ICON_MAP, FA_UI_OUTLINE_ICON_MAP, FA_PLATFORM_ICON_MAP, PLATFORM_COLORS, getIcon, ICON_ALIASES } from '@/lib/icon-mappings';
 import { SafeQuestionMarkIcon } from '@/lib/icon-helpers';
 
 // Import Font Awesome styles
@@ -197,7 +197,7 @@ library.add(
 export const UI_ICON_MAP = FA_UI_ICON_MAP;
 export const UI_OUTLINE_ICON_MAP = FA_UI_OUTLINE_ICON_MAP;
 export const PLATFORM_ICON_MAP = FA_PLATFORM_ICON_MAP;
-export { PLATFORM_COLORS };
+export { PLATFORM_COLORS, ICON_ALIASES };
 
 /**
  * @deprecated Use the Icon component with appropriate mappings instead
@@ -408,10 +408,17 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(({
           return <FallbackIcon size={size} className={className} color="red" {...props} />;
         }
         
+        // Check for aliases and map to the current name if found
+        let iconName = name as string;
+        if (typeof name === 'string' && ICON_ALIASES && name in ICON_ALIASES) {
+          iconName = ICON_ALIASES[name as keyof typeof ICON_ALIASES];
+          console.debug(`[Icon] Using alias: ${name} → ${iconName}`);
+        }
+        
         // Use Font Awesome icons
         let faIcon = solid 
-          ? UI_ICON_MAP[name as keyof typeof UI_ICON_MAP]
-          : UI_OUTLINE_ICON_MAP[name as keyof typeof UI_OUTLINE_ICON_MAP];
+          ? UI_ICON_MAP[iconName as keyof typeof UI_ICON_MAP]
+          : UI_OUTLINE_ICON_MAP[iconName as keyof typeof UI_OUTLINE_ICON_MAP];
         
         // If there's no match in the map, try with getIcon for dynamic generation
         if (!faIcon) {

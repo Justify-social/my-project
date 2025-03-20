@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 // The kit adds its icons to the global fontawesome library
 import { library, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { IconPrefix, IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
+import { Button } from './button';
 
 // Safe wrapper for FontAwesomeIcon to prevent empty object errors
 const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
@@ -625,12 +626,13 @@ ${Object.entries(diagnostics.errors)
       <div>
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold mb-4">Icon Test Suite</h2>
-          <button 
+          <Button 
             onClick={testIcons}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            variant="primary"
+            size="md"
           >
             Run Icon Tests
-          </button>
+          </Button>
         </div>
         <p className="text-gray-600 mb-6">This component renders all available icons to ensure they display correctly after migration.</p>
       </div>
@@ -658,7 +660,7 @@ ${Object.entries(diagnostics.errors)
           <div className="mt-6 border-t pt-4">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-medium">Detailed Diagnostic Report</h4>
-              <button 
+              <Button 
                 onClick={() => {
                   // Copy to clipboard if available
                   if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -667,10 +669,11 @@ ${Object.entries(diagnostics.errors)
                       .catch(err => console.error('Failed to copy report:', err));
                   }
                 }}
-                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                variant="secondary"
+                size="xs"
               >
                 Copy Full Report
-              </button>
+              </Button>
             </div>
             
             <div className="bg-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-80">

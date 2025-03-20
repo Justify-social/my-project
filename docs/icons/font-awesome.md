@@ -239,6 +239,54 @@ To run diagnostics:
 
 ## Advanced: How Our Implementation Works
 
+### Icon Aliases and Resolution
+
+Our implementation uses a system of aliases to make Font Awesome icons more semantically meaningful in our codebase:
+
+```tsx
+// Import the actual Font Awesome icons
+import { faXmark, faEnvelope } from '@fortawesome/pro-solid-svg-icons';
+
+// Create aliases with more intuitive names
+const faClose = faXmark; 
+const faMail = faEnvelope;
+
+// Register both the original icons and their aliases
+library.add(faXmark, faEnvelope, /* more icons */);
+```
+
+#### Common Icon Aliases
+
+These aliases help map font-awesome icon names to more semantic names in our application:
+
+| Semantic Alias | Font Awesome Icon |
+|----------------|-------------------|
+| `faClose` | `faXmark` |
+| `faMail` | `faEnvelope` |
+| `faWarning` | `faTriangleExclamation` |
+| `faInfo` | `faCircleInfo` |
+| `faView` | `faEye` |
+| `faEdit` | `faPenToSquare` |
+| `faDocument` | `faFile` |
+| `faDocumentText` | `faFileLines` |
+| `faChatBubble` | `faCommentDots` |
+| `faDelete` | `faTrashCan` |
+| `faMagnifyingGlass` | `faSearch` |
+| `faSettings` | `faGear` |
+
+These aliases are applied consistently across light, regular and solid icon variants (e.g., `falClose`, `farClose`, etc.).
+
+#### Icon Resolution Process
+
+When using the array syntax method (`icon={['fas', 'close']}`), our system:
+
+1. Looks for the icon in the registered library
+2. Attempts to resolve any aliases to their actual Font Awesome names
+3. Falls back to alternative styles if the requested style isn't found
+4. Provides a question mark icon as the final fallback
+
+This resolution process is transparent to users of the `<Icon>` component, but it's useful to understand when debugging icon issues.
+
 ### SafeIcon Pattern
 
 Our implementation uses several safeguards to prevent common Font Awesome issues:

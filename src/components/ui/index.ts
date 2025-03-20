@@ -16,7 +16,8 @@ export {
   KPI_ICON_URLS,
   APP_ICON_URLS,
   PLATFORM_ICON_MAP,
-  PLATFORM_COLORS
+  PLATFORM_COLORS,
+  ICON_ALIASES
 } from './icon';
 export * from './typography';
 export * from './card';

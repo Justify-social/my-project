@@ -233,6 +233,13 @@ export const FA_UI_LIGHT_ICON_MAP = {
 export const FA_UI_ICON_MAP = FA_UI_SOLID_ICON_MAP;
 export const FA_UI_OUTLINE_ICON_MAP = FA_UI_LIGHT_ICON_MAP;
 
+// Icon aliases for backward compatibility (deprecated names → current names)
+export const ICON_ALIASES: Record<string, keyof typeof FA_UI_SOLID_ICON_MAP> = {
+  trash: 'delete',
+  // Add more aliases as needed:
+  // oldName: 'newName',
+};
+
 // Platform icons using brand icons
 export const FA_PLATFORM_ICON_MAP = {
   facebook: getIcon('facebook', 'fab'),
