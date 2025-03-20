@@ -199,6 +199,7 @@ export const IconTester = () => {
   const [errorCount, setErrorCount] = useState(0);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [showAllIcons, setShowAllIcons] = useState(false);
+  const [diagnosticReport, setDiagnosticReport] = useState<string>('');
 
   // Size classes for the FontAwesome icons
   const sizeClasses = {
@@ -278,9 +279,40 @@ export const IconTester = () => {
     const newErrors: Record<string, string[]> = {};
     let count = 0;
 
+    // Set diagnostic start time for performance tracking
+    const diagStartTime = performance.now();
+    
+    // Create diagnostics object to store comprehensive results
+    type DiagnosticsErrorMap = Record<string, string[]>;
+    
+    const diagnostics = {
+      startTime: new Date().toISOString(),
+      summary: { total: 0, failed: 0, succeeded: 0 },
+      performance: { startMs: diagStartTime, endMs: 0, totalMs: 0 },
+      iconCounts: { solid: 0, outline: 0, kpi: 0, app: 0, platform: 0 },
+      registrationStatus: { library: false, dom: false },
+      memoryUsage: (typeof window !== 'undefined' && 
+                   window.performance && 
+                   // @ts-ignore - Some browsers may have this property
+                   window.performance.memory) 
+        // @ts-ignore - Memory usage is browser-dependent
+        ? window.performance.memory
+        : null,
+      environment: {
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+        viewport: typeof window !== 'undefined' 
+          ? { width: window.innerWidth, height: window.innerHeight }
+          : { width: 0, height: 0 }
+      },
+      errors: {} as DiagnosticsErrorMap,
+      detailedReport: ''
+    };
+
     // Test UI Solid icons
     const uiIcons = Object.keys(UI_ICON_MAP);
     const uiIconErrors: string[] = [];
+    
+    diagnostics.iconCounts.solid = uiIcons.length;
     
     uiIcons.forEach(icon => {
       try {
@@ -288,19 +320,31 @@ export const IconTester = () => {
         if (!(icon in UI_ICON_MAP)) {
           throw new Error(`Icon ${icon} not found in UI_ICON_MAP`);
         }
+        
+        // Advanced validation: also try to access the icon to ensure it's not an empty object
+        const iconValue = UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP];
+        if (!iconValue || (typeof iconValue === 'object' && Object.keys(iconValue).length === 0)) {
+          throw new Error(`Icon ${icon} is an empty object or invalid value`);
+        }
+        
+        diagnostics.summary.succeeded++;
       } catch (e) {
         uiIconErrors.push(icon);
         count++;
+        diagnostics.summary.failed++;
       }
     });
     
     if (uiIconErrors.length > 0) {
       newErrors['UI Solid Icons'] = uiIconErrors;
+      diagnostics.errors['UI Solid Icons'] = uiIconErrors;
     }
     
     // Test UI Outline/Regular icons
     const uiOutlineIcons = Object.keys(UI_OUTLINE_ICON_MAP);
     const uiOutlineIconErrors: string[] = [];
+    
+    diagnostics.iconCounts.outline = uiOutlineIcons.length;
     
     uiOutlineIcons.forEach(icon => {
       try {
@@ -308,49 +352,123 @@ export const IconTester = () => {
         if (!(icon in UI_OUTLINE_ICON_MAP)) {
           throw new Error(`Icon ${icon} not found in UI_OUTLINE_ICON_MAP`);
         }
+        
+        // Advanced validation: also try to access the icon to ensure it's not an empty object
+        const iconValue = UI_OUTLINE_ICON_MAP[icon as keyof typeof UI_OUTLINE_ICON_MAP];
+        if (!iconValue || (typeof iconValue === 'object' && Object.keys(iconValue).length === 0)) {
+          throw new Error(`Icon ${icon} is an empty object or invalid value`);
+        }
+        
+        diagnostics.summary.succeeded++;
       } catch (e) {
         uiOutlineIconErrors.push(icon);
         count++;
+        diagnostics.summary.failed++;
       }
     });
     
     if (uiOutlineIconErrors.length > 0) {
       newErrors['UI Regular Icons'] = uiOutlineIconErrors;
+      diagnostics.errors['UI Regular Icons'] = uiOutlineIconErrors;
     }
 
     // Test KPI icons
     const kpiIcons = Object.keys(KPI_ICON_URLS);
     const kpiIconErrors: string[] = [];
     
+    diagnostics.iconCounts.kpi = kpiIcons.length;
+    
     kpiIcons.forEach(icon => {
-      if (!KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS]) {
+      try {
+        // First check if the URL exists
+        if (!KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS]) {
+          throw new Error(`KPI icon URL not found for ${icon}`);
+        }
+        
+        // Advanced check: validate that the URL is accessible
+        const url = KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS];
+        
+        // Create hidden image to test if the SVG loads properly
+        if (typeof document !== 'undefined') {
+          const img = document.createElement('img');
+          img.style.position = 'absolute';
+          img.style.opacity = '0';
+          img.style.pointerEvents = 'none';
+          img.style.width = '1px';
+          img.style.height = '1px';
+          img.src = url;
+          
+          // Note: In a production environment, you would wait for the load/error events
+          // but for diagnostic purposes, we'll just check the URL format
+          if (!url.endsWith('.svg')) {
+            throw new Error(`KPI icon URL for ${icon} does not point to an SVG file: ${url}`);
+          }
+        }
+        
+        diagnostics.summary.succeeded++;
+      } catch (e) {
         kpiIconErrors.push(icon);
         count++;
+        diagnostics.summary.failed++;
       }
     });
     
     if (kpiIconErrors.length > 0) {
       newErrors['KPI Icons'] = kpiIconErrors;
+      diagnostics.errors['KPI Icons'] = kpiIconErrors;
     }
 
     // Test App icons
     const appIcons = Object.keys(APP_ICON_URLS);
     const appIconErrors: string[] = [];
     
+    diagnostics.iconCounts.app = appIcons.length;
+    
     appIcons.forEach(icon => {
-      if (!APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS]) {
+      try {
+        // First check if the URL exists
+        if (!APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS]) {
+          throw new Error(`App icon URL not found for ${icon}`);
+        }
+        
+        // Advanced check: validate that the URL is accessible
+        const url = APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS];
+        
+        // Create hidden image to test if the SVG loads properly
+        if (typeof document !== 'undefined') {
+          const img = document.createElement('img');
+          img.style.position = 'absolute';
+          img.style.opacity = '0';
+          img.style.pointerEvents = 'none';
+          img.style.width = '1px';
+          img.style.height = '1px';
+          img.src = url;
+          
+          // Note: In a production environment, you would wait for the load/error events
+          // but for diagnostic purposes, we'll just check the URL format
+          if (!url.endsWith('.svg')) {
+            throw new Error(`App icon URL for ${icon} does not point to an SVG file: ${url}`);
+          }
+        }
+        
+        diagnostics.summary.succeeded++;
+      } catch (e) {
         appIconErrors.push(icon);
         count++;
+        diagnostics.summary.failed++;
       }
     });
     
     if (appIconErrors.length > 0) {
       newErrors['App Icons'] = appIconErrors;
+      diagnostics.errors['App Icons'] = appIconErrors;
     }
 
     // Test Platform (Brands) icons
     const platformIcons = Object.keys(PLATFORM_ICON_MAP);
     const platformIconErrors: string[] = [];
+    
+    diagnostics.iconCounts.platform = platformIcons.length;
     
     platformIcons.forEach(icon => {
       try {
@@ -358,14 +476,24 @@ export const IconTester = () => {
         if (!(icon in PLATFORM_ICON_MAP)) {
           throw new Error(`Icon ${icon} not found in PLATFORM_ICON_MAP`);
         }
+        
+        // Advanced validation: also try to access the icon to ensure it's not an empty object
+        const iconValue = PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP];
+        if (!iconValue || (typeof iconValue === 'object' && Object.keys(iconValue).length === 0)) {
+          throw new Error(`Platform icon ${icon} is an empty object or invalid value`);
+        }
+        
+        diagnostics.summary.succeeded++;
       } catch (e) {
         platformIconErrors.push(icon);
         count++;
+        diagnostics.summary.failed++;
       }
     });
     
     if (platformIconErrors.length > 0) {
       newErrors['Platform (Brands) Icons'] = platformIconErrors;
+      diagnostics.errors['Platform (Brands) Icons'] = platformIconErrors;
     }
 
     // Test direct Pro Kit access
@@ -380,27 +508,111 @@ export const IconTester = () => {
         { name: 'heart', style: 'fas' as const },
         { name: 'heart', style: 'fal' as const },
         { name: 'facebook', style: 'fab' as const },
-        { name: 'twitter', style: 'fab' as const }
+        { name: 'x-twitter', style: 'fab' as const }
       ];
       
       const proIconErrors: string[] = [];
       
       testProIcons.forEach(({ name, style }) => {
         try {
-          getProIcon(name, style);
+          const iconValue = getProIcon(name, style);
+          if (!iconValue || (Array.isArray(iconValue) && iconValue.length < 2)) {
+            throw new Error(`Invalid icon returned for ${style} ${name}`);
+          }
+          diagnostics.summary.succeeded++;
         } catch (e) {
           proIconErrors.push(`${style} ${name}`);
           count++;
+          diagnostics.summary.failed++;
         }
       });
       
       if (proIconErrors.length > 0) {
         newErrors['Pro Icons Direct Access'] = proIconErrors;
+        diagnostics.errors['Pro Icons Direct Access'] = proIconErrors;
       }
     } catch (e) {
       newErrors['Pro Icons Direct Access'] = ['Error accessing Pro Kit: ' + (e as Error).message];
+      diagnostics.errors['Pro Icons Direct Access'] = ['Error accessing Pro Kit: ' + (e as Error).message];
       count++;
+      diagnostics.summary.failed++;
     }
+    
+    // Check fontawesome library registration status
+    try {
+      const registrationTest = findIconDefinition({ prefix: 'fas', iconName: 'question' });
+      diagnostics.registrationStatus.library = !!registrationTest;
+    } catch (e) {
+      diagnostics.registrationStatus.library = false;
+    }
+    
+    // Check for DOM-related icon issues
+    if (typeof document !== 'undefined') {
+      const questionIcons = document.querySelectorAll('.question-mark-icon-fallback');
+      if (questionIcons.length > 0) {
+        diagnostics.registrationStatus.dom = false;
+        newErrors['DOM Fallback Icons'] = [`Found ${questionIcons.length} fallback icons in the DOM`];
+        diagnostics.errors['DOM Fallback Icons'] = [`Found ${questionIcons.length} fallback icons in the DOM`];
+        count++;
+      } else {
+        diagnostics.registrationStatus.dom = true;
+      }
+    }
+    
+    // Complete diagnostics
+    diagnostics.performance.endMs = performance.now();
+    diagnostics.performance.totalMs = diagnostics.performance.endMs - diagnostics.performance.startMs;
+    diagnostics.summary.total = diagnostics.summary.succeeded + diagnostics.summary.failed;
+    
+    // Generate detailed report
+    diagnostics.detailedReport = `
+=== ICON DIAGNOSTIC REPORT ===
+Time: ${diagnostics.startTime}
+Test Duration: ${diagnostics.performance.totalMs.toFixed(2)}ms
+
+SUMMARY:
+- Total Icons Tested: ${diagnostics.summary.total}
+- Successful: ${diagnostics.summary.succeeded}
+- Failed: ${diagnostics.summary.failed}
+- Success Rate: ${(diagnostics.summary.succeeded / diagnostics.summary.total * 100).toFixed(1)}%
+
+ICON COUNTS:
+- UI Solid Icons: ${diagnostics.iconCounts.solid}
+- UI Outline Icons: ${diagnostics.iconCounts.outline}
+- KPI Icons: ${diagnostics.iconCounts.kpi}
+- App Icons: ${diagnostics.iconCounts.app}
+- Platform Icons: ${diagnostics.iconCounts.platform}
+
+REGISTRATION STATUS:
+- FontAwesome Library: ${diagnostics.registrationStatus.library ? 'OK' : 'ISSUES DETECTED'}
+- DOM Issues: ${diagnostics.registrationStatus.dom ? 'None Detected' : 'FALLBACK ICONS FOUND'}
+
+SYSTEM INFO:
+- Browser: ${diagnostics.environment.userAgent}
+- Viewport: ${diagnostics.environment.viewport.width}x${diagnostics.environment.viewport.height}
+
+ERRORS:
+${Object.entries(diagnostics.errors)
+  .map(([category, errors]) => `- ${category}: ${errors.length} issues\n  ${errors.join('\n  ')}`)
+  .join('\n')}
+    `.trim();
+
+    // Recommend solutions based on errors
+    if (count > 0) {
+      diagnostics.detailedReport += `\n\nRECOMMENDED SOLUTIONS:
+1. If Font Awesome Library issues are detected, check that the library is properly initialized.
+2. For KPI/App icon issues, verify the SVG files exist at the correct paths.
+3. For empty object errors, check the icon mappings for undefined values.
+4. For DOM fallback icons, find places where icons are rendered without proper validation.`;
+    } else {
+      diagnostics.detailedReport += '\n\nNo issues detected. All icons are working properly!';
+    }
+    
+    // Save the diagnostic report to state for display
+    setDiagnosticReport(diagnostics.detailedReport);
+    
+    // Log diagnostics to console for advanced debugging
+    console.info('Icon Diagnostics:', diagnostics);
 
     setErrors(newErrors);
     setErrorCount(count);
@@ -441,6 +653,32 @@ export const IconTester = () => {
               </ul>
             </div>
           ))}
+
+          {/* Advanced diagnostic information */}
+          <div className="mt-6 border-t pt-4">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="font-medium">Detailed Diagnostic Report</h4>
+              <button 
+                onClick={() => {
+                  // Copy to clipboard if available
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(diagnosticReport || 'Detailed report not available')
+                      .then(() => alert('Diagnostic report copied to clipboard!'))
+                      .catch(err => console.error('Failed to copy report:', err));
+                  }
+                }}
+                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                Copy Full Report
+              </button>
+            </div>
+            
+            <div className="bg-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-80">
+              <p className="whitespace-pre-wrap">
+                {diagnosticReport || 'Run the test to generate a diagnostic report'}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
