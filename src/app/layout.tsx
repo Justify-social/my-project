@@ -8,6 +8,7 @@ import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 import IconRegistry from '@/lib/icon-registry';
+import IconMonitoring from '@/lib/icon-monitoring';
 
 // CRITICAL: Import Font Awesome CSS before config
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -20,11 +21,26 @@ import {
   faUser, faCheck, faGear, faBell, faStar, faMagnifyingGlass,
   faPlus, faMinus, faXmark, faChevronDown, faChevronUp, 
   faChevronLeft, faChevronRight, faEnvelope, faCalendarDays,
-  faTrash, faTriangleExclamation, faCircleInfo, faLightbulb
+  faTrash, faTriangleExclamation, faCircleInfo, faLightbulb,
+  faCopy, faArrowDown, faArrowUp, faArrowLeft, faArrowRight,
+  faHeart, faBookmark, faShare, faUpload, faDownload, 
+  faQuestion, faList, faTag, faLock, faUnlock, faKey, 
+  faPaperclip, faHomeUser, faHome, faChartBar, faChartPie, 
+  faMoneyBill, faArrowTrendUp, faArrowTrendDown, faBolt, 
+  faGlobe, faUserGroup, faBuilding, faRocket, faSignal, 
+  faBellSlash, faMap, faShield, faClock, faCircleXmark, 
+  faCircleCheck, faMagnifyingGlassPlus, faPalette, faCreditCard, 
+  faClockRotateLeft, faChartLine, faTable, faTableCells,
+  faBars, faFilter, faPlay, faFile, faFileLines
 } from '@fortawesome/pro-solid-svg-icons';
 
 import {
-  faUser as falUser, faHouse as falHouse, faGear as falGear
+  faUser as falUser, faHouse as falHouse, faGear as falGear,
+  faChevronDown as falChevronDown, faChevronUp as falChevronUp,
+  faChevronLeft as falChevronLeft, faChevronRight as falChevronRight,
+  faCalendarDays as falCalendarDays, faCopy as falCopy,
+  faArrowDown as falArrowDown, faArrowUp as falArrowUp,
+  faArrowLeft as falArrowLeft, faArrowRight as falArrowRight
 } from '@fortawesome/pro-light-svg-icons';
 
 import {
@@ -38,13 +54,29 @@ library.add(
   faPlus, faMinus, faXmark, faChevronDown, faChevronUp,
   faChevronLeft, faChevronRight, faEnvelope, faCalendarDays,
   faTrash, faTriangleExclamation, faCircleInfo, faLightbulb,
+  faCopy, faArrowDown, faArrowUp, faArrowLeft, faArrowRight,
+  faHeart, faBookmark, faShare, faUpload, faDownload, 
+  faQuestion, faList, faTag, faLock, faUnlock, faKey, 
+  faPaperclip, faHomeUser, faHome, faChartBar, faChartPie, 
+  faMoneyBill, faArrowTrendUp, faArrowTrendDown, faBolt, 
+  faGlobe, faUserGroup, faBuilding, faRocket, faSignal, 
+  faBellSlash, faMap, faShield, faClock, faCircleXmark, 
+  faCircleCheck, faMagnifyingGlassPlus, faPalette, faCreditCard, 
+  faClockRotateLeft, faChartLine, faTable, faTableCells,
+  faBars, faFilter, faPlay, faFile, faFileLines,
   
   // Light icons
   falUser, falHouse, falGear,
+  falChevronDown, falChevronUp, falChevronLeft, falChevronRight,
+  falCalendarDays, falCopy, falArrowDown, falArrowUp,
+  falArrowLeft, falArrowRight,
   
   // Brand icons
   faTwitter, faFacebook, faGithub, faInstagram, faLinkedin
 );
+
+// Import the diagnostic script for FontAwesome issues
+import '@/lib/icon-diagnostic';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -72,6 +104,7 @@ export default function RootLayout({
             routerConfig={extractRouterConfig(ourFileRouter)}
           />
           <IconRegistry />
+          <IconMonitoring />
           <Toaster />
           <ToastProvider>
             <ClientLayout>

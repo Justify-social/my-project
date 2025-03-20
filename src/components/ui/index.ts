@@ -1,7 +1,23 @@
 // Import and re-export all UI components for easier imports
 export * from './button';
 export * from './spinner';
-export * from './icon';
+// Import the original icon module but don't export it directly
+import * as IconModule from './icon';
+// Export our enhanced icon instead
+export * from './icon-fix';
+// But still export the types and map objects from the original module
+export { 
+  type IconName, 
+  type KpiIconName,
+  type AppIconName,
+  type PlatformIconName,
+  UI_ICON_MAP,
+  UI_OUTLINE_ICON_MAP,
+  KPI_ICON_URLS,
+  APP_ICON_URLS,
+  PLATFORM_ICON_MAP,
+  PLATFORM_COLORS
+} from './icon';
 export * from './typography';
 export * from './card';
 export * from './input';
@@ -29,19 +45,7 @@ export { default as NotificationBell } from './NotificationBell';
 export { Button } from './button';
 export { Input } from './input';
 export { colors } from './colors';
-export { 
-  Icon, 
-  type IconName, 
-  type KpiIconName,
-  type AppIconName,
-  type PlatformIconName,
-  UI_ICON_MAP,
-  UI_OUTLINE_ICON_MAP,
-  KPI_ICON_URLS,
-  APP_ICON_URLS,
-  PLATFORM_ICON_MAP,
-  PLATFORM_COLORS
-} from './icon';
+export { Icon } from './icon-fix';
 export { Heading, Text, Paragraph } from './typography';
 export { Avatar } from './avatar';
 export { Badge, StatusBadge } from './badge';
