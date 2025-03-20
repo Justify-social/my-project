@@ -125,7 +125,6 @@ div[class*='bg-white'] {
   display: inline-block;
   margin-right: 8px;
   vertical-align: middle;
-  filter: brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%);
 }
 
 .kpi-icon-large {
@@ -626,12 +625,31 @@ div[class*='bg-white'] {
   opacity: 0;
 }
 
+/* Common hover effects for both KPI and App icons */
 .kpi-icon-hover, .app-icon-hover {
   transition: color 0.2s ease;
 }
 
 .kpi-icon-hover:hover, .app-icon-hover:hover {
   color: var(--accent-color);
+}
+
+/* Consistent hover behavior for KPI and App icons in groups */
+.group:hover .kpi-icon img, 
+.group:hover .app-icon img {
+  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%) !important;
+}
+
+/* Consistent hover behavior for direct hover */
+.kpi-icon:hover img, 
+.app-icon:hover img {
+  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%) !important;
+}
+
+/* Apply the same active class styling to both icon types */
+.kpi-icon-active img,
+.app-icon-active img {
+  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%) !important;
 }
 
 .platform-icon-hover {

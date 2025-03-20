@@ -1,19 +1,24 @@
 'use client';
 
 import DebugTools from '@/components/ui/debug-tools';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Runtime Font Awesome detector component
 const FontAwesomeDebugger = () => {
+  // Use a ref to avoid re-renders that could cause infinite loops
+  const seenErrorsRef = useRef(new Set());
+  const initialized = useRef(false);
+  
   useEffect(() => {
+    // Only initialize once to prevent infinite loops
+    if (initialized.current) return;
+    initialized.current = true;
+    
     if (typeof window !== 'undefined') {
       console.log('[Font Awesome Debugger] Initializing');
       
       // Store the original error console
       const originalError = console.error;
-      
-      // Track seen errors to avoid spam
-      const seenErrors = new Set();
       
       // Override console.error to catch and log font awesome errors
       console.error = function(...args) {
@@ -26,8 +31,8 @@ const FontAwesomeDebugger = () => {
           // Create an error key to avoid duplicates
           const errorKey = args[0] + callStack.slice(0, 100);
           
-          if (!seenErrors.has(errorKey)) {
-            seenErrors.add(errorKey);
+          if (!seenErrorsRef.current.has(errorKey)) {
+            seenErrorsRef.current.add(errorKey);
             
             // Log detailed debugging information
             console.warn('[Font Awesome Debugger] Error caught:', args[0]);
@@ -52,7 +57,7 @@ const FontAwesomeDebugger = () => {
         console.error = originalError;
       };
     }
-  }, []);
+  }, []); // Empty dependency array to ensure this only runs once
   
   // This component doesn't render anything
   return null;

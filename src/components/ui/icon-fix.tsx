@@ -1,42 +1,89 @@
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { Icon as OriginalIcon, IconProps, IconName } from './icon';
 import { SafeIcon } from './safe-icon';
 import { UI_ICON_MAP, UI_OUTLINE_ICON_MAP } from './';
-import { findIconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { findIconDefinition, IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
-// Log icons missing from UI_ICON_MAP
-const fixIconMappingIssues = () => {
+// Direct import of problematic icons to ensure they're available
+import {
+  faChevronDown, faChevronUp, faChevronLeft, faChevronRight,
+  faArrowDown, faArrowUp, faArrowLeft, faArrowRight,
+  faCopy, faCalendarDays
+} from '@fortawesome/pro-solid-svg-icons';
+
+import {
+  faChevronDown as falChevronDown, 
+  faChevronUp as falChevronUp, 
+  faChevronLeft as falChevronLeft, 
+  faChevronRight as falChevronRight,
+  faArrowDown as falArrowDown, 
+  faArrowUp as falArrowUp, 
+  faArrowLeft as falArrowLeft, 
+  faArrowRight as falArrowRight,
+  faCopy as falCopy, 
+  faCalendarDays as falCalendarDays
+} from '@fortawesome/pro-light-svg-icons';
+
+// Extend the UI_ICON_MAP with the missing icons
+const patchIconMap = () => {
   if (typeof window === 'undefined') return;
   
   // Names that might be missing from UI_ICON_MAP
-  const potentiallyMissingNames = [
-    'chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight',
-    'arrowDown', 'arrowUp', 'arrowLeft', 'arrowRight',
-    'copy', 'calendarDays'
-  ];
+  const missingIconPairs = {
+    chevronDown: faChevronDown,
+    chevronUp: faChevronUp,
+    chevronLeft: faChevronLeft,
+    chevronRight: faChevronRight,
+    arrowDown: faArrowDown,
+    arrowUp: faArrowUp,
+    arrowLeft: faArrowLeft,
+    arrowRight: faArrowRight,
+    copy: faCopy,
+    calendarDays: faCalendarDays
+  };
   
-  // Check each icon
-  const missingIcons: string[] = [];
+  // Light icon variants
+  const missingLightIconPairs = {
+    chevronDown: falChevronDown,
+    chevronUp: falChevronUp,
+    chevronLeft: falChevronLeft,
+    chevronRight: falChevronRight,
+    arrowDown: falArrowDown,
+    arrowUp: falArrowUp,
+    arrowLeft: falArrowLeft,
+    arrowRight: falArrowRight,
+    copy: falCopy,
+    calendarDays: falCalendarDays
+  };
   
-  potentiallyMissingNames.forEach(name => {
-    // Use type assertion to avoid TypeScript error
+  // Check and patch each icon in UI_ICON_MAP
+  let patchCount = 0;
+  Object.entries(missingIconPairs).forEach(([name, icon]) => {
     if (!UI_ICON_MAP[name as keyof typeof UI_ICON_MAP]) {
-      missingIcons.push(name);
-      console.warn(`[IconFix] Missing icon '${name}' in UI_ICON_MAP`);
+      (UI_ICON_MAP as any)[name] = icon;
+      patchCount++;
     }
   });
   
-  if (missingIcons.length > 0) {
-    console.error(`[IconFix] Found ${missingIcons.length} missing icons in UI_ICON_MAP: ${missingIcons.join(', ')}`);
+  // Also patch the outline icons
+  Object.entries(missingLightIconPairs).forEach(([name, icon]) => {
+    if (!UI_OUTLINE_ICON_MAP[name as keyof typeof UI_OUTLINE_ICON_MAP]) {
+      (UI_OUTLINE_ICON_MAP as any)[name] = icon;
+      patchCount++;
+    }
+  });
+  
+  if (patchCount > 0) {
+    console.log(`[IconFix] Patched ${patchCount} missing icons in icon maps`);
   }
 };
 
 export const EnhancedIcon = forwardRef<HTMLSpanElement, IconProps>((props, ref) => {
-  // Initialize check for problematic icons on client side
-  React.useEffect(() => {
-    fixIconMappingIssues();
+  // Use useMemo to ensure we only patch once per component instance
+  useMemo(() => {
+    patchIconMap();
   }, []);
   
   const { name, solid, ...rest } = props;

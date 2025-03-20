@@ -1,0 +1,110 @@
+[2025-03-20T17:51:22.816Z] Deep Font Awesome Debugger started
+[2025-03-20T17:51:22.820Z] =====================================================
+[2025-03-20T17:51:22.820Z]   DEEP FONT AWESOME DEBUGGER
+[2025-03-20T17:51:22.820Z] =====================================================
+[2025-03-20T17:51:22.820Z] Workspace root: /Users/edadams/my-project
+[2025-03-20T17:51:22.821Z] 
+=== Deep Analysis of IconTester.tsx ===
+[2025-03-20T17:51:22.821Z] 
+Analyzing SafeFontAwesomeIcon component implementation:
+[2025-03-20T17:51:22.821Z]   ⚠️ Missing critical checks in SafeFontAwesomeIcon:
+[2025-03-20T17:51:22.821Z]   - Missing: Object.keys(icon).length === 0
+[2025-03-20T17:51:22.821Z]   - Missing: JSON.stringify(icon) === '{}'
+[2025-03-20T17:51:22.821Z]   ✅ FontAwesomeIcon appears to be protected by type checks
+[2025-03-20T17:51:22.822Z] 
+Analyzing all SafeFontAwesomeIcon usages:
+[2025-03-20T17:51:22.822Z]   Found 14 SafeFontAwesomeIcon usages
+[2025-03-20T17:51:22.822Z]   ⚠️ Found potentially problematic SafeFontAwesomeIcon usages:
+[2025-03-20T17:51:22.822Z]   * Line 577: Missing conditional validation
+[2025-03-20T17:51:22.822Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.822Z]   * Line 584: Missing conditional validation
+[2025-03-20T17:51:22.822Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.822Z]   * Line 591: Missing conditional validation
+[2025-03-20T17:51:22.822Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.822Z]   * Line 604: Missing conditional validation
+[2025-03-20T17:51:22.822Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.822Z]   * Line 611: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 618: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 631: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 638: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 645: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 658: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 665: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 672: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 751: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z]   * Line 755: Missing conditional validation
+[2025-03-20T17:51:22.823Z]     <SafeFontAwesomeIcon
+[2025-03-20T17:51:22.823Z] 
+Searching for edge cases in conditional rendering:
+[2025-03-20T17:51:22.824Z]   ⚠️ Potential Object literals that might be empty at runtime (34 matches)
+[2025-03-20T17:51:22.824Z]     Line 5: import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+[2025-03-20T17:51:22.824Z]     Line 12: const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
+[2025-03-20T17:51:22.824Z]     Line 12: const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
+[2025-03-20T17:51:22.824Z]     ... and 31 more
+[2025-03-20T17:51:22.824Z] 
+=== Creating Runtime Fix ===
+[2025-03-20T17:51:22.824Z] Runtime fix created at: /Users/edadams/my-project/font-awesome-runtime-fix.html
+[2025-03-20T17:51:22.824Z] Fix summary created at: /Users/edadams/my-project/font-awesome-deep-fixes.md
+[2025-03-20T17:51:22.825Z] Robust implementation created at: /Users/edadams/my-project/robust-safe-font-awesome-icon.jsx
+[2025-03-20T17:51:22.825Z] 
+=== Analyzing UI Components ===
+[2025-03-20T17:51:22.827Z] Found IconTester import at line 58: import { IconTester } from './IconTester';
+[2025-03-20T17:51:22.827Z] Found 1 IconTester usages
+[2025-03-20T17:51:22.827Z]   Line 2862: <IconTester />
+[2025-03-20T17:51:22.827Z] IconTester wrapper created at: /Users/edadams/my-project/icon-tester-wrapper.jsx
+[2025-03-20T17:51:22.827Z] 
+=== Analyzing Icon Component ===
+[2025-03-20T17:51:22.828Z] Found icon maps: UI_ICON_MAP and UI_OUTLINE_ICON_MAP
+[2025-03-20T17:51:22.828Z] Found IconName type definition at line 238
+[2025-03-20T17:51:22.828Z] Found 16 potentially unsafe type assertions:
+[2025-03-20T17:51:22.828Z]   Line 405: (typeof name === 'object' && (Object.keys(name as any).length === 0 || JSON.stringify(name) === '{}'))
+[2025-03-20T17:51:22.828Z]   Line 413: ? UI_ICON_MAP[name as keyof typeof UI_ICON_MAP]
+[2025-03-20T17:51:22.828Z]   Line 414: : UI_OUTLINE_ICON_MAP[name as keyof typeof UI_OUTLINE_ICON_MAP];
+[2025-03-20T17:51:22.828Z]   Line 429: {...props as any}
+[2025-03-20T17:51:22.828Z]   Line 448: if (typeof kpiName !== 'string' || Object.keys(kpiName as any).length === 0) {
+[2025-03-20T17:51:22.828Z]   Line 453: if (KPI_ICON_URLS[kpiName as keyof typeof KPI_ICON_URLS]) {
+[2025-03-20T17:51:22.828Z]   Line 465: src={KPI_ICON_URLS[kpiName as keyof typeof KPI_ICON_URLS]}
+[2025-03-20T17:51:22.828Z]   Line 485: if (typeof appName !== 'string' || Object.keys(appName as any).length === 0) {
+[2025-03-20T17:51:22.828Z]   Line 490: if (APP_ICON_URLS[appName as keyof typeof APP_ICON_URLS]) {
+[2025-03-20T17:51:22.828Z]   Line 502: src={APP_ICON_URLS[appName as keyof typeof APP_ICON_URLS]}
+[2025-03-20T17:51:22.828Z]   Line 522: if (typeof platformName !== 'string' || Object.keys(platformName as any).length === 0) {
+[2025-03-20T17:51:22.829Z]   Line 528: const faPlatformIcon = PLATFORM_ICON_MAP[platformName as keyof typeof PLATFORM_ICON_MAP];
+[2025-03-20T17:51:22.829Z]   Line 531: const platformColor = solid ? PLATFORM_COLORS[platformName as keyof typeof PLATFORM_COLORS] : 'currentColor';
+[2025-03-20T17:51:22.829Z]   Line 538: {...props as any}
+[2025-03-20T17:51:22.829Z]   Line 582: icon={[mappedPrefix as any, iconName]}
+[2025-03-20T17:51:22.829Z]   Line 585: {...props as any}
+[2025-03-20T17:51:22.829Z]   These could allow empty objects to bypass type checking
+[2025-03-20T17:51:22.829Z] Found 1 places where empty objects might be returned:
+[2025-03-20T17:51:22.829Z]   Line 392: // If all icon props are undefined, return the fallback icon
+[2025-03-20T17:51:22.829Z] Icon validator created at: /Users/edadams/my-project/icon-validator.ts
+[2025-03-20T17:51:22.829Z] 
+=== COMPREHENSIVE FIXES ===
+[2025-03-20T17:51:22.829Z] 1. Replace your SafeFontAwesomeIcon component with the robust implementation
+[2025-03-20T17:51:22.829Z] 2. Add the runtime debug script to your debug page
+[2025-03-20T17:51:22.829Z] 3. Apply the icon validator utility for all icon operations
+[2025-03-20T17:51:22.829Z] 4. Consider using the IconTester wrapper to catch errors
+[2025-03-20T17:51:22.829Z] 
+The most likely issue is that empty objects are bypassing validation in SafeFontAwesomeIcon.
+[2025-03-20T17:51:22.829Z] Check for any places in the code where {} might be passed as an icon prop.
+[2025-03-20T17:51:22.830Z] 
+Most importantly, apply the robust implementation which has extra validation layers.
+[2025-03-20T17:51:22.830Z] 
+=== WHAT TO CHECK IN BROWSER ===
+[2025-03-20T17:51:22.830Z] 1. Add console.log statements throughout the code to trace props
+[2025-03-20T17:51:22.830Z] 2. Set breakpoints in the FontAwesomeIcon and SafeFontAwesomeIcon components
+[2025-03-20T17:51:22.830Z] 3. Watch for React DevTools warnings about invalid props
+[2025-03-20T17:51:22.830Z] 
+Inline fix created at: /Users/edadams/my-project/safe-font-awesome-icon-inline-fix.tsx
+[2025-03-20T17:51:22.830Z] 
+=== SUMMARY ===
+[2025-03-20T17:51:22.830Z] Deep diagnostic complete. Use the generated files to fix your Font Awesome issues.
+[2025-03-20T17:51:22.830Z] See log file at: /Users/edadams/my-project/deep-font-awesome-debug.log

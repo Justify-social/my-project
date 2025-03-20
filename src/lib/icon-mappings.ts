@@ -259,7 +259,7 @@ export const FA_PLATFORM_ICON_MAP = {
   youtube: getIcon('youtube', 'fab'),
   tiktok: getIcon('tiktok', 'fab'),
   facebook: getIcon('facebook', 'fab'),
-  x: getIcon('twitter', 'fab'), // Using twitter icon for X
+  x: getIcon('x-twitter', 'fab'), // Using the new X icon
   linkedin: getIcon('linkedin', 'fab'),
 };
 

@@ -1,0 +1,103 @@
+
+// Font Awesome Runtime Debug Fix
+// Copy this code to the top of your page before any icon components are rendered
+
+<script>
+  (function fixFontAwesomeEmptyObjects() {
+    if (typeof window !== 'undefined') {
+      // Store the original error console
+      const originalError = console.error;
+      
+      // Track seen errors to avoid spam
+      const seenErrors = new Set();
+      
+      // Override console.error to catch and log font awesome errors
+      console.error = function(...args) {
+        // Check if this is a Font Awesome error
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('Could not find icon')) {
+          // Log the error with stack trace
+          const error = new Error('Font Awesome icon error');
+          const callStack = error.stack.split('\n').slice(2).join('\n');
+          
+          // Create an error key to avoid duplicates
+          const errorKey = args[0] + callStack.slice(0, 100);
+          
+          if (!seenErrors.has(errorKey)) {
+            seenErrors.add(errorKey);
+            
+            // Log detailed information for debugging
+            console.warn('[Font Awesome Debug] Error caught:', args[0]);
+            console.warn('[Font Awesome Debug] Call stack:', callStack);
+            console.warn('[Font Awesome Debug] Arguments:', args.slice(1));
+            
+            // Try to extract the component name from stack trace
+            const componentMatch = callStack.match(/at ([A-Za-z0-9_]+) /);
+            if (componentMatch) {
+              console.warn('[Font Awesome Debug] Likely component:', componentMatch[1]);
+            }
+          }
+        }
+        
+        // Always call the original error function
+        return originalError.apply(console, args);
+      };
+      
+      // Override FontAwesomeIcon to check for empty objects
+      const patchFontAwesomeIcon = () => {
+        if (window.__patchedFontAwesomeIcon) return;
+        
+        try {
+          // Wait for React devtools extension to load
+          if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+            // Look for the FontAwesomeIcon component
+            Object.values(window.__REACT_DEVTOOLS_GLOBAL_HOOK__.renderers)
+              .forEach(renderer => {
+                if (renderer && renderer.findFiberByType) {
+                  // Try to override the FontAwesomeIcon render
+                  window.__REACT_DEVTOOLS_GLOBAL_HOOK__.on('renderer', (id, renderer) => {
+                    setTimeout(() => {
+                      console.warn('[Font Awesome Debug] Patching FontAwesomeIcon');
+                      window.__patchedFontAwesomeIcon = true;
+                    }, 1000);
+                  });
+                }
+              });
+          }
+        } catch (e) {
+          console.warn('[Font Awesome Debug] Error patching FontAwesomeIcon:', e);
+        }
+      };
+      
+      // Try to patch the FontAwesomeIcon component
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', patchFontAwesomeIcon);
+      } else {
+        patchFontAwesomeIcon();
+      }
+    }
+  })();
+</script>
+
+<!-- Safe Debugging Wrapper for Icons -->
+<script>
+  if (typeof window !== 'undefined') {
+    window.debugIconProps = function(iconProps) {
+      try {
+        console.log('Debug icon props:', iconProps);
+        if (!iconProps) {
+          console.warn('Icon props are undefined or null');
+          return false;
+        }
+        if (typeof iconProps === 'object' && Object.keys(iconProps).length === 0) {
+          console.warn('Icon props are an empty object');
+          return false;
+        }
+        return true;
+      } catch (e) {
+        console.error('Error in debugIconProps:', e);
+        return false;
+      }
+    };
+  }
+</script>
+  

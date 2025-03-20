@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { library, findIconDefinition, IconDefinition, IconPrefix, IconName } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as solidIcons from '@fortawesome/pro-solid-svg-icons';
 import * as lightIcons from '@fortawesome/pro-light-svg-icons';
 import * as brandIcons from '@fortawesome/free-brands-svg-icons';
+
+// Track whether we've already displayed errors to avoid flooding the console
+let errorsAlreadyLogged = false;
+let patchingInProgress = false;
 
 // Map of camelCase names to kebab-case for FA
 const iconNameMap: Record<string, string> = {
@@ -199,11 +203,16 @@ function checkIconExists(name: string, style: 'fas' | 'fal' | 'far' | 'fab' = 'f
 export function IconMonitoring() {
   const [failedIcons, setFailedIcons] = useState<Record<string, boolean>>({});
   const [isFixing, setIsFixing] = useState(false);
-  const [fixAttempts, setFixAttempts] = useState(0);
-  const [lastFixTime, setLastFixTime] = useState<number | null>(null);
+  
+  // Use refs instead of state for tracking values that shouldn't trigger re-renders
+  const fixAttemptsRef = useRef(0);
+  const lastFixTimeRef = useRef<number | null>(null);
   
   // Function to verify all icons and identify failures
   const verifyIcons = () => {
+    // Skip verification if we're actively patching icons
+    if (patchingInProgress) return true;
+    
     console.log('[IconMonitoring] Verifying icon availability...');
     const failures: Record<string, boolean> = {};
     const missingIconNames: string[] = [];
@@ -213,7 +222,11 @@ export function IconMonitoring() {
       if (!exists) {
         failures[icon] = true;
         missingIconNames.push(`${icon} (solid)`);
-        console.warn(`[IconMonitoring] Icon '${icon}' (solid) not found`);
+        
+        // Only log warnings if we haven't already logged errors
+        if (!errorsAlreadyLogged) {
+          console.warn(`[IconMonitoring] Icon '${icon}' (solid) not found`);
+        }
       }
       
       // Also check light versions for outline style
@@ -221,14 +234,25 @@ export function IconMonitoring() {
       if (!lightExists) {
         failures[`${icon}_light`] = true;
         missingIconNames.push(`${icon} (light)`);
-        console.warn(`[IconMonitoring] Icon '${icon}' (light) not found`);
+        
+        // Only log warnings if we haven't already logged errors
+        if (!errorsAlreadyLogged) {
+          console.warn(`[IconMonitoring] Icon '${icon}' (light) not found`);
+        }
       }
     }
     
-    setFailedIcons(failures);
+    // Only update state if there's an actual change to avoid re-renders
+    if (Object.keys(failures).length !== Object.keys(failedIcons).length) {
+      setFailedIcons(failures);
+    }
     
     if (Object.keys(failures).length > 0) {
-      console.error(`[IconMonitoring] Found ${Object.keys(failures).length} missing icons: ${missingIconNames.join(', ')}`);
+      // Only log the error once to avoid console spam
+      if (!errorsAlreadyLogged) {
+        console.error(`[IconMonitoring] Found ${Object.keys(failures).length} missing icons: ${missingIconNames.join(', ')}`);
+        errorsAlreadyLogged = true;
+      }
       return false;
     }
     
@@ -239,6 +263,7 @@ export function IconMonitoring() {
   // Register specific icons that might be missing
   const registerMissingIcons = (missingIconNames: string[] = []) => {
     console.log('[IconMonitoring] Registering specific missing icons...');
+    patchingInProgress = true;
     
     try {
       const iconsToRegister: IconDefinition[] = [];
@@ -283,9 +308,12 @@ export function IconMonitoring() {
         console.log(`[IconMonitoring] Registered ${iconsToRegister.length} specific icons`);
       }
       
+      // After completion, set the flag back to false
+      patchingInProgress = false;
       return true;
     } catch (error) {
       console.error('[IconMonitoring] Error registering specific icons:', error);
+      patchingInProgress = false;
       return false;
     }
   };
@@ -293,6 +321,7 @@ export function IconMonitoring() {
   // Re-register all icons to ensure they're available
   const registerAllIcons = () => {
     console.log('[IconMonitoring] Registering all icons...');
+    patchingInProgress = true;
     
     try {
       // Get all icons from FA collections
@@ -314,12 +343,16 @@ export function IconMonitoring() {
       } icons`);
       
       // Record time of fix to avoid constant reregistration
-      setLastFixTime(Date.now());
-      setFixAttempts(prev => prev + 1);
+      // Use refs instead of state to avoid re-renders
+      lastFixTimeRef.current = Date.now();
+      fixAttemptsRef.current += 1;
       
+      // After completion, set the flag back to false
+      patchingInProgress = false;
       return true;
     } catch (error) {
       console.error('[IconMonitoring] Error registering icons:', error);
+      patchingInProgress = false;
       return false;
     }
   };
@@ -334,7 +367,6 @@ export function IconMonitoring() {
     const manuallyRegisterProblemIcons = () => {
       try {
         // Manually register problematic icons from our direct imports
-        const iconsToRegister: IconDefinition[] = [];
         const problemIcons = [
           // Direct imports from solid icons package
           // @ts-ignore
@@ -388,28 +420,31 @@ export function IconMonitoring() {
       }
     };
     
-    // Initial registration and verification
-    manuallyRegisterProblemIcons();
-    registerAllIcons();
-    
-    // Initial verification
-    setTimeout(() => {
-      const allValid = verifyIcons();
+    // One-time initialization - only run this once
+    if (!patchingInProgress && fixAttemptsRef.current === 0) {
+      // Initial registration and verification
+      manuallyRegisterProblemIcons();
+      registerAllIcons();
       
-      if (!allValid) {
-        console.log('[IconMonitoring] Initial verification failed, trying specific fixes');
-        setIsFixing(true);
-        registerMissingIcons(Object.keys(failedIcons).map(key => {
-          const isLight = key.endsWith('_light');
-          const baseName = isLight ? key.replace('_light', '') : key;
-          return `${baseName} (${isLight ? 'light' : 'solid'})`;
-        }));
-        setTimeout(() => {
-          verifyIcons();
-          setIsFixing(false);
-        }, 1000);
-      }
-    }, 500); // Small delay to let the initial registration complete
+      // Initial verification with delay
+      setTimeout(() => {
+        const allValid = verifyIcons();
+        
+        if (!allValid) {
+          console.log('[IconMonitoring] Initial verification failed, trying specific fixes');
+          setIsFixing(true);
+          registerMissingIcons(Object.keys(failedIcons).map(key => {
+            const isLight = key.endsWith('_light');
+            const baseName = isLight ? key.replace('_light', '') : key;
+            return `${baseName} (${isLight ? 'light' : 'solid'})`;
+          }));
+          setTimeout(() => {
+            verifyIcons();
+            setIsFixing(false);
+          }, 1000);
+        }
+      }, 500);
+    }
     
     // Setup MutationObserver to watch for DOM changes
     const observer = new MutationObserver((mutations) => {
@@ -433,9 +468,9 @@ export function IconMonitoring() {
       if (questionMarkIconsDetected && !isFixing) {
         // Only attempt a fix if it's been at least 5 seconds since last fix
         // and we haven't already tried too many times
-        const shouldFix = !lastFixTime || Date.now() - lastFixTime > 5000;
+        const shouldFix = !lastFixTimeRef.current || Date.now() - lastFixTimeRef.current > 5000;
         
-        if (shouldFix && fixAttempts < 3) {
+        if (shouldFix && fixAttemptsRef.current < 3) {
           console.log('[IconMonitoring] Question mark icons detected, attempting fix');
           setIsFixing(true);
           manuallyRegisterProblemIcons();
@@ -444,7 +479,7 @@ export function IconMonitoring() {
             verifyIcons();
             setIsFixing(false);
           }, 1000);
-        } else if (fixAttempts >= 3) {
+        } else if (fixAttemptsRef.current >= 3) {
           console.warn('[IconMonitoring] Max fix attempts reached, manual refresh recommended');
         }
       }
@@ -478,7 +513,8 @@ export function IconMonitoring() {
       window.removeEventListener('load', verifyIcons);
       window.removeEventListener('popstate', handleRouteChange);
     };
-  }, [isFixing, lastFixTime, fixAttempts, failedIcons]);
+  // Only depend on isFixing to avoid re-runs
+  }, [isFixing, failedIcons]);
 
   // This component renders nothing visible
   return null;

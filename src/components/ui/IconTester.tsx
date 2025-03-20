@@ -5,8 +5,194 @@ import { Icon, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, KPI_ICON_URLS, APP_ICON_URLS, P
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { cn } from '@/lib/utils';
 // The kit adds its icons to the global fontawesome library
-import { library } from '@fortawesome/fontawesome-svg-core';
+import { library, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { IconPrefix, IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
+
+// Safe wrapper for FontAwesomeIcon to prevent empty object errors
+const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
+  // Extra debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      console.log('[DEBUG] SafeFontAwesomeIcon received icon:', icon);
+      console.log('[DEBUG]   type:', typeof icon);
+      console.log('[DEBUG]   is array:', Array.isArray(icon));
+      if (Array.isArray(icon)) {
+        console.log('[DEBUG]   array length:', icon.length);
+        console.log('[DEBUG]   array elements:', icon);
+      }
+      if (typeof icon === 'object' && icon !== null) {
+        console.log('[DEBUG]   object keys:', Object.keys(icon));
+        try {
+          console.log('[DEBUG]   as JSON:', JSON.stringify(icon));
+        } catch (e) {
+          console.log('[DEBUG]   cannot convert to JSON:', e);
+        }
+      }
+    } catch (debugError) {
+      console.warn('[DEBUG] Error logging icon:', debugError);
+    }
+  }
+
+  try {
+    // ULTRA-COMPREHENSIVE empty/invalid icon check - catches ALL edge cases
+    const isEmptyOrInvalid = (iconInput: any): boolean => {
+      if (!iconInput) return true;
+      
+      // Handle basic empty object case
+      if (typeof iconInput === 'object' && Object.keys(iconInput).length === 0) return true;
+      
+      // Try JSON.stringify for complex empty objects
+      try {
+        if (JSON.stringify(iconInput) === '{}') return true;
+      } catch (e) {
+        // If JSON.stringify fails, consider it invalid
+        return true;
+      }
+      
+      // Array-specific validation
+      if (Array.isArray(iconInput)) {
+        // Empty array
+        if (iconInput.length === 0) return true;
+        
+        // Array too short
+        if (iconInput.length < 2) return true;
+        
+        // Array with undefined/empty values
+        if (!iconInput[0] || !iconInput[1]) return true;
+        
+        // Check if array values are strings
+        if (typeof iconInput[0] !== 'string' || typeof iconInput[1] !== 'string') return true;
+        
+        // Check if array values are empty strings
+        if (iconInput[0].trim() === '' || iconInput[1].trim() === '') return true;
+      }
+      
+      // Object-specific validation for icon object format {prefix, iconName}
+      if (typeof iconInput === 'object' && !Array.isArray(iconInput)) {
+        // Check if required properties exist
+        if (!('prefix' in iconInput) || !('iconName' in iconInput)) return true;
+        
+        // Check if properties are strings
+        if (typeof iconInput.prefix !== 'string' || typeof iconInput.iconName !== 'string') return true;
+        
+        // Check if properties are empty strings
+        if (iconInput.prefix.trim() === '' || iconInput.iconName.trim() === '') return true;
+      }
+      
+      // String-specific validation
+      if (typeof iconInput === 'string' && iconInput.trim() === '') return true;
+      
+      return false;
+    };
+    
+    if (isEmptyOrInvalid(icon)) {
+      console.warn('[FIXED] Empty or invalid icon:', typeof icon, Array.isArray(icon) ? 'array' : '', icon);
+      return (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none"
+          stroke="red"
+          strokeWidth="2"
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          className={className}
+          {...props}
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    }
+    
+    // Type-specific validation to ensure we only pass valid formats to FontAwesomeIcon
+    try {
+      if (typeof icon === 'string') {
+        // String validation
+        if (icon.trim() === '') {
+          throw new Error('Empty string icon');
+        }
+        return <FontAwesomeIcon icon={icon} className={className} {...props} />;
+      }
+      
+      if (Array.isArray(icon)) {
+        // Array validation
+        if (icon.length !== 2 || 
+            typeof icon[0] !== 'string' || 
+            typeof icon[1] !== 'string' ||
+            icon[0].trim() === '' || 
+            icon[1].trim() === '') {
+          throw new Error('Invalid array format for icon');
+        }
+        return <FontAwesomeIcon icon={icon as [IconPrefix, IconName]} className={className} {...props} />;
+      }
+      
+      if (typeof icon === 'object') {
+        // Object validation
+        if (!icon || 
+            !('prefix' in icon) || 
+            !('iconName' in icon) ||
+            typeof icon.prefix !== 'string' ||
+            typeof icon.iconName !== 'string' ||
+            icon.prefix.trim() === '' ||
+            icon.iconName.trim() === '') {
+          throw new Error('Invalid object format for icon');
+        }
+        return <FontAwesomeIcon icon={icon} className={className} {...props} />;
+      }
+      
+      // If we reach here, format is not recognized
+      throw new Error('Unrecognized icon format');
+    } catch (validationError) {
+      console.error('[FIXED] Error validating icon format:', validationError);
+      // Return fallback icon
+      return (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none"
+          stroke="red"
+          strokeWidth="2"
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          className={className}
+          {...props}
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    }
+  } catch (e) {
+    console.error('[FIXED] Uncaught error in SafeFontAwesomeIcon:', e);
+    // Return fallback icon
+    return (
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none"
+        stroke="red"
+        strokeWidth="2"
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    );
+  }
+};
 
 export const IconTester = () => {
   const [showErrors, setShowErrors] = useState(false);
@@ -24,15 +210,65 @@ export const IconTester = () => {
   };
 
   // Helper function to get Pro icons directly
-  const getProIcon = (iconName: string, style: 'fas' | 'fal' | 'far' | 'fab' = 'fas'): IconProp => {
+  const getProIcon = (iconName: string | undefined, style: 'fas' | 'fal' | 'far' | 'fab' = 'fas'): IconProp => {
+    // Debug in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[DEBUG getProIcon] Input: name=${iconName}, style=${style}`);
+    }
+    
     try {
-      if (!iconName) {
-        console.warn('Empty or undefined icon name passed to getProIcon');
+      // Ultra-strict input validation
+      if (iconName === undefined || iconName === null) {
+        console.warn(`[FIXED getProIcon] Undefined or null icon name: ${iconName}`);
         return ['fas' as IconPrefix, 'question' as IconName];
       }
-      return [style as IconPrefix, iconName as IconName];
+      
+      if (typeof iconName !== 'string') {
+        console.warn(`[FIXED getProIcon] Icon name is not a string: ${typeof iconName}`, iconName);
+        return ['fas' as IconPrefix, 'question' as IconName];
+      }
+      
+      if (iconName.trim() === '') {
+        console.warn('[FIXED getProIcon] Empty icon name');
+        return ['fas' as IconPrefix, 'question' as IconName];
+      }
+      
+      // Normalize style
+      if (!style || !['fas', 'fal', 'far', 'fab'].includes(style)) {
+        console.warn(`[FIXED getProIcon] Invalid style: ${style}, using 'fas' as fallback`);
+        style = 'fas';
+      }
+      
+      // Convert the iconName to a valid IconName in kebab-case format
+      // First check if it's already kebab-case
+      const validIconName = iconName.includes('-') 
+        ? iconName 
+        : iconName.replace(/([A-Z])/g, '-$1').toLowerCase();
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DEBUG getProIcon] Converted iconName: ${validIconName}`);
+      }
+      
+      // Verify the icon exists in the library
+      try {
+        const found = findIconDefinition({ 
+          prefix: style as IconPrefix, 
+          iconName: validIconName as IconName 
+        });
+        
+        if (!found) {
+          console.warn(`[FIXED getProIcon] Icon not found: ${style} ${validIconName}, using fallback`);
+          return ['fas' as IconPrefix, 'question' as IconName];
+        }
+        
+        // Return a safely constructed array
+        return [style as IconPrefix, validIconName as IconName];
+      } catch (findError) {
+        console.warn(`[FIXED getProIcon] Error finding icon definition: ${style} ${validIconName}`, findError);
+        return ['fas' as IconPrefix, 'question' as IconName];
+      }
     } catch (e) {
-      console.error(`Error in getProIcon for ${style} ${iconName}:`, e);
+      console.error(`[FIXED getProIcon] Unexpected error with ${style} ${iconName}:`, e);
       // Fallback to a safe icon
       return ['fas' as IconPrefix, 'question' as IconName];
     }
@@ -209,49 +445,29 @@ export const IconTester = () => {
       )}
 
       <div className="space-y-8">
-        {/* SOLID ICONS */}
-        <section>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold mb-4">UI Icons (Solid)</h3>
-            <span className="text-sm text-blue-500">{Object.keys(UI_ICON_MAP).length} icons</span>
-          </div>
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
-            {Object.keys(UI_ICON_MAP).slice(0, showAllIcons ? undefined : 24).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
-                {name && (
-                  <>
-                    <Icon name={name as keyof typeof UI_ICON_MAP} size="md" solid />
-                    <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
-                  </>
-                )}
-              </div>
-            ))}
-            {!showAllIcons && Object.keys(UI_ICON_MAP).length > 24 && (
-              <div className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 cursor-pointer"
-                onClick={() => setShowAllIcons(true)}>
-                <div className="h-5 w-5 flex items-center justify-center">
-                  <span className="text-xl">...</span>
-                </div>
-                <span className="text-xs mt-2 text-center text-blue-500">Show all</span>
-              </div>
-            )}
-          </div>
-        </section>
-        
         {/* REGULAR ICONS WITH HOVER TO SOLID EFFECT */}
         <section>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold mb-4">UI Icons (Light → Solid on hover)</h3>
+            <h3 className="text-lg font-semibold mb-4">UI Icons (Light → Solid)</h3>
             <span className="text-sm text-blue-500">{Object.keys(UI_ICON_MAP).length} icons</span>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
             {Object.keys(UI_ICON_MAP).slice(0, showAllIcons ? undefined : 24).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 group cursor-pointer">
                 {name && (
                   <>
-                    <div className="ui-icon-hover-container">
-                      <Icon name={name as keyof typeof UI_ICON_MAP} size="md" className="ui-icon-hover ui-icon-hover-light" />
-                      <Icon name={name as keyof typeof UI_ICON_MAP} size="md" solid className="ui-icon-hover ui-icon-hover-solid" />
+                    <div className="ui-icon-hover-container relative" style={{ width: '24px', height: '24px' }}>
+                      <Icon
+                        name={name as keyof typeof UI_ICON_MAP}
+                        size="md"
+                        className="text-[#333333] absolute transition-opacity duration-150 opacity-100 group-hover:opacity-0"
+                      />
+                      <Icon
+                        name={name as keyof typeof UI_ICON_MAP}
+                        size="md"
+                        solid
+                        className="text-[#00BFFF] absolute transition-opacity duration-150 opacity-0 group-hover:opacity-100"
+                      />
                     </div>
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
@@ -270,18 +486,24 @@ export const IconTester = () => {
           </div>
         </section>
         
-        {/* KPI ICONS WITH HOVER TO ACCENT COLOR */}
+        {/* KPI ICONS */}
         <section>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold mb-4">KPI Icons (Hover for accent color)</h3>
+            <h3 className="text-lg font-semibold mb-4">KPI Icons</h3>
             <span className="text-sm text-blue-500">{Object.keys(KPI_ICON_URLS).length} icons</span>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
             {Object.keys(KPI_ICON_URLS).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 group cursor-pointer">
                 {name && KPI_ICON_URLS[name as keyof typeof KPI_ICON_URLS] && (
                   <>
-                    <Icon kpiName={name as keyof typeof KPI_ICON_URLS} size="md" className="kpi-icon-hover" />
+                    <div className="relative" style={{ width: '24px', height: '24px' }}>
+                      <Icon 
+                        kpiName={name as keyof typeof KPI_ICON_URLS} 
+                        size="md" 
+                        className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
+                      />
+                    </div>
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
@@ -290,18 +512,24 @@ export const IconTester = () => {
           </div>
         </section>
         
-        {/* APP ICONS WITH HOVER TO ACCENT COLOR */}
+        {/* APP ICONS */}
         <section>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold mb-4">App Icons (Hover for accent color)</h3>
+            <h3 className="text-lg font-semibold mb-4">App Icons</h3>
             <span className="text-sm text-blue-500">{Object.keys(APP_ICON_URLS).length} icons</span>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
             {Object.keys(APP_ICON_URLS).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 group cursor-pointer">
                 {name && APP_ICON_URLS[name as keyof typeof APP_ICON_URLS] && (
                   <>
-                    <Icon appName={name as keyof typeof APP_ICON_URLS} size="md" className="app-icon-hover" />
+                    <div className="relative" style={{ width: '24px', height: '24px' }}>
+                      <Icon 
+                        appName={name as keyof typeof APP_ICON_URLS} 
+                        size="md" 
+                        className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
+                      />
+                    </div>
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
@@ -310,18 +538,24 @@ export const IconTester = () => {
           </div>
         </section>
         
-        {/* PLATFORM (BRANDS) ICONS */}
+        {/* PLATFORM ICONS */}
         <section>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold mb-4">Platform Icons (Brands)</h3>
+            <h3 className="text-lg font-semibold mb-4">Platform Icons</h3>
             <span className="text-sm text-blue-500">{Object.keys(PLATFORM_ICON_MAP).length} icons</span>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
             {Object.keys(PLATFORM_ICON_MAP).map(name => (
-              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50">
+              <div key={name} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 group cursor-pointer">
                 {name && (
                   <>
-                    <Icon platformName={name as keyof typeof PLATFORM_ICON_MAP} size="md" className="platform-icon-hover" />
+                    <div className="relative" style={{ width: '24px', height: '24px' }}>
+                      <Icon 
+                        platformName={name as keyof typeof PLATFORM_ICON_MAP} 
+                        size="md" 
+                        className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
+                      />
+                    </div>
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
                   </>
                 )}
@@ -338,15 +572,24 @@ export const IconTester = () => {
               <h4 className="font-medium text-sm border-b pb-2">Solid Icons</h4>
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('user', 'fas')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('user', 'fas')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">user</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('house', 'fas')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('house', 'fas')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">house</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('gear', 'fas')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('gear', 'fas')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">gear</span>
                 </div>
               </div>
@@ -356,15 +599,24 @@ export const IconTester = () => {
               <h4 className="font-medium text-sm border-b pb-2">Light Icons</h4>
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('user', 'fal')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('user', 'fal')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">user</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('bell', 'fal')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('bell', 'fal')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">bell</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('heart', 'fal')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('heart', 'fal')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">heart</span>
                 </div>
               </div>
@@ -374,15 +626,24 @@ export const IconTester = () => {
               <h4 className="font-medium text-sm border-b pb-2">Regular Icons</h4>
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('user', 'far')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('user', 'far')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">user</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('bell', 'far')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('bell', 'far')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">bell</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('heart', 'far')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('heart', 'far')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">heart</span>
                 </div>
               </div>
@@ -392,16 +653,25 @@ export const IconTester = () => {
               <h4 className="font-medium text-sm border-b pb-2">Brand Icons</h4>
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('twitter', 'fab')} className={cn(sizeClasses.md)} />
-                  <span className="text-xs mt-1 text-center text-gray-600">twitter (X)</span>
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('x-twitter', 'fab')} 
+                    className={cn(sizeClasses.md)} 
+                  />
+                  <span className="text-xs mt-1 text-center text-gray-600">x-twitter</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('facebook', 'fab')} className={cn(sizeClasses.md)} />
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('facebook', 'fab')} 
+                    className={cn(sizeClasses.md)} 
+                  />
                   <span className="text-xs mt-1 text-center text-gray-600">facebook</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <FontAwesomeIcon icon={getProIcon('github', 'fab')} className={cn(sizeClasses.md)} />
-                  <span className="text-xs mt-1 text-center text-gray-600">github</span>
+                  <SafeFontAwesomeIcon 
+                    icon={getProIcon('pinterest', 'fab')} 
+                    className={cn(sizeClasses.md)} 
+                  />
+                  <span className="text-xs mt-1 text-center text-gray-600">pinterest</span>
                 </div>
               </div>
             </div>
@@ -475,11 +745,12 @@ export const IconTester = () => {
               <div className="flex space-x-4 justify-center">
                 <div className="flex flex-col items-center group">
                   <div className="p-2 border rounded hover:bg-gray-100">
-                    <FontAwesomeIcon 
+                    {/* Safe usage with try-catch and checking */}
+                    <SafeFontAwesomeIcon 
                       icon={getProIcon('coffee', 'fal')} 
                       className="w-6 h-6 group-hover:hidden" 
                     />
-                    <FontAwesomeIcon 
+                    <SafeFontAwesomeIcon 
                       icon={getProIcon('coffee', 'fas')} 
                       className="w-6 h-6 hidden group-hover:block" 
                     />

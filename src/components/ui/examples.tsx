@@ -56,6 +56,64 @@ import { List, ListExample } from './list';
 import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './skeleton';
 import { heroIconToName } from '@/lib/icon-helpers';
 import { IconTester } from './IconTester';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { IconProp } from '@fortawesome/fontawesome-svg-core';
+
+// Safe wrapper for FontAwesomeIcon to prevent empty object errors
+const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
+  try {
+    // Handle undefined or empty object cases
+    if (!icon || 
+        (typeof icon === 'object' && Object.keys(icon).length === 0) || 
+        JSON.stringify(icon) === '{}') {
+      console.warn('Empty or invalid icon prop passed to SafeFontAwesomeIcon', icon);
+      // Return fallback icon
+      return (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none"
+          stroke="red"
+          strokeWidth="2"
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          className={className}
+          {...props}
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    }
+    
+    return <FontAwesomeIcon icon={icon} className={className} {...props} />;
+  } catch (e) {
+    console.error('Error rendering FontAwesomeIcon:', e);
+    // Return fallback icon
+    return (
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none"
+        stroke="red"
+        strokeWidth="2"
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    );
+  }
+};
 
 export function ButtonExamples() {
   return (
@@ -375,29 +433,49 @@ export const IconExamples = () => {
   // General UI Icons (FontAwesome)
   const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter(icon => 
     typeof icon === 'string' && 
-    icon !== 'undefined' && 
-    UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined
+    icon.trim() !== '' &&
+    typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'undefined' &&
+    UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined &&
+    UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== null &&
+    // Make sure the icon is not an empty object
+    (typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'object' || 
+      Object.keys(UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] as any).length > 0)
   );
   
   // KPI icons
   const kpiIconNames = Object.keys(KPI_ICON_URLS).sort().filter(icon => 
     typeof icon === 'string' && 
-    icon !== 'undefined' && 
-    KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined
+    icon.trim() !== '' &&
+    typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== 'undefined' &&
+    KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined &&
+    KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== null &&
+    // Make sure the URL is a non-empty string
+    typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] === 'string' &&
+    (KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] as string).trim() !== ''
   );
   
   // App icons (navigation, special)
   const appIconNames = Object.keys(APP_ICON_URLS).sort().filter(icon => 
     typeof icon === 'string' && 
-    icon !== 'undefined' && 
-    APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined
+    icon.trim() !== '' &&
+    typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== 'undefined' &&
+    APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined &&
+    APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== null &&
+    // Make sure the URL is a non-empty string
+    typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] === 'string' &&
+    (APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] as string).trim() !== ''
   );
   
   // Platform icons
   const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort().filter(icon => 
     typeof icon === 'string' && 
-    icon !== 'undefined' && 
-    PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined
+    icon.trim() !== '' &&
+    typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'undefined' &&
+    PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined &&
+    PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== null &&
+    // Make sure the icon is not an empty object
+    (typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'object' || 
+      Object.keys(PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] as any).length > 0)
   );
   
   // State for tracking hovered icons
@@ -559,19 +637,14 @@ export const IconExamples = () => {
         {/* App Icons */}
         <div className="space-y-4">
           <h3 className="text-md font-medium">App Icons</h3>
-          <p className="text-sm text-gray-500">Hover over icons to see their active state.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
             {appIconNames.map((name) => (
-              <div key={name} className="flex flex-col items-center">
-                <div
-                  className="relative mb-2"
-                  onMouseEnter={() => setHoveredIcon(name)}
-                  onMouseLeave={() => setHoveredIcon(null)}
-                >
+              <div key={name} className="flex flex-col items-center group cursor-pointer">
+                <div className="relative mb-2" style={{ width: '32px', height: '32px' }}>
                   <Icon 
                     appName={name as AppIconName} 
-                    size="xl" 
-                    active={hoveredIcon === name} 
+                    size="xl"
+                    className="absolute"
                   />
                 </div>
                 <span className="text-xs text-gray-500">{name}</span>
@@ -585,8 +658,13 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">KPI Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
             {kpiIconNames.map((name) => (
-              <div key={name} className="flex flex-col items-center">
-                <Icon kpiName={name as KpiIconName} className="mb-2" />
+              <div key={name} className="flex flex-col items-center group cursor-pointer">
+                <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
+                  <Icon 
+                    kpiName={name as KpiIconName}
+                    className="absolute"
+                  />
+                </div>
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
             ))}
@@ -598,16 +676,27 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Platform Icons</h3>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
             {platformIconNames.map((name) => (
-              <div key={name} className="flex flex-col items-center">
-                <Icon platformName={name as PlatformIconName} solid className="mb-2" />
+              <div key={name} className="flex flex-col items-center group cursor-pointer">
+                <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
+                  <Icon 
+                    platformName={name as PlatformIconName} 
+                    solid 
+                    className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
+                  />
+                </div>
                 <span className="text-xs text-gray-500">{name} (solid)</span>
               </div>
             ))}
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
             {platformIconNames.map((name) => (
-              <div key={`${name}-outline`} className="flex flex-col items-center">
-                <Icon platformName={name as PlatformIconName} className="mb-2" />
+              <div key={`${name}-outline`} className="flex flex-col items-center group cursor-pointer">
+                <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
+                  <Icon 
+                    platformName={name as PlatformIconName} 
+                    className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
+                  />
+                </div>
                 <span className="text-xs text-gray-500">{name} (outline)</span>
               </div>
             ))}
@@ -790,8 +879,8 @@ export const IconExamples = () => {
               <span className="text-xs text-gray-500">fa-solid fa-check</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-brands fa-twitter" className="w-8 h-8 mb-2" color="#000000" />
-              <span className="text-xs text-gray-500">fa-brands fa-twitter (X)</span>
+              <Icon fontAwesome="fa-brands fa-x-twitter" className="w-8 h-8 mb-2" color="#000000" />
+              <span className="text-xs text-gray-500">fa-brands fa-x-twitter</span>
             </div>
             <div className="flex flex-col items-center">
               <Icon fontAwesome="fa-brands fa-facebook" className="w-8 h-8 mb-2" color="#1877F2" />
@@ -2763,22 +2852,9 @@ export default function ComponentExamples() {
           <div className="space-y-12">
             <div>
               <h2 className="text-xl font-bold mb-4">Comprehensive Icon Library</h2>
-              <p className="text-gray-600 mb-6">This component displays all available Font Awesome icons in the system. Font Awesome Classic includes Solid, Regular, and Brands icon sets.</p>
+              <p className="text-gray-600 mb-6">This component displays all available Font Awesome icons in the system. Font Awesome Classic includes Solid, Light, and Brands icon sets.</p>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-4 border rounded-lg bg-blue-50">
-                  <h3 className="font-bold text-lg mb-2">SOLID Icons</h3>
-                  <p className="text-sm text-gray-600">Default solid weight icons for most UI elements</p>
-                </div>
-                <div className="p-4 border rounded-lg bg-green-50">
-                  <h3 className="font-bold text-lg mb-2">REGULAR Icons</h3>
-                  <p className="text-sm text-gray-600">Outline/light weight versions of common icons</p>
-                </div>
-                <div className="p-4 border rounded-lg bg-purple-50">
-                  <h3 className="font-bold text-lg mb-2">BRANDS Icons</h3>
-                  <p className="text-sm text-gray-600">Official brand/logo icons for platforms</p>
-                </div>
-              </div>
+              {/* Removed the SOLID/REGULAR/BRANDS boxes as requested */}
             </div>
             
             <IconTester />
@@ -2818,8 +2894,8 @@ export default function ComponentExamples() {
                         <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-regular fa-user" />`}</code>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-brands fa-twitter" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-brands fa-twitter" />`}</code>
+                        <Icon fontAwesome="fa-brands fa-x-twitter" />
+                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-brands fa-x-twitter" />`}</code>
                       </div>
                     </div>
                   </div>
