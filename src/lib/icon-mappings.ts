@@ -1,5 +1,4 @@
-// Import the Pro Kit first
-import '@awesome.me/kit-3e2951e127';
+// Import from fontawesome-svg-core instead of the Pro Kit
 import { findIconDefinition, IconDefinition, IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 
 /**
@@ -19,27 +18,10 @@ export function getIcon(name: string | undefined, style: 'fas' | 'fal' | 'far' |
   }
 
   try {
-    // First try to find the icon in the Pro Kit
+    // Try to find the icon in the library
     return findIconDefinition({ prefix: style as IconPrefix, iconName: name as IconName });
   } catch (e) {
-    console.warn(`[Icon] Could not find Pro icon ${style} ${name}, trying alternative styles`);
-    
-    // Check if we're in a dual-loading scenario with a Pro Kit
-    if (typeof window !== 'undefined' && (window as any).FontAwesomeKitConfig?.license === 'pro') {
-      console.info(`[Icon] Font Awesome Pro Kit detected. Using HTML class fallback for ${style} ${name}`);
-      // Return a minimal icon definition that mimics the requested icon
-      return {
-        prefix: style as IconPrefix,
-        iconName: name as IconName,
-        icon: [
-          512, // width
-          512, // height
-          [], // ligatures
-          '', // unicode
-          'M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200z'
-        ]
-      };
-    }
+    console.warn(`[Icon] Could not find icon ${style} ${name}, trying alternative styles`);
     
     // Try alternative styles if the requested style failed
     try {

@@ -11,11 +11,39 @@ import { ToastProvider } from '@/components/ui/toast';
 // CRITICAL: Import Font Awesome CSS before config
 import '@fortawesome/fontawesome-svg-core/styles.css';
 // THEN configure Font Awesome
-import { config } from '@fortawesome/fontawesome-svg-core';
+import { config, library } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false; // Prevent Font Awesome from auto-adding CSS
 
-// Import the Pro Kit for global access
-import '@awesome.me/kit-3e2951e127';
+// Import commonly used icons
+import { 
+  faUser, faCheck, faGear, faBell, faStar, faMagnifyingGlass,
+  faPlus, faMinus, faXmark, faChevronDown, faChevronUp, 
+  faChevronLeft, faChevronRight, faEnvelope, faCalendarDays,
+  faTrash, faTriangleExclamation, faCircleInfo, faLightbulb
+} from '@fortawesome/pro-solid-svg-icons';
+
+import {
+  faUser as falUser, faHouse as falHouse, faGear as falGear
+} from '@fortawesome/pro-light-svg-icons';
+
+import {
+  faTwitter, faFacebook, faGithub, faInstagram, faLinkedin
+} from '@fortawesome/free-brands-svg-icons';
+
+// Register commonly used icons
+library.add(
+  // Solid icons
+  faUser, faCheck, faGear, faBell, faStar, faMagnifyingGlass,
+  faPlus, faMinus, faXmark, faChevronDown, faChevronUp,
+  faChevronLeft, faChevronRight, faEnvelope, faCalendarDays,
+  faTrash, faTriangleExclamation, faCircleInfo, faLightbulb,
+  
+  // Light icons
+  falUser, falHouse, falGear,
+  
+  // Brand icons
+  faTwitter, faFacebook, faGithub, faInstagram, faLinkedin
+);
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,12 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Font Awesome Kit script - with proper crossOrigin attribute */}
-        <script 
-          src="https://kit.fontawesome.com/3e2951e127.js" 
-          crossOrigin="anonymous"
-          key="fontawesome-kit"
-        />
+        {/* Font Awesome Kit script removed - using only NPM packages */}
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>

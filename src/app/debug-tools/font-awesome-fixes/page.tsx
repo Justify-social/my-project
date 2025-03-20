@@ -121,40 +121,7 @@ export default function FontAwesomeFixesPage() {
         </section>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <section className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Method 3: HTML Format (Kit Only)</h2>
-          <p className="text-gray-600 mb-4">
-            Use HTML format with CSS classes (requires the Kit script):
-          </p>
-          <pre className="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">
-{`<i className="fa-solid fa-user"></i>`}
-          </pre>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center">
-              <div className="p-4 bg-indigo-50 rounded-md flex items-center justify-center">
-                <i className="fa-solid fa-user" style={{ fontSize: '2rem', color: '#4f46e5' }}></i>
-              </div>
-              <span className="mt-2 text-sm">fa-solid fa-user</span>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="p-4 bg-teal-50 rounded-md flex items-center justify-center">
-                <i className="fa-light fa-house" style={{ fontSize: '2rem', color: '#0d9488' }}></i>
-              </div>
-              <span className="mt-2 text-sm">fa-light fa-house</span>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="p-4 bg-cyan-50 rounded-md flex items-center justify-center">
-                <i className="fa-brands fa-github" style={{ fontSize: '2rem', color: '#0891b2' }}></i>
-              </div>
-              <span className="mt-2 text-sm">fa-brands fa-github</span>
-            </div>
-          </div>
-        </section>
-        
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-8 mb-8">
         <section className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Setup Requirements</h2>
           <div className="space-y-3">
@@ -168,21 +135,24 @@ config.autoAddCss = false;`}
             </div>
             
             <div className="border-l-4 border-blue-500 pl-3 py-1">
-              <h3 className="font-medium">2. Add Kit script to layout.tsx</h3>
+              <h3 className="font-medium">2. Register icons with library.add</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
-{`<script 
-  src="https://kit.fontawesome.com/3e2951e127.js" 
-  crossOrigin="anonymous"
-/>`}
+{`import { library } from '@fortawesome/fontawesome-svg-core';
+import { faUser } from '@fortawesome/pro-solid-svg-icons';
+import { faTwitter } from '@fortawesome/free-brands-svg-icons';
+
+library.add(faUser, faTwitter);`}
               </pre>
             </div>
             
             <div className="border-l-4 border-blue-500 pl-3 py-1">
-              <h3 className="font-medium">3. For array syntax, register icons</h3>
+              <h3 className="font-medium">3. Use icons in components</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
-{`import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser } from '@fortawesome/pro-solid-svg-icons';
-library.add(faUser);`}
+{`// Direct import (recommended)
+<FontAwesomeIcon icon={faUser} />
+
+// Library syntax (after registration)
+<FontAwesomeIcon icon={['fas', 'user']} />`}
               </pre>
             </div>
           </div>
