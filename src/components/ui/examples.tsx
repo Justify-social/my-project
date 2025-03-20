@@ -483,9 +483,9 @@ export const IconExamples = () => {
   
   // Ensure all icons in the categories exist in the maps
   const essentialIcons = [
-    'search', 'plus', 'minus', 'close', 'check',
-    'user', 'settings', 'mail', 'bell', 'info',
-    'warning', 'calendar', 'trash',
+    'bell', 'calendar', 'check', 'close', 'delete',
+    'info', 'mail', 'menu', 'minus', 'plus',
+    'search', 'settings', 'user', 'warning',
   ].filter(icon => icon in UI_ICON_MAP);
   
   const navigationIcons = [
@@ -730,7 +730,7 @@ export const IconExamples = () => {
               Home
             </Button>
             <Button 
-              leftIcon={<Icon name="trash" size="sm" />}
+              leftIcon={<Icon name="delete" size="sm" />}
               variant="danger"
             >
               Delete
@@ -909,7 +909,7 @@ export const IconExamples = () => {
               <div className="flex items-center space-x-2">
                 <code className="text-xs bg-white p-1 rounded">{`<Icon heroOutline="TrashIcon" />`}</code>
                 <span>→</span>
-                <code className="text-xs bg-white p-1 rounded">{`<Icon name="trash" />`}</code>
+                <code className="text-xs bg-white p-1 rounded">{`<Icon name="delete" />`}</code>
               </div>
               <div className="flex items-center space-x-2">
                 <code className="text-xs bg-white p-1 rounded">{`migrateHeroIcon("UserIcon")`}</code>
@@ -919,7 +919,7 @@ export const IconExamples = () => {
               <div className="flex items-center space-x-2">
                 <code className="text-xs bg-white p-1 rounded">{`migrateHeroIcon("TrashIcon")`}</code>
                 <span>→</span>
-                <Icon name="trash" size="md" />
+                <Icon name="delete" size="md" />
               </div>
             </div>
           </div>
