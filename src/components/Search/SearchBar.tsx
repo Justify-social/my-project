@@ -97,7 +97,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
           className={`w-full bg-gray-200 rounded-md px-4 py-2 flex items-center transition-all ${isOpen ? 'bg-white border border-gray-300 shadow-sm' : 'hover:bg-gray-300'}`}
           onClick={openSearch}
         >
-          <Image src="/magnifying-glass.svg" alt="Search" width={20} height={20} />
+          <Image src="/app/magnifying-glass.svg" alt="Search" width={20} height={20} />
           <input
             ref={inputRef}
             type="text"

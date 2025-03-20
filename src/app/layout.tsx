@@ -8,6 +8,15 @@ import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 
+// CRITICAL: Import Font Awesome CSS before config
+import '@fortawesome/fontawesome-svg-core/styles.css';
+// THEN configure Font Awesome
+import { config } from '@fortawesome/fontawesome-svg-core';
+config.autoAddCss = false; // Prevent Font Awesome from auto-adding CSS
+
+// Import the Pro Kit for global access
+import '@awesome.me/kit-3e2951e127';
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
@@ -26,7 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <script src="https://kit.fontawesome.com/3e2951e127.js" crossOrigin="anonymous"></script>
+        {/* Font Awesome Kit script - with proper crossOrigin attribute */}
+        <script 
+          src="https://kit.fontawesome.com/3e2951e127.js" 
+          crossOrigin="anonymous"
+          key="fontawesome-kit"
+        />
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>

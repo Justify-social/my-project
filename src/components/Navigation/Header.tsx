@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits,
   notificationsCount,
-  profileImageUrl = "/profile-image.svg",
+  profileImageUrl = "/app/profile-image.svg",
 }) => {
   const { user } = useUser();
   const { toggle: toggleSidebar } = useSidebar();
@@ -93,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({
               {user && (
                 <Link href="/settings">
                   <Image 
-                    src="/profile-image.svg"
+                    src="/app/profile-image.svg"
                     alt="Profile" 
                     width={32} 
                     height={32} 

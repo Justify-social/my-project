@@ -118,7 +118,7 @@ const MobileMenu = ({
             <div className="p-4 border-b">
               <div className="flex items-center space-x-3">
                 <Image 
-                  src="/profile-image.svg" 
+                  src="/app/profile-image.svg" 
                   alt="Profile" 
                   width={40} 
                   height={40}

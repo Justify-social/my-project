@@ -373,49 +373,65 @@ export function InputExamples() {
 
 export const IconExamples = () => {
   // General UI Icons (FontAwesome)
-  const uiIconNames = Object.keys(UI_ICON_MAP).sort();
+  const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter(icon => 
+    typeof icon === 'string' && 
+    icon !== 'undefined' && 
+    UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined
+  );
   
   // KPI icons
-  const kpiIconNames = Object.keys(KPI_ICON_URLS).sort();
+  const kpiIconNames = Object.keys(KPI_ICON_URLS).sort().filter(icon => 
+    typeof icon === 'string' && 
+    icon !== 'undefined' && 
+    KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined
+  );
   
   // App icons (navigation, special)
-  const appIconNames = Object.keys(APP_ICON_URLS).sort();
+  const appIconNames = Object.keys(APP_ICON_URLS).sort().filter(icon => 
+    typeof icon === 'string' && 
+    icon !== 'undefined' && 
+    APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined
+  );
   
   // Platform icons
-  const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort();
+  const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort().filter(icon => 
+    typeof icon === 'string' && 
+    icon !== 'undefined' && 
+    PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined
+  );
   
   // State for tracking hovered icons
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
   
-  // Common icon samples by category
+  // Ensure all icons in the categories exist in the maps
   const essentialIcons = [
     'search', 'plus', 'minus', 'close', 'check',
     'user', 'settings', 'mail', 'bell', 'info',
     'warning', 'calendar', 'trash',
-  ];
+  ].filter(icon => icon in UI_ICON_MAP);
   
   const navigationIcons = [
     'chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight',
     'home', 'menu',
-  ];
+  ].filter(icon => icon in UI_ICON_MAP);
   
   const actionIcons = [
     'view', 'edit', 'copy', 'delete',
     'download', 'upload', 'share',
-  ];
+  ].filter(icon => icon in UI_ICON_MAP);
   
   const objectIcons = [
     'heart', 'star', 'bookmark', 'file',
     'tag', 'filter', 'paperclip',
-  ];
+  ].filter(icon => icon in UI_ICON_MAP);
   
   const layoutIcons = [
     'grid', 'list', 'table',
-  ];
+  ].filter(icon => icon in UI_ICON_MAP);
   
   const securityIcons = [
     'lock', 'unlock', 'key',
-  ];
+  ].filter(icon => icon in UI_ICON_MAP);
   
   return (
     <div className="space-y-12" id="icons">

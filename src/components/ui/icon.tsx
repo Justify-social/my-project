@@ -1,3 +1,4 @@
+import '@awesome.me/kit-3e2951e127';
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -21,14 +22,22 @@ import { cn } from '@/lib/utils';
 
 // Font Awesome imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library, config } from '@fortawesome/fontawesome-svg-core';
-import { FA_UI_ICON_MAP, FA_UI_OUTLINE_ICON_MAP, FA_PLATFORM_ICON_MAP, PLATFORM_COLORS } from '@/lib/icon-mappings';
+import { library, config, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { FA_UI_ICON_MAP, FA_UI_OUTLINE_ICON_MAP, FA_PLATFORM_ICON_MAP, PLATFORM_COLORS, getIcon } from '@/lib/icon-mappings';
+import { SafeQuestionMarkIcon } from '@/lib/icon-helpers';
+
+// Import Font Awesome styles
+import '@fortawesome/fontawesome-svg-core/styles.css';
 
 // Configure Font Awesome
 config.autoAddCss = false; // Prevent Font Awesome from automatically injecting CSS
 
-// Initialize Font Awesome library with all icons
-library.add(...Object.values(FA_UI_ICON_MAP), ...Object.values(FA_UI_OUTLINE_ICON_MAP), ...Object.values(FA_PLATFORM_ICON_MAP));
+// Initialize with a few essential icons for fallbacks
+import { faUser, faQuestion } from '@fortawesome/pro-solid-svg-icons';
+library.add(faUser, faQuestion);
+
+// No need to initialize library - the Pro Kit already includes all icons
+// library.add(...Object.values(FA_UI_ICON_MAP), ...Object.values(FA_UI_OUTLINE_ICON_MAP), ...Object.values(FA_PLATFORM_ICON_MAP));
 
 // Re-export for convenience
 export const UI_ICON_MAP = FA_UI_ICON_MAP;
@@ -40,31 +49,35 @@ export { PLATFORM_COLORS };
  * @deprecated Use the Icon component with appropriate mappings instead
  */
 export const KPI_ICON_URLS: Record<string, string> = {
-  'views': '/icons/kpi/views.svg',
-  'engagement': '/icons/kpi/engagement.svg',
-  'reach': '/icons/kpi/reach.svg',
-  'followers': '/icons/kpi/followers.svg',
-  'impressions': '/icons/kpi/impressions.svg',
-  'comments': '/icons/kpi/comments.svg',
-  'likes': '/icons/kpi/likes.svg',
-  'shares': '/icons/kpi/shares.svg',
-  'bookmarks': '/icons/kpi/bookmarks.svg',
-  'saves': '/icons/kpi/saves.svg',
-  'linkClicks': '/icons/kpi/linkClicks.svg',
-  'profileVisits': '/icons/kpi/profileVisits.svg',
-  'videoViews': '/icons/kpi/videoViews.svg',
+  // New KPI icons - keeping only the correct ones
+  'actionIntent': '/kpis/Action_Intent.svg',
+  'adRecall': '/kpis/Ad_Recall.svg',
+  'advocacy': '/kpis/Advocacy.svg',
+  'brandAwareness': '/kpis/Brand_Awareness.svg',
+  'brandPreference': '/kpis/Brand_Preference.svg',
+  'consideration': '/kpis/Consideration.svg',
+  'messageAssociation': '/kpis/Message_Association.svg',
+  'purchaseIntent': '/kpis/Purchase_Intent.svg',
 };
 
 /**
  * @deprecated Use the Icon component with appropriate mappings instead
  */
 export const APP_ICON_URLS: Record<string, string> = {
-  'campaigns': '/icons/app/campaigns.svg',
-  'influencers': '/icons/app/influencers.svg',
-  'analytics': '/icons/app/analytics.svg',
-  'content': '/icons/app/content.svg',
-  'settings': '/icons/app/settings.svg',
-  'help': '/icons/app/help.svg',
+  'campaigns': '/app/Campaigns.svg',
+  'influencers': '/app/Influencers.svg',
+  'settings': '/app/Settings.svg',
+  'help': '/app/Help.svg',
+  // New app icons
+  'reports': '/app/Reports.svg',
+  'profile': '/app/profile-image.svg',
+  'mmm': '/app/MMM.svg',
+  'search': '/app/magnifying-glass.svg',
+  'home': '/app/Home.svg',
+  'creativeTesting': '/app/Creative_Asset_Testing.svg',
+  'brandLift': '/app/Brand_Lift.svg',
+  'brandHealth': '/app/Brand_Health.svg',
+  'billing': '/app/Billing.svg',
 };
 
 // Type definitions
@@ -167,6 +180,30 @@ interface BaseIconProps {
 export type IconProps = BaseIconProps & PathIconProps & React.SVGAttributes<SVGSVGElement>;
 
 /**
+ * Renders a safe fallback question mark icon when other icon methods fail
+ */
+const FallbackIcon: React.FC<Pick<IconProps, 'className' | 'color' | 'size' | 'stroke'>> = ({ 
+  className, color = 'red', size = 'md', ...props 
+}) => {
+  // Set the size based on the size prop
+  const sizeClasses = {
+    xs: 'w-3 h-3',
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6',
+    xl: 'w-8 h-8',
+  };
+  
+  return (
+    <SafeQuestionMarkIcon 
+      className={cn(sizeClasses[size], className)}
+      style={{ color }}
+      {...props}
+    />
+  );
+};
+
+/**
  * Icon component that can render various types of icons:
  * - UI icons (from UI_ICON_MAP)
  * - KPI icons (from KPI_ICON_URLS)
@@ -197,164 +234,205 @@ export const Icon: React.FC<IconProps> = ({
     xl: 'w-8 h-8',
   };
 
+  // If all icon props are undefined, return the fallback icon
+  if (!name && !kpiName && !appName && !platformName && !fontAwesome && !path) {
+    console.warn('[Icon] No icon specified (name, kpiName, appName, platformName, fontAwesome, or path)');
+    return <FallbackIcon size={size} className={className} color="red" {...props} />;
+  }
+
   // Use specified icon through name prop - prioritize ui icons
   if (name) {
-    // Use Font Awesome icons - FIXED: the solid/outline logic was inverted
-    const faIcon = solid 
-      ? UI_ICON_MAP[name as keyof typeof UI_ICON_MAP]
-      : UI_OUTLINE_ICON_MAP[name as keyof typeof UI_OUTLINE_ICON_MAP];
+    try {
+      // Use Font Awesome icons - FIXED: the solid/outline logic was inverted
+      let faIcon = solid 
+        ? UI_ICON_MAP[name as keyof typeof UI_ICON_MAP]
+        : UI_OUTLINE_ICON_MAP[name as keyof typeof UI_OUTLINE_ICON_MAP];
       
-    if (faIcon) {
-      return (
-        <FontAwesomeIcon
-          icon={faIcon}
-          className={cn(sizeClasses[size], className)}
-          color={color}
-          {...props as any}
-        />
-      );
+      // If there's no match in the map, try with getIcon for dynamic generation
+      if (!faIcon) {
+        const style = solid ? 'fas' : 'fal';
+        const iconName = String(name).toLowerCase().replace(/([A-Z])/g, "-$1").toLowerCase();
+        faIcon = getIcon(iconName, style);
+      }
+        
+      if (faIcon) {
+        return (
+          <FontAwesomeIcon
+            icon={faIcon}
+            className={cn(sizeClasses[size], className)}
+            color={color}
+            {...props as any}
+          />
+        );
+      }
+      
+      // If no matching Font Awesome icon, use the direct fallback
+      console.warn(`[Icon] No Font Awesome icon found for name "${name}"`);
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
+    } catch (e) {
+      console.error(`[Icon] Error rendering icon with name "${name}":`, e);
+      // Return the direct fallback icon
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
     }
-    
-    // If no matching Font Awesome icon, display a warning icon
-    console.warn(`[Icon] No Font Awesome icon found for name "${name}"`);
-    return (
-      <FontAwesomeIcon
-        icon={UI_ICON_MAP.warning}
-        className={cn(sizeClasses[size], className)}
-        color="red"
-        {...props as any}
-      />
-    );
   }
 
   // Use KPI icon through kpiName prop
   if (kpiName && KPI_ICON_URLS[kpiName]) {
-    // Extract SVG props to avoid passing them to the img element
-    const { children, dangerouslySetInnerHTML, ...imgProps } = props;
-    
-    // Using both the URL-based approach and CSS classes for maximum compatibility
-    return (
-      <span 
-        className={cn(`kpi-icon kpi-${kpiName.toLowerCase().replace(/([A-Z])/g, "-$1").toLowerCase()}`, sizeClasses[size], className)}
-        style={{ color }}
-        {...imgProps as React.HTMLAttributes<HTMLSpanElement>}
-      >
-        <img 
-          src={KPI_ICON_URLS[kpiName]} 
-          alt={kpiName}
-          className="w-full h-full"
-        />
-      </span>
-    );
+    try {
+      // Extract SVG props to avoid passing them to the img element
+      const { children, dangerouslySetInnerHTML, ...imgProps } = props;
+      
+      // Using both the URL-based approach and CSS classes for maximum compatibility
+      return (
+        <span 
+          className={cn(`kpi-icon kpi-${String(kpiName).toLowerCase().replace(/([A-Z])/g, "-$1").toLowerCase()}`, sizeClasses[size], className)}
+          style={{ color }}
+          {...imgProps as React.HTMLAttributes<HTMLSpanElement>}
+        >
+          <img 
+            src={KPI_ICON_URLS[kpiName]} 
+            alt={String(kpiName)}
+            className="w-full h-full"
+          />
+        </span>
+      );
+    } catch (e) {
+      console.error(`[Icon] Error rendering KPI icon "${kpiName}":`, e);
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
+    }
   }
 
   // Use app icon through appName prop
   if (appName && APP_ICON_URLS[appName]) {
-    // Extract SVG props to avoid passing them to the img element
-    const { children, dangerouslySetInnerHTML, ...imgProps } = props;
-    
-    // Using both the URL-based approach and CSS classes for maximum compatibility
-    return (
-      <span 
-        className={cn(`app-icon icon-${appName.toLowerCase()}`, active && 'app-icon-active', sizeClasses[size], className)}
-        style={{ color }}
-        {...imgProps as React.HTMLAttributes<HTMLSpanElement>}
-      >
-        <img 
-          src={APP_ICON_URLS[appName]} 
-          alt={appName}
-          className="w-full h-full"
-        />
-      </span>
-    );
+    try {
+      // Extract SVG props to avoid passing them to the img element
+      const { children, dangerouslySetInnerHTML, ...imgProps } = props;
+      
+      // Using both the URL-based approach and CSS classes for maximum compatibility
+      return (
+        <span 
+          className={cn(`app-icon icon-${String(appName).toLowerCase()}`, active && 'app-icon-active', sizeClasses[size], className)}
+          style={{ color }}
+          {...imgProps as React.HTMLAttributes<HTMLSpanElement>}
+        >
+          <img 
+            src={APP_ICON_URLS[appName]} 
+            alt={String(appName)}
+            className="w-full h-full"
+          />
+        </span>
+      );
+    } catch (e) {
+      console.error(`[Icon] Error rendering app icon "${appName}":`, e);
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
+    }
   }
 
   // Use platform icon through platformName prop
   if (platformName) {
-    // Use Font Awesome implementation
-    const faPlatformIcon = PLATFORM_ICON_MAP[platformName as keyof typeof PLATFORM_ICON_MAP];
-    
-    if (faPlatformIcon) {
-      const platformColor = solid ? PLATFORM_COLORS[platformName as keyof typeof PLATFORM_COLORS] : 'currentColor';
+    try {
+      // Use Font Awesome implementation
+      const faPlatformIcon = PLATFORM_ICON_MAP[platformName as keyof typeof PLATFORM_ICON_MAP];
       
-      return (
-        <FontAwesomeIcon
-          icon={faPlatformIcon}
-          className={cn(sizeClasses[size], className)}
-          color={platformColor}
-          {...props as any}
-        />
-      );
+      if (faPlatformIcon) {
+        const platformColor = solid ? PLATFORM_COLORS[platformName as keyof typeof PLATFORM_COLORS] : 'currentColor';
+        
+        return (
+          <FontAwesomeIcon
+            icon={faPlatformIcon}
+            className={cn(sizeClasses[size], className)}
+            color={platformColor}
+            {...props as any}
+          />
+        );
+      }
+      
+      // If no matching Font Awesome icon, try with getIcon for dynamic generation
+      try {
+        const brandIcon = getIcon(String(platformName), 'fab');
+        return (
+          <FontAwesomeIcon
+            icon={brandIcon}
+            className={cn(sizeClasses[size], className)}
+            color={color}
+            {...props as any}
+          />
+        );
+      } catch (innerError) {
+        console.error(`[Icon] Error getting brand icon for "${platformName}":`, innerError);
+        return <FallbackIcon size={size} className={className} color="red" {...props} />;
+      }
+    } catch (e) {
+      console.error(`[Icon] Error rendering platform icon "${platformName}":`, e);
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
     }
-    
-    // If no matching Font Awesome icon, display a warning icon
-    console.warn(`[Icon] No Font Awesome icon found for platform "${platformName}"`);
-    return (
-      <FontAwesomeIcon
-        icon={UI_ICON_MAP.warning}
-        className={cn(sizeClasses[size], className)}
-        color="red"
-        {...props as any}
-      />
-    );
   }
   
   // Use Font Awesome icon
   if (fontAwesome) {
-    // Extract icon name and prefix from the string
-    const parts = fontAwesome.split(' ');
-    let prefix: string;
-    let iconName: string;
-    
-    if (parts.length === 2) {
-      // Format like "fa-solid fa-user"
-      prefix = parts[0].replace('fa-', '');
-      iconName = parts[1].replace('fa-', '');
-    } else {
-      // Default to solid and assume single part is the icon name
-      prefix = 'solid';
-      iconName = parts[0].replace('fa-', '');
+    try {
+      // Extract icon name and prefix from the string
+      const parts = fontAwesome.split(' ');
+      let prefix: string;
+      let iconName: string;
+      
+      if (parts.length === 2) {
+        // Format like "fa-solid fa-user"
+        prefix = parts[0].replace('fa-', '');
+        iconName = parts[1].replace('fa-', '');
+      } else {
+        // Default to solid and assume single part is the icon name
+        prefix = 'solid';
+        iconName = parts[0].replace('fa-', '');
+      }
+      
+      // Try to use getIcon for safer icon retrieval
+      try {
+        const faIcon = getIcon(iconName, prefix as any);
+        return (
+          <FontAwesomeIcon
+            icon={faIcon}
+            className={cn(sizeClasses[size], className)}
+            color={color}
+            {...props as any}
+          />
+        );
+      } catch (innerError) {
+        console.error(`[Icon] Error getting icon for "${fontAwesome}":`, innerError);
+        return <FallbackIcon size={size} className={className} color="red" {...props} />;
+      }
+    } catch (e) {
+      console.error(`[Icon] Error rendering Font Awesome icon "${fontAwesome}":`, e);
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
     }
-    
-    return (
-      <FontAwesomeIcon
-        icon={[prefix as any, iconName]}
-        className={cn(sizeClasses[size], className)}
-        color={color}
-        {...props as any}
-      />
-    );
   }
 
   // If a custom path is provided, render a custom SVG
   if (path) {
-    return (
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        className={cn(sizeClasses[size], className)}
-        {...props}
-      >
-        <path d={path} />
-      </svg>
-    );
+    try {
+      return (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox={props.viewBox || "0 0 24 24"}
+          fill={props.fill || "none"}
+          stroke={color} 
+          strokeWidth={props.strokeWidth || "2"}
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          className={cn(sizeClasses[size], className)}
+          {...props}
+        >
+          <path d={path} />
+        </svg>
+      );
+    } catch (e) {
+      console.error(`[Icon] Error rendering path icon:`, e);
+      return <FallbackIcon size={size} className={className} color="red" {...props} />;
+    }
   }
 
-  // Fallback to empty SVG if no icon type is specified
-  return (
-    <svg 
-      className={cn(sizeClasses[size], className)}
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    />
-  );
+  // Final fallback for any other edge cases
+  return <FallbackIcon size={size} className={className} color="red" {...props} />;
 };
 
 export default Icon; 
