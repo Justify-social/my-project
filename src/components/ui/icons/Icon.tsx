@@ -124,6 +124,7 @@ const faChart = faChartBar;
 const faMoney = faMoneyBill;
 const faMagnifyingGlass = faSearch;
 const faXMark = faClose;
+const faPhoto = faImage;
 
 // Light icon aliases
 const falClose = falXmark;
@@ -150,6 +151,7 @@ const falChart = falChartBar;
 const falMoney = falMoneyBill;
 const falMagnifyingGlass = falSearch;
 const falXMark = falClose;
+const falPhoto = falImage;
 
 // Register all icons with library to ensure they're available throughout the app
 library.add(

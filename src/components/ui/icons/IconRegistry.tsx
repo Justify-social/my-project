@@ -21,7 +21,7 @@ import {
   faShield, faClock, faArrowDown, faArrowUp, faArrowRight, faArrowLeft,
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faQuestion,
-  // Add missing icons
+  // Make sure we add Image (previously Camera)
   faImage, faChartColumn, faUserCircle
 } from '@fortawesome/pro-solid-svg-icons';
 
@@ -54,7 +54,7 @@ import {
   faPalette as falPalette, faCreditCard as falCreditCard, 
   faClockRotateLeft as falClockRotateLeft, faChartLine as falChartLine, 
   faTable as falTable, faQuestion as falQuestion,
-  // Add missing icons for light variant
+  // Make sure we add light variants of Image (previously Camera)
   faImage as falImage, faChartColumn as falChartColumn, faUserCircle as falUserCircle
 } from '@fortawesome/pro-light-svg-icons';
 
@@ -81,7 +81,8 @@ library.add(
   faShield, faClock, faArrowDown, faArrowUp, faArrowRight, faArrowLeft,
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faQuestion,
-  // Add missing icons
+  
+  // Add image icon instead of camera
   faImage, faChartColumn, faUserCircle,
   
   // Light icons
@@ -99,12 +100,12 @@ library.add(
   falArrowRight, falArrowLeft, falCircleXmark, falMagnifyingGlassPlus, 
   falPalette, falCreditCard, falClockRotateLeft, falChartLine, 
   falTable, falQuestion,
-  // Add missing icons for light variant
+  
+  // Add light version of image icon
   falImage, falChartColumn, falUserCircle,
   
   // Brand icons
   faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faGithub,
-  // Add X Twitter icon
   faXTwitter
 );
 

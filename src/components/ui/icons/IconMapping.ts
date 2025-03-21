@@ -241,8 +241,28 @@ export const FA_UI_OUTLINE_ICON_MAP = FA_UI_LIGHT_ICON_MAP;
 // Icon aliases for backward compatibility (deprecated names → current names)
 export const ICON_ALIASES: Record<string, keyof typeof FA_UI_SOLID_ICON_MAP> = {
   trash: 'delete',
-  // Add more aliases as needed:
-  // oldName: 'newName',
+  userCircle: 'user',  // If userCircle doesn't exist, map it to 'user'
+  pencil: 'edit',
+  'eye-off': 'view',
+  'document-text': 'documentText',
+  'x': 'xMark',
+  'chevron-left': 'chevronLeft',
+  'chevron-right': 'chevronRight',
+  'chevron-up': 'chevronUp',
+  'chevron-down': 'chevronDown',
+  'x-circle': 'xCircle',
+  'check-circle': 'checkCircle',
+  'arrow-up': 'arrowUp',
+  'arrow-down': 'arrowDown',
+  'arrow-left': 'arrowLeft',
+  'arrow-right': 'arrowRight',
+  'user-group': 'userGroup',
+  'light-bulb': 'lightBulb',
+  'chat-bubble': 'chatBubble',
+  'credit-card': 'creditCard',
+  'table-cells': 'tableCells',
+  'chart-bar': 'chartBar',
+  'presentation-chart-bar': 'presentationChartBar'
 };
 
 // Platform icons using brand icons
