@@ -172,7 +172,7 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
       </label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-2.5 text-secondary-color">
+          <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
             {icon}
           </div>
         )}
@@ -181,7 +181,7 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
             as={as}
             id={name}
             name={name}
-            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans`}
+            className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`}
             {...props}
           >
             {children}
@@ -191,16 +191,21 @@ const StyledField = ({ label, name, type = "text", as, children, required = fals
             type={type}
             id={name}
             name={name}
-            className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans`}
+            className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`}
             {...props}
           />
         )}
         {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
         {type === "date" && !icon && (
-          <Icon name="calendar" className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
+          <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+            <Icon name="calendar" className="w-5 h-5" />
+          </div>
         )}
+        {/* Add chevron only for select elements */}
         {as === "select" && (
-          <Icon name="chevronDown" className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color pointer-events-none" />
+          <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-secondary-color pointer-events-none form-icon-container">
+            <Icon name="chevronDown" className="w-5 h-5" />
+          </div>
         )}
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
@@ -224,7 +229,7 @@ const DateField = ({ label, name, required = false, ...props }: any) => {
           className="w-full p-2.5 pr-10 border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans"
           {...props}
         />
-        <Icon className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
+        <Icon name="calendar" className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" />
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
     </div>
@@ -444,8 +449,8 @@ const DateRangePicker = ({
               Start Date
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-2.5 text-secondary-color">
-                <Icon className="w-5 h-5" />
+              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+                <Icon name="calendar" className="w-5 h-5" />
               </div>
               <input
                 type="date"
@@ -453,7 +458,7 @@ const DateRangePicker = ({
                 name={startFieldName}
                 value={startDate}
                 onChange={handleStartDateChange}
-                className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color ${
+                className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color form-input-with-icon ${
                   errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues]
                     ? 'border-red-500'
                     : 'border-gray-300'
@@ -473,8 +478,8 @@ const DateRangePicker = ({
               End Date
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-2.5 text-secondary-color">
-                <Icon className="w-5 h-5" />
+              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+                <Icon name="calendar" className="w-5 h-5" />
               </div>
               <input
                 type="date"
@@ -482,7 +487,7 @@ const DateRangePicker = ({
                 name={endFieldName}
                 value={endDate}
                 onChange={(e) => setFieldValue(endFieldName, e.target.value)}
-                className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color ${
+                className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color form-input-with-icon ${
                   errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues]
                     ? 'border-red-500'
                     : 'border-gray-300'
@@ -502,7 +507,7 @@ const DateRangePicker = ({
         {startDate && endDate && (
           <div className="mt-3 text-sm text-primary-color bg-blue-50 p-2 rounded">
             <div className="flex items-center">
-              <Icon className="w-4 h-4 mr-1 text-accent-color" />
+              <Icon name="info" className="w-4 h-4 mr-1 text-accent-color" />
               <span>Campaign Duration: {calculateDuration(startDate, endDate)}</span>
             </div>
           </div>
@@ -763,7 +768,7 @@ const InfluencerEntry = ({ index, remove, arrayHelpers }: { index: number, remov
             />
             {isValidating && (
               <div className="absolute right-2 top-2">
-                <Icon className="h-5 w-5 text-primary-color animate-spin" />
+                <Icon name="info" className="h-5 w-5 text-primary-color animate-spin" />
               </div>
             )}
           </div>
@@ -781,7 +786,7 @@ const InfluencerEntry = ({ index, remove, arrayHelpers }: { index: number, remov
       {isValidating && (
         <div className="mt-3 text-primary-color flex items-center">
           <span className="animate-spin mr-2">
-            <Icon className="h-4 w-4" />
+            <Icon name="info" className="h-4 w-4" />
           </span>
           Validating influencer...
         </div>
@@ -849,7 +854,7 @@ const InfluencerPreview = ({
     return (
       <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center">
         <div className="animate-spin mr-2">
-          <Icon className="h-4 w-4 text-primary-color" />
+          <Icon name="info" className="h-4 w-4 text-primary-color" />
         </div>
         <p className="text-sm text-gray-600">Validating influencer...</p>
       </div>
@@ -885,7 +890,7 @@ const InfluencerPreview = ({
           />
         ) : (
           <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-            <Icon className="h-6 w-6 text-gray-500" />
+            <Icon name="info" className="h-6 w-6 text-gray-500" />
           </div>
         )}
         <div>
@@ -895,7 +900,7 @@ const InfluencerPreview = ({
             </p>
             {influencerData.verified && (
               <span className="ml-1 text-blue-500">
-                <Icon className="h-4 w-4" />
+                <Icon name="info" className="h-4 w-4" />
               </span>
             )}
           </div>
@@ -1557,7 +1562,7 @@ function FormContent() {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
                     <Image 
-                      src="/Campaigns.svg" 
+                      src="/app/Campaigns.svg" 
                       alt="Campaigns" 
                       width={16} 
                       height={16} 
@@ -1593,7 +1598,7 @@ function FormContent() {
                       name="timeZone"
                       as="select"
                       required
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="globe" className="w-5 h-5" />}
                     >
                       <option value="">Select time zone</option>
                       <option value="UTC">UTC (Coordinated Universal Time)</option>
@@ -1615,7 +1620,7 @@ function FormContent() {
                 {/* Primary Contact */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon name="user" className="w-5 h-5 mr-2 text-accent-color" />
                     Primary Contact
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1624,14 +1629,14 @@ function FormContent() {
                       name="primaryContact.firstName"
                       placeholder="Enter first name"
                       required
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="user" className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Last Name"
                       name="primaryContact.surname"
                       placeholder="Enter last name"
                       required
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="user" className="w-5 h-5" />}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -1641,14 +1646,14 @@ function FormContent() {
                       type="email"
                       placeholder="email@example.com"
                       required
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="mail" className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Position"
                       name="primaryContact.position"
                       as="select"
                       required
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="building" className="w-5 h-5" />}
                     >
                       <option value="">Select Position</option>
                       <option value={Position.Manager}>{Position.Manager}</option>
@@ -1661,7 +1666,7 @@ function FormContent() {
                 {/* Secondary Contact */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon name="userGroup" className="w-5 h-5 mr-2 text-accent-color" />
                     Secondary Contact <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1669,13 +1674,13 @@ function FormContent() {
                       label="First Name"
                       name="secondaryContact.firstName"
                       placeholder="Enter first name"
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="user" className="w-5 h-5" />}
                     />
                     <StyledField
                       label="Last Name"
                       name="secondaryContact.surname"
                       placeholder="Enter last name"
-                      icon={<Icon className="w-5 h-5" />}
+                      icon={<Icon name="user" className="w-5 h-5" />}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -1690,7 +1695,7 @@ function FormContent() {
                       label="Position"
                       name="secondaryContact.position"
                       as="select"
-                      icon={<Icon name="settings" className="w-5 h-5" />}
+                      icon={<Icon name="building" className="w-5 h-5" />}
                     >
                       <option value="">Select Position</option>
                       <option value={Position.Manager}>{Position.Manager}</option>
@@ -1769,7 +1774,7 @@ function FormContent() {
                             label="Position"
                             name={`additionalContacts.${index}.position`}
                             as="select"
-                            icon={<Icon name="settings" className="w-5 h-5" />}
+                            icon={<Icon name="building" className="w-5 h-5" />}
                           >
                             <option value="">Select Position</option>
                             <option value={Position.Manager}>{Position.Manager}</option>
@@ -1791,7 +1796,7 @@ function FormContent() {
                 {/* Influencers */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="user" className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon name="star" className="w-5 h-5 mr-2 text-accent-color" />
                     Influencer Details
                   </h2>
                   <div className="mb-4">
@@ -1830,7 +1835,7 @@ function FormContent() {
                 {/* Budget Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="info" className="w-5 h-5 mr-2 text-accent-color" />
+                    <Icon name="money" className="w-5 h-5 mr-2 text-accent-color" />
                     Budget
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1840,7 +1845,7 @@ function FormContent() {
                         name="currency"
                         as="select"
                         required
-                        icon={<Icon name="info" className="w-5 h-5" />}
+                        icon={<Icon name="money" className="w-5 h-5" />}
                       >
                         <option value="">Select currency</option>
                         <option value={Currency.GBP}>GBP (£)</option>
@@ -1863,7 +1868,7 @@ function FormContent() {
                       type="number"
                       placeholder="5000"
                       required
-                      icon={<Icon name="info" className="w-5 h-5" />}
+                      icon={<Icon name="money" className="w-5 h-5" />}
                     />
                     
                     <StyledField
@@ -1872,7 +1877,7 @@ function FormContent() {
                       type="number"
                       placeholder="3000"
                       required
-                      icon={<Icon name="info" className="w-5 h-5" />}
+                      icon={<Icon name="money" className="w-5 h-5" />}
                     />
                   </div>
                 </div>

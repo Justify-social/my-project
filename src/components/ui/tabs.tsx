@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -129,7 +131,7 @@ export function Tab({ children, id, className, disabled = false }: TabProps) {
           
           // Enclosed variant
           'border-t border-l border-r border-gray-200 rounded-t-md -mb-px bg-white': isActive && variant === 'enclosed',
-          'text-gray-500 hover:text-gray-700': !isActive && variant === 'enclosed',
+          'text-gray-500 hover:text-gray-700 bg-transparent': !isActive && variant === 'enclosed',
           
           // Button variant
           'bg-[#3182CE] text-white': isActive && variant === 'button',

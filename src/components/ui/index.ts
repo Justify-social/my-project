@@ -15,7 +15,7 @@ export * from './progress';
 export * from './tabs';
 export * from './skeleton';
 export * from './colors';
-export * from './form-field';
+export * from './forms';
 export * from './select';
 export * from './checkbox';
 export * from './radio';
@@ -45,7 +45,7 @@ export {
   TableRowSkeleton 
 } from './skeleton';
 export { Container } from './container';
-export { FormField } from './form-field';
+export { FormField, FormStyleReset } from './forms';
 export { Grid } from './grid';
 export { List } from './list';
 export { Table } from './table';

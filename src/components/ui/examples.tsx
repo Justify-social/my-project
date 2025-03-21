@@ -6,10 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardHeader, 
-  CardContent, 
+import {
+  Card,
+  CardHeader,
+  CardContent,
   CardFooter,
   MetricCard,
   Spinner,
@@ -29,31 +29,31 @@ import {
   TabList,
   Tab,
   TabPanels,
-  TabPanel
-} from './';
+  TabPanel } from
+'./';
 
 // Import from the new icons structure
-import { 
-  Icon, 
+import {
+  Icon,
   IconName,
   KpiIconName,
   AppIconName,
   PlatformIconName,
-  UI_ICON_MAP, 
+  UI_ICON_MAP,
   UI_OUTLINE_ICON_MAP,
-  PLATFORM_ICON_MAP, 
+  PLATFORM_ICON_MAP,
   PLATFORM_COLORS,
   KPI_ICON_URLS,
   APP_ICON_URLS,
-  migrateHeroIcon
-} from './icons';
+  migrateHeroIcon } from
+'./icons';
 
 import { Container } from './container';
 import { Grid } from './grid';
 import { Alert } from './alert';
 import { useToast, ToastProvider } from './toast';
 import { ComponentNav } from './ComponentNav';
-import { FormField } from './form-field';
+import { FormField } from './forms/form-controls';
 import { Select } from './select';
 import { Checkbox } from './checkbox';
 import { Radio, RadioGroup } from './radio';
@@ -146,45 +146,45 @@ export function ButtonExamples() {
         <div className="flex flex-wrap gap-4 items-center">
           <div>
             <p className="text-sm text-gray-500 mb-2">Left Icon</p>
-            <Button 
+            <Button
               leftIcon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="16" />
                   <line x1="8" y1="12" x2="16" y2="12" />
                 </svg>
-              }
-            >
+              }>
+
               Add Item
             </Button>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Right Icon</p>
-            <Button 
+            <Button
               rightIcon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
-              }
-            >
+              }>
+
               Next
             </Button>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Both Icons</p>
-            <Button 
+            <Button
               leftIcon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                 </svg>
               }
               rightIcon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
-              }
-            >
+              }>
+
               Options
             </Button>
           </div>
@@ -195,15 +195,15 @@ export function ButtonExamples() {
         <h2 className="text-lg font-semibold mb-4">Full Width Button</h2>
         <Button fullWidth>Full Width Button</Button>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function InputExamples() {
   const [value, setValue] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  
+
   return (
     <div className="space-y-8" id="inputs">
       <div>
@@ -215,8 +215,8 @@ export function InputExamples() {
               label="Full Name"
               placeholder="Enter your full name"
               value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
+              onChange={(e) => setValue(e.target.value)} />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Email Input</p>
@@ -224,8 +224,8 @@ export function InputExamples() {
               type="email"
               label="Email Address"
               placeholder="you@example.com"
-              helpText="We'll never share your email."
-            />
+              helpText="We'll never share your email." />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Password Input</p>
@@ -234,8 +234,8 @@ export function InputExamples() {
               label="Password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+              onChange={(e) => setPassword(e.target.value)} />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Number Input</p>
@@ -244,8 +244,8 @@ export function InputExamples() {
               label="Age"
               placeholder="Enter your age"
               min={0}
-              max={120}
-            />
+              max={120} />
+
           </div>
         </div>
       </div>
@@ -259,32 +259,32 @@ export function InputExamples() {
               label="Username"
               placeholder="Enter your username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
+              onChange={(e) => setUsername(e.target.value)} />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Disabled</p>
             <Input
               label="Disabled Input"
               placeholder="This input is disabled"
-              disabled
-            />
+              disabled />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">With Help Text</p>
             <Input
               label="Username"
               placeholder="Choose a username"
-              helpText="Username must be between 3-20 characters."
-            />
+              helpText="Username must be between 3-20 characters." />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">With Error</p>
             <Input
               label="Email"
               placeholder="you@example.com"
-              error="Please enter a valid email address."
-            />
+              error="Please enter a valid email address." />
+
           </div>
         </div>
       </div>
@@ -296,22 +296,22 @@ export function InputExamples() {
             <p className="text-sm text-gray-500 mb-2">Small</p>
             <Input
               inputSize="sm"
-              placeholder="Small input"
-            />
+              placeholder="Small input" />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Medium (default)</p>
             <Input
               inputSize="md"
-              placeholder="Medium input"
-            />
+              placeholder="Medium input" />
+
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Large</p>
             <Input
               inputSize="lg"
-              placeholder="Large input"
-            />
+              placeholder="Large input" />
+
           </div>
         </div>
       </div>
@@ -328,8 +328,8 @@ export function InputExamples() {
               <Input
                 type="text"
                 placeholder="Search..."
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
           </div>
           
@@ -339,8 +339,8 @@ export function InputExamples() {
               <Input
                 type="email"
                 placeholder="Enter your email"
-                className="pr-10"
-              />
+                className="pr-10" />
+
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <Icon name="settings" className="h-5 w-5 text-gray-400" />
               </div>
@@ -356,8 +356,8 @@ export function InputExamples() {
               <Input
                 type="password"
                 placeholder="Enter your password"
-                className="pl-10 pr-10"
-              />
+                className="pl-10 pr-10" />
+
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <Icon name="settings" className="h-5 w-5 text-gray-400" />
               </div>
@@ -371,95 +371,95 @@ export function InputExamples() {
         <Input
           fullWidth
           label="Address"
-          placeholder="Enter your full address"
-        />
+          placeholder="Enter your full address" />
+
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export const IconExamples = () => {
   // General UI Icons (FontAwesome)
-  const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter(icon => 
-    typeof icon === 'string' && 
-    icon.trim() !== '' &&
-    typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'undefined' &&
-    UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined &&
-    UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== null &&
-    // Make sure the icon is not an empty object
-    (typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'object' || 
-      Object.keys(UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] as any).length > 0)
+  const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter((icon) =>
+  typeof icon === 'string' &&
+  icon.trim() !== '' &&
+  typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'undefined' &&
+  UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined &&
+  UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== null && (
+  // Make sure the icon is not an empty object
+  typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'object' ||
+  Object.keys(UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] as any).length > 0)
   );
-  
+
   // KPI icons
-  const kpiIconNames = Object.keys(KPI_ICON_URLS).sort().filter(icon => 
-    typeof icon === 'string' && 
-    icon.trim() !== '' &&
-    typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== 'undefined' &&
-    KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined &&
-    KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== null &&
-    // Make sure the URL is a non-empty string
-    typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] === 'string' &&
-    (KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] as string).trim() !== ''
+  const kpiIconNames = Object.keys(KPI_ICON_URLS).sort().filter((icon) =>
+  typeof icon === 'string' &&
+  icon.trim() !== '' &&
+  typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== 'undefined' &&
+  KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined &&
+  KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== null &&
+  // Make sure the URL is a non-empty string
+  typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] === 'string' &&
+  (KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] as string).trim() !== ''
   );
-  
+
   // App icons (navigation, special)
-  const appIconNames = Object.keys(APP_ICON_URLS).sort().filter(icon => 
-    typeof icon === 'string' && 
-    icon.trim() !== '' &&
-    typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== 'undefined' &&
-    APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined &&
-    APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== null &&
-    // Make sure the URL is a non-empty string
-    typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] === 'string' &&
-    (APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] as string).trim() !== ''
+  const appIconNames = Object.keys(APP_ICON_URLS).sort().filter((icon) =>
+  typeof icon === 'string' &&
+  icon.trim() !== '' &&
+  typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== 'undefined' &&
+  APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined &&
+  APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== null &&
+  // Make sure the URL is a non-empty string
+  typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] === 'string' &&
+  (APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] as string).trim() !== ''
   );
-  
+
   // Platform icons
-  const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort().filter(icon => 
-    typeof icon === 'string' && 
-    icon.trim() !== '' &&
-    typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'undefined' &&
-    PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined &&
-    PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== null &&
-    // Make sure the icon is not an empty object
-    (typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'object' || 
-      Object.keys(PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] as any).length > 0)
+  const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort().filter((icon) =>
+  typeof icon === 'string' &&
+  icon.trim() !== '' &&
+  typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'undefined' &&
+  PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined &&
+  PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== null && (
+  // Make sure the icon is not an empty object
+  typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'object' ||
+  Object.keys(PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] as any).length > 0)
   );
-  
+
   // State for tracking hovered icons
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
-  
+
   // Ensure all icons in the categories exist in the maps
   const essentialIcons = [
-    'bell', 'calendar', 'check', 'close', 'delete',
-    'info', 'mail', 'menu', 'minus', 'plus',
-    'search', 'settings', 'user', 'warning',
-  ].filter(icon => icon in UI_ICON_MAP);
-  
+  'bell', 'calendar', 'check', 'close', 'delete',
+  'info', 'mail', 'menu', 'minus', 'plus',
+  'search', 'settings', 'user', 'warning'].
+  filter((icon) => icon in UI_ICON_MAP);
+
   const navigationIcons = [
-    'chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight',
-    'home', 'menu',
-  ].filter(icon => icon in UI_ICON_MAP);
-  
+  'chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight',
+  'home', 'menu'].
+  filter((icon) => icon in UI_ICON_MAP);
+
   const actionIcons = [
-    'view', 'edit', 'copy', 'delete',
-    'download', 'upload', 'share',
-  ].filter(icon => icon in UI_ICON_MAP);
-  
+  'view', 'edit', 'copy', 'delete',
+  'download', 'upload', 'share'].
+  filter((icon) => icon in UI_ICON_MAP);
+
   const objectIcons = [
-    'heart', 'star', 'bookmark', 'file',
-    'tag', 'filter', 'paperclip',
-  ].filter(icon => icon in UI_ICON_MAP);
-  
+  'heart', 'star', 'bookmark', 'file',
+  'tag', 'filter', 'paperclip'].
+  filter((icon) => icon in UI_ICON_MAP);
+
   const layoutIcons = [
-    'grid', 'list', 'table',
-  ].filter(icon => icon in UI_ICON_MAP);
-  
+  'grid', 'list', 'table'].
+  filter((icon) => icon in UI_ICON_MAP);
+
   const securityIcons = [
-    'lock', 'unlock', 'key',
-  ].filter(icon => icon in UI_ICON_MAP);
-  
+  'lock', 'unlock', 'key'].
+  filter((icon) => icon in UI_ICON_MAP);
+
   return (
     <div className="space-y-12" id="icons">
       <div className="space-y-6">
@@ -519,12 +519,12 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Essential UI Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
-            {essentialIcons.map((name) => (
-              <div key={name} className="flex flex-col items-center">
+            {essentialIcons.map((name) =>
+            <div key={name} className="flex flex-col items-center">
                 <Icon name={name as IconName} className="mb-2" />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
@@ -532,12 +532,12 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Navigation Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6">
-            {navigationIcons.map((name) => (
-              <div key={name} className="flex flex-col items-center">
+            {navigationIcons.map((name) =>
+            <div key={name} className="flex flex-col items-center">
                 <Icon name={name as IconName} className="mb-2" />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
@@ -545,12 +545,12 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Action Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
-            {actionIcons.map((name) => (
-              <div key={name} className="flex flex-col items-center">
+            {actionIcons.map((name) =>
+            <div key={name} className="flex flex-col items-center">
                 <Icon name={name as IconName} className="mb-2" />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
-            ))}
+            )}
             <div className="flex flex-col items-center">
               <Icon name="view" solid className="mb-2" />
               <span className="text-xs text-gray-500">view (solid)</span>
@@ -574,12 +574,12 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Object Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
-            {objectIcons.map((name) => (
-              <div key={name} className="flex flex-col items-center">
+            {objectIcons.map((name) =>
+            <div key={name} className="flex flex-col items-center">
                 <Icon name={name as IconName} className="mb-2" />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
@@ -587,18 +587,18 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">App Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
-            {appIconNames.map((name) => (
-              <div key={name} className="flex flex-col items-center group cursor-pointer">
+            {appIconNames.map((name) =>
+            <div key={name} className="flex flex-col items-center group cursor-pointer">
                 <div className="relative mb-2" style={{ width: '32px', height: '32px' }}>
-                  <Icon 
-                    appName={name as AppIconName} 
-                    size="xl"
-                    className="absolute"
-                  />
+                  <Icon name="info"
+                  appName={name as AppIconName}
+                  size="xl"
+                  className="absolute" />
+
                 </div>
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
@@ -606,17 +606,17 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">KPI Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {kpiIconNames.map((name) => (
-              <div key={name} className="flex flex-col items-center group cursor-pointer">
+            {kpiIconNames.map((name) =>
+            <div key={name} className="flex flex-col items-center group cursor-pointer">
                 <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
-                  <Icon 
-                    kpiName={name as KpiIconName}
-                    className="absolute"
-                  />
+                  <Icon name="info"
+                  kpiName={name as KpiIconName}
+                  className="absolute" />
+
                 </div>
                 <span className="text-xs text-gray-500">{name}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
@@ -624,31 +624,31 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Platform Icons</h3>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
-            {platformIconNames.map((name) => (
-              <div key={name} className="flex flex-col items-center group cursor-pointer">
+            {platformIconNames.map((name) =>
+            <div key={name} className="flex flex-col items-center group cursor-pointer">
                 <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
-                  <Icon 
-                    platformName={name as PlatformIconName} 
-                    solid 
-                    className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
-                  />
+                  <Icon name="info"
+                  platformName={name as PlatformIconName}
+                  solid
+                  className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" />
+
                 </div>
                 <span className="text-xs text-gray-500">{name} (solid)</span>
               </div>
-            ))}
+            )}
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
-            {platformIconNames.map((name) => (
-              <div key={`${name}-outline`} className="flex flex-col items-center group cursor-pointer">
+            {platformIconNames.map((name) =>
+            <div key={`${name}-outline`} className="flex flex-col items-center group cursor-pointer">
                 <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
-                  <Icon 
-                    platformName={name as PlatformIconName} 
-                    className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" 
-                  />
+                  <Icon name="info"
+                  platformName={name as PlatformIconName}
+                  className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" />
+
                 </div>
                 <span className="text-xs text-gray-500">{name} (outline)</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         
@@ -656,74 +656,74 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Icons with Button</h3>
           <div className="flex flex-wrap gap-4">
-            <Button 
-              leftIcon={<Icon name="search" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon name="search" size="sm" />}>
+
               Search
             </Button>
-            <Button 
-              rightIcon={<Icon name="chevronRight" size="sm" />}
-            >
+            <Button
+              rightIcon={<Icon name="chevronRight" size="sm" />}>
+
               Next
             </Button>
-            <Button 
+            <Button
               leftIcon={<Icon name="plus" size="sm" />}
-              variant="secondary"
-            >
+              variant="secondary">
+
               Add Item
             </Button>
-            <Button 
+            <Button
               leftIcon={<Icon appName="home" size="sm" />}
-              variant="outline"
-            >
+              variant="outline">
+
               Home
             </Button>
-            <Button 
+            <Button
               leftIcon={<Icon name="delete" size="sm" />}
-              variant="danger"
-            >
+              variant="danger">
+
               Delete
             </Button>
-            <Button 
+            <Button
               leftIcon={<Icon name="calendar" size="sm" />}
-              variant="ghost"
-            >
+              variant="ghost">
+
               Budget
             </Button>
-            <Button 
-              leftIcon={<Icon platformName="instagram" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon platformName="instagram" size="sm" />}>
+
               Instagram
             </Button>
-            <Button 
-              leftIcon={<Icon platformName="youtube" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon platformName="youtube" size="sm" />}>
+
               YouTube
             </Button>
-            <Button 
-              leftIcon={<Icon platformName="facebook" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon platformName="facebook" size="sm" />}>
+
               Facebook
             </Button>
-            <Button 
-              leftIcon={<Icon platformName="x" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon platformName="x" size="sm" />}>
+
               X
             </Button>
-            <Button 
-              leftIcon={<Icon platformName="linkedin" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon platformName="linkedin" size="sm" />}>
+
               LinkedIn
             </Button>
-            <Button 
-              leftIcon={<Icon platformName="tiktok" size="sm" />}
-            >
+            <Button
+              leftIcon={<Icon platformName="tiktok" size="sm" />}>
+
               TikTok
             </Button>
-            <Button 
+            <Button
               leftIcon={<Icon appName="profile" size="sm" />}
-              variant="link"
-            >
+              variant="link">
+
               Profile
             </Button>
           </div>
@@ -739,8 +739,8 @@ export const IconExamples = () => {
               </div>
               <Input
                 placeholder="Search..."
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -748,8 +748,8 @@ export const IconExamples = () => {
               </div>
               <Input
                 placeholder="Enter your email"
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -757,8 +757,8 @@ export const IconExamples = () => {
               </div>
               <Input
                 placeholder="Campaign ID..."
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -766,8 +766,8 @@ export const IconExamples = () => {
               </div>
               <Input
                 placeholder="Upload document..."
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -775,8 +775,8 @@ export const IconExamples = () => {
               </div>
               <Input
                 placeholder="Enter amount..."
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -784,8 +784,8 @@ export const IconExamples = () => {
               </div>
               <Input
                 placeholder="YouTube channel..."
-                className="pl-10"
-              />
+                className="pl-10" />
+
             </div>
           </div>
         </div>
@@ -796,15 +796,15 @@ export const IconExamples = () => {
           <p className="text-sm text-gray-500">The Icon component can render custom SVG paths directly.</p>
           <div className="flex space-x-12">
             <div className="flex flex-col items-center">
-              <Icon path="M12 4v16m8-8H4" className="mb-2" />
+              <Icon name="info" path="M12 4v16m8-8H4" className="mb-2" />
               <span className="text-xs text-gray-500">Custom Plus Icon</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon path="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0" className="mb-2" />
+              <Icon name="info" path="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0" className="mb-2" />
               <span className="text-xs text-gray-500">Custom Eye Icon</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon path="M8 2v4M12 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z" className="mb-2" />
+              <Icon name="info" path="M8 2v4M12 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z" className="mb-2" />
               <span className="text-xs text-gray-500">Custom Calendar Icon</span>
             </div>
           </div>
@@ -874,8 +874,8 @@ export const IconExamples = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export function CardExamples() {
@@ -952,11 +952,11 @@ export function CardExamples() {
             <CardHeader
               icon={<Icon name="info" className="w-5 h-5 text-[#3182CE]" />}
               actions={
-                <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm">
                   <Icon name="settings" className="w-4 h-4" />
                 </Button>
-              }
-            >
+              }>
+
               <h3 className="text-lg font-medium">Card with Icon</h3>
             </CardHeader>
             <CardContent>
@@ -997,8 +997,8 @@ export function CardExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function TypographyExamples() {
@@ -1228,8 +1228,8 @@ export function TypographyExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function ContainerExamples() {
@@ -1266,8 +1266,8 @@ export function ContainerExamples() {
           </Container>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function GridExamples() {
@@ -1279,27 +1279,27 @@ export function GridExamples() {
         <div>
           <p className="text-sm text-gray-500 mb-2">1 column grid (default)</p>
           <Grid className="mb-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#00BFFF]/10 p-4 text-center rounded">Item {i}</div>
-            ))}
+            {[1, 2, 3].map((i) =>
+            <div key={i} className="bg-[#00BFFF]/10 p-4 text-center rounded">Item {i}</div>
+            )}
           </Grid>
         </div>
         
         <div>
           <p className="text-sm text-gray-500 mb-2">2 column grid</p>
           <Grid cols={2} className="mb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-green-100 p-4 text-center rounded">Item {i}</div>
-            ))}
+            {[1, 2, 3, 4].map((i) =>
+            <div key={i} className="bg-green-100 p-4 text-center rounded">Item {i}</div>
+            )}
           </Grid>
         </div>
         
         <div>
           <p className="text-sm text-gray-500 mb-2">Responsive grid (1→2→3→4 columns)</p>
           <Grid cols={1} colsSm={2} colsMd={3} colsLg={4} className="mb-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="bg-purple-100 p-4 text-center rounded">Item {i}</div>
-            ))}
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) =>
+            <div key={i} className="bg-purple-100 p-4 text-center rounded">Item {i}</div>
+            )}
           </Grid>
         </div>
         
@@ -1308,29 +1308,29 @@ export function GridExamples() {
           <div className="space-y-4">
             <p className="text-xs text-gray-500">Small gap (sm)</p>
             <Grid cols={3} gap="sm" className="mb-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>
-              ))}
+              {[1, 2, 3].map((i) =>
+              <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>
+              )}
             </Grid>
             
             <p className="text-xs text-gray-500">Large gap (lg)</p>
             <Grid cols={3} gap="lg" className="mb-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>
-              ))}
+              {[1, 2, 3].map((i) =>
+              <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>
+              )}
             </Grid>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function AlertExamples() {
   // State for dismissible alerts
   const [showInfo, setShowInfo] = useState(true);
   const [showWarning, setShowWarning] = useState(true);
-  
+
   return (
     <div className="space-y-8" id="alerts">
       <h2 className="text-lg font-semibold mb-4">Alert Styles</h2>
@@ -1371,40 +1371,40 @@ export function AlertExamples() {
         
         <div>
           <h3 className="text-md font-medium mb-3">Dismissible Alerts</h3>
-          {showInfo && (
-            <div className="mb-3">
-              <Alert 
-                variant="info" 
-                dismissible 
-                onDismiss={() => setShowInfo(false)}
-                title="Information"
-              >
+          {showInfo &&
+          <div className="mb-3">
+              <Alert
+              variant="info"
+              dismissible
+              onDismiss={() => setShowInfo(false)}
+              title="Information">
+
                 This alert can be dismissed by clicking the X button.
               </Alert>
             </div>
-          )}
+          }
           
-          {showWarning && (
-            <Alert 
-              variant="warning" 
-              dismissible 
-              onDismiss={() => setShowWarning(false)}
-            >
+          {showWarning &&
+          <Alert
+            variant="warning"
+            dismissible
+            onDismiss={() => setShowWarning(false)}>
+
               This is a dismissible warning alert.
             </Alert>
-          )}
+          }
           
-          {(!showInfo || !showWarning) && (
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowInfo(true);
-                setShowWarning(true);
-              }}
-            >
+          {(!showInfo || !showWarning) &&
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowInfo(true);
+              setShowWarning(true);
+            }}>
+
               Reset Dismissible Alerts
             </Button>
-          )}
+          }
         </div>
         
         <div>
@@ -1428,8 +1428,8 @@ export function AlertExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function ToastExamples() {
@@ -1441,7 +1441,7 @@ export function ToastExamples() {
       position: 'top-right'
     });
   };
-  
+
   const showCompactErrorToast = () => {
     error('Failed to load campaign data', {
       style: 'compact',
@@ -1469,21 +1469,21 @@ export function ToastExamples() {
       position: 'top-center'
     });
   };
-  
+
   const showBannerErrorToast = () => {
     error('An error occurred. Please try again.', {
       style: 'banner',
       position: 'top-center'
     });
   };
-  
+
   const showBannerInfoToast = () => {
     info('This is an informational message.', {
       style: 'banner',
       position: 'top-center'
     });
   };
-  
+
   const showBannerWarningToast = () => {
     warning('Warning: This action cannot be undone.', {
       style: 'banner',
@@ -1607,8 +1607,8 @@ export function ToastExamples() {
           Persistent
         </Button>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function FormComponentsExamples() {
@@ -1619,7 +1619,7 @@ export function FormComponentsExamples() {
     withLabel: false,
     disabled: false
   });
-  
+
   return (
     <div className="space-y-8" id="form-components">
       {/* FormField Examples */}
@@ -1629,8 +1629,8 @@ export function FormComponentsExamples() {
           <FormField
             label="Basic Input"
             id="basic-input"
-            helperText="This is a basic form field with helper text"
-          >
+            helperText="This is a basic form field with helper text">
+
             <Input placeholder="Enter your name" />
           </FormField>
           
@@ -1638,16 +1638,16 @@ export function FormComponentsExamples() {
             label="Required Field"
             id="required-input"
             required
-            helperText="This field is required"
-          >
+            helperText="This field is required">
+
             <Input placeholder="Required field" />
           </FormField>
           
           <FormField
             label="With Error"
             id="error-input"
-            error="This field has an error message"
-          >
+            error="This field has an error message">
+
             <Input placeholder="Error state" />
           </FormField>
           
@@ -1655,8 +1655,8 @@ export function FormComponentsExamples() {
             label="With Icons"
             id="icon-input"
             startIcon={<Icon name="user" className="h-5 w-5 text-gray-400" />}
-            endIcon={<Icon name="info" className="h-5 w-5 text-gray-400" />}
-          >
+            endIcon={<Icon name="info" className="h-5 w-5 text-gray-400" />}>
+
             <Input placeholder="Enter username" />
           </FormField>
           
@@ -1664,8 +1664,8 @@ export function FormComponentsExamples() {
             label="Horizontal Layout"
             id="horizontal-input"
             layout="horizontal"
-            helperText="This field uses a horizontal layout"
-          >
+            helperText="This field uses a horizontal layout">
+
             <Input placeholder="Horizontal form field" />
           </FormField>
           
@@ -1673,8 +1673,8 @@ export function FormComponentsExamples() {
             label="Disabled Field"
             id="disabled-input"
             disabled
-            helperText="This field is disabled"
-          >
+            helperText="This field is disabled">
+
             <Input placeholder="Disabled field" disabled />
           </FormField>
         </div>
@@ -1689,11 +1689,11 @@ export function FormComponentsExamples() {
             <Select
               placeholder="Select an option"
               options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ]}
-            />
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }]
+              } />
+
           </div>
           
           <div>
@@ -1702,11 +1702,11 @@ export function FormComponentsExamples() {
               placeholder="Select an option"
               error
               options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ]}
-            />
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }]
+              } />
+
           </div>
           
           <div>
@@ -1716,26 +1716,26 @@ export function FormComponentsExamples() {
                 size="sm"
                 placeholder="Small"
                 options={[
-                  { value: 'option1', label: 'Option 1' },
-                  { value: 'option2', label: 'Option 2' },
-                ]}
-              />
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' }]
+                } />
+
               <Select
                 size="md"
                 placeholder="Medium"
                 options={[
-                  { value: 'option1', label: 'Option 1' },
-                  { value: 'option2', label: 'Option 2' },
-                ]}
-              />
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' }]
+                } />
+
               <Select
                 size="lg"
                 placeholder="Large"
                 options={[
-                  { value: 'option1', label: 'Option 1' },
-                  { value: 'option2', label: 'Option 2' },
-                ]}
-              />
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' }]
+                } />
+
             </div>
           </div>
           
@@ -1745,11 +1745,11 @@ export function FormComponentsExamples() {
               placeholder="Select an option"
               disabled
               options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ]}
-            />
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }]
+              } />
+
           </div>
           
           <div>
@@ -1758,11 +1758,11 @@ export function FormComponentsExamples() {
               placeholder="No chevron icon"
               showChevron={false}
               options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ]}
-            />
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }]
+              } />
+
           </div>
           
           <div>
@@ -1770,17 +1770,17 @@ export function FormComponentsExamples() {
             <FormField
               label="Country"
               id="country-select"
-              helperText="Select your country"
-            >
+              helperText="Select your country">
+
               <Select
                 placeholder="Select country"
                 options={[
-                  { value: 'us', label: 'United States' },
-                  { value: 'ca', label: 'Canada' },
-                  { value: 'uk', label: 'United Kingdom' },
-                  { value: 'au', label: 'Australia' },
-                ]}
-              />
+                { value: 'us', label: 'United States' },
+                { value: 'ca', label: 'Canada' },
+                { value: 'uk', label: 'United Kingdom' },
+                { value: 'au', label: 'Australia' }]
+                } />
+
             </FormField>
           </div>
         </div>
@@ -1792,79 +1792,79 @@ export function FormComponentsExamples() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-md font-medium mb-2">Basic Checkbox</h3>
-            <Checkbox 
+            <Checkbox
               id="basic-checkbox"
               checked={checkboxState.basic}
-              onChange={(e) => setCheckboxState({...checkboxState, basic: e.target.checked})}
-            />
+              onChange={(e) => setCheckboxState({ ...checkboxState, basic: e.target.checked })} />
+
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">With Label</h3>
-            <Checkbox 
+            <Checkbox
               id="label-checkbox"
               label="Checkbox with label"
               checked={checkboxState.withLabel}
-              onChange={(e) => setCheckboxState({...checkboxState, withLabel: e.target.checked})}
-            />
+              onChange={(e) => setCheckboxState({ ...checkboxState, withLabel: e.target.checked })} />
+
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Indeterminate</h3>
-            <Checkbox 
+            <Checkbox
               id="indeterminate-checkbox"
               label="Indeterminate state"
               indeterminate
               checked={checkboxState.indeterminate}
-              onChange={(e) => setCheckboxState({...checkboxState, indeterminate: e.target.checked})}
-            />
+              onChange={(e) => setCheckboxState({ ...checkboxState, indeterminate: e.target.checked })} />
+
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Disabled</h3>
-            <Checkbox 
+            <Checkbox
               id="disabled-checkbox"
               label="Disabled checkbox"
               disabled
               checked={checkboxState.disabled}
-              onChange={(e) => setCheckboxState({...checkboxState, disabled: e.target.checked})}
-            />
+              onChange={(e) => setCheckboxState({ ...checkboxState, disabled: e.target.checked })} />
+
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Label Position</h3>
             <div className="space-y-2">
-              <Checkbox 
+              <Checkbox
                 id="right-label"
                 label="Label on right (default)"
-                labelPosition="right"
-              />
-              <Checkbox 
+                labelPosition="right" />
+
+              <Checkbox
                 id="left-label"
                 label="Label on left"
-                labelPosition="left"
-              />
+                labelPosition="left" />
+
             </div>
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Sizes</h3>
             <div className="space-y-2">
-              <Checkbox 
+              <Checkbox
                 id="small-checkbox"
                 label="Small size"
-                size="sm"
-              />
-              <Checkbox 
+                size="sm" />
+
+              <Checkbox
                 id="medium-checkbox"
                 label="Medium size (default)"
-                size="md"
-              />
-              <Checkbox 
+                size="md" />
+
+              <Checkbox
                 id="large-checkbox"
                 label="Large size"
-                size="lg"
-              />
+                size="lg" />
+
             </div>
           </div>
           
@@ -1873,12 +1873,12 @@ export function FormComponentsExamples() {
             <FormField
               label="Terms and Conditions"
               id="terms-checkbox-field"
-              helperText="Please read and accept the terms"
-            >
-              <Checkbox 
+              helperText="Please read and accept the terms">
+
+              <Checkbox
                 id="terms-checkbox"
-                label="I accept the terms and conditions"
-              />
+                label="I accept the terms and conditions" />
+
             </FormField>
           </div>
         </div>
@@ -1891,22 +1891,22 @@ export function FormComponentsExamples() {
           <div>
             <h3 className="text-md font-medium mb-2">Basic Radio</h3>
             <div className="space-y-2">
-              <Radio 
+              <Radio
                 id="radio-1"
                 name="basic-radio"
                 value="option1"
                 label="Option 1"
                 checked={selectedValue === 'option1'}
-                onChange={(e) => e.target.checked && setSelectedValue(e.target.value)}
-              />
-              <Radio 
+                onChange={(e) => e.target.checked && setSelectedValue(e.target.value)} />
+
+              <Radio
                 id="radio-2"
                 name="basic-radio"
                 value="option2"
                 label="Option 2"
                 checked={selectedValue === 'option2'}
-                onChange={(e) => e.target.checked && setSelectedValue(e.target.value)}
-              />
+                onChange={(e) => e.target.checked && setSelectedValue(e.target.value)} />
+
             </div>
           </div>
           
@@ -1917,11 +1917,11 @@ export function FormComponentsExamples() {
               value={selectedValue}
               onChange={setSelectedValue}
               options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ]}
-            />
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }]
+              } />
+
           </div>
           
           <div>
@@ -1932,60 +1932,60 @@ export function FormComponentsExamples() {
               onChange={setSelectedValue}
               orientation="horizontal"
               options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ]}
-            />
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' }]
+              } />
+
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Disabled Radio</h3>
             <div className="space-y-2">
-              <Radio 
+              <Radio
                 id="disabled-radio"
                 name="disabled-radio"
                 value="disabled"
                 label="Disabled radio"
-                disabled
-              />
+                disabled />
+
               <RadioGroup
                 name="disabled-radio-group"
                 value={selectedValue}
                 onChange={setSelectedValue}
                 disabled
                 options={[
-                  { value: 'option1', label: 'Disabled option 1' },
-                  { value: 'option2', label: 'Disabled option 2' },
-                ]}
-              />
+                { value: 'option1', label: 'Disabled option 1' },
+                { value: 'option2', label: 'Disabled option 2' }]
+                } />
+
             </div>
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Radio Sizes</h3>
             <div className="space-y-2">
-              <Radio 
+              <Radio
                 id="small-radio"
                 name="radio-sizes"
                 value="small"
                 label="Small radio"
-                size="sm"
-              />
-              <Radio 
+                size="sm" />
+
+              <Radio
                 id="medium-radio"
                 name="radio-sizes"
                 value="medium"
                 label="Medium radio (default)"
-                size="md"
-              />
-              <Radio 
+                size="md" />
+
+              <Radio
                 id="large-radio"
                 name="radio-sizes"
                 value="large"
                 label="Large radio"
-                size="lg"
-              />
+                size="lg" />
+
             </div>
           </div>
           
@@ -1994,24 +1994,24 @@ export function FormComponentsExamples() {
             <FormField
               label="Subscription Plan"
               id="plan-field"
-              helperText="Choose your subscription plan"
-            >
+              helperText="Choose your subscription plan">
+
               <RadioGroup
                 name="subscription-plan"
                 value={selectedValue}
                 onChange={setSelectedValue}
                 options={[
-                  { value: 'free', label: 'Free Plan' },
-                  { value: 'pro', label: 'Pro Plan' },
-                  { value: 'enterprise', label: 'Enterprise Plan' },
-                ]}
-              />
+                { value: 'free', label: 'Free Plan' },
+                { value: 'pro', label: 'Pro Plan' },
+                { value: 'enterprise', label: 'Enterprise Plan' }]
+                } />
+
             </FormField>
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 }
 
 export function ColorPaletteLogosExamples() {
@@ -2097,8 +2097,8 @@ export function ColorPaletteLogosExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function AvatarExamples() {
@@ -2175,8 +2175,8 @@ export function AvatarExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function BadgeExamples() {
@@ -2279,8 +2279,8 @@ export function BadgeExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function CalendarExamples() {
@@ -2296,18 +2296,18 @@ export function CalendarExamples() {
       <div>
         <h2 className="text-lg font-semibold mb-4">Calendar with Events</h2>
         <div className="border rounded-md w-full max-w-md">
-          <Calendar 
+          <Calendar
             events={[
-              { id: 1, date: new Date(2025, 2, 15), title: 'Team Meeting' },
-              { id: 2, date: new Date(2025, 2, 18), title: 'Product Launch' },
-              { id: 3, date: new Date(2025, 2, 22), title: 'Client Call' },
-            ]}
-            selectedDate={new Date(2025, 2, 18)}
-          />
+            { id: 1, date: new Date(2025, 2, 15), title: 'Team Meeting' },
+            { id: 2, date: new Date(2025, 2, 18), title: 'Product Launch' },
+            { id: 3, date: new Date(2025, 2, 22), title: 'Client Call' }]
+            }
+            selectedDate={new Date(2025, 2, 18)} />
+
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function ChartExamples() {
@@ -2325,8 +2325,8 @@ export function ChartExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function ProgressExamples() {
@@ -2428,8 +2428,8 @@ export function ProgressExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function TabsExamples() {
@@ -2507,8 +2507,8 @@ export function TabsExamples() {
           </Tabs>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function LoadingExamples() {
@@ -2613,7 +2613,7 @@ export function LoadingExamples() {
         <div className="mt-4 p-4 bg-gray-50 rounded border">
           <p className="text-sm text-gray-700 font-semibold mb-2">Implementation:</p>
           <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
-{`<div className="min-h-screen flex items-center justify-center">
+            {`<div className="min-h-screen flex items-center justify-center">
   <div className="text-center">
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto"></div>
     <p className="mt-4 text-gray-600">Checking authentication...</p>
@@ -2728,8 +2728,8 @@ export function LoadingExamples() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default function ComponentExamples() {
@@ -2937,8 +2937,8 @@ export default function ComponentExamples() {
                         </div>
                         <Input
                           placeholder="Search..."
-                          className="pl-10"
-                        />
+                          className="pl-10" />
+
                       </div>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -2946,8 +2946,8 @@ export default function ComponentExamples() {
                         </div>
                         <Input
                           placeholder="Enter your email"
-                          className="pl-10"
-                        />
+                          className="pl-10" />
+
                       </div>
                     </div>
                   </div>
@@ -3001,6 +3001,6 @@ export default function ComponentExamples() {
           <TypographyExamples />
         </section>
       </div>
-    </div>
-  );
+    </div>);
+
 }

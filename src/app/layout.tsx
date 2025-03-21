@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 import IconRegistry from '@/components/ui/icons/IconRegistry';
 import IconMonitoring from '@/components/ui/icons/IconMonitoring';
+import { FormStyleReset } from '@/components/ui';
 
 // CRITICAL: Import Font Awesome CSS before config
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -107,6 +108,7 @@ export default function RootLayout({
           <IconMonitoring />
           <Toaster />
           <ToastProvider>
+            <FormStyleReset />
             <ClientLayout>
               <main className="min-h-screen bg-gray-100">
                 {children}

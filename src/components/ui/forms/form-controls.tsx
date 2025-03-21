@@ -2,8 +2,83 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Input } from './input';
-import { Icon } from './icon';
+import { Input } from '../input';
+import { Icon } from '../icons';
+
+/**
+ * FormStyleReset Component
+ * 
+ * This component provides global styling to reset browser-native form controls
+ * like select dropdowns, date pickers, etc. to allow for consistent custom styling.
+ * 
+ * This should be included in the main layout to apply these styles globally.
+ */
+export const FormStyleReset: React.FC = () => {
+  return (
+    <style jsx global>{`
+      /* Hide browser-native select dropdowns */
+      select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: none !important;
+      }
+      
+      /* Hide browser-native date picker controls */
+      input[type="date"]::-webkit-calendar-picker-indicator,
+      input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+      input[type="time"]::-webkit-calendar-picker-indicator,
+      input[type="week"]::-webkit-calendar-picker-indicator,
+      input[type="month"]::-webkit-calendar-picker-indicator {
+        display: none !important;
+        opacity: 0 !important;
+      }
+      
+      /* Hide browser-native spinner controls for number inputs */
+      input[type="date"]::-webkit-inner-spin-button,
+      input[type="date"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+      }
+      
+      /* Additional Firefox-specific fixes */
+      @-moz-document url-prefix() {
+        select {
+          text-indent: 0.01px;
+          text-overflow: '';
+          padding-right: 1rem;
+        }
+        
+        input[type="date"] {
+          -moz-appearance: none;
+        }
+      }
+      
+      /* Ensure vertical alignment of icons and text in form controls */
+      .form-input-with-icon {
+        display: flex;
+        align-items: center;
+      }
+      
+      .form-input-with-icon input,
+      .form-input-with-icon select,
+      .form-input-with-icon textarea {
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+      }
+      
+      .form-icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+    `}</style>
+  );
+};
 
 export interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -121,7 +196,7 @@ export function FormField({
       )}>
         {/* If we have a start icon and children is Input, we need to apply padding */}
         {startIcon && isInputComponent && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none form-icon-container">
             {startIcon}
           </div>
         )}
@@ -133,6 +208,7 @@ export function FormField({
               'aria-invalid': !!error,
               'aria-describedby': helperText ? `${id}-description` : undefined,
               className: cn(
+                'form-input-with-icon',
                 (children as React.ReactElement).props.className,
                 error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '',
                 startIcon ? 'pl-10' : '',
@@ -144,7 +220,7 @@ export function FormField({
         
         {/* If we have an end icon and children is Input, we need to apply padding */}
         {endIcon && isInputComponent && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none form-icon-container">
             {endIcon}
           </div>
         )}
@@ -299,3 +375,5 @@ FormField.Root = FormFieldCompound.Root;
 FormField.Label = FormFieldCompound.Label;
 FormField.HelperText = FormFieldCompound.HelperText;
 FormField.ErrorMessage = FormFieldCompound.ErrorMessage; 
+
+export default FormStyleReset; 
