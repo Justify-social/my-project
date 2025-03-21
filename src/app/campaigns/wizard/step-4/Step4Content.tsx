@@ -10,7 +10,6 @@ import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "react-hot-toast";
 import { Icon } from "@/components/ui/icon";
-import { migrateHeroIcon } from "@/lib/icon-helpers";
 import { CampaignAssetUploader, UploadedAsset } from "@/components/upload/CampaignAssetUploader";
 import { AssetPreview } from '@/components/upload/AssetPreview';
 import { KPI, Feature, Platform } from '@prisma/client';
@@ -833,11 +832,11 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center w-full">
+                    <div className="flex items-center w-full border border-gray-200 rounded-md p-2 bg-gray-50">
                       <span className="text-gray-700 font-medium truncate max-w-xs">{assetName}</span>
                       <button
                         onClick={toggleNameEdit}
-                        className="text-gray-400 hover:text-indigo-600 transition-colors"
+                        className="text-gray-400 hover:text-indigo-600 transition-colors ml-3"
                         title="Edit asset name"
                       >
                         <Icon name="edit" className="h-4 w-4" />
@@ -850,10 +849,10 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
 
             <button
               onClick={handleDeleteAsset}
-              className="ml-2 text-gray-400 hover:text-red-600 transition-colors"
+              className="ml-2 text-gray-400 hover:text-red-600 transition-colors group"
               aria-label="Delete asset"
             >
-              <Icon name="trash" className="h-5 w-5" />
+              <Icon name="delete" action="delete" className="h-5 w-5" />
             </button>
           </div>
 

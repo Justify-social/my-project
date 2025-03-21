@@ -239,8 +239,8 @@ export function CampaignAssetUploader({
           allowedContent: "Images and videos only",
           label: "Choose a file or drag and drop",
           uploadIcon: () => (
-            <div className="mb-4 p-3 rounded-full bg-blue-50">
-              <Icon name="upload" className="h-8 w-8 text-blue-500" />
+            <div className="mb-8 p-6 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
+              <Icon name="upload" className="h-16 w-16 text-blue-500" />
             </div>
           ),
           button: ({ ready }: { ready: boolean }) => (
