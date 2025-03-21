@@ -49,7 +49,7 @@ import {
   faRocket, faSignal, faBellSlash, faMap, faShield, faClock,
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faTableCells, faPlay,
-  faBars, faList, faCamera, faChartColumn, faUserCircle
+  faBars, faList, faImage, faChartColumn, faUserCircle
 } from '@fortawesome/pro-solid-svg-icons';
 
 import {
@@ -82,7 +82,7 @@ import {
   faTable as falTable, faTableCells as falTableCells, 
   faQuestion as falQuestion, faPlay as falPlay,
   faList as falList, faBars as falBars, faLightbulb as falLightbulb,
-  faCamera as falCamera, faChartColumn as falChartColumn, faUserCircle as falUserCircle
+  faImage as falImage, faChartColumn as falChartColumn, faUserCircle as falUserCircle
 } from '@fortawesome/pro-light-svg-icons';
 
 import {
@@ -156,7 +156,7 @@ library.add(
   // Solid (fas) icons - listed alphabetically for easier management
   faArrowDown, faArrowLeft, faArrowRight, faArrowUp, 
   faArrowTrendDown, faArrowTrendUp, faBars, faBell, faBellSlash, faBolt, 
-  faBookmark, faBuilding, faCamera, faCalendarDays, faChartBar, faChartColumn,
+  faBookmark, faBuilding, faImage, faCalendarDays, faChartBar, faChartColumn,
   faChartLine, faChartPie, faCheck, faChevronDown, faChevronLeft, 
   faChevronRight, faChevronUp, faCircleCheck, faCircleInfo, faCircleXmark,
   faClock, faClockRotateLeft, faCommentDots, faCopy, faCreditCard,
@@ -171,7 +171,7 @@ library.add(
   // Light (fal) icons - listed alphabetically for easier management
   falArrowDown, falArrowLeft, falArrowRight, falArrowUp,
   falArrowTrendDown, falArrowTrendUp, falBars, falBell, falBellSlash, 
-  falBolt, falBookmark, falBuilding, falCalendarDays, falCamera, falChartBar, 
+  falBolt, falBookmark, falBuilding, falCalendarDays, falImage, falChartBar, 
   falChartColumn, falChartLine, falChartPie, falCheck, falChevronDown, 
   falChevronLeft, falChevronRight, falChevronUp, falCircleCheck, 
   falCircleXmark, falClock, falClockRotateLeft, falCommentDots, 

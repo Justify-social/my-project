@@ -22,7 +22,7 @@ import {
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faQuestion,
   // Add missing icons
-  faCamera, faChartColumn, faUserCircle
+  faImage, faChartColumn, faUserCircle
 } from '@fortawesome/pro-solid-svg-icons';
 
 // Light variants for outline styles
@@ -55,7 +55,7 @@ import {
   faClockRotateLeft as falClockRotateLeft, faChartLine as falChartLine, 
   faTable as falTable, faQuestion as falQuestion,
   // Add missing icons for light variant
-  faCamera as falCamera, faChartColumn as falChartColumn, faUserCircle as falUserCircle
+  faImage as falImage, faChartColumn as falChartColumn, faUserCircle as falUserCircle
 } from '@fortawesome/pro-light-svg-icons';
 
 // Import brand icons for social platforms
@@ -82,7 +82,7 @@ library.add(
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faQuestion,
   // Add missing icons
-  faCamera, faChartColumn, faUserCircle,
+  faImage, faChartColumn, faUserCircle,
   
   // Light icons
   falUser, falCheck, falGear, falSearch, falPlus, falMinus, falXmark,
@@ -100,7 +100,7 @@ library.add(
   falPalette, falCreditCard, falClockRotateLeft, falChartLine, 
   falTable, falQuestion,
   // Add missing icons for light variant
-  falCamera, falChartColumn, falUserCircle,
+  falImage, falChartColumn, falUserCircle,
   
   // Brand icons
   faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faGithub,

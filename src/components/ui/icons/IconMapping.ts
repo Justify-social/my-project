@@ -152,7 +152,7 @@ export const FA_UI_SOLID_ICON_MAP = {
   warning: getIcon('triangle-exclamation', 'fas'),
   xCircle: getIcon('circle-xmark', 'fas'),
   xMark: getIcon('xmark', 'fas'),
-  photo: getIcon('camera', 'fas')
+  photo: getIcon('image', 'fas')
 };
 
 // Light icon variants - alphabetically ordered
@@ -231,7 +231,7 @@ export const FA_UI_LIGHT_ICON_MAP = {
   warning: getIcon('triangle-exclamation', 'fal'),
   xCircle: getIcon('circle-xmark', 'fal'),
   xMark: getIcon('xmark', 'fal'),
-  photo: getIcon('camera', 'fal')
+  photo: getIcon('image', 'fal')
 };
 
 // For backwards compatibility
