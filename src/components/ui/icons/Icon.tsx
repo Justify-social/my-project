@@ -49,7 +49,7 @@ import {
   faRocket, faSignal, faBellSlash, faMap, faShield, faClock,
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faTableCells, faPlay,
-  faBars, faList
+  faBars, faList, faCamera, faChartColumn, faUserCircle
 } from '@fortawesome/pro-solid-svg-icons';
 
 import {
@@ -79,13 +79,15 @@ import {
   faCircleXmark as falCircleXmark, faMagnifyingGlassPlus as falMagnifyingGlassPlus,
   faPalette as falPalette, faCreditCard as falCreditCard,
   faClockRotateLeft as falClockRotateLeft, faChartLine as falChartLine,
-  faTable as falTable, faTableCells as falTableCells, faPlay as falPlay,
-  faBars as falBars, faList as falList, faLightbulb as falLightbulb
+  faTable as falTable, faTableCells as falTableCells, 
+  faQuestion as falQuestion, faPlay as falPlay,
+  faList as falList, faBars as falBars, faLightbulb as falLightbulb,
+  faCamera as falCamera, faChartColumn as falChartColumn, faUserCircle as falUserCircle
 } from '@fortawesome/pro-light-svg-icons';
 
 import {
   faTwitter, faXTwitter, faFacebook, faInstagram, faYoutube,
-  faLinkedin, faTiktok, faReddit, faPinterest
+  faLinkedin, faTiktok, faReddit, faPinterest, faGithub
 } from '@fortawesome/free-brands-svg-icons';
 
 import {
@@ -149,50 +151,44 @@ const falMoney = falMoneyBill;
 const falMagnifyingGlass = falSearch;
 const falXMark = falClose;
 
-// Register all essential icons
+// Register all icons with library to ensure they're available throughout the app
 library.add(
-  // Solid icons
-  faUser, faQuestion, faCheck, faStar, faHeart, 
-  faBell, faGear, faSearch, faPlus, faMinus, faClose,
-  faChevronDown, faChevronUp, faChevronLeft, faChevronRight,
-  faMail, faCalendarDays, faTrash, faWarning,
-  faInfo, faLightbulb, faView, faEdit, faCopy,
-  faDownload, faUpload, faShare, faBookmark, faDocument,
-  faDocumentText, faTag, faFilter, faPaperclip, faLock, faUnlock, faKey,
-  faHistory, faArrowUp, faArrowDown, faArrowLeft, faArrowRight,
-  faCircleCheck, faChatBubble, faDelete, faHome, faHouse,
-  faChartBar, faChartPie, faMoneyBill, faTrendUp, 
-  faTrendDown, faLightning, faGlobe, faUserGroup, faBuilding,
-  faRocket, faSignal, faBellAlert, faMap, faShield, faClock,
-  faXCircle, faCheckCircle, faMagnifyingGlassPlus, faSwatch, faCreditCard,
-  faClockRotateLeft, faPresentationChartBar, faTable, faGrid, faPlay,
-  faMenu, faList, faSettings, faLightBulb, faCalendar, faChart, faMoney,
-  faMagnifyingGlass, faXMark, faFile, faFileLines, faTableCells,
-  
-  // Light icons
-  falUser, falCheck, falStar, falHeart, falBell, falGear,
-  falSearch, falPlus, falMinus, falClose, falChevronDown,
-  falChevronUp, falChevronLeft, falChevronRight, falMail,
-  falCalendarDays, falTrash, falCircleCheck, falChatBubble,
-  falView, falEdit, falCopy, falDownload, falUpload,
-  falShare, falBookmark, falDocument, falDocumentText, falTag, falFilter,
-  falPaperclip, falLock, falUnlock, falKey, falHome, falHouse,
-  falChartBar, falChartPie, falMoneyBill, falTrendUp,
-  falTrendDown, falLightning, falGlobe, falUserGroup,
-  falBuilding, falRocket, falSignal, falBellAlert,
-  falMap, falShield, falClock, falArrowDown, falArrowUp,
-  falArrowRight, falArrowLeft, falXCircle, falCheckCircle, falMagnifyingGlassPlus,
-  falSwatch, falCreditCard, falClockRotateLeft, falPresentationChartBar,
-  falTable, falGrid, falPlay, falMenu, falList, falSettings, falLightBulb,
-  falCalendar, falChart, falMoney, falMagnifyingGlass, falXMark, falFile,
-  falFileLines, falTableCells,
-  
+  // Solid (fas) icons - listed alphabetically for easier management
+  faArrowDown, faArrowLeft, faArrowRight, faArrowUp, 
+  faArrowTrendDown, faArrowTrendUp, faBars, faBell, faBellSlash, faBolt, 
+  faBookmark, faBuilding, faCamera, faCalendarDays, faChartBar, faChartColumn,
+  faChartLine, faChartPie, faCheck, faChevronDown, faChevronLeft, 
+  faChevronRight, faChevronUp, faCircleCheck, faCircleInfo, faCircleXmark,
+  faClock, faClockRotateLeft, faCommentDots, faCopy, faCreditCard,
+  faDownload, faEye, faFile, faFileLines, faFilter, faGear, faGlobe,
+  faHeart, faHistory, faHome, faHouse, faKey, faLightbulb, faList,
+  faLock, faMagnifyingGlassPlus, faMap, faMinus, faMoneyBill, faPalette,
+  faPaperclip, faPenToSquare, faPlay, faPlus, faQuestion, faRocket,
+  faSearch, faShare, faShield, faSignal, faStar, faTable, faTableCells,
+  faTag, faTrash, faTrashCan, faUnlock, faUpload, faUser, faUserCircle,
+  faUserGroup, faXmark,
+
+  // Light (fal) icons - listed alphabetically for easier management
+  falArrowDown, falArrowLeft, falArrowRight, falArrowUp,
+  falArrowTrendDown, falArrowTrendUp, falBars, falBell, falBellSlash, 
+  falBolt, falBookmark, falBuilding, falCalendarDays, falCamera, falChartBar, 
+  falChartColumn, falChartLine, falChartPie, falCheck, falChevronDown, 
+  falChevronLeft, falChevronRight, falChevronUp, falCircleCheck, 
+  falCircleXmark, falClock, falClockRotateLeft, falCommentDots, 
+  falCopy, falCreditCard, falDownload, falEye, falFile, falFileLines,
+  falFilter, falGear, falGlobe, falHeart, falHome, falHouse, falKey,
+  falLightbulb, falList, falLock, falMagnifyingGlassPlus, falMap,
+  falMinus, falMoneyBill, falPalette, falPaperclip, falPenToSquare,
+  falPlay, falPlus, falQuestion, falRocket, falSearch, falShare, falShield,
+  falSignal, falStar, falTable, falTableCells, falTag, falTrash,
+  falUnlock, falUpload, falUser, falUserCircle, falUserGroup, falXmark,
+
   // Regular icons
   farUser, farCheck, farStar, farHeart, farBell,
   
   // Brand icons
   faTwitter, faXTwitter, faFacebook, faInstagram, faYoutube,
-  faLinkedin, faTiktok, faReddit, faPinterest
+  faLinkedin, faTiktok, faReddit, faPinterest, faGithub
 );
 
 // Re-export for convenience

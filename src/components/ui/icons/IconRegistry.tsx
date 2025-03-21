@@ -20,7 +20,9 @@ import {
   faUserGroup, faBuilding, faRocket, faSignal, faBellSlash, faMap,
   faShield, faClock, faArrowDown, faArrowUp, faArrowRight, faArrowLeft,
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
-  faClockRotateLeft, faChartLine, faTable, faQuestion
+  faClockRotateLeft, faChartLine, faTable, faQuestion,
+  // Add missing icons
+  faCamera, faChartColumn, faUserCircle
 } from '@fortawesome/pro-solid-svg-icons';
 
 // Light variants for outline styles
@@ -51,12 +53,16 @@ import {
   faCircleXmark as falCircleXmark, faMagnifyingGlassPlus as falMagnifyingGlassPlus, 
   faPalette as falPalette, faCreditCard as falCreditCard, 
   faClockRotateLeft as falClockRotateLeft, faChartLine as falChartLine, 
-  faTable as falTable, faQuestion as falQuestion
+  faTable as falTable, faQuestion as falQuestion,
+  // Add missing icons for light variant
+  faCamera as falCamera, faChartColumn as falChartColumn, faUserCircle as falUserCircle
 } from '@fortawesome/pro-light-svg-icons';
 
 // Import brand icons for social platforms
 import {
-  faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faGithub
+  faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faGithub,
+  // Add X Twitter icon
+  faXTwitter
 } from '@fortawesome/free-brands-svg-icons';
 
 // Register all icons with library
@@ -75,6 +81,8 @@ library.add(
   faShield, faClock, faArrowDown, faArrowUp, faArrowRight, faArrowLeft,
   faCircleXmark, faMagnifyingGlassPlus, faPalette, faCreditCard,
   faClockRotateLeft, faChartLine, faTable, faQuestion,
+  // Add missing icons
+  faCamera, faChartColumn, faUserCircle,
   
   // Light icons
   falUser, falCheck, falGear, falSearch, falPlus, falMinus, falXmark,
@@ -91,9 +99,13 @@ library.add(
   falArrowRight, falArrowLeft, falCircleXmark, falMagnifyingGlassPlus, 
   falPalette, falCreditCard, falClockRotateLeft, falChartLine, 
   falTable, falQuestion,
+  // Add missing icons for light variant
+  falCamera, falChartColumn, falUserCircle,
   
   // Brand icons
-  faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faGithub
+  faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faGithub,
+  // Add X Twitter icon
+  faXTwitter
 );
 
 // Component that can be used to ensure icons are loaded
