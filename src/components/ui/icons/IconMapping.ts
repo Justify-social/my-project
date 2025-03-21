@@ -1,11 +1,12 @@
 // Import from fontawesome-svg-core instead of the Pro Kit
 import { findIconDefinition, IconDefinition, IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
+import { iconConfig, getIconPrefix } from './IconConfig';
 
 /**
  * Enhanced helper function to safely get Font Awesome icons with robust fallbacks
  * This function never throws errors and always returns a valid icon definition
  */
-export function getIcon(name: string | undefined, style: 'fas' | 'fal' | 'far' | 'fab' = 'fas'): IconDefinition {
+export function getIcon(name: string | undefined, style: 'fas' | 'fal' | 'far' | 'fab' = getIconPrefix('light') as 'fas' | 'fal' | 'far' | 'fab'): IconDefinition {
   // Handle undefined or empty name
   if (!name) {
     console.warn('[Icon] Undefined or empty icon name, using fallback question icon');
@@ -145,11 +146,13 @@ export const FA_UI_SOLID_ICON_MAP = {
   unlock: getIcon('unlock', 'fas'),
   upload: getIcon('upload', 'fas'),
   user: getIcon('user', 'fas'),
+  userCircle: getIcon('user-circle', 'fas'),
   userGroup: getIcon('user-group', 'fas'),
   view: getIcon('eye', 'fas'),
   warning: getIcon('triangle-exclamation', 'fas'),
   xCircle: getIcon('circle-xmark', 'fas'),
-  xMark: getIcon('xmark', 'fas')
+  xMark: getIcon('xmark', 'fas'),
+  photo: getIcon('camera', 'fas')
 };
 
 // Light icon variants - alphabetically ordered
@@ -222,11 +225,13 @@ export const FA_UI_LIGHT_ICON_MAP = {
   unlock: getIcon('unlock', 'fal'),
   upload: getIcon('upload', 'fal'),
   user: getIcon('user', 'fal'),
+  userCircle: getIcon('user-circle', 'fal'),
   userGroup: getIcon('user-group', 'fal'),
   view: getIcon('eye', 'fal'),
   warning: getIcon('triangle-exclamation', 'fal'),
   xCircle: getIcon('circle-xmark', 'fal'),
-  xMark: getIcon('xmark', 'fal')
+  xMark: getIcon('xmark', 'fal'),
+  photo: getIcon('camera', 'fal')
 };
 
 // For backwards compatibility

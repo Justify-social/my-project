@@ -11,13 +11,13 @@ import LoadingSkeleton from '@/components/LoadingSkeleton'
 import { useSidebar } from '@/providers/SidebarProvider'
 import Image from 'next/image'
 import { Icon } from '@/components/ui/icon'
-import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers'
+import { migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Import Currency from shared types
 import { Currency, Platform, Position } from '@/components/Wizard/shared/types';
-import { FA_UI_ICON_MAP } from '@/lib/icon-mappings'
-import { IconName } from '@/components/ui/icon'
+import { UI_ICON_MAP } from '@/components/ui/icons'
+import { iconConfig, IconName } from '@/components/ui/icons'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -308,7 +308,7 @@ const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = 
           {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1">{subtext}</div>}
         </div>
         <div className="p-3 bg-[var(--accent-light)] rounded-full">
-          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" />
+          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" iconType="static" />
         </div>
       </div>
     </div>
@@ -337,7 +337,7 @@ const DataCard: React.FC<DataCardProps> = ({
     <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" />
+          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" />
         </div>
         <div>
           <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
@@ -373,7 +373,7 @@ const DataRow = ({ label, value, iconName, tooltip, featured = false }: DataRowP
       <div className="flex items-center text-[var(--secondary-color)]">
         {iconName && (
           <span className="mr-2">
-            <Icon name={iconName} className="h-4 w-4" />
+            <Icon name={iconName} className="h-4 w-4" iconType="static" />
           </span>
         )}
         <span className={featured ? 'font-medium' : ''}>{label}</span>
@@ -1027,7 +1027,7 @@ const DetailSection = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div className="flex items-center">
           <div className="bg-blue-50 p-2.5 rounded-lg mr-3">
-            <Icon name={iconName} className="w-5 h-5 text-blue-500" />
+            <Icon name={iconName} className="w-5 h-5 text-blue-500" iconType="static" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-800">{title}</h3>

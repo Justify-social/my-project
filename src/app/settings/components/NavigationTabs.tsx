@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Icon } from '@/components/ui/icon';
-import { iconComponentFactory } from '@/lib/icon-helpers';
+import { iconComponentFactory } from '@/components/ui/icons';
 
 export interface TabConfig {
   id: string;

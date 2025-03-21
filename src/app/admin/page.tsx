@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { migrateHeroIcon } from '@/lib/icon-helpers';
+import { migrateHeroIcon } from '@/components/ui/icons';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@auth0/nextjs-auth0';
 import type { UserProfile } from '@auth0/nextjs-auth0/client';

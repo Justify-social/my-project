@@ -7,8 +7,8 @@ import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
-import IconRegistry from '@/lib/icon-registry';
-import IconMonitoring from '@/lib/icon-monitoring';
+import IconRegistry from '@/components/ui/icons/IconRegistry';
+import IconMonitoring from '@/components/ui/icons/IconMonitoring';
 
 // CRITICAL: Import Font Awesome CSS before config
 import '@fortawesome/fontawesome-svg-core/styles.css';

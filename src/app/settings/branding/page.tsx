@@ -4,7 +4,7 @@ import React, { useState, ChangeEvent, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@/components/ui/icon';
-import { iconComponentFactory } from '@/lib/icon-helpers';
+import { iconComponentFactory } from '@/components/ui/icons';
 import NavigationTabs from '../components/NavigationTabs';
 import toast from 'react-hot-toast';
 

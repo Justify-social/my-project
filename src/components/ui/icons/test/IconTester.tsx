@@ -1,13 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Icon, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, KPI_ICON_URLS, APP_ICON_URLS, PLATFORM_ICON_MAP } from './icon';
+import { 
+  Icon, 
+  UI_ICON_MAP, 
+  UI_OUTLINE_ICON_MAP,
+  PLATFORM_ICON_MAP, 
+  PLATFORM_COLORS,
+  iconConfig,
+  KPI_ICON_URLS,
+  APP_ICON_URLS
+} from '../';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { cn } from '@/lib/utils';
 // The kit adds its icons to the global fontawesome library
 import { library, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { IconPrefix, IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
-import { Button } from './button';
+import { Button } from '../../button';
 
 // Safe wrapper for FontAwesomeIcon to prevent empty object errors
 const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
@@ -707,7 +716,7 @@ ${Object.entries(diagnostics.errors)
                         name={name as keyof typeof UI_ICON_MAP}
                         size="md"
                         solid
-                        className="text-[#00BFFF] absolute transition-opacity duration-150 opacity-0 group-hover:opacity-100"
+                        className={`text-[${iconConfig.colors.hover}] absolute transition-opacity duration-150 opacity-0 group-hover:opacity-100`}
                       />
                     </div>
                     <span className="text-xs mt-2 text-center text-gray-600">{name}</span>

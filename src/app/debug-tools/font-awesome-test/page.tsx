@@ -4,8 +4,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { findIconDefinition, library } from '@fortawesome/fontawesome-svg-core';
 import { Icon } from '@/components/ui/icon';
-import { SafeQuestionMarkIcon } from '@/lib/icon-helpers';
-import { getIcon } from '@/lib/icon-mappings';
+import { SafeQuestionMarkIcon } from '@/components/ui/icons';
+import { getIcon } from '@/components/ui/icons';
 
 // Import and register all icons needed for testing
 import { 

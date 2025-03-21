@@ -2,7 +2,7 @@
 
 import React, { useState, ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { migrateHeroIcon } from '@/lib/icon-helpers';
+import { migrateHeroIcon } from '@/components/ui/icons';
 import Link from 'next/link';
 
 export default function TestUploadPage() {

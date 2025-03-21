@@ -9,7 +9,7 @@ import {
   ComposedChart, Scatter,
 } from "recharts";
 import { Icon } from '@/components/ui/icon';
-import { iconComponentFactory } from '@/lib/icon-helpers';
+import { iconComponentFactory } from '@/components/ui/icons';
 
 // Enhanced data structures for enterprise metrics
 interface BrandMetrics {

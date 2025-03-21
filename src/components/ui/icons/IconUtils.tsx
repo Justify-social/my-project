@@ -1,17 +1,21 @@
 import React from 'react';
-import { Icon, IconName } from '@/components/ui/icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { iconConfig, IconName } from './IconConfig';
+import { Icon } from './Icon';
+
+// Import IconName from the FontAwesome core
+import { IconName as FontAwesomeIconName } from '@fortawesome/fontawesome-svg-core';
 
 /**
- * A safe wrapper for FontAwesomeIcon that handles errors gracefully
- * This component is used in the Font Awesome diagnostic tool
+ * A safe wrapper for FontAwesome that handles errors gracefully
  */
 export const SafeFontAwesomeIcon = ({ icon, className, ...props }: any) => {
   try {
     return <FontAwesomeIcon icon={icon} className={className} {...props} />;
   } catch (error) {
     console.error('Error rendering FontAwesomeIcon:', error);
-    return <SafeQuestionMarkIcon className={className} {...props} />;
+    return <SafeQuestionMarkIcon className={className} />;
   }
 };
 
@@ -147,31 +151,11 @@ export function migrateHeroIcon(
 }
 
 /**
- * Creates a factory for icon components that can be used with component props
- * 
- * @example
- * // Before
- * <SomeComponent icon={UserIcon} />
- * 
- * // After using helper
- * <SomeComponent icon={iconComponentFactory('user')} />
+ * Creates a React component from an icon name
+ * Useful for dynamic icon rendering
  */
-export function iconComponentFactory(iconName: IconName) {
-  // Return a React component that renders the Icon with proper lazy loading
-  const IconComponent = (props: any) => {
-    // Dynamically import the Icon component to avoid circular dependencies
-    const LazyIcon = React.lazy(() => import('@/components/ui/icon').then(module => ({
-      default: module.Icon
-    })));
-    
-    return (
-      <React.Suspense fallback={<div className={props.className || 'w-5 h-5'} />}>
-        <LazyIcon name={iconName} {...props} />
-      </React.Suspense>
-    );
-  };
-  
-  return IconComponent;
+export function iconComponentFactory(iconName: string, props: any = {}) {
+  return () => <Icon name={iconName as IconName} {...props} />;
 }
 
 /**
@@ -190,21 +174,87 @@ export function getIconName(heroIconName: string): IconName {
 }
 
 /**
- * A safe, direct SVG element for rendering a question mark icon
- * as a last resort fallback when all other icon loading methods fail
+ * Safe question mark icon that never throws
  */
-export const SafeQuestionMarkIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
+export const SafeQuestionMarkIcon: React.FC<{
+  className?: string;
+  style?: React.CSSProperties;
+  [key: string]: any;
+}> = ({ className, style, ...props }) => {
   return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 512 512" 
-      width="1em" 
-      height="1em"
-      fill="currentColor"
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      style={{ color: 'red', ...style }}
       {...props}
     >
-      {/* Simple question mark icon path */}
-      <path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z" />
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M12 16v2M9 9a3 3 0 016 0c0 1.5-2 2-2 5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
+};
+
+/**
+ * Helper component to migrate from direct FontAwesome usage to our Icon system
+ * This enables icons to use the default light->solid hover effect while still 
+ * accepting FontAwesome-specific props like icon
+ * 
+ * @example
+ * // Instead of:
+ * <FontAwesomeIcon icon={faUser} className="w-6 h-6" />
+ * 
+ * // Use:
+ * <IconFa icon={faUser} className="w-6 h-6" />
+ * // Or with solid variant:
+ * <IconFa icon={faUser} solid className="w-6 h-6" />
+ */
+export const IconFa: React.FC<{
+  icon: IconProp;
+  solid?: boolean;
+  active?: boolean;
+  className?: string;
+  [key: string]: any;
+}> = ({ icon, solid = false, active = false, className, ...props }) => {
+  try {
+    // For brand icons (fab prefix)
+    if (Array.isArray(icon) && icon[0] === 'fab') {
+      return <Icon platformName={icon[1] as any} className={className} {...props} />;
+    }
+    
+    // For direct imported icons, try to extract the name
+    if (typeof icon === 'object' && icon !== null && 'iconName' in icon) {
+      const iconName = icon.iconName as string;
+      // Convert kebab-case to camelCase if needed
+      const camelCaseName = iconName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+      return <Icon name={camelCaseName as any} solid={solid} active={active} className={className} {...props} />;
+    }
+    
+    // For array syntax with ['fas'|'fal', 'icon-name']
+    if (Array.isArray(icon) && icon.length === 2) {
+      const iconName = icon[1] as string;
+      // Convert kebab-case to camelCase if needed
+      const camelCaseName = iconName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+      
+      // If explicitly using 'fas', override the solid prop
+      const forceSolid = icon[0] === 'fas' ? true : solid;
+      
+      return <Icon name={camelCaseName as any} solid={forceSolid} active={active} className={className} {...props} />;
+    }
+    
+    // Fallback to original FontAwesomeIcon if we can't convert
+    console.warn('[IconFa] Could not convert to Icon component, using direct FontAwesomeIcon:', icon);
+    return <FontAwesomeIcon icon={icon} className={className} {...props} />;
+  } catch (error) {
+    console.error('[IconFa] Error rendering icon:', error);
+    return <SafeQuestionMarkIcon className={className} />;
+  }
 }; 

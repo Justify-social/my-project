@@ -11,7 +11,7 @@ import LoadingSkeleton from '@/components/LoadingSkeleton'
 import { useSidebar } from '@/providers/SidebarProvider'
 import Image from 'next/image'
 import { Icon } from '@/components/ui/icon'
-import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers'
+import { migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Import Currency from shared types

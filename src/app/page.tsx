@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import Link from 'next/link';
-import { migrateHeroIcon } from '@/lib/icon-helpers';
+import { migrateHeroIcon } from '@/components/ui/icons';
 
 export default function Home() {
   const router = useRouter();

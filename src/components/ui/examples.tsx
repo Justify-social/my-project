@@ -16,17 +16,6 @@ import {
   LoadingSpinner,
   Button,
   Input,
-  Icon, 
-  IconName,
-  KpiIconName,
-  AppIconName,
-  PlatformIconName,
-  UI_ICON_MAP, 
-  UI_OUTLINE_ICON_MAP,
-  KPI_ICON_URLS, 
-  APP_ICON_URLS, 
-  PLATFORM_ICON_MAP, 
-  PLATFORM_COLORS,
   Heading,
   Text,
   Paragraph,
@@ -42,6 +31,23 @@ import {
   TabPanels,
   TabPanel
 } from './';
+
+// Import from the new icons structure
+import { 
+  Icon, 
+  IconName,
+  KpiIconName,
+  AppIconName,
+  PlatformIconName,
+  UI_ICON_MAP, 
+  UI_OUTLINE_ICON_MAP,
+  PLATFORM_ICON_MAP, 
+  PLATFORM_COLORS,
+  KPI_ICON_URLS,
+  APP_ICON_URLS,
+  migrateHeroIcon
+} from './icons';
+
 import { Container } from './container';
 import { Grid } from './grid';
 import { Alert } from './alert';
@@ -54,66 +60,9 @@ import { Radio, RadioGroup } from './radio';
 import { Table, TableExample } from './table';
 import { List, ListExample } from './list';
 import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './skeleton';
-import { heroIconToName } from '@/lib/icon-helpers';
-import { IconTester } from './IconTester';
+import { IconTester } from './icons/test/IconTester';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { IconProp } from '@fortawesome/fontawesome-svg-core';
-
-// Safe wrapper for FontAwesomeIcon to prevent empty object errors
-const SafeFontAwesomeIcon = ({ icon, className, ...props }: { icon: IconProp, className?: string, [key: string]: any }) => {
-  try {
-    // Handle undefined or empty object cases
-    if (!icon || 
-        (typeof icon === 'object' && Object.keys(icon).length === 0) || 
-        JSON.stringify(icon) === '{}') {
-      console.warn('Empty or invalid icon prop passed to SafeFontAwesomeIcon', icon);
-      // Return fallback icon
-      return (
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none"
-          stroke="red"
-          strokeWidth="2"
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-          className={className}
-          {...props}
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-      );
-    }
-    
-    return <FontAwesomeIcon icon={icon} className={className} {...props} />;
-  } catch (e) {
-    console.error('Error rendering FontAwesomeIcon:', e);
-    // Return fallback icon
-    return (
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none"
-        stroke="red"
-        strokeWidth="2"
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-        className={className}
-        {...props}
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    );
-  }
-};
 
 export function ButtonExamples() {
   return (

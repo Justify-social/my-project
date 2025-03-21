@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@/components/ui/icon';
-import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers';
+import { migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons';
 
 /* --------------------------------------------------
    Type Definitions

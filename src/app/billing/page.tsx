@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/icon';
-import { iconComponentFactory } from '@/lib/icon-helpers';
+import { iconComponentFactory } from '@/components/ui/icons';
 
 interface PaymentMethod {
   id: number;

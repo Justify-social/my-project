@@ -28,7 +28,7 @@ import {
   PolarRadiusAxis,
 } from "recharts";
 import { Icon, IconName } from '@/components/ui/icon';
-import { migrateHeroIcon, iconComponentFactory } from '@/lib/icon-helpers';
+import { migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons';
 import useSWR from 'swr';
 import Image from 'next/image';
 import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';

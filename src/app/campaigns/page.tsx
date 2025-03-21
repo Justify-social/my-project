@@ -4,8 +4,9 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { migrateHeroIcon } from '@/lib/icon-helpers';
+import { migrateHeroIcon } from '@/components/ui/icons';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { Icon } from '@/components/ui/icon';
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
@@ -737,15 +738,9 @@ const ClientCampaignList: React.FC = () => {
             aria-label="Search campaigns by name"
             className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
           />
-          <svg 
-            className="absolute left-3 top-3 h-4 w-4 text-gray-500" 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <span className="absolute left-3 top-3 text-gray-500">
+            <Icon name="search" size="sm" iconType="static" />
+          </span>
         </div>
 
         {/* Filter Selection */}
@@ -766,9 +761,7 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
+              <Icon name="chevronDown" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -792,9 +785,7 @@ const ClientCampaignList: React.FC = () => {
               <option value="completed">Completed</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
+              <Icon name="chevronDown" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -816,9 +807,7 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
+              <Icon name="chevronDown" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -840,9 +829,7 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
+              <Icon name="chevronDown" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -946,34 +933,34 @@ const ClientCampaignList: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-3 justify-center">
-                            <button 
+                            <span 
                               onClick={() => handleViewCampaign(campaign.id.toString())}
-                              className="text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
+                              className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                               title="View campaign"
                             >
-                              {migrateHeroIcon('EyeIcon', { className: "h-5 w-5" })}
-                            </button>
+                              <Icon name="view" size="md" />
+                            </span>
                             <Link 
                               href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                              className="text-gray-500 hover:text-[var(--accent-color)] transition-colors"
+                              className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors"
                               title="Edit campaign"
                             >
-                              {migrateHeroIcon('PencilIcon', { className: "h-5 w-5" })}
+                              <Icon name="edit" size="md" />
                             </Link>
-                            <button 
+                            <span 
                               onClick={() => handleDuplicateClick(campaign)}
-                              className="text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
+                              className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                               title="Duplicate campaign"
                             >
-                              {migrateHeroIcon('DocumentDuplicateIcon', { className: "h-5 w-5" })}
-                            </button>
-                            <button
+                              <Icon name="copy" size="md" />
+                            </span>
+                            <span
                               onClick={() => handleDeleteClick(campaign)}
-                              className="text-gray-500 hover:text-red-600 transition-colors"
+                              className="group text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                               title="Delete campaign"
                             >
-                              {migrateHeroIcon('TrashIcon', { className: "h-5 w-5" })}
-                            </button>
+                              <Icon name="delete" size="md" action="delete" />
+                            </span>
                           </div>
                         </td>
                       </tr>
@@ -1052,34 +1039,34 @@ const ClientCampaignList: React.FC = () => {
                   </div>
                   
                   <div className="flex justify-end space-x-3 border-t border-[var(--divider-color)] pt-4">
-                    <button 
+                    <span 
                       onClick={() => handleViewCampaign(campaign.id.toString())}
-                      className="p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
+                      className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                       title="View campaign"
                     >
-                      {migrateHeroIcon('EyeIcon', { className: "h-5 w-5" })}
-                    </button>
+                      <Icon name="view" size="md" />
+                    </span>
                     <Link 
                       href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                      className="p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors"
+                      className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors"
                       title="Edit campaign"
                     >
-                      {migrateHeroIcon('PencilIcon', { className: "h-5 w-5" })}
+                      <Icon name="edit" size="md" />
                     </Link>
-                    <button 
+                    <span 
                       onClick={() => handleDuplicateClick(campaign)}
-                      className="p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors" 
+                      className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                       title="Duplicate campaign"
                     >
-                      {migrateHeroIcon('DocumentDuplicateIcon', { className: "h-5 w-5" })}
-                    </button>
-                    <button
+                      <Icon name="copy" size="md" />
+                    </span>
+                    <span
                       onClick={() => handleDeleteClick(campaign)}
-                      className="p-1.5 text-gray-500 hover:text-red-600 transition-colors"
+                      className="group p-1.5 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                       title="Delete campaign"
                     >
-                      {migrateHeroIcon('TrashIcon', { className: "h-5 w-5" })}
-                    </button>
+                      <Icon name="delete" size="md" action="delete" />
+                    </span>
                   </div>
                 </div>
               );
@@ -1119,9 +1106,9 @@ const ClientCampaignList: React.FC = () => {
               <h3 className="text-lg font-semibold text-[var(--primary-color)]">Confirm Deletion</h3>
               <button 
                 onClick={() => setShowDeleteModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="group text-gray-500 hover:text-gray-700"
               >
-                {migrateHeroIcon('XMarkIcon', { className: "h-5 w-5" })}
+                <Icon name="close" size="sm" iconType="button" />
               </button>
             </div>
             
@@ -1172,9 +1159,9 @@ const ClientCampaignList: React.FC = () => {
               <h3 className="text-lg font-semibold text-[var(--primary-color)]">Duplicate Campaign</h3>
               <button 
                 onClick={() => setShowDuplicateModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="group text-gray-500 hover:text-gray-700"
               >
-                {migrateHeroIcon('XMarkIcon', { className: "h-5 w-5" })}
+                <Icon name="close" size="sm" iconType="button" />
               </button>
             </div>
             

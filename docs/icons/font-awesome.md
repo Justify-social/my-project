@@ -4,16 +4,65 @@
 
 This document provides a comprehensive guide to using Font Awesome Pro icons in the project. Our implementation uses the official NPM packages from Font Awesome with custom safeguards to ensure reliable icon rendering across the application.
 
+Our application uses a standardized approach that ensures consistent icon rendering across all UI components:
+
+- **Light to Solid Hover Effect**: All interactive icons use the LIGHT style by default, and change to SOLID on hover
+- **Static vs Interactive Icons**: Icons can be configured as static (non-changing) or interactive (hover effects)
+- **Action-Specific Colors**: Icons like delete/remove use appropriate colors (red) on hover
+- **Centralized Configuration**: All icon settings are stored in a central location
+- **Automatic Adoption**: New icons automatically follow the defined behavior
+
+## Updated Icon System Structure
+
+All icon-related functionality has been consolidated in a single location:
+
+```
+src/components/ui/icons/
+├── Icon.tsx                // Main Icon component
+├── IconVariants.tsx        // Icon variant wrappers (Static, Button, etc.)
+├── IconConfig.ts           // Central configuration 
+├── IconMapping.ts          // Icon name mappings
+├── IconRegistry.tsx        // Icon registration
+├── IconMonitoring.tsx      // Runtime monitoring
+├── IconUtils.tsx           // Utility functions
+└── index.ts                // Public API exports
+```
+
+### Importing from the New Structure
+
+Always import from the central path:
+
+```tsx
+// Import from the central location
+import { Icon, StaticIcon, DeleteIcon } from '@/components/ui/icons';
+```
+
+> **Note**: Legacy imports are still supported through backward-compatibility files, but they are deprecated and will be removed in a future version.
+
+## System Design
+
+Our icon system is built around these core components:
+
+1. **Icon Registry**: All icons are registered with Font Awesome at app initialization
+2. **Icon Component**: A consistent component API for rendering icons
+3. **Icon Configuration**: Central settings that control icon appearance 
+4. **Icon Monitoring**: Runtime validation to ensure icons load correctly
+5. **Type Safety**: TypeScript guarantees only valid icon names are used
+
 ## Table of Contents
 
 - [Implementation Architecture](#implementation-architecture)
 - [Using Icons](#using-icons)
   - [Icon Component](#icon-component)
+  - [Icon Types and Behaviors](#icon-types-and-behaviors)
+  - [Action Colors](#action-colors)
   - [Direct FontAwesome Usage](#direct-fontawesome-usage)
   - [Icon Types](#icon-types)
+- [Configuration](#configuration)
+- [Hover Effect](#hover-effect)
+- [Best Practices](#best-practices)
 - [Troubleshooting](#troubleshooting)
 - [Diagnostics](#diagnostics)
-- [Best Practices](#best-practices)
 - [Advanced: How Our Implementation Works](#advanced-how-our-implementation-works)
 
 ## Implementation Architecture
@@ -23,16 +72,18 @@ Our Font Awesome integration consists of multiple layers:
 1. **Core Registration**: Icons are registered in `src/lib/icon-registry.tsx`
 2. **Component Abstraction**: Our custom `<Icon>` component in `src/components/ui/icon.tsx`
 3. **Icon Mappings**: Centralized mappings in `src/lib/icon-mappings.ts`
-4. **Safety Utilities**: Error prevention in `src/lib/icon-helpers.tsx`
-5. **Monitoring**: Runtime monitoring in `src/lib/icon-monitoring.tsx`
+4. **Central Configuration**: Icon settings in `src/config/icon-config.ts`
+5. **Safety Utilities**: Error prevention in `src/lib/icon-helpers.tsx`
+6. **Monitoring**: Runtime monitoring in `src/lib/icon-monitoring.tsx`
 
 This architecture provides:
 
 - Type-safe icon usage
-- Standardized styling
+- Standardized styling and behavior
 - Consistent fallbacks
 - Robust error handling
 - Comprehensive diagnostics
+- Light to solid hover effects for interactive icons
 
 ## Using Icons
 
@@ -41,13 +92,22 @@ This architecture provides:
 The recommended way to use icons is through our custom `Icon` component:
 
 ```tsx
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icons';
 
-// UI icon (with hover effect from light to solid)
+// Interactive UI icon (with hover effect from light to solid)
 <Icon name="user" />
 
-// UI icon (solid variant)
+// Static UI icon (no hover effects, for decorative purposes)
+<Icon name="user" iconType="static" />
+
+// Danger action icon (turns red on hover)
+<Icon name="delete" action="delete" />
+
+// UI icon with solid variant (no hover effect)
 <Icon name="check" solid />
+
+// Apply active state (uses solid variant with active color)
+<Icon name="bell" active />
 
 // KPI icon
 <Icon kpiName="brandAwareness" />
@@ -66,6 +126,37 @@ import { Icon } from '@/components/ui/icon';
 />
 ```
 
+### Icon Wrapper Components
+
+For even simpler usage, we provide specialized wrapper components to ensure icons follow the global configuration:
+
+```tsx
+import { 
+  StaticIcon, 
+  ButtonIcon, 
+  DeleteIcon, 
+  WarningIcon, 
+  SuccessIcon 
+} from '@/components/ui/icon-wrapper';
+
+// Decorative static icon (no hover effects)
+<StaticIcon name="user" />
+
+// Interactive button icon (light to solid hover effect)
+<ButtonIcon name="edit" />
+
+// Delete icon (red on hover)
+<DeleteIcon name="trash" />
+
+// Warning icon (yellow on hover)
+<WarningIcon name="warning" />
+
+// Success icon (green on hover)
+<SuccessIcon name="check" />
+```
+
+These wrapper components automatically set the appropriate `iconType` and `action` props to ensure consistent behavior across the application.
+
 #### Icon Props
 
 | Prop | Type | Description |
@@ -79,7 +170,77 @@ import { Icon } from '@/components/ui/icon';
 | `size` | `'xs'｜'sm'｜'md'｜'lg'｜'xl'` | Icon size preset (default: 'md') |
 | `color` | `string` | Icon color (default: 'currentColor') |
 | `active` | `boolean` | Whether icon is in active state |
+| `iconType` | `'button'｜'static'` | Determines hover behavior (default: 'button') |
+| `action` | `'default'｜'delete'｜'warning'｜'success'` | Determines hover color (default: 'default') |
 | `className` | `string` | Additional CSS classes |
+
+### Icon Types and Behaviors
+
+Our system distinguishes between two types of icons:
+
+#### Button Icons (`iconType="button"`)
+
+Button icons are interactive elements that provide visual feedback when users interact with them:
+
+- **Default Style**: LIGHT variant
+- **Hover Behavior**: Changes to SOLID variant
+- **Hover Color**: Changes based on the `action` prop
+- **Usage**: For clickable elements, buttons, links, interactive UI elements
+
+```tsx
+// Default button icon (blue on hover)
+<Icon name="edit" />
+
+// Delete button icon (red on hover)
+<Icon name="delete" action="delete" />
+
+// Warning button icon (yellow on hover)
+<Icon name="warning" action="warning" />
+
+// Success button icon (green on hover)
+<Icon name="check" action="success" />
+```
+
+#### Static Icons (`iconType="static"`)
+
+Static icons are non-interactive, decorative elements that don't change appearance:
+
+- **Default Style**: LIGHT or SOLID (based on the `solid` prop)
+- **Hover Behavior**: No change on hover
+- **Usage**: For decorative, informational, or non-interactive UI elements
+
+```tsx
+// Static light icon (doesn't change on hover)
+<Icon name="info" iconType="static" />
+
+// Static solid icon
+<Icon name="info" iconType="static" solid />
+```
+
+### Action Colors
+
+Icons can have different hover colors based on their action type:
+
+| Action | Color | Usage |
+|--------|-------|-------|
+| `default` | Light Blue (#00BFFF) | Standard interactive icons |
+| `delete` | Red (#FF3B30) | Delete, remove, or dangerous actions |
+| `warning` | Yellow (#FFCC00) | Warning or caution actions |
+| `success` | Green (#34C759) | Success or confirmation actions |
+
+```tsx
+// Default action (light blue on hover)
+<Icon name="edit" />
+
+// Delete action (red on hover)
+<Icon name="delete" action="delete" />
+
+// Warning action (yellow on hover) 
+<Icon name="warning" action="warning" />
+
+// Success action (green on hover)
+<Icon name="check" action="success" />
+```
 
 ### Direct FontAwesome Usage
 
@@ -100,6 +261,19 @@ import { faHeart as falHeart } from '@fortawesome/pro-light-svg-icons';
 ```
 
 We recommend using the direct import method for better type safety and to avoid runtime errors.
+
+### Hover Effect
+
+For the light-to-solid hover effect to work properly with button icons, include your icon in a parent with the `group` class:
+
+```tsx
+<button className="group flex items-center">
+  <Icon name="edit" />
+  <span className="ml-2">Edit</span>
+</button>
+```
+
+This enables the icon to transition from light to solid style when hovered.
 
 ### Icon Types
 
@@ -125,15 +299,7 @@ Custom SVG icons for Key Performance Indicators.
 <Icon kpiName="brandAwareness" />
 ```
 
-Available in `KPI_ICON_URLS`:
-- `actionIntent`
-- `adRecall`
-- `advocacy`
-- `brandAwareness`
-- `brandPreference`
-- `consideration`
-- `messageAssociation`
-- `purchaseIntent`
+Available in `KPI_ICON_URLS`.
 
 #### App Icons
 
@@ -144,20 +310,7 @@ Navigation and application feature icons.
 <Icon appName="campaigns" />
 ```
 
-Available in `APP_ICON_URLS`:
-- `campaigns`
-- `influencers`
-- `settings`
-- `help`
-- `reports`
-- `profile`
-- `mmm`
-- `search`
-- `home`
-- `creativeTesting`
-- `brandLift`
-- `brandHealth`
-- `billing`
+Available in `APP_ICON_URLS`.
 
 #### Platform Icons
 
@@ -170,6 +323,64 @@ Social media and platform-specific icons with brand colors.
 
 Available in `PLATFORM_ICON_MAP`.
 
+## Configuration
+
+The icon system can be configured by modifying `src/config/icon-config.ts`:
+
+```typescript
+export const iconConfig = {
+  // Default icon style ('light', 'solid', 'regular', 'brand')
+  defaultStyle: 'light',
+  
+  // Icon types and their behavior
+  types: {
+    // Static icons - used for visual/informational purposes
+    static: {
+      hoverEffect: false,
+      solidOnHover: false,
+      colorOnHover: false
+    },
+    
+    // Button icons - interactive elements with hover effects
+    button: {
+      hoverEffect: true,
+      solidOnHover: true,
+      colorOnHover: true
+    }
+  },
+  
+  // Default hover behavior
+  hoverEffect: true,
+  
+  // Style to prefix mapping
+  styleToPrefix: {
+    light: 'fal',
+    solid: 'fas',
+    regular: 'far',
+    brand: 'fab'
+  },
+  
+  // Icon colors
+  colors: {
+    default: 'currentColor',
+    hover: '#00BFFF',      // Light blue color for hover
+    active: '#00BFFF',     // Light blue color for active state
+    danger: '#FF3B30',     // Red color for dangerous actions (delete, remove)
+    warning: '#FFCC00',    // Yellow color for warning actions
+    success: '#34C759'     // Green color for success actions
+  },
+  
+  // Action type to color mapping
+  actionColors: {
+    delete: 'danger',
+    remove: 'danger',
+    warning: 'warning',
+    success: 'success',
+    default: 'hover'
+  }
+};
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -178,6 +389,7 @@ Available in `PLATFORM_ICON_MAP`.
    - Make sure the icon name is correctly spelled
    - Check if the icon is registered in the library
    - For direct usage, ensure icon is imported correctly
+   - Ensure the parent has the `group` class for hover effects to work
 
 2. **Type errors with array syntax**
    - Use direct import instead of array syntax
@@ -187,6 +399,17 @@ Available in `PLATFORM_ICON_MAP`.
    - Ensure Font Awesome CSS is imported
    - Check for className conflicts
    - Verify TailwindCSS classes are properly applied
+
+4. **Hover effect not working**
+   - Make sure the parent container has the `group` class
+   - Verify `solid={true}` is not set (disables hover effect)
+   - Check that `iconType="static"` is not set (disables hover effect)
+   - Check iconConfig.hoverEffect is enabled in the config
+
+5. **Icon hover color not changing**
+   - Verify you've set the correct `action` prop (e.g., `action="delete"`)
+   - Check that the icon has `iconType="button"` (default)
+   - Ensure the parent has the `group` class
 
 ### Debugging Tools
 
@@ -220,19 +443,30 @@ To run diagnostics:
    - Prefer `<Icon name="user" />` over direct FontAwesome usage
    - Use consistent sizing through the `size` prop
 
-2. **Follow Type Conventions**
+2. **Follow Icon Behavior Conventions**
+   - Use `iconType="static"` for non-interactive/decorative icons
+   - Use `iconType="button"` (default) for interactive elements
+   - Use appropriate `action` prop for special actions (delete, warning, success)
+
+3. **Follow Type Conventions**
    - Use camelCase for icon names (`userGroup` not `user-group`)
    - Use existing icon constants when possible
 
-3. **Handle Edge Cases**
-   - Wrap icons in error boundaries for critical UI sections
-   - Use optional chaining for dynamic icon names
+4. **Container Class**
+   - Include interactive icons in a parent with the `group` class to enable hover effects
 
-4. **Performance Considerations**
+5. **Consistent Sizing**
+   - Use the `size` prop to maintain consistent icon sizes
+
+6. **Accessibility**
+   - Use appropriate title/aria attributes on parent elements
+   - For decorative icons, mark as `aria-hidden="true"`
+
+7. **Performance Considerations**
    - Import only the icons you need for direct usage
    - Use consistent icon sets to benefit from caching
 
-5. **Styling Guidelines**
+8. **Styling Guidelines**
    - Use Tailwind utility classes for styling
    - Keep hover effects in parent components
    - Follow the design system color palette
