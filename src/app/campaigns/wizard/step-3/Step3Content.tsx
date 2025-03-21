@@ -362,7 +362,7 @@ function FormContent() {
                                     setFieldValue('location', newLocations);
                                   }}
                                 >
-                                  <Icon className="h-5 w-5" />
+                                  <Icon name="delete" action="delete" className="w-4 h-4" />
                                 </button>
                               </span>
                             ))}
@@ -633,7 +633,7 @@ function FormContent() {
                             }}
                             className="text-gray-400 hover:text-gray-500"
                           >
-                            <Icon className="h-5 w-5" />
+                            <Icon name="delete" action="delete" className="w-4 h-4" />
                           </button>
                         </div>
                       ))}
@@ -684,7 +684,7 @@ function FormContent() {
                                   setFieldValue('languages', newLanguages);
                                 }}
                               >
-                                <Icon className="h-5 w-5" />
+                                <Icon name="delete" action="delete" className="w-4 h-4" />
                               </button>
                             </span>
                           ))}
@@ -805,7 +805,7 @@ function FormContent() {
                                       setFieldValue('jobTitles', newJobTitles);
                                     }}
                                   >
-                                    <Icon className="h-5 w-5" />
+                                    <Icon name="delete" action="delete" className="w-4 h-4" />
                 </button>
                                 </span>
                               ))}
@@ -955,7 +955,7 @@ function FormContent() {
                                 setFieldValue('competitors', updatedCompetitors);
                               }}
                             >
-                              <Icon className="h-4 w-4" />
+                              <Icon name="delete" action="delete" className="w-4 h-4" />
                             </button>
                           </span>
                         ))}
