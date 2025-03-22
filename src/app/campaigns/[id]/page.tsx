@@ -310,10 +310,10 @@ const MetricCard = ({
   let trendIcon = null;
   let trendColor = "text-gray-500";
   if (trend === "up") {
-    trendIcon = <Icon name="faChartLine" className="inline-block h-4 w-4 ml-1" solid={false} />;
+    trendIcon = <Icon name="faArrowUp" className="inline-block h-4 w-4 ml-1" solid={false} />;
     trendColor = "text-green-600";
   } else if (trend === "down") {
-    trendIcon = <Icon name="faChartLine" className="inline-block h-4 w-4 ml-1" solid={false} />;
+    trendIcon = <Icon name="faArrowDown" className="inline-block h-4 w-4 ml-1" solid={false} />;
     trendColor = "text-red-600";
   }
   return <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)]">
@@ -353,7 +353,7 @@ const DataCard: React.FC<DataCardProps> = ({
     <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" solid={false} />
+          <Icon name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" solid={false} />
         </div>
         <div>
           <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
@@ -386,11 +386,11 @@ const DataRow = ({
 }: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'}`}>
     <div className="w-1/3 flex-shrink-0">
       <div className="flex items-center text-[var(--secondary-color)]">
-        {iconName && <span className="mr-2">
-            <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-4 w-4" iconType="static" solid={false} />
+        {iconName && <span className="mr-2 flex-shrink-0">
+            <Icon name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-4 w-4" iconType="static" solid={false} />
           </span>}
         <span className={featured ? 'font-medium' : ''}>{label}</span>
-        {tooltip && <span className="ml-1" title={tooltip}>
+        {tooltip && <span className="ml-1 cursor-help" title={tooltip}>
             {<Icon name="faCircleInfo" className="h-4 w-4 text-gray-400" solid={false} />}
           </span>}
       </div>
@@ -823,359 +823,111 @@ function validateCampaignData(data: any): CampaignValidation {
   };
 }
 
-// Updated StatusBadge component
-interface StatusBadgeProps {
-  status: string | undefined | null;
-  size?: "sm" | "md";
-  className?: string;
-}
-const StatusBadge = ({
-  status = "draft",
-  size = "md",
-  className = ""
-}: StatusBadgeProps) => {
-  let bgColor = "bg-gray-100";
-  let textColor = "text-gray-800";
-  let statusText = "Draft";
-  const safeStatus = status?.toLowerCase() || "draft";
-  switch (safeStatus) {
-    case "approved":
-      bgColor = "bg-green-100";
-      textColor = "text-green-800";
-      statusText = "Approved";
+// Helper function to capitalize a string
+const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+// StatusBadge component with semantic icons
+const StatusBadge = ({ status }: { status?: string }) => {
+  let statusColor = "bg-gray-100 text-gray-700";
+  let statusIcon = <Icon name="faCircleQuestion" className="h-4 w-4 mr-1" solid={false} />;
+  
+  switch (status?.toLowerCase()) {
+    case 'draft':
+      statusColor = "bg-yellow-50 text-yellow-700";
+      statusIcon = <Icon name="faPencil" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "active":
-      bgColor = "bg-green-100";
-      textColor = "text-green-800";
-      statusText = "Active";
+    case 'submitted':
+      statusColor = "bg-blue-50 text-blue-700";
+      statusIcon = <Icon name="faPaperPlane" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "submitted":
-      bgColor = "bg-green-100";
-      textColor = "text-green-800";
-      statusText = "Submitted";
+    case 'pending':
+      statusColor = "bg-orange-50 text-orange-700";
+      statusIcon = <Icon name="faClock" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "in_review":
-    case "in-review":
-    case "inreview":
-      bgColor = "bg-yellow-100";
-      textColor = "text-yellow-800";
-      statusText = "In Review";
+    case 'approved':
+      statusColor = "bg-green-50 text-green-700";
+      statusIcon = <Icon name="faCircleCheck" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "paused":
-      bgColor = "bg-yellow-100";
-      textColor = "text-yellow-800";
-      statusText = "Paused";
+    case 'rejected':
+      statusColor = "bg-red-50 text-red-700";
+      statusIcon = <Icon name="faCircleXmark" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "completed":
-      bgColor = "bg-blue-100";
-      textColor = "text-blue-800";
-      statusText = "Completed";
+    case 'error':
+      statusColor = "bg-red-50 text-red-700";
+      statusIcon = <Icon name="faTriangleExclamation" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "error":
-      bgColor = "bg-red-100";
-      textColor = "text-red-800";
-      statusText = "DATA ERROR";
+    case 'active':
+      statusColor = "bg-green-50 text-green-700";
+      statusIcon = <Icon name="faPlay" className="h-4 w-4 mr-1" solid={false} />;
       break;
-    case "draft":
+    case 'completed':
+      statusColor = "bg-purple-50 text-purple-700";
+      statusIcon = <Icon name="faFlag" className="h-4 w-4 mr-1" solid={false} />;
+      break;
     default:
-      bgColor = "bg-gray-100";
-      textColor = "text-gray-800";
-      statusText = "Draft";
-      break;
+      statusColor = "bg-gray-100 text-gray-700";
+      statusIcon = <Icon name="faCircleQuestion" className="h-4 w-4 mr-1" solid={false} />;
   }
-  return <span className={`inline-flex items-center rounded-full ${bgColor} ${textColor} ${size === "md" ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"} font-medium ${className}`}>
-      {statusText}
+  
+  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
+      {statusIcon}
+      {capitalize(status || 'Unknown')}
     </span>;
 };
 
-// Add component testing utility
-// This should be placed near the top with other utility functions
-const componentTester = {
-  testComponentProps<T extends Record<string, any>>(componentName: string, props: T, requiredProps: Array<keyof T> = []): void {
-    if (DEBUG) {
-      console.group(`🧪 Testing ${componentName} props`);
+// Error status badge for displaying API errors
+const ErrorStatusBadge = ({ message }: { message: string }) => {
+  return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm">
+      <Icon name="faTriangleExclamation" className="h-4 w-4 mr-2" solid={false} />
+      <span>{message}</span>
+    </div>;
+};
 
-      // Test for undefined required props
-      const missingProps = requiredProps.filter(prop => props[prop] === undefined);
-      if (missingProps.length > 0) {
-        console.warn(`⚠️ Missing required props: ${missingProps.join(', ')}`);
-      }
+// Add missing utility functions
+/**
+ * Format file size into human readable format
+ */
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
-      // Test all props for undefined/null values
-      Object.entries(props).forEach(([key, value]) => {
-        if (value === undefined) {
-          console.warn(`⚠️ Prop "${key}" is undefined`);
-        } else if (value === null) {
-          console.info(`ℹ️ Prop "${key}" is null`);
-        }
-
-        // Check for property access on potentially null/undefined objects
-        if (value !== null && typeof value === 'object') {
-          console.info(`ℹ️ Object prop "${key}" - safe to access properties`);
-        }
-      });
-      console.groupEnd();
-    }
-
-    // In production, we do nothing
-    return;
+/**
+ * Get description for a feature
+ */
+const getFeatureDescription = (feature: string): string => {
+  switch (feature) {
+    case Feature.CREATIVE_ASSET_TESTING:
+      return 'Test multiple creative assets to identify top performers';
+    case Feature.BRAND_LIFT:
+      return 'Measure the impact of your campaign on brand metrics';
+    case Feature.BRAND_HEALTH:
+      return 'Monitor key brand health indicators';
+    case Feature.MIXED_MEDIA_MODELLING:
+      return 'Analyze effectiveness across multiple media channels';
+    default:
+      return 'Advanced campaign feature';
   }
 };
 
-// Add DetailSection component
-interface DetailSectionProps {
-  iconName: string;
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-  className?: string;
-  actions?: React.ReactNode;
-}
-const DetailSection = ({
-  iconName,
-  title,
-  description,
-  children,
-  className = '',
-  actions
-}: DetailSectionProps) => <motion.section initial={{
-  opacity: 0,
-  y: 20
-}} animate={{
-  opacity: 1,
-  y: 0
-}} className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200 ${className}`}>
+// Format percentage for display
+const formatPercentage = (value: number): string => {
+  return `${value > 0 ? '+' : ''}${value}%`;
+};
 
-    <div className="p-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-        <div className="flex items-center">
-          <div className="bg-blue-50 p-2.5 rounded-lg mr-3">
-            <Icon name={iconName} className="w-5 h-5 text-blue-500" iconType="static" solid={false} />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-            {description && <p className="text-sm text-gray-500 mt-0.5">{description}</p>}
-          </div>
-        </div>
-        {actions && <div className="flex space-x-2 ml-auto sm:ml-0">
-            {actions}
-          </div>}
-      </div>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </div>
-  </motion.section>;
-
-// Add a safe access helper function
-function safeAccess<T, K extends keyof T>(obj: T | null | undefined, property: K, fallback: T[K]): T[K] {
-  if (obj === null || obj === undefined) {
-    return fallback;
-  }
-  return obj[property] !== undefined ? obj[property] : fallback;
-}
-
-// Add a comprehensive testing utility for rendering safety
-class ComponentSafetyTester {
-  private static hasErrors = false;
-  static testNullAccess(componentName: string, value: any, path: string): void {
-    if (DEBUG) {
-      if (value === undefined) {
-        console.error(`❌ Test Failed: ${componentName} - ${path} is undefined`);
-        this.hasErrors = true;
-      } else if (value === null) {
-        console.warn(`⚠️ Test Warning: ${componentName} - ${path} is null`);
-      }
-    }
-  }
-  static testBatchProps(componentName: string, props: Record<string, any>): void {
-    if (DEBUG) {
-      console.group(`🧪 Testing ${componentName} props`);
-      Object.entries(props).forEach(([key, value]) => {
-        this.testNullAccess(componentName, value, key);
-      });
-      console.groupEnd();
-    }
-  }
-  static resetErrorState(): void {
-    this.hasErrors = false;
-  }
-  static hasTestErrors(): boolean {
-    return this.hasErrors;
-  }
-}
-
-// Add a debug mode toggle at the top of the file
-const ENABLE_SAFETY_MODE = true; // Set to true to enable runtime checks
-
-// Wrap all access to potentially undefined properties in a safety check
-function safe<T>(value: T | undefined | null, fallback: T): T {
-  if (value === undefined || value === null) {
-    if (ENABLE_SAFETY_MODE && typeof window !== 'undefined') {
-      console.warn('🛡️ Safety Mode: Accessed undefined/null value, using fallback', {
-        fallback
-      });
-    }
-    return fallback;
-  }
-  return value;
-}
-
-// For currency specifically
-function safeCurrency(value: Currency | string | undefined | null): string {
+// Helper function to safely access currency values
+const safeCurrency = (value: Currency | string | undefined | null): string => {
   if (value === undefined || value === null) {
     return 'USD';
   }
   return typeof value === 'string' ? value : String(Object.values(Currency)[Object.values(Currency).indexOf(value)]);
-}
-
-// Advanced runtime safety checker for component props
-function safeProps<T extends Record<string, any>>(componentName: string, props: T): void {
-  if (!ENABLE_SAFETY_MODE || typeof window === 'undefined') return;
-  console.group(`🧪 Checking ${componentName} Props`);
-  Object.entries(props).forEach(([key, value]) => {
-    if (value === undefined) {
-      console.error(`⚠️ ${componentName}: Property "${key}" is undefined`);
-    } else if (value === null) {
-      console.warn(`ℹ️ ${componentName}: Property "${key}" is null`);
-    }
-  });
-  console.groupEnd();
-}
-
-// Add a stress test function to simulate missing data
-function stressTestWithNullValues(data: CampaignDetail, formatDate: (date: string) => string, calculateDuration: (start: string, end: string) => string, formatCurrency: (value: number | string, currency: Currency | string | undefined) => string): void {
-  if (!ENABLE_SAFETY_MODE || typeof window === 'undefined') return;
-  console.group('🔥 Stress Testing Component with Missing Data');
-  try {
-    // Create data clone with missing fields to test error handling
-    const testCases = [{
-      fieldName: 'submissionStatus',
-      testData: {
-        ...data,
-        submissionStatus: undefined
-      }
-    }, {
-      fieldName: 'campaignName',
-      testData: {
-        ...data,
-        campaignName: undefined
-      }
-    }, {
-      fieldName: 'brandName',
-      testData: {
-        ...data,
-        brandName: undefined
-      }
-    }, {
-      fieldName: 'id',
-      testData: {
-        ...data,
-        id: undefined
-      }
-    }, {
-      fieldName: 'totalBudget',
-      testData: {
-        ...data,
-        totalBudget: undefined
-      }
-    }, {
-      fieldName: 'currency',
-      testData: {
-        ...data,
-        currency: undefined
-      }
-    }, {
-      fieldName: 'startDate',
-      testData: {
-        ...data,
-        startDate: undefined
-      }
-    }, {
-      fieldName: 'endDate',
-      testData: {
-        ...data,
-        endDate: undefined
-      }
-    }, {
-      fieldName: 'primaryKPI',
-      testData: {
-        ...data,
-        primaryKPI: undefined
-      }
-    }, {
-      fieldName: 'features',
-      testData: {
-        ...data,
-        features: undefined
-      }
-    }];
-    console.log(`Running ${testCases.length} stress tests for null fields...`);
-
-    // Test each case to see if it would cause errors
-    testCases.forEach(({
-      fieldName,
-      testData
-    }) => {
-      try {
-        // Test accessing specific properties that could cause errors
-        if (fieldName === 'submissionStatus') {
-          // Test status badge with undefined status
-          const safeStatus = typeof testData.submissionStatus === 'string' && testData.submissionStatus ? testData.submissionStatus.toLowerCase() : 'draft';
-          console.log(`Testing StatusBadge with missing ${fieldName}: ${safeStatus}`);
-        }
-        if (fieldName === 'id') {
-          // Test ID substring that could throw error
-          const idDisplay = testData.id ? testData.id.substring(0, 8) : 'N/A';
-          console.log(`Testing ID substring with missing ${fieldName}: ${idDisplay}`);
-        }
-        if (fieldName === 'startDate' || fieldName === 'endDate') {
-          // Test date formatting
-          const formattedDate = fieldName === 'startDate' ? testData.startDate ? formatDate(testData.startDate) : 'Not set' : testData.endDate ? formatDate(testData.endDate) : 'Not set';
-          console.log(`Testing date formatting with missing ${fieldName}: ${formattedDate}`);
-
-          // Test duration calculation if applicable
-          if (testData.startDate && testData.endDate) {
-            const duration = calculateDuration(testData.startDate, testData.endDate);
-            console.log(`Testing duration with ${fieldName}: ${duration}`);
-          }
-        }
-        if (fieldName === 'totalBudget' || fieldName === 'currency') {
-          // Test currency formatting
-          const budget = testData.totalBudget !== undefined ? formatCurrency(testData.totalBudget, testData.currency) : 'N/A';
-          console.log(`Testing currency formatting with missing ${fieldName}: ${budget}`);
-        }
-        if (fieldName === 'features') {
-          // Test features array mapping
-          const featuresDisplay = testData.features && testData.features.length > 0 ? `${testData.features.length} features` : 'No features';
-          console.log(`Testing features display with missing ${fieldName}: ${featuresDisplay}`);
-        }
-        console.log(`✅ Test passed for missing ${fieldName}`);
-      } catch (error) {
-        console.error(`❌ Error with missing ${fieldName}:`, error);
-      }
-    });
-    console.log('Stress testing complete.');
-  } catch (error) {
-    console.error('Error during stress testing:', error);
-  }
-  console.groupEnd();
-}
-
-// Format percentage for display
-const formatPercentage = (value: number) => {
-  return `${value > 0 ? '+' : ''}${value}%`;
 };
 
-// Add new error status badge component
-const ErrorStatusBadge = ({
-  message
-}: {
-  message: string;
-}) => <div className="text-red-600 font-medium p-3 border border-red-300 bg-red-50 rounded-md flex items-center space-x-2">
-    <Icon name="faCircleXmark" className="h-5 w-5 text-red-600" iconType="static" solid={false} />
-    <span>{message}</span>
-  </div>;
 export default function CampaignDetail() {
   const params = useParams();
   const router = useRouter();
@@ -1503,63 +1255,7 @@ export default function CampaignDetail() {
 
   // Test all components that will render with data
   if (DEBUG && data) {
-    // Reset error state before testing
-    ComponentSafetyTester.resetErrorState();
-
-    // Test MetricCard data
-    ComponentSafetyTester.testBatchProps('MetricCard - Budget', {
-      'totalBudget': data.totalBudget,
-      'currency': data.currency
-    });
-    ComponentSafetyTester.testBatchProps('MetricCard - Dates', {
-      'startDate': data.startDate,
-      'endDate': data.endDate
-    });
-
-    // Test header properties
-    ComponentSafetyTester.testBatchProps('Campaign Header', {
-      'campaignName': data.campaignName,
-      'submissionStatus': data.submissionStatus,
-      'brandName': data.brandName,
-      'id': data.id
-    });
-
-    // Run stress tests on test mode
-    if (testMode) {
-      stressTestWithNullValues(data, formatDate, calculateDuration, formatCurrency);
-    }
-
-    // Log if any critical errors were found
-    if (ComponentSafetyTester.hasTestErrors()) {
-      console.error('⚠️ CRITICAL: Component tests detected potential runtime errors');
-    }
-  }
-
-  // Component safety testing
-  if (data) {
-    ComponentSafetyTester.testBatchProps('MetricCard - Dates', {
-      'startDate': data.startDate,
-      'endDate': data.endDate
-    });
-
-    // Test header properties
-    ComponentSafetyTester.testBatchProps('Campaign Header', {
-      'campaignName': data.campaignName,
-      'submissionStatus': data.submissionStatus,
-      'brandName': data.brandName,
-      'id': data.id
-    });
-
-    // Run stress tests on test mode
-    if (testMode) {
-      stressTestWithNullValues(data, formatDate, calculateDuration, formatCurrency);
-    }
-
-    // Test StatusBadge props
-    componentTester.testComponentProps('StatusBadge', {
-      status: data.submissionStatus,
-      size: 'md'
-    }, ['status']);
+    console.log('Debug mode active for campaign details', data.id);
   }
 
   // Ensure we have data before rendering the component
@@ -1583,8 +1279,7 @@ export default function CampaignDetail() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex items-center space-x-3">
               <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Go back">
-
-                {<Icon name="faChevronLeft" className="h-5 w-5 text-[var(--secondary-color)]" solid={false} />}
+                <Icon name="faChevronLeft" className="h-5 w-5 text-[var(--secondary-color)]" solid={false} />
               </button>
               <div>
                 <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "N/A"}</h1>
@@ -1598,17 +1293,16 @@ export default function CampaignDetail() {
             
             <div className="flex space-x-3 mt-4 md:mt-0">
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
-                {<Icon name="faPrint" className="h-4 w-4 mr-2" solid={false} />}
-                Print
+                <Icon name="faPrint" className="h-4 w-4 mr-2" solid={false} iconType="button" />
+                <span>Print</span>
               </button>
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
-                {<Icon name="faShare" className="h-4 w-4 mr-2" solid={false} />}
-                Share
+                <Icon name="faShare" className="h-4 w-4 mr-2" solid={false} iconType="button" />
+                <span>Share</span>
               </button>
               <button onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)} className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]" disabled={!!error}>
-
-                {<Icon name="faEdit" className="h-4 w-4 mr-2" solid={false} />}
-                Edit
+                <Icon name="faEdit" className="h-4 w-4 mr-2" solid={false} iconType="button" />
+                <span>Edit</span>
               </button>
             </div>
           </div>
@@ -1619,18 +1313,14 @@ export default function CampaignDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Key Metrics Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <MetricCard title="Total Budget" value={error ? "N/A" : data?.totalBudget || "N/A"} iconName="money" format={error ? "text" : "currency"} />
-
+          <MetricCard title="Total Budget" value={error ? "N/A" : data?.totalBudget || "N/A"} iconName="dollarSign" format={error ? "text" : "currency"} />
           <MetricCard title="Campaign Duration" value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} iconName="calendar" />
-
           <MetricCard title="Platform" value={error ? "N/A" : data?.platform || "N/A"} iconName="globe" />
-
         </div>
 
         {/* Campaign Details & Primary Contact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <DataCard title="Campaign Details" iconName="documentText" description="Basic campaign information">
-
             <div className="space-y-3">
               <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
               <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
@@ -1638,17 +1328,14 @@ export default function CampaignDetail() {
               <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconName="calendar" />
               <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconName="calendar" />
               <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconName="clock" />
-              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconName="money" />
-              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconName="money" featured={true} />
-
-              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconName="money" />
-
+              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconName="dollarSign" />
+              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconName="dollarSign" featured={true} />
+              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconName="dollarSign" />
               <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconName="globe" />
             </div>
           </DataCard>
 
           <DataCard title="Primary Contact" iconName="userCircle" description="Primary point of contact for this campaign">
-
             <div className="space-y-3">
               <div className="flex items-center mb-4">
                 <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold">
@@ -1662,23 +1349,23 @@ export default function CampaignDetail() {
                 </div>
               </div>
               
-              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
+              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center">
                     {data?.primaryContact?.email || "N/A"}
                   </a>} iconName="mail" />
 
-              
               <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconName="building" />
+              <DataRow label="Phone" value={error ? "N/A" : <a href={`tel:${data?.primaryContact?.phone}`} className="text-[var(--accent-color)] hover:underline">
+                    {data?.primaryContact?.phone || "N/A"}
+                  </a>} iconName="phone" />
             </div>
 
             {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
                 <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary Contact</h4>
                 <div className="space-y-3">
                   <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconName="userCircle" />
-
                   <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
                         {data.secondaryContact.email}
                       </a>} iconName="mail" />
-
                   <DataRow label="Position" value={data.secondaryContact.position} iconName="building" />
                 </div>
               </div>}
@@ -1688,7 +1375,6 @@ export default function CampaignDetail() {
         {/* Objectives & Audience */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {error ? <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
-
               <div className="space-y-5">
                 <div>
                   <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
@@ -1711,7 +1397,6 @@ export default function CampaignDetail() {
             </DataCard> : data && <ObjectivesSection campaign={data} />}
           
           {error ? <DataCard title="Target Audience" iconName="userGroup" description="Detailed audience targeting information">
-
               <div className="text-center py-10 text-[var(--secondary-color)]">
                 <p>N/A</p>
               </div>
@@ -1721,84 +1406,63 @@ export default function CampaignDetail() {
         {/* Creative Assets */}
         <div className="mb-6">
           <DataCard title="Creative Assets" iconName="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}>
-
             {error ? <div className="text-center py-10 text-[var(--secondary-color)]">
-                {<Icon name="faPhoto" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
-                <p>N/A</p>
-              </div> : data && (data.creativeAssets.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {data.creativeAssets.slice(0, 6).map((asset, index) => <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
-                      {/* Asset Preview - Square/Tiled */}
-                      <div className="aspect-square w-full overflow-hidden relative bg-gray-50">
-                        <CampaignDetailAssetPreview url={asset.url} fileName={asset.name || 'Asset preview'} type={asset.type} className="w-full h-full" />
-
-                        
-                        {/* Asset Name Overlay at Top */}
-                        <div className="absolute top-0 left-0 right-0 bg-white bg-opacity-90 py-2 px-3 border-b border-gray-200">
-                          <h3 className="font-medium text-gray-800 truncate text-sm">
-                            {asset.name || 'Untitled Asset'}
-                          </h3>
-                        </div>
-                      </div>
-                      
-                      {/* Asset Details Section */}
-                      <div className="p-4 bg-white flex-grow">
-                        <div className="space-y-4">
-                          {/* Influencer */}
-                          <div className="flex items-start">
-                            {<Icon name="faUserCircle" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />}
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Influencer</p>
-                              <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
-                            </div>
-                          </div>
-                          
-                          {/* Why this influencer */}
-                          <div className="flex items-start">
-                            {<Icon name="faCircleInfo" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />}
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
-                              <p className="text-sm text-gray-800">{asset.description || 'No details provided'}</p>
-                            </div>
-                          </div>
-                          
-                          {/* Budget */}
-                          <div className="flex items-start">
-                            {<Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />}
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Budget</p>
-                              <p className="text-sm text-gray-800 font-medium">
-                                {asset.budget ? formatCurrency(asset.budget, data.currency) : 'Not specified'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                {<Icon name="faImage" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
+                <p>No creative assets available</p>
+              </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(data?.creativeAssets || []).slice(0, 3).map((asset: any, index: number) => <div key={index} className="border border-[var(--divider-color)] rounded-md overflow-hidden">
+                      {asset.type === "image" ? <div className="h-32 bg-gray-100 relative">
+                          {asset.url ? <Image src={asset.url} alt={asset.name || 'Creative asset'} className="object-cover" fill sizes="(max-width: 768px) 100vw, 33vw" /> : <div className="flex items-center justify-center h-full">
+                              <Icon name="faImage" className="h-10 w-10 text-gray-300" solid={false} />
+                            </div>}
+                        </div> : <div className="h-32 bg-black flex items-center justify-center relative">
+                          <Icon name="faVideo" className="h-10 w-10 text-white opacity-70" solid={false} />
+                          {asset.url && <div className="absolute inset-0 opacity-40 bg-gradient-to-t from-black to-transparent" />}
+                        </div>}
+                      <div className="p-3">
+                        <h4 className="font-medium text-[var(--primary-color)] truncate">{asset.name || 'Untitled'}</h4>
+                        <p className="text-xs text-[var(--secondary-color)] mt-1 flex items-center">
+                          <Icon name={asset.type === "image" ? "faImage" : "faVideo"} className="h-3 w-3 mr-1" solid={false} />
+                          <span>{asset.type === "image" ? "Image" : "Video"}</span>
+                          {asset.size && <span className="ml-2">{formatFileSize(asset.size)}</span>}
+                        </p>
                       </div>
                     </div>)}
-                </div> : <div className="text-center py-10 text-[var(--secondary-color)]">
-                  {<Icon name="faPhoto" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
-                  <p>No creative assets available</p>
-                </div>)}
+                  {(data?.creativeAssets || []).length === 0 && <div className="col-span-3 text-center py-8 text-[var(--secondary-color)]">
+                      <Icon name="faImage" className="h-8 w-8 mx-auto mb-2 opacity-50" solid={false} />
+                      <p>No creative assets uploaded yet</p>
+                    </div>}
+                </div>}
           </DataCard>
         </div>
 
         {/* Campaign Features */}
         <div className="mb-6">
-          <DataCard title="Campaign Features" iconName="lightning" description="Additional features enabled for this campaign">
-
+          <DataCard title="Campaign Features" iconName="bolt" description="Additional features enabled for this campaign">
             {error ? <div className="text-center py-8 text-[var(--secondary-color)]">
                 <p>N/A</p>
-              </div> : data?.features && data.features.length > 0 ? <div className="flex flex-wrap gap-3">
-                  {data.features.map((feature, index) => <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
-                      <div className="w-5 h-5 mr-2" style={{
-                filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)'
-              }}>
-                        <Image src={featureIconsMap[feature as keyof typeof featureIconsMap]?.icon || "/app/Brand_Lift.svg"} alt={formatFeatureName(feature)} width={20} height={20} />
-
-                      </div>
-                      <span>{formatFeatureName(feature)}</span>
-                    </div>)}
-                </div> : <div className="text-center py-8 text-[var(--secondary-color)]">
-                  <p>No features specified</p>
+              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {data?.features && data.features.length > 0 ? data.features.map((feature: string, index: number) => {
+                    const featureKey = feature as keyof typeof featureIconsMap;
+                    return <div key={index} className="bg-[rgba(0,191,255,0.05)] p-4 rounded-lg">
+                        <div className="flex items-start">
+                          <div className="rounded-md flex-shrink-0 p-2">
+                            {featureIconsMap[featureKey] ? <Image src={featureIconsMap[featureKey].icon} width={24} height={24} alt={featureIconsMap[featureKey].title} className="w-6 h-6" /> : <Icon name="faBolt" className="h-6 w-6 text-[var(--accent-color)]" solid={false} />}
+                          </div>
+                          <div className="ml-3">
+                            <h4 className="font-medium text-[var(--primary-color)]">
+                              {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
+                            </h4>
+                            <p className="text-xs text-[var(--secondary-color)] mt-1">
+                              {getFeatureDescription(feature)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>;
+                  }) : <div className="col-span-3 text-center py-8 text-[var(--secondary-color)]">
+                      <Icon name="faBolt" className="h-8 w-8 mx-auto mb-2 opacity-50" solid={false} />
+                      <p>No features enabled for this campaign</p>
+                    </div>}
                 </div>}
           </DataCard>
         </div>
