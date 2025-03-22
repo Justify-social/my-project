@@ -52,6 +52,10 @@ export function useIconValidation(props: {
   const { name, solid, iconType, className } = props;
   
   useEffect(() => {
+    // Disable validation warnings completely - we'll rely on the audit script
+    return;
+    
+    /* Original validation logic commented out to reduce noise in console
     if (process.env.NODE_ENV === 'development') {
       // Only log warnings in development mode to avoid console spam in production
       try {
@@ -83,6 +87,7 @@ export function useIconValidation(props: {
         console.warn('Error in icon validation:', error);
       }
     }
+    */
   }, [name, solid, iconType, className]);
 }
 
@@ -99,6 +104,10 @@ export function hasGroupClass(el: HTMLElement | null): boolean {
  */
 export function useButtonIconValidation(ref: RefObject<HTMLElement>, iconType?: string) {
   useEffect(() => {
+    // Disable validation warnings completely - we'll rely on the audit script
+    return;
+    
+    /* Original validation logic commented out to reduce noise in console
     if (process.env.NODE_ENV === 'development' && iconType === 'button') {
       try {
         const parentElement = ref.current?.parentElement || null;
@@ -116,6 +125,7 @@ export function useButtonIconValidation(ref: RefObject<HTMLElement>, iconType?: 
         console.warn('Error in button icon validation:', error);
       }
     }
+    */
   }, [ref, iconType]);
 }
 
@@ -127,7 +137,7 @@ export function validateDynamicName(name: any): string | undefined {
   // Handle common edge cases gracefully
   if (name === null || name === undefined) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('Icon component received null or undefined name');
+      // console.warn('Icon component received null or undefined name');
     }
     return undefined;
   }
@@ -140,11 +150,13 @@ export function validateDynamicName(name: any): string | undefined {
     return nameStr;
   }
   
-  // Warning for development
+  // Warning for development - disabled to reduce noise
+  /*
   if (process.env.NODE_ENV === 'development') {
     console.warn(`Invalid icon name: "${nameStr}"`);
     console.info('Available icons:', ICON_NAMES.join(', '));
   }
+  */
   
   return undefined;
 }

@@ -327,7 +327,12 @@ const MetricCard = ({
           {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1">{subtext}</div>}
         </div>
         <div className="p-3 bg-[var(--accent-light)] rounded-full">
-          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" iconType="static" solid={false} />
+          <Icon 
+            name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
+            className="h-5 w-5 text-[var(--accent-color)]" 
+            iconType="static" 
+            solid={false} 
+          />
         </div>
       </div>
     </div>;
@@ -353,7 +358,13 @@ const DataCard: React.FC<DataCardProps> = ({
     <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" solid={false} />
+          <Icon 
+            name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
+            className="h-5 w-5 text-[var(--accent-color)]" 
+            aria-hidden="true" 
+            iconType="static" 
+            solid={false} 
+          />
         </div>
         <div>
           <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
@@ -387,7 +398,12 @@ const DataRow = ({
     <div className="w-1/3 flex-shrink-0">
       <div className="flex items-center text-[var(--secondary-color)]">
         {iconName && <span className="mr-2 flex-shrink-0">
-            <Icon name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-4 w-4" iconType="static" solid={false} />
+            <Icon 
+              name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
+              className="h-4 w-4" 
+              iconType="static" 
+              solid={false} 
+            />
           </span>}
         <span className={featured ? 'font-medium' : ''}>{label}</span>
         {tooltip && <span className="ml-1 cursor-help" title={tooltip}>
@@ -598,13 +614,13 @@ const ObjectivesSection: React.FC<{
         </div>}
 
       <div className="space-y-3 pt-2">
-        <DataRow label="Main Message" value={campaign.mainMessage} />
-        <DataRow label="Brand Perception" value={campaign.brandPerception} />
+        <DataRow label="Main Message" value={campaign.mainMessage} iconName="lightBulb" />
+        <DataRow label="Brand Perception" value={campaign.brandPerception} iconName="chart" />
         <DataRow label="Hashtags" value={campaign.hashtags} iconName="tag" />
-        <DataRow label="Key Benefits" value={campaign.keyBenefits} />
-        <DataRow label="Memorability" value={campaign.memorability} />
-        <DataRow label="Expected Achievements" value={campaign.expectedAchievements} />
-        <DataRow label="Purchase Intent" value={campaign.purchaseIntent} />
+        <DataRow label="Key Benefits" value={campaign.keyBenefits} iconName="circleCheck" />
+        <DataRow label="Memorability" value={campaign.memorability} iconName="bookmark" />
+        <DataRow label="Expected Achievements" value={campaign.expectedAchievements} iconName="trendUp" />
+        <DataRow label="Purchase Intent" value={campaign.purchaseIntent} iconName="dollarSign" />
       </div>
     </div>
   </DataCard>;
@@ -1354,9 +1370,6 @@ export default function CampaignDetail() {
                   </a>} iconName="mail" />
 
               <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconName="building" />
-              <DataRow label="Phone" value={error ? "N/A" : <a href={`tel:${data?.primaryContact?.phone}`} className="text-[var(--accent-color)] hover:underline">
-                    {data?.primaryContact?.phone || "N/A"}
-                  </a>} iconName="phone" />
             </div>
 
             {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
@@ -1385,13 +1398,13 @@ export default function CampaignDetail() {
                   <div className="text-[var(--secondary-color)]">N/A</div>
                 </div>
                 <div className="space-y-3 pt-2">
-                  <DataRow label="Main Message" value="N/A" />
-                  <DataRow label="Brand Perception" value="N/A" />
+                  <DataRow label="Main Message" value="N/A" iconName="lightBulb" />
+                  <DataRow label="Brand Perception" value="N/A" iconName="chart" />
                   <DataRow label="Hashtags" value="N/A" iconName="tag" />
-                  <DataRow label="Key Benefits" value="N/A" />
-                  <DataRow label="Memorability" value="N/A" />
-                  <DataRow label="Expected Achievements" value="N/A" />
-                  <DataRow label="Purchase Intent" value="N/A" />
+                  <DataRow label="Key Benefits" value="N/A" iconName="circleCheck" />
+                  <DataRow label="Memorability" value="N/A" iconName="bookmark" />
+                  <DataRow label="Expected Achievements" value="N/A" iconName="trendUp" />
+                  <DataRow label="Purchase Intent" value="N/A" iconName="dollarSign" />
                 </div>
               </div>
             </DataCard> : data && <ObjectivesSection campaign={data} />}

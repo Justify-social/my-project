@@ -248,152 +248,223 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   explicitStyle,
   action = 'default',
   onClick,
-  fontAwesome,
+  spin = false,
+  pulse = false,
+  flipHorizontal = false,
+  flipVertical = false,
+  rotation = 0,
   ...rest
 }, ref) => {
-  // Add validation in development mode
-  useIconValidation({
-    name,
-    solid,
-    iconType,
-    className
-  });
-
-  // Create a ref if one wasn't passed in
-  const internalRef = useRef<SVGSVGElement>(null);
-  const elementRef = ref || internalRef;
-
-  // Validate button icons have proper parent elements with group class
-  useButtonIconValidation(elementRef as unknown as React.RefObject<HTMLElement>, iconType);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const resolvedRef = (ref || svgRef) as React.RefObject<SVGSVGElement>;
   
-  // First check if the provided name is a semantic name that needs lookup
-  // If it doesn't start with 'fa', check if it's in SEMANTIC_TO_FA_MAP
-  let resolvedName = name;
-  if (name && !name.startsWith('fa') && SEMANTIC_TO_FA_MAP[name]) {
-    resolvedName = SEMANTIC_TO_FA_MAP[name];
-  }
+  // Figure out which type of icon we're rendering
+  const hasName = Boolean(name);
+  const hasPlatformName = Boolean(platformName);
+  const hasKpiName = Boolean(kpiName);
+  const hasAppName = Boolean(appName);
 
-  // Get the icon prefix (fa, ri, etc.) for style mapping
-  const prefix = getIconPrefix(resolvedName || '');
-
-  // Filter out custom props that shouldn't be passed to DOM elements
-  const sanitizedRest = {
-    ...rest
-  };
-  // Remove any potential non-DOM props
-  delete sanitizedRest.kpiName;
-  delete sanitizedRest.appName;
-  delete sanitizedRest.platformName;
-  delete sanitizedRest.fontAwesome;
-  delete sanitizedRest.explicitStyle;
-
-  // For button icons that should change on hover, we use different logic
-  // static icons: use solid if specified, otherwise use the default prefix mapping
-  // button icons: use light by default (unless solid is specified) and rely on hover for solid
-  const usesSolidStyle = solid || active;
-
-  // Determine style based on name suffix, explicit style, or defaults
-  let styleName = explicitStyle;
-  if (!styleName) {
-    if (resolvedName?.endsWith('Light')) {
-      styleName = 'light';
-    } else if (usesSolidStyle) {
-      styleName = 'solid';
-    } else {
-      // Use the mapped style or default to light for button icons and solid for static icons
-      if (iconType === 'button' && !active) {
-        styleName = 'light'; // Button icons default to light unless active
-      } else {
-        styleName = ICON_STYLE_FOLDERS[prefix as keyof typeof ICON_STYLE_FOLDERS] || 'solid';
-      }
-    }
-  }
-
-  // Remove Light suffix to get base name
-  const nameWithoutSuffix = resolvedName?.replace(/Light$/, '') || '';
-  const iconBaseName = getIconBaseName(nameWithoutSuffix);
-
-  // For button icons that should show solid on hover, we'll need both light and solid
-  const shouldUseHoverEffect = iconType === 'button' && !active && !solid;
-
-  // Create the URL for the icon SVG using our unified API endpoint
-  let iconUrl = `/api/assets/icon?style=${styleName}&name=${iconBaseName}`;
+  // Make sure at least one icon type is specified
+  const isValidIcon = hasName || hasPlatformName || hasKpiName || hasAppName;
   
-  // URL for the hover state (solid version)
-  let hoverIconUrl = shouldUseHoverEffect ? `/api/assets/icon?style=solid&name=${iconBaseName}` : undefined;
+  // For platform specific icons, look up the name
+  const iconName = hasPlatformName ? PLATFORM_ICON_MAP[platformName as PlatformName] : 
+                  (name || '');
+                  
+  // Normalize icon name (handle special cases like icons from UI_ICON_MAP)
+  const normalizedIconName = SEMANTIC_TO_FA_MAP[iconName] || iconName;
 
-  // Get hover effect classes based on icon type and action
+  // Only use validation in development to avoid unnecessary overhead in production
+  if (process.env.NODE_ENV === 'development') {
+    // Validate icon name and properties, suppressing console warnings
+    useIconValidation({ 
+      name: normalizedIconName, 
+      solid, 
+      iconType,
+      className 
+    });
+    
+    // Check if button icons have proper parent elements with group class
+    useButtonIconValidation(resolvedRef as unknown as React.RefObject<HTMLElement>, iconType);
+  }
+  
+  // Extract prefix (fa, fas, far, fal, fab) and base name
+  const baseName = getIconBaseName(normalizedIconName);
+  const defaultPrefix = getIconPrefix(normalizedIconName);
+  
+  // Determine which prefix to use based on props and defaults
+  const useExplicitStyle = style ? `fa${style.charAt(0).toUpperCase()}${style.slice(1)}` : '';
+  const useSolidStyle = solid || active; // Use solid style when active or explicitly requested
+  const finalPrefix = useExplicitStyle || (useSolidStyle ? 'fas' : defaultPrefix);
+  
+  // Size class based on the size prop
+  const sizeClass = SIZE_CLASSES[size as IconSize] || SIZE_CLASSES.md;
+  
+  // Helper for hover effects
   const getHoverClasses = () => {
-    if (iconType === 'static' || active) return '';
-    const actionColors: Record<string, string> = {
-      default: 'group-hover:text-[#00BFFF]',
-      // Deep Sky Blue
-      delete: 'group-hover:text-red-600',
-      warning: 'group-hover:text-yellow-500',
-      success: 'group-hover:text-green-600'
-    };
-    return `transition-colors duration-200 ${actionColors[action as keyof typeof actionColors] || actionColors.default}`;
+    if (iconType !== 'button') return '';
+    
+    // For button icons, add transition effects
+    const baseHoverClass = 'transition-colors duration-200';
+    
+    // Different classes based on the action type
+    switch (action) {
+      case 'delete':
+        return `${baseHoverClass} group-hover:text-red-500`;
+      case 'warning':
+        return `${baseHoverClass} group-hover:text-yellow-500`;
+      case 'success':
+        return `${baseHoverClass} group-hover:text-green-500`;
+      default:
+        return `${baseHoverClass} group-hover:text-[var(--accent-color)]`;
+    }
   };
-  const hoverClasses = getHoverClasses();
-
-  // Build transformation CSS classes
-  const transformClasses = useMemo(() => {
-    return [
-      // Add transformation classes if needed - spin, flip, etc. can be added here
-    ].filter(Boolean).join(' ');
-  }, []);
-
-  // If we have embedded data, use it
-  if (iconData[resolvedName]) {
-    const {
-      width,
-      height,
-      path,
-      url
-    } = iconData[resolvedName];
-
-    // Get the corresponding solid icon name for hover effects
-    let hoverName: string | undefined;
-    if (shouldUseHoverEffect) {
-      if (resolvedName.endsWith('Light')) {
-        // For Light icons, remove the Light suffix to get the solid version
-        hoverName = resolvedName.replace(/Light$/, '');
-      } else {
-        // For non-Light icons, try to find a solid version if it exists
-        const solidName = `fa${getIconBaseName(resolvedName)}`;
-        hoverName = iconData[solidName] ? solidName : undefined;
+  
+  // Transform classes for spin, pulse, flip, and rotation
+  const getTransformClasses = () => {
+    const classes = [];
+    
+    if (spin) classes.push('animate-spin');
+    if (pulse) classes.push('animate-pulse');
+    
+    // Flip transformations
+    if (flipHorizontal && flipVertical) {
+      classes.push('scale-x-[-1] scale-y-[-1]');
+    } else if (flipHorizontal) {
+      classes.push('scale-x-[-1]');
+    } else if (flipVertical) {
+      classes.push('scale-y-[-1]');
+    }
+    
+    // Rotation
+    if (rotation) {
+      switch (rotation) {
+        case 90:
+          classes.push('rotate-90');
+          break;
+        case 180:
+          classes.push('rotate-180');
+          break;
+        case 270:
+          classes.push('rotate-270');
+          break;
       }
     }
-    const hoverIconData = hoverName && iconData[hoverName];
-    return <span className={cn('inline-block relative', SIZE_CLASSES[size as keyof typeof SIZE_CLASSES], className)} aria-hidden={!title} {...sanitizedRest}>
-        {/* Base icon */}
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${width} ${height}`} fill="currentColor" className={cn('w-full h-full', transformClasses, hoverClasses, shouldUseHoverEffect && 'group-hover:opacity-0')} onClick={onClick} ref={elementRef}>
-          {title && <title>{title}</title>}
-          <path d={path} />
-        </svg>
-
-        {/* Hover icon (solid version) */}
-        {shouldUseHoverEffect && hoverIconData && <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${hoverIconData.width} ${hoverIconData.height}`} fill="currentColor" className={cn('w-full h-full absolute inset-0 opacity-0 group-hover:opacity-100', transformClasses, hoverClasses)} onClick={onClick}>
-            {title && <title>{title}</title>}
-            <path d={hoverIconData.path} />
-          </svg>}
-      </span>;
+    
+    return classes.join(' ');
+  };
+  
+  // Compute CSS classes for the icon
+  // Safely handling className which could be a string or dynamic value
+  const cssClasses = useMemo(() => {
+    // Start with base classes that are always applied
+    const baseClasses = 'inline-block';
+    
+    // Add transformation classes
+    const transformClasses = getTransformClasses();
+    
+    // Add hover effect classes if this is a button icon
+    const hoverClasses = getHoverClasses();
+    
+    // Size classes based on the size prop
+    const sizeClasses = SIZE_CLASSES[size as IconSize] || SIZE_CLASSES.md;
+    
+    // Special handling for className to safely handle dynamic values
+    let safeClassName = '';
+    try {
+      // Attempt to use className directly if it's a string
+      if (typeof className === 'string') {
+        safeClassName = className;
+      } else if (className && typeof className === 'object') {
+        // For objects like Tailwind's clsx output, convert to string if possible
+        safeClassName = String(className);
+      }
+    } catch (e) {
+      // If anything goes wrong, just use an empty string
+      console.warn('Error processing className in Icon component', e);
+    }
+    
+    // Combine all classes, handling dynamic className safely
+    return cn(
+      baseClasses,
+      sizeClasses,
+      transformClasses,
+      hoverClasses,
+      safeClassName
+    );
+  }, [size, spin, pulse, flipHorizontal, flipVertical, rotation, iconType, action, className]);
+  
+  // Determine if we need to use SVG or Next.js Image component
+  const useNextImage = false; // Currently not using Next.js Image for icons
+  
+  // Check if icon exists in our icon-data.ts file
+  // For button icons, we need to handle both the default (light) and hover (solid) states
+  const isButtonIcon = iconType === 'button';
+  const iconKey = `${normalizedIconName}${solid ? '' : 'Light'}`; 
+  const iconExists = Boolean(iconData[iconKey]?.path);
+  
+  // If icon data is not found, use a fallback question mark icon
+  const finalIconName = iconExists ? normalizedIconName : 'faQuestion';
+  
+  // For button icons, we need a different approach to handle hover
+  let finalIconKey;
+  let hoverIconKey;
+  
+  if (isButtonIcon) {
+    // Button icons use Light variant by default and Solid on hover
+    finalIconKey = `${finalIconName}Light`;
+    hoverIconKey = `${finalIconName}`; // Solid version (no Light suffix)
+  } else {
+    // Static icons just use whatever was specified (solid or light)
+    finalIconKey = `${finalIconName}${solid ? '' : 'Light'}`;
   }
-
-  // Fallback to loading the SVG file directly
-  return <span className={cn('inline-flex shrink-0 relative', SIZE_CLASSES[size as keyof typeof SIZE_CLASSES], className)} aria-hidden={!title} {...sanitizedRest}>
-      {/* Base icon (light) */}
-      <img src={iconUrl} alt={title || `${resolvedName} icon`} className={cn('w-full h-full', transformClasses, shouldUseHoverEffect && 'group-hover:opacity-0 transition-opacity duration-200')} style={{
-      pointerEvents: rest.onClick ? 'auto' : 'none',
-      objectFit: 'contain'
-    }} onClick={rest.onClick as any} title={title} />
-      
-      {/* Hover icon (solid version) */}
-      {shouldUseHoverEffect && hoverIconUrl && <img src={hoverIconUrl} alt={title || `${resolvedName} solid icon`} className={cn('w-full h-full absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200', transformClasses)} style={{
-      pointerEvents: rest.onClick ? 'auto' : 'none',
-      objectFit: 'contain'
-    }} onClick={rest.onClick as any} title={title} />}
-    </span>;
+  
+  const finalIconData = iconData[finalIconKey] || {
+    width: 512,
+    height: 512,
+    path: '', // Will use file path instead
+    url: `/ui-icons/light/${getIconBaseName(finalIconName)}.svg`
+  };
+  
+  // For button icons, also get the hover (solid) icon data
+  const hoverIconData = isButtonIcon ? (iconData[hoverIconKey || ''] || {
+    width: 512,
+    height: 512,
+    path: '',
+    url: `/ui-icons/solid/${getIconBaseName(finalIconName)}.svg`
+  }) : null;
+  
+  // Pass the appropriate CSS classes and SVG path to svg element
+  return (
+    <svg 
+      ref={resolvedRef}
+      className={cssClasses}
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox={`0 0 ${finalIconData.width} ${finalIconData.height}`}
+      fill="currentColor"
+      aria-hidden={!title}
+      role={title ? 'img' : 'presentation'}
+      onClick={onClick}
+      {...rest}
+    >
+      {title && <title>{title}</title>}
+      {/* For button icons, use two paths - one for default state, one for hover */}
+      {isButtonIcon ? (
+        <>
+          <path 
+            d={finalIconData.path || ''} 
+            className="group-hover:opacity-0 transition-opacity duration-200"
+          />
+          <path 
+            d={hoverIconData?.path || ''} 
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          />
+        </>
+      ) : (
+        <path d={finalIconData.path || ''} />
+      )}
+    </svg>
+  );
 });
 SvgIcon.displayName = 'SvgIcon';
 

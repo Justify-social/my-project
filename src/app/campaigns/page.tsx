@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Icon } from '@/components/ui/icons';
+import { Icon, ButtonIcon } from '@/components/ui/icons';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
 /**
@@ -297,9 +297,9 @@ const ClientCampaignList: React.FC = () => {
         return undefined;
       }
     };
-    const startDatesArray = campaigns.filter(campaign => campaign.startDate).map(campaign => safelyFormatDate(campaign.startDate)).filter((date): date is string => !!date); // Type guard to ensure we only have strings
+    const startDatesArray = campaigns.filter((campaign) => campaign.startDate).map((campaign) => safelyFormatDate(campaign.startDate)).filter((date): date is string => !!date); // Type guard to ensure we only have strings
 
-    const endDatesArray = campaigns.filter(campaign => campaign.endDate).map(campaign => safelyFormatDate(campaign.endDate)).filter((date): date is string => !!date); // Type guard to ensure we only have strings
+    const endDatesArray = campaigns.filter((campaign) => campaign.endDate).map((campaign) => safelyFormatDate(campaign.endDate)).filter((date): date is string => !!date); // Type guard to ensure we only have strings
 
     const startDatesSet = new Set(startDatesArray);
     const endDatesSet = new Set(endDatesArray);
@@ -341,7 +341,7 @@ const ClientCampaignList: React.FC = () => {
   // Filter campaigns based on search text and dropdown filters
   const filteredCampaigns = useMemo(() => {
     if (!campaigns) return [];
-    return campaigns.filter(campaign => {
+    return campaigns.filter((campaign) => {
       if (!campaign) return false;
       const matchesSearch = campaign.campaignName?.toLowerCase()?.includes(search.toLowerCase()) ?? false;
       const matchesStatus = !statusFilter || campaign.submissionStatus === statusFilter;
@@ -490,7 +490,7 @@ const ClientCampaignList: React.FC = () => {
         console.warn('Campaign not found during deletion:', data);
 
         // Still update the UI to remove the campaign since it's not in the database
-        setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId));
+        setCampaigns((prevCampaigns) => prevCampaigns.filter((campaign) => campaign.id.toString() !== campaignId));
 
         // Show a more user-friendly message
         toast.success('Campaign removed from list');
@@ -507,7 +507,7 @@ const ClientCampaignList: React.FC = () => {
       }
 
       // Update local state
-      setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId));
+      setCampaigns((prevCampaigns) => prevCampaigns.filter((campaign) => campaign.id.toString() !== campaignId));
 
       // If the deletion was successful, also trigger a refresh from the server to get the latest data
       if (data.success) {
@@ -562,7 +562,7 @@ const ClientCampaignList: React.FC = () => {
             toast.error('Campaign ID format issue detected. The system will still try to delete the campaign.');
 
             // Even with invalid format, still remove it from the UI
-            setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id.toString() !== campaignToAction.id));
+            setCampaigns((prevCampaigns) => prevCampaigns.filter((campaign) => campaign.id.toString() !== campaignToAction.id));
             setShowDeleteModal(false);
           } else {
             // For other errors, show error toast
@@ -690,7 +690,7 @@ const ClientCampaignList: React.FC = () => {
 
   // Helper to get KPI display name from key
   const getKpiDisplayName = (kpiKey: string): string => {
-    const kpi = KPI_OPTIONS.find(k => k.key === kpiKey);
+    const kpi = KPI_OPTIONS.find((k) => k.key === kpiKey);
     return kpi ? kpi.title : kpiKey;
   };
   return <div className="min-h-screen bg-white px-4 md:px-6 py-6">
@@ -706,32 +706,32 @@ const ClientCampaignList: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         {/* Search Bar */}
         <div className="relative w-full md:w-auto md:flex-grow md:max-w-md">
-          <input type="text" placeholder="Search campaigns" value={search} onChange={e => {
+          <input type="text" placeholder="Search campaigns" value={search} onChange={(e) => {
           setSearch(e.target.value);
           setCurrentPage(1);
         }} aria-label="Search campaigns by name" className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" />
-          <span className="absolute left-3 top-3 text-gray-500">
-            <Icon name="faSearchLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
-          </span>
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+            <Icon name="faSearch" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
+          </div>
         </div>
 
         {/* Filter Selection */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative inline-block">
-            <select value={objectiveFilter} onChange={e => {
+            <select value={objectiveFilter} onChange={(e) => {
             setObjectiveFilter(e.target.value);
             setCurrentPage(1);
           }} aria-label="Filter by objective" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">Objective</option>
-              {KPI_OPTIONS.map(kpi => <option key={kpi.key} value={kpi.key}>{kpi.title}</option>)}
+              {KPI_OPTIONS.map((kpi) => <option key={kpi.key} value={kpi.key}>{kpi.title}</option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
+              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
           <div className="relative inline-block">
-            <select value={statusFilter} onChange={e => {
+            <select value={statusFilter} onChange={(e) => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }} aria-label="Filter by status" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
@@ -745,37 +745,37 @@ const ClientCampaignList: React.FC = () => {
               <option value="completed">Completed</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
+              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
           <div className="relative inline-block">
-            <select value={startDateFilter} onChange={e => {
+            <select value={startDateFilter} onChange={(e) => {
             setStartDateFilter(e.target.value);
             setCurrentPage(1);
           }} aria-label="Filter by start date" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">Start Date</option>
-              {uniqueDates.startDates.map(date => <option key={date} value={date}>
+              {uniqueDates.startDates.map((date) => <option key={date} value={date}>
                   {formatDate(date)}
                 </option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
+              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
           <div className="relative inline-block">
-            <select value={endDateFilter} onChange={e => {
+            <select value={endDateFilter} onChange={(e) => {
             setEndDateFilter(e.target.value);
             setCurrentPage(1);
           }} aria-label="Filter by end date" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">End Date</option>
-              {uniqueDates.endDates.map(date => <option key={date} value={date}>
+              {uniqueDates.endDates.map((date) => <option key={date} value={date}>
                   {formatDate(date)}
                 </option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
+              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
@@ -842,18 +842,18 @@ const ClientCampaignList: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-3 justify-center">
-                            <span onClick={() => handleViewCampaign(campaign.id.toString())} className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="View campaign">
-                              <Icon name="faEyeLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
-                            </span>
-                            <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors" title="Edit campaign">
-                              <Icon name="faPenToSquareLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
+                            <button onClick={() => handleViewCampaign(campaign.id.toString())} className="group text-gray-500 transition-colors" title="View campaign">
+                              <Icon name="faEye" size="md" iconType="button" />
+                            </button>
+                            <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group text-gray-500 transition-colors" title="Edit campaign">
+                              <Icon name="faPenToSquare" size="md" iconType="button" />
                             </Link>
-                            <span onClick={() => handleDuplicateClick(campaign)} className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="Duplicate campaign">
-                              <Icon name="faCopyLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
-                            </span>
-                            <span onClick={() => handleDeleteClick(campaign)} className="group text-gray-500 hover:text-red-600 transition-colors cursor-pointer" title="Delete campaign">
-                              <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" solid={false} />
-                            </span>
+                            <button onClick={() => handleDuplicateClick(campaign)} className="group text-gray-500 transition-colors cursor-pointer" title="Duplicate campaign">
+                              <Icon name="faCopy" size="md" iconType="button" />
+                            </button>
+                            <button onClick={() => handleDeleteClick(campaign)} className="group text-gray-500 transition-colors cursor-pointer" title="Delete campaign">
+                              <Icon name="faTrashCan" size="md" iconType="button" action="delete" />
+                            </button>
                           </div>
                         </td>
                       </tr>;
@@ -866,7 +866,7 @@ const ClientCampaignList: React.FC = () => {
             <div className="px-6 py-4 flex items-center justify-between border-t border-[var(--divider-color)]">
               <div className="flex items-center">
                 <span className="mr-2 text-sm text-gray-700">Show</span>
-                <select value={campaignsPerPage} onChange={e => {
+                <select value={campaignsPerPage} onChange={(e) => {
               setCampaignsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }} className="border border-[var(--divider-color)] rounded p-1 text-sm">
@@ -877,10 +877,10 @@ const ClientCampaignList: React.FC = () => {
                 </select>
               </div>
               <div className="flex items-center space-x-4">
-                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors">
+                <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors">
                   Previous
                 </button>
-                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors">
+                <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors">
                   Next
                 </button>
               </div>
@@ -889,7 +889,7 @@ const ClientCampaignList: React.FC = () => {
 
           {/* Mobile View as Cards */}
           <div className="md:hidden space-y-4">
-            {displayedCampaigns.map(campaign => {
+            {displayedCampaigns.map((campaign) => {
           const statusInfo = getStatusInfo(campaign.submissionStatus);
           return <div key={campaign.id} className="bg-white border border-[var(--divider-color)] rounded-lg p-5 shadow-sm">
                   <div className="flex justify-between items-start mb-3">
@@ -917,18 +917,18 @@ const ClientCampaignList: React.FC = () => {
                   </div>
                   
                   <div className="flex justify-end space-x-3 border-t border-[var(--divider-color)] pt-4">
-                    <span onClick={() => handleViewCampaign(campaign.id.toString())} className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="View campaign">
-                      <Icon name="faEyeLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
-                    </span>
-                    <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors" title="Edit campaign">
-                      <Icon name="faPenToSquareLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
+                    <button onClick={() => handleViewCampaign(campaign.id.toString())} className="group p-1.5 text-gray-500 transition-colors cursor-pointer" title="View campaign">
+                      <Icon name="faEye" size="md" iconType="button" />
+                    </button>
+                    <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group p-1.5 text-gray-500 transition-colors" title="Edit campaign">
+                      <Icon name="faPenToSquare" size="md" iconType="button" />
                     </Link>
-                    <span onClick={() => handleDuplicateClick(campaign)} className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="Duplicate campaign">
-                      <Icon name="faCopyLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
-                    </span>
-                    <span onClick={() => handleDeleteClick(campaign)} className="group p-1.5 text-gray-500 hover:text-red-600 transition-colors cursor-pointer" title="Delete campaign">
-                      <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" solid={false} />
-                    </span>
+                    <button onClick={() => handleDuplicateClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer" title="Duplicate campaign">
+                      <Icon name="faCopy" size="md" iconType="button" />
+                    </button>
+                    <button onClick={() => handleDeleteClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer" title="Delete campaign">
+                      <Icon name="faTrashCan" size="md" iconType="button" action="delete" />
+                    </button>
                   </div>
                 </div>;
         })}
@@ -939,10 +939,10 @@ const ClientCampaignList: React.FC = () => {
                 Page {currentPage} of {totalPages}
               </span>
               <div className="flex space-x-3">
-                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                   Previous
                 </button>
-                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                   Next
                 </button>
               </div>
@@ -956,7 +956,7 @@ const ClientCampaignList: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-[var(--primary-color)]">Confirm Deletion</h3>
               <button onClick={() => setShowDeleteModal(false)} className="group text-gray-500 hover:text-gray-700">
-                <Icon name="faClose" size="sm" iconType="button" solid={false} />
+                <Icon name="faXmark" size="sm" iconType="button" />
               </button>
             </div>
             
@@ -988,7 +988,7 @@ const ClientCampaignList: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-[var(--primary-color)]">Duplicate Campaign</h3>
               <button onClick={() => setShowDuplicateModal(false)} className="group text-gray-500 hover:text-gray-700">
-                <Icon name="faClose" size="sm" iconType="button" solid={false} />
+                <Icon name="faXmark" size="sm" iconType="button" />
               </button>
             </div>
             
@@ -996,7 +996,7 @@ const ClientCampaignList: React.FC = () => {
               <label htmlFor="duplicateName" className="block mb-2 text-sm font-medium text-gray-700">
                 Please name the duplicate campaign:
               </label>
-              <input type="text" id="duplicateName" value={duplicateName} onChange={e => setDuplicateName(e.target.value)} className="w-full p-2.5 border border-[var(--divider-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="Enter campaign name" />
+              <input type="text" id="duplicateName" value={duplicateName} onChange={(e) => setDuplicateName(e.target.value)} className="w-full p-2.5 border border-[var(--divider-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="Enter campaign name" />
             </div>
             
             <div className="flex justify-end space-x-3">

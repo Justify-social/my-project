@@ -1,0 +1,7114 @@
+{
+  "timestamp": "2025-03-22T22:30:45.048Z",
+  "totalIcons": 452,
+  "totalIssues": 188,
+  "details": [
+    {
+      "file": "/src/app/page.tsx",
+      "line": 37,
+      "column": 50,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/page.tsx",
+      "line": 41,
+      "column": 50,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/page.tsx",
+      "line": 45,
+      "column": 50,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/CalendarUpcoming.tsx",
+      "line": 83,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/CalendarUpcoming.tsx",
+      "line": 92,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/CalendarUpcoming.tsx",
+      "line": 133,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "w-5 h-5 mr-2 text-blue-600",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/CalendarUpcoming.tsx",
+      "line": 152,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faChatBubble",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/CalendarUpcoming.tsx",
+      "line": 160,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 223,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "h-4 w-4 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 233,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "h-4 w-4 text-white",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 344,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-gray-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 354,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "h-3 w-3 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 360,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "h-3 w-3 text-white",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 396,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/pricing/PricingContent.tsx",
+      "line": 454,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 67,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 107,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 112,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 117,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 123,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faKey",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 171,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 182,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 185,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 223,
+      "column": 34,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 288,
+      "column": 34,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 301,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 304,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "className": "w-16 h-16 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 317,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 333,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 355,
+      "column": 34,
+      "component": "Icon",
+      "props": {
+        "name": "faKey",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 393,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-4 h-4 mr-2 text-green-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 397,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-4 h-4 mr-2 text-green-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 401,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-4 h-4 mr-2 text-green-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 405,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-4 h-4 mr-2 text-green-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 419,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-2 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 431,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 439,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faKey",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 454,
+      "column": 34,
+      "component": "Icon",
+      "props": {
+        "name": "faBell",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 723,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-12 h-12 text-red-400 mr-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/page.tsx",
+      "line": 737,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 60,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "w-5 h-5 text-gray-500",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 60,
+      "column": 92,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "w-5 h-5 text-gray-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 311,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 319,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faMail",
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faMail\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 327,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faChatBubble",
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 352,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 357,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 362,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faBookmark",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 367,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChatBubble",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 381,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 386,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "w-5 h-5 text-gray-400 hover:text-gray-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 414,
+      "column": 54,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 415,
+      "column": 58,
+      "component": "Icon",
+      "props": {
+        "name": "faBookmark",
+        "className": "w-5 h-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 416,
+      "column": 59,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 439,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 mr-3",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 444,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 mr-3",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 449,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faBookmark",
+        "className": "w-5 h-5 mr-3",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 454,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faChatBubble",
+        "className": "w-5 h-5 mr-3",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 465,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faShare",
+        "className": "w-3 h-3 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 483,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faStar",
+        "className": "w-6 h-6 text-[var(--accent-color)] mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 490,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faView",
+        "className": "w-6 h-6 text-[var(--accent-color)] mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faView\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 497,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-6 h-6 text-[var(--accent-color)] mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 504,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-6 h-6 text-[var(--accent-color)] mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 511,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-6 h-6 text-[var(--accent-color)] mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/help/page.tsx",
+      "line": 518,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faStar",
+        "className": "w-6 h-6 text-[var(--accent-color)] mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 45,
+      "column": 21,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 49,
+      "column": 21,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 53,
+      "column": 21,
+      "component": "Icon",
+      "props": {
+        "name": "faBellAlert",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faBellAlert\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 68,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "className": "w-4 h-4 sm:w-5 sm:h-5",
+        "solid": false
+      },
+      "issues": [
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 82,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-8 h-8 text-red-500",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 90,
+      "column": 8,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-4 h-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 120,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "className": "w-5 h-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 181,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"className\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 319,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "w-5 h-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 325,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronUp",
+        "className": "w-3 h-3 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 325,
+      "column": 93,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "className": "w-3 h-3 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 507,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "w-5 h-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 958,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "w-5 h-5 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 961,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "w-5 h-5 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/dashboard/DashboardContent.tsx",
+      "line": 1273,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 689,
+      "column": 13,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 696,
+      "column": 41,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowUp",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 696,
+      "column": 131,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowDown",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 696,
+      "column": 195,
+      "component": "Icon",
+      "props": {
+        "name": "faMinus",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 724,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"style\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 863,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 868,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-8 h-8 text-green-600",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 877,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-4 h-4 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 880,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowDown",
+        "className": "w-4 h-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 896,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"style\" detected (cannot validate at runtime)",
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 917,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faPresentationChartBar",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"style\" detected (cannot validate at runtime)",
+        "Icon \"faPresentationChartBar\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 938,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faTableCells",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"style\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 959,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faChartBar",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"style\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 999,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-4 h-4 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1002,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowDown",
+        "className": "w-4 h-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1045,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowUp",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1175,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "w-4 h-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1188,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1212,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1216,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faUserGroup",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1232,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1256,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1260,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faUserGroup",
+        "className": "w-4 h-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1300,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faLightning",
+        "solid": true,
+        "className": "w-6 h-6 text-white"
+      },
+      "issues": [
+        "Icon \"faLightning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1318,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-6 h-6",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1334,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-5 h-5 text-blue-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1561,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faLightning",
+        "solid": true,
+        "className": "w-6 h-6 text-white"
+      },
+      "issues": [
+        "Icon \"faLightning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1567,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowUp",
+        "className": "w-5 h-5 mr-2 flex-shrink-0 mt-0.5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1571,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faUserGroup",
+        "className": "w-5 h-5 mr-2 flex-shrink-0 mt-0.5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1575,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faShield",
+        "className": "w-5 h-5 mr-2 flex-shrink-0 mt-0.5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/brand-health/page.tsx",
+      "line": 1579,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faChartBar",
+        "className": "w-5 h-5 mr-2 flex-shrink-0 mt-0.5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 714,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "sm",
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 729,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "size": "sm",
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 748,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "size": "sm",
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 763,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "size": "sm",
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 778,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "size": "sm",
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 846,
+      "column": 30,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faEye",
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 849,
+      "column": 30,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faPenToSquare",
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 852,
+      "column": 30,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faCopy",
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 855,
+      "column": 30,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faTrashCan",
+        "size": "md",
+        "action": "delete"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 921,
+      "column": 22,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faEye",
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 924,
+      "column": 22,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faPenToSquare",
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 927,
+      "column": 22,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faCopy",
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 930,
+      "column": 22,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faTrashCan",
+        "size": "md",
+        "action": "delete"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 959,
+      "column": 16,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faXmark",
+        "size": "sm"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/page.tsx",
+      "line": 991,
+      "column": 16,
+      "component": "ButtonIcon",
+      "props": {
+        "name": "faXmark",
+        "size": "sm"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 53,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 84,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 text-green-500 mr-2 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 94,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "name": "faLightning",
+        "solid": true,
+        "className": "w-5 h-5 mr-2"
+      },
+      "issues": [
+        "Icon \"faLightning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 144,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 339,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 352,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faCreditCard",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 363,
+      "column": 71,
+      "component": "Icon",
+      "props": {
+        "name": "faCreditCard",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 363,
+      "column": 185,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 385,
+      "column": 46,
+      "component": "Icon",
+      "props": {
+        "name": "faLightning",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faLightning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 404,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 410,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 text-green-500 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 419,
+      "column": 46,
+      "component": "Icon",
+      "props": {
+        "name": "faCreditCard",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 426,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faCreditCard",
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 444,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 460,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 476,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 484,
+      "column": 46,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 534,
+      "column": 59,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 534,
+      "column": 130,
+      "component": "Icon",
+      "props": {
+        "name": "faClock",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 546,
+      "column": 32,
+      "component": "Icon",
+      "props": {
+        "name": "faDownload",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 554,
+      "column": 34,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 566,
+      "column": 46,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 586,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 591,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 601,
+      "column": 46,
+      "component": "Icon",
+      "props": {
+        "name": "faLightning",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faLightning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 618,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 660,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/billing/page.tsx",
+      "line": 750,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/admin/page.tsx",
+      "line": 243,
+      "column": 13,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "h-6 w-6 text-red-500",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/admin/page.tsx",
+      "line": 252,
+      "column": 13,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "h-6 w-6 text-green-500",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/admin/page.tsx",
+      "line": 272,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faBug",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/admin/page.tsx",
+      "line": 375,
+      "column": 21,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "h-6 w-6",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/upload/CampaignAssetUploader.tsx",
+      "line": 214,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faUpload",
+        "className": "h-16 w-16 text-blue-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/upload/CampaignAssetUploader.tsx",
+      "line": 250,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-6 w-6 text-gray-400 mr-3",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/upload/AssetPreview.tsx",
+      "line": 78,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-8 w-8 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/upload/AssetPreview.tsx",
+      "line": 99,
+      "column": 29,
+      "component": "Icon",
+      "props": {
+        "name": "faMinus",
+        "className": "h-6 w-6 text-gray-800",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/upload/AssetPreview.tsx",
+      "line": 99,
+      "column": 103,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "h-6 w-6 text-gray-800",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/upload/AssetPreview.tsx",
+      "line": 106,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-12 w-12 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/table.tsx",
+      "line": 254,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronUp",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"className\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/table.tsx",
+      "line": 256,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"className\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/table.tsx",
+      "line": 374,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/table.tsx",
+      "line": 385,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/select.tsx",
+      "line": 101,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "aria-hidden": "true",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"className\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/list.tsx",
+      "line": 226,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icon-wrapper.tsx",
+      "line": 18,
+      "column": 9,
+      "component": "Icon",
+      "props": {
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icon-wrapper.tsx",
+      "line": 26,
+      "column": 9,
+      "component": "Icon",
+      "props": {
+        "iconType": "button",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icon-wrapper.tsx",
+      "line": 34,
+      "column": 9,
+      "component": "Icon",
+      "props": {
+        "iconType": "button",
+        "action": "delete",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icon-wrapper.tsx",
+      "line": 42,
+      "column": 9,
+      "component": "Icon",
+      "props": {
+        "iconType": "button",
+        "action": "warning",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icon-wrapper.tsx",
+      "line": 50,
+      "column": 9,
+      "component": "Icon",
+      "props": {
+        "iconType": "button",
+        "action": "success",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 231,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 244,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faSettings",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSettings\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 253,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 258,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faSettings",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSettings\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 314,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "xs",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 318,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "sm",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 322,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "md",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 326,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "lg",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 330,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "xl",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 341,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faBell",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 345,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faBell",
+        "solid": true,
+        "className": "mb-2"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 349,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faBell",
+        "color": "blue",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 353,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faBell",
+        "className": "mb-2 text-teal-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 364,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 375,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 386,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 390,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faView",
+        "solid": true,
+        "className": "mb-2"
+      },
+      "issues": [
+        "Icon \"faView\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 394,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "solid": true,
+        "className": "mb-2"
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 398,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faCopy",
+        "solid": true,
+        "className": "mb-2"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 402,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "solid": true,
+        "className": "mb-2"
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 413,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 428,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "size": "xl",
+        "className": "absolute",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"appName\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 444,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 461,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 475,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 479,
+      "column": 31,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 483,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 487,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "appName": "home",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 491,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 495,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 499,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "platformName": "instagram",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 503,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "platformName": "youtube",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 507,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "platformName": "facebook",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 511,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "platformName": "x",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 515,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "platformName": "linkedin",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 519,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "platformName": "tiktok",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 523,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "appName": "profile",
+        "size": "sm",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 536,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 543,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faMail",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faMail\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 550,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "appName": "campaigns",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 557,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faUpload",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 564,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 571,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "platformName": "youtube",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 585,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "path": "M12 4v16m8-8H4",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 589,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "path": "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 593,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "path": "M8 2v4M12 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z",
+        "className": "mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 605,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "fontAwesome": "fa-solid fa-user",
+        "className": "w-8 h-8 mb-2",
+        "name": "faExamples",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faExamples\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 609,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "fontAwesome": "fa-solid fa-envelope",
+        "className": "w-8 h-8 mb-2",
+        "name": "faExamples",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faExamples\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 613,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "fontAwesome": "fa-solid fa-check",
+        "className": "w-8 h-8 mb-2",
+        "name": "faExamples",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faExamples\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 617,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "fontAwesome": "fa-brands fa-x-twitter",
+        "className": "w-8 h-8 mb-2",
+        "color": "#000000",
+        "name": "faExamples",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faExamples\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 621,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "fontAwesome": "fa-brands fa-facebook",
+        "className": "w-8 h-8 mb-2",
+        "color": "#1877F2",
+        "name": "faExamples",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faExamples\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 625,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "fontAwesome": "fa-brands fa-instagram",
+        "className": "w-8 h-8 mb-2",
+        "color": "#E4405F",
+        "name": "faExamples",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faExamples\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 652,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "solid": true,
+        "size": "md",
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 657,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "size": "md",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 671,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "size": "lg",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 686,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "size": "lg",
+        "data-source": "fontawesome",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 770,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 text-[#3182CE]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 771,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faSettings",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSettings\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 1218,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleCheck",
+        "solid": true,
+        "className": "h-3 w-3 text-white"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 1423,
+      "column": 67,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/examples.tsx",
+      "line": 1423,
+      "column": 148,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyPreviewContent.tsx",
+      "line": 309,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "w-5 h-5 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyDesignContent.tsx",
+      "line": 1106,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faTrash",
+        "className": "mr-2 h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyDesignContent.tsx",
+      "line": 1273,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faTrash",
+        "className": "h-4 w-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyApprovalContent.tsx",
+      "line": 281,
+      "column": 39,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "className": "h-5 w-5 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyApprovalContent.tsx",
+      "line": 281,
+      "column": 135,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-5 w-5 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyApprovalContent.tsx",
+      "line": 311,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyApprovalContent.tsx",
+      "line": 315,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faTrash",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyApprovalContent.tsx",
+      "line": 373,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/Brand-Lift/SurveyApprovalContent.tsx",
+      "line": 380,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleCheck",
+        "className": "h-5 w-5 text-green-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/test-upload/page.tsx",
+      "line": 129,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faRotate",
+        "className": "w-5 h-5 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/test-upload/page.tsx",
+      "line": 157,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faRotate",
+        "className": "w-5 h-5 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/components/NavigationTabs.tsx",
+      "line": 28,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/components/NavigationTabs.tsx",
+      "line": 33,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/components/NavigationTabs.tsx",
+      "line": 38,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/components/NavigationTabs.tsx",
+      "line": 44,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faKey",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 40,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 391,
+      "column": 8,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-8 h-8 text-[var(--accent-color)] animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 438,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 449,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 452,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 479,
+      "column": 42,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 493,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 496,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "className": "w-12 h-12 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 510,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 527,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 537,
+      "column": 42,
+      "component": "Icon",
+      "props": {
+        "name": "faSwatch",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faSwatch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/branding/page.tsx",
+      "line": 571,
+      "column": 42,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 57,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "className": "w-6 h-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 421,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 432,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "w-5 h-5 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 435,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 461,
+      "column": 42,
+      "component": "Icon",
+      "props": {
+        "name": "faUserGroup",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 475,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "absolute left-3 top-2.5 w-5 h-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 486,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 596,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "inline w-4 h-4 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 614,
+      "column": 44,
+      "component": "Icon",
+      "props": {
+        "name": "faUserGroup",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 656,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "h-6 w-6",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 687,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowRight",
+        "className": "h-4 w-4 mr-2 animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/settings/team-management/page.tsx",
+      "line": 754,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faCheckCircle",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 88,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faServer",
+        "className": "h-5 w-5 text-blue-600",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 94,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faChartBar",
+        "className": "h-5 w-5 text-blue-600",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 100,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "h-5 w-5 text-green-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 106,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "h-5 w-5 text-green-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 112,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "h-5 w-5 text-green-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 118,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "h-5 w-5 text-purple-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 124,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faWarning",
+        "className": "h-5 w-5 text-yellow-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faWarning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 130,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faWarning",
+        "className": "h-5 w-5 text-yellow-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faWarning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 136,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faWarning",
+        "className": "h-5 w-5 text-yellow-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faWarning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 142,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "h-5 w-5 text-green-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 148,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faWarning",
+        "className": "h-5 w-5 text-yellow-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faWarning\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/debug-tools/database/page.tsx",
+      "line": 276,
+      "column": 11,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-4 w-4 mr-1 rotate-180",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 313,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowUp",
+        "className": "inline-block h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 316,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faArrowDown",
+        "className": "inline-block h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 330,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "h-5 w-5 text-[var(--accent-color)]",
+        "iconType": "static",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 361,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "h-5 w-5 text-[var(--accent-color)]",
+        "aria-hidden": "true",
+        "iconType": "static",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 401,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "className": "h-4 w-4",
+        "iconType": "static",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 410,
+      "column": 13,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleInfo",
+        "className": "h-4 w-4 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 572,
+      "column": 11,
+      "component": "Icon",
+      "props": {
+        "name": "faDocument",
+        "className": "h-12 w-12 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocument\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 668,
+      "column": 13,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "w-5 h-5 text-gray-400 mr-3 mt-0.5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 850,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleQuestion",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 855,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faPencil",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 859,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faPaperPlane",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 863,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faClock",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 867,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleCheck",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 871,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleXmark",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 875,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faTriangleExclamation",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 879,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faPlay",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 883,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faFlag",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 887,
+      "column": 19,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleQuestion",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 899,
+      "column": 6,
+      "component": "Icon",
+      "props": {
+        "name": "faTriangleExclamation",
+        "className": "h-4 w-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1298,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "h-5 w-5 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1312,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faPrint",
+        "className": "h-4 w-4 mr-2",
+        "solid": false,
+        "iconType": "button"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1316,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faShare",
+        "className": "h-4 w-4 mr-2",
+        "solid": false,
+        "iconType": "button"
+      },
+      "issues": [
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1320,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 mr-2",
+        "solid": false,
+        "iconType": "button"
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download",
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1423,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faImage",
+        "className": "h-10 w-10 mx-auto mb-2 opacity-50",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1429,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faImage",
+        "className": "h-10 w-10 text-gray-300",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1432,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faVideo",
+        "className": "h-10 w-10 text-white opacity-70",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1438,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "className": "h-3 w-3 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1445,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faImage",
+        "className": "h-8 w-8 mx-auto mb-2 opacity-50",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1463,
+      "column": 193,
+      "component": "Icon",
+      "props": {
+        "name": "faBolt",
+        "className": "h-6 w-6 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/page.tsx",
+      "line": 1476,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faBolt",
+        "className": "h-8 w-8 mx-auto mb-2 opacity-50",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 67,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "w-4 h-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 82,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "w-4 h-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 92,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "h-12 w-12 text-[#00BFFF]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 131,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 146,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 161,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 171,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "w-4 h-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/submission/SubmissionContent.tsx",
+      "line": 177,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-5 h-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 489,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 719,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "className": "h-8 w-8 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 722,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-10 w-10 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 724,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-10 w-10 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 743,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 749,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-4/Step4Content.tsx",
+      "line": 758,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "action": "delete",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 286,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 298,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "h-3 w-3 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 313,
+      "column": 34,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "action": "delete",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 475,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "h-5 w-5 text-gray-400 absolute left-3",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 498,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "h-3 w-3 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 529,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "action": "delete",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 567,
+      "column": 32,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "action": "delete",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 581,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronRight",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"className\" detected (cannot validate at runtime)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 624,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "h-5 w-5 text-gray-400 absolute left-3",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 647,
+      "column": 32,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "h-3 w-3 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 665,
+      "column": 36,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "action": "delete",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 679,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-gray-400 cursor-help",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 761,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faSearch",
+        "className": "h-5 w-5 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faSearch\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 773,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "h-3 w-3 text-white",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-3/Step3Content.tsx",
+      "line": 788,
+      "column": 30,
+      "component": "Icon",
+      "props": {
+        "name": "faDelete",
+        "action": "delete",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDelete\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 441,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faView",
+        "className": "w-5 h-5 mr-2 text-blue-500",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faView\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 489,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-5 h-5 mr-2 text-blue-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 526,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faTrash",
+        "className": "w-4 h-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 542,
+      "column": 139,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 545,
+      "column": 94,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 548,
+      "column": 100,
+      "component": "Icon",
+      "props": {
+        "name": "faStar",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 551,
+      "column": 118,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 564,
+      "column": 155,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 567,
+      "column": 158,
+      "component": "Icon",
+      "props": {
+        "name": "faLightBulb",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faLightBulb\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 570,
+      "column": 145,
+      "component": "Icon",
+      "props": {
+        "name": "faChatBubble",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-2/Step2Content.tsx",
+      "line": 578,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faCheck",
+        "className": "w-5 h-5 mr-2 text-blue-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 62,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 725,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-12 w-12 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1156,
+      "column": 137,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "h-4 w-4 text-[var(--secondary-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1159,
+      "column": 131,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "h-4 w-4 text-[var(--secondary-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1170,
+      "column": 87,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4 text-[var(--secondary-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1173,
+      "column": 123,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4 text-[var(--secondary-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1176,
+      "column": 136,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4 text-[var(--secondary-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1250,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1284,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1312,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1365,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "h-10 w-10 text-gray-400 mx-auto mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1369,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1398,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1407,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1416,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1428,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-10 w-10 text-gray-400 mx-auto mb-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-5/Step5Content.tsx",
+      "line": 1432,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 mr-1",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 185,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 189,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronDown",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 211,
+      "column": 8,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "absolute right-3 top-2.5 w-5 h-5 text-secondary-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 410,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 426,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faCalendar",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 440,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "w-4 h-4 mr-1 text-accent-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 652,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 680,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-5 w-5 text-primary-color animate-spin",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 691,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 744,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4 text-primary-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 764,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-6 w-6 text-gray-500",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 772,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faInfo",
+        "className": "h-4 w-4",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1368,
+      "column": 94,
+      "component": "Icon",
+      "props": {
+        "name": "faGlobe",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1390,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5 mr-2 text-accent-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1394,
+      "column": 130,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1396,
+      "column": 126,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1400,
+      "column": 135,
+      "component": "Icon",
+      "props": {
+        "name": "faMail",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faMail\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1402,
+      "column": 108,
+      "component": "Icon",
+      "props": {
+        "name": "faBuilding",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1415,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faUserGroup",
+        "className": "w-5 h-5 mr-2 text-accent-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1419,
+      "column": 123,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1421,
+      "column": 119,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1425,
+      "column": 128,
+      "component": "Icon",
+      "props": {
+        "name": "faMail",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faMail\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1427,
+      "column": 101,
+      "component": "Icon",
+      "props": {
+        "name": "faBuilding",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1441,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5 mr-2 text-accent-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1454,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "w-5 h-5 mr-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1466,
+      "column": 26,
+      "component": "Icon",
+      "props": {
+        "name": "faClose",
+        "className": "h-5 w-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faClose\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1472,
+      "column": 142,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1474,
+      "column": 138,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1478,
+      "column": 147,
+      "component": "Icon",
+      "props": {
+        "name": "faMail",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faMail\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1480,
+      "column": 120,
+      "component": "Icon",
+      "props": {
+        "name": "faBuilding",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1489,
+      "column": 22,
+      "component": "Icon",
+      "props": {
+        "name": "faUser",
+        "className": "w-12 h-12 mx-auto text-accent-color opacity-70",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1498,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faStar",
+        "className": "w-5 h-5 mr-2 text-accent-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1522,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faPlus",
+        "className": "h-5 w-5 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1533,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "className": "w-5 h-5 mr-2 text-accent-color",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1538,
+      "column": 95,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1554,
+      "column": 130,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/wizard/step-1/Step1Content.tsx",
+      "line": 1557,
+      "column": 134,
+      "component": "Icon",
+      "props": {
+        "name": "faMoney",
+        "className": "w-5 h-5",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 311,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faChartLine",
+        "className": "inline-block h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 314,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faChartLine",
+        "className": "inline-block h-4 w-4 ml-1",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 328,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "h-5 w-5 text-[var(--accent-color)]",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 354,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "className": "h-5 w-5 text-[var(--accent-color)]",
+        "aria-hidden": "true",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 388,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "className": "h-4 w-4",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 392,
+      "column": 13,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleInfo",
+        "className": "h-4 w-4 text-gray-400",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 554,
+      "column": 11,
+      "component": "Icon",
+      "props": {
+        "name": "faDocument",
+        "className": "h-12 w-12 text-gray-400",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocument\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 650,
+      "column": 10,
+      "component": "Icon",
+      "props": {
+        "name": "faDocumentText",
+        "className": "w-5 h-5 text-gray-400 mr-3 mt-0.5",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faDocumentText\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 951,
+      "column": 12,
+      "component": "Icon",
+      "props": {
+        "className": "w-5 h-5 text-blue-500",
+        "solid": false
+      },
+      "issues": [
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1174,
+      "column": 5,
+      "component": "Icon",
+      "props": {
+        "name": "faXCircle",
+        "className": "h-5 w-5 text-red-600",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faXCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1585,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faChevronLeft",
+        "className": "h-5 w-5 text-[var(--secondary-color)]",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1599,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faPrint",
+        "className": "h-4 w-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1603,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faShare",
+        "className": "h-4 w-4 mr-2",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1608,
+      "column": 17,
+      "component": "Icon",
+      "props": {
+        "name": "faEdit",
+        "className": "h-4 w-4 mr-2",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faEdit\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1724,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "className": "h-10 w-10 mx-auto mb-2 opacity-50",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1746,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faUserCircle",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faUserCircle\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1755,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faCircleInfo",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1764,
+      "column": 28,
+      "component": "Icon",
+      "props": {
+        "name": "faDollarSign",
+        "className": "h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0",
+        "solid": false
+      },
+      "issues": [],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/app/campaigns/[id]/backup/page.original.tsx",
+      "line": 1776,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "name": "faPhoto",
+        "className": "h-10 w-10 mx-auto mb-2 opacity-50",
+        "solid": false
+      },
+      "issues": [
+        "Icon \"faPhoto\" not downloaded to public/ui-icons"
+      ],
+      "suggestions": [
+        "Run \"npm run update-icons\" to download"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.tsx",
+      "line": 407,
+      "column": 225,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"className\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.tsx",
+      "line": 407,
+      "column": 441,
+      "component": "Icon",
+      "props": {
+        "solid": true,
+        "className": "text-[var(--warning-color)]",
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"size\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.tsx",
+      "line": 408,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "className": "text-[var(--warning-color)]",
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.tsx",
+      "line": 410,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "className": "text-[var(--warning-color)]",
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.tsx",
+      "line": 419,
+      "column": 31,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"className\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 254,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "className": "text-[var(--primary-color)] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-opacity duration-150 opacity-100 group-hover:opacity-0 group-focus-within:opacity-0",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 256,
+      "column": 20,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "className": "text-[var(--accent-color)] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-opacity duration-150 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 287,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "className": "text-[var(--warning-color)] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-opacity duration-150 opacity-100 group-hover:opacity-0",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 289,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "className": "text-[var(--warning-color)] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-opacity duration-150 opacity-0 group-hover:opacity-100"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 290,
+      "column": 54,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"className\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 290,
+      "column": 270,
+      "component": "Icon",
+      "props": {
+        "solid": true,
+        "className": "text-[var(--warning-color)]",
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"size\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 291,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "className": "text-[var(--warning-color)]",
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 293,
+      "column": 24,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "className": "text-[var(--warning-color)]",
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconTester.backup.tsx",
+      "line": 302,
+      "column": 31,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "solid": true,
+        "iconType": "static"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "Dynamic prop \"className\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 28,
+      "column": 14,
+      "component": "Icon",
+      "props": {
+        "size": "md",
+        "iconType": "button",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 94,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "iconType": "button",
+        "action": "default",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 106,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "iconType": "button",
+        "action": "delete",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 119,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "iconType": "button",
+        "action": "warning",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 132,
+      "column": 18,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "iconType": "button",
+        "action": "success",
+        "solid": false
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)",
+        "Button icon should be inside a parent with \"group\" class for hover effects"
+      ],
+      "suggestions": [
+        "Add className=\"group\" to parent element"
+      ],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 146,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "iconType": "static",
+        "solid": false,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    },
+    {
+      "file": "/src/components/ui/icons/test/IconGrid.tsx",
+      "line": 156,
+      "column": 16,
+      "component": "Icon",
+      "props": {
+        "size": "lg",
+        "iconType": "static",
+        "solid": true,
+        "className": "text-[var(--secondary-color)]"
+      },
+      "issues": [
+        "Dynamic prop \"name\" detected (cannot validate at runtime)",
+        "No icon type specified (name, kpiName, appName, or platformName missing)"
+      ],
+      "suggestions": [],
+      "fixed": false
+    }
+  ],
+  "fixedCount": 0,
+  "fixedFiles": [],
+  "lightSolidValidation": {
+    "distinct": 101,
+    "duplicates": 1,
+    "pairs": [
+      {
+        "name": "globe",
+        "identical": false,
+        "similarity": 0.9663503019844694,
+        "lightPath": "/Users/edadams/my-project/public/ui-icons/light/globe.svg",
+        "solidPath": "/Users/edadams/my-project/public/ui-icons/solid/globe.svg"
+      }
+    ],
+    "missingLight": [],
+    "missingSolid": []
+  }
+}
