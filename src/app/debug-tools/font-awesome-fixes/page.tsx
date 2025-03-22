@@ -9,26 +9,24 @@ import { faTwitter, faFacebook, faGithub } from '@fortawesome/free-brands-svg-ic
 
 // 1. Register icons with library - important for array syntax to work
 library.add(
-  // Solid icons
-  faUser, faCheck, faGear, faBell, faStar,
-  // Light icons
-  falUser, falHouse,
-  // Brand icons
-  faTwitter, faFacebook, faGithub
-);
-
+// Solid icons
+faUser, faCheck, faGear, faBell, faStar,
+// Light icons
+falUser, falHouse,
+// Brand icons
+faTwitter, faFacebook, faGithub);
 export default function FontAwesomeFixesPage() {
   const [renderCount, setRenderCount] = useState(0);
-  
+
   // Only track initial render and count icons once
   useEffect(() => {
     // Only log on first render
     console.log(`[FA-FIXES] Initial page render`);
-    
+
     // Log Font Awesome configuration
     if (typeof window !== 'undefined') {
       console.log('[FA-FIXES] Kit config:', (window as any).FontAwesomeKitConfig);
-      
+
       // Count rendered FA icons after a delay
       setTimeout(() => {
         const faIcons = document.querySelectorAll('.svg-inline--fa').length;
@@ -36,19 +34,16 @@ export default function FontAwesomeFixesPage() {
       }, 500);
     }
   }, []); // Empty dependency array = runs once
-  
+
   // Track render count separately with a safe approach
   useEffect(() => {
     // Increment render count only once, after initial mount
     const timer = setTimeout(() => {
       setRenderCount(1);
     }, 2000);
-    
     return () => clearTimeout(timer);
   }, []);
-  
-  return (
-    <div className="container mx-auto p-8">
+  return <div className="container mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">Font Awesome - Guaranteed Working Examples</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -58,28 +53,28 @@ export default function FontAwesomeFixesPage() {
             Import and use icons directly without relying on the library:
           </p>
           <pre className="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">
-{`import { faUser } from '@fortawesome/pro-solid-svg-icons';
+          {`import { faUser } from '@fortawesome/pro-solid-svg-icons';
 <FontAwesomeIcon icon={faUser} />`}
           </pre>
           
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col items-center">
               <div className="p-4 bg-blue-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-blue-600" />
+                <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-blue-600" solid={false} />
               </div>
               <span className="mt-2 text-sm">Solid User</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-green-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={faCheck} className="w-8 h-8 text-green-600" />
+                <FontAwesomeIcon icon={faCheck} className="w-8 h-8 text-green-600" solid={false} />
               </div>
               <span className="mt-2 text-sm">Solid Check</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-purple-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-purple-600" />
+                <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-purple-600" solid={false} />
               </div>
               <span className="mt-2 text-sm">Light User</span>
             </div>
@@ -92,28 +87,28 @@ export default function FontAwesomeFixesPage() {
             Use array syntax after registering icons with library.add():
           </p>
           <pre className="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">
-{`// Requires first: library.add(faUser, faCheck);
+          {`// Requires first: library.add(faUser, faCheck);
 <FontAwesomeIcon icon={['fas', 'user']} />`}
           </pre>
           
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col items-center">
               <div className="p-4 bg-red-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={['fas', 'user']} className="w-8 h-8 text-red-600" />
+                <FontAwesomeIcon icon={['fas', 'user']} className="w-8 h-8 text-red-600" solid={false} />
               </div>
               <span className="mt-2 text-sm">Array: fas user</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-amber-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={['fal', 'house']} className="w-8 h-8 text-amber-600" />
+                <FontAwesomeIcon icon={['fal', 'house']} className="w-8 h-8 text-amber-600" solid={false} />
               </div>
               <span className="mt-2 text-sm">Array: fal house</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-sky-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={['fab', 'twitter']} className="w-8 h-8 text-sky-500" />
+                <FontAwesomeIcon icon={['fab', 'twitter']} className="w-8 h-8 text-sky-500" solid={false} />
               </div>
               <span className="mt-2 text-sm">Array: fab twitter</span>
             </div>
@@ -128,7 +123,7 @@ export default function FontAwesomeFixesPage() {
             <div className="border-l-4 border-blue-500 pl-3 py-1">
               <h3 className="font-medium">1. Import CSS before config</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
-{`import '@fortawesome/fontawesome-svg-core/styles.css';
+              {`import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;`}
               </pre>
@@ -137,7 +132,7 @@ config.autoAddCss = false;`}
             <div className="border-l-4 border-blue-500 pl-3 py-1">
               <h3 className="font-medium">2. Register icons with library.add</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
-{`import { library } from '@fortawesome/fontawesome-svg-core';
+              {`import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUser } from '@fortawesome/pro-solid-svg-icons';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons';
 
@@ -148,7 +143,7 @@ library.add(faUser, faTwitter);`}
             <div className="border-l-4 border-blue-500 pl-3 py-1">
               <h3 className="font-medium">3. Use icons in components</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
-{`// Direct import (recommended)
+              {`// Direct import (recommended)
 <FontAwesomeIcon icon={faUser} />
 
 // Library syntax (after registration)
@@ -168,35 +163,35 @@ library.add(faUser, faTwitter);`}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-gray-700" />
+              <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-gray-700" solid={false} />
             </div>
             <span className="mt-2 text-sm">Solid User</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-gray-700" />
+              <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-gray-700" solid={false} />
             </div>
             <span className="mt-2 text-sm">Light User</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faTwitter} className="w-8 h-8 text-gray-700" />
+              <FontAwesomeIcon icon={faTwitter} className="w-8 h-8 text-gray-700" solid={false} />
             </div>
             <span className="mt-2 text-sm">Brand Twitter</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faGear} className="w-8 h-8 text-gray-700" />
+              <FontAwesomeIcon icon={faGear} className="w-8 h-8 text-gray-700" solid={false} />
             </div>
             <span className="mt-2 text-sm">Solid Gear</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faGithub} className="w-8 h-8 text-gray-700" />
+              <FontAwesomeIcon icon={faGithub} className="w-8 h-8 text-gray-700" solid={false} />
             </div>
             <span className="mt-2 text-sm">Brand GitHub</span>
           </div>
@@ -211,6 +206,5 @@ library.add(faUser, faTwitter);`}
           <span className="font-medium">Component rendered {renderCount} times.</span> This helps verify that icons persist through re-renders.
         </p>
       </div>
-    </div>
-  );
-} 
+    </div>;
+}

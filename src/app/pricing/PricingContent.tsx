@@ -13,7 +13,6 @@ interface FeatureInfo {
   description: string;
   features: Record<string, string>;
 }
-
 type FeatureDefinitions = {
   [category: string]: FeatureInfo;
 };
@@ -83,7 +82,6 @@ const featureDefinitions: FeatureDefinitions = {
     }
   }
 };
-
 type FeatureCategory = keyof typeof featureDefinitions;
 
 // Define which features to highlight for each tier
@@ -107,91 +105,78 @@ interface Tier {
 }
 
 // Updated tiers with more structured feature information
-const tiers: Tier[] = [
-  {
-    name: "Pay-As-You-Go",
-    id: "pay-as-you-go",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PAYG_PRICE_ID || "",
-    price: "2,499",
-    popular: false,
-    description: "For occasional campaign needs",
-    tooltip: "Perfect for brands looking for one-time campaign analysis without a monthly commitment",
-    features: {
-      "Studies / Month": "N/A",
-      "Creative Testing": true,
-      "Brand Lift": true,
-      "Influencer Safety": false,
-      "Brand Health": false,
-      "MMM Analysis": false,
-      "Support": "Email"
-    }
-  },
-  {
-    name: "Essential",
-    id: "essential",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_ESSENTIAL_PRICE_ID || "",
-    price: "1,999",
-    popular: false,
-    description: "Basic package for small teams",
-    tooltip: "Our starter package with core features for brands beginning to scale their marketing efforts",
-    features: {
-      "Studies / Month": 1,
-      "Creative Testing": true,
-      "Brand Lift": true,
-      "Influencer Safety": true,
-      "Brand Health": false,
-      "MMM Analysis": false,
-      "Support": "Email"
-    }
-  },
-  {
-    name: "Professional",
-    id: "professional",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID || "",
-    price: "5,999",
-    popular: true,
-    description: "Ideal for growing brands",
-    tooltip: "Our most popular plan with advanced features and priority support",
-    features: {
-      "Studies / Month": 3,
-      "Creative Testing": true,
-      "Brand Lift": true,
-      "Influencer Safety": true,
-      "Brand Health": true,
-      "MMM Analysis": false,
-      "Support": "Email, Phone"
-    }
-  },
-  {
-    name: "Advanced",
-    id: "advanced",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID || "",
-    price: "10,999",
-    popular: false,
-    description: "Complete solution for enterprises",
-    tooltip: "Enterprise-grade solution with all features and dedicated support for maximum marketing effectiveness",
-    features: {
-      "Studies / Month": 6,
-      "Creative Testing": true,
-      "Brand Lift": true,
-      "Influencer Safety": true,
-      "Brand Health": true,
-      "MMM Analysis": true,
-      "Support": "Full Support"
-    }
-  },
-];
+const tiers: Tier[] = [{
+  name: "Pay-As-You-Go",
+  id: "pay-as-you-go",
+  priceId: process.env.NEXT_PUBLIC_STRIPE_PAYG_PRICE_ID || "",
+  price: "2,499",
+  popular: false,
+  description: "For occasional campaign needs",
+  tooltip: "Perfect for brands looking for one-time campaign analysis without a monthly commitment",
+  features: {
+    "Studies / Month": "N/A",
+    "Creative Testing": true,
+    "Brand Lift": true,
+    "Influencer Safety": false,
+    "Brand Health": false,
+    "MMM Analysis": false,
+    "Support": "Email"
+  }
+}, {
+  name: "Essential",
+  id: "essential",
+  priceId: process.env.NEXT_PUBLIC_STRIPE_ESSENTIAL_PRICE_ID || "",
+  price: "1,999",
+  popular: false,
+  description: "Basic package for small teams",
+  tooltip: "Our starter package with core features for brands beginning to scale their marketing efforts",
+  features: {
+    "Studies / Month": 1,
+    "Creative Testing": true,
+    "Brand Lift": true,
+    "Influencer Safety": true,
+    "Brand Health": false,
+    "MMM Analysis": false,
+    "Support": "Email"
+  }
+}, {
+  name: "Professional",
+  id: "professional",
+  priceId: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID || "",
+  price: "5,999",
+  popular: true,
+  description: "Ideal for growing brands",
+  tooltip: "Our most popular plan with advanced features and priority support",
+  features: {
+    "Studies / Month": 3,
+    "Creative Testing": true,
+    "Brand Lift": true,
+    "Influencer Safety": true,
+    "Brand Health": true,
+    "MMM Analysis": false,
+    "Support": "Email, Phone"
+  }
+}, {
+  name: "Advanced",
+  id: "advanced",
+  priceId: process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID || "",
+  price: "10,999",
+  popular: false,
+  description: "Complete solution for enterprises",
+  tooltip: "Enterprise-grade solution with all features and dedicated support for maximum marketing effectiveness",
+  features: {
+    "Studies / Month": 6,
+    "Creative Testing": true,
+    "Brand Lift": true,
+    "Influencer Safety": true,
+    "Brand Health": true,
+    "MMM Analysis": true,
+    "Support": "Full Support"
+  }
+}];
 
 // Feature categories in the order they should appear in the table - matching the screenshot
-const featureCategories: FeatureCategory[] = [
-  "Studies / Month",
-  "Creative Testing",
-  "Brand Lift",
-  "Influencer Safety",
-  "Brand Health",
-  "MMM Analysis",
-  "Support"
-];
+const featureCategories: FeatureCategory[] = ["Studies / Month", "Creative Testing", "Brand Lift", "Influencer Safety", "Brand Health", "MMM Analysis", "Support"];
 
 // Tooltips for features
 const featureTooltips: Record<string, string> = {
@@ -223,113 +208,95 @@ const featureValueTooltips: Record<string, Record<string, string>> = {
 const renderFeatureValue = (category: FeatureCategory, value: string | number | boolean, tierName: string) => {
   // Convert the value to string for lookup in the tooltip object
   const valueKey = String(value);
-  
+
   // Get tooltip for this specific feature value
-  const tooltipText = 
-    featureValueTooltips[category] && featureValueTooltips[category][valueKey]
-      ? featureValueTooltips[category][valueKey]
-      : null;
+  const tooltipText = featureValueTooltips[category] && featureValueTooltips[category][valueKey] ? featureValueTooltips[category][valueKey] : null;
 
   // Check if this is a highlighted feature for this tier
-  const isHighlightedFeature = 
-    featureHighlights[tierName] && 
-    featureHighlights[tierName].includes(category);
-  
+  const isHighlightedFeature = featureHighlights[tierName] && featureHighlights[tierName].includes(category);
   if (typeof value === 'boolean') {
-    return (
-      <div className="flex justify-center">
-        {value ? (
-          <div className="relative group">
+    return <div className="flex justify-center">
+        {value ? <div className="relative group">
             <div className="flex items-center justify-center">
               {/* Circular checkmark icon - light blue color to match screenshot */}
               <div className="h-6 w-6 rounded-full bg-[#50b5ff] flex items-center justify-center">
-                <Icon name="check" className="h-4 w-4 text-white" />
+                <Icon name="faCheck" className="h-4 w-4 text-white" solid={false} />
               </div>
             </div>
-            {tooltipText && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
+            {tooltipText && <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
                 {tooltipText}
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="relative group">
+              </div>}
+          </div> : <div className="relative group">
             {/* Circular X mark icon - light gray color to match screenshot */}
             <div className="h-6 w-6 rounded-full bg-[#d1d5db] flex items-center justify-center">
-              <Icon name="close" className="h-4 w-4 text-white" />
+              <Icon name="faClose" className="h-4 w-4 text-white" solid={false} />
             </div>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
               Not included in this plan
               <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
             </div>
-          </div>
-        )}
-      </div>
-    );
+          </div>}
+      </div>;
   }
-  
+
   // For non-boolean values (like "Email" or numbers)
-  return (
-    <div className="relative group text-center font-normal">
+  return <div className="relative group text-center font-normal">
       <span>{value}</span>
-      {tooltipText && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
+      {tooltipText && <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
           {tooltipText}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default function PricingContent() {
   const router = useRouter();
-  const { user, error, isLoading: userLoading } = useUser();
+  const {
+    user,
+    error,
+    isLoading: userLoading
+  } = useUser();
   const [selectedTier, setSelectedTier] = useState<string>("professional");
   const [selectedMobileTier, setSelectedMobileTier] = useState<string>("professional");
   const [isLoading, setIsLoading] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<string>("professional");
-  
+
   // Create refs for scrolling to sections
   const pricingRef = useRef<HTMLDivElement>(null);
   const whyJustifyRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
-  
+
   // Function to scroll to section
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     if (ref.current) {
       const yOffset = -100; // Increased offset to account for fixed header
       const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({top: y, behavior: 'smooth'});
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
     }
   };
-
   const handleCheckout = async (tier: string) => {
     if (isLoading) return;
-    
     setIsLoading(true);
     setSelectedTier(tier);
-
     if (!user) {
       // Save selected plan to localStorage and redirect to sign in
       localStorage.setItem("selectedPriceId", tier);
       router.push("/api/auth/login");
       return;
     }
-
     const response = await fetch("/api/checkout", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        priceId: tier,
-      }),
+        priceId: tier
+      })
     });
-
     const data = await response.json();
-
     if (!response.ok) {
       throw new Error(data.error || "Something went wrong");
     }
@@ -337,37 +304,26 @@ export default function PricingContent() {
     // Redirect to Stripe Checkout
     window.location.href = data.url;
   };
-
-  return (
-    <div className="pb-16 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+  return <div className="pb-16 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
       {/* Add padding to account for proper spacing */}
       <div className="pt-6">
         {/* Mini Navigation Bar - Sticky below header (not fixed at very top) */}
         <div className="sticky top-[72px] z-40 bg-white py-3 border-b border-gray-200 shadow-sm mb-8 before:content-[''] before:absolute before:top-[-72px] before:left-0 before:right-0 before:h-[72px] before:bg-white before:z-[-1]">
           <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-sm">
-            <button 
-              onClick={() => scrollToSection(pricingRef)}
-              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-            >
+            <button onClick={() => scrollToSection(pricingRef)} className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors">
+
               Pricing
             </button>
-            <button 
-              onClick={() => scrollToSection(whyJustifyRef)}
-              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-            >
+            <button onClick={() => scrollToSection(whyJustifyRef)} className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors">
+
               Why Justify?
             </button>
-            <button 
-              onClick={() => scrollToSection(faqRef)}
-              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-            >
+            <button onClick={() => scrollToSection(faqRef)} className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors">
+
               FAQ
             </button>
-            <Link 
-              href="https://www.justify.social/case-study" 
-              target="_blank"
-              className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors"
-            >
+            <Link href="https://www.justify.social/case-study" target="_blank" className="font-medium text-gray-600 hover:text-[var(--accent-color)] transition-colors">
+
               Case Study →
             </Link>
           </div>
@@ -385,7 +341,7 @@ export default function PricingContent() {
         <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-8">
           <div className="flex items-center gap-2">
             <div className="relative group">
-              <Icon name="info" className="h-5 w-5 text-gray-500" />
+              <Icon name="faInfo" className="h-5 w-5 text-gray-500" solid={false} />
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-48 font-normal shadow-lg">
                 Hover for more details
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
@@ -395,13 +351,13 @@ export default function PricingContent() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-5 w-5 rounded-full bg-[#50b5ff] flex items-center justify-center">
-              <Icon name="check" className="h-3 w-3 text-white" />
+              <Icon name="faCheck" className="h-3 w-3 text-white" solid={false} />
             </div>
             <span className="text-sm text-gray-600">Included</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-5 w-5 rounded-full bg-[#d1d5db] flex items-center justify-center">
-              <Icon name="close" className="h-3 w-3 text-white" />
+              <Icon name="faClose" className="h-3 w-3 text-white" solid={false} />
             </div>
             <span className="text-sm text-gray-600">Not included</span>
           </div>
@@ -410,34 +366,17 @@ export default function PricingContent() {
         {/* Mobile Plan Selection Tabs - Visible on small screens only */}
         <div className="md:hidden mb-8 px-1">
           <div className="flex rounded-md shadow-sm overflow-x-auto relative">
-            {tiers.map((tier) => (
-              <button
-                key={tier.id}
-                type="button"
-                onClick={() => setActiveMobileTab(tier.id)}
-                className={`relative flex-1 min-w-[120px] py-2 text-sm font-medium ${
-                  activeMobileTab === tier.id 
-                    ? 'bg-[var(--accent-color)] text-white' 
-                    : 'bg-white text-[var(--primary-color)] hover:bg-gray-50'
-                } border border-[var(--divider-color)] ${
-                  tier.id === "pay-as-you-go" ? "rounded-l-md" : ""
-                } ${
-                  tier.id === "advanced" ? "rounded-r-md" : ""
-                }`}
-              >
+            {tiers.map(tier => <button key={tier.id} type="button" onClick={() => setActiveMobileTab(tier.id)} className={`relative flex-1 min-w-[120px] py-2 text-sm font-medium ${activeMobileTab === tier.id ? 'bg-[var(--accent-color)] text-white' : 'bg-white text-[var(--primary-color)] hover:bg-gray-50'} border border-[var(--divider-color)] ${tier.id === "pay-as-you-go" ? "rounded-l-md" : ""} ${tier.id === "advanced" ? "rounded-r-md" : ""}`}>
+
                 {tier.name}
-              </button>
-            ))}
+              </button>)}
           </div>
         </div>
 
         {/* Mobile Plan Card - Visible on small screens only */}
         <div className="md:hidden mb-8">
-          {tiers.map((tier) => (
-            <div 
-              key={tier.id}
-              className={`${activeMobileTab === tier.id ? 'block' : 'hidden'} bg-white rounded-lg shadow-md border border-[var(--divider-color)] p-6 relative`}
-            >
+          {tiers.map(tier => <div key={tier.id} className={`${activeMobileTab === tier.id ? 'block' : 'hidden'} bg-white rounded-lg shadow-md border border-[var(--divider-color)] p-6 relative`}>
+
               <div className="text-center mb-6 relative">
                 <div className="flex flex-col items-center space-y-3">
                   <h3 className="text-xl font-bold text-[var(--primary-color)] font-sora">{tier.name}</h3>
@@ -445,62 +384,44 @@ export default function PricingContent() {
                     <span className="text-2xl sm:text-3xl font-light tracking-tight text-[var(--primary-color)] font-['Work_Sans']">£{tier.price}</span>
                     <span className="ml-1 text-sm font-medium text-[var(--secondary-color)]">/month</span>
                   </div>
-                  {tier.description && (
-                    <p className="text-sm text-[var(--secondary-color)]">{tier.description}</p>
-                  )}
+                  {tier.description && <p className="text-sm text-[var(--secondary-color)]">{tier.description}</p>}
                 </div>
               </div>
               
               <div className="space-y-4">
-                {featureCategories.map((category) => (
-                  <div key={category} className="flex justify-between pb-2 border-b border-gray-100">
+                {featureCategories.map(category => <div key={category} className="flex justify-between pb-2 border-b border-gray-100">
                     <div className="font-medium text-[var(--primary-color)] flex items-center">
                       <span className="font-sora text-sm">{category}</span>
-                      {featureDefinitions[category] && (
-                        <div className="relative ml-1 group cursor-help">
-                          <Icon name="info" className="h-4 w-4 text-gray-400" />
+                      {featureDefinitions[category] && <div className="relative ml-1 group cursor-help">
+                          <Icon name="faInfo" className="h-4 w-4 text-gray-400" solid={false} />
                           <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-56 font-normal shadow-lg">
                             {featureDefinitions[category].description}
                             <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
                           </div>
-                        </div>
-                      )}
+                        </div>}
                     </div>
                     <div className="text-[var(--secondary-color)]">
                       {renderFeatureValue(category, tier.features[category] ?? false, tier.id)}
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
               
               <div className="mt-8">
-                <button
-                  onClick={() => handleCheckout(tier.priceId)}
-                  disabled={isLoading && selectedTier === tier.priceId}
-                  className={`w-full rounded-md py-3 px-4 text-center text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
-                    ${
-                      tier.popular
-                        ? "bg-[var(--accent-color)] text-white hover:opacity-90 focus-visible:outline-[var(--accent-color)]"
-                        : "bg-white border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-gray-50"
-                    }
+                <button onClick={() => handleCheckout(tier.priceId)} disabled={isLoading && selectedTier === tier.priceId} className={`w-full rounded-md py-3 px-4 text-center text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+                    ${tier.popular ? "bg-[var(--accent-color)] text-white hover:opacity-90 focus-visible:outline-[var(--accent-color)]" : "bg-white border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-gray-50"}
                     ${isLoading && selectedTier === tier.priceId ? "opacity-50 cursor-not-allowed" : ""}
-                  `}
-                >
-                  {isLoading && selectedTier === tier.priceId ? (
-                    <span className="flex items-center justify-center">
+                  `}>
+
+                  {isLoading && selectedTier === tier.priceId ? <span className="flex items-center justify-center">
                       <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       Processing...
-                    </span>
-                  ) : (
-                    <span>Get Started</span>
-                  )}
+                    </span> : <span>Get Started</span>}
                 </button>
               </div>
-            </div>
-          ))}
+            </div>)}
         </div>
 
         {/* Desktop: Pricing Table */}
@@ -511,31 +432,26 @@ export default function PricingContent() {
                 <th className="text-left p-4 bg-white w-1/5">
                   <span className="font-sora text-base">Plan / Month</span>
                 </th>
-                {tiers.map((tier) => (
-                  <th key={tier.id} className="p-4 w-1/5 bg-white relative">
+                {tiers.map(tier => <th key={tier.id} className="p-4 w-1/5 bg-white relative">
                     <div className="pt-5 min-h-[130px] flex flex-col items-center justify-between">
                       <h3 className="text-base lg:text-lg font-bold text-gray-900 font-sora w-full text-center mb-2">{tier.name}</h3>
                       <div className="flex items-baseline justify-center w-full mb-2">
                         <span className="text-xl lg:text-2xl font-light text-gray-900 font-['Work_Sans']">£{tier.price}</span>
                         <span className="ml-1 text-xs lg:text-sm font-medium text-gray-500">/month</span>
                       </div>
-                      {tier.description && (
-                        <p className="text-xs text-gray-600 max-w-[15ch] text-center leading-tight">{tier.description}</p>
-                      )}
+                      {tier.description && <p className="text-xs text-gray-600 max-w-[15ch] text-center leading-tight">{tier.description}</p>}
                     </div>
-                  </th>
-                ))}
+                  </th>)}
               </tr>
             </thead>
             <tbody>
               {/* Feature rows - ensure consistent text size */}
-              {featureCategories.map((category, idx) => (
-                <tr key={category} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+              {featureCategories.map((category, idx) => <tr key={category} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                   <td className="px-4 py-4 text-gray-700">
                     <div className="flex items-center">
                       <span className="font-sora text-sm">{category}</span>
                       <div className="relative ml-2 group">
-                        <Icon name="info" className="h-4 w-4 text-gray-400" />
+                        <Icon name="faInfo" className="h-4 w-4 text-gray-400" solid={false} />
                         <div className="absolute bottom-full left-0 transform -translate-y-2 z-50 hidden group-hover:block bg-black text-white text-xs rounded py-1 px-2 w-60 font-normal shadow-lg">
                           {featureTooltips[category]}
                           <div className="absolute top-full left-4 transform border-4 border-transparent border-t-black"></div>
@@ -543,46 +459,27 @@ export default function PricingContent() {
                       </div>
                     </div>
                   </td>
-                  {tiers.map((tier) => (
-                    <td key={`${tier.id}-${category}`} className="px-4 py-4 text-center text-sm">
-                      {renderFeatureValue(
-                        category as FeatureCategory, 
-                        tier.features[category], 
-                        tier.id
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+                  {tiers.map(tier => <td key={`${tier.id}-${category}`} className="px-4 py-4 text-center text-sm">
+                      {renderFeatureValue(category as FeatureCategory, tier.features[category], tier.id)}
+                    </td>)}
+                </tr>)}
               
               {/* Call to Action */}
               <tr className="bg-white">
                 <td className="px-4 py-6 text-sm text-gray-600"></td>
-                {tiers.map((tier) => (
-                  <td key={`${tier.id}-cta`} className="px-6 py-6 text-center">
-                    <button
-                      onClick={() => handleCheckout(tier.priceId)}
-                      disabled={isLoading && selectedTier === tier.priceId}
-                      className={`w-full rounded-md px-3 py-2 text-center text-sm font-medium leading-6 
-                        ${tier.id === "professional" 
-                          ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-color-dark)]" 
-                          : "bg-white text-[var(--primary-color)] ring-1 ring-inset ring-[var(--divider-color)] hover:ring-[var(--accent-color)]"
-                        } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]`}
-                    >
-                      {isLoading && selectedTier === tier.priceId ? (
-                        <span className="flex items-center justify-center">
+                {tiers.map(tier => <td key={`${tier.id}-cta`} className="px-6 py-6 text-center">
+                    <button onClick={() => handleCheckout(tier.priceId)} disabled={isLoading && selectedTier === tier.priceId} className={`w-full rounded-md px-3 py-2 text-center text-sm font-medium leading-6 
+                        ${tier.id === "professional" ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-color-dark)]" : "bg-white text-[var(--primary-color)] ring-1 ring-inset ring-[var(--divider-color)] hover:ring-[var(--accent-color)]"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]`}>
+
+                      {isLoading && selectedTier === tier.priceId ? <span className="flex items-center justify-center">
                           <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
                           Processing...
-                        </span>
-                      ) : (
-                        <span>Get started</span>
-                      )}
+                        </span> : <span>Get started</span>}
                     </button>
-                  </td>
-                ))}
+                  </td>)}
               </tr>
             </tbody>
           </table>
@@ -635,14 +532,11 @@ export default function PricingContent() {
           <p className="text-[var(--secondary-color)] mb-4">
             Already subscribed to a plan?
           </p>
-          <Link
-            href="/billing"
-            className="inline-flex items-center rounded-md bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-          >
+          <Link href="/billing" className="inline-flex items-center rounded-md bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity">
+
             View your subscription & billing
           </Link>
         </div>
       </div>
-    </div>
-  );
-} 
+    </div>;
+}

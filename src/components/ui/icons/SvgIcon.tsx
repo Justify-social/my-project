@@ -1,8 +1,19 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { cn } from '@/lib/utils';
+import React, { forwardRef, useRef, useMemo } from 'react';
+import cn from 'classnames';
 import Image from 'next/image';
+import { useIconValidation, useButtonIconValidation, validateDynamicName } from './validation';
+
+// To avoid circular imports, define a map of semantic icon names to FontAwesome names here
+// This is a subset of UI_ICON_MAP focusing on problematic icons
+const SEMANTIC_TO_FA_MAP: Record<string, string> = {
+  'xCircle': 'faCircleXmark',
+  'checkCircle': 'faCircleCheck',
+  'userCircle': 'faCircleUser',
+  'circleInfo': 'faCircleInfo',
+  'circleCheck': 'faCircleCheck'
+};
 
 // This type will be created when icon-data.ts is generated
 // For now we're using a placeholder until the scripts are run
@@ -21,23 +32,22 @@ const ICON_STYLE_FOLDERS = {
   'fab': 'brands',
   'far': 'regular'
 };
-
 export interface SvgIconProps {
   /**
    * Name of the icon to display
    */
   name: IconName;
-  
+
   /**
    * CSS class names to apply to the icon
    */
   className?: string;
-  
+
   /**
    * Size variant of the icon
    */
   size?: IconSize;
-  
+
   /**
    * Optional title for accessibility
    */
@@ -47,27 +57,27 @@ export interface SvgIconProps {
    * Click handler for the icon
    */
   onClick?: (e: React.MouseEvent<SVGElement>) => void;
-  
+
   /**
    * Whether to apply a spin animation to the icon
    */
   spin?: boolean;
-  
+
   /**
    * Whether to apply a pulse animation to the icon
    */
   pulse?: boolean;
-  
+
   /**
    * Whether the icon should be flipped horizontally
    */
   flipHorizontal?: boolean;
-  
+
   /**
    * Whether the icon should be flipped vertically
    */
   flipVertical?: boolean;
-  
+
   /**
    * Degree rotation for the icon (0-360)
    */
@@ -77,47 +87,46 @@ export interface SvgIconProps {
    * Icon style (solid, light, etc) - by default uses the style from the icon prefix
    */
   style?: 'solid' | 'light' | 'brands' | 'regular';
-  
+
   /**
    * Whether to use solid variant of the icon (alternative to style='solid')
    */
   solid?: boolean;
-  
+
   /**
    * Whether the icon is in active state
    */
   active?: boolean;
-  
+
   /**
    * Type of icon (button or static) - affects hover behavior
    */
   iconType?: 'button' | 'static';
-  
+
   /**
    * Action type of the icon - affects hover color
    */
   action?: 'default' | 'delete' | 'warning' | 'success';
-  
+
   // Allow any other props to be passed through to the SVG element
   [key: string]: any;
 }
-
 export interface PlatformIconProps {
   /**
    * Name of the platform
    */
   platformName: PlatformName;
-  
+
   /**
    * CSS class names to apply to the icon
    */
   className?: string;
-  
+
   /**
    * Size variant of the icon
    */
   size?: IconSize;
-  
+
   /**
    * Click handler for the icon
    */
@@ -135,7 +144,7 @@ const SIZE_CLASSES: Record<IconSize, string> = {
   'xl': 'w-8 h-8',
   '2xl': 'w-10 h-10',
   '3xl': 'w-12 h-12',
-  '4xl': 'w-16 h-16',
+  '4xl': 'w-16 h-16'
 };
 
 /**
@@ -147,14 +156,14 @@ const PLATFORM_ICON_MAP: Record<PlatformName, IconName> = {
   'linkedin': 'faLinkedin',
   'tiktok': 'faTiktok',
   'youtube': 'faYoutube',
-  'x': 'faXTwitter',
+  'x': 'faXTwitter'
 } as const;
 
 // We'll try to dynamically import the icon data when the script generates it
-let iconData: Record<string, { 
-  width: number; 
-  height: number; 
-  path: string; 
+let iconData: Record<string, {
+  width: number;
+  height: number;
+  path: string;
   url: string;
   prefix?: string; // Add prefix as it might come from the registry
   name?: string;
@@ -179,10 +188,15 @@ function getIconBaseName(fullName: string): string {
   if (!fullName) {
     return 'question'; // Default to question icon as fallback
   }
-  
-  // Handle special Light icon case - remove Light suffix
+
+  // Handle special Light icon suffix - remove Light suffix
   const nameWithoutLightSuffix = fullName.replace(/Light$/, '');
-  
+
+  // Special case for X Twitter
+  if (nameWithoutLightSuffix === 'faXTwitter') {
+    return 'x-twitter';
+  }
+
   // Convert e.g. faUserCircle to user-circle
   const baseName = nameWithoutLightSuffix.replace(/^fa/, '').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   return baseName;
@@ -196,20 +210,20 @@ function getIconPrefix(fullName: string): string {
   if (!fullName) {
     return 'fas'; // Default to solid as a fallback
   }
-  
+
   // Special case for Light icons
   if (fullName.endsWith('Light')) {
     return 'fal'; // Light icons
   }
-  
+
   // Check if it's a social media icon
-  const socialIcons = ['faFacebook', 'faInstagram', 'faLinkedin', 'faTiktok', 'faYoutube', 'faXTwitter', 'faTwitter', 'faGithub', 'faReddit', 'faPinterest'];
+  const socialIcons = ['faFacebook', 'faInstagram', 'faLinkedin', 'faTiktok', 'faYoutube', 'faXTwitter', 'faGithub', 'faReddit', 'faPinterest'];
   if (socialIcons.includes(fullName)) {
     return 'fab'; // Brand icons
   }
-  
+
   // For imported icons like faUser, we get the prefix from icon data or default to 'fas' (solid)
-  return (iconData[fullName]?.prefix || 'fas');
+  return iconData[fullName]?.prefix || 'fas';
 }
 
 /**
@@ -221,6 +235,8 @@ function getIconPrefix(fullName: string): string {
 export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   name,
   platformName,
+  kpiName,
+  appName,
   size = 'md',
   className = '',
   color,
@@ -232,61 +248,92 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   explicitStyle,
   action = 'default',
   onClick,
+  fontAwesome,
   ...rest
 }, ref) => {
-  // Get the icon prefix (fa, ri, etc.) for style mapping
-  const prefix = getIconPrefix(name || '');
+  // Add validation in development mode
+  useIconValidation({
+    name,
+    solid,
+    iconType,
+    className
+  });
+
+  // Create a ref if one wasn't passed in
+  const internalRef = useRef<SVGSVGElement>(null);
+  const elementRef = ref || internalRef;
+
+  // Validate button icons have proper parent elements with group class
+  useButtonIconValidation(elementRef as unknown as React.RefObject<HTMLElement>, iconType);
   
+  // First check if the provided name is a semantic name that needs lookup
+  // If it doesn't start with 'fa', check if it's in SEMANTIC_TO_FA_MAP
+  let resolvedName = name;
+  if (name && !name.startsWith('fa') && SEMANTIC_TO_FA_MAP[name]) {
+    resolvedName = SEMANTIC_TO_FA_MAP[name];
+  }
+
+  // Get the icon prefix (fa, ri, etc.) for style mapping
+  const prefix = getIconPrefix(resolvedName || '');
+
+  // Filter out custom props that shouldn't be passed to DOM elements
+  const sanitizedRest = {
+    ...rest
+  };
+  // Remove any potential non-DOM props
+  delete sanitizedRest.kpiName;
+  delete sanitizedRest.appName;
+  delete sanitizedRest.platformName;
+  delete sanitizedRest.fontAwesome;
+  delete sanitizedRest.explicitStyle;
+
   // For button icons that should change on hover, we use different logic
   // static icons: use solid if specified, otherwise use the default prefix mapping
   // button icons: use light by default (unless solid is specified) and rely on hover for solid
   const usesSolidStyle = solid || active;
-  
+
   // Determine style based on name suffix, explicit style, or defaults
   let styleName = explicitStyle;
   if (!styleName) {
-    if (name?.endsWith('Light')) {
+    if (resolvedName?.endsWith('Light')) {
       styleName = 'light';
     } else if (usesSolidStyle) {
       styleName = 'solid';
     } else {
       // Use the mapped style or default to light for button icons and solid for static icons
       if (iconType === 'button' && !active) {
-        styleName = 'light';  // Button icons default to light unless active
+        styleName = 'light'; // Button icons default to light unless active
       } else {
         styleName = ICON_STYLE_FOLDERS[prefix as keyof typeof ICON_STYLE_FOLDERS] || 'solid';
       }
     }
   }
-  
+
   // Remove Light suffix to get base name
-  const nameWithoutSuffix = name?.replace(/Light$/, '') || '';
+  const nameWithoutSuffix = resolvedName?.replace(/Light$/, '') || '';
   const iconBaseName = getIconBaseName(nameWithoutSuffix);
-  
+
   // For button icons that should show solid on hover, we'll need both light and solid
   const shouldUseHoverEffect = iconType === 'button' && !active && !solid;
-  
-  // Create the URL for the icon SVG
-  const iconUrl = `/ui-icons/${styleName}/${iconBaseName}.svg`;
+
+  // Create the URL for the icon SVG using our unified API endpoint
+  let iconUrl = `/api/assets/icon?style=${styleName}&name=${iconBaseName}`;
   
   // URL for the hover state (solid version)
-  const hoverIconUrl = shouldUseHoverEffect ? 
-    `/ui-icons/solid/${iconBaseName}.svg` : undefined;
+  let hoverIconUrl = shouldUseHoverEffect ? `/api/assets/icon?style=solid&name=${iconBaseName}` : undefined;
 
   // Get hover effect classes based on icon type and action
   const getHoverClasses = () => {
     if (iconType === 'static' || active) return '';
-    
     const actionColors: Record<string, string> = {
-      default: 'group-hover:text-[#00BFFF]', // Deep Sky Blue
+      default: 'group-hover:text-[#00BFFF]',
+      // Deep Sky Blue
       delete: 'group-hover:text-red-600',
       warning: 'group-hover:text-yellow-500',
       success: 'group-hover:text-green-600'
     };
-    
     return `transition-colors duration-200 ${actionColors[action as keyof typeof actionColors] || actionColors.default}`;
   };
-  
   const hoverClasses = getHoverClasses();
 
   // Build transformation CSS classes
@@ -297,113 +344,57 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   }, []);
 
   // If we have embedded data, use it
-  if (iconData[name]) {
-    const { width, height, path, url } = iconData[name];
-    
+  if (iconData[resolvedName]) {
+    const {
+      width,
+      height,
+      path,
+      url
+    } = iconData[resolvedName];
+
     // Get the corresponding solid icon name for hover effects
     let hoverName: string | undefined;
     if (shouldUseHoverEffect) {
-      if (name.endsWith('Light')) {
+      if (resolvedName.endsWith('Light')) {
         // For Light icons, remove the Light suffix to get the solid version
-        hoverName = name.replace(/Light$/, '');
+        hoverName = resolvedName.replace(/Light$/, '');
       } else {
         // For non-Light icons, try to find a solid version if it exists
-        const solidName = `fa${getIconBaseName(name)}`;
+        const solidName = `fa${getIconBaseName(resolvedName)}`;
         hoverName = iconData[solidName] ? solidName : undefined;
       }
     }
-    
     const hoverIconData = hoverName && iconData[hoverName];
-
-    return (
-      <span 
-        className={cn(
-          'inline-block relative',
-          SIZE_CLASSES[size as keyof typeof SIZE_CLASSES],
-          className
-        )} 
-        aria-hidden={!title}
-        {...rest}
-      >
+    return <span className={cn('inline-block relative', SIZE_CLASSES[size as keyof typeof SIZE_CLASSES], className)} aria-hidden={!title} {...sanitizedRest}>
         {/* Base icon */}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox={`0 0 ${width} ${height}`}
-          fill="currentColor"
-          className={cn('w-full h-full', transformClasses, hoverClasses, shouldUseHoverEffect && 'group-hover:opacity-0')}
-          onClick={onClick}
-          ref={ref}
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${width} ${height}`} fill="currentColor" className={cn('w-full h-full', transformClasses, hoverClasses, shouldUseHoverEffect && 'group-hover:opacity-0')} onClick={onClick} ref={elementRef}>
           {title && <title>{title}</title>}
           <path d={path} />
         </svg>
 
         {/* Hover icon (solid version) */}
-        {shouldUseHoverEffect && hoverIconData && (
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox={`0 0 ${hoverIconData.width} ${hoverIconData.height}`}
-            fill="currentColor"
-            className={cn('w-full h-full absolute inset-0 opacity-0 group-hover:opacity-100', transformClasses, hoverClasses)}
-            onClick={onClick}
-          >
+        {shouldUseHoverEffect && hoverIconData && <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${hoverIconData.width} ${hoverIconData.height}`} fill="currentColor" className={cn('w-full h-full absolute inset-0 opacity-0 group-hover:opacity-100', transformClasses, hoverClasses)} onClick={onClick}>
             {title && <title>{title}</title>}
             <path d={hoverIconData.path} />
-          </svg>
-        )}
-      </span>
-    );
+          </svg>}
+      </span>;
   }
 
   // Fallback to loading the SVG file directly
-  return (
-    <span 
-      className={cn(
-        'inline-flex shrink-0 relative',
-        SIZE_CLASSES[size as keyof typeof SIZE_CLASSES],
-        className
-      )} 
-      aria-hidden={!title}
-      {...rest}
-    >
+  return <span className={cn('inline-flex shrink-0 relative', SIZE_CLASSES[size as keyof typeof SIZE_CLASSES], className)} aria-hidden={!title} {...sanitizedRest}>
       {/* Base icon (light) */}
-      <img 
-        src={iconUrl}
-        alt={title || `${name} icon`}
-        className={cn(
-          'w-full h-full', 
-          transformClasses, 
-          shouldUseHoverEffect && 'group-hover:opacity-0 transition-opacity duration-200'
-        )}
-        style={{ 
-          pointerEvents: rest.onClick ? 'auto' : 'none',
-          objectFit: 'contain' 
-        }}
-        onClick={rest.onClick as any}
-        title={title}
-      />
+      <img src={iconUrl} alt={title || `${resolvedName} icon`} className={cn('w-full h-full', transformClasses, shouldUseHoverEffect && 'group-hover:opacity-0 transition-opacity duration-200')} style={{
+      pointerEvents: rest.onClick ? 'auto' : 'none',
+      objectFit: 'contain'
+    }} onClick={rest.onClick as any} title={title} />
       
       {/* Hover icon (solid version) */}
-      {shouldUseHoverEffect && hoverIconUrl && (
-        <img
-          src={hoverIconUrl}
-          alt={title || `${name} solid icon`}
-          className={cn(
-            'w-full h-full absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200', 
-            transformClasses
-          )}
-          style={{ 
-            pointerEvents: rest.onClick ? 'auto' : 'none',
-            objectFit: 'contain' 
-          }}
-          onClick={rest.onClick as any}
-          title={title}
-        />
-      )}
-    </span>
-  );
+      {shouldUseHoverEffect && hoverIconUrl && <img src={hoverIconUrl} alt={title || `${resolvedName} solid icon`} className={cn('w-full h-full absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200', transformClasses)} style={{
+      pointerEvents: rest.onClick ? 'auto' : 'none',
+      objectFit: 'contain'
+    }} onClick={rest.onClick as any} title={title} />}
+    </span>;
 });
-
 SvgIcon.displayName = 'SvgIcon';
 
 /**
@@ -413,28 +404,21 @@ export function PlatformIcon({
   platformName,
   className,
   size = 'md',
-  onClick,
+  onClick
 }: PlatformIconProps) {
   // Convert platform name to corresponding icon name
   const iconName = PLATFORM_ICON_MAP[platformName];
-  
+
+  // Simple validation
   if (!iconName) {
     console.warn(`Unknown platform name: ${platformName}`);
     return null;
   }
-  
-  return (
-    <SvgIcon
-      name={iconName}
-      className={className}
-      size={size}
-      onClick={onClick}
-    />
-  );
+  return <SvgIcon name={iconName} className={className} size={size} onClick={onClick} solid={false} />;
 }
 
 /**
  * This is a drop-in replacement for the FontAwesome-based Icon component.
  * Uses local SVG files for maximum reliability.
  */
-export const Icon = SvgIcon; 
+export const Icon = SvgIcon;

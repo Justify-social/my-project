@@ -8,7 +8,6 @@
  * internal implementations without breaking consumer code.
  */
 
-import { SvgIcon, SvgIconProps, PlatformIcon } from './SvgIcon';
 import { IconName } from './icon-data';
 import { iconConfig, getIconPrefix, shouldUseHoverEffect, getActionColor } from './IconConfig';
 import {
@@ -19,6 +18,7 @@ import {
   SuccessIcon
 } from './IconVariants';
 import React from 'react';
+import { SvgIcon, PlatformIcon, SvgIconProps } from './SvgIcon';
 
 // Re-export the main components
 export { 
@@ -60,7 +60,7 @@ export const PLATFORM_COLORS: Record<PlatformName, string> = {
   'linkedin': '#0A66C2',
   'tiktok': '#000000',
   'youtube': '#FF0000',
-  'x': '#1DA1F2'
+  'x': '#000000'
 };
 
 // Configuration exports for advanced usage
@@ -92,6 +92,7 @@ export const UI_ICON_MAP: Record<string, string> = {
   'calendar': 'faCalendarDays',
   'warning': 'faTriangleExclamation',
   'info': 'faCircleInfo',
+  'circleInfo': 'faCircleInfo',
   'bell': 'faBell',
   'document': 'faFile',
   'documentText': 'faFileLines',
@@ -133,7 +134,7 @@ export const UI_ICON_MAP: Record<string, string> = {
   'chartLine': 'faChartLine',
   'chartPie': 'faChartPie',
   'xCircle': 'faCircleXmark',
-  'checkCircle': 'faCircleCheck', 
+  'checkCircle': 'faCircleCheck',
   'bellAlert': 'faBellSlash',
   'userCircle': 'faCircleUser',
   'swatch': 'faPalette',
@@ -141,7 +142,15 @@ export const UI_ICON_MAP: Record<string, string> = {
   'menu': 'faBars',
   'key': 'faKey',
   'trashCan': 'faTrashCan',
-  // Default for any missing icons
+  'print': 'faPrint',
+  'building': 'faBuilding',
+  'dollar': 'faDollar',
+  'dollarSign': 'faDollarSign',
+  'currency': 'faDollarSign',
+  'files': 'faFileLines',
+  'file': 'faFile',
+  'fileLines': 'faFileLines',
+  'office': 'faBuilding',
   'default': 'faQuestion'
 };
 
@@ -187,66 +196,9 @@ export type AppIconName = keyof typeof APP_ICON_URLS;
 
 // Factory function to create Icon components from semantic names
 export const iconComponentFactory = (iconName: string) => {
-  // Find the corresponding FontAwesome icon name
-  const faIconName = UI_ICON_MAP[iconName] || UI_ICON_MAP.default;
-  
-  // Return a React element function that renders the icon
-  return function IconComponent(props: Omit<SvgIconProps, 'name'>) {
-    return React.createElement(Icon, {
-      name: faIconName,
-      iconType: "button",
-      ...props
-    });
+  return (props: React.ComponentProps<typeof Icon>) => {
+    return React.createElement(Icon, { name: iconName, ...props });
   };
-};
-
-// Utility function to migrate from HeroIcon to our icon system (for backward compatibility)
-export const migrateHeroIcon = (heroIconName: string) => {
-  // Map common HeroIcon names to our semantic names
-  const heroToSemanticMap: Record<string, string> = {
-    'user': 'user',
-    'users': 'userGroup',
-    'cog': 'settings',
-    'gear': 'settings',
-    'mail': 'mail',
-    'bell': 'bell',
-    'calendar': 'calendar',
-    'document': 'document',
-    'document-text': 'documentText',
-    'trash': 'delete',
-    'pencil': 'edit',
-    'pencil-alt': 'edit',
-    'eye': 'view',
-    'eye-off': 'view',
-    'chevron-down': 'chevronDown',
-    'chevron-up': 'chevronUp',
-    'chevron-left': 'chevronLeft',
-    'chevron-right': 'chevronRight',
-    'x': 'xmark',
-    'x-circle': 'xCircle',
-    'check': 'check',
-    'check-circle': 'checkCircle',
-    'exclamation': 'warning',
-    'exclamation-circle': 'warning',
-    'information-circle': 'info',
-    'plus': 'plus',
-    'minus': 'minus',
-    'search': 'search',
-    'home': 'home',
-    'heart': 'heart',
-    'photograph': 'photo',
-    'image': 'photo',
-    'chip': 'lightning',
-    'question-mark-circle': 'info',
-    'lock-closed': 'lock',
-    'lock-open': 'unlock',
-  };
-  
-  // Get the semantic name or default to the original name
-  const semanticName = heroToSemanticMap[heroIconName] || heroIconName;
-  
-  // Return the component factory for this semantic name
-  return iconComponentFactory(semanticName);
 };
 
 /**

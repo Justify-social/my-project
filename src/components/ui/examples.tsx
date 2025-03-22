@@ -4,50 +4,11 @@
  * This file contains examples of how to use the UI components.
  * It's meant for documentation and testing purposes only.
  */
-
 import React, { useState } from 'react';
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-  MetricCard,
-  Spinner,
-  LoadingSpinner,
-  Button,
-  Input,
-  Heading,
-  Text,
-  Paragraph,
-  Avatar,
-  Badge,
-  StatusBadge,
-  Calendar,
-  Progress,
-  CircularProgress,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel } from
-'./';
+import { Card, CardHeader, CardContent, CardFooter, MetricCard, Spinner, LoadingSpinner, Button, Input, Heading, Text, Paragraph, Avatar, Badge, StatusBadge, Calendar, Progress, CircularProgress, Tabs, TabList, Tab, TabPanels, TabPanel } from './';
 
 // Import from the new icons structure
-import {
-  Icon,
-  IconName,
-  KpiIconName,
-  AppIconName,
-  PlatformIconName,
-  UI_ICON_MAP,
-  UI_OUTLINE_ICON_MAP,
-  PLATFORM_ICON_MAP,
-  PLATFORM_COLORS,
-  KPI_ICON_URLS,
-  APP_ICON_URLS,
-  migrateHeroIcon } from
-'./icons';
-
+import { Icon, IconName, KpiIconName, AppIconName, PlatformName, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, PLATFORM_ICON_MAP, PLATFORM_COLORS, KPI_ICON_URLS, APP_ICON_URLS } from './icons';
 import { Container } from './container';
 import { Grid } from './grid';
 import { Alert } from './alert';
@@ -61,12 +22,9 @@ import { Table, TableExample } from './table';
 import { List, ListExample } from './list';
 import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './skeleton';
 import { IconTester } from './icons/test/IconTester';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { IconProp } from '@fortawesome/fontawesome-svg-core';
-
+import { cn } from '@/lib/utils';
 export function ButtonExamples() {
-  return (
-    <div className="space-y-8" id="buttons">
+  return <div className="space-y-8" id="buttons">
       <div>
         <h2 className="text-lg font-semibold mb-4">Button Variants</h2>
         <div className="flex flex-wrap gap-4 items-center">
@@ -146,44 +104,32 @@ export function ButtonExamples() {
         <div className="flex flex-wrap gap-4 items-center">
           <div>
             <p className="text-sm text-gray-500 mb-2">Left Icon</p>
-            <Button
-              leftIcon={
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <Button leftIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="16" />
                   <line x1="8" y1="12" x2="16" y2="12" />
-                </svg>
-              }>
+                </svg>}>
 
               Add Item
             </Button>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Right Icon</p>
-            <Button
-              rightIcon={
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <Button rightIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
-                </svg>
-              }>
+                </svg>}>
 
               Next
             </Button>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Both Icons</p>
-            <Button
-              leftIcon={
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <Button leftIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
-                </svg>
-              }
-              rightIcon={
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                </svg>} rightIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />
-                </svg>
-              }>
+                </svg>}>
 
               Options
             </Button>
@@ -195,56 +141,34 @@ export function ButtonExamples() {
         <h2 className="text-lg font-semibold mb-4">Full Width Button</h2>
         <Button fullWidth>Full Width Button</Button>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function InputExamples() {
   const [value, setValue] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-
-  return (
-    <div className="space-y-8" id="inputs">
+  return <div className="space-y-8" id="inputs">
       <div>
         <h2 className="text-lg font-semibold mb-4">Input Types</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p className="text-sm text-gray-500 mb-2">Text Input (default)</p>
-            <Input
-              label="Full Name"
-              placeholder="Enter your full name"
-              value={value}
-              onChange={(e) => setValue(e.target.value)} />
+            <Input label="Full Name" placeholder="Enter your full name" value={value} onChange={e => setValue(e.target.value)} />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Email Input</p>
-            <Input
-              type="email"
-              label="Email Address"
-              placeholder="you@example.com"
-              helpText="We'll never share your email." />
+            <Input type="email" label="Email Address" placeholder="you@example.com" helpText="We'll never share your email." />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Password Input</p>
-            <Input
-              type="password"
-              label="Password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)} />
+            <Input type="password" label="Password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Number Input</p>
-            <Input
-              type="number"
-              label="Age"
-              placeholder="Enter your age"
-              min={0}
-              max={120} />
+            <Input type="number" label="Age" placeholder="Enter your age" min={0} max={120} />
 
           </div>
         </div>
@@ -255,35 +179,22 @@ export function InputExamples() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p className="text-sm text-gray-500 mb-2">Default</p>
-            <Input
-              label="Username"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)} />
+            <Input label="Username" placeholder="Enter your username" value={username} onChange={e => setUsername(e.target.value)} />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Disabled</p>
-            <Input
-              label="Disabled Input"
-              placeholder="This input is disabled"
-              disabled />
+            <Input label="Disabled Input" placeholder="This input is disabled" disabled />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">With Help Text</p>
-            <Input
-              label="Username"
-              placeholder="Choose a username"
-              helpText="Username must be between 3-20 characters." />
+            <Input label="Username" placeholder="Choose a username" helpText="Username must be between 3-20 characters." />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">With Error</p>
-            <Input
-              label="Email"
-              placeholder="you@example.com"
-              error="Please enter a valid email address." />
+            <Input label="Email" placeholder="you@example.com" error="Please enter a valid email address." />
 
           </div>
         </div>
@@ -294,23 +205,17 @@ export function InputExamples() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <p className="text-sm text-gray-500 mb-2">Small</p>
-            <Input
-              inputSize="sm"
-              placeholder="Small input" />
+            <Input inputSize="sm" placeholder="Small input" />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Medium (default)</p>
-            <Input
-              inputSize="md"
-              placeholder="Medium input" />
+            <Input inputSize="md" placeholder="Medium input" />
 
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Large</p>
-            <Input
-              inputSize="lg"
-              placeholder="Large input" />
+            <Input inputSize="lg" placeholder="Large input" />
 
           </div>
         </div>
@@ -323,12 +228,9 @@ export function InputExamples() {
             <p className="text-sm text-gray-500 mb-2">Left Icon</p>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="user" className="h-5 w-5 text-gray-400" />
+                <Icon name="faUser" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
-              <Input
-                type="text"
-                placeholder="Search..."
-                className="pl-10" />
+              <Input type="text" placeholder="Search..." className="pl-10" />
 
             </div>
           </div>
@@ -336,13 +238,10 @@ export function InputExamples() {
           <div>
             <p className="text-sm text-gray-500 mb-2">Right Icon</p>
             <div className="relative">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="pr-10" />
+              <Input type="email" placeholder="Enter your email" className="pr-10" />
 
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Icon name="settings" className="h-5 w-5 text-gray-400" />
+                <Icon name="faSettings" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
             </div>
           </div>
@@ -351,15 +250,12 @@ export function InputExamples() {
             <p className="text-sm text-gray-500 mb-2">Both Icons</p>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="info" className="h-5 w-5 text-gray-400" />
+                <Icon name="faInfo" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                className="pl-10 pr-10" />
+              <Input type="password" placeholder="Enter your password" className="pl-10 pr-10" />
 
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Icon name="settings" className="h-5 w-5 text-gray-400" />
+                <Icon name="faSettings" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
             </div>
           </div>
@@ -368,100 +264,45 @@ export function InputExamples() {
 
       <div>
         <h2 className="text-lg font-semibold mb-4">Full Width Input</h2>
-        <Input
-          fullWidth
-          label="Address"
-          placeholder="Enter your full address" />
+        <Input fullWidth label="Address" placeholder="Enter your full address" />
 
       </div>
-    </div>);
-
+    </div>;
 }
-
 export const IconExamples = () => {
   // General UI Icons (FontAwesome)
-  const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter((icon) =>
-  typeof icon === 'string' &&
-  icon.trim() !== '' &&
-  typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'undefined' &&
-  UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined &&
-  UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== null && (
+  const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter(icon => typeof icon === 'string' && icon.trim() !== '' && typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'undefined' && UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined && UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== null && (
   // Make sure the icon is not an empty object
-  typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'object' ||
-  Object.keys(UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] as any).length > 0)
-  );
+  typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'object' || Object.keys(UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] as any).length > 0));
 
   // KPI icons
-  const kpiIconNames = Object.keys(KPI_ICON_URLS).sort().filter((icon) =>
-  typeof icon === 'string' &&
-  icon.trim() !== '' &&
-  typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== 'undefined' &&
-  KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined &&
-  KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== null &&
+  const kpiIconNames = Object.keys(KPI_ICON_URLS).sort().filter(icon => typeof icon === 'string' && icon.trim() !== '' && typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== 'undefined' && KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== undefined && KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] !== null &&
   // Make sure the URL is a non-empty string
-  typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] === 'string' &&
-  (KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] as string).trim() !== ''
-  );
+  typeof KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] === 'string' && (KPI_ICON_URLS[icon as keyof typeof KPI_ICON_URLS] as string).trim() !== '');
 
   // App icons (navigation, special)
-  const appIconNames = Object.keys(APP_ICON_URLS).sort().filter((icon) =>
-  typeof icon === 'string' &&
-  icon.trim() !== '' &&
-  typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== 'undefined' &&
-  APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined &&
-  APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== null &&
+  const appIconNames = Object.keys(APP_ICON_URLS).sort().filter(icon => typeof icon === 'string' && icon.trim() !== '' && typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== 'undefined' && APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== undefined && APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] !== null &&
   // Make sure the URL is a non-empty string
-  typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] === 'string' &&
-  (APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] as string).trim() !== ''
-  );
+  typeof APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] === 'string' && (APP_ICON_URLS[icon as keyof typeof APP_ICON_URLS] as string).trim() !== '');
 
   // Platform icons
-  const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort().filter((icon) =>
-  typeof icon === 'string' &&
-  icon.trim() !== '' &&
-  typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'undefined' &&
-  PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined &&
-  PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== null && (
+  const platformIconNames = Object.keys(PLATFORM_ICON_MAP).sort().filter(icon => typeof icon === 'string' && icon.trim() !== '' && typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'undefined' && PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== undefined && PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== null && (
   // Make sure the icon is not an empty object
-  typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'object' ||
-  Object.keys(PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] as any).length > 0)
-  );
+  typeof PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] !== 'object' || Object.keys(PLATFORM_ICON_MAP[icon as keyof typeof PLATFORM_ICON_MAP] as any).length > 0));
 
   // State for tracking hovered icons
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
   // Ensure all icons in the categories exist in the maps
-  const essentialIcons = [
-  'bell', 'calendar', 'check', 'close', 'delete',
-  'info', 'mail', 'menu', 'minus', 'plus',
-  'search', 'settings', 'user', 'warning'].
-  filter((icon) => icon in UI_ICON_MAP);
+  const essentialIcons = ['bell', 'calendar', 'check', 'close', 'delete', 'info', 'mail', 'menu', 'minus', 'plus', 'search', 'settings', 'user', 'warning'].filter(icon => icon in UI_ICON_MAP);
+  const navigationIcons = ['chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight', 'home', 'menu'].filter(icon => icon in UI_ICON_MAP);
+  const actionIcons = ['view', 'edit', 'copy', 'delete', 'download', 'upload', 'share'].filter(icon => icon in UI_ICON_MAP);
+  const objectIcons = ['heart', 'star', 'bookmark', 'file', 'tag', 'filter', 'paperclip'].filter(icon => icon in UI_ICON_MAP);
+  const layoutIcons = ['grid', 'list', 'table'].filter(icon => icon in UI_ICON_MAP);
+  const securityIcons = ['lock', 'unlock', 'key'].filter(icon => icon in UI_ICON_MAP);
 
-  const navigationIcons = [
-  'chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight',
-  'home', 'menu'].
-  filter((icon) => icon in UI_ICON_MAP);
-
-  const actionIcons = [
-  'view', 'edit', 'copy', 'delete',
-  'download', 'upload', 'share'].
-  filter((icon) => icon in UI_ICON_MAP);
-
-  const objectIcons = [
-  'heart', 'star', 'bookmark', 'file',
-  'tag', 'filter', 'paperclip'].
-  filter((icon) => icon in UI_ICON_MAP);
-
-  const layoutIcons = [
-  'grid', 'list', 'table'].
-  filter((icon) => icon in UI_ICON_MAP);
-
-  const securityIcons = [
-  'lock', 'unlock', 'key'].
-  filter((icon) => icon in UI_ICON_MAP);
-
-  return (
-    <div className="space-y-12" id="icons">
+  // Render sections for different icon types
+  return <div className="space-y-12" id="icons">
       <div className="space-y-6">
         <h2 className="text-lg font-semibold">Icons</h2>
         
@@ -470,23 +311,23 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Icon Sizes</h3>
           <div className="flex items-end space-x-8">
             <div className="flex flex-col items-center">
-              <Icon name="search" size="xs" className="mb-2" />
+              <Icon name="faSearch" size="xs" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">XS</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="search" size="sm" className="mb-2" />
+              <Icon name="faSearch" size="sm" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">SM</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="search" size="md" className="mb-2" />
+              <Icon name="faSearch" size="md" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">MD (default)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="search" size="lg" className="mb-2" />
+              <Icon name="faSearch" size="lg" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">LG</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="search" size="xl" className="mb-2" />
+              <Icon name="faSearch" size="xl" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">XL</span>
             </div>
           </div>
@@ -497,19 +338,19 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Icon Styles</h3>
           <div className="flex space-x-8">
             <div className="flex flex-col items-center">
-              <Icon name="bell" className="mb-2" />
+              <Icon name="faBell" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">Outline (default)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="bell" solid className="mb-2" />
+              <Icon name="faBell" solid className="mb-2" />
               <span className="text-xs text-gray-500">Solid</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="bell" color="blue" className="mb-2" />
+              <Icon name="faBell" color="blue" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">Custom Color</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="bell" className="mb-2 text-teal-500" />
+              <Icon name="faBell" className="mb-2 text-teal-500" solid={false} />
               <span className="text-xs text-gray-500">Custom Class</span>
             </div>
           </div>
@@ -519,12 +360,10 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Essential UI Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
-            {essentialIcons.map((name) =>
-            <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" />
+            {essentialIcons.map(name => <div key={name} className="flex flex-col items-center">
+                <Icon name={name as IconName} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
-              </div>
-            )}
+              </div>)}
           </div>
         </div>
         
@@ -532,12 +371,10 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Navigation Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6">
-            {navigationIcons.map((name) =>
-            <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" />
+            {navigationIcons.map(name => <div key={name} className="flex flex-col items-center">
+                <Icon name={name as IconName} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
-              </div>
-            )}
+              </div>)}
           </div>
         </div>
         
@@ -545,26 +382,24 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Action Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
-            {actionIcons.map((name) =>
-            <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" />
+            {actionIcons.map(name => <div key={name} className="flex flex-col items-center">
+                <Icon name={name as IconName} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
-              </div>
-            )}
+              </div>)}
             <div className="flex flex-col items-center">
-              <Icon name="view" solid className="mb-2" />
+              <Icon name="faView" solid className="mb-2" />
               <span className="text-xs text-gray-500">view (solid)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="edit" solid className="mb-2" />
+              <Icon name="faEdit" solid className="mb-2" />
               <span className="text-xs text-gray-500">edit (solid)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="copy" solid className="mb-2" />
+              <Icon name="faCopy" solid className="mb-2" />
               <span className="text-xs text-gray-500">copy (solid)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="delete" solid className="mb-2" />
+              <Icon name="faDelete" solid className="mb-2" />
               <span className="text-xs text-gray-500">delete (solid)</span>
             </div>
           </div>
@@ -574,12 +409,10 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Object Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
-            {objectIcons.map((name) =>
-            <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" />
+            {objectIcons.map(name => <div key={name} className="flex flex-col items-center">
+                <Icon name={name as IconName} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
-              </div>
-            )}
+              </div>)}
           </div>
         </div>
         
@@ -587,68 +420,51 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">App Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
-            {appIconNames.map((name) =>
-            <div key={name} className="flex flex-col items-center group cursor-pointer">
-                <div className="relative mb-2" style={{ width: '32px', height: '32px' }}>
-                  <Icon name="info"
-                  appName={name as AppIconName}
-                  size="xl"
-                  className="absolute" />
+            {appIconNames.map(name => <div key={name} className="flex flex-col items-center group cursor-pointer">
+                <div className="relative mb-2" style={{
+              width: '32px',
+              height: '32px'
+            }}>
+                  <Icon name="faInfo" appName={name as AppIconName} size="xl" className="absolute" solid={false} />
 
                 </div>
                 <span className="text-xs text-gray-500">{name}</span>
-              </div>
-            )}
+              </div>)}
           </div>
         </div>
         
         {/* KPI Icons */}
         <div className="space-y-4">
           <h3 className="text-md font-medium">KPI Icons</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {kpiIconNames.map((name) =>
-            <div key={name} className="flex flex-col items-center group cursor-pointer">
-                <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
-                  <Icon name="info"
-                  kpiName={name as KpiIconName}
-                  className="absolute" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+            {kpiIconNames.map(name => <div key={name} className="flex flex-col items-center" onMouseEnter={() => setHoveredIcon(name)} onMouseLeave={() => setHoveredIcon(null)}>
 
+                <div className={cn("flex items-center justify-center p-2 rounded-md", hoveredIcon === name ? "bg-gray-100" : "")}>
+                  {/* Use the name prop instead of directly passing kpiName as a DOM prop */}
+                  <Icon name={UI_ICON_MAP[name] || "faQuestion"} size="lg" solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs text-gray-500">{name}</span>
-              </div>
-            )}
+                <span className="text-xs mt-1 text-center break-all">
+                  {name}
+                </span>
+              </div>)}
           </div>
         </div>
         
         {/* Platform Icons */}
         <div className="space-y-4">
           <h3 className="text-md font-medium">Platform Icons</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
-            {platformIconNames.map((name) =>
-            <div key={name} className="flex flex-col items-center group cursor-pointer">
-                <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
-                  <Icon name="info"
-                  platformName={name as PlatformIconName}
-                  solid
-                  className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+            {platformIconNames.map(name => <div key={name} className="flex flex-col items-center" onMouseEnter={() => setHoveredIcon(name)} onMouseLeave={() => setHoveredIcon(null)}>
+
+                <div className={cn("flex items-center justify-center p-2 rounded-md", hoveredIcon === name ? "bg-gray-100" : "")}>
+                  {/* Use the name prop with PLATFORM_ICON_MAP instead of directly passing platformName as a DOM prop */}
+                  <Icon name={PLATFORM_ICON_MAP[name as keyof typeof PLATFORM_ICON_MAP] || "faQuestion"} size="lg" solid={false} className="text-[var(--secondary-color)]" />
 
                 </div>
-                <span className="text-xs text-gray-500">{name} (solid)</span>
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
-            {platformIconNames.map((name) =>
-            <div key={`${name}-outline`} className="flex flex-col items-center group cursor-pointer">
-                <div className="relative mb-2" style={{ width: '24px', height: '24px' }}>
-                  <Icon name="info"
-                  platformName={name as PlatformIconName}
-                  className="text-[#333333] absolute transition-colors duration-150 group-hover:text-[#00BFFF]" />
-
-                </div>
-                <span className="text-xs text-gray-500">{name} (outline)</span>
-              </div>
-            )}
+                <span className="text-xs mt-1 text-center break-all">
+                  {name}
+                </span>
+              </div>)}
           </div>
         </div>
         
@@ -656,73 +472,55 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Icons with Button</h3>
           <div className="flex flex-wrap gap-4">
-            <Button
-              leftIcon={<Icon name="search" size="sm" />}>
+            <Button leftIcon={<Icon name="faSearch" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               Search
             </Button>
-            <Button
-              rightIcon={<Icon name="chevronRight" size="sm" />}>
+            <Button rightIcon={<Icon name="faChevronRight" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               Next
             </Button>
-            <Button
-              leftIcon={<Icon name="plus" size="sm" />}
-              variant="secondary">
+            <Button leftIcon={<Icon name="faPlus" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="secondary">
 
               Add Item
             </Button>
-            <Button
-              leftIcon={<Icon appName="home" size="sm" />}
-              variant="outline">
+            <Button leftIcon={<Icon appName="home" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="outline">
 
               Home
             </Button>
-            <Button
-              leftIcon={<Icon name="delete" size="sm" />}
-              variant="danger">
+            <Button leftIcon={<Icon name="faDelete" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="danger">
 
               Delete
             </Button>
-            <Button
-              leftIcon={<Icon name="calendar" size="sm" />}
-              variant="ghost">
+            <Button leftIcon={<Icon name="faCalendar" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="ghost">
 
               Budget
             </Button>
-            <Button
-              leftIcon={<Icon platformName="instagram" size="sm" />}>
+            <Button leftIcon={<Icon platformName="instagram" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               Instagram
             </Button>
-            <Button
-              leftIcon={<Icon platformName="youtube" size="sm" />}>
+            <Button leftIcon={<Icon platformName="youtube" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               YouTube
             </Button>
-            <Button
-              leftIcon={<Icon platformName="facebook" size="sm" />}>
+            <Button leftIcon={<Icon platformName="facebook" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               Facebook
             </Button>
-            <Button
-              leftIcon={<Icon platformName="x" size="sm" />}>
+            <Button leftIcon={<Icon platformName="x" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               X
             </Button>
-            <Button
-              leftIcon={<Icon platformName="linkedin" size="sm" />}>
+            <Button leftIcon={<Icon platformName="linkedin" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               LinkedIn
             </Button>
-            <Button
-              leftIcon={<Icon platformName="tiktok" size="sm" />}>
+            <Button leftIcon={<Icon platformName="tiktok" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               TikTok
             </Button>
-            <Button
-              leftIcon={<Icon appName="profile" size="sm" />}
-              variant="link">
+            <Button leftIcon={<Icon appName="profile" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="link">
 
               Profile
             </Button>
@@ -735,56 +533,44 @@ export const IconExamples = () => {
           <div className="space-y-4 max-w-md">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="search" className="h-5 w-5 text-gray-400" />
+                <Icon name="faSearch" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
-              <Input
-                placeholder="Search..."
-                className="pl-10" />
+              <Input placeholder="Search..." className="pl-10" />
 
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="mail" className="h-5 w-5 text-gray-400" />
+                <Icon name="faMail" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
-              <Input
-                placeholder="Enter your email"
-                className="pl-10" />
+              <Input placeholder="Enter your email" className="pl-10" />
 
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon appName="campaigns" className="h-5 w-5" />
+                <Icon appName="campaigns" className="h-5 w-5" solid={false} />
               </div>
-              <Input
-                placeholder="Campaign ID..."
-                className="pl-10" />
+              <Input placeholder="Campaign ID..." className="pl-10" />
 
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="upload" className="h-5 w-5 text-gray-400" />
+                <Icon name="faUpload" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
-              <Input
-                placeholder="Upload document..."
-                className="pl-10" />
+              <Input placeholder="Upload document..." className="pl-10" />
 
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="calendar" className="h-5 w-5 text-gray-400" />
+                <Icon name="faCalendar" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
-              <Input
-                placeholder="Enter amount..."
-                className="pl-10" />
+              <Input placeholder="Enter amount..." className="pl-10" />
 
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon platformName="youtube" className="h-5 w-5" />
+                <Icon platformName="youtube" className="h-5 w-5" solid={false} />
               </div>
-              <Input
-                placeholder="YouTube channel..."
-                className="pl-10" />
+              <Input placeholder="YouTube channel..." className="pl-10" />
 
             </div>
           </div>
@@ -796,15 +582,15 @@ export const IconExamples = () => {
           <p className="text-sm text-gray-500">The Icon component can render custom SVG paths directly.</p>
           <div className="flex space-x-12">
             <div className="flex flex-col items-center">
-              <Icon name="info" path="M12 4v16m8-8H4" className="mb-2" />
+              <Icon name="faInfo" path="M12 4v16m8-8H4" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">Custom Plus Icon</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="info" path="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0" className="mb-2" />
+              <Icon name="faInfo" path="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">Custom Eye Icon</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="info" path="M8 2v4M12 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z" className="mb-2" />
+              <Icon name="faInfo" path="M8 2v4M12 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">Custom Calendar Icon</span>
             </div>
           </div>
@@ -816,27 +602,27 @@ export const IconExamples = () => {
           <p className="text-sm text-gray-500">Font Awesome icons can be used directly with the fontAwesome prop.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-solid fa-user" className="w-8 h-8 mb-2" />
+              <Icon fontAwesome="fa-solid fa-user" className="w-8 h-8 mb-2" name="faExamples" solid={false} />
               <span className="text-xs text-gray-500">fa-solid fa-user</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-solid fa-envelope" className="w-8 h-8 mb-2" />
+              <Icon fontAwesome="fa-solid fa-envelope" className="w-8 h-8 mb-2" name="faExamples" solid={false} />
               <span className="text-xs text-gray-500">fa-solid fa-envelope</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-solid fa-check" className="w-8 h-8 mb-2" />
+              <Icon fontAwesome="fa-solid fa-check" className="w-8 h-8 mb-2" name="faExamples" solid={false} />
               <span className="text-xs text-gray-500">fa-solid fa-check</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-brands fa-x-twitter" className="w-8 h-8 mb-2" color="#000000" />
+              <Icon fontAwesome="fa-brands fa-x-twitter" className="w-8 h-8 mb-2" color="#000000" name="faExamples" solid={false} />
               <span className="text-xs text-gray-500">fa-brands fa-x-twitter</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-brands fa-facebook" className="w-8 h-8 mb-2" color="#1877F2" />
+              <Icon fontAwesome="fa-brands fa-facebook" className="w-8 h-8 mb-2" color="#1877F2" name="faExamples" solid={false} />
               <span className="text-xs text-gray-500">fa-brands fa-facebook</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon fontAwesome="fa-brands fa-instagram" className="w-8 h-8 mb-2" color="#E4405F" />
+              <Icon fontAwesome="fa-brands fa-instagram" className="w-8 h-8 mb-2" color="#E4405F" name="faExamples" solid={false} />
               <span className="text-xs text-gray-500">fa-brands fa-instagram</span>
             </div>
           </div>
@@ -847,40 +633,72 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Icon Migration Reference</h3>
           <div className="p-4 border border-blue-200 bg-blue-50 rounded-md">
             <p className="text-sm text-blue-800 mb-2">
-              Migration from HeroIcons to Font Awesome:
+              Font Awesome Icon Examples:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-center space-x-2">
-                <code className="text-xs bg-white p-1 rounded">{`<Icon heroSolid="UserIcon" />`}</code>
+                <code className="text-xs bg-white p-1 rounded">{`<Icon name="user" />`}</code>
                 <span>→</span>
                 <code className="text-xs bg-white p-1 rounded">{`<Icon name="user" solid />`}</code>
               </div>
               <div className="flex items-center space-x-2">
-                <code className="text-xs bg-white p-1 rounded">{`<Icon heroOutline="TrashIcon" />`}</code>
+                <code className="text-xs bg-white p-1 rounded">{`<Icon name="trash" />`}</code>
                 <span>→</span>
                 <code className="text-xs bg-white p-1 rounded">{`<Icon name="delete" />`}</code>
               </div>
               <div className="flex items-center space-x-2">
-                <code className="text-xs bg-white p-1 rounded">{`migrateHeroIcon("UserIcon")`}</code>
+                <code className="text-xs bg-white p-1 rounded">{`<Icon name="user" />`}</code>
                 <span>→</span>
-                <Icon name="user" solid size="md" />
+                <Icon name="faUser" solid size="md" className="text-[var(--secondary-color)]" />
               </div>
               <div className="flex items-center space-x-2">
-                <code className="text-xs bg-white p-1 rounded">{`migrateHeroIcon("TrashIcon")`}</code>
+                <code className="text-xs bg-white p-1 rounded">{`<Icon name="delete" />`}</code>
                 <span>→</span>
-                <Icon name="delete" size="md" />
+                <Icon name="faDelete" size="md" solid={false} className="text-[var(--secondary-color)]" />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>);
 
+      {/* FontAwesome comparison section - make sure this doesn't pass fontAwesome as a DOM property */}
+      <div className="space-y-4">
+        <h3 className="text-md font-medium">SVG vs FontAwesome Comparison</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border p-4 rounded-md">
+            <h4 className="text-sm font-medium mb-2">SVG Icon (Our Implementation)</h4>
+            <div className="flex items-center space-x-4">
+              <Icon name="faUser" size="lg" solid={false} className="text-[var(--secondary-color)]" />
+              <div>
+                <p className="text-sm">Advantages:</p>
+                <ul className="text-xs text-gray-600 list-disc pl-4">
+                  <li>Faster loading - no external libraries</li>
+                  <li>Reduced bundle size</li>
+                  <li>More consistent styling</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="border p-4 rounded-md">
+            <h4 className="text-sm font-medium mb-2">FontAwesome (Legacy)</h4>
+            <div className="flex items-center space-x-4">
+              {/* Add a data- attribute instead of fontAwesome prop */}
+              <Icon name="faUser" size="lg" data-source="fontawesome" solid={false} className="text-[var(--secondary-color)]" />
+              <div>
+                <p className="text-sm">Used only for:</p>
+                <ul className="text-xs text-gray-600 list-disc pl-4">
+                  <li>Debug/development tools</li>
+                  <li>Icon scripts for downloading</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>;
 };
-
 export function CardExamples() {
-  return (
-    <div className="space-y-8" id="cards">
+  return <div className="space-y-8" id="cards">
       <h2 className="text-lg font-semibold mb-4">Card Component</h2>
       
       {/* Basic Card Structure */}
@@ -949,13 +767,9 @@ export function CardExamples() {
         <h3 className="text-md font-medium">Card Header with Icon and Actions</h3>
         <div className="max-w-md">
           <Card>
-            <CardHeader
-              icon={<Icon name="info" className="w-5 h-5 text-[#3182CE]" />}
-              actions={
-              <Button variant="ghost" size="sm">
-                  <Icon name="settings" className="w-4 h-4" />
-                </Button>
-              }>
+            <CardHeader icon={<Icon name="faInfo" className="w-5 h-5 text-[#3182CE]" solid={false} />} actions={<Button variant="ghost" size="sm">
+                  <Icon name="faSettings" className="w-4 h-4" solid={false} />
+                </Button>}>
 
               <h3 className="text-lg font-medium">Card with Icon</h3>
             </CardHeader>
@@ -997,13 +811,10 @@ export function CardExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function TypographyExamples() {
-  return (
-    <div className="space-y-8" id="typography">
+  return <div className="space-y-8" id="typography">
       <div>
         <h1 className="text-2xl font-bold mb-4">Typography System</h1>
         <div className="p-4 border rounded bg-gray-50 mb-6">
@@ -1013,20 +824,39 @@ export function TypographyExamples() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-4">
             <div className="p-3 border rounded bg-white">
-              <h3 className="text-base font-semibold mb-1" style={{ fontFamily: 'Sora' }}>Sora</h3>
+              <h3 className="text-base font-semibold mb-1" style={{
+              fontFamily: 'Sora'
+            }}>Sora</h3>
               <p className="text-sm mb-2">Primary font used for headings and emphasis text.</p>
               <div className="space-y-1">
-                <p className="text-sm" style={{ fontFamily: 'Sora', fontWeight: 400 }}>Regular (400): Primary headings</p>
-                <p className="text-sm" style={{ fontFamily: 'Sora', fontWeight: 700 }}>Bold (700): Emphasis, buttons</p>
+                <p className="text-sm" style={{
+                fontFamily: 'Sora',
+                fontWeight: 400
+              }}>Regular (400): Primary headings</p>
+                <p className="text-sm" style={{
+                fontFamily: 'Sora',
+                fontWeight: 700
+              }}>Bold (700): Emphasis, buttons</p>
               </div>
             </div>
             <div className="p-3 border rounded bg-white">
-              <h3 className="text-base font-semibold mb-1" style={{ fontFamily: 'Work Sans' }}>Work Sans</h3>
+              <h3 className="text-base font-semibold mb-1" style={{
+              fontFamily: 'Work Sans'
+            }}>Work Sans</h3>
               <p className="text-sm mb-2">Secondary font used for body text and UI elements.</p>
               <div className="space-y-1">
-                <p className="text-sm" style={{ fontFamily: 'Work Sans', fontWeight: 400 }}>Regular (400): Body text</p>
-                <p className="text-sm" style={{ fontFamily: 'Work Sans', fontWeight: 500 }}>Medium (500): Labels</p>
-                <p className="text-sm" style={{ fontFamily: 'Work Sans', fontWeight: 600 }}>Semibold (600): Navigation</p>
+                <p className="text-sm" style={{
+                fontFamily: 'Work Sans',
+                fontWeight: 400
+              }}>Regular (400): Body text</p>
+                <p className="text-sm" style={{
+                fontFamily: 'Work Sans',
+                fontWeight: 500
+              }}>Medium (500): Labels</p>
+                <p className="text-sm" style={{
+                fontFamily: 'Work Sans',
+                fontWeight: 600
+              }}>Semibold (600): Navigation</p>
               </div>
             </div>
           </div>
@@ -1228,13 +1058,10 @@ export function TypographyExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function ContainerExamples() {
-  return (
-    <div className="space-y-8" id="container">
+  return <div className="space-y-8" id="container">
       <h2 className="text-lg font-semibold mb-4">Container Component</h2>
       
       <div className="space-y-8 border-2 border-dashed border-gray-200 p-4">
@@ -1266,40 +1093,31 @@ export function ContainerExamples() {
           </Container>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function GridExamples() {
-  return (
-    <div className="space-y-8" id="grid">
+  return <div className="space-y-8" id="grid">
       <h2 className="text-lg font-semibold mb-4">Grid Component</h2>
       
       <div className="space-y-6">
         <div>
           <p className="text-sm text-gray-500 mb-2">1 column grid (default)</p>
           <Grid className="mb-4">
-            {[1, 2, 3].map((i) =>
-            <div key={i} className="bg-[#00BFFF]/10 p-4 text-center rounded">Item {i}</div>
-            )}
+            {[1, 2, 3].map(i => <div key={i} className="bg-[#00BFFF]/10 p-4 text-center rounded">Item {i}</div>)}
           </Grid>
         </div>
         
         <div>
           <p className="text-sm text-gray-500 mb-2">2 column grid</p>
           <Grid cols={2} className="mb-4">
-            {[1, 2, 3, 4].map((i) =>
-            <div key={i} className="bg-green-100 p-4 text-center rounded">Item {i}</div>
-            )}
+            {[1, 2, 3, 4].map(i => <div key={i} className="bg-green-100 p-4 text-center rounded">Item {i}</div>)}
           </Grid>
         </div>
         
         <div>
           <p className="text-sm text-gray-500 mb-2">Responsive grid (1→2→3→4 columns)</p>
           <Grid cols={1} colsSm={2} colsMd={3} colsLg={4} className="mb-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) =>
-            <div key={i} className="bg-purple-100 p-4 text-center rounded">Item {i}</div>
-            )}
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <div key={i} className="bg-purple-100 p-4 text-center rounded">Item {i}</div>)}
           </Grid>
         </div>
         
@@ -1308,31 +1126,23 @@ export function GridExamples() {
           <div className="space-y-4">
             <p className="text-xs text-gray-500">Small gap (sm)</p>
             <Grid cols={3} gap="sm" className="mb-4">
-              {[1, 2, 3].map((i) =>
-              <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>
-              )}
+              {[1, 2, 3].map(i => <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>)}
             </Grid>
             
             <p className="text-xs text-gray-500">Large gap (lg)</p>
             <Grid cols={3} gap="lg" className="mb-4">
-              {[1, 2, 3].map((i) =>
-              <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>
-              )}
+              {[1, 2, 3].map(i => <div key={i} className="bg-yellow-100 p-4 text-center rounded">Item {i}</div>)}
             </Grid>
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function AlertExamples() {
   // State for dismissible alerts
   const [showInfo, setShowInfo] = useState(true);
   const [showWarning, setShowWarning] = useState(true);
-
-  return (
-    <div className="space-y-8" id="alerts">
+  return <div className="space-y-8" id="alerts">
       <h2 className="text-lg font-semibold mb-4">Alert Styles</h2>
       
       <div className="space-y-6 max-w-2xl">
@@ -1371,40 +1181,25 @@ export function AlertExamples() {
         
         <div>
           <h3 className="text-md font-medium mb-3">Dismissible Alerts</h3>
-          {showInfo &&
-          <div className="mb-3">
-              <Alert
-              variant="info"
-              dismissible
-              onDismiss={() => setShowInfo(false)}
-              title="Information">
+          {showInfo && <div className="mb-3">
+              <Alert variant="info" dismissible onDismiss={() => setShowInfo(false)} title="Information">
 
                 This alert can be dismissed by clicking the X button.
               </Alert>
-            </div>
-          }
+            </div>}
           
-          {showWarning &&
-          <Alert
-            variant="warning"
-            dismissible
-            onDismiss={() => setShowWarning(false)}>
+          {showWarning && <Alert variant="warning" dismissible onDismiss={() => setShowWarning(false)}>
 
               This is a dismissible warning alert.
-            </Alert>
-          }
+            </Alert>}
           
-          {(!showInfo || !showWarning) &&
-          <Button
-            variant="outline"
-            onClick={() => {
-              setShowInfo(true);
-              setShowWarning(true);
-            }}>
+          {(!showInfo || !showWarning) && <Button variant="outline" onClick={() => {
+          setShowInfo(true);
+          setShowWarning(true);
+        }}>
 
               Reset Dismissible Alerts
-            </Button>
-          }
+            </Button>}
         </div>
         
         <div>
@@ -1420,7 +1215,7 @@ export function AlertExamples() {
               <p className="text-sm text-gray-500 mb-2">Toast (Success)</p>
               <div className="shadow-md rounded-lg p-3 bg-white border border-gray-200 flex items-center gap-2 max-w-sm">
                 <div className="rounded-full bg-green-500 p-1 flex-shrink-0">
-                  <Icon name="circleCheck" solid className="h-3 w-3 text-white" />
+                  <Icon name="faCircleCheck" solid className="h-3 w-3 text-white" />
                 </div>
                 <span className="text-sm text-gray-800">Campaign data loaded</span>
               </div>
@@ -1428,90 +1223,82 @@ export function AlertExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function ToastExamples() {
-  const { success, error, info, warning, custom } = useToast();
-
+  const {
+    success,
+    error,
+    info,
+    warning,
+    custom
+  } = useToast();
   const showCompactSuccessToast = () => {
     success('Campaign data loaded', {
       style: 'compact',
       position: 'top-right'
     });
   };
-
   const showCompactErrorToast = () => {
     error('Failed to load campaign data', {
       style: 'compact',
       position: 'top-right'
     });
   };
-
   const showCompactInfoToast = () => {
     info('New updates available', {
       style: 'compact',
       position: 'top-right'
     });
   };
-
   const showCompactWarningToast = () => {
     warning('Session expires soon', {
       style: 'compact',
       position: 'top-right'
     });
   };
-
   const showBannerSuccessToast = () => {
     success('Operation completed successfully!', {
       style: 'banner',
       position: 'top-center'
     });
   };
-
   const showBannerErrorToast = () => {
     error('An error occurred. Please try again.', {
       style: 'banner',
       position: 'top-center'
     });
   };
-
   const showBannerInfoToast = () => {
     info('This is an informational message.', {
       style: 'banner',
       position: 'top-center'
     });
   };
-
   const showBannerWarningToast = () => {
     warning('Warning: This action cannot be undone.', {
       style: 'banner',
       position: 'top-center'
     });
   };
-
   const showTopRightToast = () => {
     success('Positioned at the top-right corner', {
       position: 'top-right',
       style: 'compact'
     });
   };
-
   const showTopLeftToast = () => {
     info('Positioned at the top-left corner', {
       position: 'top-left',
       style: 'compact'
     });
   };
-
   const showBottomLeftToast = () => {
     warning('Positioned at the bottom-left corner', {
       position: 'bottom-left',
       style: 'compact'
     });
   };
-
   const showPersistentToast = () => {
     custom({
       message: 'This toast will not auto-dismiss',
@@ -1521,23 +1308,19 @@ export function ToastExamples() {
       style: 'compact'
     });
   };
-
   const showShortToast = () => {
     success('This toast will dismiss quickly', {
       duration: 2000,
       style: 'compact'
     });
   };
-
   const showLongToast = () => {
     warning('This toast will stay longer', {
       duration: 10000,
       style: 'compact'
     });
   };
-
-  return (
-    <div className="space-y-8" id="toasts">
+  return <div className="space-y-8" id="toasts">
       <h2 className="text-lg font-semibold mb-4">Toast Styles</h2>
       <div className="space-y-6">
         {/* Compact Toasts */}
@@ -1607,10 +1390,8 @@ export function ToastExamples() {
           Persistent
         </Button>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function FormComponentsExamples() {
   const [selectedValue, setSelectedValue] = useState<string>('option1');
   const [checkboxState, setCheckboxState] = useState({
@@ -1619,61 +1400,37 @@ export function FormComponentsExamples() {
     withLabel: false,
     disabled: false
   });
-
-  return (
-    <div className="space-y-8" id="form-components">
+  return <div className="space-y-8" id="form-components">
       {/* FormField Examples */}
       <section>
         <h2 className="text-lg font-semibold mb-4">Form Field</h2>
         <div className="space-y-6">
-          <FormField
-            label="Basic Input"
-            id="basic-input"
-            helperText="This is a basic form field with helper text">
+          <FormField label="Basic Input" id="basic-input" helperText="This is a basic form field with helper text">
 
             <Input placeholder="Enter your name" />
           </FormField>
           
-          <FormField
-            label="Required Field"
-            id="required-input"
-            required
-            helperText="This field is required">
+          <FormField label="Required Field" id="required-input" required helperText="This field is required">
 
             <Input placeholder="Required field" />
           </FormField>
           
-          <FormField
-            label="With Error"
-            id="error-input"
-            error="This field has an error message">
+          <FormField label="With Error" id="error-input" error="This field has an error message">
 
             <Input placeholder="Error state" />
           </FormField>
           
-          <FormField
-            label="With Icons"
-            id="icon-input"
-            startIcon={<Icon name="user" className="h-5 w-5 text-gray-400" />}
-            endIcon={<Icon name="info" className="h-5 w-5 text-gray-400" />}>
+          <FormField label="With Icons" id="icon-input" startIcon={<Icon name="faUser" className="h-5 w-5 text-gray-400" solid={false} />} endIcon={<Icon name="faInfo" className="h-5 w-5 text-gray-400" solid={false} />}>
 
             <Input placeholder="Enter username" />
           </FormField>
           
-          <FormField
-            label="Horizontal Layout"
-            id="horizontal-input"
-            layout="horizontal"
-            helperText="This field uses a horizontal layout">
+          <FormField label="Horizontal Layout" id="horizontal-input" layout="horizontal" helperText="This field uses a horizontal layout">
 
             <Input placeholder="Horizontal form field" />
           </FormField>
           
-          <FormField
-            label="Disabled Field"
-            id="disabled-input"
-            disabled
-            helperText="This field is disabled">
+          <FormField label="Disabled Field" id="disabled-input" disabled helperText="This field is disabled">
 
             <Input placeholder="Disabled field" disabled />
           </FormField>
@@ -1686,100 +1443,111 @@ export function FormComponentsExamples() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-md font-medium mb-2">Basic Select</h3>
-            <Select
-              placeholder="Select an option"
-              options={[
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' },
-              { value: 'option3', label: 'Option 3' }]
-              } />
+            <Select placeholder="Select an option" options={[{
+            value: 'option1',
+            label: 'Option 1'
+          }, {
+            value: 'option2',
+            label: 'Option 2'
+          }, {
+            value: 'option3',
+            label: 'Option 3'
+          }]} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Select with Error</h3>
-            <Select
-              placeholder="Select an option"
-              error
-              options={[
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' },
-              { value: 'option3', label: 'Option 3' }]
-              } />
+            <Select placeholder="Select an option" error options={[{
+            value: 'option1',
+            label: 'Option 1'
+          }, {
+            value: 'option2',
+            label: 'Option 2'
+          }, {
+            value: 'option3',
+            label: 'Option 3'
+          }]} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Select Sizes</h3>
             <div className="space-y-2">
-              <Select
-                size="sm"
-                placeholder="Small"
-                options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' }]
-                } />
+              <Select size="sm" placeholder="Small" options={[{
+              value: 'option1',
+              label: 'Option 1'
+            }, {
+              value: 'option2',
+              label: 'Option 2'
+            }]} />
 
-              <Select
-                size="md"
-                placeholder="Medium"
-                options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' }]
-                } />
+              <Select size="md" placeholder="Medium" options={[{
+              value: 'option1',
+              label: 'Option 1'
+            }, {
+              value: 'option2',
+              label: 'Option 2'
+            }]} />
 
-              <Select
-                size="lg"
-                placeholder="Large"
-                options={[
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' }]
-                } />
+              <Select size="lg" placeholder="Large" options={[{
+              value: 'option1',
+              label: 'Option 1'
+            }, {
+              value: 'option2',
+              label: 'Option 2'
+            }]} />
 
             </div>
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Disabled Select</h3>
-            <Select
-              placeholder="Select an option"
-              disabled
-              options={[
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' },
-              { value: 'option3', label: 'Option 3' }]
-              } />
+            <Select placeholder="Select an option" disabled options={[{
+            value: 'option1',
+            label: 'Option 1'
+          }, {
+            value: 'option2',
+            label: 'Option 2'
+          }, {
+            value: 'option3',
+            label: 'Option 3'
+          }]} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Without Chevron</h3>
-            <Select
-              placeholder="No chevron icon"
-              showChevron={false}
-              options={[
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' },
-              { value: 'option3', label: 'Option 3' }]
-              } />
+            <Select placeholder="No chevron icon" showChevron={false} options={[{
+            value: 'option1',
+            label: 'Option 1'
+          }, {
+            value: 'option2',
+            label: 'Option 2'
+          }, {
+            value: 'option3',
+            label: 'Option 3'
+          }]} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">With Form Field</h3>
-            <FormField
-              label="Country"
-              id="country-select"
-              helperText="Select your country">
+            <FormField label="Country" id="country-select" helperText="Select your country">
 
-              <Select
-                placeholder="Select country"
-                options={[
-                { value: 'us', label: 'United States' },
-                { value: 'ca', label: 'Canada' },
-                { value: 'uk', label: 'United Kingdom' },
-                { value: 'au', label: 'Australia' }]
-                } />
+              <Select placeholder="Select country" options={[{
+              value: 'us',
+              label: 'United States'
+            }, {
+              value: 'ca',
+              label: 'Canada'
+            }, {
+              value: 'uk',
+              label: 'United Kingdom'
+            }, {
+              value: 'au',
+              label: 'Australia'
+            }]} />
 
             </FormField>
           </div>
@@ -1792,57 +1560,46 @@ export function FormComponentsExamples() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-md font-medium mb-2">Basic Checkbox</h3>
-            <Checkbox
-              id="basic-checkbox"
-              checked={checkboxState.basic}
-              onChange={(e) => setCheckboxState({ ...checkboxState, basic: e.target.checked })} />
+            <Checkbox id="basic-checkbox" checked={checkboxState.basic} onChange={e => setCheckboxState({
+            ...checkboxState,
+            basic: e.target.checked
+          })} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">With Label</h3>
-            <Checkbox
-              id="label-checkbox"
-              label="Checkbox with label"
-              checked={checkboxState.withLabel}
-              onChange={(e) => setCheckboxState({ ...checkboxState, withLabel: e.target.checked })} />
+            <Checkbox id="label-checkbox" label="Checkbox with label" checked={checkboxState.withLabel} onChange={e => setCheckboxState({
+            ...checkboxState,
+            withLabel: e.target.checked
+          })} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Indeterminate</h3>
-            <Checkbox
-              id="indeterminate-checkbox"
-              label="Indeterminate state"
-              indeterminate
-              checked={checkboxState.indeterminate}
-              onChange={(e) => setCheckboxState({ ...checkboxState, indeterminate: e.target.checked })} />
+            <Checkbox id="indeterminate-checkbox" label="Indeterminate state" indeterminate checked={checkboxState.indeterminate} onChange={e => setCheckboxState({
+            ...checkboxState,
+            indeterminate: e.target.checked
+          })} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Disabled</h3>
-            <Checkbox
-              id="disabled-checkbox"
-              label="Disabled checkbox"
-              disabled
-              checked={checkboxState.disabled}
-              onChange={(e) => setCheckboxState({ ...checkboxState, disabled: e.target.checked })} />
+            <Checkbox id="disabled-checkbox" label="Disabled checkbox" disabled checked={checkboxState.disabled} onChange={e => setCheckboxState({
+            ...checkboxState,
+            disabled: e.target.checked
+          })} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Label Position</h3>
             <div className="space-y-2">
-              <Checkbox
-                id="right-label"
-                label="Label on right (default)"
-                labelPosition="right" />
+              <Checkbox id="right-label" label="Label on right (default)" labelPosition="right" />
 
-              <Checkbox
-                id="left-label"
-                label="Label on left"
-                labelPosition="left" />
+              <Checkbox id="left-label" label="Label on left" labelPosition="left" />
 
             </div>
           </div>
@@ -1850,34 +1607,20 @@ export function FormComponentsExamples() {
           <div>
             <h3 className="text-md font-medium mb-2">Sizes</h3>
             <div className="space-y-2">
-              <Checkbox
-                id="small-checkbox"
-                label="Small size"
-                size="sm" />
+              <Checkbox id="small-checkbox" label="Small size" size="sm" />
 
-              <Checkbox
-                id="medium-checkbox"
-                label="Medium size (default)"
-                size="md" />
+              <Checkbox id="medium-checkbox" label="Medium size (default)" size="md" />
 
-              <Checkbox
-                id="large-checkbox"
-                label="Large size"
-                size="lg" />
+              <Checkbox id="large-checkbox" label="Large size" size="lg" />
 
             </div>
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">With Form Field</h3>
-            <FormField
-              label="Terms and Conditions"
-              id="terms-checkbox-field"
-              helperText="Please read and accept the terms">
+            <FormField label="Terms and Conditions" id="terms-checkbox-field" helperText="Please read and accept the terms">
 
-              <Checkbox
-                id="terms-checkbox"
-                label="I accept the terms and conditions" />
+              <Checkbox id="terms-checkbox" label="I accept the terms and conditions" />
 
             </FormField>
           </div>
@@ -1891,73 +1634,55 @@ export function FormComponentsExamples() {
           <div>
             <h3 className="text-md font-medium mb-2">Basic Radio</h3>
             <div className="space-y-2">
-              <Radio
-                id="radio-1"
-                name="basic-radio"
-                value="option1"
-                label="Option 1"
-                checked={selectedValue === 'option1'}
-                onChange={(e) => e.target.checked && setSelectedValue(e.target.value)} />
+              <Radio id="radio-1" name="basic-radio" value="option1" label="Option 1" checked={selectedValue === 'option1'} onChange={e => e.target.checked && setSelectedValue(e.target.value)} />
 
-              <Radio
-                id="radio-2"
-                name="basic-radio"
-                value="option2"
-                label="Option 2"
-                checked={selectedValue === 'option2'}
-                onChange={(e) => e.target.checked && setSelectedValue(e.target.value)} />
+              <Radio id="radio-2" name="basic-radio" value="option2" label="Option 2" checked={selectedValue === 'option2'} onChange={e => e.target.checked && setSelectedValue(e.target.value)} />
 
             </div>
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Radio Group</h3>
-            <RadioGroup
-              name="radio-group"
-              value={selectedValue}
-              onChange={setSelectedValue}
-              options={[
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' },
-              { value: 'option3', label: 'Option 3' }]
-              } />
+            <RadioGroup name="radio-group" value={selectedValue} onChange={setSelectedValue} options={[{
+            value: 'option1',
+            label: 'Option 1'
+          }, {
+            value: 'option2',
+            label: 'Option 2'
+          }, {
+            value: 'option3',
+            label: 'Option 3'
+          }]} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Horizontal Radio Group</h3>
-            <RadioGroup
-              name="horizontal-radio-group"
-              value={selectedValue}
-              onChange={setSelectedValue}
-              orientation="horizontal"
-              options={[
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' },
-              { value: 'option3', label: 'Option 3' }]
-              } />
+            <RadioGroup name="horizontal-radio-group" value={selectedValue} onChange={setSelectedValue} orientation="horizontal" options={[{
+            value: 'option1',
+            label: 'Option 1'
+          }, {
+            value: 'option2',
+            label: 'Option 2'
+          }, {
+            value: 'option3',
+            label: 'Option 3'
+          }]} />
 
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">Disabled Radio</h3>
             <div className="space-y-2">
-              <Radio
-                id="disabled-radio"
-                name="disabled-radio"
-                value="disabled"
-                label="Disabled radio"
-                disabled />
+              <Radio id="disabled-radio" name="disabled-radio" value="disabled" label="Disabled radio" disabled />
 
-              <RadioGroup
-                name="disabled-radio-group"
-                value={selectedValue}
-                onChange={setSelectedValue}
-                disabled
-                options={[
-                { value: 'option1', label: 'Disabled option 1' },
-                { value: 'option2', label: 'Disabled option 2' }]
-                } />
+              <RadioGroup name="disabled-radio-group" value={selectedValue} onChange={setSelectedValue} disabled options={[{
+              value: 'option1',
+              label: 'Disabled option 1'
+            }, {
+              value: 'option2',
+              label: 'Disabled option 2'
+            }]} />
 
             </div>
           </div>
@@ -1965,58 +1690,38 @@ export function FormComponentsExamples() {
           <div>
             <h3 className="text-md font-medium mb-2">Radio Sizes</h3>
             <div className="space-y-2">
-              <Radio
-                id="small-radio"
-                name="radio-sizes"
-                value="small"
-                label="Small radio"
-                size="sm" />
+              <Radio id="small-radio" name="radio-sizes" value="small" label="Small radio" size="sm" />
 
-              <Radio
-                id="medium-radio"
-                name="radio-sizes"
-                value="medium"
-                label="Medium radio (default)"
-                size="md" />
+              <Radio id="medium-radio" name="radio-sizes" value="medium" label="Medium radio (default)" size="md" />
 
-              <Radio
-                id="large-radio"
-                name="radio-sizes"
-                value="large"
-                label="Large radio"
-                size="lg" />
+              <Radio id="large-radio" name="radio-sizes" value="large" label="Large radio" size="lg" />
 
             </div>
           </div>
           
           <div>
             <h3 className="text-md font-medium mb-2">With Form Field</h3>
-            <FormField
-              label="Subscription Plan"
-              id="plan-field"
-              helperText="Choose your subscription plan">
+            <FormField label="Subscription Plan" id="plan-field" helperText="Choose your subscription plan">
 
-              <RadioGroup
-                name="subscription-plan"
-                value={selectedValue}
-                onChange={setSelectedValue}
-                options={[
-                { value: 'free', label: 'Free Plan' },
-                { value: 'pro', label: 'Pro Plan' },
-                { value: 'enterprise', label: 'Enterprise Plan' }]
-                } />
+              <RadioGroup name="subscription-plan" value={selectedValue} onChange={setSelectedValue} options={[{
+              value: 'free',
+              label: 'Free Plan'
+            }, {
+              value: 'pro',
+              label: 'Pro Plan'
+            }, {
+              value: 'enterprise',
+              label: 'Enterprise Plan'
+            }]} />
 
             </FormField>
           </div>
         </div>
       </section>
-    </div>);
-
+    </div>;
 }
-
 export function ColorPaletteLogosExamples() {
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Color Palette */}
       <div>
         <h3 className="text-md font-medium mb-4">Brand Colors</h3>
@@ -2097,13 +1802,10 @@ export function ColorPaletteLogosExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function AvatarExamples() {
-  return (
-    <div className="space-y-8" id="avatars">
+  return <div className="space-y-8" id="avatars">
       <div>
         <h2 className="text-lg font-semibold mb-4">Avatar Sizes</h2>
         <div className="flex gap-4 items-center">
@@ -2175,13 +1877,10 @@ export function AvatarExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function BadgeExamples() {
-  return (
-    <div className="space-y-8" id="badges">
+  return <div className="space-y-8" id="badges">
       <div>
         <h2 className="text-lg font-semibold mb-4">Badge Variants</h2>
         <div className="flex flex-wrap gap-4 items-center">
@@ -2279,13 +1978,10 @@ export function BadgeExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function CalendarExamples() {
-  return (
-    <div className="space-y-8" id="calendar">
+  return <div className="space-y-8" id="calendar">
       <div>
         <h2 className="text-lg font-semibold mb-4">Basic Calendar</h2>
         <div className="border rounded-md w-full max-w-md">
@@ -2296,23 +1992,26 @@ export function CalendarExamples() {
       <div>
         <h2 className="text-lg font-semibold mb-4">Calendar with Events</h2>
         <div className="border rounded-md w-full max-w-md">
-          <Calendar
-            events={[
-            { id: 1, date: new Date(2025, 2, 15), title: 'Team Meeting' },
-            { id: 2, date: new Date(2025, 2, 18), title: 'Product Launch' },
-            { id: 3, date: new Date(2025, 2, 22), title: 'Client Call' }]
-            }
-            selectedDate={new Date(2025, 2, 18)} />
+          <Calendar events={[{
+          id: 1,
+          date: new Date(2025, 2, 15),
+          title: 'Team Meeting'
+        }, {
+          id: 2,
+          date: new Date(2025, 2, 18),
+          title: 'Product Launch'
+        }, {
+          id: 3,
+          date: new Date(2025, 2, 22),
+          title: 'Client Call'
+        }]} selectedDate={new Date(2025, 2, 18)} />
 
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function ChartExamples() {
-  return (
-    <div className="space-y-8" id="charts">
+  return <div className="space-y-8" id="charts">
       <div>
         <h2 className="text-lg font-semibold mb-4">Chart Placeholder</h2>
         <div className="border rounded-md p-4 w-full max-w-3xl">
@@ -2325,13 +2024,10 @@ export function ChartExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function ProgressExamples() {
-  return (
-    <div className="space-y-8" id="progress">
+  return <div className="space-y-8" id="progress">
       <div>
         <h2 className="text-lg font-semibold mb-4">Linear Progress Variants</h2>
         <div className="space-y-4 max-w-md">
@@ -2428,13 +2124,10 @@ export function ProgressExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function TabsExamples() {
-  return (
-    <div className="space-y-12" id="tabs">
+  return <div className="space-y-12" id="tabs">
       <div>
         <h2 className="text-lg font-semibold mb-4">Underline Tabs (Default)</h2>
         <div className="border rounded-md p-4">
@@ -2507,13 +2200,10 @@ export function TabsExamples() {
           </Tabs>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export function LoadingExamples() {
-  return (
-    <div className="space-y-8" id="loading">
+  return <div className="space-y-8" id="loading">
       <div>
         <h2 className="text-lg font-semibold mb-4">Spinner Variants</h2>
         <div className="flex gap-4 items-center">
@@ -2728,13 +2418,10 @@ export function LoadingExamples() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>;
 }
-
 export default function ComponentExamples() {
-  return (
-    <div className="space-y-6 overflow-x-hidden">
+  return <div className="space-y-6 overflow-x-hidden">
       <style jsx global>{`
         html {
           scroll-padding-top: 10rem;
@@ -2808,152 +2495,7 @@ export default function ComponentExamples() {
             
             <IconTester />
             
-            <div className="mt-6 space-y-8">
-              <section>
-                <h3 className="text-lg font-semibold mb-4">Icon Usage Examples</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Basic Icon Usage</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Icon name="user" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon name="user" />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon name="user" solid />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon name="user" solid />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon platformName="instagram" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon platformName="instagram" />`}</code>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Direct Font Awesome Usage</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-solid fa-user" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-solid fa-user" />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-regular fa-user" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-regular fa-user" />`}</code>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Icon fontAwesome="fa-brands fa-x-twitter" />
-                        <code className="text-xs bg-gray-100 p-1 rounded">{`<Icon fontAwesome="fa-brands fa-x-twitter" />`}</code>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icon Sizes</h4>
-                    <div className="flex items-end space-x-4">
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="xs" className="mb-2" />
-                        <span className="text-xs text-gray-500">xs</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="sm" className="mb-2" />
-                        <span className="text-xs text-gray-500">sm</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="md" className="mb-2" />
-                        <span className="text-xs text-gray-500">md</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">lg</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="user" size="xl" className="mb-2" />
-                        <span className="text-xs text-gray-500">xl</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icon Colors</h4>
-                    <div className="flex space-x-4">
-                      <div className="flex flex-col items-center">
-                        <Icon name="star" color="gold" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">gold</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="heart" color="#e91e63" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">#e91e63</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="check" color="rgb(0, 200, 83)" size="lg" className="mb-2" />
-                        <span className="text-xs text-gray-500">rgb(0, 200, 83)</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">CSS Effects</h4>
-                    <div className="flex space-x-6">
-                      <div className="flex flex-col items-center">
-                        <Icon name="history" size="lg" className="mb-2 animate-spin" />
-                        <span className="text-xs text-gray-500">animate-spin</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="bell" size="lg" className="mb-2 animate-bounce" />
-                        <span className="text-xs text-gray-500">animate-bounce</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <Icon name="arrowUp" size="lg" className="mb-2 rotate-45" />
-                        <span className="text-xs text-gray-500">rotate-45</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              
-              <section>
-                <h3 className="text-lg font-semibold mb-4">Icon Application Examples</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icons with Buttons</h4>
-                    <div className="flex flex-wrap gap-3">
-                      <Button leftIcon={<Icon name="plus" size="sm" />}>Add Item</Button>
-                      <Button rightIcon={<Icon name="arrowRight" size="sm" />}>Next</Button>
-                      <Button variant="outline" leftIcon={<Icon name="download" size="sm" />}>Download</Button>
-                      <Button variant="secondary" leftIcon={<Icon platformName="instagram" size="sm" />}>Share</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium text-md mb-3">Icons with Inputs</h4>
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Icon name="search" className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          placeholder="Search..."
-                          className="pl-10" />
-
-                      </div>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Icon name="mail" className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          placeholder="Enter your email"
-                          className="pl-10" />
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
+            {/* Removed duplicated icon usage examples */}
           </div>
         </section>
         
@@ -3001,6 +2543,5 @@ export default function ComponentExamples() {
           <TypographyExamples />
         </section>
       </div>
-    </div>);
-
+    </div>;
 }

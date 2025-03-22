@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { migrateHeroIcon, Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/icons';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
 /**
@@ -14,25 +14,25 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 const transformCampaignData = (campaign: any): Campaign => {
   // Log the incoming campaign ID for debugging
   console.log(`Campaign ID from API: ${campaign.id}, type: ${typeof campaign.id}`);
-  
+
   // Debug date formats
   console.log(`Raw startDate from API: ${JSON.stringify(campaign.startDate)}, type: ${typeof campaign.startDate}`);
   console.log(`Raw endDate from API: ${JSON.stringify(campaign.endDate)}, type: ${typeof campaign.endDate}`);
-  
+
   // Helper to safely parse dates from various formats
   const safelyParseDate = (dateValue: any): string => {
     try {
       // Handle null or undefined
       if (!dateValue) return '';
-      
+
       // Handle empty object case: {}
       if (dateValue && typeof dateValue === 'object' && Object.keys(dateValue).length === 0) {
         return '';
       }
-      
+
       // Handle null values that might come from the API
       if (dateValue === null) return '';
-      
+
       // Handle ISO date strings (which is what the API returns)
       if (typeof dateValue === 'string' && dateValue.trim() !== '') {
         // Check if it's a valid date without converting format
@@ -42,7 +42,6 @@ const transformCampaignData = (campaign: any): Campaign => {
           return dateValue;
         }
       }
-      
       return '';
     } catch (error) {
       console.error('Error parsing date:', error, dateValue);
@@ -55,7 +54,6 @@ const transformCampaignData = (campaign: any): Campaign => {
     if (typeof jsonValue === 'object' && jsonValue !== null) {
       return jsonValue;
     }
-    
     if (typeof jsonValue === 'string') {
       try {
         return JSON.parse(jsonValue);
@@ -63,26 +61,23 @@ const transformCampaignData = (campaign: any): Campaign => {
         console.error('Error parsing JSON:', error, jsonValue);
       }
     }
-    
     return defaultValue;
   };
 
   // Helper to safely get budget total
   const safelyGetBudgetTotal = (budget: any): number => {
     if (!budget) return 0;
-    
     try {
       // Already parsed object
       if (typeof budget === 'object') {
         return Number(budget.total || budget.totalBudget || 0);
       }
-      
+
       // String that needs parsing
       if (typeof budget === 'string') {
         const parsedBudget = JSON.parse(budget);
         return Number(parsedBudget.total || parsedBudget.totalBudget || 0);
       }
-      
       return 0;
     } catch (error) {
       console.error('Error getting budget total:', error, budget);
@@ -91,7 +86,10 @@ const transformCampaignData = (campaign: any): Campaign => {
   };
 
   // Parse primary contact
-  const primaryContact = safelyParseJSON(campaign.primaryContact, { firstName: '', surname: '' });
+  const primaryContact = safelyParseJSON(campaign.primaryContact, {
+    firstName: '',
+    surname: ''
+  });
 
   // Map the status properly from the database schema (DRAFT, IN_REVIEW, APPROVED, ACTIVE, COMPLETED)
   // to the frontend statuses
@@ -101,7 +99,6 @@ const transformCampaignData = (campaign: any): Campaign => {
   } else {
     status = 'draft';
   }
-
   return {
     id: campaign.id,
     campaignName: campaign.name || 'Untitled Campaign',
@@ -125,21 +122,36 @@ interface KpiOption {
   key: string;
   title: string;
 }
-
-const KPI_OPTIONS: KpiOption[] = [
-  { key: "adRecall", title: "Ad Recall" },
-  { key: "brandAwareness", title: "Brand Awareness" },
-  { key: "consideration", title: "Consideration" },
-  { key: "messageAssociation", title: "Message Association" },
-  { key: "brandPreference", title: "Brand Preference" },
-  { key: "purchaseIntent", title: "Purchase Intent" },
-  { key: "actionIntent", title: "Action Intent" },
-  { key: "recommendationIntent", title: "Recommendation Intent" },
-  { key: "advocacy", title: "Advocacy" }
-];
-
+const KPI_OPTIONS: KpiOption[] = [{
+  key: "adRecall",
+  title: "Ad Recall"
+}, {
+  key: "brandAwareness",
+  title: "Brand Awareness"
+}, {
+  key: "consideration",
+  title: "Consideration"
+}, {
+  key: "messageAssociation",
+  title: "Message Association"
+}, {
+  key: "brandPreference",
+  title: "Brand Preference"
+}, {
+  key: "purchaseIntent",
+  title: "Purchase Intent"
+}, {
+  key: "actionIntent",
+  title: "Action Intent"
+}, {
+  key: "recommendationIntent",
+  title: "Recommendation Intent"
+}, {
+  key: "advocacy",
+  title: "Advocacy"
+}];
 interface Campaign {
-  id: string | number;  // Handle both string and number IDs
+  id: string | number; // Handle both string and number IDs
   campaignName: string;
   submissionStatus: "draft" | "in_review" | "approved" | "active" | "submitted" | "paused" | "completed";
   platform: "Instagram" | "YouTube" | "TikTok";
@@ -155,14 +167,18 @@ interface Campaign {
   };
   createdAt: string;
   audience?: {
-    locations: { location: string }[];
+    locations: {
+      location: string;
+    }[];
   };
 }
-
 type SortDirection = "ascending" | "descending";
-
 const ClientCampaignList: React.FC = () => {
-  const { user, isLoading: userLoading, error: userError } = useUser();
+  const {
+    user,
+    isLoading: userLoading,
+    error: userError
+  } = useUser();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -177,14 +193,16 @@ const ClientCampaignList: React.FC = () => {
     key: keyof Campaign;
     direction: SortDirection;
   } | null>(null);
-  
+
   // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [campaignToAction, setCampaignToAction] = useState<{id: string, name: string} | null>(null);
+  const [campaignToAction, setCampaignToAction] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
   const [deleteInProgress, setDeleteInProgress] = useState(false);
-  
   const router = useRouter();
 
   // Fetch campaigns from API
@@ -195,28 +213,24 @@ const ClientCampaignList: React.FC = () => {
         if (!user) {
           throw new Error('Not authenticated');
         }
-
         const response = await fetch('/api/campaigns', {
           method: 'GET',
           credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-          },
+            'Content-Type': 'application/json'
+          }
         });
-
         if (!response.ok) {
           throw new Error(`Failed to load campaigns: ${response.status}`);
         }
-
         const data = await response.json();
         console.log("API Response:", data);
-        
         if (data.success && Array.isArray(data.data)) {
           console.log("Setting campaigns:", data.data);
-          
+
           // Transform the raw campaign data to match the Campaign interface
           const transformedCampaigns = data.data.map(transformCampaignData);
-          
+
           // Debug the first campaign's dates if available
           if (transformedCampaigns.length > 0) {
             console.log("Debugging first campaign's dates:");
@@ -225,16 +239,11 @@ const ClientCampaignList: React.FC = () => {
             console.log(`Start date: ${firstCampaign.startDate}`);
             console.log(`End date: ${firstCampaign.endDate}`);
           }
-          
           console.log("Transformed campaigns:", transformedCampaigns);
           setCampaigns(transformedCampaigns);
         } else {
           console.log("Invalid data format:", data);
-          const errorDetails = !data.success 
-            ? "API response indicates failure" 
-            : !Array.isArray(data.data) 
-              ? `Expected data.data to be an array, got ${typeof data.data}` 
-              : "Unknown data format error";
+          const errorDetails = !data.success ? "API response indicates failure" : !Array.isArray(data.data) ? `Expected data.data to be an array, got ${typeof data.data}` : "Unknown data format error";
           throw new Error(`Invalid data format received from server: ${errorDetails}`);
         }
       } catch (error) {
@@ -244,7 +253,6 @@ const ClientCampaignList: React.FC = () => {
         setLoading(false);
       }
     };
-
     if (!userLoading && user) {
       fetchCampaigns();
     }
@@ -252,18 +260,20 @@ const ClientCampaignList: React.FC = () => {
 
   // Get unique start and end dates from campaigns
   const uniqueDates = useMemo(() => {
-    if (!campaigns || campaigns.length === 0) return { startDates: [], endDates: [] };
-    
+    if (!campaigns || campaigns.length === 0) return {
+      startDates: [],
+      endDates: []
+    };
+
     // Helper function to safely parse dates
     const safelyFormatDate = (dateValue: any): string | undefined => {
       if (!dateValue) return undefined;
-      
       try {
         // If it's already a Date object
         if (dateValue instanceof Date) {
           return dateValue.toISOString().split('T')[0];
         }
-        
+
         // Handle string dates
         if (typeof dateValue === 'string') {
           // For ISO strings and other standard formats
@@ -273,7 +283,7 @@ const ClientCampaignList: React.FC = () => {
             return date.toISOString().split('T')[0];
           }
         }
-        
+
         // Handle cases where the date might be a timestamp
         if (typeof dateValue === 'number') {
           const date = new Date(dateValue);
@@ -281,32 +291,26 @@ const ClientCampaignList: React.FC = () => {
             return date.toISOString().split('T')[0];
           }
         }
-        
         return undefined;
       } catch (error) {
         console.error('Error parsing date:', error, dateValue);
         return undefined;
       }
     };
-    
-    const startDatesArray = campaigns
-      .filter(campaign => campaign.startDate)
-      .map(campaign => safelyFormatDate(campaign.startDate))
-      .filter((date): date is string => !!date); // Type guard to ensure we only have strings
-    
-    const endDatesArray = campaigns
-      .filter(campaign => campaign.endDate)
-      .map(campaign => safelyFormatDate(campaign.endDate))
-      .filter((date): date is string => !!date); // Type guard to ensure we only have strings
-    
+    const startDatesArray = campaigns.filter(campaign => campaign.startDate).map(campaign => safelyFormatDate(campaign.startDate)).filter((date): date is string => !!date); // Type guard to ensure we only have strings
+
+    const endDatesArray = campaigns.filter(campaign => campaign.endDate).map(campaign => safelyFormatDate(campaign.endDate)).filter((date): date is string => !!date); // Type guard to ensure we only have strings
+
     const startDatesSet = new Set(startDatesArray);
     const endDatesSet = new Set(endDatesArray);
-    
+
     // Convert Sets to Arrays and sort
     const startDates = Array.from(startDatesSet).sort();
     const endDates = Array.from(endDatesSet).sort();
-    
-    return { startDates, endDates };
+    return {
+      startDates,
+      endDates
+    };
   }, [campaigns]);
 
   // Format date for display
@@ -315,18 +319,18 @@ const ClientCampaignList: React.FC = () => {
     try {
       // Parse the ISO date string
       const date = new Date(dateString);
-      
+
       // Check if date is valid
       if (isNaN(date.getTime())) {
         console.warn(`Invalid date format: ${dateString}`);
         return 'Invalid date';
       }
-      
+
       // Format the date for display
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
       });
     } catch (error) {
       console.error('Error formatting date:', error, dateString);
@@ -337,27 +341,17 @@ const ClientCampaignList: React.FC = () => {
   // Filter campaigns based on search text and dropdown filters
   const filteredCampaigns = useMemo(() => {
     if (!campaigns) return [];
-    
-    return campaigns.filter((campaign) => {
+    return campaigns.filter(campaign => {
       if (!campaign) return false;
-      
-      const matchesSearch = campaign.campaignName
-        ?.toLowerCase()
-        ?.includes(search.toLowerCase()) ?? false;
-        
+      const matchesSearch = campaign.campaignName?.toLowerCase()?.includes(search.toLowerCase()) ?? false;
       const matchesStatus = !statusFilter || campaign.submissionStatus === statusFilter;
-      
+
       // Match primaryKPI with objective filter using KPI_OPTIONS
-      const matchesObjective = !objectiveFilter || 
-        campaign.primaryKPI === objectiveFilter;
-      
+      const matchesObjective = !objectiveFilter || campaign.primaryKPI === objectiveFilter;
+
       // Date filters with proper date comparison
-      const matchesStartDate = !startDateFilter || 
-        (campaign.startDate && new Date(campaign.startDate).toISOString().split('T')[0] >= startDateFilter);
-      
-      const matchesEndDate = !endDateFilter || 
-        (campaign.endDate && new Date(campaign.endDate).toISOString().split('T')[0] <= endDateFilter);
-      
+      const matchesStartDate = !startDateFilter || campaign.startDate && new Date(campaign.startDate).toISOString().split('T')[0] >= startDateFilter;
+      const matchesEndDate = !endDateFilter || campaign.endDate && new Date(campaign.endDate).toISOString().split('T')[0] <= endDateFilter;
       return matchesSearch && matchesStatus && matchesObjective && matchesStartDate && matchesEndDate;
     });
   }, [campaigns, search, statusFilter, objectiveFilter, startDateFilter, endDateFilter]);
@@ -366,13 +360,11 @@ const ClientCampaignList: React.FC = () => {
   const sortedCampaigns = useMemo(() => {
     if (!filteredCampaigns || filteredCampaigns.length === 0) return [];
     if (!sortConfig) return filteredCampaigns;
-
     return [...filteredCampaigns].sort((a, b) => {
       if (!a || !b) return 0;
-      
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
-      
+
       // Add null checks
       if (aVal === null || aVal === undefined) return 1;
       if (bVal === null || bVal === undefined) return -1;
@@ -386,26 +378,20 @@ const ClientCampaignList: React.FC = () => {
 
       // Compare strings
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortConfig.direction === "ascending"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+        return sortConfig.direction === "ascending" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       }
 
       // Compare numbers
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortConfig.direction === "ascending" ? aVal - bVal : bVal - aVal;
       }
-
       return 0;
     });
   }, [filteredCampaigns, sortConfig]);
 
   // Pagination calculations
   const totalPages = Math.ceil(sortedCampaigns.length / campaignsPerPage);
-  const displayedCampaigns = sortedCampaigns.slice(
-    (currentPage - 1) * campaignsPerPage,
-    currentPage * campaignsPerPage
-  );
+  const displayedCampaigns = sortedCampaigns.slice((currentPage - 1) * campaignsPerPage, currentPage * campaignsPerPage);
 
   // Handle sorting request from clicking on table headers
   const requestSort = (key: keyof Campaign) => {
@@ -413,7 +399,10 @@ const ClientCampaignList: React.FC = () => {
     if (sortConfig && sortConfig.key === key && sortConfig.direction === "ascending") {
       direction = "descending";
     }
-    setSortConfig({ key, direction });
+    setSortConfig({
+      key,
+      direction
+    });
   };
 
   // Function to refetch campaigns from the server
@@ -427,22 +416,18 @@ const ClientCampaignList: React.FC = () => {
           'Content-Type': 'application/json',
           // Add cache busting to ensure we get fresh data
           'Cache-Control': 'no-cache'
-        },
+        }
       });
-
       if (!response.ok) {
         console.error(`Failed to refresh campaigns: ${response.status}`);
         return;
       }
-
       const data = await response.json();
-      
       if (data.success && Array.isArray(data.data)) {
         console.log("Refreshed campaigns data:", data.data);
-        
+
         // Transform the raw campaign data to match the Campaign interface
         const transformedCampaigns = data.data.map(transformCampaignData);
-        
         setCampaigns(transformedCampaigns);
       }
     } catch (error) {
@@ -451,7 +436,6 @@ const ClientCampaignList: React.FC = () => {
       setLoading(false);
     }
   };
-
   const deleteCampaign = async (campaignId: string) => {
     try {
       if (!user) {
@@ -463,32 +447,29 @@ const ClientCampaignList: React.FC = () => {
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const isUuid = uuidRegex.test(campaignId);
       const isNumeric = !isNaN(Number(campaignId));
-      
       if (!isUuid && !isNumeric) {
         console.error(`Invalid ID format (neither UUID nor numeric): ${campaignId}`);
         throw new Error('Invalid campaign ID format');
       }
-      
+
       // Try to refresh the session before making the delete request
       try {
-        await fetch('/api/auth/refresh', { 
+        await fetch('/api/auth/refresh', {
           method: 'GET',
           credentials: 'include'
         });
       } catch (refreshError) {
         console.warn('Session refresh failed, proceeding with deletion anyway', refreshError);
       }
-
       console.log(`Sending DELETE request for campaign ID: ${campaignId} (${isUuid ? 'UUID format' : 'numeric format'})`);
-      
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           // Ensure we have the latest auth cookie
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache'
         },
-        credentials: 'include',
+        credentials: 'include'
       });
 
       // Handle authentication errors specifically
@@ -496,7 +477,6 @@ const ClientCampaignList: React.FC = () => {
         toast.error('Authentication error. Please try logging in again.');
         throw new Error('Authentication failed when deleting campaign');
       }
-
       let data;
       try {
         data = await response.json();
@@ -508,15 +488,16 @@ const ClientCampaignList: React.FC = () => {
       // Handle 404 errors specially - treat as success since the campaign is gone anyway
       if (response.status === 404) {
         console.warn('Campaign not found during deletion:', data);
-        
+
         // Still update the UI to remove the campaign since it's not in the database
-        setCampaigns(prevCampaigns => 
-          prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
-        );
-        
+        setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId));
+
         // Show a more user-friendly message
         toast.success('Campaign removed from list');
-        return { success: true, message: 'Campaign no longer exists' };
+        return {
+          success: true,
+          message: 'Campaign no longer exists'
+        };
       }
 
       // Handle other errors
@@ -526,9 +507,7 @@ const ClientCampaignList: React.FC = () => {
       }
 
       // Update local state
-      setCampaigns(prevCampaigns => 
-        prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
-      );
+      setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId));
 
       // If the deletion was successful, also trigger a refresh from the server to get the latest data
       if (data.success) {
@@ -538,34 +517,30 @@ const ClientCampaignList: React.FC = () => {
           refetchCampaigns();
         }, 1000);
       }
-
       return data;
     } catch (error) {
       console.error('Error deleting campaign:', error);
       throw error;
     }
   };
-
   const handleDeleteClick = (campaign: Campaign) => {
     // Convert ID to string in case it's a number
     const campaignId = campaign.id.toString();
-    
+
     // Log the ID to help debugging
     console.log(`Preparing to delete campaign: ${campaignId}, type: ${typeof campaign.id}`);
-    
-    setCampaignToAction({id: campaignId, name: campaign.campaignName});
+    setCampaignToAction({
+      id: campaignId,
+      name: campaign.campaignName
+    });
     setShowDeleteModal(true);
   };
-
   const confirmDelete = async () => {
     if (!campaignToAction) return;
-    
     console.log(`Confirming deletion of campaign: ${campaignToAction.id}`);
-    
     try {
       // Don't use toast.promise since we're handling 404s specially
       setDeleteInProgress(true);
-      
       try {
         const result = await deleteCampaign(campaignToAction.id);
         console.log('Delete campaign result:', result);
@@ -574,10 +549,8 @@ const ClientCampaignList: React.FC = () => {
       } catch (error) {
         // Error is already logged in deleteCampaign
         console.log('Delete campaign error details:', error);
-        
         if (error instanceof Error) {
           const errorMessage = error.message.toLowerCase();
-          
           if (errorMessage.includes('not found') || errorMessage.includes('404')) {
             // If campaign wasn't found, still close the modal and show success
             console.log('Handling "not found" error as success');
@@ -587,11 +560,9 @@ const ClientCampaignList: React.FC = () => {
             // Special handling for invalid ID format errors
             console.log('Invalid ID format error detected');
             toast.error('Campaign ID format issue detected. The system will still try to delete the campaign.');
-            
+
             // Even with invalid format, still remove it from the UI
-            setCampaigns(prevCampaigns => 
-              prevCampaigns.filter(campaign => campaign.id.toString() !== campaignToAction.id)
-            );
+            setCampaigns(prevCampaigns => prevCampaigns.filter(campaign => campaign.id.toString() !== campaignToAction.id));
             setShowDeleteModal(false);
           } else {
             // For other errors, show error toast
@@ -609,30 +580,29 @@ const ClientCampaignList: React.FC = () => {
       setDeleteInProgress(false);
     }
   };
-
   const handleDuplicateClick = (campaign: Campaign) => {
-    setCampaignToAction({id: campaign.id.toString(), name: campaign.campaignName});
+    setCampaignToAction({
+      id: campaign.id.toString(),
+      name: campaign.campaignName
+    });
     setDuplicateName(`Copy of ${campaign.campaignName}`);
     setShowDuplicateModal(true);
   };
-
   const duplicateCampaign = async () => {
     if (!campaignToAction || !duplicateName.trim()) return;
-    
     try {
       setLoading(true);
-      
       const response = await fetch(`/api/campaigns/${campaignToAction.id}/duplicate`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify({ newName: duplicateName.trim() })
+        body: JSON.stringify({
+          newName: duplicateName.trim()
+        })
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || `Failed to duplicate campaign: ${response.status}`);
       }
@@ -642,18 +612,15 @@ const ClientCampaignList: React.FC = () => {
         method: 'GET',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
-      
       const updatedData = await updatedResponse.json();
       if (updatedData.success && Array.isArray(updatedData.data)) {
         // Transform the raw campaign data to match the Campaign interface
         const transformedCampaigns = updatedData.data.map(transformCampaignData);
-        
         setCampaigns(transformedCampaigns);
       }
-
       toast.success('Campaign duplicated successfully');
       setShowDuplicateModal(false);
     } catch (error) {
@@ -663,11 +630,9 @@ const ClientCampaignList: React.FC = () => {
       setLoading(false);
     }
   };
-
   const handleViewCampaign = (campaignId: string) => {
     router.push(`/campaigns/${campaignId}`);
   };
-
   const resetFilters = () => {
     setSearch("");
     setStatusFilter("");
@@ -681,25 +646,45 @@ const ClientCampaignList: React.FC = () => {
   const getStatusInfo = (status: string) => {
     // Normalize status to lowercase for case-insensitive matching
     const normalizedStatus = (status || '').toLowerCase();
-    
-    switch(normalizedStatus) {
+    switch (normalizedStatus) {
       case 'approved':
-        return { class: 'bg-green-100 text-green-800', text: 'Approved' };
+        return {
+          class: 'bg-green-100 text-green-800',
+          text: 'Approved'
+        };
       case 'active':
-        return { class: 'bg-green-100 text-green-800', text: 'Active' };
+        return {
+          class: 'bg-green-100 text-green-800',
+          text: 'Active'
+        };
       case 'submitted':
-        return { class: 'bg-green-100 text-green-800', text: 'Submitted' };
+        return {
+          class: 'bg-green-100 text-green-800',
+          text: 'Submitted'
+        };
       case 'in_review':
       case 'in-review':
       case 'inreview':
-        return { class: 'bg-yellow-100 text-yellow-800', text: 'In Review' };
+        return {
+          class: 'bg-yellow-100 text-yellow-800',
+          text: 'In Review'
+        };
       case 'paused':
-        return { class: 'bg-yellow-100 text-yellow-800', text: 'Paused' };
+        return {
+          class: 'bg-yellow-100 text-yellow-800',
+          text: 'Paused'
+        };
       case 'completed':
-        return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
+        return {
+          class: 'bg-blue-100 text-blue-800',
+          text: 'Completed'
+        };
       case 'draft':
       default:
-        return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
+        return {
+          class: 'bg-gray-100 text-gray-800',
+          text: 'Draft'
+        };
     }
   };
 
@@ -708,16 +693,11 @@ const ClientCampaignList: React.FC = () => {
     const kpi = KPI_OPTIONS.find(k => k.key === kpiKey);
     return kpi ? kpi.title : kpiKey;
   };
-
-  return (
-    <div className="min-h-screen bg-white px-4 md:px-6 py-6">
+  return <div className="min-h-screen bg-white px-4 md:px-6 py-6">
       {/* Header: Title and Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <h1 className="text-xl md:text-2xl font-bold text-[var(--primary-color)]">Campaign List View</h1>
-        <Link 
-          href="/campaigns/wizard/step-1" 
-          className="mt-4 md:mt-0 px-5 py-2.5 bg-[var(--accent-color)] text-white rounded text-base font-medium"
-        >
+        <Link href="/campaigns/wizard/step-1" className="mt-4 md:mt-0 px-5 py-2.5 bg-[var(--accent-color)] text-white rounded text-base font-medium">
           New Campaign
         </Link>
       </div>
@@ -726,54 +706,35 @@ const ClientCampaignList: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         {/* Search Bar */}
         <div className="relative w-full md:w-auto md:flex-grow md:max-w-md">
-          <input
-            type="text"
-            placeholder="Search campaigns"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            aria-label="Search campaigns by name"
-            className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-          />
+          <input type="text" placeholder="Search campaigns" value={search} onChange={e => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }} aria-label="Search campaigns by name" className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" />
           <span className="absolute left-3 top-3 text-gray-500">
-            <Icon name="faSearchLight" size="sm" iconType="static" />
+            <Icon name="faSearchLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
           </span>
         </div>
 
         {/* Filter Selection */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative inline-block">
-            <select
-              value={objectiveFilter}
-              onChange={(e) => {
-                setObjectiveFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Filter by objective"
-              className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-            >
+            <select value={objectiveFilter} onChange={e => {
+            setObjectiveFilter(e.target.value);
+            setCurrentPage(1);
+          }} aria-label="Filter by objective" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">Objective</option>
-              {KPI_OPTIONS.map(kpi => (
-                <option key={kpi.key} value={kpi.key}>{kpi.title}</option>
-              ))}
+              {KPI_OPTIONS.map(kpi => <option key={kpi.key} value={kpi.key}>{kpi.title}</option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
           <div className="relative inline-block">
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Filter by status"
-              className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-            >
+            <select value={statusFilter} onChange={e => {
+            setStatusFilter(e.target.value);
+            setCurrentPage(1);
+          }} aria-label="Filter by status" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">Status</option>
               <option value="approved">Approved</option>
               <option value="active">Active</option>
@@ -784,131 +745,80 @@ const ClientCampaignList: React.FC = () => {
               <option value="completed">Completed</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
           <div className="relative inline-block">
-            <select
-              value={startDateFilter}
-              onChange={(e) => {
-                setStartDateFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Filter by start date"
-              className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-            >
+            <select value={startDateFilter} onChange={e => {
+            setStartDateFilter(e.target.value);
+            setCurrentPage(1);
+          }} aria-label="Filter by start date" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">Start Date</option>
-              {uniqueDates.startDates.map(date => (
-                <option key={date} value={date}>
+              {uniqueDates.startDates.map(date => <option key={date} value={date}>
                   {formatDate(date)}
-                </option>
-              ))}
+                </option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
           <div className="relative inline-block">
-            <select
-              value={endDateFilter}
-              onChange={(e) => {
-                setEndDateFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Filter by end date"
-              className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-            >
+            <select value={endDateFilter} onChange={e => {
+            setEndDateFilter(e.target.value);
+            setCurrentPage(1);
+          }} aria-label="Filter by end date" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
               <option value="">End Date</option>
-              {uniqueDates.endDates.map(date => (
-                <option key={date} value={date}>
+              {uniqueDates.endDates.map(date => <option key={date} value={date}>
                   {formatDate(date)}
-                </option>
-              ))}
+                </option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="faChevronDownLight" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
             </div>
           </div>
 
-          <button
-            onClick={resetFilters}
-            className="px-3 py-2.5 bg-[var(--secondary-color)] text-white rounded text-sm font-medium hover:bg-opacity-90 transition-colors"
-          >
+          <button onClick={resetFilters} className="px-3 py-2.5 bg-[var(--secondary-color)] text-white rounded text-sm font-medium hover:bg-opacity-90 transition-colors">
             Reset Filters
           </button>
         </div>
       </div>
 
       {/* Loading, Error, or Empty States */}
-      {userLoading ? (
-        <div className="bg-white p-6 text-center">Loading user...</div>
-      ) : loading ? (
-        <div className="bg-white p-6 text-center">Loading campaigns...</div>
-      ) : error ? (
-        <div className="bg-white p-6 text-center text-red-500">{error}</div>
-      ) : sortedCampaigns.length === 0 ? (
-        <div className="bg-white p-6 text-center">
+      {userLoading ? <div className="bg-white p-6 text-center">Loading user...</div> : loading ? <div className="bg-white p-6 text-center">Loading campaigns...</div> : error ? <div className="bg-white p-6 text-center text-red-500">{error}</div> : sortedCampaigns.length === 0 ? <div className="bg-white p-6 text-center">
           No campaigns found. Try adjusting your search criteria.
-        </div>
-      ) : (
-        <>
+        </div> : <>
           {/* Campaign Table for Larger Screens */}
           <div className="hidden md:block overflow-hidden rounded-lg border border-[var(--divider-color)]">
             <div className="overflow-x-auto">
               <table className="min-w-full border-collapse">
                 <thead className="bg-white border-b border-[var(--divider-color)]">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => requestSort("campaignName")}
-                    >
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort("campaignName")}>
                       Campaign Name
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => requestSort("submissionStatus")}
-                    >
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort("submissionStatus")}>
                       Status
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => requestSort("primaryKPI")}
-                    >
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort("primaryKPI")}>
                       Objective
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => requestSort("startDate")}
-                    >
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort("startDate")}>
                       Start Date
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => requestSort("endDate")}
-                    >
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort("endDate")}>
                       End Date
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--divider-color)]">
                   {displayedCampaigns.map((campaign, index) => {
-                    const statusInfo = getStatusInfo(campaign.submissionStatus);
-                    
-                    return (
-                      <tr key={campaign.id} className="hover:bg-[var(--background-color)]">
+                const statusInfo = getStatusInfo(campaign.submissionStatus);
+                return <tr key={campaign.id} className="hover:bg-[var(--background-color)]">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Link href={`/campaigns/${campaign.id}`}>
                             <span className="text-[var(--accent-color)] hover:underline cursor-pointer font-medium">
@@ -932,39 +842,22 @@ const ClientCampaignList: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-3 justify-center">
-                            <span 
-                              onClick={() => handleViewCampaign(campaign.id.toString())}
-                              className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
-                              title="View campaign"
-                            >
-                              <Icon name="faEyeLight" size="md" iconType="button" />
+                            <span onClick={() => handleViewCampaign(campaign.id.toString())} className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="View campaign">
+                              <Icon name="faEyeLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
                             </span>
-                            <Link 
-                              href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                              className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors"
-                              title="Edit campaign"
-                            >
-                              <Icon name="faPenToSquareLight" size="md" iconType="button" />
+                            <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors" title="Edit campaign">
+                              <Icon name="faPenToSquareLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
                             </Link>
-                            <span 
-                              onClick={() => handleDuplicateClick(campaign)}
-                              className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
-                              title="Duplicate campaign"
-                            >
-                              <Icon name="faCopyLight" size="md" iconType="button" />
+                            <span onClick={() => handleDuplicateClick(campaign)} className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="Duplicate campaign">
+                              <Icon name="faCopyLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
                             </span>
-                            <span
-                              onClick={() => handleDeleteClick(campaign)}
-                              className="group text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
-                              title="Delete campaign"
-                            >
-                              <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" />
+                            <span onClick={() => handleDeleteClick(campaign)} className="group text-gray-500 hover:text-red-600 transition-colors cursor-pointer" title="Delete campaign">
+                              <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" solid={false} />
                             </span>
                           </div>
                         </td>
-                      </tr>
-                    );
-                  })}
+                      </tr>;
+              })}
                 </tbody>
               </table>
             </div>
@@ -973,14 +866,10 @@ const ClientCampaignList: React.FC = () => {
             <div className="px-6 py-4 flex items-center justify-between border-t border-[var(--divider-color)]">
               <div className="flex items-center">
                 <span className="mr-2 text-sm text-gray-700">Show</span>
-                <select
-                  value={campaignsPerPage}
-                  onChange={(e) => {
-                    setCampaignsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="border border-[var(--divider-color)] rounded p-1 text-sm"
-                >
+                <select value={campaignsPerPage} onChange={e => {
+              setCampaignsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }} className="border border-[var(--divider-color)] rounded p-1 text-sm">
                   <option value={10}>10</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
@@ -988,18 +877,10 @@ const ClientCampaignList: React.FC = () => {
                 </select>
               </div>
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors"
-                >
+                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors">
                   Previous
                 </button>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors"
-                >
+                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors">
                   Next
                 </button>
               </div>
@@ -1008,11 +889,9 @@ const ClientCampaignList: React.FC = () => {
 
           {/* Mobile View as Cards */}
           <div className="md:hidden space-y-4">
-            {displayedCampaigns.map((campaign) => {
-              const statusInfo = getStatusInfo(campaign.submissionStatus);
-              
-              return (
-                <div key={campaign.id} className="bg-white border border-[var(--divider-color)] rounded-lg p-5 shadow-sm">
+            {displayedCampaigns.map(campaign => {
+          const statusInfo = getStatusInfo(campaign.submissionStatus);
+          return <div key={campaign.id} className="bg-white border border-[var(--divider-color)] rounded-lg p-5 shadow-sm">
                   <div className="flex justify-between items-start mb-3">
                     <Link href={`/campaigns/${campaign.id}`}>
                       <h3 className="font-semibold text-[var(--primary-color)]">
@@ -1038,38 +917,21 @@ const ClientCampaignList: React.FC = () => {
                   </div>
                   
                   <div className="flex justify-end space-x-3 border-t border-[var(--divider-color)] pt-4">
-                    <span 
-                      onClick={() => handleViewCampaign(campaign.id.toString())}
-                      className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
-                      title="View campaign"
-                    >
-                      <Icon name="faEyeLight" size="md" iconType="button" />
+                    <span onClick={() => handleViewCampaign(campaign.id.toString())} className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="View campaign">
+                      <Icon name="faEyeLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
                     </span>
-                    <Link 
-                      href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                      className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors"
-                      title="Edit campaign"
-                    >
-                      <Icon name="faPenToSquareLight" size="md" iconType="button" />
+                    <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors" title="Edit campaign">
+                      <Icon name="faPenToSquareLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
                     </Link>
-                    <span 
-                      onClick={() => handleDuplicateClick(campaign)}
-                      className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
-                      title="Duplicate campaign"
-                    >
-                      <Icon name="faCopyLight" size="md" iconType="button" />
+                    <span onClick={() => handleDuplicateClick(campaign)} className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" title="Duplicate campaign">
+                      <Icon name="faCopyLight" size="md" iconType="button" solid={false} className="text-[var(--secondary-color)]" />
                     </span>
-                    <span
-                      onClick={() => handleDeleteClick(campaign)}
-                      className="group p-1.5 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
-                      title="Delete campaign"
-                    >
-                      <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" />
+                    <span onClick={() => handleDeleteClick(campaign)} className="group p-1.5 text-gray-500 hover:text-red-600 transition-colors cursor-pointer" title="Delete campaign">
+                      <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" solid={false} />
                     </span>
                   </div>
-                </div>
-              );
-            })}
+                </div>;
+        })}
             
             {/* Mobile Pagination */}
             <div className="flex justify-between items-center border-t border-[var(--divider-color)] pt-4 mt-6">
@@ -1077,37 +939,24 @@ const ClientCampaignList: React.FC = () => {
                 Page {currentPage} of {totalPages}
               </span>
               <div className="flex space-x-3">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                   Previous
                 </button>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                   Next
                 </button>
               </div>
             </div>
           </div>
-        </>
-      )}
+        </>}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      {showDeleteModal && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-[var(--primary-color)]">Confirm Deletion</h3>
-              <button 
-                onClick={() => setShowDeleteModal(false)}
-                className="group text-gray-500 hover:text-gray-700"
-              >
-                <Icon name="faClose" size="sm" iconType="button" />
+              <button onClick={() => setShowDeleteModal(false)} className="group text-gray-500 hover:text-gray-700">
+                <Icon name="faClose" size="sm" iconType="button" solid={false} />
               </button>
             </div>
             
@@ -1117,50 +966,29 @@ const ClientCampaignList: React.FC = () => {
             </div>
             
             <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                disabled={deleteInProgress}
-                className={`px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors ${
-                  deleteInProgress ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
+              <button onClick={() => setShowDeleteModal(false)} disabled={deleteInProgress} className={`px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors ${deleteInProgress ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 Cancel
               </button>
-              <button
-                onClick={confirmDelete}
-                disabled={deleteInProgress}
-                className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center ${
-                  deleteInProgress ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                {deleteInProgress ? (
-                  <>
+              <button onClick={confirmDelete} disabled={deleteInProgress} className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center ${deleteInProgress ? 'opacity-70 cursor-not-allowed' : ''}`}>
+                {deleteInProgress ? <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Deleting...
-                  </>
-                ) : (
-                  'Delete'
-                )}
+                  </> : 'Delete'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Duplicate Campaign Modal */}
-      {showDuplicateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      {showDuplicateModal && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-[var(--primary-color)]">Duplicate Campaign</h3>
-              <button 
-                onClick={() => setShowDuplicateModal(false)}
-                className="group text-gray-500 hover:text-gray-700"
-              >
-                <Icon name="faClose" size="sm" iconType="button" />
+              <button onClick={() => setShowDuplicateModal(false)} className="group text-gray-500 hover:text-gray-700">
+                <Icon name="faClose" size="sm" iconType="button" solid={false} />
               </button>
             </div>
             
@@ -1168,37 +996,19 @@ const ClientCampaignList: React.FC = () => {
               <label htmlFor="duplicateName" className="block mb-2 text-sm font-medium text-gray-700">
                 Please name the duplicate campaign:
               </label>
-              <input
-                type="text"
-                id="duplicateName"
-                value={duplicateName}
-                onChange={(e) => setDuplicateName(e.target.value)}
-                className="w-full p-2.5 border border-[var(--divider-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
-                placeholder="Enter campaign name"
-              />
+              <input type="text" id="duplicateName" value={duplicateName} onChange={e => setDuplicateName(e.target.value)} className="w-full p-2.5 border border-[var(--divider-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="Enter campaign name" />
             </div>
             
             <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDuplicateModal(false)}
-                className="px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors"
-              >
+              <button onClick={() => setShowDuplicateModal(false)} className="px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors">
                 Cancel
               </button>
-              <button
-                onClick={duplicateCampaign}
-                disabled={!duplicateName.trim()}
-                className="px-4 py-2 bg-[var(--accent-color)] text-white rounded hover:bg-opacity-90 transition-colors disabled:bg-opacity-50 disabled:cursor-not-allowed"
-              >
+              <button onClick={duplicateCampaign} disabled={!duplicateName.trim()} className="px-4 py-2 bg-[var(--accent-color)] text-white rounded hover:bg-opacity-90 transition-colors disabled:bg-opacity-50 disabled:cursor-not-allowed">
                 Duplicate
               </button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default ClientCampaignList;
-

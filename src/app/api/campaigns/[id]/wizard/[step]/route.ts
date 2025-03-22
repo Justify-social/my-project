@@ -178,7 +178,7 @@ export async function PATCH(
     }
     
     // Prepare update data based on step
-    let updateData: any = {
+    const updateData: any = {
       ...transformedData,
       updatedAt: new Date()
     };

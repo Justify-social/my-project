@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'react-hot-toast'
-import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary'
-import { Analytics } from '@/lib/analytics/analytics'
-import ErrorFallback from '@/components/ErrorFallback'
-import LoadingSkeleton from '@/components/LoadingSkeleton'
-import { useSidebar } from '@/providers/SidebarProvider'
-import Image from 'next/image'
-import { Icon, migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons'
+import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
+import { Analytics } from '@/lib/analytics/analytics';
+import ErrorFallback from '@/components/ErrorFallback';
+import LoadingSkeleton from '@/components/LoadingSkeleton';
+import { useSidebar } from '@/providers/SidebarProvider';
+import Image from 'next/image';
+import { Icon, iconComponentFactory } from '@/components/ui/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Import Currency from shared types
 import { Currency, Platform, Position } from '@/components/Wizard/shared/types';
-import { UI_ICON_MAP } from '@/components/ui/icons'
-import { iconConfig } from '@/components/ui/icons'
-import type { IconName } from '@/components/ui/icons'
+import { UI_ICON_MAP } from '@/components/ui/icons';
+import { iconConfig } from '@/components/ui/icons';
+import type { IconName } from '@/components/ui/icons';
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -30,14 +30,13 @@ enum KPI {
   purchaseIntent = 'purchaseIntent',
   actionIntent = 'actionIntent',
   recommendationIntent = 'recommendationIntent',
-  advocacy = 'advocacy'
+  advocacy = 'advocacy',
 }
-
 enum Feature {
   CREATIVE_ASSET_TESTING = 'CREATIVE_ASSET_TESTING',
   BRAND_LIFT = 'BRAND_LIFT',
   BRAND_HEALTH = 'BRAND_HEALTH',
-  MIXED_MEDIA_MODELLING = 'MIXED_MEDIA_MODELLING'
+  MIXED_MEDIA_MODELLING = 'MIXED_MEDIA_MODELLING',
 }
 
 // Update interface to match properties used in components
@@ -70,7 +69,7 @@ interface CampaignDetail {
     position: Position;
     phone: string;
   };
-  
+
   // Campaign Details
   brandName: string;
   category: string;
@@ -79,7 +78,7 @@ interface CampaignDetail {
   submissionStatus: string;
   primaryKPI: string;
   secondaryKPIs: KPI[];
-  
+
   // Campaign Objectives
   mainMessage: string;
   hashtags: string;
@@ -102,7 +101,7 @@ interface CampaignDetail {
       languages: string[];
     };
   };
-  
+
   // Creative Assets
   creativeAssets: Array<{
     name: string;
@@ -114,7 +113,6 @@ interface CampaignDetail {
     description?: string;
     budget?: number;
   }>;
-  
   creativeRequirements: Array<{
     requirement: string;
     description?: string;
@@ -168,6 +166,7 @@ interface APICampaignResponse {
     position: string;
   };
   audience: null | {
+
     // ... audience fields if needed ...
   };
   creativeAssets: any[];
@@ -176,16 +175,33 @@ interface APICampaignResponse {
 
 // Animation variants
 const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 }
-}
-
+  initial: {
+    opacity: 0,
+    y: 20
+  },
+  animate: {
+    opacity: 1,
+    y: 0
+  },
+  exit: {
+    opacity: 0,
+    y: -20
+  }
+};
 const slideIn = {
-  initial: { x: -20, opacity: 0 },
-  animate: { x: 0, opacity: 1 },
-  exit: { x: 20, opacity: 0 }
-}
+  initial: {
+    x: -20,
+    opacity: 0
+  },
+  animate: {
+    x: 0,
+    opacity: 1
+  },
+  exit: {
+    x: 20,
+    opacity: 0
+  }
+};
 
 // Add a KPI mapping with icons
 const kpiIconsMap = {
@@ -250,17 +266,14 @@ const featureIconsMap = {
 // Format feature name for display
 const formatFeatureName = (feature: string): string => {
   if (!feature) return "N/A";
-  return featureIconsMap[feature as keyof typeof featureIconsMap]?.title || 
-    feature.replace(/_/g, ' ').toLowerCase()
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+  return featureIconsMap[feature as keyof typeof featureIconsMap]?.title || feature.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
 };
 
 // Format KPI name for display
 const formatKpiName = (kpi: string): string => {
   if (!kpi) return "N/A";
   // Get from map or format manually
-  return kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.title || 
-    kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  return kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.title || kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 };
 
 // Updated MetricCard component
@@ -272,12 +285,21 @@ interface MetricCardProps {
   subtext?: string;
   format?: "number" | "currency" | "percent" | "text";
 }
-
-const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = "text" }: MetricCardProps) => {
+const MetricCard = ({
+  title,
+  value,
+  iconName,
+  trend = "none",
+  subtext,
+  format = "text"
+}: MetricCardProps) => {
   // Format the value based on the format prop
   let formattedValue = value;
   if (format === "currency" && typeof value === "number") {
-    formattedValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    formattedValue = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
   } else if (format === "percent" && typeof value === "number") {
     formattedValue = formatPercentage(value);
   } else if (format === "number" && typeof value === "number") {
@@ -287,17 +309,14 @@ const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = 
   // Determine trend arrow and color
   let trendIcon = null;
   let trendColor = "text-gray-500";
-  
   if (trend === "up") {
-    trendIcon = migrateHeroIcon('ArrowTrendingUpIcon', { className: "inline-block h-4 w-4 ml-1" });
+    trendIcon = <Icon name="faChartLine" className="inline-block h-4 w-4 ml-1" solid={false} />;
     trendColor = "text-green-600";
   } else if (trend === "down") {
-    trendIcon = migrateHeroIcon('ArrowTrendingDownIcon', { className: "inline-block h-4 w-4 ml-1" });
+    trendIcon = <Icon name="faChartLine" className="inline-block h-4 w-4 ml-1" solid={false} />;
     trendColor = "text-red-600";
   }
-  
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)]">
+  return <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)]">
       <div className="flex justify-between items-start">
         <div>
           <div className="text-[var(--secondary-color)] text-sm mb-2">{title}</div>
@@ -308,11 +327,10 @@ const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = 
           {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1">{subtext}</div>}
         </div>
         <div className="p-3 bg-[var(--accent-light)] rounded-full">
-          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" iconType="static" />
+          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" iconType="static" solid={false} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
 
 // Enhanced components for better data display
@@ -324,39 +342,32 @@ interface DataCardProps {
   className?: string;
   actions?: React.ReactNode;
 }
-
-const DataCard: React.FC<DataCardProps> = ({ 
-  title, 
-  description, 
-  iconName, 
-  children, 
+const DataCard: React.FC<DataCardProps> = ({
+  title,
+  description,
+  iconName,
+  children,
   className = '',
   actions
-}) => (
-  <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden ${className}`}>
+}) => <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden ${className}`}>
     <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" />
+          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" solid={false} />
         </div>
         <div>
           <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
-          {description && (
-            <p className="text-[var(--secondary-color)] text-sm mt-1">{description}</p>
-          )}
+          {description && <p className="text-[var(--secondary-color)] text-sm mt-1">{description}</p>}
         </div>
       </div>
-      {actions && (
-        <div className="flex space-x-2">
+      {actions && <div className="flex space-x-2">
           {actions}
-        </div>
-      )}
+        </div>}
     </div>
     <div className="px-4 py-5 sm:p-6 bg-white">
       {children}
     </div>
-  </div>
-);
+  </div>;
 
 // Add DataRow component before the main CampaignDetail component
 interface DataRowProps {
@@ -366,67 +377,58 @@ interface DataRowProps {
   tooltip?: string;
   featured?: boolean;
 }
-
-const DataRow = ({ label, value, iconName, tooltip, featured = false }: DataRowProps) => (
-  <div className={`flex ${featured ? 'py-3' : 'py-2'}`}>
+const DataRow = ({
+  label,
+  value,
+  iconName,
+  tooltip,
+  featured = false
+}: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'}`}>
     <div className="w-1/3 flex-shrink-0">
       <div className="flex items-center text-[var(--secondary-color)]">
-        {iconName && (
-          <span className="mr-2">
-            <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-4 w-4" iconType="static" />
-          </span>
-        )}
+        {iconName && <span className="mr-2">
+            <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-4 w-4" iconType="static" solid={false} />
+          </span>}
         <span className={featured ? 'font-medium' : ''}>{label}</span>
-        {tooltip && (
-          <span className="ml-1" title={tooltip}>
-            {migrateHeroIcon('InformationCircleIcon', { className: "h-4 w-4 text-gray-400" })}
-          </span>
-        )}
+        {tooltip && <span className="ml-1" title={tooltip}>
+            {<Icon name="faCircleInfo" className="h-4 w-4 text-gray-400" solid={false} />}
+          </span>}
       </div>
     </div>
     <div className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'}`}>
       {value}
     </div>
-  </div>
-);
+  </div>;
 
 // Add new components for enhanced sections
-const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }> = ({ audience }) => {
+const AudienceSection: React.FC<{
+  audience: CampaignDetail['audience'] | null;
+}> = ({
+  audience
+}) => {
   if (!audience) return null;
-
   const getNumericValue = (value: string): number => {
     if (value.includes('+')) {
       return parseInt(value.replace('+', ''));
     }
-    
     const parts = value.split('-');
     if (parts.length === 2) {
       return (parseInt(parts[0]) + parseInt(parts[1])) / 2;
     }
-    
     return 0;
   };
 
   // Sorting age ranges by their numeric value
-  const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort(
-    (a, b) => getNumericValue(a) - getNumericValue(b)
-  );
+  const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort((a, b) => getNumericValue(a) - getNumericValue(b));
+  return <DataCard title="Audience Demographics" iconName="faUserGroup" description="Target audience information for this campaign">
 
-  return (
-    <DataCard 
-      title="Audience Demographics" 
-      iconName="faUserGroup"
-      description="Target audience information for this campaign"
-    >
       <div className="space-y-5">
         <div>
           <h4 className="text-[var(--primary-color)] font-medium mb-3">Location</h4>
           <div className="flex flex-wrap gap-2">
-            {audience.demographics.locations.map((location, index) => (
-              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+            {audience.demographics.locations.map((location, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                 {location}
-              </span>
-            ))}
+              </span>)}
             {audience.demographics.locations.length === 0 && <span className="text-[var(--secondary-color)]">No locations specified</span>}
           </div>
         </div>
@@ -434,16 +436,10 @@ const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }>
         <div>
           <h4 className="text-[var(--primary-color)] font-medium mb-3">Age Range</h4>
           <div className="grid grid-cols-6 gap-1 mb-2">
-            {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => (
-              <div 
-                key={range} 
-                className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range) 
-                  ? 'bg-[var(--accent-color)] text-white font-medium' 
-                  : 'bg-gray-100 text-gray-500'}`}
-              >
+            {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => <div key={range} className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range) ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
+
                 {range}
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
 
@@ -451,22 +447,18 @@ const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }>
           <div>
             <h4 className="text-[var(--primary-color)] font-medium mb-3">Gender</h4>
             <div className="flex flex-wrap gap-2">
-              {audience.demographics.gender.map((gender, index) => (
-                <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+              {audience.demographics.gender.map((gender, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                   {gender}
-                </span>
-              ))}
+                </span>)}
             </div>
           </div>
 
           <div>
             <h4 className="text-[var(--primary-color)] font-medium mb-3">Languages</h4>
             <div className="flex flex-wrap gap-2">
-              {audience.demographics.languages.map((language, index) => (
-                <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+              {audience.demographics.languages.map((language, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                   {language}
-                </span>
-              ))}
+                </span>)}
             </div>
           </div>
         </div>
@@ -474,40 +466,38 @@ const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }>
         <div>
           <h4 className="text-[var(--primary-color)] font-medium mb-3">Education Level</h4>
           <div className="flex flex-wrap gap-2">
-            {audience.demographics.education.map((education, index) => (
-              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                {education === 'some_college' ? 'Some College' : 
-                 education === 'professional' ? 'Professional Degree' :
-                 education === 'bachelors' ? 'Bachelor\'s Degree' :
-                 education === 'associates' ? 'Associate\'s Degree' :
-                 education === 'high_school' ? 'High School' :
-                 education === 'graduate' ? 'Graduate Degree' : education}
-              </span>
-            ))}
+            {audience.demographics.education.map((education, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                {education === 'some_college' ? 'Some College' : education === 'professional' ? 'Professional Degree' : education === 'bachelors' ? 'Bachelor\'s Degree' : education === 'associates' ? 'Associate\'s Degree' : education === 'high_school' ? 'High School' : education === 'graduate' ? 'Graduate Degree' : education}
+              </span>)}
           </div>
         </div>
 
-        {audience.demographics.interests.length > 0 && (
-          <div>
+        {audience.demographics.interests.length > 0 && <div>
             <h4 className="text-[var(--primary-color)] font-medium mb-3">Interests/Job Titles</h4>
             <div className="flex flex-wrap gap-2">
-              {audience.demographics.interests.map((interest, index) => (
-                <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+              {audience.demographics.interests.map((interest, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                   {interest}
-                </span>
-              ))}
+                </span>)}
             </div>
-          </div>
-        )}
+          </div>}
       </div>
-    </DataCard>
-  );
+    </DataCard>;
 };
 
 // Add this Step5-style Asset Preview component 
-const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { url: string, fileName: string, type: string, className?: string }) => {
-  const isVideo = type === 'video' || (typeof type === 'string' && type.includes('video'));
-  const isImage = type === 'image' || (typeof type === 'string' && type.includes('image'));
+const CampaignDetailAssetPreview = ({
+  url,
+  fileName,
+  type,
+  className = ''
+}: {
+  url: string;
+  fileName: string;
+  type: string;
+  className?: string;
+}) => {
+  const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
+  const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Effect to handle video autoplay and looping
@@ -531,7 +521,6 @@ const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { u
           });
         }
       };
-
       const handleEnded = () => {
         video.currentTime = 0;
         video.play().catch(err => {
@@ -543,7 +532,7 @@ const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { u
       video.addEventListener('loadedmetadata', playVideo);
       video.addEventListener('timeupdate', handleTimeUpdate);
       video.addEventListener('ended', handleEnded);
-      
+
       // Remove event listeners on cleanup
       return () => {
         video.removeEventListener('loadedmetadata', playVideo);
@@ -552,91 +541,61 @@ const CampaignDetailAssetPreview = ({ url, fileName, type, className = '' }: { u
       };
     }
   }, [isVideo, url]);
-
-  return (
-    <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+  return <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
       {/* Image preview */}
-      {isImage && (
-        <img 
-          src={url} 
-          alt={fileName}
-          className="w-full h-full object-cover"
-        />
-      )}
+      {isImage && <img src={url} alt={fileName} className="w-full h-full object-cover" />}
       
       {/* Video preview (with autoplay and loop) */}
-      {isVideo && (
-        <div className="relative">
-          <video
-            ref={videoRef}
-            src={url}
-            className="w-full h-full object-cover"
-            muted
-            playsInline
-            loop
-            autoPlay
-          />
-        </div>
-      )}
+      {isVideo && <div className="relative">
+          <video ref={videoRef} src={url} className="w-full h-full object-cover" muted playsInline loop autoPlay />
+
+        </div>}
       
       {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo && (
-        <div className="flex items-center justify-center p-8">
-          {migrateHeroIcon('DocumentIcon', { className: 'h-12 w-12 text-gray-400' })}
-        </div>
-      )}
-    </div>
-  );
+      {!isImage && !isVideo && <div className="flex items-center justify-center p-8">
+          {<Icon name="faDocument" className="h-12 w-12 text-gray-400" solid={false} />}
+        </div>}
+    </div>;
 };
 
 // Add new components for missing sections
-const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign }) => (
-  <DataCard 
-    title="Campaign Objectives" 
-    iconName="lightning"
-    description="Key objectives and performance indicators"
-  >
+const ObjectivesSection: React.FC<{
+  campaign: CampaignDetail;
+}> = ({
+  campaign
+}) => <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
+
     <div className="space-y-5">
       <div>
         <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
         <div className="flex items-center text-lg font-medium text-[var(--accent-color)]">
-          {campaign.primaryKPI && (
-            <div className="flex items-center">
-              <div className="w-6 h-6 mr-2" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
-                <Image 
-                  src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} 
-                  alt={formatKpiName(campaign.primaryKPI)}
-                  width={24}
-                  height={24}
-                />
+          {campaign.primaryKPI && <div className="flex items-center">
+              <div className="w-6 h-6 mr-2" style={{
+            filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)'
+          }}>
+                <Image src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} alt={formatKpiName(campaign.primaryKPI)} width={24} height={24} />
+
               </div>
               {formatKpiName(campaign.primaryKPI)}
-            </div>
-          )}
+            </div>}
           {!campaign.primaryKPI && "N/A"}
         </div>
       </div>
 
-      {campaign.secondaryKPIs.length > 0 && (
-        <div>
+      {campaign.secondaryKPIs.length > 0 && <div>
           <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary KPIs</h4>
           <div className="flex flex-wrap gap-2">
-            {campaign.secondaryKPIs.map((kpi, index) => (
-              <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm flex items-center">
-                <div className="w-4 h-4 mr-1" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
-                  <Image 
-                    src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} 
-                    alt={formatKpiName(kpi)}
-                    width={16}
-                    height={16}
-                  />
+            {campaign.secondaryKPIs.map((kpi, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm flex items-center">
+                <div className="w-4 h-4 mr-1" style={{
+            filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)'
+          }}>
+                  <Image src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} alt={formatKpiName(kpi)} width={16} height={16} />
+
                 </div>
                 {formatKpiName(kpi)}
-              </span>
-            ))}
+              </span>)}
           </div>
-        </div>
-      )}
+        </div>}
 
       <div className="space-y-3 pt-2">
         <DataRow label="Main Message" value={campaign.mainMessage} />
@@ -648,24 +607,23 @@ const ObjectivesSection: React.FC<{ campaign: CampaignDetail }> = ({ campaign })
         <DataRow label="Purchase Intent" value={campaign.purchaseIntent} />
       </div>
     </div>
-  </DataCard>
-);
-
-const AudienceInsightsSection: React.FC<{ audience: CampaignDetail['audience'] | null }> = ({ audience }) => {
+  </DataCard>;
+const AudienceInsightsSection: React.FC<{
+  audience: CampaignDetail['audience'] | null;
+}> = ({
+  audience
+}) => {
   if (!audience) return null; // Early return if no audience data
 
-  return (
-    <DataCard title="Audience Insights" iconName="userCircle" className="col-span-2">
+  return <DataCard title="Audience Insights" iconName="userCircle" className="col-span-2">
       <div className="grid grid-cols-2 gap-8">
         {/* Screening Questions */}
         <div>
           <h3 className="text-lg font-medium mb-4">Screening Questions</h3>
           <div className="space-y-2">
-            {audience.demographics.interests.map((interest) => (
-              <div key={interest} className="p-3 bg-gray-50 rounded-lg">
+            {audience.demographics.interests.map(interest => <div key={interest} className="p-3 bg-gray-50 rounded-lg">
                 {interest}
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
         
@@ -673,41 +631,31 @@ const AudienceInsightsSection: React.FC<{ audience: CampaignDetail['audience'] |
         <div>
           <h3 className="text-lg font-medium mb-4">Competitors</h3>
           <div className="flex flex-wrap gap-2">
-            {audience.demographics.interests.map((interest) => (
-              <span key={interest} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+            {audience.demographics.interests.map(interest => <span key={interest} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
                 {interest}
-              </span>
-            ))}
+              </span>)}
           </div>
         </div>
       </div>
-    </DataCard>
-  );
+    </DataCard>;
 };
 
 // Add Creative Requirements Section
-const CreativeRequirementsSection: React.FC<{ requirements: CampaignDetail['creativeRequirements'] }> = ({ requirements }) => (
-  <DataCard 
-    title="Creative Requirements" 
-    iconName="documentText"
-    description="Campaign creative specifications"
-  >
+const CreativeRequirementsSection: React.FC<{
+  requirements: CampaignDetail['creativeRequirements'];
+}> = ({
+  requirements
+}) => <DataCard title="Creative Requirements" iconName="documentText" description="Campaign creative specifications">
+
     <div className="space-y-2">
-      {requirements && requirements.length > 0 ? (
-        requirements.map((req) => (
-          <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start">
-            {migrateHeroIcon('DocumentTextIcon', { className: 'w-5 h-5 text-gray-400 mr-3 mt-0.5' })}
+      {requirements && requirements.length > 0 ? requirements.map(req => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start">
+            {<Icon name="faDocumentText" className="w-5 h-5 text-gray-400 mr-3 mt-0.5" solid={false} />}
             <span className="text-gray-700">{req.requirement}</span>
-          </div>
-        ))
-      ) : (
-        <div className="p-3 bg-gray-50 rounded-lg">
+          </div>) : <div className="p-3 bg-gray-50 rounded-lg">
           <p className="text-gray-500 italic">No requirements specified</p>
-        </div>
-      )}
+        </div>}
     </div>
-  </DataCard>
-);
+  </DataCard>;
 
 // 1. Define strict types for all possible string operations
 type StringOperation = {
@@ -720,9 +668,11 @@ type StringOperation = {
 // 2. Implement operation tracking for debugging
 class StringOperationTracker {
   private static operations: StringOperation[] = [];
-  
   static track(operation: Omit<StringOperation, 'timestamp'>) {
-    this.operations.push({ ...operation, timestamp: Date.now() });
+    this.operations.push({
+      ...operation,
+      timestamp: Date.now()
+    });
     if (process.env.NODE_ENV === 'development') {
       console.log(`String Operation: ${operation.operation}`, {
         value: operation.value,
@@ -731,7 +681,6 @@ class StringOperationTracker {
       });
     }
   }
-
   static getOperations() {
     return this.operations;
   }
@@ -740,10 +689,12 @@ class StringOperationTracker {
 // 3. Implement robust string handling with instrumentation
 class SafeString {
   private static readonly FALLBACK = '';
-
   static transform(value: unknown, operation: 'toUpperCase' | 'toLowerCase', source: string): string {
-    StringOperationTracker.track({ operation, value, source });
-
+    StringOperationTracker.track({
+      operation,
+      value,
+      source
+    });
     try {
       // Guard against null/undefined
       if (value == null) {
@@ -756,7 +707,6 @@ class SafeString {
 
       // Perform requested operation
       return stringValue[operation]();
-
     } catch (error) {
       console.error(`String operation ${operation} failed:`, {
         value,
@@ -787,14 +737,11 @@ const debugHistory: DebugEvent[] = [];
 // Enhanced logging utility
 function debugLog(event: Omit<DebugEvent, 'timestamp'>) {
   if (!DEBUG) return;
-
   const logEvent: DebugEvent = {
     ...event,
     timestamp: performance.now()
   };
-
   debugHistory.push(logEvent);
-
   console.group(`🔍 [${logEvent.type}] ${logEvent.message}`);
   if (logEvent.data) console.log('Data:', logEvent.data);
   if (logEvent.error) {
@@ -806,13 +753,8 @@ function debugLog(event: Omit<DebugEvent, 'timestamp'>) {
 
 // Type guard utilities
 function isIterable(value: unknown): value is Iterable<unknown> {
-  return Boolean(
-    value != null && 
-    typeof value === 'object' && 
-    typeof (value as any)[Symbol.iterator] === 'function'
-  );
+  return Boolean(value != null && typeof value === 'object' && typeof (value as any)[Symbol.iterator] === 'function');
 }
-
 function isCampaignData(data: unknown): data is CampaignDetail {
   return data != null && typeof data === 'object' && 'id' in data;
 }
@@ -824,12 +766,10 @@ function debugString(value: any, fieldName: string): string {
     type: typeof value,
     fieldName
   });
-  
   if (value === undefined || value === null) {
     console.warn(`Warning: ${fieldName} is ${value}`);
     return '';
   }
-  
   try {
     return String(value).toUpperCase();
   } catch (error) {
@@ -843,13 +783,11 @@ if (typeof window !== 'undefined') {
   // Override toString and toUpperCase globally for debugging
   const originalToString = String.prototype.toString;
   const originalToUpperCase = String.prototype.toUpperCase;
-
-  String.prototype.toString = function() {
+  String.prototype.toString = function () {
     console.log('toString called on:', this);
     return originalToString.call(this);
   };
-
-  String.prototype.toUpperCase = function() {
+  String.prototype.toUpperCase = function () {
     console.log('toUpperCase called on:', this);
     return originalToUpperCase.call(this);
   };
@@ -864,30 +802,21 @@ interface CampaignValidation {
 // Add validation function
 function validateCampaignData(data: any): CampaignValidation {
   const errors: string[] = [];
-
   if (!data) {
     errors.push('No campaign data received');
-    return { isValid: false, errors };
+    return {
+      isValid: false,
+      errors
+    };
   }
 
   // Required fields
-  const requiredFields = [
-    'id',
-    'campaignName',
-    'startDate',
-    'endDate',
-    'currency',
-    'totalBudget',
-    'platform',
-    'submissionStatus'
-  ];
-
+  const requiredFields = ['id', 'campaignName', 'startDate', 'endDate', 'currency', 'totalBudget', 'platform', 'submissionStatus'];
   requiredFields.forEach(field => {
     if (!data[field]) {
       errors.push(`Missing required field: ${field}`);
     }
   });
-
   return {
     isValid: errors.length === 0,
     errors
@@ -900,15 +829,16 @@ interface StatusBadgeProps {
   size?: "sm" | "md";
   className?: string;
 }
-
-const StatusBadge = ({ status = "draft", size = "md", className = "" }: StatusBadgeProps) => {
+const StatusBadge = ({
+  status = "draft",
+  size = "md",
+  className = ""
+}: StatusBadgeProps) => {
   let bgColor = "bg-gray-100";
   let textColor = "text-gray-800";
   let statusText = "Draft";
-
   const safeStatus = status?.toLowerCase() || "draft";
-
-  switch(safeStatus) {
+  switch (safeStatus) {
     case "approved":
       bgColor = "bg-green-100";
       textColor = "text-green-800";
@@ -925,7 +855,7 @@ const StatusBadge = ({ status = "draft", size = "md", className = "" }: StatusBa
       statusText = "Submitted";
       break;
     case "in_review":
-    case "in-review": 
+    case "in-review":
     case "inreview":
       bgColor = "bg-yellow-100";
       textColor = "text-yellow-800";
@@ -953,31 +883,24 @@ const StatusBadge = ({ status = "draft", size = "md", className = "" }: StatusBa
       statusText = "Draft";
       break;
   }
-
-  return (
-    <span className={`inline-flex items-center rounded-full ${bgColor} ${textColor} ${size === "md" ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"} font-medium ${className}`}>
+  return <span className={`inline-flex items-center rounded-full ${bgColor} ${textColor} ${size === "md" ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs"} font-medium ${className}`}>
       {statusText}
-    </span>
-  );
+    </span>;
 };
 
 // Add component testing utility
 // This should be placed near the top with other utility functions
 const componentTester = {
-  testComponentProps<T extends Record<string, any>>(
-    componentName: string,
-    props: T,
-    requiredProps: Array<keyof T> = []
-  ): void {
+  testComponentProps<T extends Record<string, any>>(componentName: string, props: T, requiredProps: Array<keyof T> = []): void {
     if (DEBUG) {
       console.group(`🧪 Testing ${componentName} props`);
-      
+
       // Test for undefined required props
       const missingProps = requiredProps.filter(prop => props[prop] === undefined);
       if (missingProps.length > 0) {
         console.warn(`⚠️ Missing required props: ${missingProps.join(', ')}`);
       }
-      
+
       // Test all props for undefined/null values
       Object.entries(props).forEach(([key, value]) => {
         if (value === undefined) {
@@ -985,16 +908,15 @@ const componentTester = {
         } else if (value === null) {
           console.info(`ℹ️ Prop "${key}" is null`);
         }
-        
+
         // Check for property access on potentially null/undefined objects
         if (value !== null && typeof value === 'object') {
           console.info(`ℹ️ Object prop "${key}" - safe to access properties`);
         }
       });
-      
       console.groupEnd();
     }
-    
+
     // In production, we do nothing
     return;
   }
@@ -1009,45 +931,41 @@ interface DetailSectionProps {
   className?: string;
   actions?: React.ReactNode;
 }
-
-const DetailSection = ({ 
-  iconName, 
-  title, 
+const DetailSection = ({
+  iconName,
+  title,
   description,
-  children, 
+  children,
   className = '',
   actions
-}: DetailSectionProps) => (
-  <motion.section
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200 ${className}`}
-  >
+}: DetailSectionProps) => <motion.section initial={{
+  opacity: 0,
+  y: 20
+}} animate={{
+  opacity: 1,
+  y: 0
+}} className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200 ${className}`}>
+
     <div className="p-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div className="flex items-center">
           <div className="bg-blue-50 p-2.5 rounded-lg mr-3">
-            <Icon name={iconName} className="w-5 h-5 text-blue-500" iconType="static" />
+            <Icon name={iconName} className="w-5 h-5 text-blue-500" iconType="static" solid={false} />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-            {description && (
-              <p className="text-sm text-gray-500 mt-0.5">{description}</p>
-            )}
+            {description && <p className="text-sm text-gray-500 mt-0.5">{description}</p>}
           </div>
         </div>
-        {actions && (
-          <div className="flex space-x-2 ml-auto sm:ml-0">
+        {actions && <div className="flex space-x-2 ml-auto sm:ml-0">
             {actions}
-          </div>
-        )}
+          </div>}
       </div>
       <div className="space-y-4">
         {children}
       </div>
     </div>
-  </motion.section>
-);
+  </motion.section>;
 
 // Add a safe access helper function
 function safeAccess<T, K extends keyof T>(obj: T | null | undefined, property: K, fallback: T[K]): T[K] {
@@ -1060,7 +978,6 @@ function safeAccess<T, K extends keyof T>(obj: T | null | undefined, property: K
 // Add a comprehensive testing utility for rendering safety
 class ComponentSafetyTester {
   private static hasErrors = false;
-  
   static testNullAccess(componentName: string, value: any, path: string): void {
     if (DEBUG) {
       if (value === undefined) {
@@ -1071,7 +988,6 @@ class ComponentSafetyTester {
       }
     }
   }
-  
   static testBatchProps(componentName: string, props: Record<string, any>): void {
     if (DEBUG) {
       console.group(`🧪 Testing ${componentName} props`);
@@ -1081,11 +997,9 @@ class ComponentSafetyTester {
       console.groupEnd();
     }
   }
-  
   static resetErrorState(): void {
     this.hasErrors = false;
   }
-  
   static hasTestErrors(): boolean {
     return this.hasErrors;
   }
@@ -1098,7 +1012,9 @@ const ENABLE_SAFETY_MODE = true; // Set to true to enable runtime checks
 function safe<T>(value: T | undefined | null, fallback: T): T {
   if (value === undefined || value === null) {
     if (ENABLE_SAFETY_MODE && typeof window !== 'undefined') {
-      console.warn('🛡️ Safety Mode: Accessed undefined/null value, using fallback', { fallback });
+      console.warn('🛡️ Safety Mode: Accessed undefined/null value, using fallback', {
+        fallback
+      });
     }
     return fallback;
   }
@@ -1116,9 +1032,7 @@ function safeCurrency(value: Currency | string | undefined | null): string {
 // Advanced runtime safety checker for component props
 function safeProps<T extends Record<string, any>>(componentName: string, props: T): void {
   if (!ENABLE_SAFETY_MODE || typeof window === 'undefined') return;
-  
   console.group(`🧪 Checking ${componentName} Props`);
-  
   Object.entries(props).forEach(([key, value]) => {
     if (value === undefined) {
       console.error(`⚠️ ${componentName}: Property "${key}" is undefined`);
@@ -1126,92 +1040,125 @@ function safeProps<T extends Record<string, any>>(componentName: string, props: 
       console.warn(`ℹ️ ${componentName}: Property "${key}" is null`);
     }
   });
-  
   console.groupEnd();
 }
 
 // Add a stress test function to simulate missing data
 function stressTestWithNullValues(data: CampaignDetail, formatDate: (date: string) => string, calculateDuration: (start: string, end: string) => string, formatCurrency: (value: number | string, currency: Currency | string | undefined) => string): void {
   if (!ENABLE_SAFETY_MODE || typeof window === 'undefined') return;
-  
   console.group('🔥 Stress Testing Component with Missing Data');
-  
   try {
     // Create data clone with missing fields to test error handling
-    const testCases = [
-      { fieldName: 'submissionStatus', testData: { ...data, submissionStatus: undefined } },
-      { fieldName: 'campaignName', testData: { ...data, campaignName: undefined } },
-      { fieldName: 'brandName', testData: { ...data, brandName: undefined } },
-      { fieldName: 'id', testData: { ...data, id: undefined } },
-      { fieldName: 'totalBudget', testData: { ...data, totalBudget: undefined } },
-      { fieldName: 'currency', testData: { ...data, currency: undefined } },
-      { fieldName: 'startDate', testData: { ...data, startDate: undefined } },
-      { fieldName: 'endDate', testData: { ...data, endDate: undefined } },
-      { fieldName: 'primaryKPI', testData: { ...data, primaryKPI: undefined } },
-      { fieldName: 'features', testData: { ...data, features: undefined } },
-    ];
-    
+    const testCases = [{
+      fieldName: 'submissionStatus',
+      testData: {
+        ...data,
+        submissionStatus: undefined
+      }
+    }, {
+      fieldName: 'campaignName',
+      testData: {
+        ...data,
+        campaignName: undefined
+      }
+    }, {
+      fieldName: 'brandName',
+      testData: {
+        ...data,
+        brandName: undefined
+      }
+    }, {
+      fieldName: 'id',
+      testData: {
+        ...data,
+        id: undefined
+      }
+    }, {
+      fieldName: 'totalBudget',
+      testData: {
+        ...data,
+        totalBudget: undefined
+      }
+    }, {
+      fieldName: 'currency',
+      testData: {
+        ...data,
+        currency: undefined
+      }
+    }, {
+      fieldName: 'startDate',
+      testData: {
+        ...data,
+        startDate: undefined
+      }
+    }, {
+      fieldName: 'endDate',
+      testData: {
+        ...data,
+        endDate: undefined
+      }
+    }, {
+      fieldName: 'primaryKPI',
+      testData: {
+        ...data,
+        primaryKPI: undefined
+      }
+    }, {
+      fieldName: 'features',
+      testData: {
+        ...data,
+        features: undefined
+      }
+    }];
     console.log(`Running ${testCases.length} stress tests for null fields...`);
-    
+
     // Test each case to see if it would cause errors
-    testCases.forEach(({ fieldName, testData }) => {
+    testCases.forEach(({
+      fieldName,
+      testData
+    }) => {
       try {
         // Test accessing specific properties that could cause errors
         if (fieldName === 'submissionStatus') {
           // Test status badge with undefined status
-          const safeStatus = typeof testData.submissionStatus === 'string' && testData.submissionStatus 
-            ? testData.submissionStatus.toLowerCase() 
-            : 'draft';
+          const safeStatus = typeof testData.submissionStatus === 'string' && testData.submissionStatus ? testData.submissionStatus.toLowerCase() : 'draft';
           console.log(`Testing StatusBadge with missing ${fieldName}: ${safeStatus}`);
         }
-        
         if (fieldName === 'id') {
           // Test ID substring that could throw error
           const idDisplay = testData.id ? testData.id.substring(0, 8) : 'N/A';
           console.log(`Testing ID substring with missing ${fieldName}: ${idDisplay}`);
         }
-        
         if (fieldName === 'startDate' || fieldName === 'endDate') {
           // Test date formatting
-          const formattedDate = fieldName === 'startDate' 
-            ? (testData.startDate ? formatDate(testData.startDate) : 'Not set')
-            : (testData.endDate ? formatDate(testData.endDate) : 'Not set');
+          const formattedDate = fieldName === 'startDate' ? testData.startDate ? formatDate(testData.startDate) : 'Not set' : testData.endDate ? formatDate(testData.endDate) : 'Not set';
           console.log(`Testing date formatting with missing ${fieldName}: ${formattedDate}`);
-          
+
           // Test duration calculation if applicable
           if (testData.startDate && testData.endDate) {
             const duration = calculateDuration(testData.startDate, testData.endDate);
             console.log(`Testing duration with ${fieldName}: ${duration}`);
           }
         }
-        
         if (fieldName === 'totalBudget' || fieldName === 'currency') {
           // Test currency formatting
-          const budget = testData.totalBudget !== undefined 
-            ? formatCurrency(testData.totalBudget, testData.currency) 
-            : 'N/A';
+          const budget = testData.totalBudget !== undefined ? formatCurrency(testData.totalBudget, testData.currency) : 'N/A';
           console.log(`Testing currency formatting with missing ${fieldName}: ${budget}`);
         }
-        
         if (fieldName === 'features') {
           // Test features array mapping
-          const featuresDisplay = testData.features && testData.features.length > 0
-            ? `${testData.features.length} features`
-            : 'No features';
+          const featuresDisplay = testData.features && testData.features.length > 0 ? `${testData.features.length} features` : 'No features';
           console.log(`Testing features display with missing ${fieldName}: ${featuresDisplay}`);
         }
-        
         console.log(`✅ Test passed for missing ${fieldName}`);
       } catch (error) {
         console.error(`❌ Error with missing ${fieldName}:`, error);
       }
     });
-    
     console.log('Stress testing complete.');
   } catch (error) {
     console.error('Error during stress testing:', error);
   }
-  
   console.groupEnd();
 }
 
@@ -1221,17 +1168,20 @@ const formatPercentage = (value: number) => {
 };
 
 // Add new error status badge component
-const ErrorStatusBadge = ({ message }: { message: string }) => (
-  <div className="text-red-600 font-medium p-3 border border-red-300 bg-red-50 rounded-md flex items-center space-x-2">
-    <Icon name="faCircleXmark" className="h-5 w-5 text-red-600" iconType="static" />
+const ErrorStatusBadge = ({
+  message
+}: {
+  message: string;
+}) => <div className="text-red-600 font-medium p-3 border border-red-300 bg-red-50 rounded-md flex items-center space-x-2">
+    <Icon name="faCircleXmark" className="h-5 w-5 text-red-600" iconType="static" solid={false} />
     <span>{message}</span>
-  </div>
-);
-
+  </div>;
 export default function CampaignDetail() {
   const params = useParams();
   const router = useRouter();
-  const { isOpen } = useSidebar(); // Access sidebar state
+  const {
+    isOpen
+  } = useSidebar(); // Access sidebar state
   const [data, setData] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1264,7 +1214,8 @@ export default function CampaignDetail() {
     category: "N/A",
     product: "N/A",
     targetMarket: "N/A",
-    submissionStatus: "error", // Special status to indicate error
+    submissionStatus: "error",
+    // Special status to indicate error
     primaryKPI: "N/A",
     secondaryKPIs: [],
     mainMessage: "N/A",
@@ -1291,7 +1242,6 @@ export default function CampaignDetail() {
     createdAt: "",
     updatedAt: ""
   };
-
   useEffect(() => {
     // Check URL params for test mode
     if (typeof window !== 'undefined') {
@@ -1300,7 +1250,7 @@ export default function CampaignDetail() {
         setTestMode(true);
         console.info('🧪 Test mode enabled - checking for potential errors');
       }
-      
+
       // Check if we should use the mock data directly
       if (urlParams.has('mock')) {
         setUseFallbackData(true);
@@ -1308,35 +1258,30 @@ export default function CampaignDetail() {
       }
     }
   }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       // If mock data is explicitly requested, use it
       if (useFallbackData) {
         console.log('Using mock data instead of fetching from API');
         setData(emptyData); // Use empty data instead of fallbackData
-        setError("DEMO MODE: Using placeholder data."); 
+        setError("DEMO MODE: Using placeholder data.");
         setLoading(false);
         return;
       }
-      
       try {
         setLoading(true);
         console.log(`Fetching campaign data for ID: ${params.id}`);
-
         const response = await fetch(`/api/campaigns/${params.id}`);
-        
         if (!response.ok) {
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
         }
-        
         const apiResponse = await response.json();
         console.log('API response received:', apiResponse);
-        
+
         // The API returns { success: true, data: { ... } }
         // Extract the data property from the response
         const result = apiResponse.data || {};
-        
+
         // Check if the result is empty
         if (!result || Object.keys(result).length === 0) {
           console.warn('Empty API response received. Using empty data.');
@@ -1345,7 +1290,7 @@ export default function CampaignDetail() {
           setLoading(false);
           return;
         }
-        
+
         // Map API fields to expected format before validation
         const mappedResult = {
           id: result.id,
@@ -1354,19 +1299,16 @@ export default function CampaignDetail() {
           endDate: result.endDate || '',
           currency: result.budget?.currency || result.currency || 'USD',
           totalBudget: result.budget?.total || result.totalBudget || 0,
-          platform: (result.influencers && result.influencers[0]?.platform) 
-            ? result.influencers[0].platform 
-            : (result.platform || 'Instagram'),
+          platform: result.influencers && result.influencers[0]?.platform ? result.influencers[0].platform : result.platform || 'Instagram',
           submissionStatus: result.status?.toLowerCase() || result.submissionStatus || 'draft'
         };
-        
         console.log('Mapped result for validation:', mappedResult);
-        
+
         // Validate data
         const validation = validateCampaignData(mappedResult);
         if (!validation.isValid) {
           console.error('Invalid campaign data received', result, validation.errors);
-          
+
           // Use empty data instead of fallback data
           console.warn('Using empty data due to validation errors');
           setData(emptyData);
@@ -1389,7 +1331,6 @@ export default function CampaignDetail() {
           platform: mappedResult.platform as Platform,
           influencerHandle: result.influencerHandle || '',
           website: result.website || "",
-          
           // Format the primary contact data
           primaryContact: {
             firstName: result.primaryContact?.firstName || '',
@@ -1398,7 +1339,6 @@ export default function CampaignDetail() {
             position: result.primaryContact?.position || 'Manager',
             phone: result.primaryContact?.phone || "N/A"
           },
-          
           // Format secondary contact if available
           secondaryContact: result.secondaryContact ? {
             firstName: result.secondaryContact.firstName || '',
@@ -1407,7 +1347,6 @@ export default function CampaignDetail() {
             position: result.secondaryContact.position || 'Manager',
             phone: result.secondaryContact.phone || "N/A"
           } : undefined,
-          
           // Campaign Details
           brandName: result.brandName || mappedResult.campaignName,
           category: result.category || "Not specified",
@@ -1416,7 +1355,6 @@ export default function CampaignDetail() {
           submissionStatus: mappedResult.submissionStatus,
           primaryKPI: result.primaryKPI || '',
           secondaryKPIs: result.secondaryKPIs || [],
-          
           // Campaign Objectives
           mainMessage: result.messaging?.mainMessage || result.mainMessage || "",
           hashtags: result.messaging?.hashtags || result.hashtags || "",
@@ -1426,46 +1364,34 @@ export default function CampaignDetail() {
           purchaseIntent: result.messaging?.purchaseIntent || result.purchaseIntent || "",
           brandPerception: result.messaging?.brandPerception || result.brandPerception || "",
           features: result.features || [],
-          
           // Audience data
           audience: {
             demographics: {
-              ageRange: result.demographics?.ageDistribution 
-                ? Object.entries(result.demographics.ageDistribution)
-                    .filter(([_, value]) => Number(value) > 0)
-                    .map(([key]) => key.replace('age', '').replace('plus', '+'))
-                : ['18-24', '25-34'],
+              ageRange: result.demographics?.ageDistribution ? Object.entries(result.demographics.ageDistribution).filter(([_, value]) => Number(value) > 0).map(([key]) => key.replace('age', '').replace('plus', '+')) : ['18-24', '25-34'],
               gender: result.demographics?.gender || ['All'],
               education: result.demographics?.educationLevel ? [result.demographics.educationLevel] : ['All'],
               income: result.demographics?.incomeLevel ? [result.demographics.incomeLevel.toString()] : ['All'],
               interests: result.demographics?.jobTitles || [],
               locations: result.locations ? result.locations.map((loc: any) => loc.location || '') : [],
-              languages: result.targeting?.languages 
-                ? result.targeting.languages.map((lang: any) => lang.language || '')
-                : ['English']
+              languages: result.targeting?.languages ? result.targeting.languages.map((lang: any) => lang.language || '') : ['English']
             }
           },
-          
           // Creative Assets
           creativeAssets: result.assets || result.creativeAssets || [],
-          
           // Creative Requirements
           creativeRequirements: result.requirements || result.creativeRequirements || [],
-
           // Timestamps
           createdAt: result.createdAt || new Date().toISOString(),
           updatedAt: result.updatedAt || new Date().toISOString()
         };
-
         setData(processedData);
         setError(null);
       } catch (err) {
         console.error('Error fetching campaign data:', err);
-        
+
         // Use empty data on error
         console.warn('Using empty data due to API error');
         setData(emptyData);
-        
         if (err instanceof Error) {
           setError(`API ERROR: ${err.message}`);
         } else {
@@ -1475,7 +1401,6 @@ export default function CampaignDetail() {
         setLoading(false);
       }
     };
-
     if (params.id) {
       fetchData();
     }
@@ -1486,14 +1411,13 @@ export default function CampaignDetail() {
   const formatCurrency = (value: number | string, currencyCode: Currency | string | undefined) => {
     // Convert string to number if needed
     const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-    
+
     // Default to 0 if NaN
     const safeValue = isNaN(numericValue) ? 0 : numericValue;
-    
+
     // Get the string representation of the currency
     // Default to USD
     let currencyString = 'USD';
-    
     if (currencyCode) {
       // If it's already a string, use it directly if valid
       if (typeof currencyCode === 'string') {
@@ -1501,11 +1425,11 @@ export default function CampaignDetail() {
         if (['USD', 'GBP', 'EUR'].includes(currencyCode)) {
           currencyString = currencyCode;
         }
-      } 
+      }
       // If it's an enum value, convert it safely
       else {
         // Handle Currency enum values
-        switch(currencyCode) {
+        switch (currencyCode) {
           case Currency.USD:
             currencyString = 'USD';
             break;
@@ -1520,13 +1444,13 @@ export default function CampaignDetail() {
         }
       }
     }
-    
     try {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: currencyString, // Use the string directly
+        currency: currencyString,
+        // Use the string directly
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 0
       }).format(safeValue);
     } catch (error) {
       console.error('Error formatting currency:', error);
@@ -1534,7 +1458,7 @@ export default function CampaignDetail() {
       return new Intl.NumberFormat('en-US', {
         style: 'decimal',
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 0
       }).format(safeValue);
     }
   };
@@ -1563,12 +1487,11 @@ export default function CampaignDetail() {
     try {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      
+
       // Check if dates are valid
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         return 'N/A';
       }
-      
       const diffTime = Math.abs(end.getTime() - start.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return `${diffDays} days`;
@@ -1582,18 +1505,17 @@ export default function CampaignDetail() {
   if (DEBUG && data) {
     // Reset error state before testing
     ComponentSafetyTester.resetErrorState();
-    
+
     // Test MetricCard data
     ComponentSafetyTester.testBatchProps('MetricCard - Budget', {
       'totalBudget': data.totalBudget,
       'currency': data.currency
     });
-    
     ComponentSafetyTester.testBatchProps('MetricCard - Dates', {
       'startDate': data.startDate,
       'endDate': data.endDate
     });
-    
+
     // Test header properties
     ComponentSafetyTester.testBatchProps('Campaign Header', {
       'campaignName': data.campaignName,
@@ -1601,25 +1523,25 @@ export default function CampaignDetail() {
       'brandName': data.brandName,
       'id': data.id
     });
-    
+
     // Run stress tests on test mode
     if (testMode) {
       stressTestWithNullValues(data, formatDate, calculateDuration, formatCurrency);
     }
-    
+
     // Log if any critical errors were found
     if (ComponentSafetyTester.hasTestErrors()) {
       console.error('⚠️ CRITICAL: Component tests detected potential runtime errors');
     }
   }
-  
+
   // Component safety testing
-    if (data) {
+  if (data) {
     ComponentSafetyTester.testBatchProps('MetricCard - Dates', {
       'startDate': data.startDate,
       'endDate': data.endDate
     });
-    
+
     // Test header properties
     ComponentSafetyTester.testBatchProps('Campaign Header', {
       'campaignName': data.campaignName,
@@ -1627,55 +1549,42 @@ export default function CampaignDetail() {
       'brandName': data.brandName,
       'id': data.id
     });
-    
+
     // Run stress tests on test mode
     if (testMode) {
       stressTestWithNullValues(data, formatDate, calculateDuration, formatCurrency);
     }
-    
+
     // Test StatusBadge props
-    componentTester.testComponentProps(
-      'StatusBadge', 
-      { status: data.submissionStatus, size: 'md' },
-      ['status']
-    );
+    componentTester.testComponentProps('StatusBadge', {
+      status: data.submissionStatus,
+      size: 'md'
+    }, ['status']);
   }
 
   // Ensure we have data before rendering the component
   if (loading) {
-    return (
-      <div className="py-10">
+    return <div className="py-10">
         <LoadingSkeleton />
-      </div>
-    );
+      </div>;
   }
-
   if (error && !data) {
-    return (
-      <div className="py-10">
+    return <div className="py-10">
         <ErrorFallback error={new Error(error)} />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
       <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)]`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {error && (
-            <div className="mb-4">
+          {error && <div className="mb-4">
               <ErrorStatusBadge message={error} />
-            </div>
-          )}
+            </div>}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex items-center space-x-3">
-              <button 
-                onClick={() => window.history.back()}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Go back"
-              >
-                {migrateHeroIcon('ArrowLeftIcon', { className: 'h-5 w-5 text-[var(--secondary-color)]' })}
+              <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Go back">
+
+                {<Icon name="faChevronLeft" className="h-5 w-5 text-[var(--secondary-color)]" solid={false} />}
               </button>
               <div>
                 <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "N/A"}</h1>
@@ -1689,19 +1598,16 @@ export default function CampaignDetail() {
             
             <div className="flex space-x-3 mt-4 md:mt-0">
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
-                {migrateHeroIcon('PrinterIcon', { className: 'h-4 w-4 mr-2' })}
+                {<Icon name="faPrint" className="h-4 w-4 mr-2" solid={false} />}
                 Print
               </button>
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
-                {migrateHeroIcon('ShareIcon', { className: 'h-4 w-4 mr-2' })}
+                {<Icon name="faShare" className="h-4 w-4 mr-2" solid={false} />}
                 Share
               </button>
-              <button 
-                onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
-                className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]"
-                disabled={!!error}
-              >
-                {migrateHeroIcon('PencilIcon', { className: 'h-4 w-4 mr-2' })}
+              <button onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)} className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]" disabled={!!error}>
+
+                {<Icon name="faEdit" className="h-4 w-4 mr-2" solid={false} />}
                 Edit
               </button>
             </div>
@@ -1713,59 +1619,36 @@ export default function CampaignDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Key Metrics Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <MetricCard 
-            title="Total Budget" 
-            value={error ? "N/A" : (data?.totalBudget || "N/A")} 
-            iconName="money" 
-            format={error ? "text" : "currency"} 
-          />
-          <MetricCard 
-            title="Campaign Duration" 
-            value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} 
-            iconName="calendar" 
-          />
-          <MetricCard 
-            title="Platform" 
-            value={error ? "N/A" : (data?.platform || "N/A")} 
-            iconName="globe" 
-          />
+          <MetricCard title="Total Budget" value={error ? "N/A" : data?.totalBudget || "N/A"} iconName="money" format={error ? "text" : "currency"} />
+
+          <MetricCard title="Campaign Duration" value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} iconName="calendar" />
+
+          <MetricCard title="Platform" value={error ? "N/A" : data?.platform || "N/A"} iconName="globe" />
+
         </div>
 
         {/* Campaign Details & Primary Contact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <DataCard 
-            title="Campaign Details" 
-            iconName="documentText"
-            description="Basic campaign information"
-          >
+          <DataCard title="Campaign Details" iconName="documentText" description="Basic campaign information">
+
             <div className="space-y-3">
-              <DataRow label="Campaign Name" value={error ? "N/A" : (data?.campaignName || "N/A")} featured={true} />
-              <DataRow label="Description" value={error ? "N/A" : (data?.description || "N/A")} />
-              <DataRow label="Brand Name" value={error ? "N/A" : (data?.brandName || "N/A")} />
-              <DataRow label="Start Date" value={error ? "N/A" : (data?.startDate ? formatDate(data.startDate) : "N/A")} iconName="calendar" />
-              <DataRow label="End Date" value={error ? "N/A" : (data?.endDate ? formatDate(data.endDate) : "N/A")} iconName="calendar" />
-              <DataRow label="Time Zone" value={error ? "N/A" : (data?.timeZone || "N/A")} iconName="clock" />
+              <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
+              <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
+              <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
+              <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconName="calendar" />
+              <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconName="calendar" />
+              <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconName="clock" />
               <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconName="money" />
-              <DataRow 
-                label="Total Budget" 
-                value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} 
-                iconName="money" 
-                featured={true}
-              />
-              <DataRow 
-                label="Social Media Budget" 
-                value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} 
-                iconName="money"
-              />
-              <DataRow label="Website" value={error ? "N/A" : (data?.website || "N/A")} iconName="globe" />
+              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconName="money" featured={true} />
+
+              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconName="money" />
+
+              <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconName="globe" />
             </div>
           </DataCard>
 
-          <DataCard 
-            title="Primary Contact" 
-            iconName="userCircle"
-            description="Primary point of contact for this campaign"
-          >
+          <DataCard title="Primary Contact" iconName="userCircle" description="Primary point of contact for this campaign">
+
             <div className="space-y-3">
               <div className="flex items-center mb-4">
                 <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold">
@@ -1775,56 +1658,37 @@ export default function CampaignDetail() {
                   <h4 className="text-[var(--primary-color)] font-semibold">
                     {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
                   </h4>
-                  <p className="text-[var(--secondary-color)] text-sm">{error ? "N/A" : (data?.primaryContact?.position || "N/A")}</p>
+                  <p className="text-[var(--secondary-color)] text-sm">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
                 </div>
               </div>
               
-              <DataRow 
-                label="Email" 
-                value={error ? "N/A" : (
-                  <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
+              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline">
                     {data?.primaryContact?.email || "N/A"}
-                  </a>
-                )} 
-                iconName="mail" 
-              />
+                  </a>} iconName="mail" />
+
               
-              <DataRow label="Position" value={error ? "N/A" : (data?.primaryContact?.position || "N/A")} iconName="building" />
+              <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconName="building" />
             </div>
 
-            {!error && data?.secondaryContact && (
-              <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
+            {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
                 <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary Contact</h4>
                 <div className="space-y-3">
-                  <DataRow 
-                    label="Name" 
-                    value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} 
-                    iconName="userCircle" 
-                  />
-                  <DataRow 
-                    label="Email" 
-                    value={
-                      <a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
+                  <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconName="userCircle" />
+
+                  <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
                         {data.secondaryContact.email}
-                      </a>
-                    } 
-                    iconName="mail" 
-                  />
+                      </a>} iconName="mail" />
+
                   <DataRow label="Position" value={data.secondaryContact.position} iconName="building" />
                 </div>
-              </div>
-            )}
+              </div>}
           </DataCard>
         </div>
 
         {/* Objectives & Audience */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {error ? (
-            <DataCard 
-              title="Campaign Objectives" 
-              iconName="lightning"
-              description="Key objectives and performance indicators"
-            >
+          {error ? <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
+
               <div className="space-y-5">
                 <div>
                   <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
@@ -1844,52 +1708,29 @@ export default function CampaignDetail() {
                   <DataRow label="Purchase Intent" value="N/A" />
                 </div>
               </div>
-            </DataCard>
-          ) : (
-            data && <ObjectivesSection campaign={data} />
-          )}
+            </DataCard> : data && <ObjectivesSection campaign={data} />}
           
-          {error ? (
-            <DataCard 
-              title="Target Audience" 
-              iconName="userGroup"
-              description="Detailed audience targeting information"
-            >
+          {error ? <DataCard title="Target Audience" iconName="userGroup" description="Detailed audience targeting information">
+
               <div className="text-center py-10 text-[var(--secondary-color)]">
                 <p>N/A</p>
               </div>
-            </DataCard>
-          ) : (
-            data && <AudienceSection audience={data.audience} />
-          )}
+            </DataCard> : data && <AudienceSection audience={data.audience} />}
         </div>
 
         {/* Creative Assets */}
         <div className="mb-6">
-          <DataCard 
-            title="Creative Assets" 
-            iconName="photo"
-            description="Campaign creative assets"
-            actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}
-          >
-            {error ? (
-              <div className="text-center py-10 text-[var(--secondary-color)]">
-                {migrateHeroIcon('PhotoIcon', { className: 'h-10 w-10 mx-auto mb-2 opacity-50' })}
+          <DataCard title="Creative Assets" iconName="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}>
+
+            {error ? <div className="text-center py-10 text-[var(--secondary-color)]">
+                {<Icon name="faPhoto" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
                 <p>N/A</p>
-              </div>
-            ) : (
-              data && (data.creativeAssets.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {data.creativeAssets.slice(0, 6).map((asset, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+              </div> : data && (data.creativeAssets.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {data.creativeAssets.slice(0, 6).map((asset, index) => <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
                       {/* Asset Preview - Square/Tiled */}
                       <div className="aspect-square w-full overflow-hidden relative bg-gray-50">
-                        <CampaignDetailAssetPreview
-                          url={asset.url}
-                          fileName={asset.name || 'Asset preview'}
-                          type={asset.type}
-                          className="w-full h-full"
-                        />
+                        <CampaignDetailAssetPreview url={asset.url} fileName={asset.name || 'Asset preview'} type={asset.type} className="w-full h-full" />
+
                         
                         {/* Asset Name Overlay at Top */}
                         <div className="absolute top-0 left-0 right-0 bg-white bg-opacity-90 py-2 px-3 border-b border-gray-200">
@@ -1904,7 +1745,7 @@ export default function CampaignDetail() {
                         <div className="space-y-4">
                           {/* Influencer */}
                           <div className="flex items-start">
-                            {migrateHeroIcon('UserCircleIcon', { className: 'h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0' })}
+                            {<Icon name="faUserCircle" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />}
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Influencer</p>
                               <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
@@ -1913,7 +1754,7 @@ export default function CampaignDetail() {
                           
                           {/* Why this influencer */}
                           <div className="flex items-start">
-                            {migrateHeroIcon('InformationCircleIcon', { className: 'h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0' })}
+                            {<Icon name="faCircleInfo" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />}
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
                               <p className="text-sm text-gray-800">{asset.description || 'No details provided'}</p>
@@ -1922,69 +1763,45 @@ export default function CampaignDetail() {
                           
                           {/* Budget */}
                           <div className="flex items-start">
-                            {migrateHeroIcon('CurrencyDollarIcon', { className: 'h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0' })}
+                            {<Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />}
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Budget</p>
                               <p className="text-sm text-gray-800 font-medium">
-                                {asset.budget 
-                                  ? formatCurrency(asset.budget, data.currency) 
-                                  : 'Not specified'
-                                }
+                                {asset.budget ? formatCurrency(asset.budget, data.currency) : 'Not specified'}
                               </p>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-[var(--secondary-color)]">
-                  {migrateHeroIcon('PhotoIcon', { className: 'h-10 w-10 mx-auto mb-2 opacity-50' })}
+                    </div>)}
+                </div> : <div className="text-center py-10 text-[var(--secondary-color)]">
+                  {<Icon name="faPhoto" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
                   <p>No creative assets available</p>
-                </div>
-              ))
-            )}
+                </div>)}
           </DataCard>
         </div>
 
         {/* Campaign Features */}
         <div className="mb-6">
-          <DataCard 
-            title="Campaign Features" 
-            iconName="lightning"
-            description="Additional features enabled for this campaign"
-          >
-            {error ? (
-              <div className="text-center py-8 text-[var(--secondary-color)]">
+          <DataCard title="Campaign Features" iconName="lightning" description="Additional features enabled for this campaign">
+
+            {error ? <div className="text-center py-8 text-[var(--secondary-color)]">
                 <p>N/A</p>
-              </div>
-            ) : (
-              (data?.features && data.features.length > 0) ? (
-                <div className="flex flex-wrap gap-3">
-                  {data.features.map((feature, index) => (
-                    <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
-                      <div className="w-5 h-5 mr-2" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
-                        <Image 
-                          src={featureIconsMap[feature as keyof typeof featureIconsMap]?.icon || "/app/Brand_Lift.svg"}
-                          alt={formatFeatureName(feature)}
-                          width={20}
-                          height={20}
-                        />
+              </div> : data?.features && data.features.length > 0 ? <div className="flex flex-wrap gap-3">
+                  {data.features.map((feature, index) => <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
+                      <div className="w-5 h-5 mr-2" style={{
+                filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)'
+              }}>
+                        <Image src={featureIconsMap[feature as keyof typeof featureIconsMap]?.icon || "/app/Brand_Lift.svg"} alt={formatFeatureName(feature)} width={20} height={20} />
+
                       </div>
                       <span>{formatFeatureName(feature)}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-[var(--secondary-color)]">
+                    </div>)}
+                </div> : <div className="text-center py-8 text-[var(--secondary-color)]">
                   <p>No features specified</p>
-                </div>
-              )
-            )}
+                </div>}
           </DataCard>
         </div>
       </div>
-    </div>
-  );
-} 
+    </div>;
+}

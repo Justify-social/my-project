@@ -19,23 +19,23 @@ const ICON_STYLE_FOLDERS = {
   'fab': 'brands',
   'far': 'regular'
 };
-
 export interface LocalIconProps {
+  solid?: any;
   /**
    * Name of the icon to display
    */
   name: IconName;
-  
+
   /**
    * CSS class names to apply to the icon
    */
   className?: string;
-  
+
   /**
    * Size variant of the icon
    */
   size?: IconSize;
-  
+
   /**
    * Optional title for accessibility
    */
@@ -45,27 +45,27 @@ export interface LocalIconProps {
    * Click handler for the icon
    */
   onClick?: (e: React.MouseEvent<SVGElement>) => void;
-  
+
   /**
    * Whether to apply a spin animation to the icon
    */
   spin?: boolean;
-  
+
   /**
    * Whether to apply a pulse animation to the icon
    */
   pulse?: boolean;
-  
+
   /**
    * Whether the icon should be flipped horizontally
    */
   flipHorizontal?: boolean;
-  
+
   /**
    * Whether the icon should be flipped vertically
    */
   flipVertical?: boolean;
-  
+
   /**
    * Degree rotation for the icon (0-360)
    */
@@ -76,23 +76,22 @@ export interface LocalIconProps {
    */
   style?: 'solid' | 'light' | 'brands' | 'regular';
 }
-
 export interface PlatformIconProps {
   /**
    * Name of the platform
    */
   platformName: PlatformName;
-  
+
   /**
    * CSS class names to apply to the icon
    */
   className?: string;
-  
+
   /**
    * Size variant of the icon
    */
   size?: IconSize;
-  
+
   /**
    * Click handler for the icon
    */
@@ -110,7 +109,7 @@ const SIZE_CLASSES: Record<IconSize, string> = {
   'xl': 'w-8 h-8',
   '2xl': 'w-10 h-10',
   '3xl': 'w-12 h-12',
-  '4xl': 'w-16 h-16',
+  '4xl': 'w-16 h-16'
 };
 
 /**
@@ -122,7 +121,7 @@ const PLATFORM_ICON_MAP: Record<PlatformName, IconName> = {
   'linkedin': 'faLinkedin',
   'tiktok': 'faTiktok',
   'youtube': 'faYoutube',
-  'x': 'faXTwitter',
+  'x': 'faXTwitter'
 };
 
 /**
@@ -131,7 +130,7 @@ const PLATFORM_ICON_MAP: Record<PlatformName, IconName> = {
 function getIconBaseName(fullName: string): string {
   // Handle special Light icon case - remove Light suffix
   const nameWithoutLightSuffix = fullName.replace(/Light$/, '');
-  
+
   // Convert e.g. faUserCircle to user-circle
   const baseName = nameWithoutLightSuffix.replace(/^fa/, '').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   return baseName;
@@ -168,49 +167,24 @@ export function LocalIcon({
   flipHorizontal = false,
   flipVertical = false,
   rotation = 0,
-  style, // This is optional - we'll detect automatically if not provided
+  style,
+  // This is optional - we'll detect automatically if not provided
   ...props
 }: LocalIconProps) {
   // Build transformation CSS classes
-  const transformClasses = [
-    spin && 'animate-spin',
-    pulse && 'animate-pulse',
-    flipHorizontal && 'scale-x-[-1]',
-    flipVertical && 'scale-y-[-1]',
-    rotation && `rotate-${rotation}`,
-  ].filter(Boolean).join(' ');
+  const transformClasses = [spin && 'animate-spin', pulse && 'animate-pulse', flipHorizontal && 'scale-x-[-1]', flipVertical && 'scale-y-[-1]', rotation && `rotate-${rotation}`].filter(Boolean).join(' ');
 
   // Get the base name of the icon
   const iconBaseName = getIconBaseName(name);
-  
+
   // Determine icon style if not explicitly provided
-  const detectedStyle = 
-    style ? style : 
-    isLightIcon(name) ? 'light' : 
-    isBrandIcon(name) ? 'brands' : 
-    'solid';
-  
+  const detectedStyle = style ? style : isLightIcon(name) ? 'light' : isBrandIcon(name) ? 'brands' : 'solid';
+
   // Create the path to the SVG file
   const iconPath = `/ui-icons/${detectedStyle}/${iconBaseName}.svg`;
-
-  return (
-    <span 
-      className={cn(
-        'inline-flex shrink-0',
-        SIZE_CLASSES[size],
-        className
-      )} 
-      aria-hidden={!title}
-      {...props}
-    >
-      <img 
-        src={iconPath} 
-        alt={title || name}
-        className={cn('w-full h-full', transformClasses)}
-        onClick={onClick as any} 
-      />
-    </span>
-  );
+  return <span className={cn('inline-flex shrink-0', SIZE_CLASSES[size], className)} aria-hidden={!title} {...props}>
+      <img src={iconPath} alt={title || name} className={cn('w-full h-full', transformClasses)} onClick={onClick as any} />
+    </span>;
 }
 
 /**
@@ -220,25 +194,17 @@ export function PlatformIcon({
   platformName,
   className,
   size = 'md',
-  onClick,
+  onClick
 }: PlatformIconProps) {
   // Convert platform name to corresponding icon name
   const iconName = PLATFORM_ICON_MAP[platformName];
-  
   if (!iconName) {
     console.warn(`Unknown platform name: ${platformName}`);
     return null;
   }
-  
+
   // No need to set style='brands' - it will be detected automatically
-  return (
-    <LocalIcon
-      name={iconName}
-      className={className}
-      size={size}
-      onClick={onClick}
-    />
-  );
+  return <LocalIcon name={iconName} className={className} size={size} onClick={onClick} solid={false} />;
 }
 
 /**
@@ -246,4 +212,4 @@ export function PlatformIcon({
  * You can switch to using this component once you've run the download-icons.js script
  * to extract all the SVG icons used in your project.
  */
-export const Icon = LocalIcon; 
+export const Icon = LocalIcon;

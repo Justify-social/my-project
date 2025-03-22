@@ -2,9 +2,8 @@
 
 import React, { useState, ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { migrateHeroIcon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/icons';
 import Link from 'next/link';
-
 export default function TestUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -17,7 +16,7 @@ export default function TestUploadPage() {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      
+
       // Create preview for images
       if (selectedFile.type.startsWith('image/')) {
         const reader = new FileReader();
@@ -38,7 +37,6 @@ export default function TestUploadPage() {
       const response = await fetch('/api/uploadthing/test');
       const data = await response.json();
       setApiStatus(data);
-      
       if (data.success) {
         toast.success('UploadThing API is accessible!');
       } else {
@@ -58,10 +56,9 @@ export default function TestUploadPage() {
       toast.error('Please select a file first');
       return;
     }
-
     try {
       setIsLoading(true);
-      
+
       // Create form data for the upload - using the actual format expected by the branding endpoint
       const formData = new FormData();
       formData.append('primaryColor', '#00BFFF');
@@ -71,19 +68,17 @@ export default function TestUploadPage() {
       formData.append('bodyFont', 'Work Sans');
       formData.append('bodyFontSize', '14px');
       formData.append('logoFile', file);
-      
+
       // Simple direct upload using our branding endpoint as a test
       const response = await fetch('/api/settings/branding', {
         method: 'POST',
         body: formData
       });
-      
       let responseText;
       try {
         responseText = await response.text();
         const result = JSON.parse(responseText);
         setUploadResult(result);
-        
         if (response.ok) {
           if (result.data?.logoUrl) {
             toast.success(`Upload successful! Logo URL: ${result.data.logoUrl}`);
@@ -98,28 +93,29 @@ export default function TestUploadPage() {
       } catch (parseError) {
         console.error('Failed to parse response as JSON:', parseError);
         console.log('Raw response:', responseText);
-        setUploadResult({ error: 'JSON parse error', rawResponse: responseText });
+        setUploadResult({
+          error: 'JSON parse error',
+          rawResponse: responseText
+        });
         toast.error('Failed to parse server response');
       }
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload file');
-      setUploadResult({ error: String(error) });
+      setUploadResult({
+        error: String(error)
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-[var(--background-color)] p-8">
+  return <div className="min-h-screen bg-[var(--background-color)] p-8">
       <div className="max-w-2xl mx-auto bg-[var(--background-color)] p-6 rounded-lg border border-[var(--divider-color)] shadow-sm">
         <h1 className="text-2xl font-bold mb-6 text-[var(--primary-color)]">UploadThing Test</h1>
         
         <div className="mb-4">
-          <Link 
-            href="/debug-tools" 
-            className="text-[var(--accent-color)] hover:underline"
-          >
+          <Link href="/debug-tools" className="text-[var(--accent-color)] hover:underline">
+
             ← Back to Debug Tools
           </Link>
         </div>
@@ -127,26 +123,17 @@ export default function TestUploadPage() {
         {/* API Status Check */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)]">API Status</h2>
-          <button
-            onClick={checkApiStatus}
-            disabled={isLoading}
-            className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                {migrateHeroIcon('ArrowPathIcon', { className: 'w-5 h-5 mr-2 animate-spin' })}
+          <button onClick={checkApiStatus} disabled={isLoading} className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50">
+
+            {isLoading ? <span className="flex items-center">
+                {<Icon name="faRotate" className="w-5 h-5 mr-2 animate-spin" solid={false} />}
                 Checking...
-              </span>
-            ) : (
-              'Check API Status'
-            )}
+              </span> : 'Check API Status'}
           </button>
           
-          {apiStatus && (
-            <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
+          {apiStatus && <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
               <pre className="text-sm text-[var(--secondary-color)]">{JSON.stringify(apiStatus, null, 2)}</pre>
-            </div>
-          )}
+            </div>}
         </div>
         
         {/* File Upload */}
@@ -155,43 +142,28 @@ export default function TestUploadPage() {
           
           <div className="mb-4">
             <label className="block text-sm font-medium text-[var(--secondary-color)]">Select File</label>
-            <input
-              type="file"
-              onChange={handleFileSelect}
-              className="mt-1 block w-full text-sm text-[var(--secondary-color)] border border-[var(--divider-color)] rounded-md"
-            />
+            <input type="file" onChange={handleFileSelect} className="mt-1 block w-full text-sm text-[var(--secondary-color)] border border-[var(--divider-color)] rounded-md" />
+
           </div>
           
-          {preview && (
-            <div className="mb-4">
+          {preview && <div className="mb-4">
               <p className="text-sm font-medium text-[var(--secondary-color)]">Preview:</p>
               <img src={preview} alt="Preview" className="mt-2 max-h-40 rounded" />
-            </div>
-          )}
+            </div>}
           
-          <button
-            onClick={uploadFile}
-            disabled={isLoading || !file}
-            className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                {migrateHeroIcon('ArrowPathIcon', { className: 'w-5 h-5 mr-2 animate-spin' })}
+          <button onClick={uploadFile} disabled={isLoading || !file} className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50">
+
+            {isLoading ? <span className="flex items-center">
+                {<Icon name="faRotate" className="w-5 h-5 mr-2 animate-spin" solid={false} />}
                 Uploading...
-              </span>
-            ) : (
-              'Upload File'
-            )}
+              </span> : 'Upload File'}
           </button>
           
-          {uploadResult && (
-            <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
+          {uploadResult && <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
               <h3 className="font-medium mb-2 text-[var(--primary-color)]">Upload Result:</h3>
               <pre className="text-sm text-[var(--secondary-color)]">{JSON.stringify(uploadResult, null, 2)}</pre>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
-    </div>
-  );
-} 
+    </div>;
+}

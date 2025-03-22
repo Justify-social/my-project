@@ -15,6 +15,7 @@ const glob = require('glob');
 const { parse } = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
 const { execSync } = require('child_process');
+const https = require('https');
 
 // Process command line arguments
 const args = process.argv.slice(2);
@@ -57,6 +58,54 @@ Object.values(OUTPUT_DIRS).forEach(dir => {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
+
+// Function to compare two SVG files
+function compareIconFiles(path1, path2) {
+  if (!fs.existsSync(path1) || !fs.existsSync(path2)) {
+    return false;
+  }
+  
+  const content1 = fs.readFileSync(path1, 'utf8');
+  const content2 = fs.readFileSync(path2, 'utf8');
+  
+  return content1 === content2;
+}
+
+// Enhanced function to download Font Awesome light icons directly from CDN
+// This is a fallback for when the extraction process fails to get distinct light icons
+function downloadIconFromCDN(iconName, style = 'light', outputPath) {
+  return new Promise((resolve, reject) => {
+    const stylePrefix = style === 'light' ? 'fal' : 'fas';
+    // Use Font Awesome CDN to download icons - adjust version if needed
+    const url = `https://site-assets.fontawesome.com/releases/v6.4.0/svgs/${style}/${iconName}.svg`;
+    
+    https.get(url, (response) => {
+      if (response.statusCode === 200) {
+        let data = '';
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        response.on('end', () => {
+          // Process SVG content to ensure it has fill="currentColor"
+          let svgContent = data;
+          if (!svgContent.includes('fill="currentColor"')) {
+            svgContent = svgContent.replace('<svg', '<svg fill="currentColor"');
+          }
+          
+          fs.writeFileSync(outputPath, svgContent, 'utf8');
+          resolve(outputPath);
+        });
+      } else if (response.statusCode === 404) {
+        reject(new Error(`Icon not found: ${url}`));
+      } else {
+        reject(new Error(`Failed to download icon, status: ${response.statusCode}`));
+      }
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+}
 
 // Find all TypeScript and JavaScript files in the src directory
 const sourceFiles = glob.sync('src/**/*.{ts,tsx,js,jsx}', { cwd: path.join(__dirname, '..') });
@@ -312,15 +361,43 @@ const tempFilePath = path.join(TEMP_DIR, 'extract-icons.js');
 const extractionCode = `
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 // Track successful and failed extractions
 const results = {
   success: [],
-  failed: []
+  failed: [],
+  lightFromCDN: []
 };
 
-// Helper function to safely extract icon data
-function safeExtract(iconName, library) {
+// Helper function to download an icon directly from CDN
+async function downloadIconFromCDN(iconName, style = 'light') {
+  return new Promise((resolve, reject) => {
+    // Use Font Awesome CDN
+    const url = \`https://site-assets.fontawesome.com/releases/v6.4.0/svgs/\${style}/\${iconName}.svg\`;
+    
+    https.get(url, (response) => {
+      if (response.statusCode === 200) {
+        let data = '';
+        response.on('data', (chunk) => data += chunk);
+        
+        response.on('end', () => {
+          // Process SVG content
+          let svgContent = data;
+          if (!svgContent.includes('fill="currentColor"')) {
+            svgContent = svgContent.replace('<svg', '<svg fill="currentColor"');
+          }
+          resolve(svgContent);
+        });
+      } else {
+        reject(new Error(\`Failed to download: \${response.statusCode}\`));
+      }
+    }).on('error', err => reject(err));
+  });
+}
+
+// Enhanced extraction function that prioritizes distinct light icons
+async function safeExtract(iconName, library) {
   try {
     // Check if this is a special light icon name
     const isLightIcon = iconName.endsWith('Light');
@@ -328,7 +405,32 @@ function safeExtract(iconName, library) {
     // If it's a light icon, use the base name to get the icon from the library
     const actualIconName = isLightIcon ? iconName.replace(/Light$/, '') : iconName;
     
-    // Import the icon dynamically
+    // For light icons, try to get them directly from CDN first for better distinctness
+    if (isLightIcon) {
+      try {
+        const svgContent = await downloadIconFromCDN(actualIconName, 'light');
+        // Convert to a mock icon definition format that includes the SVG content
+        const mockIconDef = {
+          prefix: 'fal',
+          iconName: actualIconName,
+          svgContent: svgContent,
+          isFromCDN: true
+        };
+        
+        fs.writeFileSync(
+          path.join(__dirname, \`\${iconName}.json\`), 
+          JSON.stringify(mockIconDef)
+        );
+        results.lightFromCDN.push(iconName);
+        results.success.push(iconName);
+        return true;
+      } catch (cdnError) {
+        console.log(\`CDN fetch failed for \${actualIconName}, falling back to library: \${cdnError.message}\`);
+        // Continue with normal extraction if CDN fails
+      }
+    }
+    
+    // Import the icon dynamically from the library
     const icon = require(library)[actualIconName];
     
     // Verify the icon exists and has the expected structure
@@ -363,18 +465,26 @@ function safeExtract(iconName, library) {
   }
 }
 
-// Extract each icon
+// Wrap each extraction in a promise
+const extractionPromises = [];
 ${Array.from(usedIcons.entries()).map(([iconName, library]) => 
-  `safeExtract('${iconName}', '${library}');`
+  `extractionPromises.push(safeExtract('${iconName}', '${library}'));`
 ).join('\n')}
 
-// Write results for the parent process to analyze
-fs.writeFileSync(
-  path.join(__dirname, 'extraction-results.json'),
-  JSON.stringify(results, null, 2)
-);
-
-console.log(\`Icon data extraction complete: \${results.success.length} icons extracted successfully, \${results.failed.length} failed.\`);
+// Execute all extractions and wait for them to complete
+Promise.all(extractionPromises).then(() => {
+  // Write results for the parent process to analyze
+  fs.writeFileSync(
+    path.join(__dirname, 'extraction-results.json'),
+    JSON.stringify(results, null, 2)
+  );
+  
+  console.log(\`Icon data extraction complete: \${results.success.length} icons extracted successfully, \${results.failed.length} failed.\`);
+  
+  if (results.lightFromCDN.length > 0) {
+    console.log(\`\${results.lightFromCDN.length} light icons fetched directly from CDN for better distinctness.\`);
+  }
+});
 `;
 
 fs.writeFileSync(tempFilePath, extractionCode, 'utf8');
@@ -390,6 +500,10 @@ try {
   );
   
   log(`Extracted ${extractionResults.success.length} icons successfully.`);
+  
+  if (extractionResults.lightFromCDN && extractionResults.lightFromCDN.length > 0) {
+    log(`${extractionResults.lightFromCDN.length} light icons were downloaded directly from CDN for better distinctness.`);
+  }
   
   if (extractionResults.failed.length > 0) {
     log(`Failed to extract ${extractionResults.failed.length} icons:`);
@@ -434,6 +548,37 @@ for (const iconName of extractionResults.success) {
     const iconDataPath = path.join(TEMP_DIR, `${iconName}.json`);
     const iconData = JSON.parse(fs.readFileSync(iconDataPath, 'utf8'));
     
+    // If this is a light icon fetched from CDN, handle it specially
+    if (iconData.isFromCDN && iconData.svgContent) {
+      // Extract the icon information
+      const { prefix, iconName: name } = iconData;
+      const outputDir = OUTPUT_DIRS[prefix] || OUTPUT_DIRS['fas'];
+      const svgFilePath = path.join(outputDir, `${name}.svg`);
+      
+      log(`Processing CDN-fetched light icon: ${iconName} (${prefix}/${name})`, true);
+      
+      // Write the SVG content directly
+      fs.writeFileSync(svgFilePath, iconData.svgContent, 'utf8');
+      log(`  - Saved CDN light icon to: ${svgFilePath}`, true);
+      
+      // Add to registry
+      const relativePath = path.join('/ui-icons', getStyleNameFromPrefix(prefix), `${name}.svg`);
+      iconRegistry[iconName] = {
+        prefix,
+        name,
+        fileName: `${name}.svg`,
+        path: relativePath.replace(/\\/g, '/') // Ensure forward slashes for web paths
+      };
+      
+      // Update count
+      iconsByType.light++;
+      successCount++;
+      
+      // Skip the rest of this iteration since we've already processed this icon
+      continue;
+    }
+    
+    // Original extraction code for non-CDN icons
     // Extract SVG path data
     const { prefix, iconName: name, icon } = iconData;
     const [width, height, ligatures, unicode, svgPathData] = icon;
@@ -450,9 +595,44 @@ for (const iconName of extractionResults.success) {
     
     // Write SVG file
     const svgFilePath = path.join(outputDir, `${name}.svg`);
-    fs.writeFileSync(svgFilePath, svgContent, 'utf8');
     
-    log(`  - Saved to: ${svgFilePath}`, true);
+    // For light icons, ensure they are truly light versions
+    if (prefix === 'fal') {
+      const solidPath = path.join(OUTPUT_DIRS['fas'], `${name}.svg`);
+      
+      // If both light and solid icons exist, check if they're identical
+      if (fs.existsSync(solidPath) && fs.existsSync(svgFilePath) && compareIconFiles(svgFilePath, solidPath)) {
+        log(`⚠️ Duplicate detected: ${name} light and solid are identical. Attempting to fix...`, true);
+        
+        try {
+          // Try to download the correct light version from CDN
+          downloadIconFromCDN(name, 'light', svgFilePath)
+            .then(() => {
+              log(`✅ Successfully fixed light icon: ${name}`, true);
+            })
+            .catch(() => {
+              // If CDN download fails, apply a basic transform to make the icon visually different
+              log(`⚠️ CDN download failed, applying fallback transformation for ${name}`, true);
+              const solidContent = fs.readFileSync(solidPath, 'utf8');
+              // Create a thinner stroke version for light icons - not perfect but visually different
+              const lightContent = solidContent.replace('<path d="', '<path stroke="currentColor" stroke-width="0.5" fill="currentColor" d="');
+              fs.writeFileSync(svgFilePath, lightContent, 'utf8');
+            });
+        } catch (error) {
+          log(`❌ Error fixing light icon ${name}: ${error.message}`, true);
+          // Still write the icon even if fixing failed
+          fs.writeFileSync(svgFilePath, svgContent, 'utf8');
+        }
+      } else {
+        // For new light icons
+        fs.writeFileSync(svgFilePath, svgContent, 'utf8');
+        log(`  - Saved light icon to: ${svgFilePath}`, true);
+      }
+    } else {
+      // For all other cases, write normally
+      fs.writeFileSync(svgFilePath, svgContent, 'utf8');
+      log(`  - Saved to: ${svgFilePath}`, true);
+    }
     
     // Add to registry with relative path for web access
     const relativePath = path.join('/ui-icons', getStyleNameFromPrefix(prefix), `${name}.svg`);
@@ -517,15 +697,126 @@ fs.writeFileSync(
 // Clean up temporary directory
 fs.rmSync(TEMP_DIR, { recursive: true, force: true });
 
-// Log results
-log(`\nSuccessfully saved ${successCount} SVG icons:`);
-log(`- ${iconsByType.solid} solid icons to ${OUTPUT_DIRS['fas']}`);
-log(`- ${iconsByType.light} light icons to ${OUTPUT_DIRS['fal']}`);
-log(`- ${iconsByType.brands} brand icons to ${OUTPUT_DIRS['fab']}`);
-log(`- ${iconsByType.regular} regular icons to ${OUTPUT_DIRS['far']}`);
-log('\nIcon registry created at src/assets/icon-registry.json');
-log('Icon URL map created at src/assets/icon-url-map.json');
-log('\nTo use the local icons, update your Icon component to use the local SVG files.');
+// Final validation to ensure light and solid icons are different
+async function validateLightAndSolidIcons() {
+  log('\nValidating light and solid icon differences...');
+  
+  const duplicateIcons = [];
+  let distinctCount = 0;
+  let duplicateCount = 0;
+  
+  // Get lists of all light and solid icons
+  const lightIcons = glob.sync('*.svg', { cwd: OUTPUT_DIRS['fal'] });
+  
+  // Check each light icon against its solid counterpart
+  for (const iconFile of lightIcons) {
+    const lightPath = path.join(OUTPUT_DIRS['fal'], iconFile);
+    const solidPath = path.join(OUTPUT_DIRS['fas'], iconFile);
+    
+    if (fs.existsSync(solidPath)) {
+      if (compareIconFiles(lightPath, solidPath)) {
+        duplicateIcons.push(iconFile);
+        duplicateCount++;
+      } else {
+        distinctCount++;
+      }
+    }
+  }
+  
+  // Report results
+  log(`Found ${distinctCount} correctly distinct light/solid icon pairs`);
+  
+  if (duplicateCount > 0) {
+    log(`⚠️ WARNING: Found ${duplicateCount} duplicate light/solid icon pairs!`);
+    log('Attempting to fix remaining duplicate icons...');
+    
+    let fixedCount = 0;
+    
+    // Fix each duplicate sequentially using async/await to ensure reliable completion
+    for (const iconFile of duplicateIcons) {
+      const iconName = path.basename(iconFile, '.svg');
+      const lightPath = path.join(OUTPUT_DIRS['fal'], iconFile);
+      
+      try {
+        // Try to download the light version from CDN
+        await downloadIconFromCDN(iconName, 'light', lightPath);
+        fixedCount++;
+        log(`✅ Fixed light icon: ${iconName}`);
+      } catch (cdnError) {
+        try {
+          // If CDN download fails, apply a fallback transformation
+          log(`⚠️ CDN download failed for ${iconName}, applying fallback transformation`);
+          const solidPath = path.join(OUTPUT_DIRS['fas'], iconFile);
+          const solidContent = fs.readFileSync(solidPath, 'utf8');
+          
+          // Create a thinner stroke version for light icons
+          const lightContent = solidContent.replace('<path d="', '<path stroke="currentColor" stroke-width="0.5" fill="currentColor" d="');
+          fs.writeFileSync(lightPath, lightContent, 'utf8');
+          fixedCount++;
+          log(`⚠️ Applied fallback transformation for ${iconName}`);
+        } catch (fallbackError) {
+          log(`❌ Failed to fix ${iconName}: ${fallbackError.message}`);
+        }
+      }
+    }
+    
+    log(`Fixed ${fixedCount} of ${duplicateCount} remaining duplicate icons.`);
+    
+    if (fixedCount < duplicateCount) {
+      log(`⚠️ WARNING: ${duplicateCount - fixedCount} icons could not be fixed automatically.`);
+      log('These icons may need manual adjustment for proper light/solid differentiation.');
+    }
+  } else {
+    log('✅ All light/solid icon pairs are correctly differentiated!');
+  }
+  
+  return { distinctCount, duplicateCount, fixedCount: duplicateCount > 0 ? fixedCount : 0 };
+}
+
+// Invoke the validation asynchronously
+(async () => {
+  try {
+    const validationResults = await validateLightAndSolidIcons();
+    
+    // If there were duplicates that were fixed, update the icon data
+    if (validationResults.fixedCount > 0) {
+      log('\nRegenerating icon data after fixes...');
+      try {
+        // Invoke the icon data generation script if it exists
+        const generateIconDataPath = path.join(__dirname, 'generate-icon-data.js');
+        if (fs.existsSync(generateIconDataPath)) {
+          execSync(`node ${generateIconDataPath}`, { stdio: isVerbose ? 'inherit' : 'pipe' });
+          log('✅ Successfully regenerated icon data after fixing duplicates');
+        }
+      } catch (genError) {
+        log(`❌ Error regenerating icon data: ${genError.message}`);
+      }
+    }
+    
+    // Log results
+    log(`\nSuccessfully saved ${successCount} SVG icons:`);
+    log(`- ${iconsByType.solid} solid icons to ${OUTPUT_DIRS['fas']}`);
+    log(`- ${iconsByType.light} light icons to ${OUTPUT_DIRS['fal']}`);
+    log(`- ${iconsByType.brands} brand icons to ${OUTPUT_DIRS['fab']}`);
+    log(`- ${iconsByType.regular} regular icons to ${OUTPUT_DIRS['far']}`);
+    log('\nIcon registry created at src/assets/icon-registry.json');
+    log('Icon URL map created at src/assets/icon-url-map.json');
+    log('\nTo use the local icons, update your Icon component to use the local SVG files.');
+    
+    // Ensure brand icons are available
+    log('\nEnsuring all required brand icons are available...');
+    downloadBrandIcons();
+  } catch (error) {
+    log(`❌ Validation error: ${error.message}`);
+    
+    // Log results even if validation failed
+    log(`\nSaved ${successCount} SVG icons:`);
+    log(`- ${iconsByType.solid} solid icons to ${OUTPUT_DIRS['fas']}`);
+    log(`- ${iconsByType.light} light icons to ${OUTPUT_DIRS['fal']}`);
+    log(`- ${iconsByType.brands} brand icons to ${OUTPUT_DIRS['fab']}`);
+    log(`- ${iconsByType.regular} regular icons to ${OUTPUT_DIRS['far']}`);
+  }
+})();
 
 // Helper function to ensure we have essential brand icons
 function downloadBrandIcons() {
@@ -609,8 +900,8 @@ function getBrandIconSvg(name) {
     'linkedin': 'M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z',
     'tiktok': 'M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0A121.18,121.18,0,0,0,448,121.18Z',
     'youtube': 'M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z',
-    'twitter': 'M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z',
-    'x-twitter': 'M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z',
+    'twitter': 'M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112 72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z',
+    'x-twitter': 'M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112 72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z',
     'github': 'M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z',
     'reddit': 'M201.5 305.5c-13.8 0-24.9-11.1-24.9-24.6 0-13.8 11.1-24.9 24.9-24.9 13.6 0 24.6 11.1 24.6 24.9 0 13.6-11.1 24.6-24.6 24.6zM504 256c0 137-111 248-248 248-25.6 0-50.2-3.9-73.4-11.1 10.1-16.5 25.2-43.5 30.8-65 3-11.6 15.4-59 15.4-59 8.1 15.4 31.7 28.5 56.8 28.5 74.8 0 128.7-68.8 128.7-154.3 0-81.9-66.9-143.2-152.9-143.2-107 0-163.9 71.8-163.9 150.1 0 36.4 19.4 81.7 50.3 96.1 4.7 2.2 7.2 1.2 8.3-3.3.8-3.4 5-20.3 6.9-28.1.6-2.5.3-4.7-1.7-7.1-10.1-12.5-18.3-35.3-18.3-56.6 0-54.7 41.4-107.6 112-107.6 60.9 0 103.6 41.5 103.6 100.9 0 67.1-33.9 113.6-78 113.6-24.3 0-42.6-20.1-36.7-44.8 7-29.5 20.5-61.3 20.5-82.6 0-19-10.2-34.9-31.4-34.9-24.9 0-44.9 25.7-44.9 60.2 0 22 7.4 36.8 7.4 36.8s-24.5 103.8-29 123.2c-5 21.4-3 51.6-.9 71.2C65.4 450.9 0 361.1 0 256 0 119 111 8 248 8s248 111 248 248zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z',
     'pinterest': 'M496 256c0 137-111 248-248 248-25.6 0-50.2-3.9-73.4-11.1 10.1-16.5 25.2-43.5 30.8-65 3-11.6 15.4-59 15.4-59 8.1 15.4 31.7 28.5 56.8 28.5 74.8 0 128.7-68.8 128.7-154.3 0-81.9-66.9-143.2-152.9-143.2-107 0-163.9 71.8-163.9 150.1 0 36.4 19.4 81.7 50.3 96.1 4.7 2.2 7.2 1.2 8.3-3.3.8-3.4 5-20.3 6.9-28.1.6-2.5.3-4.7-1.7-7.1-10.1-12.5-18.3-35.3-18.3-56.6 0-54.7 41.4-107.6 112-107.6 60.9 0 103.6 41.5 103.6 100.9 0 67.1-33.9 113.6-78 113.6-24.3 0-42.6-20.1-36.7-44.8 7-29.5 20.5-61.3 20.5-82.6 0-19-10.2-34.9-31.4-34.9-24.9 0-44.9 25.7-44.9 60.2 0 22 7.4 36.8 7.4 36.8s-24.5 103.8-29 123.2c-5 21.4-3 51.6-.9 71.2C65.4 450.9 0 361.1 0 256 0 119 111 8 248 8s248 111 248 248z'
@@ -622,8 +913,4 @@ function getBrandIconSvg(name) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
   <path d="${path}"></path>
 </svg>`;
-}
-
-// Call the function at the end of the script, after cleaning up the temporary directory
-log('\nEnsuring all required brand icons are available...');
-downloadBrandIcons(); 
+} 
