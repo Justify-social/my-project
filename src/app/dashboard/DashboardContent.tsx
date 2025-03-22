@@ -308,25 +308,35 @@ interface MetricCardProps {
   title: string;
   value: number | string;
   trend?: number;
-  iconName: IconName; // Changed from icon component to iconName string
+  iconName?: IconName; // Changed from icon component to iconName string
+  imageSrc?: string; // Add support for direct SVG images
   description?: string;
   format?: "number" | "currency" | "percent";
 }
 
-// Update the MetricCard component for better mobile responsiveness and to use CSS variables
+// Update the MetricCard component to apply a white filter to SVG images
 const MetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   trend,
   iconName,
-  // Changed from icon
+  imageSrc,
   description,
   format = "number"
 }) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow p-4">
     <div className="flex justify-between items-start">
       <div className="flex items-center">
-        <div className="mr-3 p-2 bg-[var(--accent-color)] bg-opacity-10 rounded-lg">
-          <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)]" solid={false} />
+        <div className="mr-3 p-2 bg-[var(--accent-color)] rounded-lg flex items-center justify-center w-9 h-9">
+          {imageSrc ? (
+            <img 
+              src={imageSrc} 
+              alt={title} 
+              className="w-5 h-5" 
+              style={{ filter: 'brightness(0) invert(1)' }} 
+            />
+          ) : (
+            <Icon name={iconName!} className="w-5 h-5 text-white" solid={true} />
+          )}
         </div>
         <h3 className="text-sm font-medium text-[var(--secondary-color)]">{title}</h3>
       </div>
@@ -1385,7 +1395,7 @@ export default function DashboardContent({
               title="Total Campaigns" 
               value={metrics.stats.totalCampaigns} 
               trend={metrics.stats.campaignChange} 
-              iconName="faInfoCircle" 
+              imageSrc="/app/Campaigns.svg" 
               description={`+${metrics.stats.campaignChange} campaigns`} 
             />
             
@@ -1401,7 +1411,7 @@ export default function DashboardContent({
               title="Live Campaigns" 
               value={metrics.stats.liveCampaigns} 
               trend={metrics.stats.liveChange} 
-              iconName="faCirclePlay" 
+              iconName="faPlay" 
               description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} 
             />
             
@@ -1409,7 +1419,7 @@ export default function DashboardContent({
               title="Credits Available" 
               value={metrics.stats.creditsAvailable} 
               trend={metrics.stats.creditsChange} 
-              iconName="faMoneyBill" 
+              imageSrc="/coins.svg" 
               description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} 
             />
           </div>
