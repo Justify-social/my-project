@@ -23,7 +23,9 @@
     "update-icons": "node scripts/download-icons.js",
     "audit-icons": "node scripts/audit-icons.js",
     "verify-icons": "node scripts/verify-icons.js",
-    "check-debug-icons": "node scripts/check-debug-icons.js"
+    "check-debug-icons": "node scripts/check-debug-icons.js",
+    "check-icons": "node scripts/check-icon-formatting.js",
+    "fix-icons": "node scripts/check-icon-formatting.js --fix"
   },
   "dependencies": {
     "@algolia/client-search": "5.21.0",

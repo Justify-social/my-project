@@ -47,6 +47,28 @@ import { Icon } from '@/components/ui/icons';
 <Icon appName="campaigns" />
 ```
 
+## Consistent Icon Name Resolution
+
+To ensure consistent icon rendering across the application, **always** use the `resolveIconName` utility function:
+
+```tsx
+import { Icon, resolveIconName } from '@/components/ui/icons';
+
+// ✅ Do this
+<Icon name={resolveIconName(iconName)} />
+
+// ❌ Don't do this
+<Icon name={iconName.startsWith('fa') ? iconName : `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} />
+<Icon name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} />
+```
+
+### Benefits of resolveIconName
+
+- Handles all icon name formats seamlessly
+- Centralizes naming logic in one place
+- Ensures consistent icon rendering
+- Simplifies component code
+
 ## Specialized Icon Components
 
 For common use cases, we provide specialized components:

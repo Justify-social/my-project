@@ -361,7 +361,7 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Essential UI Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
             {essentialIcons.map(name => <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" solid={false} />
+                <Icon name={resolveIconName(name as IconName)} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>)}
           </div>
@@ -372,7 +372,7 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Navigation Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6">
             {navigationIcons.map(name => <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" solid={false} />
+                <Icon name={resolveIconName(name as IconName)} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>)}
           </div>
@@ -383,7 +383,7 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Action Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
             {actionIcons.map(name => <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" solid={false} />
+                <Icon name={resolveIconName(name as IconName)} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>)}
             <div className="flex flex-col items-center">
@@ -410,7 +410,7 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Object Icons</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
             {objectIcons.map(name => <div key={name} className="flex flex-col items-center">
-                <Icon name={name as IconName} className="mb-2" solid={false} />
+                <Icon name={resolveIconName(name as IconName)} className="mb-2" solid={false} />
                 <span className="text-xs text-gray-500">{name}</span>
               </div>)}
           </div>
@@ -441,7 +441,7 @@ export const IconExamples = () => {
 
                 <div className={cn("flex items-center justify-center p-2 rounded-md", hoveredIcon === name ? "bg-gray-100" : "")}>
                   {/* Use the name prop instead of directly passing kpiName as a DOM prop */}
-                  <Icon name={UI_ICON_MAP[name] || "faQuestion"} size="lg" solid={false} className="text-[var(--secondary-color)]" />
+                  <Icon name={resolveIconName(UI_ICON_MAP[name] || "faQuestion")} size="lg" solid={false} className="text-[var(--secondary-color)]" />
                 </div>
                 <span className="text-xs mt-1 text-center break-all">
                   {name}
@@ -458,7 +458,7 @@ export const IconExamples = () => {
 
                 <div className={cn("flex items-center justify-center p-2 rounded-md", hoveredIcon === name ? "bg-gray-100" : "")}>
                   {/* Use the name prop with PLATFORM_ICON_MAP instead of directly passing platformName as a DOM prop */}
-                  <Icon name={PLATFORM_ICON_MAP[name as keyof typeof PLATFORM_ICON_MAP] || "faQuestion"} size="lg" solid={false} className="text-[var(--secondary-color)]" />
+                  <Icon name={resolveIconName(PLATFORM_ICON_MAP[name as keyof typeof PLATFORM_ICON_MAP] || "faQuestion")} size="lg" solid={false} className="text-[var(--secondary-color)]" />
 
                 </div>
                 <span className="text-xs mt-1 text-center break-all">

@@ -154,6 +154,33 @@ export const UI_ICON_MAP: Record<string, string> = {
   'default': 'faQuestion'
 };
 
+/**
+ * Resolves any icon name to the proper format for the Icon component
+ * Works with semantic names (like "user") and direct names (like "faUser")
+ * 
+ * @example
+ * // Instead of:
+ * <Icon name={iconName.startsWith('fa') ? iconName : UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} />
+ * 
+ * // Use:
+ * <Icon name={resolveIconName(iconName)} />
+ */
+export function resolveIconName(iconName: string): string {
+  // If already in proper format (faName), return as is
+  if (iconName.startsWith('fa') && iconName.length > 2 && 
+      iconName[2] === iconName[2].toUpperCase()) {
+    return iconName;
+  }
+  
+  // Check UI_ICON_MAP for semantic names
+  if (UI_ICON_MAP[iconName]) {
+    return UI_ICON_MAP[iconName];
+  }
+  
+  // Add fa prefix and capitalize first letter
+  return `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`;
+}
+
 // Map of semantic icon names to light/outline FontAwesome icon names
 export const UI_OUTLINE_ICON_MAP: Record<string, string> = {
   // Generate light versions of all icons in UI_ICON_MAP

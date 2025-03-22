@@ -11,7 +11,6 @@ const KPI_ICON_NAMES = Object.keys(KPI_ICON_URLS) as KpiIconName[];
 
 // Get all APP icon names
 const APP_ICON_NAMES = Object.keys(APP_ICON_URLS) as AppIconName[];
-
 export function IconGrid() {
   return <div className="p-4">
       {/* UI Icons Section */}
@@ -25,7 +24,7 @@ export function IconGrid() {
         // Only add Light suffix if not already a light icon
         const lightIconName = faIconName.endsWith('Light') ? faIconName : `${faIconName}Light`;
         return <div key={name} className="group flex flex-col items-center p-3 border rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
-              <Icon name={lightIconName} size="md" iconType="button"
+              <Icon name={resolveIconName(lightIconName)} size="md" iconType="button"
           // No custom Tailwind hover class - let the component handle it
           solid={false} className="text-[var(--secondary-color)]" />
               <span className="text-xs mt-2 text-center text-gray-600">{name}</span>
@@ -91,7 +90,7 @@ export function IconGrid() {
           <h3 className="font-medium mb-3">Default Action (Blue)</h3>
           <div className="flex justify-center space-x-4">
             {["user", "bell", "heart", "star"].map(name => <div key={name} className="group flex flex-col items-center">
-                <Icon name={`fa${name.charAt(0).toUpperCase() + name.slice(1)}Light`} size="lg" iconType="button" action="default" solid={false} />
+                <Icon name={resolveIconName(`fa${name.charAt(0).toUpperCase() + name.slice(1)}Light`)} size="lg" iconType="button" action="default" solid={false} />
                 <span className="text-xs mt-2 text-gray-600">{name}</span>
               </div>)}
           </div>
@@ -103,7 +102,7 @@ export function IconGrid() {
             {["trash-can", "xmark", "minus", "circle-xmark"].map(name => {
             const iconName = `fa${name.split('-').map((part, i) => i === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part.charAt(0).toUpperCase() + part.slice(1)).join('')}Light`;
             return <div key={name} className="group flex flex-col items-center">
-                  <Icon name={iconName} size="lg" iconType="button" action="delete" solid={false} />
+                  <Icon name={resolveIconName(iconName)} size="lg" iconType="button" action="delete" solid={false} />
                   <span className="text-xs mt-2 text-gray-600">{name.split('-')[0]}</span>
                 </div>;
           })}
@@ -116,7 +115,7 @@ export function IconGrid() {
             {["triangle-exclamation", "circle-info", "shield", "bell-slash"].map(name => {
             const iconName = `fa${name.split('-').map((part, i) => i === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part.charAt(0).toUpperCase() + part.slice(1)).join('')}Light`;
             return <div key={name} className="group flex flex-col items-center">
-                  <Icon name={iconName} size="lg" iconType="button" action="warning" solid={false} />
+                  <Icon name={resolveIconName(iconName)} size="lg" iconType="button" action="warning" solid={false} />
                   <span className="text-xs mt-2 text-gray-600">{name.split('-')[0]}</span>
                 </div>;
           })}
@@ -129,7 +128,7 @@ export function IconGrid() {
             {["check", "circle-check", "upload", "plus"].map(name => {
             const iconName = `fa${name.split('-').map((part, i) => i === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part.charAt(0).toUpperCase() + part.slice(1)).join('')}Light`;
             return <div key={name} className="group flex flex-col items-center">
-                  <Icon name={iconName} size="lg" iconType="button" action="success" solid={false} />
+                  <Icon name={resolveIconName(iconName)} size="lg" iconType="button" action="success" solid={false} />
                   <span className="text-xs mt-2 text-gray-600">{name.split('-')[0]}</span>
                 </div>;
           })}
@@ -143,7 +142,7 @@ export function IconGrid() {
           <h3 className="font-medium mb-3">Light Static Icons</h3>
           <div className="flex justify-center space-x-4">
             {["user", "bell", "heart", "gear", "check"].map(name => <div key={name} className="flex flex-col items-center">
-                <Icon name={`fa${name.charAt(0).toUpperCase() + name.slice(1)}Light`} size="lg" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
+                <Icon name={resolveIconName(`fa${name.charAt(0).toUpperCase() + name.slice(1)}Light`)} size="lg" iconType="static" solid={false} className="text-[var(--secondary-color)]" />
                 <span className="text-xs mt-2 text-gray-600">{name}</span>
               </div>)}
           </div>
@@ -153,7 +152,7 @@ export function IconGrid() {
           <h3 className="font-medium mb-3">Solid Static Icons</h3>
           <div className="flex justify-center space-x-4">
             {["user", "bell", "heart", "gear", "check"].map(name => <div key={name} className="flex flex-col items-center">
-                <Icon name={`fa${name.charAt(0).toUpperCase() + name.slice(1)}`} size="lg" iconType="static" solid className="text-[var(--secondary-color)]" />
+                <Icon name={resolveIconName(`fa${name.charAt(0).toUpperCase() + name.slice(1)}`)} size="lg" iconType="static" solid className="text-[var(--secondary-color)]" />
                 <span className="text-xs mt-2 text-gray-600">{name}</span>
               </div>)}
           </div>

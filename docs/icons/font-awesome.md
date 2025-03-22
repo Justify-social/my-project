@@ -130,6 +130,48 @@ The system automatically creates both solid and light variants of all icons. To 
 
 The script automatically creates light versions of all solid icons, so you can use any icon in either style without having to add it explicitly.
 
+## Consistent Icon Name Resolution
+
+To ensure that all icon names are properly formatted and resolved consistently across the application, always use the `resolveIconName` utility function:
+
+```tsx
+import { Icon, resolveIconName } from '@/components/ui/icons';
+
+// In your component
+<Icon name={resolveIconName(iconName)} />
+```
+
+The `resolveIconName` function handles all icon name formats and ensures they're properly formatted for the Icon component:
+
+1. **Semantic names**: Converts 'user' to 'faUser'
+2. **Already formatted names**: Passes 'faUser' through unchanged
+3. **Custom names**: Adds the 'fa' prefix and proper casing if needed
+
+This creates a consistent pattern across your application and eliminates inconsistent icon rendering.
+
+### Examples:
+
+```tsx
+resolveIconName('user')          // -> 'faUser'
+resolveIconName('faUser')        // -> 'faUser' (unchanged)
+resolveIconName('chevronDown')   // -> 'faChevronDown'
+resolveIconName('star')          // -> 'faStar'
+```
+
+### Implementation in Components:
+
+```tsx
+// In components like DataCard, MetricCard, etc.
+const DataCard = ({ iconName, ...props }) => (
+  <div>
+    <Icon name={resolveIconName(iconName)} />
+    {/* rest of component */}
+  </div>
+);
+```
+
+This approach ensures all pages pull icons in the correct format, eliminating weird-looking icons due to inconsistent naming.
+
 ## Light vs Solid Icon Differentiation
 
 The system ensures that light icon variants are visually distinct from their solid counterparts. This is critical for hover effects and proper visual cues.

@@ -4,15 +4,39 @@ import React, { forwardRef, useRef, useMemo } from 'react';
 import cn from 'classnames';
 import Image from 'next/image';
 import { useIconValidation, useButtonIconValidation, validateDynamicName } from './validation';
+import { iconConfig } from './IconConfig';
 
-// To avoid circular imports, define a map of semantic icon names to FontAwesome names here
-// This is a subset of UI_ICON_MAP focusing on problematic icons
+// Map of icon prefixes to style folders
+const ICON_STYLE_FOLDERS = {
+  'fas': 'solid',
+  'fal': 'light',
+  'fab': 'brands',
+  'far': 'regular'
+};
+
+// Define basic semantic name mappings directly to avoid circular imports
 const SEMANTIC_TO_FA_MAP: Record<string, string> = {
-  'xCircle': 'faCircleXmark',
-  'checkCircle': 'faCircleCheck',
+  'user': 'faUser',
+  'search': 'faSearch',
+  'plus': 'faPlus',
+  'minus': 'faMinus',
+  'close': 'faXmark',
+  'check': 'faCheck',
+  'chevronDown': 'faChevronDown',
+  'chevronUp': 'faChevronUp',
+  'chevronLeft': 'faChevronLeft',
+  'chevronRight': 'faChevronRight',
+  'settings': 'faGear',
+  'gear': 'faGear',
+  'mail': 'faEnvelope',
+  'calendar': 'faCalendarDays',
+  'warning': 'faTriangleExclamation',
+  'info': 'faCircleInfo',
+  'document': 'faFile',
+  'documentText': 'faFileLines',
+  'lightning': 'faBolt',
   'userCircle': 'faCircleUser',
-  'circleInfo': 'faCircleInfo',
-  'circleCheck': 'faCircleCheck'
+  'userGroup': 'faUserGroup',
 };
 
 // This type will be created when icon-data.ts is generated
@@ -25,13 +49,6 @@ type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 // Platform names for social icons
 type PlatformName = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'x';
 
-// Map of icon prefixes to style folders
-const ICON_STYLE_FOLDERS = {
-  'fas': 'solid',
-  'fal': 'light',
-  'fab': 'brands',
-  'far': 'regular'
-};
 export interface SvgIconProps {
   /**
    * Name of the icon to display
@@ -304,7 +321,8 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       if (iconType === 'button' && !active) {
         styleName = 'light'; // Button icons default to light unless active
       } else {
-        styleName = ICON_STYLE_FOLDERS[prefix as keyof typeof ICON_STYLE_FOLDERS] || 'solid';
+        // Default to light for static icons too - consistent with global default
+        styleName = ICON_STYLE_FOLDERS[prefix as keyof typeof ICON_STYLE_FOLDERS] || iconConfig.defaultStyle;
       }
     }
   }
