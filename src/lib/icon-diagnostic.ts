@@ -10,8 +10,8 @@
  */
 
 import { IconDefinition, IconName, IconPrefix, findIconDefinition, library } from '@fortawesome/fontawesome-svg-core';
-import * as SolidIcons from '@fortawesome/pro-solid-svg-icons';
-import * as LightIcons from '@fortawesome/pro-light-svg-icons';
+import * as SolidIcons from '@fortawesome/free-solid-svg-icons';
+import * as LightIcons from '@fortawesome/free-regular-svg-icons';
 import * as BrandIcons from '@fortawesome/free-brands-svg-icons';
 
 // Map of icon names (kebab-case) by their prefix
