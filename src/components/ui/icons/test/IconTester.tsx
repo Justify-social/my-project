@@ -707,12 +707,12 @@ ${Object.entries(diagnostics.errors)
                 {name && (
                   <>
                     <div className="ui-icon-hover-container relative" style={{ width: '24px', height: '24px' }}>
-                      <Icon
+                      <Icon 
                         name={name as keyof typeof UI_ICON_MAP}
                         size="md"
                         className="text-[#333333] absolute transition-opacity duration-150 opacity-100 group-hover:opacity-0"
                       />
-                      <Icon
+                      <Icon 
                         name={name as keyof typeof UI_ICON_MAP}
                         size="md"
                         solid

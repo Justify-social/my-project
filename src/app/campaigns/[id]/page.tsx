@@ -10,14 +10,14 @@ import ErrorFallback from '@/components/ErrorFallback'
 import LoadingSkeleton from '@/components/LoadingSkeleton'
 import { useSidebar } from '@/providers/SidebarProvider'
 import Image from 'next/image'
-import { Icon } from '@/components/ui/icon'
-import { migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons'
+import { Icon, migrateHeroIcon, iconComponentFactory } from '@/components/ui/icons'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Import Currency from shared types
 import { Currency, Platform, Position } from '@/components/Wizard/shared/types';
 import { UI_ICON_MAP } from '@/components/ui/icons'
-import { iconConfig, IconName } from '@/components/ui/icons'
+import { iconConfig } from '@/components/ui/icons'
+import type { IconName } from '@/components/ui/icons'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -231,19 +231,19 @@ const kpiIconsMap = {
 const featureIconsMap = {
   CREATIVE_ASSET_TESTING: {
     title: "Creative Asset Testing",
-    icon: "/Creative_Asset_Testing.svg"
+    icon: "/app/Creative_Asset_Testing.svg"
   },
   BRAND_LIFT: {
     title: "Brand Lift",
-    icon: "/Brand_Lift.svg"
+    icon: "/app/Brand_Lift.svg"
   },
   BRAND_HEALTH: {
     title: "Brand Health",
-    icon: "/Brand_Health.svg"
+    icon: "/app/Brand_Health.svg"
   },
   MIXED_MEDIA_MODELLING: {
     title: "Mixed Media Modelling",
-    icon: "/MMM.svg"
+    icon: "/app/MMM.svg"
   }
 };
 
@@ -267,7 +267,7 @@ const formatKpiName = (kpi: string): string => {
 interface MetricCardProps {
   title: string;
   value: string | number;
-  iconName: IconName;
+  iconName: string;
   trend?: "up" | "down" | "none";
   subtext?: string;
   format?: "number" | "currency" | "percent" | "text";
@@ -308,7 +308,7 @@ const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = 
           {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1">{subtext}</div>}
         </div>
         <div className="p-3 bg-[var(--accent-light)] rounded-full">
-          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" iconType="static" />
+          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" iconType="static" />
         </div>
       </div>
     </div>
@@ -319,7 +319,7 @@ const MetricCard = ({ title, value, iconName, trend = "none", subtext, format = 
 interface DataCardProps {
   title: string;
   description?: string;
-  iconName: IconName;
+  iconName: string;
   children: React.ReactNode;
   className?: string;
   actions?: React.ReactNode;
@@ -337,7 +337,7 @@ const DataCard: React.FC<DataCardProps> = ({
     <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon name={iconName} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" />
+          <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-5 w-5 text-[var(--accent-color)]" aria-hidden="true" iconType="static" />
         </div>
         <div>
           <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
@@ -362,7 +362,7 @@ const DataCard: React.FC<DataCardProps> = ({
 interface DataRowProps {
   label: string;
   value: React.ReactNode;
-  iconName?: IconName;
+  iconName?: string;
   tooltip?: string;
   featured?: boolean;
 }
@@ -373,7 +373,7 @@ const DataRow = ({ label, value, iconName, tooltip, featured = false }: DataRowP
       <div className="flex items-center text-[var(--secondary-color)]">
         {iconName && (
           <span className="mr-2">
-            <Icon name={iconName} className="h-4 w-4" iconType="static" />
+            <Icon name={`fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} className="h-4 w-4" iconType="static" />
           </span>
         )}
         <span className={featured ? 'font-medium' : ''}>{label}</span>
@@ -415,7 +415,7 @@ const AudienceSection: React.FC<{ audience: CampaignDetail['audience'] | null }>
   return (
     <DataCard 
       title="Audience Demographics" 
-      iconName="userGroup"
+      iconName="faUserGroup"
       description="Target audience information for this campaign"
     >
       <div className="space-y-5">
@@ -1002,7 +1002,7 @@ const componentTester = {
 
 // Add DetailSection component
 interface DetailSectionProps {
-  iconName: IconName;
+  iconName: string;
   title: string;
   description?: string;
   children: React.ReactNode;
@@ -1223,7 +1223,7 @@ const formatPercentage = (value: number) => {
 // Add new error status badge component
 const ErrorStatusBadge = ({ message }: { message: string }) => (
   <div className="text-red-600 font-medium p-3 border border-red-300 bg-red-50 rounded-md flex items-center space-x-2">
-    {migrateHeroIcon('XCircleIcon', { className: 'h-5 w-5 text-red-600' })}
+    <Icon name="faCircleXmark" className="h-5 w-5 text-red-600" iconType="static" />
     <span>{message}</span>
   </div>
 );
@@ -1966,7 +1966,7 @@ export default function CampaignDetail() {
                     <div key={index} className="flex items-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-4 py-2 rounded-lg">
                       <div className="w-5 h-5 mr-2" style={{ filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)' }}>
                         <Image 
-                          src={featureIconsMap[feature as keyof typeof featureIconsMap]?.icon || "/Brand_Lift.svg"}
+                          src={featureIconsMap[feature as keyof typeof featureIconsMap]?.icon || "/app/Brand_Lift.svg"}
                           alt={formatFeatureName(feature)}
                           width={20}
                           height={20}

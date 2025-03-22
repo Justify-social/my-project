@@ -1,43 +1,67 @@
 import React from 'react';
-import { Icon, IconProps } from './Icon';
-import { iconConfig } from './IconConfig';
+import { SvgIcon, SvgIconProps } from './SvgIcon';
+
+// Create a type that omits iconType but keeps name as required
+type StaticIconProps = Omit<SvgIconProps, 'iconType'>;
+
+// Create a type that omits iconType but keeps name as required
+type ButtonIconProps = Omit<SvgIconProps, 'iconType'>;
+
+// Create a type that omits iconType and action but keeps name as required
+type ActionIconProps = Omit<SvgIconProps, 'iconType' | 'action'>;
 
 /**
- * StaticIcon - A wrapper for the Icon component that always uses static mode
- * Use for decorative, informational icons that should not change on hover
+ * StaticIcon Component - Non-interactive icon with no hover effects
+ * Use for decorative or informational icons that don't change appearance
  */
-export const StaticIcon: React.FC<Omit<IconProps, 'iconType'>> = (props) => {
-  return <Icon {...props} iconType="static" />;
-};
+export const StaticIcon = React.forwardRef<SVGSVGElement, StaticIconProps>(
+  (props, ref) => {
+    return <SvgIcon {...props} iconType="static" ref={ref} />;
+  }
+);
+StaticIcon.displayName = 'StaticIcon';
 
 /**
- * ButtonIcon - A wrapper for the Icon component that uses button mode with hover effects
- * Use for interactive elements like buttons, links, etc.
+ * ButtonIcon Component - Interactive icon with hover effects
+ * Changes from light to solid on hover and changes color based on action
+ * Must be wrapped in a parent with the 'group' class for hover effects to work
  */
-export const ButtonIcon: React.FC<Omit<IconProps, 'iconType'>> = (props) => {
-  return <Icon {...props} iconType="button" />;
-};
+export const ButtonIcon = React.forwardRef<SVGSVGElement, ButtonIconProps>(
+  (props, ref) => {
+    return <SvgIcon {...props} iconType="button" action="default" ref={ref} />;
+  }
+);
+ButtonIcon.displayName = 'ButtonIcon';
 
 /**
- * DeleteIcon - A specialized button icon for delete/remove actions
- * Automatically uses red color on hover
+ * DeleteIcon Component - Interactive icon with red hover color
+ * Specialized for delete/remove operations
  */
-export const DeleteIcon: React.FC<Omit<IconProps, 'iconType' | 'action'>> = (props) => {
-  return <Icon {...props} iconType="button" action="delete" />;
-};
+export const DeleteIcon = React.forwardRef<SVGSVGElement, ActionIconProps>(
+  (props, ref) => {
+    return <SvgIcon {...props} iconType="button" action="delete" ref={ref} />;
+  }
+);
+DeleteIcon.displayName = 'DeleteIcon';
 
 /**
- * WarningIcon - A specialized button icon for warning actions
- * Automatically uses yellow color on hover
+ * WarningIcon Component - Interactive icon with yellow hover color
+ * Specialized for warning/caution operations
  */
-export const WarningIcon: React.FC<Omit<IconProps, 'iconType' | 'action'>> = (props) => {
-  return <Icon {...props} iconType="button" action="warning" />;
-};
+export const WarningIcon = React.forwardRef<SVGSVGElement, ActionIconProps>(
+  (props, ref) => {
+    return <SvgIcon {...props} iconType="button" action="warning" ref={ref} />;
+  }
+);
+WarningIcon.displayName = 'WarningIcon';
 
 /**
- * SuccessIcon - A specialized button icon for success/confirmation actions
- * Automatically uses green color on hover
+ * SuccessIcon Component - Interactive icon with green hover color
+ * Specialized for success/confirmation operations
  */
-export const SuccessIcon: React.FC<Omit<IconProps, 'iconType' | 'action'>> = (props) => {
-  return <Icon {...props} iconType="button" action="success" />;
-}; 
+export const SuccessIcon = React.forwardRef<SVGSVGElement, ActionIconProps>(
+  (props, ref) => {
+    return <SvgIcon {...props} iconType="button" action="success" ref={ref} />;
+  }
+);
+SuccessIcon.displayName = 'SuccessIcon'; 

@@ -4,9 +4,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { migrateHeroIcon } from '@/components/ui/icons';
+import { migrateHeroIcon, Icon } from '@/components/ui/icons';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { Icon } from '@/components/ui/icon';
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
@@ -739,7 +738,7 @@ const ClientCampaignList: React.FC = () => {
             className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
           />
           <span className="absolute left-3 top-3 text-gray-500">
-            <Icon name="search" size="sm" iconType="static" />
+            <Icon name="faSearchLight" size="sm" iconType="static" />
           </span>
         </div>
 
@@ -761,7 +760,7 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="chevronDown" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -785,7 +784,7 @@ const ClientCampaignList: React.FC = () => {
               <option value="completed">Completed</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="chevronDown" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -807,7 +806,7 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="chevronDown" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -829,7 +828,7 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <Icon name="chevronDown" size="sm" iconType="static" />
+              <Icon name="faChevronDownLight" size="sm" iconType="static" />
             </div>
           </div>
 
@@ -938,28 +937,28 @@ const ClientCampaignList: React.FC = () => {
                               className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                               title="View campaign"
                             >
-                              <Icon name="view" size="md" />
+                              <Icon name="faEyeLight" size="md" iconType="button" />
                             </span>
                             <Link 
                               href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                               className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors"
                               title="Edit campaign"
                             >
-                              <Icon name="edit" size="md" />
+                              <Icon name="faPenToSquareLight" size="md" iconType="button" />
                             </Link>
                             <span 
                               onClick={() => handleDuplicateClick(campaign)}
                               className="group text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                               title="Duplicate campaign"
                             >
-                              <Icon name="copy" size="md" />
+                              <Icon name="faCopyLight" size="md" iconType="button" />
                             </span>
                             <span
                               onClick={() => handleDeleteClick(campaign)}
                               className="group text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                               title="Delete campaign"
                             >
-                              <Icon name="delete" size="md" action="delete" />
+                              <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" />
                             </span>
                           </div>
                         </td>
@@ -1044,28 +1043,28 @@ const ClientCampaignList: React.FC = () => {
                       className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                       title="View campaign"
                     >
-                      <Icon name="view" size="md" />
+                      <Icon name="faEyeLight" size="md" iconType="button" />
                     </span>
                     <Link 
                       href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                       className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors"
                       title="Edit campaign"
                     >
-                      <Icon name="edit" size="md" />
+                      <Icon name="faPenToSquareLight" size="md" iconType="button" />
                     </Link>
                     <span 
                       onClick={() => handleDuplicateClick(campaign)}
                       className="group p-1.5 text-gray-500 hover:text-[var(--accent-color)] transition-colors cursor-pointer" 
                       title="Duplicate campaign"
                     >
-                      <Icon name="copy" size="md" />
+                      <Icon name="faCopyLight" size="md" iconType="button" />
                     </span>
                     <span
                       onClick={() => handleDeleteClick(campaign)}
                       className="group p-1.5 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                       title="Delete campaign"
                     >
-                      <Icon name="delete" size="md" action="delete" />
+                      <Icon name="faTrashCanLight" size="md" iconType="button" action="delete" />
                     </span>
                   </div>
                 </div>
@@ -1108,7 +1107,7 @@ const ClientCampaignList: React.FC = () => {
                 onClick={() => setShowDeleteModal(false)}
                 className="group text-gray-500 hover:text-gray-700"
               >
-                <Icon name="close" size="sm" iconType="button" />
+                <Icon name="faClose" size="sm" iconType="button" />
               </button>
             </div>
             
@@ -1161,7 +1160,7 @@ const ClientCampaignList: React.FC = () => {
                 onClick={() => setShowDuplicateModal(false)}
                 className="group text-gray-500 hover:text-gray-700"
               >
-                <Icon name="close" size="sm" iconType="button" />
+                <Icon name="faClose" size="sm" iconType="button" />
               </button>
             </div>
             

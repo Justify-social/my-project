@@ -14,7 +14,7 @@ export type IconPrefix = FAIconPrefix;
 export type IconName = 
   | 'user' | 'search' | 'plus' | 'minus' | 'close' | 'check'
   | 'chevronDown' | 'chevronUp' | 'chevronLeft' | 'chevronRight'
-  | 'settings' | 'mail' | 'calendar' | 'trash' | 'warning'
+  | 'settings' | 'mail' | 'calendar' | 'warning'
   | 'info' | 'bell' | 'documentText' | 'document' | 'money'
   | 'bolt' | 'arrowPath' | 'arrowUp' | 'arrowDown' | 'arrowLeft'
   | 'arrowRight' | 'home' | 'globe' | 'bookmark' | 'heart'
@@ -80,9 +80,9 @@ export const iconConfig = {
    * Icon colors
    */
   colors: {
-    default: 'currentColor',
-    hover: '#00BFFF',      // Light blue color for hover
-    active: '#00BFFF',     // Light blue color for active state
+    default: '#333333',    // Jet color for regular state
+    hover: '#00BFFF',      // Deep Sky Blue color for hover
+    active: '#00BFFF',     // Deep Sky Blue color for active state
     danger: '#FF3B30',     // Red color for dangerous actions (delete, remove)
     warning: '#FFCC00',    // Yellow color for warning actions
     success: '#34C759'     // Green color for success actions
