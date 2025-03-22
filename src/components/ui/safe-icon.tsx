@@ -3,8 +3,8 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition, findIconDefinition, IconPrefix, IconName } from '@fortawesome/fontawesome-svg-core';
-import { faQuestion } from '@fortawesome/pro-solid-svg-icons';
-import * as solidIcons from '@fortawesome/pro-solid-svg-icons';
+import { faQuestion } from '@fortawesome/free-solid-svg-icons';
+import * as solidIcons from '@fortawesome/free-solid-svg-icons';
 import { cn } from '@/lib/utils';
 
 // Map of camelCase names to kebab-case for FA

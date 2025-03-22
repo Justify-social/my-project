@@ -30,18 +30,17 @@ function log(message, isVerboseOnly = false) {
 
 // Font Awesome icon sets used in the project
 const FA_LIBRARIES = [
-  '@fortawesome/pro-solid-svg-icons',
-  '@fortawesome/pro-light-svg-icons',
-  '@fortawesome/free-brands-svg-icons',
-  '@fortawesome/pro-regular-svg-icons'
+  '@fortawesome/free-solid-svg-icons',
+  '@fortawesome/free-regular-svg-icons',
+  '@fortawesome/free-brands-svg-icons'
 ];
 
 // Icon prefixes and their corresponding libraries
 const ICON_PREFIXES = {
-  'fas': '@fortawesome/pro-solid-svg-icons',
-  'fal': '@fortawesome/pro-light-svg-icons',
+  'fas': '@fortawesome/free-solid-svg-icons',
+  'fal': '@fortawesome/free-regular-svg-icons',
   'fab': '@fortawesome/free-brands-svg-icons',
-  'far': '@fortawesome/pro-regular-svg-icons'
+  'far': '@fortawesome/free-regular-svg-icons'
 };
 
 // Output directories for the SVG icons based on style
@@ -164,14 +163,14 @@ function processFile(filePath) {
             propName.startsWith('fa')
           ) {
             // Try to determine which library this likely belongs to based on the name pattern
-            let library = '@fortawesome/pro-solid-svg-icons'; // Default
+            let library = '@fortawesome/free-solid-svg-icons'; // Default
             
             if (objName.includes('light')) {
-              library = '@fortawesome/pro-light-svg-icons';
+              library = '@fortawesome/free-regular-svg-icons';
             } else if (objName.includes('brand')) {
               library = '@fortawesome/free-brands-svg-icons';
             } else if (objName.includes('regular')) {
-              library = '@fortawesome/pro-regular-svg-icons';
+              library = '@fortawesome/free-regular-svg-icons';
             }
             
             if (!usedIcons.has(propName)) {
@@ -193,7 +192,7 @@ function processFile(filePath) {
             !value.includes('_')) {
           
           // Default to solid icons unless we can determine otherwise from context
-          let library = '@fortawesome/pro-solid-svg-icons';
+          let library = '@fortawesome/free-solid-svg-icons';
           
           // Try to infer the icon type from surrounding code
           const parent = path.parent;
@@ -203,9 +202,9 @@ function processFile(filePath) {
               if (prop.key && prop.key.name === 'prefix') {
                 if (prop.value && prop.value.value) {
                   const prefix = prop.value.value;
-                  if (prefix === 'fal') library = '@fortawesome/pro-light-svg-icons';
+                  if (prefix === 'fal') library = '@fortawesome/free-regular-svg-icons';
                   else if (prefix === 'fab') library = '@fortawesome/free-brands-svg-icons';
-                  else if (prefix === 'far') library = '@fortawesome/pro-regular-svg-icons';
+                  else if (prefix === 'far') library = '@fortawesome/free-regular-svg-icons';
                 }
                 break;
               }
@@ -242,7 +241,7 @@ for (const [prefix, dir] of Object.entries(OUTPUT_DIRS)) {
       const camelName = `fa${baseName.charAt(0).toUpperCase()}${baseName.substring(1).replace(/-([a-z])/g, g => g[1].toUpperCase())}`;
       
       // Map prefix to library
-      const library = ICON_PREFIXES[prefix] || '@fortawesome/pro-solid-svg-icons';
+      const library = ICON_PREFIXES[prefix] || '@fortawesome/free-solid-svg-icons';
       
       if (!usedIcons.has(camelName)) {
         usedIcons.set(camelName, library);
@@ -271,20 +270,20 @@ const REQUIRED_PLATFORM_ICONS = {
 
 // Required light icons - always include these common light icons
 const REQUIRED_LIGHT_ICONS = {
-  'faUser': '@fortawesome/pro-light-svg-icons',
-  'faChevronDown': '@fortawesome/pro-light-svg-icons',
-  'faChevronUp': '@fortawesome/pro-light-svg-icons',
-  'faChevronLeft': '@fortawesome/pro-light-svg-icons',
-  'faChevronRight': '@fortawesome/pro-light-svg-icons',
-  'faCalendar': '@fortawesome/pro-light-svg-icons',
-  'faCheck': '@fortawesome/pro-light-svg-icons',
-  'faXmark': '@fortawesome/pro-light-svg-icons',
-  'faBell': '@fortawesome/pro-light-svg-icons',
-  'faCircleInfo': '@fortawesome/pro-light-svg-icons',
-  'faCircleCheck': '@fortawesome/pro-light-svg-icons',
-  'faCircleXmark': '@fortawesome/pro-light-svg-icons',
-  'faEnvelope': '@fortawesome/pro-light-svg-icons',
-  'faSearch': '@fortawesome/pro-light-svg-icons'
+  'faUser': '@fortawesome/free-regular-svg-icons',
+  'faChevronDown': '@fortawesome/free-regular-svg-icons',
+  'faChevronUp': '@fortawesome/free-regular-svg-icons',
+  'faChevronLeft': '@fortawesome/free-regular-svg-icons',
+  'faChevronRight': '@fortawesome/free-regular-svg-icons',
+  'faCalendar': '@fortawesome/free-regular-svg-icons',
+  'faCheck': '@fortawesome/free-regular-svg-icons',
+  'faXmark': '@fortawesome/free-regular-svg-icons',
+  'faBell': '@fortawesome/free-regular-svg-icons',
+  'faCircleInfo': '@fortawesome/free-regular-svg-icons',
+  'faCircleCheck': '@fortawesome/free-regular-svg-icons',
+  'faCircleXmark': '@fortawesome/free-regular-svg-icons',
+  'faEnvelope': '@fortawesome/free-regular-svg-icons',
+  'faSearch': '@fortawesome/free-regular-svg-icons'
 };
 
 // Add any required icons
@@ -302,7 +301,7 @@ const solidIcons = Array.from(usedIcons.entries())
   .filter(([iconName, library]) => {
     // Skip icons that already have Light variants
     return !iconName.endsWith('Light') && 
-           library === '@fortawesome/pro-solid-svg-icons';
+           library === '@fortawesome/free-solid-svg-icons';
   });
 
 // Add light versions of all solid icons
@@ -324,7 +323,7 @@ for (const [iconName, library] of Object.entries(REQUIRED_LIGHT_ICONS)) {
 // Then, automatically create light versions of all solid icons
 for (const [iconName, solidLibrary] of solidIcons) {
   const lightIconName = `${iconName}Light`;
-  const lightLibrary = '@fortawesome/pro-light-svg-icons';
+  const lightLibrary = '@fortawesome/free-regular-svg-icons';
   
   // Only add if we don't already have this light icon
   if (!usedIcons.has(lightIconName)) {

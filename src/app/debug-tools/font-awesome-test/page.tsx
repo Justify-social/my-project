@@ -8,18 +8,18 @@ import { SafeQuestionMarkIcon } from '@/components/ui/icons';
 import { getIcon } from '@/components/ui/icons';
 
 // Import and register all icons needed for testing
-import { faUser, faCheck, faGear, faBell, faStar, faTrash, faHouse, faMagnifyingGlass, faChartPie, faEnvelope, faPlus } from '@fortawesome/pro-solid-svg-icons';
-import { faUser as falUser, faHouse as falHouse, faMagnifyingGlass as falMagnifyingGlass, faGear as falGear, faChartPie as falChartPie, faEnvelope as falEnvelope, faBell as falBell, faCheck as falCheck, faTrash as falTrash, faPlus as falPlus } from '@fortawesome/pro-light-svg-icons';
-import { faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faReddit, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { faQuestionCircle, faUser, faCheck, faGear, faHouse, faCircleInfo, faCircleCheck, faStar, faEnvelope, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUser as farUser, faCircleXmark, faStar as farStar, faCircleInfo as farCircleInfo, faCircleCheck as farCircleCheck, faPlus as farPlus } from '@fortawesome/free-regular-svg-icons';
+import { faTwitter, faFacebook, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 // Register all the icons needed for the test page
 library.add(
 // Solid icons
-faUser, faCheck, faGear, faBell, faStar, faTrash, faHouse, faMagnifyingGlass, faChartPie, faEnvelope, faPlus,
+faUser, faCheck, faGear, faHouse, faCircleInfo, faCircleCheck, faStar, faEnvelope, faPlus,
 // Light icons
-falUser, falHouse, falMagnifyingGlass, falGear, falChartPie, falEnvelope, falBell, falCheck, falTrash, falPlus,
+farUser, farCircleXmark, farStar, farCircleInfo, farCircleCheck, farPlus,
 // Brand icons
-faTwitter, faFacebook, faInstagram, faYoutube, faLinkedin, faTiktok, faReddit, faGithub);
+faTwitter, faFacebook, faGithub);
 
 // Define a safe fallback FontAwesomeIcon component
 const SafeFontAwesomeIcon = ({
@@ -416,27 +416,27 @@ library.add(faUser, faCheck, faTwitter);`}
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faMagnifyingGlass} style={{
+                  <FontAwesomeIcon icon={faCircleInfo} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">magnifying-glass</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-info</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faGear} style={{
+                  <FontAwesomeIcon icon={faCircleCheck} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">gear</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-check</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faChartPie} style={{
+                  <FontAwesomeIcon icon={faStar} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">chart-pie</span>
+                <span className="text-xs mt-1 text-center text-gray-600">star</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
@@ -448,19 +448,11 @@ library.add(faUser, faCheck, faTwitter);`}
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faBell} style={{
+                  <FontAwesomeIcon icon={faPlus} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">bell</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faCheck} style={{
-                  fontSize: '1.5rem'
-                }} solid={false} className="text-[var(--secondary-color)]" />
-                </div>
-                <span className="text-xs mt-1 text-center text-gray-600">check</span>
+                <span className="text-xs mt-1 text-center text-gray-600">plus</span>
               </div>
             </div>
           </div>
@@ -470,7 +462,7 @@ library.add(faUser, faCheck, faTwitter);`}
             <div className="grid grid-cols-4 gap-3">
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falUser} style={{
+                  <FontAwesomeIcon icon={farUser} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
@@ -478,59 +470,43 @@ library.add(faUser, faCheck, faTwitter);`}
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falHouse} style={{
+                  <FontAwesomeIcon icon={farCircleXmark} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">house</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-xmark</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falMagnifyingGlass} style={{
+                  <FontAwesomeIcon icon={farStar} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">magnifying-glass</span>
+                <span className="text-xs mt-1 text-center text-gray-600">star</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falGear} style={{
+                  <FontAwesomeIcon icon={farCircleInfo} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">gear</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-info</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falChartPie} style={{
+                  <FontAwesomeIcon icon={farCircleCheck} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">chart-pie</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-check</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falEnvelope} style={{
+                  <FontAwesomeIcon icon={farPlus} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">envelope</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falBell} style={{
-                  fontSize: '1.5rem'
-                }} solid={false} className="text-[var(--secondary-color)]" />
-                </div>
-                <span className="text-xs mt-1 text-center text-gray-600">bell</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falCheck} style={{
-                  fontSize: '1.5rem'
-                }} solid={false} className="text-[var(--secondary-color)]" />
-                </div>
-                <span className="text-xs mt-1 text-center text-gray-600">check</span>
+                <span className="text-xs mt-1 text-center text-gray-600">plus</span>
               </div>
             </div>
           </div>
@@ -557,46 +533,6 @@ library.add(faUser, faCheck, faTwitter);`}
             </div>
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                <FontAwesomeIcon icon={faInstagram} style={{
-                fontSize: '1.5rem'
-              }} solid={false} className="text-[var(--secondary-color)]" />
-              </div>
-              <span className="text-xs mt-1 text-center text-gray-600">instagram</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                <FontAwesomeIcon icon={faYoutube} style={{
-                fontSize: '1.5rem'
-              }} solid={false} className="text-[var(--secondary-color)]" />
-              </div>
-              <span className="text-xs mt-1 text-center text-gray-600">youtube</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                <FontAwesomeIcon icon={faLinkedin} style={{
-                fontSize: '1.5rem'
-              }} solid={false} className="text-[var(--secondary-color)]" />
-              </div>
-              <span className="text-xs mt-1 text-center text-gray-600">linkedin</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                <FontAwesomeIcon icon={faTiktok} style={{
-                fontSize: '1.5rem'
-              }} solid={false} className="text-[var(--secondary-color)]" />
-              </div>
-              <span className="text-xs mt-1 text-center text-gray-600">tiktok</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                <FontAwesomeIcon icon={faReddit} style={{
-                fontSize: '1.5rem'
-              }} solid={false} className="text-[var(--secondary-color)]" />
-              </div>
-              <span className="text-xs mt-1 text-center text-gray-600">reddit</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
                 <FontAwesomeIcon icon={faGithub} style={{
                 fontSize: '1.5rem'
               }} solid={false} className="text-[var(--secondary-color)]" />
@@ -619,7 +555,7 @@ library.add(faUser, faCheck, faTwitter);`}
             <div className="grid grid-cols-4 gap-3">
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falUser} style={{
+                  <FontAwesomeIcon icon={farUser} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
@@ -627,23 +563,23 @@ library.add(faUser, faCheck, faTwitter);`}
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falTrash} style={{
+                  <FontAwesomeIcon icon={farCircleXmark} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">trash</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-xmark</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falCheck} style={{
+                  <FontAwesomeIcon icon={farCircleCheck} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">check</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-check</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={falPlus} style={{
+                  <FontAwesomeIcon icon={farPlus} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
@@ -665,19 +601,19 @@ library.add(faUser, faCheck, faTwitter);`}
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faTrash} style={{
+                  <FontAwesomeIcon icon={faCircleXmark} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">trash (solid)</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-xmark (solid)</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faCheck} style={{
+                  <FontAwesomeIcon icon={faCircleCheck} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">check (solid)</span>
+                <span className="text-xs mt-1 text-center text-gray-600">circle-check (solid)</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
@@ -711,19 +647,11 @@ library.add(faUser, faCheck, faTwitter);`}
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faInstagram} style={{
+                  <FontAwesomeIcon icon={faGithub} style={{
                   fontSize: '1.5rem'
                 }} solid={false} className="text-[var(--secondary-color)]" />
                 </div>
-                <span className="text-xs mt-1 text-center text-gray-600">instagram</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-md">
-                  <FontAwesomeIcon icon={faLinkedin} style={{
-                  fontSize: '1.5rem'
-                }} solid={false} className="text-[var(--secondary-color)]" />
-                </div>
-                <span className="text-xs mt-1 text-center text-gray-600">linkedin</span>
+                <span className="text-xs mt-1 text-center text-gray-600">github</span>
               </div>
             </div>
           </div>

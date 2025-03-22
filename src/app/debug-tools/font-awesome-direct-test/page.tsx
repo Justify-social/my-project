@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser, faHouse, faGear } from '@fortawesome/pro-solid-svg-icons';
-import { faUser as falUser } from '@fortawesome/pro-light-svg-icons';
+import { faUser, faHouse, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faUser as falUser } from '@fortawesome/free-regular-svg-icons';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons';
 
 // Add icons to library

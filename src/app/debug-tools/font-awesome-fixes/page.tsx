@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser, faCheck, faGear, faBell, faStar } from '@fortawesome/pro-solid-svg-icons';
-import { faUser as falUser, faHouse as falHouse } from '@fortawesome/pro-light-svg-icons';
+import { faUser, faCheck, faGear, faBell, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faUser as falUser, faHouse as falHouse } from '@fortawesome/free-regular-svg-icons';
 import { faTwitter, faFacebook, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 // 1. Register icons with library - important for array syntax to work
@@ -15,6 +15,14 @@ faUser, faCheck, faGear, faBell, faStar,
 falUser, falHouse,
 // Brand icons
 faTwitter, faFacebook, faGithub);
+
+// Update any code examples in the file
+const codeExamples = {
+  importExample: `import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';`,
+  // ... other examples
+};
+
 export default function FontAwesomeFixesPage() {
   const [renderCount, setRenderCount] = useState(0);
 
@@ -53,7 +61,7 @@ export default function FontAwesomeFixesPage() {
             Import and use icons directly without relying on the library:
           </p>
           <pre className="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">
-          {`import { faUser } from '@fortawesome/pro-solid-svg-icons';
+          {`import { faUser } from '@fortawesome/free-solid-svg-icons';
 <FontAwesomeIcon icon={faUser} />`}
           </pre>
           
@@ -133,7 +141,7 @@ config.autoAddCss = false;`}
               <h3 className="font-medium">2. Register icons with library.add</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
               {`import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser } from '@fortawesome/pro-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons';
 
 library.add(faUser, faTwitter);`}
