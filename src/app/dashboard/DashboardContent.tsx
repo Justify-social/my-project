@@ -12,6 +12,7 @@ import useSWR from 'swr';
 import Image from 'next/image';
 import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
 
 // Import dynamically loaded components and ensure they are exported correctly.
 const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming"), {
@@ -21,6 +22,15 @@ const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming
 // -----------------------
 // Helper Components
 // -----------------------
+
+// Define Icon props type
+interface IconProps {
+  className?: string;
+  solid?: boolean;
+  name?: string;
+  iconType?: string;
+  [key: string]: any;
+}
 
 // Spinner for loading states
 const Spinner: React.FC = () => <div className="flex justify-center items-center py-8">
@@ -42,15 +52,15 @@ const Toast: React.FC<ToastProps> = ({
   const config = {
     error: {
       bg: "bg-red-600",
-      icon: props => <Icon name="faXCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
+      icon: (props: IconProps) => <Icon name="faXCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
     },
     success: {
       bg: "bg-green-600",
-      icon: props => <Icon name="faCheckCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
+      icon: (props: IconProps) => <Icon name="faCheckCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
     },
     info: {
       bg: "bg-[var(--accent-color)]",
-      icon: props => <Icon name="faBellAlert" {...props} solid={false} className="text-[var(--secondary-color)]" />
+      icon: (props: IconProps) => <Icon name="faBellAlert" {...props} solid={false} className="text-[var(--secondary-color)]" />
     }
   }[type];
   const Icon = config.icon;
@@ -85,9 +95,9 @@ const ErrorDisplay: React.FC<{
     <p className="text-sm text-[var(--secondary-color)] mb-4">
       {message}
     </p>
-    {onRetry && <button onClick={onRetry} className="inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors">
+    {onRetry && <button onClick={onRetry} className="group inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors">
 
-        <Icon name="faArrowRight" className="w-4 h-4 mr-2" solid={false} />
+        <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
         <span>Try again</span>
       </button>}
     </div>;
@@ -952,13 +962,13 @@ const CalendarMonthView: React.FC<{
   }
   return <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full">
       <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)]">
-        <h3 className="text-base font-medium text-[var(--primary-color)]">{monthName} {year}</h3>
+        <h3 className="text-base font-semibold text-center">{format(month, 'MMMM yyyy')}</h3>
         <div className="flex space-x-2">
-          <button onClick={prevMonth} className="p-1 rounded-md hover:bg-[var(--background-color)]">
-            <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)]" solid={false} />
+          <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)]">
+            <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)]" iconType="button" />
           </button>
-          <button onClick={nextMonth} className="p-1 rounded-md hover:bg-[var(--background-color)]">
-            <Icon name="faChevronRight" className="w-5 h-5 text-[var(--secondary-color)]" solid={false} />
+          <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)]">
+            <Icon name="faChevronRight" className="w-5 h-5 text-[var(--secondary-color)]" iconType="button" />
           </button>
         </div>
       </div>
@@ -1054,6 +1064,38 @@ const generateChartPath = (dataPoints: Array<{
 const generateAreaPath = (linePath: string): string => {
   return `${linePath} L300,100 L0,100 Z`;
 };
+
+// Make sure the helper functions for styling are properly defined 
+// (if they were removed, add them back)
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'Performance': return 'bg-blue-500';
+    case 'Audience': return 'bg-purple-500';
+    case 'Content': return 'bg-green-500';
+    case 'Strategy': return 'bg-yellow-500';
+    default: return 'bg-gray-500';
+  }
+};
+
+const getCategoryTextColor = (category: string) => {
+  switch (category) {
+    case 'Performance': return 'text-blue-500 bg-blue-100';
+    case 'Audience': return 'text-purple-500 bg-purple-100';
+    case 'Content': return 'text-green-500 bg-green-100';
+    case 'Strategy': return 'text-yellow-500 bg-yellow-100';
+    default: return 'text-gray-500 bg-gray-100';
+  }
+};
+
+const getImpactBadgeColor = (impact: string) => {
+  switch (impact) {
+    case 'High': return 'bg-red-100 text-red-700';
+    case 'Medium': return 'bg-yellow-100 text-yellow-700';
+    case 'Low': return 'bg-green-100 text-green-700';
+    default: return 'bg-gray-100 text-gray-700';
+  }
+};
+
 export default function DashboardContent({
   user = {
     id: '',
@@ -1247,17 +1289,33 @@ export default function DashboardContent({
     onAction
   }) => <motion.div initial={{
     opacity: 0,
-    y: 20
+    y: 10
   }} animate={{
     opacity: 1,
     y: 0
-  }} className="p-4 border border-[var(--divider-color)] rounded-lg bg-white hover:shadow-md transition-all duration-300">
-
-      {/* ... existing InsightCard implementation ... */}
-    </motion.div>;
+  }} className="bg-white rounded-xl border border-[var(--divider-color)] overflow-hidden shadow-sm">
+    <div className={`h-2 ${getCategoryColor(insight.category)}`} />
+    <div className="p-5">
+      <div className="flex items-center mb-3">
+        <span className={`${getCategoryTextColor(insight.category)} text-xs font-medium px-2.5 py-0.5 rounded-full bg-opacity-15`}>
+          {insight.category}
+        </span>
+        <span className={`ml-2 ${getImpactBadgeColor(insight.impact)} text-xs font-medium px-2 py-0.5 rounded-full`}>
+          {insight.impact} Impact
+        </span>
+      </div>
+      <h3 className="text-base font-semibold text-[var(--primary-color)] mb-2">{insight.title}</h3>
+      <p className="text-sm text-[var(--secondary-color)] mb-4">{insight.description}</p>
+      <button onClick={() => onAction(insight.action)} className="group w-full px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center">
+        <span>Take Action</span>
+        <Icon name="faArrowRight" className="w-4 h-4 ml-2" iconType="button" />
+      </button>
+    </div>
+  </motion.div>;
 
   // Return the JSX for the dashboard
-  return <div className="min-h-screen bg-white">
+  return (
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6">
         {toastMessage && <Toast message={toastMessage} type="info" />}
 
@@ -1268,11 +1326,9 @@ export default function DashboardContent({
               <span className="block sm:hidden">Overview</span>
               <span className="hidden sm:block">Campaigns Overview</span>
             </h2>
-            <button onClick={() => router.push('/campaigns/wizard/step-1')} className="px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
-
-              <Icon name="faPlus" className="w-4 h-4" solid={false} />
-              <span className="hidden sm:inline">Create New Campaign</span>
-              <span className="inline sm:hidden">Campaign</span>
+            <button onClick={() => router.push('/campaigns/wizard/step-1')} className="group px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all">
+              <Icon name="faPlus" className="w-4 h-4 mr-2" iconType="button" />
+              <span>New Campaign</span>
             </button>
           </div>
           
@@ -1291,18 +1347,26 @@ export default function DashboardContent({
                 </div>
                 
                 <div className="p-3 sm:p-4">
-                  {isLoadingCampaigns ? <div className="text-center py-4 sm:py-6">
+                  {isLoadingCampaigns ? (
+                    <div className="text-center py-4 sm:py-6">
                       <Spinner />
                       <p className="mt-2 text-sm text-[var(--secondary-color)]">Loading campaigns...</p>
-                    </div> : upcomingCampaigns.length === 0 ? <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg">
+                    </div>
+                  ) : upcomingCampaigns.length === 0 ? (
+                    <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg">
                       <p className="text-sm text-[var(--secondary-color)]">No upcoming campaigns</p>
-                      <button onClick={handleNewCampaign} className="mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
-
-                        Create Your First Campaign
+                      <button onClick={handleNewCampaign} className="group mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
+                        <Icon name="faPlus" className="w-3 h-3 mr-1" iconType="button" />
+                        <span>Create Your First Campaign</span>
                       </button>
-                    </div> : <div className="space-y-3 overflow-y-auto max-h-[300px]">
-                      {upcomingCampaigns.map(campaign => <CampaignCard key={campaign.id} campaign={campaign} onClick={() => router.push(`/campaigns/${campaign.id}`)} />)}
-                    </div>}
+                    </div>
+                  ) : (
+                    <div className="space-y-3 overflow-y-auto max-h-[300px]">
+                      {upcomingCampaigns.map(campaign => (
+                        <CampaignCard key={campaign.id} campaign={campaign} onClick={() => router.push(`/campaigns/${campaign.id}`)} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1317,17 +1381,37 @@ export default function DashboardContent({
           
           {/* Performance Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <MetricCard title="Total Campaigns" value={metrics.stats.totalCampaigns} trend={metrics.stats.campaignChange} iconName="info" description={`+${metrics.stats.campaignChange} campaigns`} />
-
+            <MetricCard 
+              title="Total Campaigns" 
+              value={metrics.stats.totalCampaigns} 
+              trend={metrics.stats.campaignChange} 
+              iconName="faInfoCircle" 
+              description={`+${metrics.stats.campaignChange} campaigns`} 
+            />
             
-            <MetricCard title="Survey Responses" value={metrics.stats.surveyResponses} trend={metrics.stats.surveyChange} iconName="chatBubble" description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
-
+            <MetricCard 
+              title="Survey Responses" 
+              value={metrics.stats.surveyResponses} 
+              trend={metrics.stats.surveyChange} 
+              iconName="faCommentDots" 
+              description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} 
+            />
             
-            <MetricCard title="Live Campaigns" value={metrics.stats.liveCampaigns} trend={metrics.stats.liveChange} iconName="info" description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} />
-
+            <MetricCard 
+              title="Live Campaigns" 
+              value={metrics.stats.liveCampaigns} 
+              trend={metrics.stats.liveChange} 
+              iconName="faCirclePlay" 
+              description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} 
+            />
             
-            <MetricCard title="Credits Available" value={metrics.stats.creditsAvailable} trend={metrics.stats.creditsChange} iconName="money" description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} />
-
+            <MetricCard 
+              title="Credits Available" 
+              value={metrics.stats.creditsAvailable} 
+              trend={metrics.stats.creditsChange} 
+              iconName="faMoneyBill" 
+              description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} 
+            />
           </div>
         </div>
 
@@ -1336,30 +1420,26 @@ export default function DashboardContent({
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Influencers Overview</h2>
             <div className="flex space-x-3">
-              <button onClick={() => router.push('/influencers/reports')} className="px-4 py-2 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
-
-                View Detailed Report
+              <button onClick={() => router.push('/influencers/reports')} className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
+                <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
+                <span>View Detailed Report</span>
               </button>
             </div>
           </div>
           
           <div className="bg-white rounded-lg border border-[var(--divider-color)]">
             <div className="flex border-b border-[var(--divider-color)]">
-              <button className="px-4 py-3 text-sm font-medium text-[#0ea5e9] border-b-2 border-[#0ea5e9]">
-
-                Social Profiles
+              <button className="group px-4 py-3 text-sm font-medium text-[var(--accent-color)] border-b-2 border-[var(--accent-color)]">
+                <span>Social Profiles</span>
               </button>
-              <button className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
-
-                Engagement
+              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
+                <span>Engagement</span>
               </button>
-              <button className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
-
-                Likes
+              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
+                <span>Likes</span>
               </button>
-              <button className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
-
-                Comments
+              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
+                <span>Comments</span>
               </button>
             </div>
             
@@ -1391,7 +1471,7 @@ export default function DashboardContent({
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
+                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
                         width: '90%'
                       }}></div>
                       </div>
@@ -1418,67 +1498,13 @@ export default function DashboardContent({
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
+                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
                         width: '85%'
                       }}></div>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-sm">3K</td>
                     <td className="py-3 px-4 text-right font-medium text-sm">52</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/86.jpg" alt="" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-gray-900">James Reach</div>
-                          <div className="text-sm text-gray-500 flex items-center">
-                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
-                            </svg>
-                            <span>Letters of Love</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
-                        width: '75%'
-                      }}></div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">7K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">156</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/54.jpg" alt="" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-gray-900">Liam Focus</div>
-                          <div className="text-sm text-gray-500 flex items-center">
-                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <span>Women Who Inspire</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
-                        width: '90%'
-                      }}></div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">10K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">384</td>
                   </tr>
                 </tbody>
               </table>
@@ -1493,7 +1519,9 @@ export default function DashboardContent({
                 </div>
                 <div className="flex space-x-3">
                   <div className="bg-red-50 text-red-600 text-xs font-medium px-3 py-1 rounded-md">Next in 5 Days</div>
-                  <button className="bg-[#0ea5e9] text-white text-xs font-medium px-3 py-1 rounded-md">Run Check</button>
+                  <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-3 py-1 rounded-md">
+                    <span>Run Check</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1501,59 +1529,55 @@ export default function DashboardContent({
         </div>
 
         {/* Insights Summary Section */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Insights Summary</h2>
-          <a href="#" className="text-[#0ea5e9] text-sm font-medium flex items-center hover:underline">
-            View All Insights
-            <svg className="w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </a>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Youth Momentum Insight Card */}
-          <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden">
-            <div className="flex items-start mb-3">
-              <div className="bg-[#0ea5e9] p-2 rounded-md mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-[#0c4a6e]">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
-              </div>
-            </div>
-            <p className="text-sm text-[#0c4a6e] mb-4">
-              Campaign "NextGen Focus: Amplify Impact" is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.
-            </p>
-            <div className="flex justify-end">
-              <button className="bg-[#0ea5e9] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90">Read</button>
-            </div>
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Insights Summary</h2>
+            <a href="#" className="group text-[var(--accent-color)] text-sm font-medium flex items-center hover:underline">
+              <span>View All Insights</span>
+              <Icon name="faArrowRight" className="w-4 h-4 ml-1" iconType="button" />
+            </a>
           </div>
           
-          {/* Low Engagement Alert Card */}
-          <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-1">
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex items-start mb-3">
-              <div className="bg-gray-300 p-2 rounded-md mr-3">
-                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Youth Momentum Insight Card */}
+            <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden">
+              <div className="flex items-start mb-3">
+                <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3">
+                  <Icon name="faChartLine" className="w-5 h-5 text-white" solid={false} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-[#0c4a6e]">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-700">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
+              <p className="text-sm text-[#0c4a6e] mb-4">
+                Campaign "NextGen Focus: Amplify Impact" is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.
+              </p>
+              <div className="flex justify-end">
+                <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90">
+                  <span>Read</span>
+                </button>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Engagement rate is 15% below average. Consider revising the call-to-action.
-            </p>
+            
+            {/* Low Engagement Alert Card */}
+            <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-1">
+                <button className="group text-gray-400 hover:text-gray-600">
+                  <Icon name="faXmark" className="w-4 h-4" iconType="button" />
+                </button>
+              </div>
+              <div className="flex items-start mb-3">
+                <div className="bg-gray-300 p-2 rounded-md mr-3">
+                  <Icon name="faTriangleExclamation" className="w-5 h-5 text-gray-600" solid={false} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-gray-700">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Engagement rate is 15% below average. Consider revising the call-to-action.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -1561,9 +1585,8 @@ export default function DashboardContent({
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Latest Campaigns List</h2>
-            <button className="px-4 py-2 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
-
-              Manage
+            <button className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
+              <span>Manage</span>
             </button>
           </div>
           
@@ -1580,12 +1603,15 @@ export default function DashboardContent({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {isLoadingCampaigns ? <tr>
+                  {isLoadingCampaigns ? (
+                    <tr>
                       <td colSpan={4} className="py-8 text-center">
                         <Spinner />
                         <p className="mt-2 text-sm text-gray-500">Loading campaigns...</p>
                       </td>
-                    </tr> : <>
+                    </tr>
+                  ) : (
+                    <>
                       <tr className="hover:bg-gray-50 cursor-pointer">
                         <td className="py-3 px-4">
                           <div className="flex items-center">
@@ -1602,7 +1628,7 @@ export default function DashboardContent({
                             <div className="text-xs font-medium text-gray-600">Budget</div>
                             <div className="flex items-center">
                               <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
+                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
                               width: '75%'
                             }}></div>
                               </div>
@@ -1630,7 +1656,7 @@ export default function DashboardContent({
                             <div className="text-xs font-medium text-gray-600">Budget</div>
                             <div className="flex items-center">
                               <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
+                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
                               width: '60%'
                             }}></div>
                               </div>
@@ -1642,250 +1668,155 @@ export default function DashboardContent({
                           <div className="text-sm font-medium">46 of 413 Users</div>
                         </td>
                       </tr>
-                      <tr className="hover:bg-gray-50 cursor-pointer">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">Engage 360</div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Paused
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex flex-col">
-                            <div className="text-xs font-medium text-gray-600">Budget</div>
-                            <div className="flex items-center">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
-                              width: '40%'
-                            }}></div>
-                              </div>
-                              <span className="text-xs font-medium">1,134$</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm font-medium">31 of 450 Users</div>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-gray-50 cursor-pointer">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">The Interaction Initiative</div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Paused
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex flex-col">
-                            <div className="text-xs font-medium text-gray-600">Budget</div>
-                            <div className="flex items-center">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
-                              width: '20%'
-                            }}></div>
-                              </div>
-                              <span className="text-xs font-medium">5,014$</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm font-medium">46 of 314 Users</div>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-gray-50 cursor-pointer">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">Join the Pulse</div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            Completed
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex flex-col">
-                            <div className="text-xs font-medium text-gray-600">Budget</div>
-                            <div className="flex items-center">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[#0ea5e9] h-1.5 rounded-full" style={{
-                              width: '100%'
-                            }}></div>
-                              </div>
-                              <span className="text-xs font-medium">234$</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm font-medium">405 of 500 Users</div>
-                        </td>
-                      </tr>
-                    </>}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-        
-        {/* Brand Health Snapshot */}
-        <div>
+
+        {/* Brand health card - Moved to bottom of page */}
+        <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5 mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Brand Health Snapshot</h2>
-            <button onClick={() => router.push('/brand-health')} className="px-4 py-2 bg-[#0ea5e9] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
-
-              View Brand Health
-            </button>
+            <h2 className="text-xl font-semibold text-gray-900">Brand Health</h2>
           </div>
-          
-          {/* Brand health card */}
-          <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left side - Sentiment Score */}
-              <div>
-                <div className="mb-3 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-sm text-gray-500 mb-1">Sentiment Score</h3>
-                    <div className="flex items-baseline">
-                      <span className="text-2xl font-bold">76% Positive Score</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
-                    <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left side - Sentiment Score */}
+            <div>
+              <div className="mb-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm text-gray-500 mb-1">Sentiment Score</h3>
+                  <div className="flex items-baseline">
+                    <span className="text-2xl font-bold">76% Positive Score</span>
                   </div>
                 </div>
-                
-                {/* Chart */}
-                <div className="mt-4 h-48 relative">
-                  {/* Simulated chart with lines */}
-                  <div className="absolute top-0 left-0 w-full h-full">
-                    <div className="relative w-full h-full">
-                      {/* Y-axis labels */}
-                      <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
-                        <span>20k</span>
-                        <span>15k</span>
-                        <span>10k</span>
-                        <span>5k</span>
-                        <span>1k</span>
-                        <span>0</span>
-                      </div>
-                      
-                      {/* X-axis grid lines */}
-                      <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200">
-                        <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100"></div>
-                      </div>
-                      
-                      {/* Line chart with actual data */}
-                      <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
-                            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,20 280,25 300,20" stroke="#0ea5e9" strokeWidth="2" fill="none" />
-
-                        <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient)" />
-
-                      </svg>
-                      
-                      {/* X-axis labels */}
-                      <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
-                        <span>01 Aug</span>
-                        <span>05 Aug</span>
-                        <span>10 Aug</span>
-                        <span>15 Aug</span>
-                        <span>20 Aug</span>
-                        <span>25 Aug</span>
-                        <span>30 Aug</span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-center">
+                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
+                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
                 </div>
-                
-                {/* Event marker */}
-                <div className="mt-6 flex items-center">
-                  <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center">
-                    <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1"></span>
-                    <span>Senior Travellers Campaign launch</span>
+              </div>
+              
+              {/* Chart */}
+              <div className="mt-4 h-48 relative">
+                {/* Simulated chart with lines */}
+                <div className="absolute top-0 left-0 w-full h-full">
+                  <div className="relative w-full h-full">
+                    {/* Y-axis labels */}
+                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
+                      <span>20k</span>
+                      <span>15k</span>
+                      <span>10k</span>
+                      <span>5k</span>
+                      <span>1k</span>
+                      <span>0</span>
+                    </div>
+                    
+                    {/* X-axis grid lines */}
+                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200">
+                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100"></div>
+                    </div>
+                    
+                    {/* Line chart with actual data */}
+                    <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
+                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,20 280,25 300,20" stroke="#0ea5e9" strokeWidth="2" fill="none" />
+                      <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient)" />
+                    </svg>
+                    
+                    {/* X-axis labels */}
+                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
+                      <span>01 Aug</span>
+                      <span>05 Aug</span>
+                      <span>10 Aug</span>
+                      <span>15 Aug</span>
+                      <span>20 Aug</span>
+                      <span>25 Aug</span>
+                      <span>30 Aug</span>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              {/* Right side - Latest mentions */}
-              <div>
-                <div className="mb-3 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-sm text-gray-500 mb-1">Latest Mentions</h3>
-                    <div className="flex items-baseline">
-                      <span className="text-2xl font-bold">1,561 Mentions</span>
-                      <span className="ml-2 text-xs text-green-600 font-medium">+47% More than last week</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
-                    <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
+              {/* Event marker */}
+              <div className="mt-6 flex items-center">
+                <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center">
+                  <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1"></span>
+                  <span>Senior Travellers Campaign launch</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side - Latest mentions */}
+            <div>
+              <div className="mb-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm text-gray-500 mb-1">Latest Mentions</h3>
+                  <div className="flex items-baseline">
+                    <span className="text-2xl font-bold">1,561 Mentions</span>
+                    <span className="ml-2 text-xs text-green-600 font-medium">+47% More than last week</span>
                   </div>
                 </div>
-                
-                {/* Chart */}
-                <div className="mt-4 h-48 relative">
-                  {/* Simulated chart with lines */}
-                  <div className="absolute top-0 left-0 w-full h-full">
-                    <div className="relative w-full h-full">
-                      {/* Y-axis labels */}
-                      <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
-                        <span>20k</span>
-                        <span>15k</span>
-                        <span>10k</span>
-                        <span>5k</span>
-                        <span>1k</span>
-                        <span>0</span>
-                      </div>
-                      
-                      {/* X-axis grid lines */}
-                      <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200">
-                        <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100"></div>
-                        <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100"></div>
-                      </div>
-                      
-                      {/* Line chart (simulated with SVG path) */}
-                      <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id="blue-gradient-2" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
-                            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15" stroke="#0ea5e9" strokeWidth="2" fill="none" />
-
-                        <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient-2)" />
-
-                      </svg>
-                      
-                      {/* X-axis labels */}
-                      <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
-                        <span>01 Aug</span>
-                        <span>05 Aug</span>
-                        <span>10 Aug</span>
-                        <span>15 Aug</span>
-                        <span>20 Aug</span>
-                        <span>25 Aug</span>
-                        <span>30 Aug</span>
-                      </div>
+                <div className="flex items-center">
+                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
+                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
+                </div>
+              </div>
+              
+              {/* Chart */}
+              <div className="mt-4 h-48 relative">
+                {/* Simulated chart with lines */}
+                <div className="absolute top-0 left-0 w-full h-full">
+                  <div className="relative w-full h-full">
+                    {/* Y-axis labels */}
+                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
+                      <span>20k</span>
+                      <span>15k</span>
+                      <span>10k</span>
+                      <span>5k</span>
+                      <span>1k</span>
+                      <span>0</span>
+                    </div>
+                    
+                    {/* X-axis grid lines */}
+                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200">
+                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100"></div>
+                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100"></div>
+                    </div>
+                    
+                    {/* Line chart (simulated with SVG path) */}
+                    <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="blue-gradient-2" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
+                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15" stroke="#0ea5e9" strokeWidth="2" fill="none" />
+                      <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient-2)" />
+                    </svg>
+                    
+                    {/* X-axis labels */}
+                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
+                      <span>01 Aug</span>
+                      <span>05 Aug</span>
+                      <span>10 Aug</span>
+                      <span>15 Aug</span>
+                      <span>20 Aug</span>
+                      <span>25 Aug</span>
+                      <span>30 Aug</span>
                     </div>
                   </div>
                 </div>
@@ -1894,5 +1825,6 @@ export default function DashboardContent({
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }

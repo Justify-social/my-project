@@ -180,11 +180,35 @@ export function LocalIcon({
   // Determine icon style if not explicitly provided
   const detectedStyle = style ? style : isLightIcon(name) ? 'light' : isBrandIcon(name) ? 'brands' : 'solid';
 
-  // Create the path to the SVG file
-  const iconPath = `/ui-icons/${detectedStyle}/${iconBaseName}.svg`;
-  return <span className={cn('inline-flex shrink-0', SIZE_CLASSES[size], className)} aria-hidden={!title} {...props}>
-      <img src={iconPath} alt={title || name} className={cn('w-full h-full', transformClasses)} onClick={onClick as any} />
-    </span>;
+  // Instead of loading SVG file directly, use embedded SVG with paths from iconData
+  // First, find the icon data by name in our iconData registry
+  const normalizedName = name.replace(/Light$/, '');
+  const iconKey = isLightIcon(name) ? `${normalizedName}Light` : normalizedName;
+  
+  // Try to find icon data, fallback to a placeholder if not found
+  const iconInfo = iconData[iconKey as IconName] || {
+    width: 512,
+    height: 512,
+    path: 'M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z', // Circle placeholder
+    url: '' // No longer needed
+  };
+
+  return (
+    <span className={cn('inline-flex shrink-0', SIZE_CLASSES[size], className)} aria-hidden={!title} {...props}>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox={`0 0 ${iconInfo.width} ${iconInfo.height}`}
+        className={cn('w-full h-full', transformClasses)}
+        fill="currentColor"
+        aria-hidden={!title}
+        role={title ? 'img' : 'presentation'}
+        onClick={onClick as any}
+      >
+        {title && <title>{title}</title>}
+        <path d={iconInfo.path} />
+      </svg>
+    </span>
+  );
 }
 
 /**
