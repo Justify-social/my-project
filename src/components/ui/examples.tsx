@@ -229,7 +229,7 @@ export function InputExamples() {
             <p className="text-sm text-gray-500 mb-2">Left Icon</p>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="faUser" className="h-5 w-5 text-gray-400" solid={false} />
+                <Icon name="faMagnifyingGlass" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
               <Input type="text" placeholder="Search..." className="pl-10" />
 
@@ -251,12 +251,12 @@ export function InputExamples() {
             <p className="text-sm text-gray-500 mb-2">Both Icons</p>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="faInfo" className="h-5 w-5 text-gray-400" solid={false} />
+                <Icon name="faLock" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
               <Input type="password" placeholder="Enter your password" className="pl-10 pr-10" />
 
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Icon name="faSettings" className="h-5 w-5 text-gray-400" solid={false} />
+                <Icon name="faQuestion" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
             </div>
           </div>

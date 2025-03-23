@@ -3,14 +3,7 @@
 import { createContext, useState, useContext, useCallback, ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { 
-  BsCheckCircleFill, 
-  BsInfoCircleFill, 
-  BsExclamationTriangleFill, 
-  BsXCircleFill, 
-  BsCheck, 
-  BsX 
-} from 'react-icons/bs';
+import { Icon } from './icon';
 
 // Types for Toast functionality
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -304,9 +297,9 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         : 'bg-green-50 text-green-800 border-l-4 border-green-400',
       icon: toast.style === 'compact' 
         ? <div className="rounded-full bg-green-500 p-1 flex-shrink-0">
-            <BsCheckCircleFill className="h-3 w-3 text-white" />
+            <Icon name="faCircleCheck" className="h-3 w-3 text-white" solid />
           </div>
-        : <BsCheck className="h-4 w-4 text-green-500" />,
+        : <Icon name="faCheck" className="h-4 w-4 text-green-500" solid />,
       title: toast.title || 'Success'
     },
     error: {
@@ -315,9 +308,9 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         : 'bg-red-50 text-red-800 border-l-4 border-red-400',
       icon: toast.style === 'compact'
         ? <div className="rounded-full bg-red-500 p-1 flex-shrink-0">
-            <BsXCircleFill className="h-3 w-3 text-white" />
+            <Icon name="faCircleXmark" className="h-3 w-3 text-white" solid />
           </div>
-        : <BsXCircleFill className="h-4 w-4 text-red-500" />,
+        : <Icon name="faCircleXmark" className="h-4 w-4 text-red-500" solid />,
       title: toast.title || 'Error'
     },
     warning: {
@@ -326,9 +319,9 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         : 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400',
       icon: toast.style === 'compact'
         ? <div className="rounded-full bg-yellow-500 p-1 flex-shrink-0">
-            <BsExclamationTriangleFill className="h-3 w-3 text-white" />
+            <Icon name="faTriangleExclamation" className="h-3 w-3 text-white" solid />
           </div>
-        : <BsExclamationTriangleFill className="h-4 w-4 text-yellow-500" />,
+        : <Icon name="faTriangleExclamation" className="h-4 w-4 text-yellow-500" solid />,
       title: toast.title || 'Warning'
     },
     info: {
@@ -337,9 +330,9 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         : 'bg-blue-50 text-blue-800 border-l-4 border-blue-400',
       icon: toast.style === 'compact'
         ? <div className="rounded-full bg-blue-500 p-1 flex-shrink-0">
-            <BsInfoCircleFill className="h-3 w-3 text-white" />
+            <Icon name="faCircleInfo" className="h-3 w-3 text-white" solid />
           </div>
-        : <BsInfoCircleFill className="h-4 w-4 text-blue-500" />,
+        : <Icon name="faCircleInfo" className="h-4 w-4 text-blue-500" solid />,
       title: toast.title || 'Info'
     }
   }[toast.type];
@@ -388,7 +381,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
           aria-label="Close toast"
         >
           <span className="sr-only">Close</span>
-          <BsX className="h-4 w-4" />
+          <Icon name="faXmark" className="h-4 w-4" solid={false} />
         </button>
       )}
     </motion.div>
