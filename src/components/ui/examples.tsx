@@ -768,8 +768,8 @@ export function CardExamples() {
         <h3 className="text-md font-medium">Card Header with Icon and Actions</h3>
         <div className="max-w-md">
           <Card>
-            <CardHeader icon={<Icon name="faInfo" className="w-5 h-5 text-[#3182CE]" solid={false} />} actions={<Button variant="ghost" size="sm">
-                  <Icon name="faSettings" className="w-4 h-4" solid={false} />
+            <CardHeader icon={<Icon name="faCircleInfo" className="w-5 h-5 text-[#3182CE]" solid={false} />} actions={<Button variant="ghost" size="sm">
+                  <Icon name="faGear" className="w-4 h-4" solid={false} />
                 </Button>}>
 
               <h3 className="text-lg font-medium">Card with Icon</h3>
