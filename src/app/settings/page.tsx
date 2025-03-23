@@ -7,6 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@/components/ui/icon';
 import { iconComponentFactory } from '@/components/ui/icons';
 
+// Add debug function
+function debugLog(message: string, data?: any) {
+  console.log(`[Settings Debug] ${message}`, data || '');
+}
+
 /* --------------------------------------------------
    Type Definitions
 ----------------------------------------------------- */
@@ -520,6 +525,10 @@ const ProfileSettingsPage: React.FC = () => {
     isLoading,
     error
   } = useUser();
+
+  // Add debug logging
+  debugLog('useUser hook state:', { user: !!user, isLoading, error: !!error });
+  
   const [activeTab, setActiveTab] = useState('profile');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -560,21 +569,34 @@ const ProfileSettingsPage: React.FC = () => {
 
   // Effect to check super admin status
   useEffect(() => {
+    debugLog('useEffect triggered', { user: !!user });
+    
     const checkSuperAdmin = async () => {
       try {
+        debugLog('Checking super admin status');
         const response = await fetch('/api/auth/verify-role');
+        debugLog('Admin check response status:', response.status);
+        
         if (!response.ok) throw new Error('Failed to verify role');
         const data = await response.json();
+        debugLog('Admin check response data:', data);
+        
         setIsSuperAdmin(data?.user?.isSuperAdmin || false);
       } catch (error) {
         console.error('Error checking super admin status:', error);
+        debugLog('Admin check error:', error);
         setIsSuperAdmin(false);
       } finally {
         setIsPageLoading(false);
+        debugLog('Page loading complete');
       }
     };
+    
     if (user) {
       checkSuperAdmin();
+    } else {
+      debugLog('No user, skipping admin check');
+      setIsPageLoading(false);
     }
   }, [user]);
 
@@ -698,6 +720,7 @@ const ProfileSettingsPage: React.FC = () => {
 
   // Render loading state
   if (isLoading || isPageLoading) {
+    debugLog('Showing loading state', { isLoading, isPageLoading });
     return <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-color)]"></div>
@@ -708,6 +731,7 @@ const ProfileSettingsPage: React.FC = () => {
 
   // Render error state
   if (error || !user) {
+    debugLog('Showing error state', { error, user: !!user });
     return <div className="flex items-center justify-center min-h-screen">
         <motion.div initial={{
         opacity: 0,
@@ -741,6 +765,8 @@ const ProfileSettingsPage: React.FC = () => {
         </motion.div>
       </div>;
   }
+  
+  debugLog('Rendering main content', { user: !!user });
   return <motion.div initial={{
     opacity: 0
   }} animate={{
