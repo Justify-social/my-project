@@ -257,7 +257,7 @@ export function ListExample() {
   // Basic list example matching the screenshot
   const basicItems = [{
     primary: 'Inbox',
-    icon: 'faInbox'
+    icon: 'faEnvelope'
   }, {
     primary: 'Sent',
     icon: 'faPaperPlane'
@@ -273,7 +273,7 @@ export function ListExample() {
   const detailedItems = [{
     primary: 'Project Alpha',
     secondary: 'Due in 3 days',
-    icon: 'faFolder',
+    icon: 'faFileLines',
     action: <span className="text-xs font-medium text-blue-600">View</span>
   }, {
     primary: 'Team Meeting',
@@ -309,7 +309,7 @@ export function ListExample() {
         <h3 className="text-lg font-medium mb-2">Horizontal List</h3>
         <List layout="horizontal" bordered bgColor="white" className="inline-block">
           <ListItem primary="Home" className="py-2 px-4" icon="faHouse" />
-          <ListItem primary="Products" className="py-2 px-4" icon="faBox" />
+          <ListItem primary="Products" className="py-2 px-4" icon="faGlobe" />
           <ListItem primary="About" className="py-2 px-4" icon="faCircleInfo" />
           <ListItem primary="Contact" className="py-2 px-4" icon="faEnvelope" />
         </List>
