@@ -164,22 +164,10 @@ export default function DebugTools() {
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
-              href="/debug-tools/font-awesome-test"
+              href="/debug-tools/font-awesome-fixes"
               className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
             >
-              Test Font Awesome
-            </Link>
-            <Link
-              href="/debug-tools/font-awesome-direct-test"
-              className="px-4 py-2 border border-[var(--accent-color)] text-[var(--accent-color)] bg-white rounded-md inline-block hover:bg-[var(--accent-color)] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
-            >
-              Direct Icon Test
-            </Link>
-            <Link
-              href="/debug-tools/font-awesome-fixes"
-              className="px-4 py-2 border-2 border-green-600 text-green-600 bg-white rounded-md inline-block hover:bg-green-600 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
-            >
-              Working Examples
+              Font Awesome Examples
             </Link>
           </div>
         </div>
