@@ -2,10 +2,12 @@ import { Inter } from 'next/font/google'
 import { UserProvider } from '@auth0/nextjs-auth0/client'
 import ClientLayout from '@/components/layouts/client-layout'
 import './globals.css'
+// Re-enable UploadThing with correct imports for Next.js 15
+import { generateUploadDropzone, generateUploadButton } from "@uploadthing/react";
+import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 import { FormStyleReset } from '@/components/ui';
-import ErrorBoundaryWrapper from '@/components/ErrorBoundaryWrapper';
 
 // Import diagnostic script for legacy compatibility
 import '@/lib/icon-diagnostic';
@@ -32,16 +34,15 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
+          {/* UploadThing is now properly configured via the utility functions import */}
           <Toaster />
           <ToastProvider>
             <FormStyleReset />
-            <ErrorBoundaryWrapper>
-              <ClientLayout>
-                <main className="min-h-screen bg-gray-100">
-                  {children}
-                </main>
-              </ClientLayout>
-            </ErrorBoundaryWrapper>
+            <ClientLayout>
+              <main className="min-h-screen bg-gray-100">
+                {children}
+              </main>
+            </ClientLayout>
           </ToastProvider>
         </UserProvider>
       </body>

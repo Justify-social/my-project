@@ -20,7 +20,7 @@ export const ourFileRouter = {
   })
     .middleware(async ({ req }) => {
       return { 
-        campaignId: req.headers.get("x-campaign-id") || "unknown",
+        campaignId: req?.headers?.get("x-campaign-id") || "unknown",
         userId: "user" 
       };
     })

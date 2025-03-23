@@ -1,19 +1,10 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install --legacy-peer-deps --no-package-lock",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "build": {
     "env": {
-      "NPM_FLAGS": "--legacy-peer-deps --force"
-    }
-  },
-  "crons": [{
-    "path": "/api/cron/cleanup-temp",
-    "schedule": "0 0 * * *"
-  }],
-  "git": {
-    "deploymentEnabled": {
-      "main": true
+      "NPM_FLAGS": "--legacy-peer-deps"
     }
   }
 } 

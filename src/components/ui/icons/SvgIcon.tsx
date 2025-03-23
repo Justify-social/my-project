@@ -277,13 +277,13 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   // Only use validation in development to avoid unnecessary overhead in production
   if (process.env.NODE_ENV === 'development') {
     // Validate icon name and properties, suppressing console warnings
-    useIconValidation({ 
+  useIconValidation({
       name: normalizedIconName, 
-      solid, 
-      iconType,
-      className 
-    });
-    
+    solid,
+    iconType,
+    className
+  });
+
     // Check if button icons have proper parent elements with group class
     useButtonIconValidation(resolvedRef as unknown as React.RefObject<HTMLElement>, iconType);
   }
@@ -364,8 +364,8 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     const transformClasses = getTransformClasses();
     
     // Add hover effect classes if this is a button icon
-    const hoverClasses = getHoverClasses();
-    
+  const hoverClasses = getHoverClasses();
+
     // Size classes based on the size prop
     const sizeClasses = SIZE_CLASSES[size as IconSize] || SIZE_CLASSES.md;
     

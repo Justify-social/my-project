@@ -13,10 +13,16 @@ import { Icon } from "@/components/ui/icon";
 import { CampaignAssetUploader, UploadedAsset } from "@/components/upload/CampaignAssetUploader";
 import { AssetPreview } from '@/components/upload/AssetPreview';
 import { KPI, Feature, Platform } from '@prisma/client';
+import { generateReactHelpers } from "@uploadthing/react";
 import { v4 as uuidv4 } from "uuid";
 import { ourFileRouter } from '@/app/api/uploadthing/core';
 import { deleteAssetFromStorage, logOrphanedAsset } from '@/services/assetService';
 import { compressImage } from '@/utils/imageCompression';
+
+// Create the uploadthing helper
+const {
+  useUploadThing
+} = generateReactHelpers<typeof ourFileRouter>();
 
 // We'll implement the validation function directly, no need for external import
 // import { fetchInfluencerData } from '@/lib/influencer-service';
@@ -227,45 +233,190 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   campaignId,
   onAssetsAdded
 }) => {
-  // Remove unused state since we'll delegate to CampaignAssetUploader
+  const [dragActive, setDragActive] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
-  // Handle upload success from the uploader component
-  const handleUploadComplete = (assets: UploadedAsset[]) => {
-    // Convert the UploadedAsset format to the Asset format expected by the form
-    const formattedAssets = assets.map(asset => ({
-      id: asset.id,
-      url: asset.url,
-      fileName: asset.fileName,
-      fileSize: asset.fileSize,
-      type: asset.type,
-      progress: 100, // Completed upload
-      details: {
-        assetName: asset.details.assetName,
-        budget: 0,
-        description: '',
-        influencerHandle: '',
-        platform: '',
+  // Use UploadThing hook with standard options to avoid type issues
+  const {
+    startUpload
+  } = useUploadThing("campaignAssetUploader", {
+    onClientUploadComplete: res => {
+      if (res) {
+        handleUploadComplete(res);
       }
-    }));
-    
-    onAssetsAdded(formattedAssets);
+    },
+    onUploadError: error => {
+      console.error('Upload error:', error);
+      toast.error(`Upload failed: ${error.message}`);
+    },
+    headers: () => ({
+      "x-campaign-id": campaignId
+    })
+  });
+
+  // Helper for compressing image files before upload
+  const compressImageIfNeeded = async (file: File): Promise<File> => {
+    if (!file.type.startsWith('image/')) return file;
+    try {
+      return await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85
+      });
+    } catch (error) {
+      console.error('Compression failed, using original file:', error);
+      return file;
+    }
   };
 
-  // Handle upload error
-  const handleUploadError = (error: Error) => {
-    toast.error(`Upload error: ${error.message}`);
+  // Enhanced upload handler with compression
+  const handleUpload = async () => {
+    if (!selectedFiles.length) return;
+    setIsUploading(true);
+    setIsCompressing(true);
+    try {
+      // Process files with compression for images
+      const compressedFiles = await Promise.all(selectedFiles.map(async file => {
+        return await compressImageIfNeeded(file);
+      }));
+      setIsCompressing(false);
+
+      // Start upload without metadata (the endpoint already has the campaign ID from headers)
+      const uploadResult = await startUpload(compressedFiles);
+      if (!uploadResult) {
+        throw new Error("Upload failed");
+      }
+
+      // Clear selected files on successful upload
+      setSelectedFiles([]);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      // Cache failed upload for potential recovery
+      try {
+        localStorage.setItem(`pendingUpload_${campaignId}`, JSON.stringify({
+          files: selectedFiles.map(f => ({
+            name: f.name,
+            size: f.size,
+            type: f.type
+          })),
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        console.error('Failed to cache upload state:', e);
+      }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  return (
-    <div className="w-full">
-      <CampaignAssetUploader
-        campaignId={campaignId}
-        onUploadComplete={handleUploadComplete}
-        onUploadError={handleUploadError}
-      />
-    </div>
-  );
+  // Enhanced completion handler with resilience
+  const handleUploadComplete = (results: any[]) => {
+    const correlationId = `complete-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    console.log(`[${correlationId}] Processing upload results:`, results);
+
+    // Ensure results is an array and filter invalid entries
+    const validResults = Array.isArray(results) ? results.filter(Boolean) : [];
+    if (validResults.length === 0) {
+      console.warn(`[${correlationId}] No valid upload results`);
+      toast.error("Upload completed but no valid files were processed");
+      setIsUploading(false);
+      return;
+    }
+    const newAssets = validResults.map((result, index) => {
+      // Use explicit checks for properties that might be undefined
+      const resultObj = result as Record<string, any>;
+      // The UploadThing type definition doesn't include 'name', so let's use a safer approach
+      const fileKey = 'name' in resultObj ? 'name' : 'key';
+      const safeName = typeof resultObj[fileKey] === 'string' ? resultObj[fileKey] : `asset-${index}-${Date.now()}`;
+      const extension = safeName.includes('.') ? safeName.split('.').pop() : 'unknown';
+      return {
+        id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        url: String(resultObj.url || ''),
+        // Ensure URL is a string
+        fileName: safeName,
+        fileSize: Number(resultObj.size || 0),
+        // Coerce to number with fallback
+        type: typeof resultObj.type === 'string' ? resultObj.type : detectFileType(safeName),
+        // Use utility fallback
+        format: extension || 'unknown',
+        progress: 100,
+        details: {
+          assetName: safeName,
+          budget: 0,
+          description: '',
+          influencerHandle: '',
+          platform: ''
+        }
+      };
+    });
+
+    // Clear state
+    setSelectedFiles([]);
+    localStorage.removeItem(`pendingUpload_${campaignId}`);
+
+    // Add to parent component
+    onAssetsAdded(newAssets);
+    toast.success(`Successfully uploaded ${newAssets.length} asset(s)`);
+  };
+
+  // Check for recoverable uploads
+  useEffect(() => {
+    try {
+      const pendingUploadData = localStorage.getItem(`pendingUpload_${campaignId}`);
+      if (pendingUploadData) {
+        const {
+          timestamp
+        } = JSON.parse(pendingUploadData);
+        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+
+        // Only offer recovery for recent uploads (last 5 minutes)
+        if (timestamp > fiveMinutesAgo) {
+          toast(t => <div>
+              <p>You have a pending upload. Would you like to retry?</p>
+              <div className="mt-2">
+                <button className="px-2 py-1 bg-blue-500 text-white rounded mr-2" onClick={() => {
+                toast.dismiss(t.id);
+                // User needs to reselect files - can't recover File objects from storage
+                if (inputRef.current) {
+                  inputRef.current.click();
+                }
+              }}>
+
+                  Retry Upload
+                </button>
+                <button className="px-2 py-1 bg-gray-300 rounded" onClick={() => {
+                localStorage.removeItem(`pendingUpload_${campaignId}`);
+                toast.dismiss(t.id);
+              }}>
+
+                  Discard
+                </button>
+      </div>
+            </div>, {
+            duration: 10000
+          });
+        } else {
+          // Clean up old entries
+          localStorage.removeItem(`pendingUpload_${campaignId}`);
+        }
+      }
+    } catch (e) {
+      console.error('Error checking recoverable uploads:', e);
+    }
+  }, [campaignId]);
+  return <div className="relative w-full transition-all duration-300">
+      <CampaignAssetUploader campaignId={campaignId} onUploadComplete={handleUploadComplete} onUploadError={(error: Error) => {
+      console.error('Upload error:', error);
+      toast.error(`Upload failed: ${error.message}`);
+      setIsUploading(false);
+    }} />
+
+    </div>;
 };
 
 // =============================================================================

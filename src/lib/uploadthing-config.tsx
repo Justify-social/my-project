@@ -1,13 +1,16 @@
-"use client"
+'use client'
 
-// Export types needed for UploadThing
-import type { OurFileRouter } from "@/app/api/uploadthing/core"
+import { UploadDropzone } from "@uploadthing/react"
+import { OurFileRouter } from "./uploadthing"
 
-export type UploadComplete = {
-  url: string;
-  name?: string;
-  size?: number;
-};
-
-// Re-export the type for easier imports
-export type { OurFileRouter }; 
+export const UploadButton = () => (
+  <UploadDropzone<OurFileRouter>
+    endpoint="campaignAsset"
+    onClientUploadComplete={(res) => {
+      console.log("Files: ", res)
+    }}
+    onUploadError={(error: Error) => {
+      alert(`ERROR! ${error.message}`)
+    }}
+  />
+) 
