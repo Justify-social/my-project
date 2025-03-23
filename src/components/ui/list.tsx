@@ -222,8 +222,11 @@ export const ListItem = forwardRef<HTMLLIElement, ListItemProps & {
 
     // If icon is an IconName string, use the Icon component
     if (typeof icon === 'string') {
+      // Ensure the icon name is properly formatted with 'fa' prefix
+      const iconName = (icon as string).startsWith('fa') ? icon as IconName : `fa${icon.charAt(0).toUpperCase() + icon.slice(1)}` as IconName;
+      
       return <div className="mr-3 flex-shrink-0">
-          <Icon name={icon as IconName} className="h-5 w-5 text-gray-400" solid={false} />
+          <Icon name={iconName} className="h-5 w-5 text-gray-400" solid={false} />
         </div>;
     }
     return null;
@@ -254,40 +257,40 @@ export function ListExample() {
   // Basic list example matching the screenshot
   const basicItems = [{
     primary: 'Inbox',
-    icon: 'inbox'
+    icon: 'faInbox'
   }, {
     primary: 'Sent',
-    icon: 'send'
+    icon: 'faPaperPlane'
   }, {
     primary: 'Drafts',
-    icon: 'file'
+    icon: 'faFileLines'
   }, {
     primary: 'Trash',
-    icon: 'trash'
+    icon: 'faTrashCan'
   }];
 
   // Detailed list example matching the screenshot
   const detailedItems = [{
     primary: 'Project Alpha',
     secondary: 'Due in 3 days',
-    icon: 'folder',
+    icon: 'faFolder',
     action: <span className="text-xs font-medium text-blue-600">View</span>
   }, {
     primary: 'Team Meeting',
     secondary: 'Tomorrow at 10:00 AM',
-    icon: 'calendar',
+    icon: 'faCalendar',
     action: <span className="text-xs font-medium text-blue-600">Join</span>,
     active: true,
     highlighted: true
   }, {
     primary: 'Client Report',
     secondary: 'Ready for review',
-    icon: 'document',
+    icon: 'faFileLines',
     action: <span className="text-xs font-medium text-blue-600">Review</span>
   }, {
     primary: 'System Update',
     secondary: 'Scheduled for next week',
-    icon: 'settings',
+    icon: 'faGear',
     action: <span className="text-xs font-medium text-blue-600">Details</span>,
     disabled: true
   }];
@@ -305,10 +308,10 @@ export function ListExample() {
       <div>
         <h3 className="text-lg font-medium mb-2">Horizontal List</h3>
         <List layout="horizontal" bordered bgColor="white" className="inline-block">
-          <ListItem primary="Home" className="py-2 px-4" />
-          <ListItem primary="Products" className="py-2 px-4" />
-          <ListItem primary="About" className="py-2 px-4" />
-          <ListItem primary="Contact" className="py-2 px-4" />
+          <ListItem primary="Home" className="py-2 px-4" icon="faHouse" />
+          <ListItem primary="Products" className="py-2 px-4" icon="faBox" />
+          <ListItem primary="About" className="py-2 px-4" icon="faCircleInfo" />
+          <ListItem primary="Contact" className="py-2 px-4" icon="faEnvelope" />
         </List>
       </div>
     </div>;
