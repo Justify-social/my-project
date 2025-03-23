@@ -8,8 +8,16 @@ const f = createUploadthing();
 export const ourFileRouter = {
   // General media uploader for various content
   mediaUploader: f({
-    image: { maxFileSize: "4MB" },
-    video: { maxFileSize: "16MB" }
+    image: { 
+      maxFileSize: "4MB",
+      maxFileCount: 5,
+      minFileCount: 1
+    },
+    video: { 
+      maxFileSize: "16MB",
+      maxFileCount: 2,
+      minFileCount: 1 
+    }
   })
     .middleware(async () => {
       console.log("Processing media upload");
@@ -22,7 +30,11 @@ export const ourFileRouter = {
     
   // Specific route for logo uploads (used in branding settings)
   logoUploader: f({
-    image: { maxFileSize: "2MB", maxFileCount: 1 }
+    image: { 
+      maxFileSize: "2MB", 
+      maxFileCount: 1,
+      minFileCount: 1
+    }
   })
     .middleware(async () => {
       console.log("Processing logo upload");
@@ -35,7 +47,11 @@ export const ourFileRouter = {
     
   // Specific route for profile pictures/avatars
   avatarUploader: f({
-    image: { maxFileSize: "1MB", maxFileCount: 1 }
+    image: { 
+      maxFileSize: "1MB", 
+      maxFileCount: 1,
+      minFileCount: 1
+    }
   })
     .middleware(async () => {
       console.log("Processing avatar upload");
@@ -48,8 +64,16 @@ export const ourFileRouter = {
     
   // Campaign asset uploader for Step 4 of the Campaign Wizard
   campaignAssetUploader: f({
-    image: { maxFileSize: "8MB", maxFileCount: 10 },
-    video: { maxFileSize: "16MB", maxFileCount: 5 },
+    image: { 
+      maxFileSize: "8MB", 
+      maxFileCount: 10,
+      minFileCount: 1
+    },
+    video: { 
+      maxFileSize: "16MB", 
+      maxFileCount: 5,
+      minFileCount: 1
+    },
   })
     .middleware(async ({ req }) => {
       // Simplify the middleware to reduce potential issues with Effect
