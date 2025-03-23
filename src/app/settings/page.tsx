@@ -4,8 +4,7 @@ import React, { useState, useCallback, ChangeEvent, FormEvent, memo, useEffect }
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Icon } from '@/components/ui/icon';
-import { iconComponentFactory } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/icons';
 
 // Add debug function
 function debugLog(message: string, data?: any) {
@@ -35,9 +34,7 @@ interface TabConfig {
   id: string;
   label: string;
   href: string;
-  icon?: React.ComponentType<{
-    className?: string;
-  }>;
+  icon: string;
   requiresAdmin?: boolean;
 }
 
@@ -58,18 +55,16 @@ const validatePassword = (password: string): boolean => {
    Enhanced UI Components
 ----------------------------------------------------- */
 const SectionHeader: React.FC<{
-  icon: React.ComponentType<{
-    className?: string;
-  }>;
+  icon: string;
   title: string;
   description?: string;
 }> = memo(({
-  icon: Icon,
+  icon,
   title,
   description
 }) => <div className="flex items-center mb-6">
     <div className="bg-blue-50 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-[var(--accent-color)]" solid={false} />
+      <Icon name={icon} className="w-6 h-6 text-[var(--accent-color)]" />
     </div>
     <div className="ml-4">
       <h2 className="text-xl font-semibold text-[var(--primary-color)]">{title}</h2>
@@ -109,37 +104,36 @@ const NavigationTabs: React.FC<{
     id: 'profile',
     label: 'Profile Settings',
     href: '/settings',
-    icon: props => <Icon name="faUserCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
+    icon: 'faUserCircle'
   }, {
     id: 'team',
     label: 'Team Management',
     href: '/settings/team-management',
-    icon: props => <Icon name="faUserCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
+    icon: 'faUserGroup'
   }, {
     id: 'branding',
     label: 'Branding',
     href: '/settings/branding',
-    icon: props => <Icon name="faPhoto" {...props} solid={false} className="text-[var(--secondary-color)]" />
+    icon: 'faImage'
   }, {
     id: 'admin',
     label: 'Super Admin Console',
     href: '/admin',
     requiresAdmin: true,
-    icon: props => <Icon name="faKey" {...props} solid={false} className="text-[var(--secondary-color)]" />
+    icon: 'faKey'
   }];
   return <div className="mb-8 border-b border-gray-200">
       <nav className="flex space-x-1" aria-label="Settings navigation">
         {tabs.map(tab => {
         if (tab.requiresAdmin && !isSuperAdmin) return null;
         const isActive = activeTab === tab.id;
-        const IconComponent = tab.icon;
         return <button key={tab.id} onClick={() => onTabChange(tab.id)} className={`
                 relative py-4 px-6 flex items-center transition-all duration-200
                 ${isActive ? 'text-[var(--accent-color)] bg-[var(--background-color)] bg-opacity-50' : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:bg-[var(--background-color)]'}
                 rounded-t-lg
               `} aria-current={isActive ? 'page' : undefined}>
 
-              {IconComponent && <IconComponent className="w-5 h-5 mr-2" />}
+              <Icon name={tab.icon} className="w-5 h-5 mr-2" />
               <span className="font-medium">{tab.label}</span>
               {isActive && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-color)]" />}
             </button>;
@@ -171,9 +165,7 @@ const ActionButtons: React.FC<{
   }} onClick={onCancel} disabled={isSaving} className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
         transition-colors duration-200 font-medium flex items-center">
 
-
-
-      <Icon name="faXCircle" className="w-5 h-5 mr-2" solid={false} />
+      <Icon name="faXCircle" className="w-5 h-5 mr-2" />
       Cancel
     </motion.button>
     <motion.button whileHover={{
@@ -184,10 +176,10 @@ const ActionButtons: React.FC<{
         flex items-center ${!hasChanges || isSaving ? 'bg-blue-300 cursor-not-allowed text-white' : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'}`}>
 
       {isSaving ? <>
-          <Icon name="faArrowRight" className="w-5 h-5 mr-2 animate-spin" solid={false} />
+          <Icon name="faSpinner" className="w-5 h-5 mr-2 animate-spin" />
           Saving...
         </> : <>
-          <Icon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} />
+          <Icon name="faCheckCircle" className="w-5 h-5 mr-2" />
           Save
         </>}
     </motion.button>
@@ -198,13 +190,7 @@ const ActionButtons: React.FC<{
   }} onClick={onSignOut} className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 
         transition-colors duration-200 font-medium flex items-center">
 
-
-
-      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-
-      </svg>
+      <Icon name="faRightFromBracket" className="w-5 h-5 mr-2" />
       Logout
     </motion.button>
   </div>);
@@ -225,7 +211,7 @@ const PersonalInfoSection: React.FC<{
   onChange,
   onToggleEdit
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faUserCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Personal Information" description="Update your personal details and company information." />
+    <SectionHeader icon="faUserCircle" title="Personal Information" description="Update your personal details and company information." />
 
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -290,7 +276,7 @@ const ProfilePicture: React.FC<{
   onRemove,
   error
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faPhoto" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Profile Picture" description="Upload or update your profile picture" />
+    <SectionHeader icon="faImage" title="Profile Picture" description="Upload or update your profile picture" />
 
     <div className="flex flex-col sm:flex-row items-center gap-4">
       <div>
@@ -303,10 +289,10 @@ const ProfilePicture: React.FC<{
           scale: 0.95
         }} onClick={onRemove} className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow-md" aria-label="Remove profile picture">
 
-              <Icon name="faXCircle" className="w-5 h-5" solid={false} />
+              <Icon name="faXCircle" className="w-5 h-5" />
             </motion.button>
           </div> : <div className="w-32 h-32 rounded-full bg-[var(--background-color)] flex items-center justify-center">
-            <Icon name="faUserCircle" className="w-16 h-16 text-[var(--secondary-color)]" solid={false} />
+            <Icon name="faUserCircle" className="w-16 h-16 text-[var(--secondary-color)]" />
           </div>}
       </div>
       <div className="flex-grow">
@@ -315,11 +301,7 @@ const ProfilePicture: React.FC<{
                 px-4 py-2 rounded-lg cursor-pointer flex items-center
                 transition-colors duration-200 font-medium group">
 
-
-
-
-
-            <Icon name="faPhoto" className="w-5 h-5 mr-2" solid={false} />
+            <Icon name="faImage" className="w-5 h-5 mr-2" />
             <span>Upload New Picture</span>
             <input type="file" id="profilePicture" accept="image/*" className="hidden" onChange={onFileChange} />
 
@@ -335,7 +317,7 @@ const ProfilePicture: React.FC<{
           y: 0
         }} className="text-red-500 text-sm flex items-center">
 
-              <Icon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
+              <Icon name="faXCircle" className="w-5 h-5 mr-1" />
               {error}
             </motion.p>}
         </div>
@@ -357,7 +339,7 @@ const PasswordManagementSection: React.FC<{
   error,
   success
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faKey" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Security" description="Update your password and security settings." />
+    <SectionHeader icon="faKey" title="Security" description="Update your password and security settings." />
 
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -395,19 +377,19 @@ const PasswordManagementSection: React.FC<{
         </h4>
         <ul className="space-y-1 text-sm text-[var(--secondary-color)]">
           <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
+            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" />
             Minimum 8 characters
           </li>
           <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
+            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" />
             At least one uppercase letter
           </li>
           <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
+            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" />
             At least one number
           </li>
           <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
+            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" />
             At least one special character
           </li>
         </ul>
@@ -421,7 +403,7 @@ const PasswordManagementSection: React.FC<{
       y: 0
     }} className="bg-red-50 text-red-700 p-4 rounded-lg flex items-start">
 
-          <Icon name="faXCircle" className="w-5 h-5 mr-2 flex-shrink-0" solid={false} />
+          <Icon name="faXCircle" className="w-5 h-5 mr-2 flex-shrink-0" />
           <p>{error}</p>
         </motion.div>}
 
@@ -433,7 +415,7 @@ const PasswordManagementSection: React.FC<{
       y: 0
     }} className="bg-green-50 text-green-700 p-4 rounded-lg flex items-start">
 
-          <Icon name="faCheckCircle" className="w-5 h-5 mr-2 flex-shrink-0" solid={false} />
+          <Icon name="faCheckCircle" className="w-5 h-5 mr-2 flex-shrink-0" />
           <p>{success}</p>
         </motion.div>}
 
@@ -441,7 +423,7 @@ const PasswordManagementSection: React.FC<{
         <button onClick={onSubmit} disabled={!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword || !validatePassword(passwordState.newPassword)} className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium
             flex items-center ${!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword || !validatePassword(passwordState.newPassword) ? 'bg-blue-300 cursor-not-allowed' : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'}`}>
 
-          <Icon name="faKey" className="w-5 h-5 mr-2" solid={false} />
+          <Icon name="faKey" className="w-5 h-5 mr-2" />
           Update Password
         </button>
       </div>
@@ -456,7 +438,7 @@ const NotificationPreferencesSection: React.FC<{
   preferences,
   onToggle
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faBell" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Notification Preferences" description="Manage how you receive updates and alerts." />
+    <SectionHeader icon="faBell" title="Notification Preferences" description="Manage how you receive updates and alerts." />
 
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -742,9 +724,7 @@ const ProfileSettingsPage: React.FC = () => {
       }} className="bg-red-50 text-red-800 rounded-xl p-6 max-w-md w-full 
             shadow-lg flex items-center">
 
-
-
-          <Icon name="faXCircle" className="w-12 h-12 text-red-400 mr-4" solid={false} />
+          <Icon name="faXCircle" className="w-12 h-12 text-red-400 mr-4" />
           <div>
             <h3 className="text-lg font-semibold mb-2">Access Error</h3>
             <p className="text-red-600">
@@ -754,11 +734,7 @@ const ProfileSettingsPage: React.FC = () => {
                   mt-4 hover:bg-opacity-90 transition-all duration-200
                   flex items-center">
 
-
-
-
-
-              <Icon name="faArrowRight" className="w-5 h-5 mr-2" solid={false} />
+              <Icon name="faArrowRight" className="w-5 h-5 mr-2" />
               Retry
             </button>
           </div>
