@@ -94,19 +94,19 @@ enum Feature {
 const features = [{
   key: Feature.CREATIVE_ASSET_TESTING,
   title: "Creative Asset Testing",
-  icon: "/Creative_Asset_Testing.svg"
+  icon: "/app/Creative_Asset_Testing.svg"
 }, {
   key: Feature.BRAND_LIFT,
   title: "Brand Lift",
-  icon: "/Brand_Lift.svg"
+  icon: "/app/Brand_Lift.svg"
 }, {
   key: Feature.BRAND_HEALTH,
   title: "Brand Health",
-  icon: "/Brand_Health.svg"
+  icon: "/app/Brand_Health.svg"
 }, {
   key: Feature.MIXED_MEDIA_MODELLING,
   title: "Mixed Media Modelling",
-  icon: "/MMM.svg"
+  icon: "/app/MMM.svg"
 }];
 
 // Update the validation schema
@@ -438,7 +438,7 @@ function FormContent() {
               {/* KPIs Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Icon name="faView" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                  <Icon name="faChartBar" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
                   Key Performance Indicators
                 </h2>
                 <p className="mb-4 text-sm text-gray-600">
@@ -486,7 +486,7 @@ function FormContent() {
               {/* Primary and Secondary KPIs */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Icon name="faCheck" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                  <Icon name="faChartLine" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
                   Primary and Secondary KPIs
                 </h2>
                 <p className="mb-4 text-sm text-gray-600">
@@ -523,7 +523,7 @@ function FormContent() {
                       setFieldValue('secondaryKPIs', updatedKpis);
                     }}>
 
-                            <Icon name="faTrash" className="w-4 h-4" solid={false} />
+                            <Icon name="faTrashCan" className="w-4 h-4" solid={false} />
                           </button>
                         </div>)}
                     </div>
@@ -533,41 +533,47 @@ function FormContent() {
 
               {/* Messaging Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-semibold mb-4">Messaging</h2>
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <Icon name="faComments" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                  Messaging
+                </h2>
                 <p className="text-gray-600 mb-6">
                   Define the key messages and value propositions for your campaign.
                 </p>
                 
                 <div className="space-y-4">
-                  <StyledField label="What is the main message of your campaign?" name="mainMessage" as="textarea" rows={3} required icon={<Icon name="faInfo" className="h-5 w-5" solid={false} />} placeholder="Discover sustainable living with our eco-friendly products." />
+                  <StyledField label="What is the main message of your campaign?" name="mainMessage" as="textarea" rows={3} required icon={<Icon name="faCircleInfo" className="h-5 w-5" solid={false} />} placeholder="Discover sustainable living with our eco-friendly products." />
 
                   
-                  <StyledField label="Hashtags related to the campaign" name="hashtags" icon={<Icon name="faInfo" className="h-5 w-5" solid={false} />} placeholder="#hashtag" />
+                  <StyledField label="Hashtags related to the campaign" name="hashtags" icon={<Icon name="faTag" className="h-5 w-5" solid={false} />} placeholder="#hashtag" />
 
                   
                   <StyledField label="Memorability Score (1-10)" name="memorability" required icon={<Icon name="faStar" className="h-5 w-5" solid={false} />} placeholder="Type the value" />
 
                   
-                  <StyledField label="What are the key benefits your brand offers?" name="keyBenefits" required icon={<Icon name="faInfo" className="h-5 w-5" solid={false} />} placeholder="Innovative design, Exceptional quality, Outstanding customer service." />
+                  <StyledField label="What are the key benefits your brand offers?" name="keyBenefits" required icon={<Icon name="faCircleCheck" className="h-5 w-5" solid={false} />} placeholder="Innovative design, Exceptional quality, Outstanding customer service." />
 
                 </div>
               </div>
 
               {/* Hypotheses Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-semibold mb-4">Hypotheses</h2>
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <Icon name="faLightbulb" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                  Hypotheses
+                </h2>
                 <p className="text-gray-600 mb-6">
                   Outline the expected outcomes of your campaign based on your objectives and KPIs.
                 </p>
                 
                 <div className="space-y-4">
-                  <StyledField label="What do you expect to achieve with this campaign?" name="expectedAchievements" as="textarea" rows={2} required icon={<Icon name="faCheck" className="h-5 w-5" solid={false} />} placeholder="We expect a 20% increase in brand awareness within three months." />
+                  <StyledField label="What do you expect to achieve with this campaign?" name="expectedAchievements" as="textarea" rows={2} required icon={<Icon name="faArrowTrendUp" className="h-5 w-5" solid={false} />} placeholder="We expect a 20% increase in brand awareness within three months." />
 
                   
-                  <StyledField label="How do you think the campaign will impact Purchase Intent?" name="purchaseIntent" as="textarea" rows={2} required icon={<Icon name="faLightBulb" className="h-5 w-5" solid={false} />} placeholder="Purchase intent will rise by 15% due to targeted ads." />
+                  <StyledField label="How do you think the campaign will impact Purchase Intent?" name="purchaseIntent" as="textarea" rows={2} required icon={<Icon name="faDollarSign" className="h-5 w-5" solid={false} />} placeholder="Purchase intent will rise by 15% due to targeted ads." />
 
                   
-                  <StyledField label="How will it change people's perception of your brand?" name="brandPerception" as="textarea" rows={2} icon={<Icon name="faChatBubble" className="h-5 w-5" solid={false} />} placeholder="Our brand will be seen as more innovative and customer-focused." />
+                  <StyledField label="How will it change people's perception of your brand?" name="brandPerception" as="textarea" rows={2} icon={<Icon name="faChartBar" className="h-5 w-5" solid={false} />} placeholder="Our brand will be seen as more innovative and customer-focused." />
 
                 </div>
               </div>
@@ -575,30 +581,75 @@ function FormContent() {
               {/* Features Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Icon name="faCheck" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                  <Icon name="faList" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
                   Features to Include
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {features.map(feature => <div key={feature.key} className="flex items-start space-x-2">
-                      <div className="pt-0.5">
-                        <Field type="checkbox" name="features" value={feature.key} checked={Array.isArray(values.features) && values.features.includes(feature.key)} onChange={() => {
-                    if (!Array.isArray(values.features)) {
-                      setFieldValue('features', [feature.key]);
-                      return;
-                    }
-                    const updatedFeatures = values.features.includes(feature.key) ? values.features.filter((f: Feature) => f !== feature.key) : [...values.features, feature.key];
-                    setFieldValue('features', updatedFeatures);
-                  }} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
-
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-5 h-5 mr-2">
-                          <Image src={feature.icon} alt={feature.title} width={20} height={20} />
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {features.map(feature => (
+                    <div 
+                      key={feature.key} 
+                      className={`
+                        cursor-pointer rounded-lg border p-4 transition-all duration-200 
+                        ${Array.isArray(values.features) && values.features.includes(feature.key) 
+                          ? 'bg-[#00BFFF] border-blue-400 shadow-md text-white transform scale-[1.02]' 
+                          : 'bg-white border-gray-200 hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-sm'}
+                        focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50
+                      `}
+                      onClick={() => {
+                        if (!Array.isArray(values.features)) {
+                          setFieldValue('features', [feature.key]);
+                          return;
+                        }
+                        const updatedFeatures = values.features.includes(feature.key)
+                          ? values.features.filter((f: Feature) => f !== feature.key)
+                          : [...values.features, feature.key];
+                        setFieldValue('features', updatedFeatures);
+                      }}
+                      tabIndex={0}
+                      role="checkbox"
+                      aria-checked={Array.isArray(values.features) && values.features.includes(feature.key)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          if (!Array.isArray(values.features)) {
+                            setFieldValue('features', [feature.key]);
+                            return;
+                          }
+                          const updatedFeatures = values.features.includes(feature.key)
+                            ? values.features.filter((f: Feature) => f !== feature.key)
+                            : [...values.features, feature.key];
+                          setFieldValue('features', updatedFeatures);
+                        }
+                      }}
+                    >
+                      {/* Hidden Formik field to properly track the value for this feature */}
+                      <Field
+                        type="checkbox"
+                        name="features"
+                        value={feature.key}
+                        checked={Array.isArray(values.features) && values.features.includes(feature.key)}
+                        className="hidden"
+                      />
+                      
+                      <div className="flex items-center mb-3">
+                        <div className="mr-3 w-6 h-6 flex items-center justify-center">
+                          <Image 
+                            src={feature.icon} 
+                            alt={feature.title} 
+                            width={28} 
+                            height={28} 
+                            className="transition-all duration-200"
+                          />
                         </div>
-                        <span>{feature.title}</span>
+                        <span className="font-medium">{feature.title}</span>
                       </div>
-                    </div>)}
+                      <div className="flex justify-end mt-3">
+                        {Array.isArray(values.features) && values.features.includes(feature.key) && (
+                          <Icon name="faCheckCircle" className="w-5 h-5" solid={true} />
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
               
