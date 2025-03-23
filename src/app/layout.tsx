@@ -5,13 +5,10 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 import { FormStyleReset } from '@/components/ui';
-import dynamic from 'next/dynamic';
+import ErrorBoundaryWrapper from '@/components/ErrorBoundaryWrapper';
 
 // Import diagnostic script for legacy compatibility
 import '@/lib/icon-diagnostic';
-
-// Dynamically import the ErrorBoundary to avoid SSR issues
-const ErrorBoundary = dynamic(() => import('@/components/ErrorBoundary'), { ssr: false });
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -38,13 +35,13 @@ export default function RootLayout({
           <Toaster />
           <ToastProvider>
             <FormStyleReset />
-            <ErrorBoundary>
+            <ErrorBoundaryWrapper>
               <ClientLayout>
                 <main className="min-h-screen bg-gray-100">
                   {children}
                 </main>
               </ClientLayout>
-            </ErrorBoundary>
+            </ErrorBoundaryWrapper>
           </ToastProvider>
         </UserProvider>
       </body>
