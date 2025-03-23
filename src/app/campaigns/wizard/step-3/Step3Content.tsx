@@ -257,7 +257,10 @@ function FormContent() {
               <Form className="space-y-6">
                 {/* Demographics Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Demographics</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    Demographics
+                  </h2>
                   
                   {/* Location Selector */}
                   <div className="mb-6">
@@ -283,9 +286,10 @@ function FormContent() {
                       }} />
 
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Icon name="faSearch" className="h-5 w-5 text-gray-400" solid={false} />
+                            <Icon name="faMap" className="h-5 w-5 text-gray-400" solid={false} />
                           </div>
-              <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center" onClick={() => {
+
+                          <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center" onClick={() => {
                         const input = document.getElementById('locationInput') as HTMLInputElement;
                         if (input && input.value.trim()) {
                           const newLocations = [...values.location, input.value.trim()];
@@ -297,20 +301,24 @@ function FormContent() {
                             <div className="bg-blue-500 rounded-full p-1">
                               <Icon name="faPlus" className="h-3 w-3 text-white" solid={false} />
                             </div>
-              </button>
-            </div>
+                          </button>
+                        </div>
 
                         {Array.isArray(values.location) && values.location.length > 0 && <div className="mt-3 flex flex-wrap gap-2">
                             {values.location.map((loc, index) => <span key={index} className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
 
                                 <span>{loc}</span>
-                                <button type="button" className="ml-2 text-gray-400 hover:text-gray-500" onClick={() => {
-                          const newLocations = [...values.location];
-                          newLocations.splice(index, 1);
-                          setFieldValue('location', newLocations);
-                        }}>
-
-                                  <Icon name="faDelete" action="delete" className="w-4 h-4" solid={false} />
+                                <button 
+                                  type="button" 
+                                  className="ml-2 group text-gray-400 hover:text-red-500" 
+                                  onClick={() => {
+                                    const newLocations = [...values.location];
+                                    newLocations.splice(index, 1);
+                                    setFieldValue('location', newLocations);
+                                  }}
+                                >
+                                  <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
+                                  <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
                                 </button>
                               </span>)}
                           </div>}
@@ -468,7 +476,10 @@ function FormContent() {
                 
                 {/* Screening Questions */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Screening Questions</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Icon name="faCircleQuestion" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    Screening Questions
+                  </h2>
                   
                   <div className="relative mb-4">
                     <div className="flex items-center">
@@ -520,13 +531,17 @@ function FormContent() {
                   {Array.isArray(values.screeningQuestions) && values.screeningQuestions.length > 0 && <div className="space-y-2">
                       {values.screeningQuestions.map((question, index) => <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
                           <span>{question}</span>
-                          <button type="button" onClick={() => {
-                    const newQuestions = [...values.screeningQuestions];
-                    newQuestions.splice(index, 1);
-                    setFieldValue('screeningQuestions', newQuestions);
-                  }} className="text-gray-400 hover:text-gray-500">
-
-                            <Icon name="faDelete" action="delete" className="w-4 h-4" solid={false} />
+                          <button 
+                            type="button" 
+                            className="group text-gray-400 hover:text-red-500" 
+                            onClick={() => {
+                              const newQuestions = [...values.screeningQuestions];
+                              newQuestions.splice(index, 1);
+                              setFieldValue('screeningQuestions', newQuestions);
+                            }}
+                          >
+                            <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
+                            <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
                           </button>
                         </div>)}
                     </div>}
@@ -534,7 +549,10 @@ function FormContent() {
                 
                 {/* Languages */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Languages</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Icon name="faGlobe" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    Languages
+                  </h2>
                   
                   <div className="relative">
                     <div className="mb-2">
@@ -559,12 +577,16 @@ function FormContent() {
                         <div className="flex flex-wrap gap-2">
                           {values.languages.map(lang => <span key={lang} className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
                               <span>{lang}</span>
-                              <button type="button" className="ml-2 text-gray-400 hover:text-gray-500" onClick={() => {
-                        const newLanguages = values.languages.filter(l => l !== lang);
-                        setFieldValue('languages', newLanguages);
-                      }}>
-
-                                <Icon name="faDelete" action="delete" className="w-4 h-4" solid={false} />
+                              <button 
+                                type="button" 
+                                className="ml-2 group text-gray-400 hover:text-red-500" 
+                                onClick={() => {
+                                  const newLanguages = values.languages.filter(l => l !== lang);
+                                  setFieldValue('languages', newLanguages);
+                                }}
+                              >
+                                <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
+                                <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
                               </button>
                             </span>)}
                         </div>
@@ -576,7 +598,10 @@ function FormContent() {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowAdvanced(!showAdvanced)}>
 
-                    <h2 className="text-lg font-semibold text-gray-900">Advanced Targeting</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Icon name="faFilter" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                      Advanced Targeting
+                    </h2>
                     <div className="text-blue-500 hover:text-blue-700">
                       <Icon name="faChevronRight" className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} solid={false} />
                     </div>
@@ -656,13 +681,17 @@ function FormContent() {
                               {values.jobTitles.map((title, index) => <span key={index} className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
 
                                   <span>{title}</span>
-                <button type="button" className="ml-2 text-gray-400 hover:text-gray-500" onClick={() => {
-                          const newJobTitles = [...values.jobTitles];
-                          newJobTitles.splice(index, 1);
-                          setFieldValue('jobTitles', newJobTitles);
-                        }}>
-
-                                    <Icon name="faDelete" action="delete" className="w-4 h-4" solid={false} />
+                <button 
+                  type="button" 
+                  className="ml-2 group text-gray-400 hover:text-red-500" 
+                  onClick={() => {
+                    const newJobTitles = [...values.jobTitles];
+                    newJobTitles.splice(index, 1);
+                    setFieldValue('jobTitles', newJobTitles);
+                  }}
+                >
+                  <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
+                  <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
                 </button>
                                 </span>)}
                             </div>}
@@ -676,7 +705,7 @@ function FormContent() {
                             Income Level
                           </label>
                           <div className="group relative">
-                            <Icon name="faInfo" className="h-5 w-5 text-gray-400 cursor-help" solid={false} />
+                            <Icon name="faCircleInfo" className="h-5 w-5 text-gray-400 cursor-help" solid={false} />
                             <div className="absolute right-0 bottom-6 w-64 bg-white shadow-lg rounded-md p-2 text-xs text-gray-700 hidden group-hover:block border border-gray-200">
                               Set the minimum income level for your target audience. This helps narrow down your demographic to users with specific purchasing power.
                             </div>
@@ -737,7 +766,10 @@ function FormContent() {
                 
                 {/* Competitors */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Competitors to Monitor</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+                    <Icon name="faBuilding" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    Competitors to Monitor
+                  </h2>
                   <p className="text-gray-600 mb-4">
                     Enter the names of key competitors you&apos;re tracking. These will help identify trends, opportunities, and gaps in your market.
                   </p>
@@ -779,13 +811,17 @@ function FormContent() {
                         {values.competitors.map((competitor, index) => <span key={index} className="inline-flex items-center justify-between px-3 py-2 border border-gray-200 rounded-lg bg-white">
 
                             <span>{competitor}</span>
-                            <button type="button" className="ml-2 text-gray-400 hover:text-gray-500" onClick={() => {
-                      const updatedCompetitors = [...values.competitors];
-                      updatedCompetitors.splice(index, 1);
-                      setFieldValue('competitors', updatedCompetitors);
-                    }}>
-
-                              <Icon name="faDelete" action="delete" className="w-4 h-4" solid={false} />
+                            <button 
+                              type="button" 
+                              className="ml-2 group text-gray-400 hover:text-red-500" 
+                              onClick={() => {
+                                const updatedCompetitors = [...values.competitors];
+                                updatedCompetitors.splice(index, 1);
+                                setFieldValue('competitors', updatedCompetitors);
+                              }}
+                            >
+                              <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
+                              <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
                             </button>
                           </span>)}
                       </div>}
