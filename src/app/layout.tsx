@@ -2,10 +2,6 @@ import { Inter } from 'next/font/google'
 import { UserProvider } from '@auth0/nextjs-auth0/client'
 import ClientLayout from '@/components/layouts/client-layout'
 import './globals.css'
-// Import UploadThing components correctly for v6
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
-import { extractRouterConfig } from "uploadthing/server";
-import { ourFileRouter } from "@/lib/uploadthing";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 import { FormStyleReset } from '@/components/ui';
@@ -35,14 +31,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
-          {/* Configure UploadThing for Next.js 15 */}
-          <NextSSRPlugin
-            /**
-             * The `extractRouterConfig` will extract the configuration from the router 
-             * to pass it to the Frontend.
-             */
-            routerConfig={extractRouterConfig(ourFileRouter)}
-          />
           <Toaster />
           <ToastProvider>
             <FormStyleReset />
