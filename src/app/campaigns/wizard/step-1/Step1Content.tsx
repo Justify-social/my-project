@@ -437,7 +437,7 @@ const DateRangePicker = ({
         
         {startDate && endDate && <div className="mt-3 text-sm text-primary-color bg-blue-50 p-2 rounded">
             <div className="flex items-center">
-              <Icon name="faInfo" className="w-4 h-4 mr-1 text-accent-color" solid={false} />
+              <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-accent-color" solid={false} />
               <span>Campaign Duration: {calculateDuration(startDate, endDate)}</span>
             </div>
           </div>}
@@ -1397,7 +1397,7 @@ function FormContent() {
 
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon name="faMail" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
 
                     <StyledField label="Position" name="primaryContact.position" as="select" required icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
 
@@ -1422,7 +1422,7 @@ function FormContent() {
 
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon name="faMail" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
 
                     <StyledField label="Position" name="secondaryContact.position" as="select" icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
 
@@ -1475,7 +1475,7 @@ function FormContent() {
 
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                          <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon name="faMail" className="w-5 h-5" solid={false} />} />
+                          <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
 
                           <StyledField label="Position" name={`additionalContacts.${index}.position`} as="select" icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
 
@@ -1530,12 +1530,12 @@ function FormContent() {
                 {/* Budget Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
                   <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="faMoney" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
+                    <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
                     Budget
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <StyledField label="Currency" name="currency" as="select" required icon={<Icon name="faMoney" className="w-5 h-5" solid={false} />}>
+                      <StyledField label="Currency" name="currency" as="select" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />}>
 
                         <option value="">Select currency</option>
                         <option value={Currency.GBP}>GBP (£)</option>
@@ -1551,10 +1551,10 @@ function FormContent() {
                       </Field>
                     </div>
                     
-                    <StyledField label="Total Campaign Budget" name="totalBudget" type="number" placeholder="5000" required icon={<Icon name="faMoney" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Total Campaign Budget" name="totalBudget" type="number" placeholder="5000" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />} />
 
                     
-                    <StyledField label="Social Media Budget" name="socialMediaBudget" type="number" placeholder="3000" required icon={<Icon name="faMoney" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Social Media Budget" name="socialMediaBudget" type="number" placeholder="3000" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />} />
 
                   </div>
                 </div>
