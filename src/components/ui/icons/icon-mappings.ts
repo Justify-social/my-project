@@ -6,15 +6,7 @@
  * Maps semantic icon names (used in the app) to their FontAwesome equivalents
  */
 export const SEMANTIC_TO_FA_MAP: Record<string, string> = {
-  // Core icon mappings
-  'close': 'faXmark',
-  'dollar': 'faDollarSign',
-  'edit': 'faPenToSquare',
-  'history': 'faClockRotateLeft',
-  'home': 'faHouse',
-  'search': 'faMagnifyingGlass',
-  'user-circle': 'faCircleUser',
-  'warning': 'faTriangleExclamation',
+  // Core icon mappings - REMOVED missing icons that already have direct FA mappings
   
   // Additional mappings for consistency
   'add': 'faPlus',
@@ -42,16 +34,7 @@ export const SEMANTIC_TO_FA_MAP: Record<string, string> = {
  * Used for direct SVG references
  */
 export const FA_TO_SVG_MAP: Record<string, string> = {
-  // Special mappings
-  'faClose': 'xmark',
-  'faDelete': 'trash-can',
-  'faEdit': 'pen-to-square',
-  'faHistory': 'clock-rotate-left',
-  'faHome': 'house',
-  'faSearch': 'magnifying-glass',
-  'faUserCircle': 'circle-user',
-  'faWarning': 'triangle-exclamation',
-  'faDollar': 'dollar-sign',
+  // Special mappings - REMOVED entries for missing icons
   
   // General pattern: convert camelCase to kebab-case
   // e.g., faCircleUser -> circle-user
@@ -69,7 +52,7 @@ export function getIconBaseName(iconName: string): string {
   }
   
   // Remove the 'fa' prefix
-  let baseName = iconName.startsWith('fa') ? iconName.substring(2) : iconName;
+  const baseName = iconName.startsWith('fa') ? iconName.substring(2) : iconName;
   
   // Convert from camelCase to kebab-case
   // e.g. CircleUser -> circle-user
