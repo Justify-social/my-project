@@ -1,12 +1,12 @@
 "use client";
 
 import { Suspense } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { StepLoader } from "@/components/Wizard/shared/StepContentLoader";
 
 export default function ClientPage() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<WizardSkeleton step={3} />}>
       <StepLoader step={3} />
     </Suspense>
   );

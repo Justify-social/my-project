@@ -13,6 +13,7 @@ import Image from 'next/image';
 import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 // Import dynamically loaded components and ensure they are exported correctly.
 const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming"), {
@@ -33,12 +34,13 @@ interface IconProps {
 }
 
 // Spinner for loading states
-const Spinner: React.FC = () => <div className="flex justify-center items-center py-8">
-    <div className="relative">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent-color)]"></div>
-      <div className="absolute top-0 left-0 animate-spin rounded-full h-12 w-12 border-t-2 border-[var(--accent-color)] opacity-30"></div>
-    </div>
-  </div>;
+const Spinner: React.FC = () => (
+  <div className="animate-pulse space-y-2 w-full">
+    <div className="h-5 bg-gray-200 rounded w-1/3 mb-2"></div>
+    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+    <div className="h-4 bg-gray-200 rounded w-2/3 mt-2"></div>
+  </div>
+);
 
 // Toast component for non-blocking notifications
 interface ToastProps {
@@ -1358,9 +1360,8 @@ export default function DashboardContent({
                 
                 <div className="p-3 sm:p-4">
                   {isLoadingCampaigns ? (
-                    <div className="text-center py-4 sm:py-6">
-                      <Spinner />
-                      <p className="mt-2 text-sm text-[var(--secondary-color)]">Loading campaigns...</p>
+                    <div className="py-4 sm:py-6">
+                      <TableSkeleton rows={3} cols={3} hasHeader={false} />
                     </div>
                   ) : upcomingCampaigns.length === 0 ? (
                     <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg">
@@ -1615,9 +1616,8 @@ export default function DashboardContent({
                 <tbody className="divide-y divide-gray-100">
                   {isLoadingCampaigns ? (
                     <tr>
-                      <td colSpan={4} className="py-8 text-center">
-                        <Spinner />
-                        <p className="mt-2 text-sm text-gray-500">Loading campaigns...</p>
+                      <td colSpan={4} className="py-8">
+                        <TableSkeleton rows={3} cols={4} hasHeader={false} />
                       </td>
                     </tr>
                   ) : (

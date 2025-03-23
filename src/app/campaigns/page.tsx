@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Icon, ButtonIcon } from '@/components/ui/icons';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
@@ -786,9 +787,34 @@ const ClientCampaignList: React.FC = () => {
       </div>
 
       {/* Loading, Error, or Empty States */}
-      {userLoading ? <div className="bg-white p-6 text-center">Loading user...</div> : loading ? <div className="bg-white p-6 text-center">Loading campaigns...</div> : error ? <div className="bg-white p-6 text-center text-red-500">{error}</div> : sortedCampaigns.length === 0 ? <div className="bg-white p-6 text-center">
+      {userLoading ? (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 overflow-hidden">
+          <TableSkeleton 
+            rows={5} 
+            cols={6} 
+            hasHeader={true}
+            hasFilter={false}
+            colWidths={['30%', '15%', '15%', '15%', '15%', '10%']}
+          />
+        </div>
+      ) : loading ? (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 overflow-hidden">
+          <TableSkeleton 
+            rows={8} 
+            cols={6} 
+            hasHeader={true}
+            hasFilter={false}
+            colWidths={['30%', '15%', '15%', '15%', '15%', '10%']}
+          />
+        </div>
+      ) : error ? (
+        <div className="bg-white p-6 text-center text-red-500">{error}</div>
+      ) : sortedCampaigns.length === 0 ? (
+        <div className="bg-white p-6 text-center">
           No campaigns found. Try adjusting your search criteria.
-        </div> : <>
+        </div>
+      ) : (
+        <>
           {/* Campaign Table for Larger Screens */}
           <div className="hidden md:block overflow-hidden rounded-lg border border-[var(--divider-color)]">
             <div className="overflow-x-auto">
@@ -948,7 +974,8 @@ const ClientCampaignList: React.FC = () => {
               </div>
             </div>
           </div>
-        </>}
+        </>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">

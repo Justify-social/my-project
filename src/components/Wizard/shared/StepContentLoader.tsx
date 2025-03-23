@@ -2,23 +2,33 @@
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { ErrorBoundary } from './ErrorBoundary';
 import { StepLoaderProps } from './types';
 
 // Pre-define the dynamic components
 const Step1Content = dynamic(() => import('@/app/campaigns/wizard/step-1/Step1Content').then(mod => mod.default), {
-  loading: () => <LoadingSpinner />,
+  loading: () => <WizardSkeleton step={1} />,
   ssr: false
 });
 
 const Step2Content = dynamic(() => import('@/app/campaigns/wizard/step-2/Step2Content').then(mod => mod.default), {
-  loading: () => <LoadingSpinner />,
+  loading: () => <WizardSkeleton step={2} />,
   ssr: false
 });
 
 const Step3Content = dynamic(() => import('@/app/campaigns/wizard/step-3/Step3Content').then(mod => mod.default), {
-  loading: () => <LoadingSpinner />,
+  loading: () => <WizardSkeleton step={3} />,
+  ssr: false
+});
+
+const Step4Content = dynamic(() => import('@/app/campaigns/wizard/step-4/Step4Content').then(mod => mod.default), {
+  loading: () => <WizardSkeleton step={4} />,
+  ssr: false
+});
+
+const Step5Content = dynamic(() => import('@/app/campaigns/wizard/step-5/Step5Content').then(mod => mod.default), {
+  loading: () => <WizardSkeleton step={5} />,
   ssr: false
 });
 
@@ -31,6 +41,10 @@ export function StepLoader({ step }: StepLoaderProps) {
         return <Step2Content />;
       case 3:
         return <Step3Content />;
+      case 4:
+        return <Step4Content />;
+      case 5:
+        return <Step5Content />;
       default:
         throw new Error(`Step ${step} not implemented`);
     }
@@ -38,7 +52,7 @@ export function StepLoader({ step }: StepLoaderProps) {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<WizardSkeleton step={step} />}>
         {renderContent()}
       </Suspense>
     </ErrorBoundary>
