@@ -1,5 +1,4 @@
-import { createUploadthing } from "uploadthing/next";
-import type { FileRouter } from "uploadthing/next";
+import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma";
 
@@ -52,7 +51,7 @@ export const ourFileRouter = {
     video: { maxFileSize: "16MB", maxFileCount: 5 },
   })
     .middleware(async ({ req }) => {
-      // Simplify the middleware to reduce potential issues with Effect
+      // Simplify the middleware to reduce potential issues
       const campaignId = req.headers.get("x-campaign-id") || "unknown";
       
       return { 
