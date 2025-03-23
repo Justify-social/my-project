@@ -18,7 +18,10 @@ export const metadata = {
   title: 'Justify',
   description: 'Measureing the impact of your social campaigns',
   icons: {
-    icon: '/favicon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png' }
+    ],
   },
 }
 

@@ -21,8 +21,9 @@ import { Radio, RadioGroup } from './radio';
 import { Table, TableExample } from './table';
 import { List, ListExample } from './list';
 import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './skeleton';
-import { IconTester } from './icons/test/IconTester';
+import { CustomIconDisplay } from './custom-icon-display';
 import { cn } from '@/lib/utils';
+
 export function ButtonExamples() {
   return <div className="space-y-8" id="buttons">
       <div>
@@ -241,7 +242,7 @@ export function InputExamples() {
               <Input type="email" placeholder="Enter your email" className="pr-10" />
 
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Icon name="faSettings" className="h-5 w-5 text-gray-400" solid={false} />
+                <Icon name="faGear" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
             </div>
           </div>
@@ -294,9 +295,9 @@ export const IconExamples = () => {
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
   // Ensure all icons in the categories exist in the maps
-  const essentialIcons = ['bell', 'calendar', 'check', 'close', 'delete', 'info', 'mail', 'menu', 'minus', 'plus', 'search', 'settings', 'user', 'warning'].filter(icon => icon in UI_ICON_MAP);
+  const essentialIcons = ['bell', 'calendar', 'check', 'xmark', 'trashCan', 'info', 'envelope', 'menu', 'minus', 'plus', 'magnifyingGlass', 'gear', 'user', 'triangleExclamation'].filter(icon => icon in UI_ICON_MAP);
   const navigationIcons = ['chevronDown', 'chevronUp', 'chevronLeft', 'chevronRight', 'home', 'menu'].filter(icon => icon in UI_ICON_MAP);
-  const actionIcons = ['view', 'edit', 'copy', 'delete', 'download', 'upload', 'share'].filter(icon => icon in UI_ICON_MAP);
+  const actionIcons = ['eye', 'penToSquare', 'copy', 'trashCan', 'download', 'upload', 'share'].filter(icon => icon in UI_ICON_MAP);
   const objectIcons = ['heart', 'star', 'bookmark', 'file', 'tag', 'filter', 'paperclip'].filter(icon => icon in UI_ICON_MAP);
   const layoutIcons = ['grid', 'list', 'table'].filter(icon => icon in UI_ICON_MAP);
   const securityIcons = ['lock', 'unlock', 'key'].filter(icon => icon in UI_ICON_MAP);
@@ -311,23 +312,23 @@ export const IconExamples = () => {
           <h3 className="text-md font-medium">Icon Sizes</h3>
           <div className="flex items-end space-x-8">
             <div className="flex flex-col items-center">
-              <Icon name="faSearch" size="xs" className="mb-2" solid={false} />
+              <Icon name="faMagnifyingGlass" size="xs" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">XS</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="faSearch" size="sm" className="mb-2" solid={false} />
+              <Icon name="faMagnifyingGlass" size="sm" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">SM</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="faSearch" size="md" className="mb-2" solid={false} />
+              <Icon name="faMagnifyingGlass" size="md" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">MD (default)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="faSearch" size="lg" className="mb-2" solid={false} />
+              <Icon name="faMagnifyingGlass" size="lg" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">LG</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="faSearch" size="xl" className="mb-2" solid={false} />
+              <Icon name="faMagnifyingGlass" size="xl" className="mb-2" solid={false} />
               <span className="text-xs text-gray-500">XL</span>
             </div>
           </div>
@@ -387,11 +388,11 @@ export const IconExamples = () => {
                 <span className="text-xs text-gray-500">{name}</span>
               </div>)}
             <div className="flex flex-col items-center">
-              <Icon name="faView" solid className="mb-2" />
+              <Icon name="faEye" solid className="mb-2" />
               <span className="text-xs text-gray-500">view (solid)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="faEdit" solid className="mb-2" />
+              <Icon name="faPenToSquare" solid className="mb-2" />
               <span className="text-xs text-gray-500">edit (solid)</span>
             </div>
             <div className="flex flex-col items-center">
@@ -399,7 +400,7 @@ export const IconExamples = () => {
               <span className="text-xs text-gray-500">copy (solid)</span>
             </div>
             <div className="flex flex-col items-center">
-              <Icon name="faDelete" solid className="mb-2" />
+              <Icon name="faTrashCan" solid className="mb-2" />
               <span className="text-xs text-gray-500">delete (solid)</span>
             </div>
           </div>
@@ -472,7 +473,7 @@ export const IconExamples = () => {
         <div className="space-y-4">
           <h3 className="text-md font-medium">Icons with Button</h3>
           <div className="flex flex-wrap gap-4">
-            <Button leftIcon={<Icon name="faSearch" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
+            <Button leftIcon={<Icon name="faMagnifyingGlass" size="sm" solid={false} className="text-[var(--secondary-color)]" />}>
 
               Search
             </Button>
@@ -488,7 +489,7 @@ export const IconExamples = () => {
 
               Home
             </Button>
-            <Button leftIcon={<Icon name="faDelete" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="danger">
+            <Button leftIcon={<Icon name="faTrashCan" size="sm" solid={false} className="text-[var(--secondary-color)]" />} variant="danger">
 
               Delete
             </Button>
@@ -533,14 +534,14 @@ export const IconExamples = () => {
           <div className="space-y-4 max-w-md">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="faSearch" className="h-5 w-5 text-gray-400" solid={false} />
+                <Icon name="faMagnifyingGlass" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
               <Input placeholder="Search..." className="pl-10" />
 
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="faMail" className="h-5 w-5 text-gray-400" solid={false} />
+                <Icon name="faEnvelope" className="h-5 w-5 text-gray-400" solid={false} />
               </div>
               <Input placeholder="Enter your email" className="pl-10" />
 
@@ -2493,7 +2494,7 @@ export default function ComponentExamples() {
               {/* Removed the SOLID/REGULAR/BRANDS boxes as requested */}
             </div>
             
-            <IconTester />
+            <CustomIconDisplay />
             
             {/* Removed duplicated icon usage examples */}
           </div>
