@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import Step4Content from "./Step4Content";
+import ClientPage from "./ClientPage";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { Metadata } from "next";
 
 // Make the page dynamic to ensure we get fresh data on each visit
@@ -9,8 +9,8 @@ export const revalidate = 0;
 
 export default function Page() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Step4Content />
+    <Suspense fallback={<WizardSkeleton step={4} />}>
+      <ClientPage />
     </Suspense>
   );
 }

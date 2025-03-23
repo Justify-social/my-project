@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { useWizard } from "@/context/WizardContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import ErrorFallback from '@/components/ErrorFallback';
 import { Icon } from "@/components/ui/icons";
 import Link from "next/link";
@@ -618,9 +618,11 @@ const formatCurrency = (amount: number | string, currencyCode: string = 'USD'): 
 // Add FeatureIcon component
 interface FeatureIconProps {
   feature: string;
+  className?: string;
 }
 const FeatureIcon: React.FC<FeatureIconProps> = ({
-  feature
+  feature,
+  className = ""
 }) => {
   const normalizedFeature = feature.toLowerCase();
   let iconPath = '';
@@ -748,6 +750,46 @@ function Step5Content() {
   const [validationMessages, setValidationMessages] = useState<string[]>([]);
   const [showAssets, setShowAssets] = useState(false);
   const [fetchAttempts, setFetchAttempts] = useState(0);
+  const [isClientSide, setIsClientSide] = useState(false);
+
+  useEffect(() => {
+    setIsClientSide(true);
+  }, []);
+
+  // Define a simple validation function in the file
+  const validateCampaignData = (data: any): void => {
+    // Reset validation messages to avoid duplicates
+    setValidationMessages([]);
+
+    // For testing: Allow submission regardless of validation state
+    // Only log any validation issues but don't prevent submission
+
+    // Add more detailed logging for debugging
+    console.log("Validating campaign data:", {
+      hasOverview: !!data?.overview,
+      hasObjectives: !!data?.objectives,
+      hasAudience: !!data?.audience,
+      hasCreativeAssets: !!data?.creativeAssets,
+      creativeAssetsLength: Array.isArray(data?.creativeAssets) ? data.creativeAssets.length : 'not an array',
+      creativeAssets: data?.creativeAssets,
+      rawAssets: data?.assets,
+      fullData: data
+    });
+
+    // Check for missing critical sections (logs only)
+    const missingKeys: string[] = [];
+    if (!data?.overview || Object.keys(data.overview || {}).length === 0) missingKeys.push('overview');
+    if (!data?.objectives || Object.keys(data.objectives || {}).length === 0) missingKeys.push('objectives');
+    if (!data?.audience || Object.keys(data.audience || {}).length === 0) missingKeys.push('audience');
+    if (!data?.creativeAssets || Array.isArray(data.creativeAssets) && data.creativeAssets.length === 0) missingKeys.push('creativeAssets');
+
+    // Log validation issues but don't block submission
+    if (missingKeys.length > 0) {
+      console.warn(`NOTE: Some campaign data is missing (${missingKeys.join(', ')}), but submission will be allowed for testing.`);
+    }
+
+    // No validation messages will be set, allowing submission to proceed
+  };
 
   // Update the displayData useMemo to use the normalizeApiData function
   const displayData = useMemo(() => {
@@ -776,8 +818,10 @@ function Step5Content() {
   }, [campaignData, contextData, error, fetchAttempts]);
 
   // Check if we have minimal data
-  const hasMinimalData = Boolean(displayData && Object.keys(displayData).length > 0 && (displayData.campaignName || displayData.overview && displayData.overview.name));
-
+  const hasMinimalData = useMemo(() => {
+    return Boolean(displayData && Object.keys(displayData).length > 0 && (displayData.campaignName || displayData.overview && displayData.overview.name));
+  }, [displayData]);
+  
   // Simplified data fetching approach - directly fetch from API
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -835,8 +879,8 @@ function Step5Content() {
       }
     };
     fetchCampaignData();
-  }, [campaignId, reloadCampaignData]);
-
+  }, [campaignId, reloadCampaignData, contextData]);
+  
   // Validate when we have data
   useEffect(() => {
     if (displayData && Object.keys(displayData).length > 0) {
@@ -844,44 +888,13 @@ function Step5Content() {
     }
   }, [displayData]);
 
+  if (!isClientSide) {
+    return <WizardSkeleton step={5} />;
+  }
+
   // Navigate to edit a specific step
   const navigateToStep = (step: number) => {
     router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`);
-  };
-
-  // Define a simple validation function in the file
-  const validateCampaignData = (data: any): void => {
-    // Reset validation messages to avoid duplicates
-    setValidationMessages([]);
-
-    // For testing: Allow submission regardless of validation state
-    // Only log any validation issues but don't prevent submission
-
-    // Add more detailed logging for debugging
-    console.log("Validating campaign data:", {
-      hasOverview: !!data?.overview,
-      hasObjectives: !!data?.objectives,
-      hasAudience: !!data?.audience,
-      hasCreativeAssets: !!data?.creativeAssets,
-      creativeAssetsLength: Array.isArray(data?.creativeAssets) ? data.creativeAssets.length : 'not an array',
-      creativeAssets: data?.creativeAssets,
-      rawAssets: data?.assets,
-      fullData: data
-    });
-
-    // Check for missing critical sections (logs only)
-    const missingKeys: string[] = [];
-    if (!data?.overview || Object.keys(data.overview || {}).length === 0) missingKeys.push('overview');
-    if (!data?.objectives || Object.keys(data.objectives || {}).length === 0) missingKeys.push('objectives');
-    if (!data?.audience || Object.keys(data.audience || {}).length === 0) missingKeys.push('audience');
-    if (!data?.creativeAssets || Array.isArray(data.creativeAssets) && data.creativeAssets.length === 0) missingKeys.push('creativeAssets');
-
-    // Log validation issues but don't block submission
-    if (missingKeys.length > 0) {
-      console.warn(`NOTE: Some campaign data is missing (${missingKeys.join(', ')}), but submission will be allowed for testing.`);
-    }
-
-    // No validation messages will be set, allowing submission to proceed
   };
 
   // Handle final submission
@@ -995,8 +1008,7 @@ function Step5Content() {
   };
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-        <p className="ml-2">Loading campaign data...</p>
+        <WizardSkeleton step={5} />
       </div>;
   }
   if (error) {
@@ -1211,14 +1223,19 @@ function Step5Content() {
 
                 <div className="bg-[rgba(0,191,255,0.03)] p-4 rounded-lg border border-[var(--divider-color)]">
                   <h4 className="text-sm font-medium text-[var(--secondary-color)] mb-3">Features</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {displayData.features && Array.isArray(displayData.features) && displayData.features.length > 0 ? displayData.features.map((feature: string, idx: number) => <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1.5 rounded-full text-sm font-medium inline-flex items-center">
-
-                          <FeatureIcon feature={feature} solid={false} className="text-[var(--secondary-color)]" />
-                        </span>) : displayData?.objectives?.features && Array.isArray(displayData?.objectives?.features) && displayData?.objectives?.features.length > 0 ? displayData.objectives.features.map((feature: string, idx: number) => <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1.5 rounded-full text-sm font-medium inline-flex items-center">
-
-                          <FeatureIcon feature={feature} solid={false} className="text-[var(--secondary-color)]" />
-                        </span>) : <span className="text-[var(--secondary-color)]">None specified</span>}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3">
+                    {displayData.features?.map((feature, i) => (
+                      <div 
+                        key={i} 
+                        className="flex items-center bg-blue-50 rounded-lg p-3"
+                      >
+                        <FeatureIcon 
+                          feature={feature} 
+                          className="text-blue-500 mr-2"
+                        />
+                        <span>{formatFeature(feature)}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

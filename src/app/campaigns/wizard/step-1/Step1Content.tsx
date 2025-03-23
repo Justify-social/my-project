@@ -8,7 +8,7 @@ import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton, FormSkeleton } from "@/components/ui/loading-skeleton";
 import Image from "next/image";
 import { Icon } from "@/components/ui/icon";
 import { EnumTransformers } from '@/utils/enum-transformers';
@@ -168,24 +168,24 @@ const StyledField = ({
   ...props
 }: any) => {
   return <div className="mb-5">
-      <label htmlFor={name} className="block text-sm font-medium text-primary-color mb-2 font-work-sans">
+      <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
         {label}
-        {required && <span className="text-accent-color ml-1">*</span>}
+        {required && <span className="text-[var(--accent-color)] ml-1">*</span>}
       </label>
       <div className="relative">
-        {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+        {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
             {icon}
           </div>}
-        {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props}>
+        {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props}>
 
             {children}
-          </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
+          </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
         {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
-        {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+        {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
             <Icon name="faCalendar" className="w-5 h-5" solid={false} />
           </div>}
         {/* Add chevron only for select elements */}
-        {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-secondary-color pointer-events-none form-icon-container">
+        {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container">
             <Icon name="faChevronDown" className="w-5 h-5" solid={false} />
           </div>}
       </div>
@@ -201,14 +201,14 @@ const DateField = ({
   ...props
 }: any) => {
   return <div className="mb-5">
-      <label htmlFor={name} className="block text-sm font-medium text-primary-color mb-2 font-work-sans">
+      <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
         {label}
-        {required && <span className="text-accent-color ml-1">*</span>}
+        {required && <span className="text-[var(--accent-color)] ml-1">*</span>}
       </label>
       <div className="relative">
-        <Field type="date" id={name} name={name} className="w-full p-2.5 pr-10 border border-divider-color rounded-md focus:ring-2 focus:ring-accent-color focus:border-accent-color focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
+        <Field type="date" id={name} name={name} className="w-full p-2.5 pr-10 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
 
-        <Icon name="faCalendar" className="absolute right-3 top-2.5 w-5 h-5 text-secondary-color" solid={false} />
+        <Icon name="faCalendar" className="absolute right-3 top-2.5 w-5 h-5 text-[var(--secondary-color)]" solid={false} />
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
     </div>;
@@ -395,21 +395,21 @@ const DateRangePicker = ({
     return nextDay.toISOString().split('T')[0];
   })() : '';
   return <div className="mb-5">
-      <label className="block text-sm font-medium text-primary-color mb-2 font-work-sans">
-        {label} <span className="text-accent-color">*</span>
+      <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+        {label} <span className="text-[var(--accent-color)]">*</span>
       </label>
       
-      <div className="bg-white rounded-lg border border-divider-color p-4">
+      <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor={startFieldName} className="block text-sm text-secondary-color mb-1">
+            <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1">
               Start Date
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
                 <Icon name="faCalendar" className="w-5 h-5" solid={false} />
               </div>
-              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color form-input-with-icon ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-gray-300'}`} min={new Date().toISOString().split('T')[0]} // Minimum is today
+              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] form-input-with-icon ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-gray-300'}`} min={new Date().toISOString().split('T')[0]} // Minimum is today
             />
             </div>
             {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1">
@@ -418,14 +418,14 @@ const DateRangePicker = ({
           </div>
           
           <div>
-            <label htmlFor={endFieldName} className="block text-sm text-secondary-color mb-1">
+            <label htmlFor={endFieldName} className="block text-sm text-[var(--secondary-color)] mb-1">
               End Date
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-secondary-color form-icon-container">
+              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
                 <Icon name="faCalendar" className="w-5 h-5" solid={false} />
               </div>
-              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={e => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color form-input-with-icon ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-gray-300'}`} min={minEndDate} // End date must be at least the day after start date
+              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={e => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] form-input-with-icon ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-gray-300'}`} min={minEndDate} // End date must be at least the day after start date
             disabled={!startDate} // Disable until start date is selected
             />
             </div>
@@ -435,9 +435,9 @@ const DateRangePicker = ({
           </div>
         </div>
         
-        {startDate && endDate && <div className="mt-3 text-sm text-primary-color bg-blue-50 p-2 rounded">
+        {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
             <div className="flex items-center">
-              <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-accent-color" solid={false} />
+              <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-[var(--accent-color)]" solid={false} />
               <span>Campaign Duration: {calculateDuration(startDate, endDate)}</span>
             </div>
           </div>}
@@ -644,9 +644,9 @@ const InfluencerEntry = ({
     }
   }, [influencer.platform, influencer.handle, debouncedValidate]);
   const hasError = touched.influencers?.[index] && ((errors.influencers?.[index] as any)?.platform || (errors.influencers?.[index] as any)?.handle);
-  return <div className="bg-white rounded-lg border border-divider-color p-4 mb-4">
+  return <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4 mb-4">
       <div className="flex justify-between items-center mb-3">
-        <h4 className="text-primary-color font-medium">Influencer #{index + 1}</h4>
+        <h4 className="text-[var(--primary-color)] font-medium">Influencer #{index + 1}</h4>
         {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700">
 
             <Icon name="faClose" className="h-5 w-5" solid={false} />
@@ -655,10 +655,10 @@ const InfluencerEntry = ({
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-primary-color mb-2">
-            Platform <span className="text-accent-color">*</span>
+          <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2">
+            Platform <span className="text-[var(--accent-color)]">*</span>
           </label>
-          <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-gray-300'}`}>
+          <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-gray-300'}`}>
 
             <option value="">Select platform</option>
             <option value={Platform.Instagram}>Instagram</option>
@@ -670,14 +670,14 @@ const InfluencerEntry = ({
         </div>
         
         <div>
-          <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-primary-color mb-2">
-            Influencer Handle <span className="text-accent-color">*</span>
+          <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2">
+            Influencer Handle <span className="text-[var(--accent-color)]">*</span>
           </label>
           <div className="relative">
-            <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-gray-300'}`} />
+            <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-gray-300'}`} />
 
             {isValidating && <div className="absolute right-2 top-2">
-                <Icon name="faInfo" className="h-5 w-5 text-primary-color animate-spin" solid={false} />
+                <Icon name="faInfo" className="h-5 w-5 text-[var(--primary-color)] animate-spin" solid={false} />
               </div>}
           </div>
           <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1" />
@@ -686,7 +686,7 @@ const InfluencerEntry = ({
         </div>
       </div>
       
-      {isValidating && <div className="mt-3 text-primary-color flex items-center">
+      {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center">
           <span className="animate-spin mr-2">
             <Icon name="faInfo" className="h-4 w-4" solid={false} />
           </span>
@@ -741,7 +741,7 @@ const InfluencerPreview = ({
   if (isLoading) {
     return <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center">
         <div className="animate-spin mr-2">
-          <Icon name="faInfo" className="h-4 w-4 text-primary-color" solid={false} />
+          <Icon name="faInfo" className="h-4 w-4 text-[var(--primary-color)]" solid={false} />
         </div>
         <p className="text-sm text-gray-600">Validating influencer...</p>
       </div>;
@@ -765,7 +765,7 @@ const InfluencerPreview = ({
           </div>}
         <div>
           <div className="flex items-center">
-            <p className="font-medium text-primary-color">
+            <p className="font-medium text-[var(--primary-color)]">
               {influencerData.displayName || handle}
             </p>
             {influencerData.verified && <span className="ml-1 text-blue-500">
@@ -1308,7 +1308,7 @@ function FormContent() {
     // This is to prevent re-initialization
   }, [wizardContext.hasLoadedData, wizardContext.campaignData]);
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <WizardSkeleton step={1} />;
   }
   if (error) {
     return <div className="p-6 bg-red-50 border border-red-200 rounded-md shadow-sm">
@@ -1322,8 +1322,8 @@ function FormContent() {
   }
   return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-primary-color mb-2 font-sora">Campaign Creation</h1>
-        <p className="text-secondary-color font-work-sans">Complete all required fields to create your campaign</p>
+        <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-2 font-sora">Campaign Creation</h1>
+        <p className="text-[var(--secondary-color)] font-work-sans">Complete all required fields to create your campaign</p>
       </div>
 
       <Formik innerRef={formikRef} initialValues={initialValues} validationSchema={ValidationSchema} onSubmit={handleSubmit} enableReinitialize={true}>
@@ -1349,8 +1349,8 @@ function FormContent() {
         return <>
               <Form className="space-y-8">
                 {/* Campaign Details */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
-                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
                     <Image src="/app/Campaigns.svg" alt="Campaigns" width={16} height={16} className="mr-2 text-black" />
 
                     Campaign Details
@@ -1385,9 +1385,9 @@ function FormContent() {
                 </div>
 
                 {/* Primary Contact */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
-                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="faUser" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                    <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Primary Contact
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1410,10 +1410,10 @@ function FormContent() {
                 </div>
 
                 {/* Secondary Contact */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
-                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
-                    Secondary Contact <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                    Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <StyledField label="First Name" name="secondaryContact.firstName" placeholder="Enter first name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
@@ -1435,11 +1435,11 @@ function FormContent() {
                 </div>
 
                 {/* Additional Contacts */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <div className="flex justify-between items-center mb-5">
-                    <h2 className="text-lg font-bold font-sora text-primary-color flex items-center">
-                      <Icon name="faUser" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
-                      Additional Contacts <span className="text-sm font-normal text-secondary-color ml-2 font-work-sans">(Optional)</span>
+                    <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] flex items-center">
+                      <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                      Additional Contacts <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                     </h2>
                     <button type="button" onClick={() => {
                   const contacts = [...values.additionalContacts, {
@@ -1449,24 +1449,24 @@ function FormContent() {
                     position: ''
                   }];
                   setFieldValue('additionalContacts', contacts);
-                }} className="flex items-center text-sm font-medium bg-white border border-accent-color text-accent-color hover:bg-accent-color/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
+                }} className="flex items-center text-sm font-medium bg-white border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
 
                       <Icon name="faPlus" className="w-5 h-5 mr-1" solid={false} />
                       Add Contact
                     </button>
                   </div>
 
-                  {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-divider-color rounded-lg p-4 relative shadow-sm bg-white">
+                  {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-[var(--divider-color)] rounded-lg p-4 relative shadow-sm bg-white">
                         <button type="button" onClick={() => {
                   const contacts = [...values.additionalContacts];
                   contacts.splice(index, 1);
                   setFieldValue('additionalContacts', contacts);
-                }} className="absolute top-2 right-2 text-secondary-color hover:text-accent-color transition-colors duration-200" aria-label="Remove contact">
+                }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200" aria-label="Remove contact">
 
                           <Icon name="faClose" className="h-5 w-5" solid={false} />
                         </button>
 
-                        <h3 className="text-md font-medium text-primary-color mb-3 font-sora">Contact {index + 3}</h3>
+                        <h3 className="text-md font-medium text-[var(--primary-color)] mb-3 font-sora">Contact {index + 3}</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <StyledField label="First Name" name={`additionalContacts.${index}.firstName`} placeholder="Enter first name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
@@ -1485,17 +1485,17 @@ function FormContent() {
                             <option value={Position.VP}>{Position.VP}</option>
                           </StyledField>
                         </div>
-                      </div>) : <div className="text-center py-8 border border-dashed border-divider-color rounded-lg bg-gray-50">
-                      <Icon name="faUser" className="w-12 h-12 mx-auto text-accent-color opacity-70" solid={false} />
-                      <p className="mt-2 text-primary-color font-sora">No additional contacts added yet.</p>
-                      <p className="text-sm text-secondary-color font-work-sans">Click "Add Contact" to include more team members.</p>
+                      </div>) : <div className="text-center py-8 border border-dashed border-[var(--divider-color)] rounded-lg bg-gray-50">
+                      <Icon name="faUser" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70" solid={false} />
+                      <p className="mt-2 text-[var(--primary-color)] font-sora">No additional contacts added yet.</p>
+                      <p className="text-sm text-[var(--secondary-color)] font-work-sans">Click "Add Contact" to include more team members.</p>
                     </div>}
                 </div>
 
                 {/* Influencers */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
-                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="faStar" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                    <Icon name="faStar" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Influencer Details
                   </h2>
                   <div className="mb-4">
@@ -1517,7 +1517,7 @@ function FormContent() {
                           <button type="button" onClick={() => push({
                       platform: '',
                       handle: ''
-                    })} className="mt-3 flex items-center text-primary-color hover:text-accent-color">
+                    })} className="mt-3 flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)]">
 
                             <Icon name="faPlus" className="h-5 w-5 mr-2" solid={false} />
                             Add Another Influencer
@@ -1528,9 +1528,9 @@ function FormContent() {
                 </div>
 
                 {/* Budget Section */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-divider-color">
-                  <h2 className="text-lg font-bold font-sora text-primary-color mb-5 flex items-center">
-                    <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-accent-color" solid={false} />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                    <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Budget
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1573,14 +1573,15 @@ function FormContent() {
 
 // Main component with Suspense boundary
 export default function Step1Content() {
-  const [mounted, setMounted] = useState(false);
+  const [isClientSide, setIsClientSide] = useState(false);
+
   useEffect(() => {
-    setMounted(true);
+    setIsClientSide(true);
   }, []);
-  if (!mounted) {
-    return <LoadingSpinner />;
+
+  if (!isClientSide) {
+    return <WizardSkeleton step={1} />;
   }
-  return <Suspense fallback={<LoadingSpinner />}>
-      <FormContent />
-    </Suspense>;
+
+  return <FormContent />;
 }

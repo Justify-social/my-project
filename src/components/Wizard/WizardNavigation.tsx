@@ -4,6 +4,7 @@ import React from 'react';
 import { useCampaignWizardContext } from '@/contexts/CampaignWizardContext';
 import { AutosaveIndicator } from './AutosaveIndicator';
 import { cn } from '@/lib/utils';
+import { Icon } from '@/components/ui/icon';
 
 interface WizardNavigationProps {
   className?: string;
@@ -39,7 +40,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
       {/* Progress bar */}
       <div className="w-full h-2 mb-4 bg-gray-200 rounded-full">
         <div
-          className="h-2 transition-all duration-300 ease-in-out bg-primary rounded-full"
+          className="h-2 transition-all duration-300 ease-in-out bg-[var(--accent-color)] rounded-full"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -52,25 +53,14 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
               className={cn(
                 'flex items-center justify-center w-8 h-8 mb-2 text-sm font-medium border-2 rounded-full',
                 step === currentStep
-                  ? 'border-primary bg-primary text-white'
+                  ? 'border-[var(--accent-color)] bg-[var(--accent-color)] text-white'
                   : step < currentStep
-                  ? 'border-primary bg-white text-primary'
+                  ? 'border-[var(--accent-color)] bg-white text-[var(--accent-color)]'
                   : 'border-gray-300 bg-white text-gray-400'
               )}
             >
               {step < currentStep ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Icon name="faCheckCircle" className="w-5 h-5 text-green-500" solid={true} />
               ) : (
                 step
               )}
@@ -79,9 +69,9 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
               className={cn(
                 'text-xs font-medium',
                 step === currentStep
-                  ? 'text-primary'
+                  ? 'text-[var(--accent-color)]'
                   : step < currentStep
-                  ? 'text-gray-700'
+                  ? 'text-[var(--primary-color)]'
                   : 'text-gray-400'
               )}
             >
@@ -100,12 +90,13 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             onClick={goToPreviousStep}
             disabled={isFirstStep || isLoading || isSaving}
             className={cn(
-              'px-4 py-2 text-sm font-medium border rounded-md',
+              'px-4 py-2 text-sm font-medium border rounded-md flex items-center',
               isFirstStep
                 ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                : 'border-[var(--secondary-color)] bg-white text-[var(--secondary-color)] hover:bg-gray-50'
             )}
           >
+            <Icon name="faArrowLeft" className="w-4 h-4 mr-2" solid={false} />
             Previous
           </button>
 
@@ -114,9 +105,10 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             type="button"
             onClick={saveAsDraft}
             disabled={isLoading || isSaving}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-[var(--primary-color)] bg-white border border-[var(--primary-color)] rounded-md hover:bg-gray-50 flex items-center"
           >
-            Save as Draft
+            <Icon name="faSave" className="w-4 h-4 mr-2" solid={false} />
+            Save Draft
           </button>
         </div>
 
@@ -130,40 +122,27 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             onClick={isLastStep ? submitCampaign : goToNextStep}
             disabled={isLoading || isSaving}
             className={cn(
-              'px-4 py-2 text-sm font-medium text-white rounded-md',
+              'px-4 py-2 text-sm font-medium text-white rounded-md flex items-center',
               isLoading || isSaving
-                ? 'bg-primary/70 cursor-not-allowed'
-                : 'bg-primary hover:bg-primary/90'
+                ? 'bg-[var(--accent-color)] opacity-70 cursor-not-allowed'
+                : 'bg-[var(--accent-color)] hover:opacity-90'
             )}
           >
             {isLoading || isSaving ? (
               <span className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-2 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+                <Icon name="faCircleNotch" className="w-4 h-4 mr-2 animate-spin" solid={false} />
                 {isLastStep ? 'Submitting...' : 'Saving...'}
               </span>
             ) : isLastStep ? (
-              'Submit Campaign'
+              <>
+                Submit Campaign
+                <Icon name="faCheck" className="w-4 h-4 ml-2" solid={false} />
+              </>
             ) : (
-              'Next Step'
+              <>
+                Next Step
+                <Icon name="faArrowRight" className="w-4 h-4 ml-2" solid={false} />
+              </>
             )}
           </button>
         </div>

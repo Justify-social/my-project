@@ -5,7 +5,7 @@
  * It's meant for documentation and testing purposes only.
  */
 import React, { useState } from 'react';
-import { Card, CardHeader, CardContent, CardFooter, MetricCard, Spinner, LoadingSpinner, Button, Input, Heading, Text, Paragraph, Avatar, Badge, StatusBadge, Calendar, Progress, CircularProgress, Tabs, TabList, Tab, TabPanels, TabPanel } from './';
+import { Card, CardHeader, CardContent, CardFooter, MetricCard, Button, Input, Heading, Text, Paragraph, Avatar, Badge, StatusBadge, Calendar, Progress, CircularProgress, Tabs, TabList, Tab, TabPanels, TabPanel } from './';
 
 // Import from the new icons structure
 import { Icon, IconName, KpiIconName, AppIconName, PlatformName, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, PLATFORM_ICON_MAP, PLATFORM_COLORS, KPI_ICON_URLS, APP_ICON_URLS } from './icons';
@@ -20,7 +20,18 @@ import { Checkbox } from './checkbox';
 import { Radio, RadioGroup } from './radio';
 import { Table, TableExample } from './table';
 import { List, ListExample } from './list';
-import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './skeleton';
+import { Skeleton, TextSkeleton, AvatarSkeleton, TableRowSkeleton, CardSkeleton } from './loading-skeleton/skeleton';
+import { Spinner, AuthSpinner, ButtonSpinner, InlineSpinner, DotsSpinner, FullscreenSpinner } from './spinner';
+import { 
+  CampaignDetailSkeleton, 
+  WizardSkeleton, 
+  TableSkeleton, 
+  FormSkeleton, 
+  AuthSkeleton,
+  FormFieldSkeleton,
+  SkeletonSection,
+  DashboardSkeleton
+} from './loading-skeleton';
 import { CustomIconDisplay } from './custom-icon-display';
 import { cn } from '@/lib/utils';
 
@@ -2206,116 +2217,136 @@ export function TabsExamples() {
 export function LoadingExamples() {
   return <div className="space-y-8" id="loading">
       <div>
-        <h2 className="text-lg font-semibold mb-4">Spinner Variants</h2>
-        <div className="flex gap-4 items-center">
+        <h2 className="text-lg font-semibold mb-4">Spinner Components</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <p className="text-sm text-gray-500 mb-2">Border (default)</p>
-            <Spinner />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">SVG</p>
-            <Spinner type="svg" />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Spinner Sizes</h2>
-        <div className="flex gap-4 items-center">
-          <div>
-            <p className="text-sm text-gray-500 mb-2">XS</p>
-            <Spinner size="xs" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">SM</p>
-            <Spinner size="sm" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">MD (default)</p>
-            <Spinner size="md" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">LG</p>
-            <Spinner size="lg" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">XL</p>
-            <Spinner size="xl" />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Spinner Colors</h2>
-        <div className="flex gap-4 items-center">
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Primary (default)</p>
-            <Spinner variant="primary" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Secondary</p>
-            <Spinner variant="secondary" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Accent</p>
-            <Spinner variant="accent" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">White</p>
-            <div className="bg-gray-800 p-2 rounded">
-              <Spinner variant="white" />
+            <p className="text-sm text-gray-500 mb-2">Base Spinner Variants</p>
+            <div className="flex gap-4 items-center">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Default</p>
+                <Spinner />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Primary</p>
+                <Spinner variant="primary" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Secondary</p>
+                <Spinner variant="secondary" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Accent</p>
+                <Spinner variant="accent" />
+              </div>
             </div>
           </div>
+          
           <div>
-            <p className="text-sm text-gray-500 mb-2">Current</p>
-            <Spinner variant="current" />
+            <p className="text-sm text-gray-500 mb-2">Spinner Sizes</p>
+            <div className="flex gap-4 items-center">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">XS</p>
+                <Spinner size="xs" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">SM</p>
+                <Spinner size="sm" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">MD</p>
+                <Spinner size="md" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">LG</p>
+                <Spinner size="lg" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">XL</p>
+                <Spinner size="xl" />
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Spinner with Label</p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Bottom (default)</p>
+                <Spinner label="Loading..." />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Right</p>
+                <div className="flex items-center">
+                  <Spinner />
+                  <span className="ml-2">Loading...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Specialized Spinners</p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Button Spinner</p>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded flex items-center">
+                  <ButtonSpinner className="mr-2" /> Loading...
+                </button>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Inline Spinner</p>
+                <div className="text-sm">Loading your data <InlineSpinner /></div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Dots Loading</p>
+                <DotsSpinner />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Legacy Spinner Components</h2>
-        <div className="flex gap-4 items-center">
-          <div>
-            <p className="text-sm text-gray-500 mb-2">loading-spinner.tsx</p>
-            <LoadingSpinner />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Authentication Loading Spinner</h2>
-        <div className="flex gap-8 items-start">
+        <h2 className="text-lg font-semibold mb-4">Authentication Spinners</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="p-6 border rounded-lg bg-white shadow-sm">
-            <p className="text-sm text-gray-500 mb-4">Used during Auth0 authentication</p>
-            <div className="flex flex-col items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
-              <p className="mt-4 text-gray-600">Checking authentication...</p>
+            <p className="text-sm text-gray-500 mb-4">AuthSpinner Component</p>
+            <div className="flex flex-col items-center justify-center h-40">
+              <div className="scale-50">
+                <AuthSpinner label="Loading Justify..." />
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-gray-50 rounded border">
+              <pre className="text-xs overflow-x-auto">
+                {`import { AuthSpinner } from '@/components/ui/spinner';
+
+// In your component
+return <AuthSpinner label="Loading Justify..." />;`}
+              </pre>
             </div>
           </div>
+          
           <div className="p-6 border rounded-lg bg-white shadow-sm">
-            <p className="text-sm text-gray-500 mb-4">Standardized version</p>
-            <div className="flex flex-col items-center justify-center">
-              <Spinner size="lg" variant="primary" />
-              <p className="mt-4 text-gray-600">Checking authentication...</p>
+            <p className="text-sm text-gray-500 mb-4">Auth Skeleton Component</p>
+            <div className="flex flex-col items-center justify-center h-40">
+              <div className="scale-75">
+                <AuthSkeleton variant="loading" showLogo={true} />
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-gray-50 rounded border">
+              <pre className="text-xs overflow-x-auto">
+                {`import { AuthSkeleton } from '@/components/ui/loading-skeleton';
+
+// In your component
+return <AuthSkeleton variant="loading" />;`}
+              </pre>
             </div>
           </div>
-        </div>
-        <div className="mt-4 p-4 bg-gray-50 rounded border">
-          <p className="text-sm text-gray-700 font-semibold mb-2">Implementation:</p>
-          <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
-            {`<div className="min-h-screen flex items-center justify-center">
-  <div className="text-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto"></div>
-    <p className="mt-4 text-gray-600">Checking authentication...</p>
-  </div>
-</div>`}
-          </pre>
         </div>
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Skeleton Loading</h2>
+        <h2 className="text-lg font-semibold mb-4">Basic Skeleton Components</h2>
         <div className="space-y-6">
           <div>
             <p className="text-sm text-gray-500 mb-2">Basic Skeletons</p>
@@ -2331,6 +2362,10 @@ export function LoadingExamples() {
               <div>
                 <p className="text-xs text-gray-500 mb-1">Text</p>
                 <Skeleton variant="text" width={200} />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Card</p>
+                <Skeleton variant="card" width={120} height={80} />
               </div>
             </div>
           </div>
@@ -2382,40 +2417,170 @@ export function LoadingExamples() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Real-world Examples</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Profile Loading</p>
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-4 mb-4">
-                    <AvatarSkeleton size="lg" />
-                    <div className="space-y-2">
-                      <Skeleton variant="text" width={150} className="h-5" />
-                      <Skeleton variant="text" width={100} className="h-4" />
-                    </div>
-                  </div>
-                  <TextSkeleton lines={3} />
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Contextual Skeleton Components</h2>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Wizard Skeleton (Step 3)</p>
+              <div className="border rounded-lg p-4 overflow-hidden" style={{ maxHeight: '300px' }}>
+                <div className="scale-[0.6] origin-top-left">
+                  <WizardSkeleton step={3} />
                 </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Dashboard Card Loading</p>
-                <div className="p-4 border rounded-lg">
-                  <div className="flex justify-between mb-4">
-                    <Skeleton variant="text" width={150} className="h-5" />
-                    <Skeleton variant="circular" width={24} height={24} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Form Field Skeleton Variants</p>
+              <div className="border rounded-lg p-4 overflow-hidden space-y-4">
+                <div className="flex flex-wrap gap-4">
+                  <div className="w-1/3">
+                    <p className="text-xs text-gray-500 mb-1">Text Input</p>
+                    <FormFieldSkeleton type="text" />
                   </div>
-                  <div className="my-4">
-                    <Skeleton height={80} className="rounded-md" />
+                  <div className="w-1/3">
+                    <p className="text-xs text-gray-500 mb-1">Select</p>
+                    <FormFieldSkeleton type="select" />
                   </div>
-                  <div className="flex justify-between">
-                    <Skeleton variant="text" width={80} className="h-4" />
-                    <Skeleton variant="text" width={50} className="h-4" />
+                  <div className="w-1/3">
+                    <p className="text-xs text-gray-500 mb-1">Checkbox</p>
+                    <FormFieldSkeleton type="checkbox" />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <div className="w-1/3">
+                    <p className="text-xs text-gray-500 mb-1">Radio</p>
+                    <FormFieldSkeleton type="radio" />
+                  </div>
+                  <div className="w-1/3">
+                    <p className="text-xs text-gray-500 mb-1">Datepicker</p>
+                    <FormFieldSkeleton type="datepicker" />
+                  </div>
+                  <div className="w-1/3">
+                    <p className="text-xs text-gray-500 mb-1">Upload</p>
+                    <FormFieldSkeleton type="upload" />
                   </div>
                 </div>
               </div>
             </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Table Skeleton with Filter</p>
+              <div className="border rounded-lg p-4 overflow-hidden">
+                <TableSkeleton rows={3} cols={4} hasFilter={true} />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Form Skeleton Grid Layout</p>
+              <div className="border rounded-lg p-4 overflow-hidden">
+                <FormSkeleton 
+                  fields={4} 
+                  layout="grid" 
+                  fieldTypes={['text', 'select', 'datepicker', 'textarea']} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Advanced Page Skeletons</h2>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Campaign Detail Skeleton</p>
+              <div className="border rounded-lg p-4 overflow-hidden" style={{ maxHeight: '300px' }}>
+                <div className="scale-[0.5] origin-top-left">
+                  <CampaignDetailSkeleton />
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Dashboard Skeleton</p>
+              <div className="border rounded-lg p-4 overflow-hidden" style={{ maxHeight: '300px' }}>
+                <div className="scale-[0.5] origin-top-left">
+                  <DashboardSkeleton />
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Auth Sign-in Skeleton</p>
+              <div className="border rounded-lg p-4 overflow-hidden" style={{ maxHeight: '300px' }}>
+                <div className="scale-[0.7] origin-top-left">
+                  <AuthSkeleton variant="signin" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Auth Sign-up Skeleton</p>
+              <div className="border rounded-lg p-4 overflow-hidden" style={{ maxHeight: '300px' }}>
+                <div className="scale-[0.7] origin-top-left">
+                  <AuthSkeleton variant="signup" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 p-4 rounded-lg border">
+        <h2 className="text-lg font-semibold mb-2">Migration Guide</h2>
+        <p className="text-sm text-gray-600 mb-4">We're standardizing loading states across the application. Please update your code to use these new contextual skeleton components.</p>
+        
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-medium">Instead of:</p>
+            <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
+              {`if (loading) {
+  return <LoadingSpinner />;
+}`}
+            </pre>
+          </div>
+          
+          <div>
+            <p className="text-sm font-medium">Use the appropriate contextual skeleton:</p>
+            <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
+              {`import { WizardSkeleton } from '@/components/ui/loading-skeleton';
+
+if (loading) {
+  return <WizardSkeleton step={currentStep} />;
+}`}
+            </pre>
+          </div>
+          
+          <div className="pt-2">
+            <p className="text-sm font-medium">For Suspense boundaries:</p>
+            <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
+              {`import { TableSkeleton } from '@/components/ui/loading-skeleton';
+
+<Suspense fallback={<TableSkeleton rows={5} hasFilter={true} />}>
+  <Component />
+</Suspense>`}
+            </pre>
+          </div>
+          
+          <div className="pt-2">
+            <p className="text-sm font-medium">For complete customization:</p>
+            <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto">
+              {`import { WizardSkeleton, SkeletonSection, FormFieldSkeleton } from '@/components/ui/loading-skeleton';
+
+<WizardSkeleton
+  step={3}
+  stepContent={
+    <>
+      <SkeletonSection title={true} titleWidth="w-1/3" lines={2} />
+      <SkeletonSection title={true} titleWidth="w-1/4" lines={0}>
+        <div className="space-y-4">
+          <FormFieldSkeleton type="text" />
+          <FormFieldSkeleton type="select" />
+        </div>
+      </SkeletonSection>
+    </>
+  }
+/>`}
+            </pre>
           </div>
         </div>
       </div>

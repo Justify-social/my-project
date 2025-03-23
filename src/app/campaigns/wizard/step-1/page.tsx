@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import ClientPage from "./ClientPage";
 
 export default function Page() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<WizardSkeleton step={1} />}>
       <ClientPage />
     </Suspense>
   );

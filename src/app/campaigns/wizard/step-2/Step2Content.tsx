@@ -9,7 +9,7 @@ import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { toast } from "react-hot-toast";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { Icon } from "@/components/ui/icon";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { sanitizeStepPayload } from '@/utils/payload-sanitizer';
@@ -373,10 +373,7 @@ function FormContent() {
     }
   };
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-        <p className="ml-2">Loading campaign data...</p>
-      </div>;
+    return <WizardSkeleton step={2} />;
   }
   if (error) {
     return <div className="p-4 bg-red-50 border border-red-200 rounded-md">
@@ -469,11 +466,11 @@ function FormContent() {
                           <div className="text-xs text-[var(--secondary-color)] mt-1">Example: {kpi.example}</div>
                         </td>
                         <td className="border p-2 text-center">
-                          <Field type="radio" name="primaryKPI" value={kpi.key} className="w-4 h-4 text-[var(--accent-color)] focus:ring-[var(--accent-color)]" />
+                          <Field type="radio" name="primaryKPI" value={kpi.key} className="w-4 h-4 text-secondary focus:ring-secondary" />
 
                         </td>
                         <td className="border p-2 text-center">
-                          <Field type="checkbox" name="secondaryKPIs" value={kpi.key} className="w-4 h-4 text-[var(--accent-color)] focus:ring-[var(--accent-color)]" disabled={values.primaryKPI === kpi.key || Array.isArray(values.secondaryKPIs) && !values.secondaryKPIs.includes(kpi.key) && values.secondaryKPIs.length >= 4} />
+                          <Field type="checkbox" name="secondaryKPIs" value={kpi.key} className="w-4 h-4 text-secondary focus:ring-secondary" disabled={values.primaryKPI === kpi.key || Array.isArray(values.secondaryKPIs) && !values.secondaryKPIs.includes(kpi.key) && values.secondaryKPIs.length >= 4} />
 
                         </td>
                       </tr>)}
@@ -497,10 +494,9 @@ function FormContent() {
                   <div>
                     <h3 className="text-md font-medium mb-2">Primary KPI</h3>
                     <div className="grid grid-cols-1 gap-2">
-                      {values.primaryKPI && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2 rounded border border-[var(--accent-color)] border-opacity-20 flex items-center">
-                          <div className="w-5 h-5 mr-2">
+                      {values.primaryKPI && <div className="bg-[var(--accent-color)] p-2 rounded border border-[var(--accent-color)] border-opacity-20 flex items-center text-white">
+                          <div className="w-5 h-5 mr-2 filter brightness-0 invert">
                             <Image src={kpis.find(k => k.key === values.primaryKPI)?.icon || "/KPIs/Ad_Recall.svg"} alt="Primary KPI" width={20} height={20} />
-
                           </div>
                           <span className="font-medium">
                             {kpis.find(k => k.key === values.primaryKPI)?.title || values.primaryKPI}
@@ -538,7 +534,7 @@ function FormContent() {
               {/* Messaging Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Icon name="faMessage" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                  <Icon name="faComments" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                   Messaging
                 </h2>
                 <p className="text-[var(--secondary-color)] mb-6">
@@ -642,7 +638,7 @@ function FormContent() {
                             alt={feature.title} 
                             width={28} 
                             height={28} 
-                            className="transition-all duration-200"
+                            className={`transition-all duration-200 ${Array.isArray(values.features) && values.features.includes(feature.key) ? 'filter brightness-0 invert' : ''}`}
                           />
                         </div>
                         <span className="font-medium">{feature.title}</span>
@@ -671,14 +667,19 @@ function FormContent() {
     </div>;
 }
 export default function Step2Content() {
-  const [mounted, setMounted] = useState(false);
+  const [isClientSide, setIsClientSide] = useState(false);
+  
   useEffect(() => {
-    setMounted(true);
+    setIsClientSide(true);
   }, []);
-  if (!mounted) {
-    return <LoadingSpinner />;
+  
+  if (!isClientSide) {
+    return <WizardSkeleton step={2} />;
   }
-  return <Suspense fallback={<LoadingSpinner />}>
+  
+  return (
+    <Suspense fallback={<WizardSkeleton step={2} />}>
       <FormContent />
-    </Suspense>;
+    </Suspense>
+  );
 }

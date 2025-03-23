@@ -9,6 +9,7 @@ import "rc-slider/assets/index.css";
 import { useWizard } from "@/context/WizardContext";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { toast } from "react-hot-toast";
 import { Icon } from "@/components/ui/icon";
 
@@ -224,8 +225,7 @@ function FormContent() {
   };
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-        <p className="ml-2">Loading campaign data...</p>
+        <WizardSkeleton step={3} />
       </div>;
   }
   if (error) {
@@ -258,7 +258,7 @@ function FormContent() {
                 {/* Demographics Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Demographics
                   </h2>
                   
@@ -286,7 +286,7 @@ function FormContent() {
                       }} />
 
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Icon name="faMap" className="h-5 w-5 text-gray-400" solid={false} />
+                            <Icon name="faMap" className="h-5 w-5 text-[var(--secondary-color)]" solid={false} />
                           </div>
 
                           <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center" onClick={() => {
@@ -298,7 +298,7 @@ function FormContent() {
                         }
                       }}>
 
-                            <div className="bg-blue-500 rounded-full p-1">
+                            <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors">
                               <Icon name="faPlus" className="h-3 w-3 text-white" solid={false} />
                             </div>
                           </button>
@@ -310,7 +310,7 @@ function FormContent() {
                                 <span>{loc}</span>
                                 <button 
                                   type="button" 
-                                  className="ml-2 group text-gray-400 hover:text-red-500" 
+                                  className="ml-2 group text-[var(--secondary-color)] hover:text-red-500" 
                                   onClick={() => {
                                     const newLocations = [...values.location];
                                     newLocations.splice(index, 1);
@@ -396,14 +396,14 @@ function FormContent() {
                         }
                         setFieldValue('ageDistribution', newDistribution);
                       }} min={0} max={100} step={1} trackStyle={{
-                        backgroundColor: '#0EA5E9',
+                        backgroundColor: 'var(--accent-color)',
                         height: 6
                       }} railStyle={{
-                        backgroundColor: '#E5E7EB',
+                        backgroundColor: 'var(--divider-color)',
                         height: 6
                       }} handleStyle={{
-                        borderColor: '#0EA5E9',
-                        backgroundColor: '#0EA5E9',
+                        borderColor: 'var(--accent-color)',
+                        backgroundColor: 'var(--accent-color)',
                         opacity: 1,
                         height: 16,
                         width: 16,
@@ -422,11 +422,11 @@ function FormContent() {
                       <h3 className="text-sm font-medium text-gray-700 mb-2">Age Distribution Summary</h3>
                       <div className="flex items-center w-full h-6">
                         {Object.entries(values.ageDistribution).map(([key, value], index) => <div key={key} className="h-full" style={{
-                      width: `${value}%`,
-                      backgroundColor: '#0EA5E9',
-                      opacity: 0.7 + index * 0.05,
-                      borderRadius: index === 0 ? '4px 0 0 4px' : index === 5 ? '0 4px 4px 0' : '0'
-                    }} />)}
+                          width: `${value}%`,
+                          backgroundColor: 'var(--accent-color)',
+                          opacity: index === 0 ? 1 : 0.85 - (index * 0.1),
+                          borderRadius: index === 0 ? '4px 0 0 4px' : index === 5 ? '0 4px 4px 0' : '0'
+                        }} />)}
                       </div>
                       <div className="flex justify-between mt-1 text-xs text-gray-500">
                         <span>18-24</span>
@@ -450,23 +450,23 @@ function FormContent() {
                     </div>
                     <div className="flex space-x-4">
                       <label className="inline-flex items-center">
-                        <Field type="checkbox" name="gender" value="Male" className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                        <Field type="checkbox" name="gender" value="Male" className="h-4 w-4 text-secondary border-divider rounded focus:ring-secondary" />
 
-                        <span className="ml-2 text-sm text-gray-700">Male</span>
+                        <span className="ml-2 text-sm text-[var(--primary-color)]">Male</span>
                       </label>
                       <label className="inline-flex items-center">
-                        <Field type="checkbox" name="gender" value="Female" className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                        <Field type="checkbox" name="gender" value="Female" className="h-4 w-4 text-secondary border-divider rounded focus:ring-secondary" />
 
-                        <span className="ml-2 text-sm text-gray-700">Female</span>
+                        <span className="ml-2 text-sm text-[var(--primary-color)]">Female</span>
                       </label>
                       <label className="inline-flex items-center">
-                        <Field type="checkbox" name="gender" value="Other" className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+                        <Field type="checkbox" name="gender" value="Other" className="h-4 w-4 text-secondary border-divider rounded focus:ring-secondary" />
 
-                        <span className="ml-2 text-sm text-gray-700">Other</span>
+                        <span className="ml-2 text-sm text-[var(--primary-color)]">Other</span>
                       </label>
                     </div>
                     {values.gender.includes("Other") && <div className="mt-2">
-                        <Field type="text" name="otherGender" placeholder="Please specify" className="mt-1 p-2 block w-full border border-gray-300 rounded-md" />
+                        <Field type="text" name="otherGender" placeholder="Please specify" className="mt-1 p-2 block w-full border border-[var(--divider-color)] rounded-md" />
 
                       </div>}
                 <ErrorMessage name="gender" component="div" className="mt-1 text-sm text-red-600" />
@@ -477,14 +477,14 @@ function FormContent() {
                 {/* Screening Questions */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Icon name="faCircleQuestion" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    <Icon name="faCircleQuestion" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Screening Questions
                   </h2>
                   
                   <div className="relative mb-4">
                     <div className="flex items-center">
-                      <Icon name="faSearch" className="h-5 w-5 text-gray-400 absolute left-3" solid={false} />
-                      <input type="text" id="screeningQueryInput" placeholder="Search Screening Questions" className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md" onKeyDown={e => {
+                      <Icon name="faSearch" className="h-5 w-5 text-[var(--secondary-color)] absolute left-3" solid={false} />
+                      <input type="text" id="screeningQueryInput" placeholder="Search Screening Questions" className="w-full p-2.5 pl-10 pr-10 border border-[var(--divider-color)] rounded-md" onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       const input = e.target as HTMLInputElement;
@@ -505,8 +505,8 @@ function FormContent() {
                     }
                   }}>
 
-                        <div className="bg-blue-500 rounded-full p-1">
-                          <Icon name="faPlus" className="h-3 w-3 text-white" solid={false} />
+                        <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors">
+                          <Icon name="faPlus" className="h-3 w-3 text-white" solid={true} />
                         </div>
                       </button>
                     </div>
@@ -517,9 +517,13 @@ function FormContent() {
                     <div className="flex flex-wrap gap-2">
                       {["Have you purchased from this brand before?", "How often do you use social media?", "Are you a decision maker for purchases in your household?"].map(question => <button key={question} type="button" className={`
                             text-sm px-3 py-1.5 rounded-md 
-                            ${values.screeningQuestions.includes(question) ? 'bg-blue-100 text-blue-800 border border-blue-300' : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'}
+                            ${values.screeningQuestions.includes(question) 
+                              ? 'bg-[var(--accent-color)] text-white border border-[var(--accent-color)]' 
+                              : 'bg-[color:var(--divider-color)] bg-opacity-30 text-[var(--primary-color)] border border-[var(--divider-color)] hover:bg-opacity-50'}
                           `} onClick={() => {
-                    const newQuestions = values.screeningQuestions.includes(question) ? values.screeningQuestions.filter(q => q !== question) : [...values.screeningQuestions, question];
+                    const newQuestions = values.screeningQuestions.includes(question) 
+                      ? values.screeningQuestions.filter(q => q !== question) 
+                      : [...values.screeningQuestions, question];
                     setFieldValue('screeningQuestions', newQuestions);
                   }}>
 
@@ -528,12 +532,12 @@ function FormContent() {
                     </div>
                   </div>
                   
-                  {Array.isArray(values.screeningQuestions) && values.screeningQuestions.length > 0 && <div className="space-y-2">
-                      {values.screeningQuestions.map((question, index) => <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
+                  {Array.isArray(values.screeningQuestions) && values.screeningQuestions.length > 0 && <div className="flex flex-wrap gap-2">
+                      {values.screeningQuestions.map((question, index) => <div key={index} className="inline-flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
                           <span>{question}</span>
                           <button 
                             type="button" 
-                            className="group text-gray-400 hover:text-red-500" 
+                            className="ml-3 group text-[var(--secondary-color)] hover:text-red-500" 
                             onClick={() => {
                               const newQuestions = [...values.screeningQuestions];
                               newQuestions.splice(index, 1);
@@ -550,7 +554,7 @@ function FormContent() {
                 {/* Languages */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Icon name="faGlobe" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    <Icon name="faGlobe" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Languages
                   </h2>
                   
@@ -564,7 +568,7 @@ function FormContent() {
                     <div className="relative">
                       <div className="mb-4">
                         {['English', 'Spanish', 'French', 'German', 'Chinese'].map(language => <div key={language} className="flex items-center mt-2">
-                            <Field type="checkbox" name="languages" value={language} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                            <Field type="checkbox" name="languages" value={language} className="h-4 w-4 text-secondary border-divider rounded focus:ring-secondary" />
 
                             <label className="ml-2 block text-sm text-gray-700">
                               {language}
@@ -579,7 +583,7 @@ function FormContent() {
                               <span>{lang}</span>
                               <button 
                                 type="button" 
-                                className="ml-2 group text-gray-400 hover:text-red-500" 
+                                className="ml-2 group text-[var(--secondary-color)] hover:text-red-500" 
                                 onClick={() => {
                                   const newLanguages = values.languages.filter(l => l !== lang);
                                   setFieldValue('languages', newLanguages);
@@ -599,10 +603,10 @@ function FormContent() {
                   <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowAdvanced(!showAdvanced)}>
 
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <Icon name="faFilter" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                      <Icon name="faFilter" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                       Advanced Targeting
                     </h2>
-                    <div className="text-blue-500 hover:text-blue-700">
+                    <div className="text-[var(--accent-color)] hover:text-[var(--interactive-color)]">
                       <Icon name="faChevronRight" className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} solid={false} />
                     </div>
                   </div>
@@ -617,7 +621,7 @@ function FormContent() {
                         </div>
                         
                         <div className="relative">
-                          <Field as="select" name="educationLevel" className="block w-full px-3 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md appearance-none">
+                          <Field as="select" name="educationLevel" className="block w-full px-3 py-2 text-base border border-[var(--divider-color)] focus:outline-none focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] sm:text-sm rounded-md appearance-none">
 
                             <option value="">Select Education</option>
                             <option value="high_school">High School</option>
@@ -629,7 +633,7 @@ function FormContent() {
                             <option value="professional">Professional Degree</option>
                           </Field>
                           <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg className="h-5 w-5 text-[var(--secondary-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                               <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                             </svg>
                           </div>
@@ -646,8 +650,8 @@ function FormContent() {
                         
                         <div className="relative mb-6">
                           <div className="flex items-center">
-                            <Icon name="faSearch" className="h-5 w-5 text-gray-400 absolute left-3" solid={false} />
-                            <input type="text" id="jobTitleInput" placeholder="Enter job titles (press Enter to add)" className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onKeyDown={e => {
+                            <Icon name="faSearch" className="h-5 w-5 text-[var(--secondary-color)] absolute left-3" solid={false} />
+                            <input type="text" id="jobTitleInput" placeholder="Enter job titles (press Enter to add)" className="w-full p-2.5 pl-10 pr-10 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" onKeyDown={e => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           const input = e.target as HTMLInputElement;
@@ -668,12 +672,12 @@ function FormContent() {
                         }
                       }}>
 
-                              <div className="bg-blue-500 rounded-full p-1">
+                              <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors">
                                 <Icon name="faPlus" className="h-3 w-3 text-white" solid={false} />
                               </div>
                             </button>
                           </div>
-                          <div className="mt-2 text-xs text-gray-500">
+                          <div className="mt-2 text-xs text-[var(--secondary-color)]">
                             <p>Examples: Marketing Manager, Software Engineer, Financial Analyst</p>
               </div>
 
@@ -683,7 +687,7 @@ function FormContent() {
                                   <span>{title}</span>
                 <button 
                   type="button" 
-                  className="ml-2 group text-gray-400 hover:text-red-500" 
+                  className="ml-2 group text-[var(--secondary-color)] hover:text-red-500" 
                   onClick={() => {
                     const newJobTitles = [...values.jobTitles];
                     newJobTitles.splice(index, 1);
@@ -724,28 +728,28 @@ function FormContent() {
                           50000: '',
                           100000: ''
                         }} trackStyle={{
-                          backgroundColor: '#3B82F6',
+                          backgroundColor: 'var(--accent-color)',
                           height: 4
                         }} railStyle={{
-                          backgroundColor: '#E5E7EB',
+                          backgroundColor: 'var(--divider-color)',
                           height: 4
                         }} handleStyle={{
-                          borderColor: '#3B82F6',
-                          backgroundColor: '#3B82F6',
+                          borderColor: 'var(--accent-color)',
+                          backgroundColor: 'var(--accent-color)',
                           opacity: 1,
                           height: 16,
                           width: 16,
                           marginTop: -6,
-                          boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)'
+                          boxShadow: '0 0 0 2px rgba(0, 191, 255, 0.2)'
                         }} dotStyle={{
-                          borderColor: '#E5E7EB',
-                          backgroundColor: '#E5E7EB',
+                          borderColor: 'var(--divider-color)',
+                          backgroundColor: 'var(--divider-color)',
                           height: 8,
                           width: 8,
                           marginBottom: 0
                         }} activeDotStyle={{
-                          borderColor: '#3B82F6',
-                          backgroundColor: '#3B82F6'
+                          borderColor: 'var(--accent-color)',
+                          backgroundColor: 'var(--accent-color)'
                         }} className="w-full" />
 
                               <div className="absolute inset-x-0 bottom-0 flex justify-between text-xs text-gray-600 px-1">
@@ -767,7 +771,7 @@ function FormContent() {
                 {/* Competitors */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
-                    <Icon name="faBuilding" className="w-5 h-5 mr-2 text-blue-500" solid={false} />
+                    <Icon name="faBuilding" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Competitors to Monitor
                   </h2>
                   <p className="text-gray-600 mb-4">
@@ -777,31 +781,37 @@ function FormContent() {
                   {/* Competitor Input */}
                   <div className="mb-6">
                     <div className="relative">
-                      <input type="text" id="competitorInput" placeholder="Enter competitor name" className="w-full p-2.5 pl-10 pr-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onKeyDown={e => {
+                      <input type="text" id="competitorInput" placeholder="Enter competitor name" className="w-full p-2.5 pl-10 pr-10 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       const input = e.target as HTMLInputElement;
                       if (input && input.value.trim()) {
-                        const newCompetitors = [...values.competitors, input.value.trim()];
-                        setFieldValue('competitors', newCompetitors);
-                        input.value = '';
+                        const companies = input.value.split(',').map(c => c.trim()).filter(Boolean);
+                        if (companies.length > 0) {
+                          const newCompetitors = [...values.competitors, ...companies];
+                          setFieldValue('competitors', newCompetitors);
+                          input.value = '';
+                        }
                       }
                     }
                   }} />
 
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Icon name="faSearch" className="h-5 w-5 text-gray-400" solid={false} />
+                        <Icon name="faSearch" className="h-5 w-5 text-[var(--secondary-color)]" solid={false} />
                       </div>
                       <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center" onClick={() => {
                     const input = document.getElementById('competitorInput') as HTMLInputElement;
                     if (input && input.value.trim()) {
-                      const newCompetitors = [...values.competitors, input.value.trim()];
-                      setFieldValue('competitors', newCompetitors);
-                      input.value = '';
+                      const companies = input.value.split(',').map(c => c.trim()).filter(Boolean);
+                      if (companies.length > 0) {
+                        const newCompetitors = [...values.competitors, ...companies];
+                        setFieldValue('competitors', newCompetitors);
+                        input.value = '';
+                      }
                     }
                   }}>
 
-                        <div className="bg-blue-500 rounded-full p-1">
+                        <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors">
                           <Icon name="faPlus" className="h-3 w-3 text-white" solid={false} />
                         </div>
                       </button>
@@ -813,7 +823,7 @@ function FormContent() {
                             <span>{competitor}</span>
                             <button 
                               type="button" 
-                              className="ml-2 group text-gray-400 hover:text-red-500" 
+                              className="ml-2 group text-[var(--secondary-color)] hover:text-red-500" 
                               onClick={() => {
                                 const updatedCompetitors = [...values.competitors];
                                 updatedCompetitors.splice(index, 1);
@@ -845,9 +855,9 @@ export default function Step3Content() {
     setMounted(true);
   }, []);
   if (!mounted) {
-    return <LoadingSpinner />;
+    return <WizardSkeleton step={3} />;
   }
-  return <Suspense fallback={<LoadingSpinner />}>
+  return <Suspense fallback={<WizardSkeleton step={3} />}>
       <FormContent />
     </Suspense>;
 }

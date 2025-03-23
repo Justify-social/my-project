@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/ErrorFallback';
-import LoadingSkeleton from '@/components/LoadingSkeleton';
+import { SkeletonSection } from '@/components/ui/loading-skeleton';
 import { useSidebar } from '@/providers/SidebarProvider';
 import Image from 'next/image';
 import { Icon, iconComponentFactory } from '@/components/ui/icons';
@@ -893,14 +893,6 @@ const StatusBadge = ({ status }: { status?: string }) => {
     </span>;
 };
 
-// Error status badge for displaying API errors
-const ErrorStatusBadge = ({ message }: { message: string }) => {
-  return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm">
-      <Icon name="faTriangleExclamation" className="h-4 w-4 mr-2" solid={false} />
-      <span>{message}</span>
-    </div>;
-};
-
 // Add missing utility functions
 /**
  * Format file size into human readable format
@@ -942,6 +934,14 @@ const safeCurrency = (value: Currency | string | undefined | null): string => {
     return 'USD';
   }
   return typeof value === 'string' ? value : String(Object.values(Currency)[Object.values(Currency).indexOf(value)]);
+};
+
+// Error status badge for displaying API errors
+const ErrorStatusBadge = ({ message }: { message: string }) => {
+  return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm">
+      <Icon name="faTriangleExclamation" className="h-4 w-4 mr-2" solid={false} />
+      <span>{message}</span>
+    </div>;
 };
 
 export default function CampaignDetail() {
@@ -1276,9 +1276,48 @@ export default function CampaignDetail() {
 
   // Ensure we have data before rendering the component
   if (loading) {
-    return <div className="py-10">
-        <LoadingSkeleton />
-      </div>;
+    return (
+      <div className="max-w-4xl mx-auto p-5 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-8" />
+        
+        {/* Campaign Details Section */}
+        <SkeletonSection 
+          title={true} 
+          titleWidth="w-1/4" 
+          actionButton={true}
+          lines={3}
+          className="mb-6"
+        />
+
+        {/* Objectives Section */}
+        <SkeletonSection 
+          title={true} 
+          titleWidth="w-1/3" 
+          actionButton={true}
+          lines={4}
+          className="mb-6"
+        />
+
+        {/* Audience Section */}
+        <SkeletonSection 
+          title={true} 
+          titleWidth="w-1/4" 
+          actionButton={true}
+          lines={3}
+          className="mb-6"
+        />
+
+        {/* Creative Assets Section */}
+        <SkeletonSection 
+          title={true} 
+          titleWidth="w-1/4" 
+          actionButton={true}
+          lines={3}
+          className="mb-6"
+        />
+      </div>
+    );
   }
   if (error && !data) {
     return <div className="py-10">

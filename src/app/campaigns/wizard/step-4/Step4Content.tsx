@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ourFileRouter } from '@/app/api/uploadthing/core';
 import { deleteAssetFromStorage, logOrphanedAsset } from '@/services/assetService';
 import { compressImage } from '@/utils/imageCompression';
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 
 // Create the uploadthing helper
 const {
@@ -1400,8 +1401,7 @@ function FormContent() {
   };
   if (wizardLoading) {
     return <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner />
-        <p className="ml-2">Loading campaign data...</p>
+        <WizardSkeleton step={4} />
       </div>;
   }
   if (error) {
@@ -1501,15 +1501,18 @@ function FormContent() {
     </div>;
 }
 export default function Step4Content() {
-  const [mounted, setMounted] = useState(false);
+  const [isClientSide, setIsClientSide] = useState(false);
+  
   useEffect(() => {
-    setMounted(true);
+    setIsClientSide(true);
   }, []);
-  if (!mounted) {
-    return <LoadingSpinner />;
+  
+  if (!isClientSide) {
+    return <WizardSkeleton step={4} />;
   }
+  
   return <div className="min-h-screen bg-white">
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<WizardSkeleton step={4} />}>
         <FormContent />
       </Suspense>
     </div>;

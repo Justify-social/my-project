@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/ErrorFallback';
-import LoadingSkeleton from '@/components/LoadingSkeleton';
+import { CampaignDetailSkeleton } from '@/components/ui/loading-skeleton';
 import { useSidebar } from '@/providers/SidebarProvider';
 import Image from 'next/image';
 import { Icon } from '@/components/ui/icon';
@@ -1563,7 +1563,7 @@ export default function CampaignDetail() {
   // Ensure we have data before rendering the component
   if (loading) {
     return <div className="py-10">
-        <LoadingSkeleton />
+        <CampaignDetailSkeleton />
       </div>;
   }
   if (error && !data) {

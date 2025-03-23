@@ -1,13 +1,13 @@
 import { Suspense } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import Step5Content from "./Step5Content";
+import ClientPage from "./ClientPage";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 
 export const dynamic = "force-dynamic";
 
 export default function Page() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Step5Content />
+    <Suspense fallback={<WizardSkeleton step={5} />}>
+      <ClientPage />
     </Suspense>
   );
 }

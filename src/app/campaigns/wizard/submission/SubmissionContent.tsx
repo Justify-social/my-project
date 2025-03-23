@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from "@/components/ui/icons";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary/ErrorBoundary";
 import ErrorFallback from '@/components/ErrorFallback';
 import { EnumTransformers } from '@/utils/enum-transformers';
+
 function SubmissionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -15,6 +16,7 @@ function SubmissionContent() {
   const [campaign, setCampaign] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchCampaign = async () => {
       if (!campaignId) {
@@ -51,12 +53,46 @@ function SubmissionContent() {
     };
     fetchCampaign();
   }, [campaignId]);
+
   if (loading) {
-    return <div className="w-full max-w-7xl mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-        <p className="ml-2">Loading campaign details...</p>
-      </div>;
+    return <WizardSkeleton step={5} stepContent={
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow p-6 text-center animate-pulse">
+          <div className="mx-auto w-20 h-20 bg-gray-200 rounded-full mb-6"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto mb-6"></div>
+          <div className="flex justify-center items-center mb-6 space-x-4">
+            <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+            <div className="h-6 bg-gray-200 rounded-full w-6"></div>
+            <div className="h-6 bg-gray-200 rounded-full w-24"></div>
+          </div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+        </div>
+        
+        <div className="mb-8">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3 mb-6"></div>
+                <div className="flex justify-end">
+                  <div className="h-5 bg-gray-200 rounded w-20"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <div className="h-8 bg-gray-200 rounded w-32"></div>
+          <div className="h-8 bg-gray-200 rounded w-32"></div>
+        </div>
+      </div>
+    } />;
   }
+
   if (error) {
     return <div className="w-full max-w-7xl mx-auto px-4 py-8 min-h-screen">
         <div className="bg-red-50 p-6 rounded-lg border border-red-200">
@@ -70,6 +106,7 @@ function SubmissionContent() {
         </div>
       </div>;
   }
+
   if (!campaign) {
     return <div className="w-full max-w-7xl mx-auto px-4 py-8 min-h-screen">
         <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
@@ -85,6 +122,7 @@ function SubmissionContent() {
         </div>
       </div>;
   }
+
   return <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-white min-h-screen">
       {/* Success Message - Simplified */}
       <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm mb-12 text-center">
@@ -180,6 +218,7 @@ function SubmissionContent() {
       </div>
     </div>;
 }
+
 export default function WrappedSubmissionContent() {
   return <ErrorBoundary fallback={<ErrorFallback />}>
       <SubmissionContent />

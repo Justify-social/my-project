@@ -5,6 +5,18 @@
     "fileName": "forward.svg",
     "path": "/ui-icons/solid/forward.svg"
   },
+  "faSave": {
+    "prefix": "fas",
+    "name": "save",
+    "fileName": "save.svg",
+    "path": "/ui-icons/solid/save.svg"
+  },
+  "faSaveLight": {
+    "prefix": "fal",
+    "name": "save",
+    "fileName": "save.svg",
+    "path": "/ui-icons/light/save.svg"
+  },
   "faChevronLeft": {
     "prefix": "fas",
     "name": "chevron-left",

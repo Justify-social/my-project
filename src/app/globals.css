@@ -63,6 +63,19 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
   --interactive-color: #3182CE;  /* Medium Blue */
 }
 
+/* Global form input styling for consistent branding */
+input[type="checkbox"], 
+input[type="radio"] {
+  accent-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+input[type="checkbox"]:focus, 
+input[type="radio"]:focus {
+  outline-color: var(--secondary-color);
+  box-shadow: 0 0 0 1px var(--secondary-color);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background-color: #FFFFFF; /* Keep background white even in dark mode */

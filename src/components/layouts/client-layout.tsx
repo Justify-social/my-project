@@ -7,15 +7,16 @@ import { SidebarProvider } from "@/providers/SidebarProvider";
 import { SearchProvider } from "@/context/SearchContext";
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { AuthSpinner } from '@/components/ui/loading-spinner/index';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
 }
 
-export default function ClientLayout({ children }: ClientLayoutProps) {
+const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoading, error } = useUser();
+  const { user, error, isLoading } = useUser();
 
   useEffect(() => {
     // If there's no user and we're not loading, redirect to login
@@ -25,19 +26,12 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     }
   }, [isLoading, user, router, pathname]);
 
-  // Show loading state while checking authentication
+  // Show the auth spinner while checking authentication
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
+    return <AuthSpinner label="Loading Justify..." />;
   }
 
-  // Show error state if there's an authentication error
+  // Show error with login button if authentication fails
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -78,4 +72,6 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       </SearchProvider>
     </SidebarProvider>
   );
-} 
+};
+
+export default ClientLayout; 
