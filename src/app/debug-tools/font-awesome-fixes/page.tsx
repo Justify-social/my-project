@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser, faCheck, faGear, faBell, faStar } from '@fortawesome/free-solid-svg-icons';
-import { faUser as falUser, faHouse as falHouse } from '@fortawesome/free-regular-svg-icons';
+import { faUser, faCheck, faGear, faBell, faStar } from '@fortawesome/pro-solid-svg-icons';
+import { faUser as falUser, faHouse as falHouse } from '@fortawesome/pro-light-svg-icons';
 import { faTwitter, faFacebook, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 // 1. Register icons with library - important for array syntax to work
@@ -18,7 +18,7 @@ faTwitter, faFacebook, faGithub);
 
 // Update any code examples in the file
 const codeExamples = {
-  importExample: `import { faUser } from '@fortawesome/free-solid-svg-icons';
+  importExample: `import { faUser } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';`,
   // ... other examples
 };
@@ -61,28 +61,28 @@ export default function FontAwesomeFixesPage() {
             Import and use icons directly without relying on the library:
           </p>
           <pre className="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">
-          {`import { faUser } from '@fortawesome/free-solid-svg-icons';
+          {`import { faUser } from '@fortawesome/pro-solid-svg-icons';
 <FontAwesomeIcon icon={faUser} />`}
           </pre>
           
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col items-center">
               <div className="p-4 bg-blue-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-blue-600" solid={false} />
+                <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-blue-600" />
               </div>
               <span className="mt-2 text-sm">Solid User</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-green-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={faCheck} className="w-8 h-8 text-green-600" solid={false} />
+                <FontAwesomeIcon icon={faCheck} className="w-8 h-8 text-green-600" />
               </div>
               <span className="mt-2 text-sm">Solid Check</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-purple-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-purple-600" solid={false} />
+                <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-purple-600" />
               </div>
               <span className="mt-2 text-sm">Light User</span>
             </div>
@@ -102,21 +102,21 @@ export default function FontAwesomeFixesPage() {
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col items-center">
               <div className="p-4 bg-red-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={['fas', 'user']} className="w-8 h-8 text-red-600" solid={false} />
+                <FontAwesomeIcon icon={['fas', 'user']} className="w-8 h-8 text-red-600" />
               </div>
               <span className="mt-2 text-sm">Array: fas user</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-amber-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={['fal', 'house']} className="w-8 h-8 text-amber-600" solid={false} />
+                <FontAwesomeIcon icon={['fal', 'house']} className="w-8 h-8 text-amber-600" />
               </div>
               <span className="mt-2 text-sm">Array: fal house</span>
             </div>
             
             <div className="flex flex-col items-center">
               <div className="p-4 bg-sky-50 rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={['fab', 'twitter']} className="w-8 h-8 text-sky-500" solid={false} />
+                <FontAwesomeIcon icon={['fab', 'twitter']} className="w-8 h-8 text-sky-500" />
               </div>
               <span className="mt-2 text-sm">Array: fab twitter</span>
             </div>
@@ -141,7 +141,7 @@ config.autoAddCss = false;`}
               <h3 className="font-medium">2. Register icons with library.add</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs mt-1">
               {`import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/pro-solid-svg-icons';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons';
 
 library.add(faUser, faTwitter);`}
@@ -171,35 +171,35 @@ library.add(faUser, faTwitter);`}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-gray-700" solid={false} />
+              <FontAwesomeIcon icon={faUser} className="w-8 h-8 text-gray-700" />
             </div>
             <span className="mt-2 text-sm">Solid User</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-gray-700" solid={false} />
+              <FontAwesomeIcon icon={falUser} className="w-8 h-8 text-gray-700" />
             </div>
             <span className="mt-2 text-sm">Light User</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faTwitter} className="w-8 h-8 text-gray-700" solid={false} />
+              <FontAwesomeIcon icon={faTwitter} className="w-8 h-8 text-gray-700" />
             </div>
             <span className="mt-2 text-sm">Brand Twitter</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faGear} className="w-8 h-8 text-gray-700" solid={false} />
+              <FontAwesomeIcon icon={faGear} className="w-8 h-8 text-gray-700" />
             </div>
             <span className="mt-2 text-sm">Solid Gear</span>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="p-4 bg-gray-50 rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faGithub} className="w-8 h-8 text-gray-700" solid={false} />
+              <FontAwesomeIcon icon={faGithub} className="w-8 h-8 text-gray-700" />
             </div>
             <span className="mt-2 text-sm">Brand GitHub</span>
           </div>

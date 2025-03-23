@@ -10,8 +10,10 @@
  */
 
 import { IconDefinition, IconName, IconPrefix, findIconDefinition, library } from '@fortawesome/fontawesome-svg-core';
-import * as SolidIcons from '@fortawesome/free-solid-svg-icons';
-import * as LightIcons from '@fortawesome/free-regular-svg-icons';
+import * as SolidIcons from '@fortawesome/pro-solid-svg-icons';
+import * as LightIcons from '@fortawesome/pro-light-svg-icons';
+import * as RegularIcons from '@fortawesome/pro-regular-svg-icons';
+import * as DuotoneIcons from '@fortawesome/pro-duotone-svg-icons';
 import * as BrandIcons from '@fortawesome/free-brands-svg-icons';
 
 // Map of icon names (kebab-case) by their prefix
@@ -52,7 +54,7 @@ export const iconLogger = new EventLogger();
 function buildIconMap(): IconMap {
   iconLogger.log('Building icon map');
   
-  const iconMap: IconMap = { fas: {}, fal: {}, far: {}, fab: {} };
+  const iconMap: IconMap = { fas: {}, fal: {}, far: {}, fad: {}, fab: {} };
   
   // Add all solid icons
   Object.keys(SolidIcons).forEach(key => {
@@ -74,6 +76,26 @@ function buildIconMap(): IconMap {
     }
   });
   
+  // Add all regular icons
+  Object.keys(RegularIcons).forEach(key => {
+    if (key.startsWith('fa') && key !== 'faForward') {
+      const icon = (RegularIcons as any)[key] as IconDefinition;
+      if (icon && icon.iconName) {
+        iconMap.far[icon.iconName] = icon;
+      }
+    }
+  });
+  
+  // Add all duotone icons
+  Object.keys(DuotoneIcons).forEach(key => {
+    if (key.startsWith('fa') && key !== 'faForward') {
+      const icon = (DuotoneIcons as any)[key] as IconDefinition;
+      if (icon && icon.iconName) {
+        iconMap.fad[icon.iconName] = icon;
+      }
+    }
+  });
+  
   // Add all brand icons
   Object.keys(BrandIcons).forEach(key => {
     if (key.startsWith('fa') && key !== 'faForward') {
@@ -86,7 +108,9 @@ function buildIconMap(): IconMap {
   
   iconLogger.log('Icon map built', { 
     solid: Object.keys(iconMap.fas).length, 
-    light: Object.keys(iconMap.fal).length, 
+    light: Object.keys(iconMap.fal).length,
+    regular: Object.keys(iconMap.far).length,
+    duotone: Object.keys(iconMap.fad).length,
     brand: Object.keys(iconMap.fab).length 
   });
   
@@ -131,15 +155,19 @@ export function ensureIconsRegistered() {
   // Count icons to be registered
   const solidIcons = Object.values(iconMap.fas);
   const lightIcons = Object.values(iconMap.fal);
+  const regularIcons = Object.values(iconMap.far);
+  const duotoneIcons = Object.values(iconMap.fad);
   const brandIcons = Object.values(iconMap.fab);
   
   try {
     // Register all icons with the library
-    library.add(...solidIcons, ...lightIcons, ...brandIcons);
+    library.add(...solidIcons, ...lightIcons, ...regularIcons, ...duotoneIcons, ...brandIcons);
     
     iconLogger.log('Registered all icons with library', {
       solid: solidIcons.length,
       light: lightIcons.length,
+      regular: regularIcons.length,
+      duotone: duotoneIcons.length,
       brand: brandIcons.length
     });
     
@@ -219,6 +247,8 @@ export function generateIconReport(): string {
     '',
     `Solid Icons: ${Object.keys(iconMap.fas).length}`,
     `Light Icons: ${Object.keys(iconMap.fal).length}`,
+    `Regular Icons: ${Object.keys(iconMap.far).length}`,
+    `Duotone Icons: ${Object.keys(iconMap.fad).length}`,
     `Brand Icons: ${Object.keys(iconMap.fab).length}`,
     '',
     'Library Initialized: ' + (checkLibraryInitialized() ? 'Yes' : 'No'),

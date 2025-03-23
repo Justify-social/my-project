@@ -16,12 +16,12 @@ const iconCache: Record<string, IconDefinition> = {};
  * Dynamically load a Font Awesome icon
  * 
  * @param iconName The name of the icon as defined in IconName type
- * @param variant 'solid' | 'regular' | 'brands'
+ * @param variant 'solid' | 'regular' | 'light' | 'duotone' | 'brands'
  * @returns Promise that resolves to the icon definition
  */
 export async function loadIcon(
   iconName: string, 
-  variant: 'solid' | 'regular' | 'brands' = 'solid'
+  variant: 'solid' | 'regular' | 'light' | 'duotone' | 'brands' = 'solid'
 ): Promise<IconDefinition> {
   // Create a cache key
   const cacheKey = `${variant}-${iconName}`;
@@ -37,10 +37,16 @@ export async function loadIcon(
     
     switch (variant) {
       case 'solid':
-        icon = (await import(`@fortawesome/free-solid-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
+        icon = (await import(`@fortawesome/pro-solid-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
         break;
       case 'regular':
-        icon = (await import(`@fortawesome/free-regular-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
+        icon = (await import(`@fortawesome/pro-regular-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
+        break;
+      case 'light':
+        icon = (await import(`@fortawesome/pro-light-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
+        break;
+      case 'duotone':
+        icon = (await import(`@fortawesome/pro-duotone-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
         break;
       case 'brands':
         icon = (await import(`@fortawesome/free-brands-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
@@ -74,7 +80,7 @@ function capitalizeFirstLetter(str: string): string {
  * This can be called during idle time or on component mount
  */
 export async function preloadCommonIcons(): Promise<void> {
-  const commonIcons: [string, 'solid' | 'regular' | 'brands'][] = [
+  const commonIcons: [string, 'solid' | 'regular' | 'light' | 'duotone' | 'brands'][] = [
     ['user', 'solid'],
     ['search', 'solid'],
     ['check', 'solid'],
@@ -90,10 +96,12 @@ export async function preloadCommonIcons(): Promise<void> {
 /**
  * Get the FontAwesome icon prefix based on variant
  */
-export function getIconPrefix(variant: 'solid' | 'regular' | 'brands'): string {
+export function getIconPrefix(variant: 'solid' | 'regular' | 'light' | 'duotone' | 'brands'): string {
   switch (variant) {
     case 'solid': return 'fas';
     case 'regular': return 'far';
+    case 'light': return 'fal';
+    case 'duotone': return 'fad';
     case 'brands': return 'fab';
     default: return 'fas';
   }
