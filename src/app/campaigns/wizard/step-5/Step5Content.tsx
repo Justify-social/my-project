@@ -13,6 +13,7 @@ import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
 import { AssetPreview } from '@/components/upload/AssetPreview';
+import { AssetCard } from '@/components/ui/assets';
 
 // Type Definitions
 interface CreativeAsset {
@@ -50,20 +51,20 @@ const SummarySection: React.FC<SummarySectionProps> = ({
   onEdit,
   children
 }) => {
-  return <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] mb-6 transition-all hover:shadow-md font-work-sans">
-      <div className="flex justify-between items-center mb-6 font-work-sans">
-        <div className="flex items-center font-work-sans">
-          <div className="h-8 w-8 bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] rounded-full flex items-center justify-center mr-3 font-semibold font-work-sans">
+  return <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] mb-6 transition-all hover:shadow-md">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <div className="h-8 w-8 bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] rounded-full flex items-center justify-center mr-3 font-semibold">
             {stepNumber}
           </div>
-          <h2 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h2>
+          <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
         </div>
-        <button onClick={onEdit} className="group text-[var(--accent-color)] text-sm flex items-center hover:text-[var(--accent-color)] transition-colors font-work-sans" aria-label={`Edit ${title}`}>
-          <Icon name="faPenToSquare" className="h-4 w-4 mr-1" iconType="button" solid={false} />
-          <span className="font-work-sans">Edit</span>
+        <button onClick={onEdit} className="group text-[var(--accent-color)] text-sm flex items-center hover:text-[var(--accent-color)] transition-colors" aria-label={`Edit ${title}`}>
+          <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
+          <span>Edit</span>
         </button>
       </div>
-      <div className="pl-11 font-work-sans">
+      <div className="pl-11">
         {children}
       </div>
     </div>;
@@ -76,7 +77,7 @@ interface KPIDisplayProps {
 const KPIDisplay: React.FC<KPIDisplayProps> = ({
   kpi
 }) => {
-  if (!kpi) return <span className="font-work-sans">Not specified</span>;
+  if (!kpi) return <span>Not specified</span>;
 
   // Map KPI values to their correct SVG paths and display text
   const getKpiInfo = (kpiValue: string): {
@@ -120,14 +121,14 @@ const KPIDisplay: React.FC<KPIDisplayProps> = ({
     iconPath,
     displayText
   } = getKpiInfo(kpi);
-  return <div className="flex items-center text-[var(--accent-color)] font-medium font-work-sans">
-      <div className="mr-2 relative w-5 h-5 flex-shrink-0 font-work-sans">
+  return <div className="flex items-center text-[var(--accent-color)] font-medium">
+      <div className="mr-2 relative w-5 h-5 flex-shrink-0">
         <Image src={iconPath} alt={displayText} fill className="object-contain blue-icon" style={{
         filter: 'brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%)'
       }} />
 
       </div>
-      <span className="font-work-sans">{displayText}</span>
+      <span>{displayText}</span>
     </div>;
 };
 
@@ -164,13 +165,13 @@ const DataItem: React.FC<DataItemProps> = ({
     }
     return value;
   };
-
-  return <div className={`mb-4 ${featured ? 'bg-[rgba(0,191,255,0.05)] p-3 rounded-md' : ''} ${className} font-work-sans`}>
-      <div className="flex items-start font-work-sans">
-        {icon && <div className="mr-2 mt-0.5 flex-shrink-0 font-work-sans">{icon}</div>}
-        <div className="flex-1 font-work-sans">
-          <p className={`text-sm text-[var(--secondary-color)] mb-1 font-medium ${className.includes('text-lg') ? 'text-base' : ''} font-work-sans`}>{label}</p>
-          <div className={`font-medium text-[var(--primary-color)] ${featured ? className.includes('text-lg') ? 'text-xl' : 'text-lg' : ''} font-work-sans`}>
+  
+  return <div className={`mb-4 ${featured ? 'bg-[rgba(0,191,255,0.05)] p-3 rounded-md' : ''} ${className}`}>
+      <div className="flex items-start">
+        {icon && <div className="mr-2 mt-0.5 flex-shrink-0">{icon}</div>}
+        <div className="flex-1">
+          <p className={`text-sm text-[var(--secondary-color)] mb-1 font-medium ${className.includes('text-lg') ? 'text-base' : ''}`}>{label}</p>
+          <div className={`font-medium text-[var(--primary-color)] ${featured ? className.includes('text-lg') ? 'text-xl' : 'text-lg' : ''}`}>
         {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
           </div>
         </div>
@@ -240,14 +241,14 @@ interface MergedData {
     avatarUrl?: string;
     description?: string;
     verified?: boolean; // Add the verified property
-    phylloData?: any; // Add the phylloData property
+    phylloData?: any;   // Add the phylloData property
   }>;
 
   // Add nested data structures
   overview: Record<string, any>;
   objectives: Record<string, any>;
   audience: AudienceData;
-
+  
   // Add property to store step-specific data for handling different data schemas
   step1?: {
     influencers?: Array<{
@@ -269,7 +270,7 @@ interface MergedData {
     }>;
     [key: string]: any;
   };
-
+  
   // Allow for any other properties that might exist
   [key: string]: any;
 }
@@ -403,6 +404,15 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
 
       // Extract influencer handle with fallbacks
       const influencerHandle = asset.influencerHandle || typeof asset.details === 'object' && asset.details?.influencerHandle || '';
+      
+      // Extract platform with comprehensive fallbacks
+      // If the influencer handle includes @, it's likely an Instagram handle
+      let platformValue = asset.platform || 
+                         data.platform || 
+                         (typeof asset.details === 'object' && asset.details?.platform) || 
+                         (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') || 
+                         'Instagram';  // Default to Instagram as the most common platform
+      
       return {
         id: asset.id || `asset-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         assetName: asset.name || '',
@@ -414,6 +424,7 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
         description: asset.description || whyInfluencerValue || '',
         whyInfluencer: whyInfluencerValue,
         influencerHandle: influencerHandle,
+        platform: platformValue,
         budget: budgetValue,
         format: asset.format || ''
       };
@@ -423,12 +434,25 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
     return data.creativeAssets.map((asset: any) => {
       // Extract whyInfluencer with fallbacks
       const whyInfluencerValue = asset.whyInfluencer || asset.description || typeof asset.details === 'object' && asset.details?.whyInfluencer || '';
+      
+      // Extract influencer handle with fallbacks
+      const influencerHandle = asset.influencerHandle || typeof asset.details === 'object' && asset.details?.influencerHandle || '';
+      
+      // Extract platform with comprehensive fallbacks
+      const platformValue = asset.platform || 
+                          data.platform || 
+                          (typeof asset.details === 'object' && asset.details?.platform) || 
+                          (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') || 
+                          'Instagram';  // Default to Instagram as the most common platform
+      
       return {
         ...asset,
         assetName: asset.assetName || asset.name || '',
         name: asset.name || asset.assetName || '',
         description: asset.description || whyInfluencerValue || '',
         whyInfluencer: whyInfluencerValue,
+        influencerHandle: influencerHandle,
+        platform: platformValue,
         // Ensure budget is a number
         budget: typeof asset.budget === 'number' ? asset.budget : typeof asset.budget === 'string' ? parseFloat(asset.budget) : 0
       };
@@ -438,12 +462,26 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
     return data.creative.creativeAssets.map((asset: any) => {
       // Extract whyInfluencer with fallbacks
       const whyInfluencerValue = asset.whyInfluencer || asset.description || typeof asset.details === 'object' && asset.details?.whyInfluencer || '';
+      
+      // Extract influencer handle with fallbacks
+      const influencerHandle = asset.influencerHandle || typeof asset.details === 'object' && asset.details?.influencerHandle || '';
+      
+      // Extract platform with comprehensive fallbacks
+      const platformValue = asset.platform || 
+                          data.platform || 
+                          data.creative?.platform || 
+                          (typeof asset.details === 'object' && asset.details?.platform) || 
+                          (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') || 
+                          'Instagram';  // Default to Instagram as the most common platform
+      
       return {
         ...asset,
         assetName: asset.assetName || asset.name || '',
         name: asset.name || asset.assetName || '',
         description: asset.description || whyInfluencerValue || '',
         whyInfluencer: whyInfluencerValue,
+        influencerHandle: influencerHandle,
+        platform: platformValue,
         // Ensure budget is a number
         budget: typeof asset.budget === 'number' ? asset.budget : typeof asset.budget === 'string' ? parseFloat(asset.budget) : 0
       };
@@ -463,12 +501,12 @@ const fetchInfluencerDetails = async (campaignId: string, handle: string, platfo
         'Cache-Control': 'no-cache'
       }
     });
-
+    
     if (!response.ok) {
       console.warn(`Failed to fetch additional influencer details: ${response.status}`);
       return null;
     }
-
+    
     const data = await response.json();
     console.log('Received influencer details:', data);
     return data.success ? data.data : null;
@@ -498,13 +536,13 @@ const normalizeApiData = (data: any): MergedData => {
 
   // Enhanced influencer extraction logic
   let influencers = [];
-
+  
   // Check all possible locations for influencer data - log attempts for debugging
   console.log("Checking for influencers in data.influencers:", Array.isArray(data.influencers) ? data.influencers.length : "not an array");
   console.log("Checking for influencers in data.Influencer:", Array.isArray(data.Influencer) ? data.Influencer.length : "not an array");
   console.log("Checking for influencers in data.overview?.influencers:", Array.isArray(data.overview?.influencers) ? data.overview.influencers.length : "not an array");
   console.log("Checking for influencers in data.step1?.influencers:", Array.isArray(data.step1?.influencers) ? data.step1.influencers.length : "not an array");
-
+  
   // Prisma might return the relation as "Influencer" instead of "influencers"
   if (Array.isArray(data.Influencer) && data.Influencer.length > 0) {
     console.log("Found influencers in Prisma relation:", data.Influencer);
@@ -525,14 +563,14 @@ const normalizeApiData = (data: any): MergedData => {
   } else {
     console.log("No influencers found in any expected location");
   }
-
+  
   // Normalize the influencer data to the expected format
   const normalizedInfluencers = influencers.map((inf: any) => {
     console.log("Normalizing influencer:", inf);
-
+    
     // Extract the Phyllo API data properties that might be nested
     const phylloData = inf.phylloData || inf.validationData || inf;
-
+    
     return {
       id: inf.id || phylloData.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
       handle: inf.handle || inf.influencerHandle || inf.username || 'unknown',
@@ -547,7 +585,7 @@ const normalizeApiData = (data: any): MergedData => {
       phylloData: phylloData
     };
   });
-
+  
   console.log("Normalized influencers:", normalizedInfluencers);
 
   // Continue with extracting other data...
@@ -574,7 +612,7 @@ const normalizeApiData = (data: any): MergedData => {
     targeting: data.targeting || {},
     competitors: Array.isArray(data.competitors) ? data.competitors : data.audience?.competitors || []
   } : data.audience || {};
-
+  
   // In the returned object, ensure we include the normalized influencers
   return {
     // Map fields to consistent names, handling both schema types
@@ -782,18 +820,18 @@ const FeatureIcon: React.FC<FeatureIconProps> = ({
   } else {
     iconPath = '/app/Campaigns.svg'; // Default icon
   }
-
-  return <div className="flex items-center font-work-sans">
-    <div className="w-5 h-5 mr-2 flex-shrink-0 font-work-sans">
-      <Image
-        src={iconPath}
-        alt={altText}
+  
+  return <div className="flex items-center">
+    <div className="w-5 h-5 mr-2 flex-shrink-0">
+      <Image 
+        src={iconPath} 
+        alt={altText} 
         width={20}
         height={20}
-        className="object-contain" />
-
+        className="object-contain"
+      />
       </div>
-      <span className="font-work-sans">{altText}</span>
+      <span>{altText}</span>
     </div>;
 };
 
@@ -803,12 +841,12 @@ const Step5AssetPreview = ({
   fileName,
   type,
   className = ''
-
-
-
-
-
-}: {url: string;fileName: string;type: string;className?: string;}) => {
+}: {
+  url: string;
+  fileName: string;
+  type: string;
+  className?: string;
+}) => {
   const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
   const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -819,15 +857,15 @@ const Step5AssetPreview = ({
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!videoRef.current) return;
-
+    
     if (isPlaying) {
       videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play().
-      catch((error) => {
-        console.warn('Play was prevented:', error);
-      });
+      videoRef.current.play()
+        .catch(error => {
+          console.warn('Play was prevented:', error);
+        });
       setIsPlaying(true);
     }
   };
@@ -836,13 +874,13 @@ const Step5AssetPreview = ({
   useEffect(() => {
     if (isVideo && videoRef.current) {
       const video = videoRef.current;
-
+      
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
-
+      
       video.addEventListener('play', handlePlay);
       video.addEventListener('pause', handlePause);
-
+      
       return () => {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
@@ -857,7 +895,7 @@ const Step5AssetPreview = ({
 
       // Auto-play the video when component mounts
       const playVideo = () => {
-        video.play().catch((error) => {
+        video.play().catch(error => {
           console.warn('Auto-play was prevented:', error);
           setIsPlaying(false);
         });
@@ -869,21 +907,21 @@ const Step5AssetPreview = ({
         if (video.currentTime >= 5) {
           video.currentTime = 0;
           if (isPlaying) {
-            video.play().catch((err) => {
-              console.error('Error replaying video:', err);
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
               setIsPlaying(false);
-            });
+          });
           }
         }
       };
-
+      
       const handleEnded = () => {
         video.currentTime = 0;
         if (isPlaying) {
-          video.play().catch((err) => {
-            console.error('Error replaying video:', err);
+        video.play().catch(err => {
+          console.error('Error replaying video:', err);
             setIsPlaying(false);
-          });
+        });
         }
       };
 
@@ -900,85 +938,83 @@ const Step5AssetPreview = ({
       };
     }
   }, [isVideo, url, isPlaying]);
-
+  
   return (
-    <div
-      className={`relative rounded-lg overflow-hidden bg-gray-100 ${className} font-work-sans`}
+    <div 
+      className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}
       onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}>
-
+      onMouseLeave={() => setIsHovering(false)}
+    >
       {/* Image preview */}
       {isImage && <img src={url} alt={fileName} className="w-full h-full object-cover" />}
       
       {/* Video preview with play/pause button */}
-      {isVideo &&
-      <div className="relative w-full h-full font-work-sans" onClick={togglePlayPause}>
-          <video
-          ref={videoRef}
-          src={url}
-          className="w-full h-full object-cover"
-          muted
-          playsInline
-          loop />
-
+      {isVideo && (
+        <div className="relative w-full h-full" onClick={togglePlayPause}>
+          <video 
+            ref={videoRef} 
+            src={url} 
+            className="w-full h-full object-cover" 
+            muted 
+            playsInline 
+            loop 
+          />
           
           {/* Play/Pause button that appears on hover */}
-          {isVideo && isHovering &&
-        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200 font-work-sans">
+          {isVideo && isHovering && (
+            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
               <button
-            onClick={togglePlayPause}
-            className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute font-work-sans"
-            aria-label={isPlaying ? "Pause video" : "Play video"}>
-
-                <Icon
-              name={isPlaying ? "faPause" : "faPlay"}
-              className="h-6 w-6 text-white font-work-sans"
-              iconType="button"
-              solid={true} />
-
+                onClick={togglePlayPause}
+                className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
+                aria-label={isPlaying ? "Pause video" : "Play video"}
+              >
+                <Icon 
+                  name={isPlaying ? "faPause" : "faPlay"} 
+                  className="h-6 w-6 text-white" 
+                  iconType="button" 
+                  solid={true} 
+                />
               </button>
             </div>
-        }
+          )}
           
-          {/* Video label in bottom corner if we want to add it */}
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-work-sans">
-            <Icon name="faVideo" className="h-3 w-3 mr-1 inline-block" iconType="static" solid={true} />
-            Video
+          {/* Video label in the bottom corner */}
+          <div className="absolute bottom-3 left-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs font-medium">
+            <div className="flex items-center">
+              <Icon name="faVideo" className="h-3 w-3 mr-1" iconType="static" solid={false} /> 
+              Video
+            </div>
           </div>
         </div>
-      }
+      )}
       
       {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo &&
-      <div className="flex items-center justify-center p-8 font-work-sans">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400 font-work-sans" iconType="static" solid={false} />
+      {!isImage && !isVideo && (
+        <div className="flex items-center justify-center p-8">
+          <Icon name="faInfo" className="h-12 w-12 text-gray-400" iconType="static" solid={false} />
         </div>
-      }
-    </div>);
-
+      )}
+    </div>
+  );
 };
 
-// Helper function to calculate duration between dates
+// Calculate campaign duration with error handling
 const calculateDuration = (startDate: string, endDate: string): string => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  if (diffDays === 1) return '1 day';
-  if (diffDays < 7) return `${diffDays} days`;
-  if (diffDays < 30) {
-    const weeks = Math.floor(diffDays / 7);
-    const days = diffDays % 7;
-    return `${weeks} week${weeks > 1 ? 's' : ''}${days ? ` and ${days} day${days > 1 ? 's' : ''}` : ''}`;
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Check if dates are valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return 'N/A';
+    }
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} days`;
+  } catch (error) {
+    console.error('Error calculating duration:', error);
+    return 'N/A';
   }
-  if (diffDays < 365) {
-    const months = Math.floor(diffDays / 30);
-    const days = diffDays % 30;
-    return `${months} month${months > 1 ? 's' : ''}${days ? ` and ${days} day${days > 1 ? 's' : ''}` : ''}`;
-  }
-  const years = Math.floor(diffDays / 365);
-  const days = diffDays % 365;
-  return `${years} year${years > 1 ? 's' : ''}${days ? ` and ${days} day${days > 1 ? 's' : ''}` : ''}`;
 };
 
 // Main Component
@@ -1046,12 +1082,12 @@ function Step5Content() {
   // Add a type-safe check for properties
   const enhanceNormalizeApiData = (data: any): MergedData => {
     const baseData = normalizeApiData(data);
-
+    
     // Check if we should add the step1 property for later use - only if it exists in source data
     if (data?.step1) {
       baseData.step1 = data.step1;
     }
-
+    
     return baseData;
   };
 
@@ -1085,7 +1121,7 @@ function Step5Content() {
   const hasMinimalData = useMemo(() => {
     return Boolean(displayData && Object.keys(displayData).length > 0 && (displayData.campaignName || displayData.overview && displayData.overview.name));
   }, [displayData]);
-
+  
   // Simplified data fetching approach - directly fetch from API
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -1139,12 +1175,12 @@ function Step5Content() {
         }
       } finally {
         setIsLoading(false);
-        setFetchAttempts((prev) => prev + 1);
+        setFetchAttempts(prev => prev + 1);
       }
     };
     fetchCampaignData();
   }, [campaignId, reloadCampaignData, contextData]);
-
+  
   // Validate when we have data
   useEffect(() => {
     if (displayData && Object.keys(displayData).length > 0) {
@@ -1159,11 +1195,11 @@ function Step5Content() {
       console.log('Root influencers:', displayData.influencers);
       console.log('Step1 influencers:', displayData?.step1?.influencers);
       console.log('Overview influencers:', displayData?.overview?.influencers);
-
+      
       // If no influencers found but campaign ID exists, try to fetch them directly
       if ((!displayData.influencers || !Array.isArray(displayData.influencers) || displayData.influencers.length === 0) && campaignId) {
         console.log('No influencers found in display data, attempting to fetch directly');
-
+        
         // Make an API call specifically for Step 1 data which contains the influencers
         const fetchStep1Data = async () => {
           try {
@@ -1172,16 +1208,16 @@ function Step5Content() {
                 'Cache-Control': 'no-cache'
               }
             });
-
+            
             if (!response.ok) {
               console.warn('Failed to fetch Step 1 data');
               return;
             }
-
+            
             const result = await response.json();
             if (result.success && result.data && Array.isArray(result.data.influencers)) {
               console.log('Successfully fetched Step 1 influencers:', result.data.influencers);
-
+              
               // Transform the influencers
               const enhancedInfluencers = await Promise.all(result.data.influencers.map(async (inf: any) => {
                 // Try to fetch additional details for each influencer
@@ -1189,7 +1225,7 @@ function Step5Content() {
                 if (inf.platform && inf.handle) {
                   additionalData = await fetchInfluencerDetails(campaignId, inf.handle, inf.platform);
                 }
-
+                
                 return {
                   id: inf.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
                   handle: inf.handle,
@@ -1202,9 +1238,9 @@ function Step5Content() {
                   verified: additionalData?.verified || false
                 };
               }));
-
+              
               // Update the campaign data
-              setCampaignData((prev) => ({
+              setCampaignData(prev => ({
                 ...prev,
                 influencers: enhancedInfluencers
               }));
@@ -1213,7 +1249,7 @@ function Step5Content() {
             console.error('Error fetching Step 1 data:', error);
           }
         };
-
+        
         fetchStep1Data();
       }
       // If influencer data exists but is minimal, enhance it
@@ -1235,16 +1271,16 @@ function Step5Content() {
           }
           return inf; // Return unchanged if already enriched
         });
-
+        
         // Update campaign data with enhanced influencers if they were modified
         const needsUpdate = enhancedInfluencers.some((inf, idx) => {
           const original = displayData.influencers?.[idx];
           return original && (inf.name !== original.name || inf.followers !== original.followers || inf.avatarUrl !== original.avatarUrl);
         });
-
+        
         if (needsUpdate) {
           console.log('Updating influencer data with enhanced values:', enhancedInfluencers);
-          setCampaignData((prev) => ({
+          setCampaignData(prev => ({
             ...prev,
             influencers: enhancedInfluencers
           }));
@@ -1372,61 +1408,61 @@ function Step5Content() {
     setTimeout(() => window.location.reload(), 500);
   };
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen font-work-sans">
+    return <div className="flex items-center justify-center min-h-screen">
         <WizardSkeleton step={5} />
       </div>;
   }
   if (error) {
     // Special handling for "not found" errors
     const isNotFoundError = typeof error === 'string' && (error.includes("404 Not Found") || error.includes("not found"));
-    return <div className="p-6 bg-red-50 border border-red-200 rounded-md font-work-sans">
-        <h3 className="text-red-800 font-semibold text-lg mb-2 font-sora">Error Loading Campaign</h3>
-        <p className="text-red-600 mb-4 font-work-sans">{String(error)}</p>
+    return <div className="p-6 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-800 font-semibold text-lg mb-2">Error Loading Campaign</h3>
+        <p className="text-red-600 mb-4">{String(error)}</p>
         
         {/* Add a reset button to clear any cached state */}
-        <button onClick={handleReset} className="mb-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-work-sans">
+        <button onClick={handleReset} className="mb-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
 
           Reset Cache & Reload
         </button>
         
-        {isNotFoundError ? <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6 font-work-sans">
-            <h4 className="text-lg font-medium mb-3 font-sora">Campaign Not Found</h4>
-            <p className="mb-4 font-work-sans">
+        {isNotFoundError ? <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
+            <h4 className="text-lg font-medium mb-3">Campaign Not Found</h4>
+            <p className="mb-4">
               The campaign with ID {campaignId} couldn't be found in the database. It may have been deleted or never existed.
             </p>
-            <div className="flex flex-col space-y-4 font-work-sans">
-              <Link href="/campaigns" className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 w-full md:w-auto font-work-sans">
+            <div className="flex flex-col space-y-4">
+              <Link href="/campaigns" className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 w-full md:w-auto">
 
                 View All Campaigns
               </Link>
               
-              <Link href="/campaigns/wizard/step-1" className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full md:w-auto font-work-sans">
+              <Link href="/campaigns/wizard/step-1" className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full md:w-auto">
 
                 Create New Campaign
               </Link>
             </div>
-          </div> : <div className="bg-red-100 p-4 rounded-md mb-4 font-work-sans">
-            <h4 className="font-medium mb-2 font-sora">Debugging Information:</h4>
-            <p className="text-sm font-work-sans">Campaign ID: {campaignId || 'Not provided'}</p>
-            <p className="text-sm font-work-sans">Data loaded: {Object.keys(contextData || {}).length > 0 ? 'Yes, from context' : 'No'}</p>
-            <p className="text-sm font-work-sans">Direct API data loaded: {Object.keys(campaignData || {}).length > 0 ? 'Yes' : 'No'}</p>
-            <p className="text-sm font-work-sans">Fetch attempts: {fetchAttempts}</p>
-            <p className="text-sm font-work-sans">Error type: {error.includes("API Error") ? "API Response Error" : error.includes("fetch") ? "Network Error" : "Other Error"}</p>
+          </div> : <div className="bg-red-100 p-4 rounded-md mb-4">
+            <h4 className="font-medium mb-2">Debugging Information:</h4>
+            <p className="text-sm">Campaign ID: {campaignId || 'Not provided'}</p>
+            <p className="text-sm">Data loaded: {Object.keys(contextData || {}).length > 0 ? 'Yes, from context' : 'No'}</p>
+            <p className="text-sm">Direct API data loaded: {Object.keys(campaignData || {}).length > 0 ? 'Yes' : 'No'}</p>
+            <p className="text-sm">Fetch attempts: {fetchAttempts}</p>
+            <p className="text-sm">Error type: {error.includes("API Error") ? "API Response Error" : error.includes("fetch") ? "Network Error" : "Other Error"}</p>
             
             {/* Add a debugging tool to check database connection */}
-            <div className="mt-4 font-work-sans">
-              <p className="text-sm font-medium mb-2 font-work-sans">Troubleshooting Steps:</p>
-              <ol className="list-decimal pl-5 text-sm space-y-1 font-work-sans">
-                <li className="font-work-sans">Check that campaign ID {campaignId} exists in your database</li>
-                <li className="font-work-sans">Verify API route <code>/api/campaigns/{campaignId}</code> is working correctly</li>
-                <li className="font-work-sans">Check browser console logs for detailed API responses and errors</li>
-                <li className="font-work-sans">Try accessing the campaign from the regular campaigns list view</li>
-                <li className="font-work-sans">Inspect your server logs for backend errors</li>
+            <div className="mt-4">
+              <p className="text-sm font-medium mb-2">Troubleshooting Steps:</p>
+              <ol className="list-decimal pl-5 text-sm space-y-1">
+                <li>Check that campaign ID {campaignId} exists in your database</li>
+                <li>Verify API route <code>/api/campaigns/{campaignId}</code> is working correctly</li>
+                <li>Check browser console logs for detailed API responses and errors</li>
+                <li>Try accessing the campaign from the regular campaigns list view</li>
+                <li>Inspect your server logs for backend errors</li>
               </ol>
             </div>
           </div>}
         
-        <div className="flex space-x-3 font-work-sans">
+        <div className="flex space-x-3">
           <button onClick={() => {
           setError(null);
           setIsLoading(true);
@@ -1438,11 +1474,11 @@ function Step5Content() {
               router.push('/campaigns');
             }
           }, 500);
-        }} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-work-sans">
+        }} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
 
             Try Again
           </button>
-          <button onClick={() => router.push('/campaigns')} className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 font-work-sans">
+          <button onClick={() => router.push('/campaigns')} className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50">
 
             Return to Campaigns
           </button>
@@ -1481,135 +1517,135 @@ function Step5Content() {
           } finally {
             setIsLoading(false);
           }
-        }} className="px-4 py-2 border border-yellow-300 bg-yellow-50 text-yellow-800 rounded-md hover:bg-yellow-100 font-work-sans">
+        }} className="px-4 py-2 border border-yellow-300 bg-yellow-50 text-yellow-800 rounded-md hover:bg-yellow-100">
 
             Test API Endpoint
           </button>
         </div>
       </div>;
   }
-  return <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-white min-h-screen font-work-sans">
+  return <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-white min-h-screen">
       {/* Add Reset Button at top when we have campaign ID but no/minimal data */}
-      {campaignId && (!hasMinimalData || error) && <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4 font-work-sans">
-          <h3 className="font-medium text-blue-800 mb-2 font-sora">Having trouble viewing this campaign?</h3>
-          <p className="text-blue-700 mb-3 font-work-sans">
+      {campaignId && (!hasMinimalData || error) && <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4">
+          <h3 className="font-medium text-blue-800 mb-2">Having trouble viewing this campaign?</h3>
+          <p className="text-blue-700 mb-3">
             {!hasMinimalData ? "Campaign data is not loading properly. You can try resetting the page cache." : "Some campaign data may be missing. You can try resetting to reload all data."}
           </p>
-          <button onClick={handleReset} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-work-sans">
+          <button onClick={handleReset} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
 
             Reset & Reload Page
           </button>
         </div>}
 
       {/* Warning if we have some data but it's incomplete */}
-      {hasMinimalData && Object.keys(displayData).length < 5 && !error && <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4 font-work-sans">
-          <h3 className="font-medium text-yellow-800 mb-2 font-sora">Limited Campaign Data</h3>
-          <p className="text-yellow-700 mb-3 font-work-sans">
+      {hasMinimalData && Object.keys(displayData).length < 5 && !error && <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+          <h3 className="font-medium text-yellow-800 mb-2">Limited Campaign Data</h3>
+          <p className="text-yellow-700 mb-3">
             We found some basic information for this campaign, but detailed data might be missing.
           </p>
         </div>}
 
-      <div className="mb-8 font-work-sans">
-        <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-1 font-sora">Campaign Creation</h1>
-        <p className="text-[var(--secondary-color)] font-work-sans">Review your campaign details and submit</p>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-1">Campaign Creation</h1>
+        <p className="text-[var(--secondary-color)]">Review your campaign details and submit</p>
       </div>
 
-      <div className="space-y-6 font-work-sans">
+      <div className="space-y-6">
         {/* Step 1: Campaign Details */}
         <SummarySection title="Campaign Details" stepNumber={1} onEdit={() => navigateToStep(1)}>
           {/* Basic Information Section */}
-              <h3 className="font-medium text-gray-800 mb-4 font-sora">Basic Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 font-work-sans">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-              <div className="space-y-4 font-work-sans">
-                <DataItem
-                label="Campaign Name"
-                value={displayData.campaignName || 'Not specified'}
-                icon={
-                <div className="relative mr-3 font-work-sans">
-                      <Image
-                    src="/app/Campaigns.svg"
-                    alt="Campaigns"
-                    width={22}
-                    height={22}
-                    className="filter brightness-0"
-                    style={{ filter: 'invert(32%) sepia(9%) saturate(1265%) hue-rotate(182deg) brightness(91%) contrast(88%)' }} />
-
+              <h3 className="font-medium text-gray-800 mb-4">Basic Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <div className="space-y-4">
+                <DataItem 
+                  label="Campaign Name" 
+                  value={displayData.campaignName || 'Not specified'} 
+                  icon={
+                    <div className="relative mr-3">
+                      <Image 
+                        src="/app/Campaigns.svg" 
+                        alt="Campaigns" 
+                        width={22} 
+                        height={22} 
+                        className="filter brightness-0"
+                        style={{ filter: 'invert(32%) sepia(9%) saturate(1265%) hue-rotate(182deg) brightness(91%) contrast(88%)' }}
+                      />
                     </div>
-                }
-                featured={true}
-                className="text-lg p-4 border-l-4 border-[var(--accent-color)] bg-[rgba(0,191,255,0.08)] font-work-sans" />
-
+                  }
+                  featured={true} 
+                  className="text-lg p-4 border-l-4 border-[var(--accent-color)] bg-[rgba(0,191,255,0.08)]"
+                />
                 
-                <DataItem
-                label="Business Goal for this Campaign"
-                value={displayData.description || 'Not specified'} />
-
+                <DataItem 
+                  label="Business Goal for this Campaign" 
+                  value={displayData.description || 'Not specified'} 
+                />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 font-work-sans">
-                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2 font-work-sans" iconType="static" solid={false} />} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
                   
-                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2 font-work-sans" iconType="static" solid={false} />} />
+                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
                 </div>
 
-                {displayData.startDate && displayData.endDate &&
-              <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded font-work-sans">
-                    <div className="flex items-start font-work-sans">
-                      <Icon name="faCircleInfo" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)] font-work-sans" iconType="static" solid={false} />
-                      <span className="flex-1 font-work-sans">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
+                {displayData.startDate && displayData.endDate && (
+                  <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
+                    <div className="flex items-start">
+                      <Icon name="faCircleInfo" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]" iconType="static" solid={false} />
+                      <span className="flex-1">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
                 </div>
                   </div>
-              }
+                )}
               </div>
             </div>
             
             {/* Budget Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-              <h3 className="font-medium text-gray-800 mb-4 font-sora">Budget Information</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Budget Information</h3>
               
-              <div className="space-y-4 font-work-sans">
-                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2 font-work-sans" iconType="static" solid={false} />} />
+              <div className="space-y-4">
+                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
                 
-                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2 font-work-sans" iconType="static" solid={false} />} featured={true} />
+                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} featured={true} />
                 
-                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2 font-work-sans" iconType="static" solid={false} />} />
+                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
               </div>
             </div>
           </div>
           
           {/* Contact Information Section */}
-          <h3 className="font-medium text-gray-800 mb-4 font-sora">Contact Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 font-work-sans">
+          <h3 className="font-medium text-gray-800 mb-4">Contact Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Primary Contact */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-              <h3 className="font-medium text-gray-800 mb-4 font-sora">Primary Contact</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Primary Contact</h3>
               
-              <div className="space-y-4 font-work-sans">
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Name</span>
-                    <span className="text-base text-gray-800 block font-medium font-work-sans">
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Name</span>
+                    <span className="text-base text-gray-800 block font-medium">
                       {`${displayData.primaryContact?.firstName || ''} ${displayData.primaryContact?.surname || displayData.primaryContact?.lastName || ''}`}
                     </span>
                   </div>
                 </div>
                 
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Email</span>
-                    <span className="text-base text-gray-800 block font-medium font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Email</span>
+                    <span className="text-base text-gray-800 block font-medium">
                       {displayData.primaryContact?.email || 'Not specified'}
                     </span>
               </div>
             </div>
                 
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Position</span>
-                    <span className="text-base text-gray-800 block font-medium font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Position</span>
+                    <span className="text-base text-gray-800 block font-medium">
                       {displayData.primaryContact?.position || 'Not specified'}
                     </span>
           </div>
@@ -1618,364 +1654,364 @@ function Step5Content() {
             </div>
             
             {/* Secondary Contact */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-              <h3 className="font-medium text-gray-800 mb-4 font-sora">Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span></h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span></h3>
               
-              {displayData.secondaryContact?.firstName || displayData.secondaryContact?.email ?
-            <div className="space-y-4 font-work-sans">
-                  <div className="flex items-start font-work-sans">
-                    <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                    <div className="flex-1 font-work-sans">
-                      <span className="text-sm text-gray-500 mb-1 block font-work-sans">Name</span>
-                      <span className="text-base text-gray-800 block font-medium font-work-sans">
+              {displayData.secondaryContact?.firstName || displayData.secondaryContact?.email ? (
+              <div className="space-y-4">
+                  <div className="flex items-start">
+                    <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <div className="flex-1">
+                      <span className="text-sm text-gray-500 mb-1 block">Name</span>
+                      <span className="text-base text-gray-800 block font-medium">
                         {`${displayData.secondaryContact?.firstName || ''} ${displayData.secondaryContact?.surname || displayData.secondaryContact?.lastName || ''}`}
                       </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-start font-work-sans">
-                    <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                    <div className="flex-1 font-work-sans">
-                      <span className="text-sm text-gray-500 mb-1 block font-work-sans">Email</span>
-                      <span className="text-base text-gray-800 block font-medium font-work-sans">
+                  <div className="flex items-start">
+                    <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <div className="flex-1">
+                      <span className="text-sm text-gray-500 mb-1 block">Email</span>
+                      <span className="text-base text-gray-800 block font-medium">
                         {displayData.secondaryContact?.email || 'Not specified'}
                       </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-start font-work-sans">
-                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                    <div className="flex-1 font-work-sans">
-                      <span className="text-sm text-gray-500 mb-1 block font-work-sans">Position</span>
-                      <span className="text-base text-gray-800 block font-medium font-work-sans">
+                  <div className="flex items-start">
+                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <div className="flex-1">
+                      <span className="text-sm text-gray-500 mb-1 block">Position</span>
+                      <span className="text-base text-gray-800 block font-medium">
                         {displayData.secondaryContact?.position || 'Not specified'}
                       </span>
                     </div>
                   </div>
-                </div> :
-
-            <div className="text-gray-500 italic font-work-sans">No secondary contact added</div>
-            }
+                </div>
+              ) : (
+                <div className="text-gray-500 italic">No secondary contact added</div>
+              )}
             </div>
           </div>
           
           {/* Influencer Details Section */}
-          <h3 className="font-medium text-gray-800 mb-4 font-sora">Influencer Details</h3>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-            <h3 className="font-medium text-gray-800 mb-4 font-sora">Influencers</h3>
+          <h3 className="font-medium text-gray-800 mb-4">Influencer Details</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 className="font-medium text-gray-800 mb-4">Influencers</h3>
             
-            {displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0 ?
-          <div className="space-y-6 font-work-sans">
-                {displayData.influencers.map((influencer, index) =>
-            <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 font-work-sans">
-                    <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.1)] to-white border-b border-gray-200 font-work-sans">
-                      <div className="flex items-center justify-between font-work-sans">
-                        <h4 className="font-semibold text-gray-800 flex items-center font-sora">
-                          <span className="bg-[var(--accent-color)] text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm font-work-sans">{index + 1}</span>
+            {displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0 ? (
+              <div className="space-y-6">
+                {displayData.influencers.map((influencer, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.1)] to-white border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-gray-800 flex items-center">
+                          <span className="bg-[var(--accent-color)] text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm">{index + 1}</span>
                           Influencer #{index + 1}
                         </h4>
-                        {influencer.verified &&
-                  <span className="inline-flex items-center text-blue-500 bg-blue-50 px-2 py-1 rounded-full text-sm font-work-sans">
+                        {influencer.verified && (
+                          <span className="inline-flex items-center text-blue-500 bg-blue-50 px-2 py-1 rounded-full text-sm">
                             <Icon name="faCheck" className="h-3 w-3 mr-1" iconType="static" solid={true} />
                             Verified
                           </span>
-                  }
+                        )}
                       </div>
                     </div>
                     
-                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                      <div className="flex items-center font-work-sans">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden mr-5 flex-shrink-0 border-2 border-[var(--accent-color)] font-work-sans">
-                          {influencer.avatarUrl ?
-                    <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" /> :
-
-                    <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] font-work-sans">
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex items-center">
+                        <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden mr-5 flex-shrink-0 border-2 border-[var(--accent-color)]">
+                          {influencer.avatarUrl ? (
+                            <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)]">
                               <Icon name="faUser" className="h-10 w-10" iconType="static" solid={false} />
                             </div>
-                    }
+                          )}
                         </div>
                         
-                        <div className="font-work-sans">
-                          <p className="font-semibold text-gray-800 text-lg mb-1 font-work-sans">{influencer.name || influencer.handle}</p>
-                          <p className="text-[var(--accent-color)] mb-2 font-medium font-work-sans">@{influencer.handle}</p>
-                          <div className="flex flex-col space-y-1 font-work-sans">
-                            {influencer.followers &&
-                      <p className="text-sm text-gray-600 flex items-center font-work-sans">
-                                <Icon name="faUsers" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)] font-work-sans" iconType="static" solid={false} />
-                                {typeof influencer.followers === 'number' ?
-                        `${new Intl.NumberFormat().format(influencer.followers)} followers` :
-                        influencer.followers}
+                        <div>
+                          <p className="font-semibold text-gray-800 text-lg mb-1">{influencer.name || influencer.handle}</p>
+                          <p className="text-[var(--accent-color)] mb-2 font-medium">@{influencer.handle}</p>
+                          <div className="flex flex-col space-y-1">
+                            {influencer.followers && (
+                              <p className="text-sm text-gray-600 flex items-center">
+                                <Icon name="faUsers" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" iconType="static" solid={false} />
+                                {typeof influencer.followers === 'number' 
+                                  ? `${new Intl.NumberFormat().format(influencer.followers)} followers` 
+                                  : influencer.followers}
                               </p>
-                      }
-                            {influencer.engagement &&
-                      <p className="text-sm text-gray-600 flex items-center font-work-sans">
-                                <Icon name="faChartLine" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)] font-work-sans" iconType="static" solid={false} />
+                            )}
+                            {influencer.engagement && (
+                              <p className="text-sm text-gray-600 flex items-center">
+                                <Icon name="faChartLine" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" iconType="static" solid={false} />
                                 {influencer.engagement} engagement
                               </p>
-                      }
+                            )}
                     </div>
                   </div>
                 </div>
 
-                      <div className="space-y-4 flex flex-col justify-center font-work-sans">
-                        <div className="flex items-start bg-gray-50 p-3 rounded-lg font-work-sans">
+                      <div className="space-y-4 flex flex-col justify-center">
+                        <div className="flex items-start bg-gray-50 p-3 rounded-lg">
                           {/* Platform icon based on platform name */}
-                          <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center mr-3 flex-shrink-0 font-work-sans">
-                            <img
-                        src={
-                        (influencer.platform || '').toLowerCase().includes('instagram') ? '/ui-icons/brands/instagram.svg' :
-                        (influencer.platform || '').toLowerCase().includes('facebook') ? '/ui-icons/brands/facebook.svg' :
-                        (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? '/ui-icons/brands/x-twitter.svg' :
-                        (influencer.platform || '').toLowerCase().includes('tiktok') ? '/ui-icons/brands/tiktok.svg' :
-                        (influencer.platform || '').toLowerCase().includes('youtube') ? '/ui-icons/brands/youtube.svg' :
-                        (influencer.platform || '').toLowerCase().includes('linkedin') ? '/ui-icons/brands/linkedin.svg' :
-                        (influencer.platform || '').toLowerCase().includes('pinterest') ? '/ui-icons/brands/pinterest.svg' :
-                        (influencer.platform || '').toLowerCase().includes('reddit') ? '/ui-icons/brands/reddit.svg' :
-                        (influencer.platform || '').toLowerCase().includes('github') ? '/ui-icons/brands/github.svg' :
-                        '/ui-icons/brands/instagram.svg' // Default to Instagram if unknown
-                        }
-                        alt={`${influencer.platform || 'Social'} platform`}
-                        className="h-5 w-5 brightness-0 invert" // Apply filter to make icon white
-                      />
+                          <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center mr-3 flex-shrink-0">
+                            <img 
+                              src={
+                                (influencer.platform || '').toLowerCase().includes('instagram') ? '/ui-icons/brands/instagram.svg' :
+                                (influencer.platform || '').toLowerCase().includes('facebook') ? '/ui-icons/brands/facebook.svg' :
+                                (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? '/ui-icons/brands/x-twitter.svg' :
+                                (influencer.platform || '').toLowerCase().includes('tiktok') ? '/ui-icons/brands/tiktok.svg' :
+                                (influencer.platform || '').toLowerCase().includes('youtube') ? '/ui-icons/brands/youtube.svg' :
+                                (influencer.platform || '').toLowerCase().includes('linkedin') ? '/ui-icons/brands/linkedin.svg' :
+                                (influencer.platform || '').toLowerCase().includes('pinterest') ? '/ui-icons/brands/pinterest.svg' :
+                                (influencer.platform || '').toLowerCase().includes('reddit') ? '/ui-icons/brands/reddit.svg' :
+                                (influencer.platform || '').toLowerCase().includes('github') ? '/ui-icons/brands/github.svg' :
+                                '/ui-icons/brands/instagram.svg' // Default to Instagram if unknown
+                              } 
+                              alt={`${influencer.platform || 'Social'} platform`}
+                              className="h-5 w-5 brightness-0 invert" // Apply filter to make icon white
+                            />
                           </div>
-                          <div className="flex-1 font-work-sans">
-                            <span className="text-sm text-gray-500 block font-work-sans">Platform</span>
-                            <span className="text-base text-gray-800 font-medium block font-work-sans">
+                          <div className="flex-1">
+                            <span className="text-sm text-gray-500 block">Platform</span>
+                            <span className="text-base text-gray-800 font-medium block">
                               {influencer.platform || 'Not specified'}
                             </span>
                           </div>
                         </div>
                         
                         {/* Only show description if it exists and isn't the default "No description available" */}
-                        {influencer.description && !influencer.description.includes('No description available') &&
-                  <div className="flex items-start bg-gray-50 p-3 rounded-lg font-work-sans">
-                            <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center mr-3 flex-shrink-0 font-work-sans">
-                              <Icon name="faInfoCircle" className="h-5 w-5 text-[var(--accent-color)] font-work-sans" iconType="static" solid={false} />
+                        {influencer.description && !influencer.description.includes('No description available') && (
+                          <div className="flex items-start bg-gray-50 p-3 rounded-lg">
+                            <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center mr-3 flex-shrink-0">
+                              <Icon name="faInfoCircle" className="h-5 w-5 text-[var(--accent-color)]" iconType="static" solid={false} />
                             </div>
-                            <div className="flex-1 font-work-sans">
-                              <span className="text-sm text-gray-500 block font-work-sans">Description</span>
-                              <span className="text-base text-gray-800 block line-clamp-2 font-work-sans">{influencer.description}</span>
+                            <div className="flex-1">
+                              <span className="text-sm text-gray-500 block">Description</span>
+                              <span className="text-base text-gray-800 block line-clamp-2">{influencer.description}</span>
                             </div>
                           </div>
-                  }
+                        )}
                       </div>
                     </div>
                       </div>
-            )}
-                  </div> :
-
-          // Show loading state if influencers might be loading
-          isLoading ?
-          <div className="bg-gray-50 p-6 rounded-md text-center font-work-sans">
-                  <div className="mb-3 animate-spin font-work-sans">
-                    <Icon name="faCircleNotch" className="h-10 w-10 text-gray-400 mx-auto font-work-sans" iconType="static" solid={false} />
-                </div>
-                  <p className="text-gray-600 mb-2 font-work-sans">Loading influencer data...</p>
-                </div> :
-
-          // Show message when no influencers found
-          <div className="bg-gray-50 p-8 rounded-md text-center font-work-sans">
-                  <div className="mb-4 bg-gray-100 p-4 rounded-full inline-flex items-center justify-center font-work-sans">
-                    <Icon name="faUserGroup" className="h-12 w-12 text-[var(--accent-color)] opacity-70 font-work-sans" iconType="static" solid={false} />
+                    ))}
                   </div>
-                  <p className="text-gray-700 font-medium mb-3 font-work-sans">No influencers added to this campaign yet.</p>
-                  <p className="text-gray-500 mb-4 font-work-sans">Add influencers to better track and manage your campaign's reach.</p>
-                  <button
-              onClick={() => navigateToStep(1)}
-              className="px-5 py-2.5 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors inline-flex items-center font-medium font-work-sans">
-
+            ) : (
+              // Show loading state if influencers might be loading
+              isLoading ? (
+                <div className="bg-gray-50 p-6 rounded-md text-center">
+                  <div className="mb-3 animate-spin">
+                    <Icon name="faCircleNotch" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+                </div>
+                  <p className="text-gray-600 mb-2">Loading influencer data...</p>
+                </div>
+              ) : (
+                // Show message when no influencers found
+                <div className="bg-gray-50 p-8 rounded-md text-center">
+                  <div className="mb-4 bg-gray-100 p-4 rounded-full inline-flex items-center justify-center">
+                    <Icon name="faUserGroup" className="h-12 w-12 text-[var(--accent-color)] opacity-70" iconType="static" solid={false} />
+                  </div>
+                  <p className="text-gray-700 font-medium mb-3">No influencers added to this campaign yet.</p>
+                  <p className="text-gray-500 mb-4">Add influencers to better track and manage your campaign's reach.</p>
+                  <button 
+                    onClick={() => navigateToStep(1)} 
+                    className="px-5 py-2.5 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors inline-flex items-center font-medium"
+                  >
                     <Icon name="faPlus" className="h-4 w-4 mr-2" iconType="static" solid={false} />
                     Add Influencers in Step 1
                   </button>
                 </div>
-
-          }
+              )
+            )}
           </div>
         </SummarySection>
 
         {/* Step 2: Objectives & Messaging */}
         <SummarySection title="Objectives & Messaging" stepNumber={2} onEdit={() => navigateToStep(2)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column - Objectives */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-              <h3 className="font-medium text-gray-800 mb-4 font-sora">Objectives</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Objectives</h3>
               
               {/* Primary KPI */}
-              <div className="mb-6 font-work-sans">
-                <label className="text-sm font-medium text-gray-600 mb-2 block font-work-sans">Primary KPI</label>
-                {displayData.primaryKPI ?
-              <div className="bg-[var(--accent-color)] text-white px-3 py-1.5 rounded-md inline-flex items-center font-work-sans">
-                    <div className="w-5 h-5 mr-2 filter brightness-0 invert font-work-sans">
-                      <Image
-                    src={`/KPIs/${displayData.primaryKPI === 'adRecall' ? 'Ad_Recall' :
-                    displayData.primaryKPI === 'brandAwareness' ? 'Brand_Awareness' :
-                    displayData.primaryKPI === 'consideration' ? 'Consideration' :
-                    displayData.primaryKPI === 'messageAssociation' ? 'Message_Association' :
-                    displayData.primaryKPI === 'brandPreference' ? 'Brand_Preference' :
-                    displayData.primaryKPI === 'purchaseIntent' ? 'Purchase_Intent' :
-                    displayData.primaryKPI === 'actionIntent' ? 'Action_Intent' :
-                    displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation_Intent' :
-                    displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`}
-                    alt={formatKPI(displayData.primaryKPI)}
-                    width={20}
-                    height={20}
-                    className="object-contain" />
-
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-600 mb-2 block">Primary KPI</label>
+                {displayData.primaryKPI ? (
+                  <div className="bg-[var(--accent-color)] text-white px-3 py-1.5 rounded-md inline-flex items-center">
+                    <div className="w-5 h-5 mr-2 filter brightness-0 invert">
+                      <Image 
+                        src={`/KPIs/${displayData.primaryKPI === 'adRecall' ? 'Ad_Recall' : 
+                                displayData.primaryKPI === 'brandAwareness' ? 'Brand_Awareness' : 
+                                displayData.primaryKPI === 'consideration' ? 'Consideration' : 
+                                displayData.primaryKPI === 'messageAssociation' ? 'Message_Association' : 
+                                displayData.primaryKPI === 'brandPreference' ? 'Brand_Preference' : 
+                                displayData.primaryKPI === 'purchaseIntent' ? 'Purchase_Intent' : 
+                                displayData.primaryKPI === 'actionIntent' ? 'Action_Intent' : 
+                                displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation_Intent' : 
+                                displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`} 
+                        alt={formatKPI(displayData.primaryKPI)}
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
                     </div>
-                    <span className="font-work-sans">{displayData.primaryKPI === 'adRecall' ? 'Ad Recall' :
-                  displayData.primaryKPI === 'brandAwareness' ? 'Brand Awareness' :
-                  displayData.primaryKPI === 'consideration' ? 'Consideration' :
-                  displayData.primaryKPI === 'messageAssociation' ? 'Message Association' :
-                  displayData.primaryKPI === 'brandPreference' ? 'Brand Preference' :
-                  displayData.primaryKPI === 'purchaseIntent' ? 'Purchase Intent' :
-                  displayData.primaryKPI === 'actionIntent' ? 'Action Intent' :
-                  displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation Intent' :
-                  displayData.primaryKPI === 'advocacy' ? 'Advocacy' :
-                  formatKPI(displayData.primaryKPI)}</span>
-                  </div> :
-
-              <div className="text-gray-500 font-work-sans">None selected</div>
-              }
+                    <span>{displayData.primaryKPI === 'adRecall' ? 'Ad Recall' : 
+                          displayData.primaryKPI === 'brandAwareness' ? 'Brand Awareness' : 
+                          displayData.primaryKPI === 'consideration' ? 'Consideration' : 
+                          displayData.primaryKPI === 'messageAssociation' ? 'Message Association' : 
+                          displayData.primaryKPI === 'brandPreference' ? 'Brand Preference' : 
+                          displayData.primaryKPI === 'purchaseIntent' ? 'Purchase Intent' : 
+                          displayData.primaryKPI === 'actionIntent' ? 'Action Intent' : 
+                          displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation Intent' : 
+                          displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 
+                          formatKPI(displayData.primaryKPI)}</span>
+                  </div>
+                ) : (
+                  <div className="text-gray-500">None selected</div>
+                )}
                 </div>
 
               {/* Secondary KPIs */}
-              <div className="mb-6 font-work-sans">
-                <label className="text-sm font-medium text-gray-600 mb-2 block font-work-sans">Secondary KPIs</label>
-                <div className="flex flex-wrap gap-2 font-work-sans">
-                  {displayData.secondaryKPIs && displayData.secondaryKPIs.length > 0 ?
-                displayData.secondaryKPIs.map((kpi, index) =>
-                <div key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center font-work-sans">
-                        <div className="w-5 h-5 mr-2 font-work-sans">
-                          <Image
-                      src={`/KPIs/${kpi === 'adRecall' ? 'Ad_Recall' :
-                      kpi === 'brandAwareness' ? 'Brand_Awareness' :
-                      kpi === 'consideration' ? 'Consideration' :
-                      kpi === 'messageAssociation' ? 'Message_Association' :
-                      kpi === 'brandPreference' ? 'Brand_Preference' :
-                      kpi === 'purchaseIntent' ? 'Purchase_Intent' :
-                      kpi === 'actionIntent' ? 'Action_Intent' :
-                      kpi === 'recommendationIntent' ? 'Recommendation_Intent' :
-                      kpi === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`}
-                      alt={formatKPI(kpi)}
-                      width={20}
-                      height={20}
-                      className="object-contain" />
-
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-600 mb-2 block">Secondary KPIs</label>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.secondaryKPIs && displayData.secondaryKPIs.length > 0 ? (
+                    displayData.secondaryKPIs.map((kpi, index) => (
+                      <div key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
+                        <div className="w-5 h-5 mr-2">
+                          <Image 
+                            src={`/KPIs/${kpi === 'adRecall' ? 'Ad_Recall' : 
+                                  kpi === 'brandAwareness' ? 'Brand_Awareness' : 
+                                  kpi === 'consideration' ? 'Consideration' : 
+                                  kpi === 'messageAssociation' ? 'Message_Association' : 
+                                  kpi === 'brandPreference' ? 'Brand_Preference' : 
+                                  kpi === 'purchaseIntent' ? 'Purchase_Intent' : 
+                                  kpi === 'actionIntent' ? 'Action_Intent' : 
+                                  kpi === 'recommendationIntent' ? 'Recommendation_Intent' : 
+                                  kpi === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`} 
+                            alt={formatKPI(kpi)}
+                            width={20}
+                            height={20}
+                            className="object-contain"
+                          />
                       </div>
-                        <span className="font-work-sans">{kpi === 'adRecall' ? 'Ad Recall' :
-                    kpi === 'brandAwareness' ? 'Brand Awareness' :
-                    kpi === 'consideration' ? 'Consideration' :
-                    kpi === 'messageAssociation' ? 'Message Association' :
-                    kpi === 'brandPreference' ? 'Brand Preference' :
-                    kpi === 'purchaseIntent' ? 'Purchase Intent' :
-                    kpi === 'actionIntent' ? 'Action Intent' :
-                    kpi === 'recommendationIntent' ? 'Recommendation Intent' :
-                    kpi === 'advocacy' ? 'Advocacy' :
-                    formatKPI(kpi)}</span>
+                        <span>{kpi === 'adRecall' ? 'Ad Recall' : 
+                              kpi === 'brandAwareness' ? 'Brand Awareness' : 
+                              kpi === 'consideration' ? 'Consideration' : 
+                              kpi === 'messageAssociation' ? 'Message Association' : 
+                              kpi === 'brandPreference' ? 'Brand Preference' : 
+                              kpi === 'purchaseIntent' ? 'Purchase Intent' : 
+                              kpi === 'actionIntent' ? 'Action Intent' : 
+                              kpi === 'recommendationIntent' ? 'Recommendation Intent' : 
+                              kpi === 'advocacy' ? 'Advocacy' : 
+                              formatKPI(kpi)}</span>
                       </div>
-                ) :
-
-                <div className="text-gray-500 font-work-sans">None selected</div>
-                }
+                    ))
+                  ) : (
+                    <div className="text-gray-500">None selected</div>
+                  )}
                   </div>
                 </div>
 
               {/* Features */}
-              <div className="mb-6 font-work-sans">
-                <label className="text-sm font-medium text-gray-600 mb-2 block font-work-sans">Features</label>
-                <div className="flex flex-wrap gap-2 font-work-sans">
-                  {displayData.features && displayData.features.length > 0 ?
-                displayData.features.map((feature: string, index: number) =>
-                <div key={index} className="inline-flex items-center p-2 bg-gray-50 rounded-md font-work-sans">
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-600 mb-2 block">Features</label>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.features && displayData.features.length > 0 ? (
+                    displayData.features.map((feature: string, index: number) => (
+                      <div key={index} className="inline-flex items-center p-2 bg-gray-50 rounded-md">
                         <FeatureIcon feature={feature} className="flex-shrink-0" />
                       </div>
-                ) :
-
-                <div className="text-gray-500 font-work-sans">No features selected</div>
-                }
+                    ))
+                  ) : (
+                    <div className="text-gray-500">No features selected</div>
+                  )}
                 </div>
               </div>
             </div>
             
             {/* Right Column - Messaging */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 font-work-sans">
-              <div className="space-y-6 font-work-sans">
-                <h3 className="font-medium text-gray-800 mb-4 font-sora">Messaging</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <div className="space-y-6">
+                <h3 className="font-medium text-gray-800 mb-4">Messaging</h3>
                 
                 {/* Main Message */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faCommentDots" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Main Message</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faCommentDots" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.mainMessage || displayData?.objectives?.mainMessage || 'Not specified'}
                     </span>
                   </div>
                 </div>
                 
                 {/* Hashtags */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faTag" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Hashtags</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faTag" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.hashtags || displayData?.objectives?.hashtags || 'Not specified'}
                     </span>
                   </div>
                 </div>
                 
                 {/* Memorability Score */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faStar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Memorability Score</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faStar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.memorability || displayData?.objectives?.memorability || 'Not specified'}
                     </span>
                   </div>
                 </div>
                 
                 {/* Key Benefits */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faCircleCheck" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Key Benefits</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faCircleCheck" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.keyBenefits || displayData?.objectives?.keyBenefits || 'Not specified'}
                     </span>
                   </div>
                 </div>
                 
-                <h3 className="font-medium text-gray-800 mb-4 mt-8 font-sora">Expected Outcomes</h3>
+                <h3 className="font-medium text-gray-800 mb-4 mt-8">Expected Outcomes</h3>
                 
                 {/* Expected Achievements */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faArrowTrendUp" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Expected Achievements</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faArrowTrendUp" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.expectedAchievements || displayData?.objectives?.expectedAchievements || 'Not specified'}
                     </span>
                   </div>
                 </div>
                 
                 {/* Impact on Purchase Intent */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Impact on Purchase Intent</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.purchaseIntent || displayData?.objectives?.purchaseIntent || 'Not specified'}
                     </span>
                   </div>
                 </div>
                 
                 {/* Brand Perception Change */}
-                <div className="flex items-start font-work-sans">
-                  <Icon name="faChartBar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                  <div className="flex-1 font-work-sans">
-                    <span className="text-sm text-gray-500 mb-1 block font-work-sans">Brand Perception Change</span>
-                    <span className="text-base text-gray-800 block font-work-sans">
+                <div className="flex items-start">
+                  <Icon name="faChartBar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
+                    <span className="text-base text-gray-800 block">
                       {displayData.brandPerception || displayData?.objectives?.brandPerception || 'Not specified'}
                     </span>
                   </div>
@@ -1987,290 +2023,228 @@ function Step5Content() {
 
         {/* Step 3: Audience & Competitors */}
         <SummarySection title="Audience Targeting" stepNumber={3} onEdit={() => navigateToStep(3)}>
-          {displayData.audience || displayData?.audience ?
-        <div className="space-y-6 font-work-sans">
+          {displayData.audience || displayData?.audience ? (
+            <div className="space-y-6">
               {/* Demographics Section */}
-              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-                <div className="flex items-start mb-4 font-work-sans">
-                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 font-work-sans" iconType="static" solid={false} />
-                  <h3 className="font-medium text-gray-800 font-sora">Demographics</h3>
+              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-start mb-4">
+                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                  <h3 className="font-medium text-gray-800">Demographics</h3>
                 </div>
 
                 {/* Age Range */}
-                <div className="mb-5 font-work-sans">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Age Range</h4>
-                  <div className="grid grid-cols-6 gap-1 font-work-sans">
+                <div className="mb-5">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
+                  <div className="grid grid-cols-6 gap-1">
                     {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range, index) => {
                   // Check if this age range is selected
                   const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
-                  const percentage = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience] ?
-                  Number(displayData.audience[ageKey as keyof typeof displayData.audience]) :
-                  0;
-                  return (
-                    <div key={range} className={`text-center py-1.5 text-xs rounded ${percentage > 0 ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'} font-work-sans`}>
+                      const percentage = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience] 
+                                       ? Number(displayData.audience[ageKey as keyof typeof displayData.audience]) 
+                                       : 0;
+                      return (
+                        <div key={range} className={`text-center py-1.5 text-xs rounded ${percentage > 0 ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
                           {range}
-                        </div>);
-
+                        </div>
+                      );
                 })}
                   </div>
                 </div>
 
                 {/* Gender */}
-                <div className="mb-5 font-work-sans">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Gender</h4>
-                  <div className="flex flex-wrap gap-2 font-work-sans">
-                    {displayData.audience?.genders && Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ?
-                displayData.audience.genders.map((g: any, idx: number) =>
-                <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
+                <div className="mb-5">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Gender</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.genders && Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ? (
+                      displayData.audience.genders.map((g: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                           {g.gender || g.toString()}
                         </span>
-                ) :
-
-                <span className="text-gray-500 text-sm font-work-sans">Not specified</span>
-                }
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Location Section */}
-              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-                <div className="flex items-start mb-4 font-work-sans">
-                  <Icon name="faMap" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 font-work-sans" iconType="static" solid={false} />
-                  <h3 className="font-medium text-gray-800 font-sora">Location</h3>
+              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-start mb-4">
+                  <Icon name="faMap" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                  <h3 className="font-medium text-gray-800">Location</h3>
                 </div>
 
                 {/* Locations */}
-                <div className="mb-5 font-work-sans">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Locations</h4>
-                  <div className="flex flex-wrap gap-2 font-work-sans">
-                    {displayData.audience?.locations && Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ?
-                displayData.audience.locations.map((l: any, idx: number) =>
-                <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
+                <div className="mb-5">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Locations</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.locations && Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ? (
+                      displayData.audience.locations.map((l: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                           {typeof l === 'string' ? l : l.location || l.name || ''}
                         </span>
-                ) :
-
-                <span className="text-gray-500 text-sm font-work-sans">Not specified</span>
-                }
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
 
                 {/* Languages */}
-                <div className="mb-4 font-work-sans">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Languages</h4>
-                  <div className="flex flex-wrap gap-2 font-work-sans">
-                    {displayData.audience?.languages && Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ?
-                displayData.audience.languages.map((l: any, idx: number) =>
-                <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
+                <div className="mb-4">
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Languages</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.languages && Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ? (
+                      displayData.audience.languages.map((l: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                           {typeof l === 'string' ? l : l.language || l.toString()}
                         </span>
-                ) :
-
-                <span className="text-gray-500 text-sm font-work-sans">Not specified</span>
-                }
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Screening Questions */}
-              {displayData.audience?.screeningQuestions && Array.isArray(displayData.audience.screeningQuestions) && displayData.audience.screeningQuestions.length > 0 &&
-          <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-                  <div className="flex items-start mb-4 font-work-sans">
-                    <Icon name="faQuestionCircle" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 font-work-sans" iconType="static" solid={false} />
-                    <h3 className="font-medium text-gray-800 font-sora">Screening Questions</h3>
+              {displayData.audience?.screeningQuestions && Array.isArray(displayData.audience.screeningQuestions) && displayData.audience.screeningQuestions.length > 0 && (
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                  <div className="flex items-start mb-4">
+                    <Icon name="faQuestionCircle" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                    <h3 className="font-medium text-gray-800">Screening Questions</h3>
                   </div>
-                  <div className="space-y-2 font-work-sans">
-                    {displayData.audience.screeningQuestions.map((q: any, idx: number) =>
-              <div key={idx} className="pl-2 border-l-2 border-[rgba(0,191,255,0.3)] font-work-sans">
-                        <p className="text-gray-700 font-work-sans">
+                  <div className="space-y-2">
+                    {displayData.audience.screeningQuestions.map((q: any, idx: number) => (
+                      <div key={idx} className="pl-2 border-l-2 border-[rgba(0,191,255,0.3)]">
+                        <p className="text-gray-700">
                           {typeof q === 'string' ? q : q.question || q.toString()}
                         </p>
                       </div>
-              )}
+                    ))}
                   </div>
                 </div>
-          }
+              )}
 
               {/* Advanced Targeting */}
-              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-                <div className="flex items-start mb-4 font-work-sans">
-                  <Icon name="faFilter" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 font-work-sans" iconType="static" solid={false} />
-                  <h3 className="font-medium text-gray-800 font-sora">Advanced Targeting</h3>
+              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-start mb-4">
+                  <Icon name="faFilter" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                  <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-work-sans">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Education Level */}
-                  <div className="font-work-sans">
-                    <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Education Level</h4>
-                    {displayData.audience?.educationLevel ?
-                <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block font-work-sans">
+                  <div>
+                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Education Level</h4>
+                    {displayData.audience?.educationLevel ? (
+                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
                         {String(displayData.audience.educationLevel)}
-                      </span> :
-
-                <span className="text-gray-500 text-sm font-work-sans">Not specified</span>
-                }
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
 
                   {/* Income Level */}
-                  <div className="font-work-sans">
-                    <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Income Level</h4>
-                    {displayData.audience?.incomeLevel ?
-                <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block font-work-sans">
+                  <div>
+                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Income Level</h4>
+                    {displayData.audience?.incomeLevel ? (
+                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
                         {formatCurrency(Number(displayData.audience.incomeLevel) || 0, displayData.currency || 'USD')}
-                      </span> :
-
-                <span className="text-gray-500 text-sm font-work-sans">Not specified</span>
-                }
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
 
                   {/* Job Titles */}
-                  <div className="font-work-sans">
-                    <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Job Titles</h4>
-                    <div className="flex flex-wrap gap-2 font-work-sans">
-                      {displayData.audience?.jobTitles ?
-                  Array.isArray(displayData.audience.jobTitles) ?
-                  displayData.audience.jobTitles.map((title: string, idx: number) =>
-                  <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
+                  <div>
+                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Job Titles</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {displayData.audience?.jobTitles ? (
+                        Array.isArray(displayData.audience.jobTitles) ? (
+                          displayData.audience.jobTitles.map((title: string, idx: number) => (
+                            <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                               {title}
                             </span>
-                  ) :
-
-                  <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
+                          ))
+                        ) : (
+                          <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                             {String(displayData.audience.jobTitles)}
-                          </span> :
-
-
-                  <span className="text-gray-500 text-sm font-work-sans">Not specified</span>
-                  }
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-gray-500 text-sm">Not specified</span>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Competitors Section (if available) */}
-              {displayData.audience?.competitors && Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 &&
-          <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-                  <div className="flex items-start mb-4 font-work-sans">
-                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 font-work-sans" iconType="static" solid={false} />
-                    <h3 className="font-medium text-gray-800 font-sora">Competitors to Monitor</h3>
+              {displayData.audience?.competitors && Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 && (
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                  <div className="flex items-start mb-4">
+                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                    <h3 className="font-medium text-gray-800">Competitors to Monitor</h3>
                   </div>
-                  <div className="flex flex-wrap gap-2 font-work-sans">
-                    {displayData.audience.competitors.map((item: any, index: number) =>
-              <span key={index} className="inline-block px-3 py-1 bg-[rgba(255,0,0,0.05)] text-red-600 border border-red-100 rounded-full text-sm font-medium font-work-sans">
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience.competitors.map((item: any, index: number) => (
+                      <span key={index} className="inline-block px-3 py-1 bg-[rgba(255,0,0,0.05)] text-red-600 border border-red-100 rounded-full text-sm font-medium">
                         {typeof item === 'string' ? item : item.competitor || item.name || ''}
                       </span>
-              )}
+                    ))}
                   </div>
-                </div>
-          }
-            </div> :
 
-        <div className="bg-gray-50 rounded-lg p-6 text-center font-work-sans">
-              <Icon name="faUser" className="h-10 w-10 text-gray-400 mx-auto mb-2 font-work-sans" iconType="static" solid={false} />
-              <p className="text-gray-500 font-work-sans">Audience data not available. Please complete Step 3.</p>
-              <button onClick={() => navigateToStep(3)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto font-work-sans">
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <Icon name="faUser" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
+              <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
+              <button onClick={() => navigateToStep(3)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto">
                 <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
                 Edit audience targeting
               </button>
             </div>
-        }
+          )}
         </SummarySection>
 
         {/* Step 4: Creative Assets */}
         <SummarySection title="Creative Assets" stepNumber={4} onEdit={() => navigateToStep(4)}>
 
-          {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-work-sans">
-              {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => <div key={asset.id || index} className="border border-gray-200 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all flex flex-col transform hover:-translate-y-1 hover:border-[var(--accent-color)] font-work-sans">
-                  {/* Asset Preview - Square/Tiled */}
-                  <div className="aspect-square w-full overflow-hidden relative bg-gray-50 font-work-sans">
-                    <Step5AssetPreview url={asset.url} fileName={asset.assetName || asset.name || 'Asset preview'} type={asset.type} className="w-full h-full font-work-sans" />
-
-                    {/* Asset Type Badge */}
-                    <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs font-medium font-work-sans">
-                      {asset.type === 'video' || typeof asset.type === 'string' && asset.type.includes('video') ?
-                <div className="flex items-center font-work-sans"><Icon name="faVideo" className="h-3 w-3 mr-1 font-work-sans" iconType="static" solid={false} /> Video</div> :
-                <div className="flex items-center font-work-sans"><Icon name="faImage" className="h-3 w-3 mr-1 font-work-sans" iconType="static" solid={false} /> Image</div>}
-                    </div>
-                  </div>
-                  
-                  {/* Asset Name - Made more prominent */}
-                  <div className="px-4 pt-4 pb-2 bg-gradient-to-r from-[rgba(0,191,255,0.05)] to-white border-b border-gray-200 font-work-sans">
-                    <div className="flex items-center justify-between font-work-sans">
-                      <h3 className="font-semibold text-gray-800 text-lg leading-tight truncate pr-2 font-sora" style={{ fontFamily: 'Sora, sans-serif' }}>
-                        {asset.assetName || asset.name || 'Untitled Asset'}
-                      </h3>
-                      {/* Platform Icon */}
-                      {(asset.platform || displayData.platform) &&
-                <div className="flex-shrink-0 bg-[rgba(0,191,255,0.1)] rounded-full p-1.5 ml-1 font-work-sans">
-                          <Icon
-                    name={
-                    (asset.platform || displayData.platform || '').toLowerCase().includes('instagram') ? 'faInstagram' :
-                    (asset.platform || displayData.platform || '').toLowerCase().includes('facebook') ? 'faFacebook' :
-                    (asset.platform || displayData.platform || '').toLowerCase().includes('twitter') || (asset.platform || displayData.platform || '').toLowerCase().includes('x') ? 'faTwitter' :
-                    (asset.platform || displayData.platform || '').toLowerCase().includes('tiktok') ? 'faTiktok' :
-                    (asset.platform || displayData.platform || '').toLowerCase().includes('youtube') ? 'faYoutube' :
-                    (asset.platform || displayData.platform || '').toLowerCase().includes('linkedin') ? 'faLinkedin' :
-                    'faGlobe'
-                    }
-                    className="h-4 w-4 text-[var(--accent-color)] font-work-sans"
-                    iconType="static"
-                    solid={true} />
-
-                        </div>
-                }
-                    </div>
-                  </div>
-                  
-                  {/* Asset Details Section */}
-                  <div className="p-4 bg-white flex-grow font-work-sans">
-                    <div className="space-y-4 font-work-sans">
-                      {/* Influencer */}
-                      <div className="flex items-start font-work-sans">
-                        <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                        <div className="flex-1 font-work-sans">
-                          <p className="text-xs text-gray-500 mb-1 font-work-sans">Influencer</p>
-                          <p className="text-sm text-gray-800 font-medium font-work-sans">{asset.influencerHandle || 'Not specified'}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Platform (if not shown next to title) */}
-                      {!(asset.platform || displayData.platform) &&
-                <div className="flex items-start font-work-sans">
-                          <Icon name="faGlobe" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                          <div className="flex-1 font-work-sans">
-                            <p className="text-xs text-gray-500 mb-1 font-work-sans">Platform</p>
-                            <p className="text-sm text-gray-800 font-medium font-work-sans">Not specified</p>
-                          </div>
-                        </div>
-                }
-                      
-                      {/* Why this influencer */}
-                      <div className="flex items-start font-work-sans">
-                        <Icon name="faCircleInfo" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                        <div className="flex-1 font-work-sans">
-                          <p className="text-xs text-gray-500 mb-1 font-work-sans">Why this influencer</p>
-                          <p className="text-sm text-gray-800 font-work-sans">{asset.whyInfluencer || 'No details provided'}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Budget */}
-                      <div className="flex items-start font-work-sans">
-                        <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-                        <div className="flex-1 font-work-sans">
-                          <p className="text-xs text-gray-500 mb-1 font-work-sans">Budget</p>
-                          <p className="text-sm text-gray-800 font-medium font-work-sans">
-                            {asset.budget ? formatCurrency(asset.budget, displayData.currency || 'USD') : 'Not specified'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>)}
-            </div> : <div className="bg-gray-50 rounded-lg p-6 text-center font-work-sans">
-              <Icon name="faImage" className="h-10 w-10 text-gray-400 mx-auto mb-2 font-work-sans" iconType="static" solid={false} />
-              <p className="text-gray-500 font-work-sans">No creative assets have been added yet.</p>
-              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto group font-work-sans">
-                <Icon name="faPenToSquare" className="h-4 w-4 mr-1" iconType="button" solid={false} />
+          {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => {
+                return (
+                  <AssetCard 
+                    key={asset.id || index}
+                    asset={{
+                      id: asset.id,
+                      name: asset.assetName || asset.name,
+                      url: asset.url,
+                      type: asset.type,
+                      // Check all possible places for platform information, including 'Instagram' string detection
+                      platform: asset.platform || 
+                               (asset.influencerHandle && asset.influencerHandle.includes('@') ? 'Instagram' : null) || 
+                               displayData.platform ||
+                               'Instagram', // Default to Instagram if no platform is found
+                      influencerHandle: asset.influencerHandle,
+                      description: asset.whyInfluencer,
+                      budget: asset.budget
+                    }}
+                    currency={displayData.currency}
+                    defaultPlatform={displayData.platform || 'Instagram'} // Provide a default platform
+                  />
+                );
+              })}
+            </div> : <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <Icon name="faImage" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
+              <p className="text-gray-500">No creative assets have been added yet.</p>
+              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto group">
+                <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
                 Add creative assets
               </button>
             </div>}
@@ -2278,8 +2252,8 @@ function Step5Content() {
       </div>
 
       {/* Add ProgressBar component at the bottom */}
-      <div className="mt-12 mb-8 font-work-sans">
-        <ProgressBar currentStep={5} onStepClick={(step) => navigateToStep(step)} onBack={() => navigateToStep(4)} onNext={handleSubmit} onSaveDraft={handleSaveDraft} disableNext={false} isFormValid={true} isDirty={false} isSaving={isSaving || isSubmitting} />
+      <div className="mt-12 mb-8">
+        <ProgressBar currentStep={5} onStepClick={step => navigateToStep(step)} onBack={() => navigateToStep(4)} onNext={handleSubmit} onSaveDraft={handleSaveDraft} disableNext={false} isFormValid={true} isDirty={false} isSaving={isSaving || isSubmitting} />
 
       </div>
     </div>;

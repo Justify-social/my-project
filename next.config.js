@@ -81,6 +81,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'oq854trbes.ufs.sh',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   typescript: {

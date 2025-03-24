@@ -6,6 +6,13 @@
  */
 import { useEffect, RefObject } from 'react';
 
+// Declare global types for our custom window properties
+declare global {
+  interface Window {
+    __ICON_SYSTEM_FALLBACKS_ACTIVE?: boolean;
+  }
+}
+
 // This will be imported from the generated icon-data.ts file
 // If it doesn't exist yet, we'll use a fallback empty array
 let ICON_NAMES: string[] = [];
@@ -104,29 +111,57 @@ export function hasGroupClass(el: HTMLElement | null): boolean {
  */
 export function useButtonIconValidation(ref: RefObject<HTMLElement>, iconType?: string) {
   useEffect(() => {
-    // Disable validation warnings completely - we'll rely on the audit script
-    return;
+    // Only run in development mode and for button icons
+    if (process.env.NODE_ENV !== 'development' || iconType !== 'button') return;
     
-    /* Original validation logic commented out to reduce noise in console
-    if (process.env.NODE_ENV === 'development' && iconType === 'button') {
+    // Use a delay to allow for the component to be mounted properly
+    const timer = setTimeout(() => {
       try {
-        const parentElement = ref.current?.parentElement || null;
-        if (!hasGroupClass(parentElement)) {
-          console.warn('Button icon should be inside a parent with "group" class for hover effects');
+        const element = ref.current;
+        if (!element) return;
+        
+        const parentElement = element.parentElement;
+        if (!parentElement) return;
+        
+        const hasGroupClass = parentElement.classList.contains('group');
+        
+        // Skip warning if the enhanced SvgIcon fallback is active
+        // (We're already handling it in the component itself)
+        if (window.__ICON_SYSTEM_FALLBACKS_ACTIVE) return;
+        
+        if (!hasGroupClass) {
+          const iconName = element.getAttribute('data-icon-name') || 'unknown';
+          const componentId = element.closest('[data-component-id]')?.getAttribute('data-component-id') || 
+                             parentElement.getAttribute('id') || 
+                             'unknown';
           
-          // Helpful suggestion for how to fix
-          console.info('Add className="group" to the parent element for proper hover effects', {
-            current: parentElement?.className || 'none',
-            element: parentElement?.tagName || 'unknown'
-          });
+          console.warn(
+            `[Icon System Warning] Button icon "${iconName}" missing parent 'group' class in component ${componentId}. This will cause rendering issues.`,
+            {
+              element: parentElement,
+              fix: "Add the 'group' class to the parent element or use ButtonWithIcon component",
+              location: window.location.pathname
+            }
+          );
+          
+          // Apply visual indicator in development
+          if (element.parentElement) {
+            element.parentElement.style.outline = '2px dashed red';
+            element.parentElement.setAttribute('title', 'Missing group class - icon hover will not work');
+          }
         }
       } catch (error) {
-        // Catch any errors that might occur during validation
-        console.warn('Error in button icon validation:', error);
+        // Silently fail for SSR or other errors
       }
-    }
-    */
+    }, 500); // Delay to ensure component is fully mounted
+    
+    return () => clearTimeout(timer);
   }, [ref, iconType]);
+}
+
+// Add global flag for tracking fallback usage
+if (typeof window !== 'undefined') {
+  window.__ICON_SYSTEM_FALLBACKS_ACTIVE = false;
 }
 
 /**

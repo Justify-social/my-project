@@ -378,6 +378,19 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   // If icon data is not found, use a fallback question mark icon
   const finalIconName = iconExists ? normalizedIconName : 'faQuestion';
 
+  // Add detection for missing 'group' class on parent elements
+  const hasGroupClassParent = useMemo(() => {
+    // Only check in browser environment
+    if (typeof window === 'undefined') return true;
+    if (!resolvedRef.current) return true;
+    
+    const parentElement = resolvedRef.current.parentElement;
+    return parentElement && parentElement.classList.contains('group');
+  }, [resolvedRef]);
+
+  // Use alternate behavior if it's a button icon without a 'group' parent
+  const useAlternateBehavior = isButtonIcon && !hasGroupClassParent;
+
   // For button icons, we need a different approach to handle hover
   let finalIconKey;
   let hoverIconKey;
@@ -410,6 +423,14 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   const iconStyle = solid ? 'solid' : 'light';
   const iconUrl = getIconPath(normalizedIconName, iconStyle);
 
+  // If DEV mode, log debug info when parent group class is missing
+  if (process.env.NODE_ENV === 'development' && isButtonIcon && !hasGroupClassParent) {
+    console.debug(`[Icon System] Button icon "${normalizedIconName}" missing parent 'group' class. Using fallback rendering.`, {
+      icon: normalizedIconName,
+      element: resolvedRef.current?.parentElement?.tagName || 'unknown'
+    });
+  }
+
   // Pass the appropriate CSS classes and SVG path to svg element
   return (
     <svg
@@ -424,8 +445,8 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       {...rest}>
 
       {title && <title className="font-sora">{title}</title>}
-      {/* For button icons, use two paths - one for default state, one for hover */}
-      {isButtonIcon ?
+      {/* For button icons with proper group class, use two paths - otherwise use simpler approach */}
+      {isButtonIcon && !useAlternateBehavior ?
       <>
           <path
           d={finalIconData.path || ''}
