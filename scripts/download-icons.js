@@ -289,7 +289,21 @@ const REQUIRED_LIGHT_ICONS = {
   'faCircleCheck': '@fortawesome/pro-light-svg-icons',
   'faCircleXmark': '@fortawesome/pro-light-svg-icons',
   'faEnvelope': '@fortawesome/pro-light-svg-icons',
-  'faSearch': '@fortawesome/pro-light-svg-icons'
+  'faSearch': '@fortawesome/pro-light-svg-icons',
+  'faPlay': '@fortawesome/pro-light-svg-icons',
+  'faPause': '@fortawesome/pro-light-svg-icons',
+  'faHouse': '@fortawesome/pro-light-svg-icons',
+  'faPenToSquare': '@fortawesome/pro-light-svg-icons'
+};
+
+// Required solid icons - always include these common solid icons
+const REQUIRED_SOLID_ICONS = {
+  'faPlay': '@fortawesome/pro-solid-svg-icons',
+  'faPause': '@fortawesome/pro-solid-svg-icons',
+  'faFileAudio': '@fortawesome/pro-solid-svg-icons',
+  'faFileImage': '@fortawesome/pro-solid-svg-icons',
+  'faFileVideo': '@fortawesome/pro-solid-svg-icons',
+  'faRotateRight': '@fortawesome/pro-solid-svg-icons'
 };
 
 // Add any required icons
@@ -298,6 +312,15 @@ for (const [iconName, library] of Object.entries(REQUIRED_PLATFORM_ICONS)) {
   if (!usedIcons.has(iconName)) {
     usedIcons.set(iconName, library);
     platformIconsAdded++;
+  }
+}
+
+// Add required solid icons
+let solidIconsAdded = 0;
+for (const [iconName, library] of Object.entries(REQUIRED_SOLID_ICONS)) {
+  if (!usedIcons.has(iconName)) {
+    usedIcons.set(iconName, library);
+    solidIconsAdded++;
   }
 }
 
@@ -349,6 +372,10 @@ if (existingLightIconsAdded > 0) {
 
 if (lightIconsAdded > 0) {
   log(`Added ${lightIconsAdded} automatically generated light icons from solid icons.`);
+}
+
+if (solidIconsAdded > 0) {
+  log(`Added ${solidIconsAdded} required solid icons that weren't found in the codebase.`);
 }
 
 log(`Total: ${usedIcons.size} unique Font Awesome icons.`);
@@ -409,6 +436,32 @@ async function safeExtract(iconName, library) {
     
     // If it's a light icon, use the base name to get the icon from the library
     const actualIconName = isLightIcon ? iconName.replace(/Light$/, '') : iconName;
+    
+    // Determine the prefix for checking existing files
+    const prefix = isLightIcon ? 'fal' : 
+                  library.includes('solid') ? 'fas' : 
+                  library.includes('light') ? 'fal' : 
+                  library.includes('brands') ? 'fab' : 
+                  library.includes('regular') ? 'far' : 'fas';
+    
+    // Check if the icon already exists and is valid in the file system
+    const iconStyleDir = prefix === 'fas' ? 'solid' : 
+                         prefix === 'fal' ? 'light' : 
+                         prefix === 'fab' ? 'brands' : 
+                         prefix === 'far' ? 'regular' : 'solid';
+    
+    const iconPath = path.join(__dirname, '..', 'public', 'ui-icons', iconStyleDir, \`\${actualIconName}.svg\`);
+    
+    // If the icon already exists, skip downloading and just record it as a success
+    if (fs.existsSync(iconPath)) {
+      const fileContent = fs.readFileSync(iconPath, 'utf8');
+      if (fileContent && fileContent.includes('<svg') && fileContent.includes('<path')) {
+        console.log(\`Icon \${actualIconName} (\${prefix}) already exists and is valid. Skipping download.\`);
+        results.success.push(iconName);
+        return true;
+      }
+      console.log(\`Icon \${actualIconName} (\${prefix}) exists but appears invalid. Re-downloading.\`);
+    }
     
     // For light icons, try to get them directly from CDN first for better distinctness
     if (isLightIcon) {
@@ -728,6 +781,70 @@ async function validateLightAndSolidIcons() {
     }
   }
   
+  // Specifically validate our play/pause icons
+  log('\nValidating play and pause icons...');
+  const targetIcons = ['play', 'pause'];
+  for (const iconName of targetIcons) {
+    const lightPath = path.join(OUTPUT_DIRS['fal'], `${iconName}.svg`);
+    const solidPath = path.join(OUTPUT_DIRS['fas'], `${iconName}.svg`);
+    
+    let lightExists = fs.existsSync(lightPath);
+    let solidExists = fs.existsSync(solidPath);
+    
+    if (!lightExists || !solidExists) {
+      log(`⚠️ Missing ${iconName} icons: Light=${lightExists}, Solid=${solidExists}`);
+      
+      // If the light version is missing but solid exists, download it from CDN
+      if (!lightExists && solidExists) {
+        try {
+          log(`Attempting to download light version of ${iconName} from CDN...`);
+          await downloadIconFromCDN(iconName, 'light', lightPath);
+          log(`✅ Successfully downloaded light version of ${iconName}`);
+          lightExists = true;
+        } catch (error) {
+          log(`❌ Failed to download light version of ${iconName}: ${error.message}`);
+        }
+      }
+      
+      // If the solid version is missing but light exists, download it from CDN
+      if (!solidExists && lightExists) {
+        try {
+          log(`Attempting to download solid version of ${iconName} from CDN...`);
+          await downloadIconFromCDN(iconName, 'solid', solidPath);
+          log(`✅ Successfully downloaded solid version of ${iconName}`);
+          solidExists = true;
+        } catch (error) {
+          log(`❌ Failed to download solid version of ${iconName}: ${error.message}`);
+        }
+      }
+      
+      // If both are missing, try downloading both
+      if (!lightExists && !solidExists) {
+        try {
+          log(`Attempting to download both versions of ${iconName} from CDN...`);
+          await downloadIconFromCDN(iconName, 'light', lightPath);
+          await downloadIconFromCDN(iconName, 'solid', solidPath);
+          log(`✅ Successfully downloaded both versions of ${iconName}`);
+        } catch (error) {
+          log(`❌ Failed to download versions of ${iconName}: ${error.message}`);
+        }
+      }
+    } else {
+      // Check if the icons are distinct
+      if (compareIconFiles(lightPath, solidPath)) {
+        log(`⚠️ Light and solid versions of ${iconName} are identical. Attempting to fix...`);
+        try {
+          await downloadIconFromCDN(iconName, 'light', lightPath);
+          log(`✅ Successfully fixed light version of ${iconName}`);
+        } catch (error) {
+          log(`❌ Failed to fix light version of ${iconName}: ${error.message}`);
+        }
+      } else {
+        log(`✅ ${iconName} icons exist and are distinct.`);
+      }
+    }
+  }
+  
   // Report results
   log(`Found ${distinctCount} correctly distinct light/solid icon pairs`);
   
@@ -778,13 +895,62 @@ async function validateLightAndSolidIcons() {
   return { distinctCount, duplicateCount, fixedCount: duplicateCount > 0 ? fixedCount : 0 };
 }
 
+// Function to ensure icons are properly added to the registry
+function ensureIconInRegistry(iconName, prefix) {
+  const style = getStyleNameFromPrefix(prefix);
+  const actualIconName = iconName;
+  const svgPath = path.join(OUTPUT_DIRS[prefix], `${actualIconName}.svg`);
+  
+  if (fs.existsSync(svgPath)) {
+    // Create registry entry if it doesn't exist
+    const camelCaseName = prefix === 'fal' ? 
+      `fa${actualIconName.charAt(0).toUpperCase()}${actualIconName.substring(1)}Light` : 
+      `fa${actualIconName.charAt(0).toUpperCase()}${actualIconName.substring(1)}`;
+    
+    // Check if already in registry
+    if (!iconRegistry[camelCaseName]) {
+      const relativePath = path.join('/ui-icons', style, `${actualIconName}.svg`);
+      iconRegistry[camelCaseName] = {
+        prefix,
+        name: actualIconName,
+        fileName: `${actualIconName}.svg`,
+        path: relativePath.replace(/\\/g, '/') // Ensure forward slashes for web paths
+      };
+      log(`Added ${camelCaseName} to icon registry`);
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
 // Invoke the validation asynchronously
 (async () => {
   try {
     const validationResults = await validateLightAndSolidIcons();
     
+    // Ensure our play/pause icons are in the registry
+    log('\nEnsuring play/pause icons are in the registry...');
+    const iconNames = ['play', 'pause'];
+    const prefixes = ['fas', 'fal'];
+    
+    let iconsAddedToRegistry = 0;
+    for (const iconName of iconNames) {
+      for (const prefix of prefixes) {
+        if (ensureIconInRegistry(iconName, prefix)) {
+          iconsAddedToRegistry++;
+        }
+      }
+    }
+    
+    if (iconsAddedToRegistry > 0) {
+      log(`Added ${iconsAddedToRegistry} play/pause icons to the registry.`);
+    } else {
+      log('All play/pause icons already in registry.');
+    }
+    
     // If there were duplicates that were fixed, update the icon data
-    if (validationResults.fixedCount > 0) {
+    if (validationResults.fixedCount > 0 || iconsAddedToRegistry > 0) {
       log('\nRegenerating icon data after fixes...');
       try {
         // Invoke the icon data generation script if it exists
@@ -918,4 +1084,22 @@ function getBrandIconSvg(name) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
   <path d="${path}"></path>
 </svg>`;
+}
+
+// Function to check if an icon already exists and is valid
+function iconExistsAndIsValid(iconName, prefix) {
+  const style = getStyleNameFromPrefix(prefix);
+  const outputDir = OUTPUT_DIRS[prefix];
+  
+  if (!outputDir) return false;
+  
+  const svgPath = path.join(outputDir, `${iconName}.svg`);
+  
+  // Check if file exists and has content
+  if (fs.existsSync(svgPath)) {
+    const content = fs.readFileSync(svgPath, 'utf8');
+    return content && content.includes('<svg') && content.includes('<path'); 
+  }
+  
+  return false;
 } 
