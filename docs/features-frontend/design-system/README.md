@@ -5,6 +5,7 @@ The Justify.social design system ensures consistent and cohesive user experience
 ## What's Inside
 
 - **[Brand Guide](brand-guide.md)**: Colors, typography, icons and UI components
+- **[Loading Components](loading-components.md)**: Skeletons, spinners, and loading states
 - **Design Principles**: Clarity, consistency, and usability
 - **Component Library**: Reusable UI building blocks
 

@@ -29,6 +29,7 @@
 * [Overview](features-frontend/README.md)
 * [Design System](features-frontend/design-system/README.md)
   * [Brand Guide](features-frontend/design-system/brand-guide.md)
+  * [Loading Components](features-frontend/design-system/loading-components.md)
 * [Dashboard](features-frontend/dashboard/README.md)
   * [Overview](features-frontend/dashboard/overview.md)
   * [Usage Guide](features-frontend/dashboard/usage.md)
