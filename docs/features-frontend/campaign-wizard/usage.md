@@ -81,16 +81,31 @@ Click **Save and Continue** to proceed.
 Manage campaign creative assets:
 
 1. **Upload Assets**:
-   - Click **Upload** to add files
+   - Click **Upload** to add files through the UploadThing interface
+   - Drag and drop files directly onto the upload area
    - Supported formats: JPEG, PNG, GIF, MP4
    - Maximum file size: 10 MB per file
-2. **Asset Details**:
-   - Add descriptions for each asset
-   - Tag with relevant keywords
-3. **Creative Guidelines**:
-   - Brand guidelines
-   - Content preferences
-   - Mandatory elements
+   - Upload progress indicator shows real-time status
+
+2. **Asset Preview**:
+   - Images display as square, centered thumbnails for consistency
+   - Videos automatically play for 5 seconds then loop for preview
+   - Click on video previews to play/pause manually
+   - Hover over interactive elements to see solid icon versions
+   - Error states provide retry options if uploads fail
+
+3. **Asset Details**:
+   - Edit asset names by clicking the edit icon
+   - Add descriptions for each asset to provide context
+   - Set budget allocation for individual assets
+   - Add influencer handles for attribution
+   - Remove assets with the delete button (with confirmation)
+
+4. **Asset Management**:
+   - Reorder assets by dragging and dropping
+   - Filter assets by type (image/video)
+   - Save draft at any point to preserve your work
+   - Assets are automatically validated before submission
 
 ### Step 6: Review & Submit
 

@@ -417,24 +417,20 @@ function FormContent() {
                         </div>)}
                     </div>
                     
-                    {/* Age Distribution Summary */}
+                    {/* Age Range */}
                     <div className="mt-6">
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">Age Distribution Summary</h3>
-                      <div className="flex items-center w-full h-6">
-                        {Object.entries(values.ageDistribution).map(([key, value], index) => <div key={key} className="h-full" style={{
-                          width: `${value}%`,
-                          backgroundColor: 'var(--accent-color)',
-                          opacity: index === 0 ? 1 : 0.85 - (index * 0.1),
-                          borderRadius: index === 0 ? '4px 0 0 4px' : index === 5 ? '0 4px 4px 0' : '0'
-                        }} />)}
-                      </div>
-                      <div className="flex justify-between mt-1 text-xs text-gray-500">
-                        <span>18-24</span>
-                        <span>25-34</span>
-                        <span>35-44</span>
-                        <span>45-54</span>
-                        <span>55-64</span>
-                        <span>65+</span>
+                      <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
+                      <div className="grid grid-cols-6 gap-1">
+                        {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range, index) => {
+                          // Check if this age range is selected
+                          const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
+                          const percentage = values.ageDistribution[ageKey as keyof AgeDistribution] || 0;
+                          return (
+                            <div key={range} className={`text-center py-1.5 text-xs rounded ${percentage > 0 ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
+                              {range}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

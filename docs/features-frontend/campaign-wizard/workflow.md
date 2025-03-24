@@ -76,16 +76,29 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 #### Step 4: Creative Assets
 
 1. Upload and manage creative assets:
-   - Upload images or videos
-   - Select aspect ratios for different platforms
-   - Add captions and hashtags
-   - Preview assets on different platforms
+   - Upload images or videos using UploadThing integration
+   - Support for multiple file formats (JPEG, PNG, GIF, MP4)
+   - Auto-detection of file type for proper preview rendering
+   - Automatic thumbnail generation and optimization
+   - Asset details customization (name, description, budget, influencer)
 
-2. System behavior:
-   - Validates file formats and sizes
+2. Asset preview functionality:
+   - Square, centered thumbnails for consistent UI appearance
+   - Videos autoplay for 5 seconds then loop for preview
+   - Interactive play/pause controls with hover effects
+   - Light to solid icon transitions on interactive elements
+   - Robust error handling with retry options for failed uploads
+   - Direct integration with UploadThing's storage API
+
+3. System behavior:
+   - Validates file formats and sizes on upload
    - Analyzes content for potential platform policy violations
    - Generates optimized versions for different platforms
-   - Provides preview functionality
+   - Server-side proxy for CORS-protected assets
+   - Resilient to connection issues with automatic recovery
+   - Maintains consistent branding using global app color palette
+   - Handles asset deletion with proper cleanup procedures
+   - Uses query parameters for secure API authentication
 
 #### Step 5: Review & Submit
 

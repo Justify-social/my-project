@@ -31,7 +31,7 @@ const OUTPUT_DIRS = {
 Object.values(OUTPUT_DIRS).forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-  }
+}
 });
 
 console.log('Icon Audit Tool');
@@ -59,8 +59,8 @@ function downloadIconFromCDN(iconName, style = 'light', outputPath) {
           let svgContent = data;
           if (!svgContent.includes('fill="currentColor"')) {
             svgContent = svgContent.replace('<svg', '<svg fill="currentColor"');
-          }
-          
+        }
+        
           fs.writeFileSync(outputPath, svgContent, 'utf8');
           console.log(`✅ Successfully saved to ${outputPath}`);
           resolve(outputPath);
@@ -76,7 +76,7 @@ function downloadIconFromCDN(iconName, style = 'light', outputPath) {
       console.log(`❌ Download error: ${err.message}`);
       reject(err);
     });
-  });
+          });
 }
 
 /**
@@ -154,19 +154,19 @@ async function fixMissingIcons() {
   
   let fixedCount = 0;
   let failedCount = 0;
-  
+
   for (const icon of missingIcons) {
     for (const style of icon.styles) {
       const outputPath = path.join(OUTPUT_DIRS[style], `${icon.name}.svg`);
       
       try {
         await downloadIconFromCDN(icon.name, style, outputPath);
-        fixedCount++;
+                  fixedCount++;
       } catch (error) {
         console.log(`Failed to download ${style}/${icon.name}: ${error.message}`);
         try {
           createFallbackIcon(icon.name, style, outputPath);
-          fixedCount++;
+                  fixedCount++;
         } catch (fallbackError) {
           console.log(`Failed to create fallback icon: ${fallbackError.message}`);
           failedCount++;
@@ -177,7 +177,7 @@ async function fixMissingIcons() {
   
   console.log(`\nFixed ${fixedCount} missing icons, failed to fix ${failedCount} icons.`);
   return { fixed: fixedCount, failed: failedCount };
-}
+            }
 
 /**
  * Fix duplicate icons (identical light/solid variants)
@@ -203,8 +203,8 @@ async function fixDuplicateIcons() {
       console.log(`❌ Can't fix ${icon} - one or both variants don't exist.`);
       failedCount++;
       continue;
-    }
-    
+          }
+
     // Check if they're actually duplicates
     if (!compareIconFiles(lightPath, solidPath)) {
       console.log(`ℹ️ ${icon} light and solid variants are already distinct, skipping.`);
@@ -280,7 +280,7 @@ async function main() {
       console.log('✅ Successfully regenerated icon data');
     } catch (error) {
       console.log(`❌ Failed to regenerate icon data: ${error.message}`);
-    }
+}
   }
   
   console.log('\nIcon audit complete!');
