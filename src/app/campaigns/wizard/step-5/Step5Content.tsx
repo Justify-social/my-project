@@ -239,6 +239,8 @@ interface MergedData {
     engagement?: string;
     avatarUrl?: string;
     description?: string;
+    verified?: boolean; // Add the verified property
+    phylloData?: any;   // Add the phylloData property
   }>;
 
   // Add nested data structures
@@ -257,6 +259,7 @@ interface MergedData {
       engagement?: string;
       avatarUrl?: string;
       description?: string;
+      verified?: boolean;
       // Support properties from Step1 schema
       influencerHandle?: string;
       username?: string;
@@ -449,6 +452,33 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
   console.warn("No creative assets found in any expected location");
   return [];
 };
+
+// Add a direct fetch function specifically for influencer data
+const fetchInfluencerDetails = async (campaignId: string, handle: string, platform: string): Promise<any> => {
+  try {
+    console.log(`Fetching additional influencer details for ${handle} on ${platform}`);
+    // We'll use the same API that Step 1 uses to validate influencers
+    const response = await fetch(`/api/influencers/validate?platform=${encodeURIComponent(platform)}&handle=${encodeURIComponent(handle)}`, {
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch additional influencer details: ${response.status}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    console.log('Received influencer details:', data);
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error('Error fetching influencer details:', error);
+    return null;
+  }
+};
+
+// Enhance the normalizeApiData function
 const normalizeApiData = (data: any): MergedData => {
   // Check which schema type we're dealing with based on field presence
   const isWizardSchema = data.name !== undefined;
@@ -459,22 +489,73 @@ const normalizeApiData = (data: any): MergedData => {
   if (isWizardSchema) console.log('Campaign name from CampaignWizard:', data.name);
   if (isSubmissionSchema) console.log('Campaign name from CampaignWizardSubmission:', data.campaignName);
 
-  // Log creative assets data for debugging
-  if (isWizardSchema) {
-    console.log('CampaignWizard assets field:', data.assets);
-    // Also log budget for debugging
-    console.log('CampaignWizard budget field:', data.budget);
-    // Log demographic data
-    console.log('CampaignWizard demographics field:', data.demographics);
-    console.log('CampaignWizard locations field:', data.locations);
+  // Log influencer data for debugging
+  console.log('Raw influencer data:', {
+    influencers: data.influencers,
+    Influencer: data.Influencer, // Check the prisma relation name
+    influencer: data.influencer
+  });
+
+  // Enhanced influencer extraction logic
+  let influencers = [];
+  
+  // Check all possible locations for influencer data - log attempts for debugging
+  console.log("Checking for influencers in data.influencers:", Array.isArray(data.influencers) ? data.influencers.length : "not an array");
+  console.log("Checking for influencers in data.Influencer:", Array.isArray(data.Influencer) ? data.Influencer.length : "not an array");
+  console.log("Checking for influencers in data.overview?.influencers:", Array.isArray(data.overview?.influencers) ? data.overview.influencers.length : "not an array");
+  console.log("Checking for influencers in data.step1?.influencers:", Array.isArray(data.step1?.influencers) ? data.step1.influencers.length : "not an array");
+  
+  // Prisma might return the relation as "Influencer" instead of "influencers"
+  if (Array.isArray(data.Influencer) && data.Influencer.length > 0) {
+    console.log("Found influencers in Prisma relation:", data.Influencer);
+    influencers = data.Influencer;
+  } else if (Array.isArray(data.influencers) && data.influencers.length > 0) {
+    console.log("Found influencers at root level:", data.influencers);
+    influencers = data.influencers;
+  } else if (data.overview && Array.isArray(data.overview.influencers) && data.overview.influencers.length > 0) {
+    console.log("Found influencers in overview:", data.overview.influencers);
+    influencers = data.overview.influencers;
+  } else if (data.step1 && Array.isArray(data.step1.influencers) && data.step1.influencers.length > 0) {
+    console.log("Found influencers in step1:", data.step1.influencers);
+    influencers = data.step1.influencers;
+  } else if (data.influencer) {
+    // Handle single influencer case
+    console.log("Found single influencer:", data.influencer);
+    influencers = [data.influencer];
   } else {
-    console.log('CreativeAssets field:', data.creativeAssets);
+    console.log("No influencers found in any expected location");
   }
+  
+  // Normalize the influencer data to the expected format
+  const normalizedInfluencers = influencers.map((inf: any) => {
+    console.log("Normalizing influencer:", inf);
+    
+    // Extract the Phyllo API data properties that might be nested
+    const phylloData = inf.phylloData || inf.validationData || inf;
+    
+    return {
+      id: inf.id || phylloData.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
+      handle: inf.handle || inf.influencerHandle || inf.username || 'unknown',
+      name: phylloData.displayName || inf.name || inf.influencerName || inf.handle || 'Unknown Influencer',
+      platform: inf.platform || 'Not specified',
+      followers: phylloData.followerCount || inf.followers || inf.influencerFollowers || '0',
+      engagement: (phylloData.engagementRate ? `${(phylloData.engagementRate * 100).toFixed(2)}%` : inf.engagement) || '0.01%',
+      avatarUrl: phylloData.avatarUrl || inf.avatarUrl || inf.avatar || '',
+      description: phylloData.description || inf.description || inf.bio || 'No description available.',
+      verified: phylloData.verified || false,
+      // Preserve the original data
+      phylloData: phylloData
+    };
+  });
+  
+  console.log("Normalized influencers:", normalizedInfluencers);
+
+  // Continue with extracting other data...
+  // ... existing code ...
 
   // Extract creative assets with our helper function
   const creativeAssets = extractCreativeAssets(data, isWizardSchema);
-  console.log("Extracted creativeAssets:", creativeAssets);
-
+  
   // Extract budget data with proper fallbacks
   const budgetData = isWizardSchema && data.budget ? typeof data.budget === 'object' ? data.budget : {
     currency: 'EUR',
@@ -485,8 +566,7 @@ const normalizeApiData = (data: any): MergedData => {
     totalBudget: data.totalBudget || 0,
     socialMediaBudget: data.socialMediaBudget || 0
   };
-  console.log("Extracted budget data:", budgetData);
-
+  
   // Extract audience data with proper fallbacks
   const audienceData = isWizardSchema ? {
     demographics: data.demographics || {},
@@ -494,8 +574,8 @@ const normalizeApiData = (data: any): MergedData => {
     targeting: data.targeting || {},
     competitors: Array.isArray(data.competitors) ? data.competitors : data.audience?.competitors || []
   } : data.audience || {};
-  console.log("Extracted audience data:", audienceData);
-  console.log("Competitors data:", audienceData.competitors);
+  
+  // In the returned object, ensure we include the normalized influencers
   return {
     // Map fields to consistent names, handling both schema types
     campaignName: isWizardSchema ? data.name : data.campaignName,
@@ -584,10 +664,10 @@ const normalizeApiData = (data: any): MergedData => {
       requirement: req
     })) : [],
     contacts: data.contacts || [],
-    influencers: Array.isArray(data.influencers) ? data.influencers :
-      (data.overview && Array.isArray(data.overview.influencers) ? data.overview.influencers :
-      (data.step1 && Array.isArray(data.step1.influencers) ? data.step1.influencers :
-      (data.influencer ? [data.influencer] : []))),
+    // Use our normalized influencers
+    influencers: normalizedInfluencers,
+    // Preserve step1 data if it exists for later reference
+    ...(data.step1 ? { step1: data.step1 } : {})
   };
 };
 
@@ -1072,61 +1152,106 @@ function Step5Content() {
     }
   }, [displayData]);
 
-  // In the Step5Content function, add a useEffect to print the influencer data for debugging
-  // Add this after the existing useEffects
+  // In the Step5Content function, update the useEffect that handles influencer data
   useEffect(() => {
-    if (displayData && displayData.influencers) {
-      console.log('Loaded influencer data:', displayData.influencers);
+    if (displayData) {
+      // Log all possible influencer data locations for debugging
+      console.log('Root influencers:', displayData.influencers);
+      console.log('Step1 influencers:', displayData?.step1?.influencers);
+      console.log('Overview influencers:', displayData?.overview?.influencers);
       
-      // If influencers data exists but in a different format than expected, attempt to normalize it
-      if (Array.isArray(displayData.influencers) && displayData.influencers.length > 0) {
-        // Check if we need to transform the data
-        const firstInfluencer = displayData.influencers[0] as any; // Use 'any' type for safe access
-        if (!firstInfluencer.handle && (firstInfluencer.influencerHandle || firstInfluencer.username)) {
-          // Transform the data to the expected format
-          const normalizedInfluencers = displayData.influencers.map((inf: any) => ({
-            id: inf.id || inf._id || `inf-${Math.random().toString(36).substring(2, 9)}`,
-            handle: inf.influencerHandle || inf.username || inf.handle || 'unknown',
-            name: inf.name || inf.influencerName || inf.handle || 'Unknown Influencer',
-            platform: inf.platform || 'Not specified',
-            followers: inf.followers || inf.influencerFollowers || '0',
-            engagement: inf.engagement || '0.01%',
-            avatarUrl: inf.avatarUrl || inf.avatar || '',
-            description: inf.description || inf.bio || 'No description available.'
-          }));
-          
-          // Update the display data with the normalized influencers
-          setCampaignData(prev => ({
-            ...prev,
-            influencers: normalizedInfluencers
-          }));
-        }
-      } else if (!Array.isArray(displayData.influencers)) {
-        // Handle the case where influencers might not be an array
-        console.warn('Influencer data is not in expected array format:', displayData.influencers);
+      // If no influencers found but campaign ID exists, try to fetch them directly
+      if ((!displayData.influencers || !Array.isArray(displayData.influencers) || displayData.influencers.length === 0) && campaignId) {
+        console.log('No influencers found in display data, attempting to fetch directly');
         
-        // Safely check if step1 exists using optional chaining
-        const step1Influencers = displayData?.step1?.influencers;
-        if (Array.isArray(step1Influencers) && step1Influencers.length > 0) {
-          console.log('Found influencers in step1 data:', step1Influencers);
+        // Make an API call specifically for Step 1 data which contains the influencers
+        const fetchStep1Data = async () => {
+          try {
+            const response = await fetch(`/api/campaigns/${campaignId}/wizard/1`, {
+              headers: {
+                'Cache-Control': 'no-cache'
+              }
+            });
+            
+            if (!response.ok) {
+              console.warn('Failed to fetch Step 1 data');
+              return;
+            }
+            
+            const result = await response.json();
+            if (result.success && result.data && Array.isArray(result.data.influencers)) {
+              console.log('Successfully fetched Step 1 influencers:', result.data.influencers);
+              
+              // Transform the influencers
+              const enhancedInfluencers = await Promise.all(result.data.influencers.map(async (inf: any) => {
+                // Try to fetch additional details for each influencer
+                let additionalData = null;
+                if (inf.platform && inf.handle) {
+                  additionalData = await fetchInfluencerDetails(campaignId, inf.handle, inf.platform);
+                }
+                
+                return {
+                  id: inf.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
+                  handle: inf.handle,
+                  name: additionalData?.displayName || inf.name || inf.handle || 'Unknown Influencer',
+                  platform: inf.platform || 'Not specified',
+                  followers: additionalData?.followerCount || inf.followers || '0',
+                  engagement: (additionalData?.engagementRate ? `${(additionalData.engagementRate * 100).toFixed(2)}%` : inf.engagement) || '0.01%',
+                  avatarUrl: additionalData?.avatarUrl || inf.avatarUrl || '',
+                  description: additionalData?.description || inf.description || 'No description available.',
+                  verified: additionalData?.verified || false
+                };
+              }));
+              
+              // Update the campaign data
+              setCampaignData(prev => ({
+                ...prev,
+                influencers: enhancedInfluencers
+              }));
+            }
+          } catch (error) {
+            console.error('Error fetching Step 1 data:', error);
+          }
+        };
+        
+        fetchStep1Data();
+      }
+      // If influencer data exists but is minimal, enhance it
+      else if (displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0) {
+        // Check if we need to transform the data (missing expected fields)
+        const enhancedInfluencers = displayData.influencers.map((inf: any) => {
+          // Only enhance if the data is minimal
+          if (inf.platform && inf.handle && (!inf.name || !inf.followers || !inf.avatarUrl)) {
+            return {
+              id: inf.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
+              handle: inf.handle,
+              name: inf.name || inf.handle || 'Unknown Influencer',
+              platform: inf.platform || 'Not specified',
+              followers: inf.followers || '0',
+              engagement: inf.engagement || '0.01%',
+              avatarUrl: inf.avatarUrl || '',
+              description: inf.description || 'No description available.'
+            };
+          }
+          return inf; // Return unchanged if already enriched
+        });
+        
+        // Update campaign data with enhanced influencers if they were modified
+        const needsUpdate = enhancedInfluencers.some((inf, idx) => {
+          const original = displayData.influencers?.[idx];
+          return original && (inf.name !== original.name || inf.followers !== original.followers || inf.avatarUrl !== original.avatarUrl);
+        });
+        
+        if (needsUpdate) {
+          console.log('Updating influencer data with enhanced values:', enhancedInfluencers);
           setCampaignData(prev => ({
             ...prev,
-            influencers: step1Influencers
+            influencers: enhancedInfluencers
           }));
         }
-      }
-    } else {
-      // Check if influencers exist in step1 data using optional chaining
-      const step1Influencers = displayData?.step1?.influencers;
-      if (Array.isArray(step1Influencers) && step1Influencers.length > 0) {
-        console.log('Found influencers in step1 data:', step1Influencers);
-        setCampaignData(prev => ({
-          ...prev,
-          influencers: step1Influencers
-        }));
       }
     }
-  }, [displayData]);
+  }, [displayData, campaignId]);
 
   if (!isClientSide) {
     return <WizardSkeleton step={5} />;
@@ -1546,6 +1671,12 @@ function Step5Content() {
                     <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.05)] to-white border-b border-gray-200">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold text-gray-800">Influencer #{index + 1}</h4>
+                        {influencer.verified && (
+                          <span className="inline-flex items-center text-blue-500">
+                            <Icon name="faCheck" className="h-4 w-4 mr-1" iconType="static" solid={true} />
+                            Verified
+                          </span>
+                        )}
                       </div>
                     </div>
                     
@@ -1581,27 +1712,24 @@ function Step5Content() {
 
                       <div className="space-y-4">
                         <div className="flex items-start">
-                          <Icon name="faBrandsfab" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                          <Icon 
+                            name={
+                              (influencer.platform || '').toLowerCase().includes('instagram') ? 'faInstagram' :
+                              (influencer.platform || '').toLowerCase().includes('facebook') ? 'faFacebook' :
+                              (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? 'faTwitter' :
+                              (influencer.platform || '').toLowerCase().includes('tiktok') ? 'faTiktok' :
+                              (influencer.platform || '').toLowerCase().includes('youtube') ? 'faYoutube' :
+                              (influencer.platform || '').toLowerCase().includes('linkedin') ? 'faLinkedin' :
+                              'faGlobe'
+                            } 
+                            className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" 
+                            iconType="static" 
+                            solid={true} 
+                          />
                           <div className="flex-1">
                             <span className="text-sm text-gray-500 mb-1 block">Platform</span>
                             <span className="text-base text-gray-800 block">
-                              <div className="flex items-center">
-                                <Icon 
-                                  name={
-                                    (influencer.platform || '').toLowerCase().includes('instagram') ? 'faInstagram' :
-                                    (influencer.platform || '').toLowerCase().includes('facebook') ? 'faFacebook' :
-                                    (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? 'faTwitter' :
-                                    (influencer.platform || '').toLowerCase().includes('tiktok') ? 'faTiktok' :
-                                    (influencer.platform || '').toLowerCase().includes('youtube') ? 'faYoutube' :
-                                    (influencer.platform || '').toLowerCase().includes('linkedin') ? 'faLinkedin' :
-                                    'faGlobe'
-                                  } 
-                                  className="h-4 w-4 mr-2 text-[var(--secondary-color)]" 
-                                  iconType="static" 
-                                  solid={true} 
-                                />
-                                {influencer.platform || 'Not specified'}
-                              </div>
+                              {influencer.platform || 'Not specified'}
                             </span>
                           </div>
                         </div>
@@ -1621,13 +1749,29 @@ function Step5Content() {
                     ))}
                   </div>
             ) : (
-              // Check for influencers in different possible locations in the data object
-              <div className="bg-gray-50 p-6 rounded-md text-center">
-                <div className="mb-3">
-                  <Icon name="faUserGroup" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+              // Show loading state if influencers might be loading
+              isLoading ? (
+                <div className="bg-gray-50 p-6 rounded-md text-center">
+                  <div className="mb-3 animate-spin">
+                    <Icon name="faCircleNotch" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+                  </div>
+                  <p className="text-gray-600 mb-2">Loading influencer data...</p>
                 </div>
-                <p className="text-gray-600 mb-2">No influencers added to this campaign yet.</p>
-              </div>
+              ) : (
+                // Show message when no influencers found
+                <div className="bg-gray-50 p-6 rounded-md text-center">
+                  <div className="mb-3">
+                    <Icon name="faUserGroup" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+                  </div>
+                  <p className="text-gray-600 mb-2">No influencers added to this campaign yet.</p>
+                  <button 
+                    onClick={() => navigateToStep(1)} 
+                    className="mt-2 px-4 py-2 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors"
+                  >
+                    Add Influencers in Step 1
+                  </button>
+                </div>
+              )
             )}
           </div>
         </SummarySection>
