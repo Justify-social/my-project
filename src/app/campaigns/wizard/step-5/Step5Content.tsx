@@ -555,7 +555,7 @@ const normalizeApiData = (data: any): MergedData => {
 
   // Extract creative assets with our helper function
   const creativeAssets = extractCreativeAssets(data, isWizardSchema);
-  
+
   // Extract budget data with proper fallbacks
   const budgetData = isWizardSchema && data.budget ? typeof data.budget === 'object' ? data.budget : {
     currency: 'EUR',
@@ -566,7 +566,7 @@ const normalizeApiData = (data: any): MergedData => {
     totalBudget: data.totalBudget || 0,
     socialMediaBudget: data.socialMediaBudget || 0
   };
-  
+
   // Extract audience data with proper fallbacks
   const audienceData = isWizardSchema ? {
     demographics: data.demographics || {},
@@ -1667,79 +1667,94 @@ function Step5Content() {
             {displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0 ? (
               <div className="space-y-6">
                 {displayData.influencers.map((influencer, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                    <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.05)] to-white border-b border-gray-200">
+                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.1)] to-white border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-gray-800">Influencer #{index + 1}</h4>
+                        <h4 className="font-semibold text-gray-800 flex items-center">
+                          <span className="bg-[var(--accent-color)] text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm">{index + 1}</span>
+                          Influencer #{index + 1}
+                        </h4>
                         {influencer.verified && (
-                          <span className="inline-flex items-center text-blue-500">
-                            <Icon name="faCheck" className="h-4 w-4 mr-1" iconType="static" solid={true} />
+                          <span className="inline-flex items-center text-blue-500 bg-blue-50 px-2 py-1 rounded-full text-sm">
+                            <Icon name="faCheck" className="h-3 w-3 mr-1" iconType="static" solid={true} />
                             Verified
                           </span>
                         )}
                       </div>
                     </div>
                     
-                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="flex items-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full overflow-hidden mr-4 flex-shrink-0">
+                        <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden mr-5 flex-shrink-0 border-2 border-[var(--accent-color)]">
                           {influencer.avatarUrl ? (
                             <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)]">
-                              <Icon name="faUser" className="h-8 w-8" iconType="static" solid={false} />
-                    </div>
+                              <Icon name="faUser" className="h-10 w-10" iconType="static" solid={false} />
+                            </div>
                           )}
                         </div>
                         
                         <div>
-                          <p className="font-medium text-gray-800 mb-1">{influencer.name || influencer.handle}</p>
-                          <p className="text-[var(--accent-color)] mb-1">@{influencer.handle}</p>
-                          {influencer.followers && (
-                            <p className="text-sm text-gray-500">
-                              {typeof influencer.followers === 'number' 
-                                ? `${new Intl.NumberFormat().format(influencer.followers)} followers` 
-                                : influencer.followers}
-                            </p>
-                          )}
-                          {influencer.engagement && (
-                            <p className="text-sm text-gray-500">
-                              {influencer.engagement} engagement
-                            </p>
-                          )}
+                          <p className="font-semibold text-gray-800 text-lg mb-1">{influencer.name || influencer.handle}</p>
+                          <p className="text-[var(--accent-color)] mb-2 font-medium">@{influencer.handle}</p>
+                          <div className="flex flex-col space-y-1">
+                            {influencer.followers && (
+                              <p className="text-sm text-gray-600 flex items-center">
+                                <Icon name="faUsers" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" iconType="static" solid={false} />
+                                {typeof influencer.followers === 'number' 
+                                  ? `${new Intl.NumberFormat().format(influencer.followers)} followers` 
+                                  : influencer.followers}
+                              </p>
+                            )}
+                            {influencer.engagement && (
+                              <p className="text-sm text-gray-600 flex items-center">
+                                <Icon name="faChartLine" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" iconType="static" solid={false} />
+                                {influencer.engagement} engagement
+                              </p>
+                            )}
+                    </div>
                   </div>
                 </div>
 
-                      <div className="space-y-4">
-                        <div className="flex items-start">
-                          <Icon 
-                            name={
-                              (influencer.platform || '').toLowerCase().includes('instagram') ? 'faInstagram' :
-                              (influencer.platform || '').toLowerCase().includes('facebook') ? 'faFacebook' :
-                              (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? 'faTwitter' :
-                              (influencer.platform || '').toLowerCase().includes('tiktok') ? 'faTiktok' :
-                              (influencer.platform || '').toLowerCase().includes('youtube') ? 'faYoutube' :
-                              (influencer.platform || '').toLowerCase().includes('linkedin') ? 'faLinkedin' :
-                              'faGlobe'
-                            } 
-                            className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" 
-                            iconType="static" 
-                            solid={true} 
-                          />
+                      <div className="space-y-4 flex flex-col justify-center">
+                        <div className="flex items-start bg-gray-50 p-3 rounded-lg">
+                          {/* Platform icon based on platform name */}
+                          <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center mr-3 flex-shrink-0">
+                            <img 
+                              src={
+                                (influencer.platform || '').toLowerCase().includes('instagram') ? '/ui-icons/brands/instagram.svg' :
+                                (influencer.platform || '').toLowerCase().includes('facebook') ? '/ui-icons/brands/facebook.svg' :
+                                (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? '/ui-icons/brands/x-twitter.svg' :
+                                (influencer.platform || '').toLowerCase().includes('tiktok') ? '/ui-icons/brands/tiktok.svg' :
+                                (influencer.platform || '').toLowerCase().includes('youtube') ? '/ui-icons/brands/youtube.svg' :
+                                (influencer.platform || '').toLowerCase().includes('linkedin') ? '/ui-icons/brands/linkedin.svg' :
+                                (influencer.platform || '').toLowerCase().includes('pinterest') ? '/ui-icons/brands/pinterest.svg' :
+                                (influencer.platform || '').toLowerCase().includes('reddit') ? '/ui-icons/brands/reddit.svg' :
+                                (influencer.platform || '').toLowerCase().includes('github') ? '/ui-icons/brands/github.svg' :
+                                '/ui-icons/brands/instagram.svg' // Default to Instagram if unknown
+                              } 
+                              alt={`${influencer.platform || 'Social'} platform`}
+                              className="h-5 w-5 brightness-0 invert" // Apply filter to make icon white
+                            />
+                          </div>
                           <div className="flex-1">
-                            <span className="text-sm text-gray-500 mb-1 block">Platform</span>
-                            <span className="text-base text-gray-800 block">
+                            <span className="text-sm text-gray-500 block">Platform</span>
+                            <span className="text-base text-gray-800 font-medium block">
                               {influencer.platform || 'Not specified'}
                             </span>
                           </div>
                         </div>
                         
-                        {influencer.description && (
-                          <div className="flex items-start">
-                            <Icon name="faInfoCircle" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                        {/* Only show description if it exists and isn't the default "No description available" */}
+                        {influencer.description && !influencer.description.includes('No description available') && (
+                          <div className="flex items-start bg-gray-50 p-3 rounded-lg">
+                            <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center mr-3 flex-shrink-0">
+                              <Icon name="faInfoCircle" className="h-5 w-5 text-[var(--accent-color)]" iconType="static" solid={false} />
+                            </div>
                             <div className="flex-1">
-                              <span className="text-sm text-gray-500 mb-1 block">Description</span>
-                              <span className="text-base text-gray-800 block">{influencer.description}</span>
+                              <span className="text-sm text-gray-500 block">Description</span>
+                              <span className="text-base text-gray-800 block line-clamp-2">{influencer.description}</span>
                             </div>
                           </div>
                         )}
@@ -1754,20 +1769,22 @@ function Step5Content() {
                 <div className="bg-gray-50 p-6 rounded-md text-center">
                   <div className="mb-3 animate-spin">
                     <Icon name="faCircleNotch" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
-                  </div>
+                </div>
                   <p className="text-gray-600 mb-2">Loading influencer data...</p>
                 </div>
               ) : (
                 // Show message when no influencers found
-                <div className="bg-gray-50 p-6 rounded-md text-center">
-                  <div className="mb-3">
-                    <Icon name="faUserGroup" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+                <div className="bg-gray-50 p-8 rounded-md text-center">
+                  <div className="mb-4 bg-gray-100 p-4 rounded-full inline-flex items-center justify-center">
+                    <Icon name="faUserGroup" className="h-12 w-12 text-[var(--accent-color)] opacity-70" iconType="static" solid={false} />
                   </div>
-                  <p className="text-gray-600 mb-2">No influencers added to this campaign yet.</p>
+                  <p className="text-gray-700 font-medium mb-3">No influencers added to this campaign yet.</p>
+                  <p className="text-gray-500 mb-4">Add influencers to better track and manage your campaign's reach.</p>
                   <button 
                     onClick={() => navigateToStep(1)} 
-                    className="mt-2 px-4 py-2 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors"
+                    className="px-5 py-2.5 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors inline-flex items-center font-medium"
                   >
+                    <Icon name="faPlus" className="h-4 w-4 mr-2" iconType="static" solid={false} />
                     Add Influencers in Step 1
                   </button>
                 </div>
