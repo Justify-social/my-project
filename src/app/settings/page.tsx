@@ -4,7 +4,8 @@ import React, { useState, useCallback, ChangeEvent, FormEvent, memo, useEffect }
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Icon } from '@/components/ui/icon';
+import { SvgIcon } from '@/components/ui/icons';
+import type { SvgIconProps } from '@/components/ui/icons';
 import { iconComponentFactory } from '@/components/ui/icons';
 
 /* --------------------------------------------------
@@ -13,27 +14,59 @@ import { iconComponentFactory } from '@/components/ui/icons';
 interface PersonalInfo {
   firstName: string;
   surname: string;
+  email: string;
+  phone: string;
+  address: string;
   companyName: string;
-  email: string; // Read-only
 }
+
 interface NotificationPreferences {
-  campaignUpdates: boolean;
-  brandHealthAlerts: boolean;
-  aiInsightNotifications: boolean;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  marketingEmails: boolean;
 }
+
 interface PasswordState {
   currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
+  hasMinLength: boolean;
+  hasUpperCase: boolean;
+  hasLowerCase: boolean;
+  hasNumber: boolean;
 }
+
 interface TabConfig {
   id: string;
   label: string;
-  href: string;
-  icon?: React.ComponentType<{
-    className?: string;
-  }>;
-  requiresAdmin?: boolean;
+  icon: string;
+  adminOnly?: boolean;
+}
+
+interface IconProps {
+  name: string;
+  className?: string;
+  solid?: boolean;
+}
+
+interface TabNavigationProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  isSuperAdmin: boolean;
+}
+
+interface SectionHeaderProps {
+  title: string;
+  description: string;
+  iconName: string;
+}
+
+interface PasswordManagementSectionProps {
+  passwordState: PasswordState;
+  onChange: (field: keyof PasswordState, value: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  error?: string;
+  success?: string;
 }
 
 /* --------------------------------------------------
@@ -52,25 +85,17 @@ const validatePassword = (password: string): boolean => {
 /* --------------------------------------------------
    Enhanced UI Components
 ----------------------------------------------------- */
-const SectionHeader: React.FC<{
-  icon: React.ComponentType<{
-    className?: string;
-  }>;
-  title: string;
-  description?: string;
-}> = memo(({
-  icon: Icon,
-  title,
-  description
-}) => <div className="flex items-center mb-6">
-    <div className="bg-blue-50 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-[var(--accent-color)]" solid={false} />
+const SectionHeader = memo(({ title, description, iconName }: SectionHeaderProps) => (
+  <div className="flex items-start mb-6">
+    <div className="mr-4">
+      <SvgIcon name={iconName} className="w-6 h-6 text-[var(--accent-color)]" iconType="static" solid={false} />
     </div>
-    <div className="ml-4">
-      <h2 className="text-xl font-semibold text-[var(--primary-color)]">{title}</h2>
-      {description && <p className="mt-1 text-sm text-[var(--secondary-color)]">{description}</p>}
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+      <p className="mt-1 text-sm text-gray-500">{description}</p>
     </div>
-  </div>);
+  </div>
+));
 const Card = memo(({
   children
 }: {
@@ -91,56 +116,54 @@ const Card = memo(({
 /* --------------------------------------------------
    Navigation Components
 ----------------------------------------------------- */
-const NavigationTabs: React.FC<{
-  activeTab: string;
-  isSuperAdmin: boolean;
-  onTabChange: (tab: string) => void;
-}> = memo(({
-  activeTab,
-  isSuperAdmin,
-  onTabChange
-}) => {
-  const tabs: TabConfig[] = [{
-    id: 'profile',
-    label: 'Profile Settings',
-    href: '/settings',
-    icon: props => <Icon name="faUserCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
-  }, {
-    id: 'team',
-    label: 'Team Management',
-    href: '/settings/team-management',
-    icon: props => <Icon name="faUserCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
-  }, {
-    id: 'branding',
-    label: 'Branding',
-    href: '/settings/branding',
-    icon: props => <Icon name="faPhoto" {...props} solid={false} className="text-[var(--secondary-color)]" />
-  }, {
-    id: 'admin',
-    label: 'Super Admin Console',
-    href: '/admin',
-    requiresAdmin: true,
-    icon: props => <Icon name="faKey" {...props} solid={false} className="text-[var(--secondary-color)]" />
-  }];
-  return <div className="mb-8 border-b border-gray-200">
-      <nav className="flex space-x-1" aria-label="Settings navigation">
-        {tabs.map(tab => {
-        if (tab.requiresAdmin && !isSuperAdmin) return null;
-        const isActive = activeTab === tab.id;
-        const IconComponent = tab.icon;
-        return <button key={tab.id} onClick={() => onTabChange(tab.id)} className={`
-                relative py-4 px-6 flex items-center transition-all duration-200
-                ${isActive ? 'text-[var(--accent-color)] bg-[var(--background-color)] bg-opacity-50' : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:bg-[var(--background-color)]'}
-                rounded-t-lg
-              `} aria-current={isActive ? 'page' : undefined}>
+const TabNavigation = memo(({ activeTab, onTabChange, isSuperAdmin }: TabNavigationProps) => {
+  const tabs = [
+    {
+      id: 'personal',
+      label: 'Personal Info',
+      icon: 'faUser',
+      requiresAdmin: false
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: 'faBell',
+      requiresAdmin: false
+    },
+    {
+      id: 'security',
+      label: 'Security',
+      icon: 'faLock',
+      requiresAdmin: false
+    },
+    {
+      id: 'admin',
+      label: 'Admin Settings',
+      icon: 'faUserCircle',
+      requiresAdmin: true
+    }
+  ];
 
-              {IconComponent && <IconComponent className="w-5 h-5 mr-2" />}
-              <span className="font-medium">{tab.label}</span>
-              {isActive && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-color)]" />}
-            </button>;
-      })}
-      </nav>
-    </div>;
+  return (
+    <div className="flex border-b border-gray-200 mb-8">
+      {tabs.map((tab) => (
+        tab.requiresAdmin && !isSuperAdmin ? null : (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`flex items-center px-6 py-3 font-medium text-sm ${
+              activeTab === tab.id
+                ? 'border-b-2 border-[var(--accent-color)] text-[var(--accent-color)]'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <SvgIcon name={tab.icon} className="w-5 h-5 mr-2" iconType="static" solid={false} />
+            {tab.label}
+          </button>
+        )
+      ))}
+    </div>
+  );
 });
 
 /* --------------------------------------------------
@@ -168,7 +191,7 @@ const ActionButtons: React.FC<{
 
 
 
-      <Icon name="faXCircle" className="w-5 h-5 mr-2" solid={false} />
+      <SvgIcon name="faXCircle" className="w-5 h-5 mr-2" solid={false} />
       Cancel
     </motion.button>
     <motion.button whileHover={{
@@ -179,10 +202,10 @@ const ActionButtons: React.FC<{
         flex items-center ${!hasChanges || isSaving ? 'bg-blue-300 cursor-not-allowed text-white' : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'}`}>
 
       {isSaving ? <>
-          <Icon name="faArrowRight" className="w-5 h-5 mr-2 animate-spin" solid={false} />
+          <SvgIcon name="faArrowRight" className="w-5 h-5 mr-2 animate-spin" solid={false} />
           Saving...
         </> : <>
-          <Icon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} />
+          <SvgIcon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} />
           Save
         </>}
     </motion.button>
@@ -220,7 +243,11 @@ const PersonalInfoSection: React.FC<{
   onChange,
   onToggleEdit
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faUserCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Personal Information" description="Update your personal details and company information." />
+    <SectionHeader 
+      iconName="faUserCircle" 
+      title="Personal Information" 
+      description="Update your personal details and company information." 
+    />
 
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -285,24 +312,33 @@ const ProfilePicture: React.FC<{
   onRemove,
   error
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faPhoto" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Profile Picture" description="Upload or update your profile picture" />
+    <SectionHeader 
+      iconName="faPhoto" 
+      title="Profile Picture" 
+      description="Upload or update your profile picture" 
+    />
 
     <div className="flex flex-col sm:flex-row items-center gap-4">
-      <div>
-        {profilePicturePreview ? <div className="relative">
-            <img src={profilePicturePreview} alt="Profile Preview" className="w-32 h-32 rounded-full object-cover" />
-
-            <motion.button whileHover={{
-          scale: 1.1
-        }} whileTap={{
-          scale: 0.95
-        }} onClick={onRemove} className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow-md" aria-label="Remove profile picture">
-
-              <Icon name="faXCircle" className="w-5 h-5" solid={false} />
-            </motion.button>
-          </div> : <div className="w-32 h-32 rounded-full bg-[var(--background-color)] flex items-center justify-center">
-            <Icon name="faUserCircle" className="w-16 h-16 text-[var(--secondary-color)]" solid={false} />
-          </div>}
+      <div className="mb-8">
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              {profilePicturePreview ? (
+                <img src={profilePicturePreview} alt="Profile Preview" className="w-full h-full object-cover" />
+              ) : (
+                <SvgIcon name="faUserCircle" className="w-16 h-16 text-[var(--secondary-color)]" iconType="static" solid={false} />
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-color)]"
+          >
+            <SvgIcon name="faXCircle" className="w-5 h-5 mr-2 inline-block" iconType="static" solid={false} />
+            Remove Profile Picture
+          </button>
+        </div>
       </div>
       <div className="flex-grow">
         <div className="space-y-2 flex flex-col sm:items-start items-center">
@@ -314,7 +350,7 @@ const ProfilePicture: React.FC<{
 
 
 
-            <Icon name="faPhoto" className="w-5 h-5 mr-2" solid={false} />
+            <SvgIcon name="faPhoto" className="w-5 h-5 mr-2" solid={false} />
             <span>Upload New Picture</span>
             <input type="file" id="profilePicture" accept="image/*" className="hidden" onChange={onFileChange} />
 
@@ -330,7 +366,7 @@ const ProfilePicture: React.FC<{
           y: 0
         }} className="text-red-500 text-sm flex items-center">
 
-              <Icon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
+              <SvgIcon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
               {error}
             </motion.p>}
         </div>
@@ -339,109 +375,110 @@ const ProfilePicture: React.FC<{
   </Card>);
 
 // Password Management Section
-const PasswordManagementSection: React.FC<{
-  passwordState: PasswordState;
-  onChange: (field: keyof PasswordState, value: string) => void;
-  onSubmit: (e: FormEvent) => void;
-  error: string;
-  success: string;
-}> = memo(({
-  passwordState,
-  onChange,
-  onSubmit,
-  error,
-  success
-}) => <Card>
-    <SectionHeader icon={props => <Icon name="faKey" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Security" description="Update your password and security settings." />
-
-    <form onSubmit={onSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
-            Current Password
-          </label>
-          <input type="password" value={passwordState.currentPassword} onChange={e => onChange('currentPassword', e.target.value)} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-              focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="Enter current password" aria-label="Current password" />
-
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
-              New Password
-            </label>
-            <input type="password" value={passwordState.newPassword} onChange={e => onChange('newPassword', e.target.value)} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="Enter new password" aria-label="New password" />
-
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
-              Confirm New Password
-            </label>
-            <input type="password" value={passwordState.confirmNewPassword} onChange={e => onChange('confirmNewPassword', e.target.value)} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="Confirm new password" aria-label="Confirm new password" />
-
-          </div>
-        </div>
+const PasswordManagementSection = memo(({ 
+  passwordState, 
+  onChange, 
+  onSubmit, 
+  error, 
+  success 
+}: PasswordManagementSectionProps) => (
+  <div className="space-y-6">
+    <div>
+      <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+        Current Password
+      </label>
+      <div className="mt-1 relative">
+        <input
+          type="password"
+          id="currentPassword"
+          name="currentPassword"
+          value={passwordState.currentPassword}
+          onChange={(e) => onChange('currentPassword', e.target.value)}
+          className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
+        />
       </div>
-      
-      <div className="mt-6">
-        <h4 className="text-sm font-medium text-[var(--primary-color)] mb-2">
-          Password Requirements
-        </h4>
-        <ul className="space-y-1 text-sm text-[var(--secondary-color)]">
-          <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
-            Minimum 8 characters
-          </li>
-          <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
-            At least one uppercase letter
-          </li>
-          <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
-            At least one number
-          </li>
-          <li className="flex items-center">
-            <Icon name="faCheckCircle" className="w-4 h-4 mr-2 text-green-500" solid={false} />
-            At least one special character
-          </li>
-        </ul>
+    </div>
+
+    <div>
+      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+        New Password
+      </label>
+      <div className="mt-1 relative">
+        <input
+          type="password"
+          id="newPassword"
+          name="newPassword"
+          value={passwordState.newPassword}
+          onChange={(e) => onChange('newPassword', e.target.value)}
+          className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
+        />
       </div>
+    </div>
 
-      {error && <motion.div initial={{
-      opacity: 0,
-      y: -10
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} className="bg-red-50 text-red-700 p-4 rounded-lg flex items-start">
-
-          <Icon name="faXCircle" className="w-5 h-5 mr-2 flex-shrink-0" solid={false} />
-          <p>{error}</p>
-        </motion.div>}
-
-      {success && <motion.div initial={{
-      opacity: 0,
-      y: -10
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} className="bg-green-50 text-green-700 p-4 rounded-lg flex items-start">
-
-          <Icon name="faCheckCircle" className="w-5 h-5 mr-2 flex-shrink-0" solid={false} />
-          <p>{success}</p>
-        </motion.div>}
-
-      <div className="flex justify-end">
-        <button onClick={onSubmit} disabled={!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword || !validatePassword(passwordState.newPassword)} className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium
-            flex items-center ${!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword || !validatePassword(passwordState.newPassword) ? 'bg-blue-300 cursor-not-allowed' : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'}`}>
-
-          <Icon name="faKey" className="w-5 h-5 mr-2" solid={false} />
-          Update Password
-        </button>
+    <div>
+      <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700">
+        Confirm New Password
+      </label>
+      <div className="mt-1 relative">
+        <input
+          type="password"
+          id="confirmNewPassword"
+          name="confirmNewPassword"
+          value={passwordState.confirmNewPassword}
+          onChange={(e) => onChange('confirmNewPassword', e.target.value)}
+          className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]"
+        />
       </div>
-    </form>
-  </Card>);
+    </div>
+
+    {/* Password Requirements */}
+    <div className="mt-4 space-y-2 text-sm text-gray-600">
+      <div className={`flex items-center ${passwordState.hasMinLength ? 'text-green-500' : ''}`}>
+        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        At least 8 characters
+      </div>
+      <div className={`flex items-center ${passwordState.hasUpperCase ? 'text-green-500' : ''}`}>
+        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        At least one uppercase letter
+      </div>
+      <div className={`flex items-center ${passwordState.hasLowerCase ? 'text-green-500' : ''}`}>
+        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        At least one lowercase letter
+      </div>
+      <div className={`flex items-center ${passwordState.hasNumber ? 'text-green-500' : ''}`}>
+        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        At least one number
+      </div>
+    </div>
+
+    {/* Error Messages */}
+    {error && (
+      <div className="mt-4 p-4 bg-red-50 rounded-lg flex items-start">
+        <SvgIcon name="faXCircle" className="w-5 h-5 mr-2 flex-shrink-0 text-red-500" iconType="static" solid={false} />
+        <p className="text-red-700">{error}</p>
+      </div>
+    )}
+
+    {/* Success Messages */}
+    {success && (
+      <div className="mt-4 p-4 bg-green-50 rounded-lg flex items-start">
+        <SvgIcon name="faCheckCircle" className="w-5 h-5 mr-2 flex-shrink-0 text-green-500" iconType="static" solid={false} />
+        <p className="text-green-700">{success}</p>
+      </div>
+    )}
+
+    {/* Submit Button */}
+    <button
+      type="submit"
+      onClick={onSubmit}
+      disabled={!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword}
+      className="mt-6 px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <SvgIcon name="faKey" className="w-5 h-5 mr-2" iconType="static" solid={false} />
+      Change Password
+    </button>
+  </div>
+));
 
 // Notification Preferences Section
 const NotificationPreferencesSection: React.FC<{
@@ -451,23 +488,27 @@ const NotificationPreferencesSection: React.FC<{
   preferences,
   onToggle
 }) => <Card>
-    <SectionHeader icon={props => <Icon name="faBell" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Notification Preferences" description="Manage how you receive updates and alerts." />
+    <SectionHeader 
+      iconName="faBell" 
+      title="Notification Preferences" 
+      description="Manage how you receive updates and alerts." 
+    />
 
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div className="flex justify-between items-center py-3">
             <div>
-              <h3 className="text-base font-medium text-[var(--primary-color)]">Campaign Updates</h3>
+              <h3 className="text-base font-medium text-[var(--primary-color)]">Email Notifications</h3>
               <p className="text-sm text-[var(--secondary-color)]">
-                Get notified about campaign status changes and performance updates
+                Get notified via email about campaign status changes and performance updates
               </p>
             </div>
-            <button onClick={() => onToggle('campaignUpdates', !preferences.campaignUpdates)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none
-                ${preferences.campaignUpdates ? 'bg-[var(--accent-color)]' : 'bg-gray-300'}`} role="switch" aria-checked={preferences.campaignUpdates}>
+            <button onClick={() => onToggle('emailNotifications', !preferences.emailNotifications)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none
+                ${preferences.emailNotifications ? 'bg-[var(--accent-color)]' : 'bg-gray-300'}`} role="switch" aria-checked={preferences.emailNotifications}>
 
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300
-                  ${preferences.campaignUpdates ? 'translate-x-6' : 'translate-x-1'}`} />
+                  ${preferences.emailNotifications ? 'translate-x-6' : 'translate-x-1'}`} />
 
             </button>
           </div>
@@ -475,15 +516,15 @@ const NotificationPreferencesSection: React.FC<{
             rounded-lg hover:bg-[var(--background-color)] transition-colors duration-200 cursor-pointer">
 
 
-            <input type="checkbox" checked={preferences.brandHealthAlerts} onChange={e => onToggle('brandHealthAlerts', e.target.checked)} className="form-checkbox h-5 w-5 text-[var(--accent-color)] rounded 
+            <input type="checkbox" checked={preferences.marketingEmails} onChange={e => onToggle('marketingEmails', e.target.checked)} className="form-checkbox h-5 w-5 text-[var(--accent-color)] rounded 
                 focus:ring-[var(--accent-color)] border-[var(--divider-color)] transition duration-150" />
 
 
 
             <div>
-              <p className="font-medium text-[var(--primary-color)]">Brand Health Alerts</p>
+              <p className="font-medium text-[var(--primary-color)]">Marketing Emails</p>
               <p className="text-sm text-[var(--secondary-color)]">
-                Get notified about changes in brand health metrics
+                Receive marketing emails and promotions
               </p>
             </div>
           </label>
@@ -493,15 +534,15 @@ const NotificationPreferencesSection: React.FC<{
             rounded-lg hover:bg-[var(--background-color)] transition-colors duration-200 cursor-pointer">
 
 
-            <input type="checkbox" checked={preferences.aiInsightNotifications} onChange={e => onToggle('aiInsightNotifications', e.target.checked)} className="form-checkbox h-5 w-5 text-[var(--accent-color)] rounded 
+            <input type="checkbox" checked={preferences.pushNotifications} onChange={e => onToggle('pushNotifications', e.target.checked)} className="form-checkbox h-5 w-5 text-[var(--accent-color)] rounded 
                 focus:ring-[var(--accent-color)] border-[var(--divider-color)] transition duration-150" />
 
 
 
             <div>
-              <p className="font-medium text-[var(--primary-color)]">AI Insights</p>
+              <p className="font-medium text-[var(--primary-color)]">Push Notifications</p>
               <p className="text-sm text-[var(--secondary-color)]">
-                Receive AI-powered insights and recommendations
+                Receive push notifications for campaign updates and alerts
               </p>
             </div>
           </label>
@@ -510,73 +551,172 @@ const NotificationPreferencesSection: React.FC<{
     </div>
   </Card>);
 
+const PasswordInput = memo(({ 
+  id, 
+  value, 
+  onChange, 
+  label, 
+  showPassword, 
+  onToggleVisibility 
+}: {
+  id: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  label: string;
+  showPassword: boolean;
+  onToggleVisibility: () => void;
+}) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      {label}
+    </label>
+    <div className="mt-1 relative">
+      <input
+        type={showPassword ? 'text' : 'password'}
+        id={id}
+        name={id}
+        value={value}
+        onChange={onChange}
+        className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[var(--accent-color)] focus:border-[var--accent-color)]"
+      />
+      <button
+        type="button"
+        onClick={onToggleVisibility}
+        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+      >
+        <SvgIcon 
+          name={showPassword ? 'faEyeSlash' : 'faEye'} 
+          className="w-5 h-5 text-gray-400" 
+          iconType="static" 
+        />
+      </button>
+    </div>
+  </div>
+));
+
 /* --------------------------------------------------
    Main Profile Settings Page Component
 ----------------------------------------------------- */
 const ProfileSettingsPage: React.FC = () => {
   const router = useRouter();
-  const {
-    user,
-    isLoading,
-    error
-  } = useUser();
-  const [activeTab, setActiveTab] = useState('profile');
+  const { user, isLoading: isUserLoading, error: userError } = useUser();
+  const [activeTab, setActiveTab] = useState('personal');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
-
-  // Personal Information state
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-    firstName: 'Ed',
-    surname: 'Addams',
-    companyName: 'The Write Company',
-    email: 'edaddams@domain.com'
-  });
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [roleCheckAttempts, setRoleCheckAttempts] = useState(0);
+  const MAX_ROLE_CHECK_ATTEMPTS = 3;
+  const LOADING_TIMEOUT_MS = 10000; // 10 seconds
+  
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    firstName: '',
+    surname: '',
+    email: '',
+    phone: '',
+    address: '',
+    companyName: ''
+  });
+
+  const [passwordState, setPasswordState] = useState<PasswordState>({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+    hasMinLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false
+  });
+
+  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>({
+    emailNotifications: true,
+    pushNotifications: true,
+    marketingEmails: false
+  });
 
   // Profile Picture state
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState('');
   const [profilePictureError, setProfilePictureError] = useState('');
 
-  // Password Management state
-  const [passwordState, setPasswordState] = useState<PasswordState>({
-    currentPassword: '',
-    newPassword: '',
-    confirmNewPassword: ''
-  });
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
-
-  // Notification Preferences state
-  const [preferences, setPreferences] = useState<NotificationPreferences>({
-    campaignUpdates: false,
-    brandHealthAlerts: false,
-    aiInsightNotifications: false
-  });
-
   // Save and Cancel state
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Effect to check super admin status
+  // Effect to initialize user data
+  useEffect(() => {
+    if (user) {
+      const nameParts = (user.name || '').split(' ');
+      setPersonalInfo({
+        firstName: nameParts[0] || '',
+        surname: nameParts.slice(1).join(' ') || '',
+        email: user.email || '',
+        phone: (user as any).phone || '',
+        address: (user as any).address || '',
+        companyName: (user as any)['https://justify.social/company'] || ''
+      });
+    }
+  }, [user]);
+
+  // Effect to check super admin status with retry logic and timeout
   useEffect(() => {
     const checkSuperAdmin = async () => {
       try {
         const response = await fetch('/api/auth/verify-role');
-        if (!response.ok) throw new Error('Failed to verify role');
+        if (!response.ok) {
+          throw new Error(`Failed to verify role: ${response.status}`);
+        }
         const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Role verification failed');
+        }
+        
         setIsSuperAdmin(data?.user?.isSuperAdmin || false);
+        setIsPageLoading(false);
+        setError('');
+        
+        // Clear timeout since we succeeded
+        if (loadingTimeout) {
+          clearTimeout(loadingTimeout);
+          setLoadingTimeout(null);
+        }
       } catch (error) {
         console.error('Error checking super admin status:', error);
-        setIsSuperAdmin(false);
-      } finally {
-        setIsPageLoading(false);
+        
+        // Retry logic
+        if (roleCheckAttempts < MAX_ROLE_CHECK_ATTEMPTS) {
+          setRoleCheckAttempts(prev => prev + 1);
+          setTimeout(checkSuperAdmin, 1000 * (roleCheckAttempts + 1)); // Exponential backoff
+        } else {
+          setError('Failed to verify your role. Please try refreshing the page.');
+          setIsPageLoading(false);
+        }
       }
     };
-    if (user) {
+
+    if (user && !isUserLoading) {
+      // Set a timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        setIsPageLoading(false);
+        setError('Loading took too long. Please try refreshing the page.');
+      }, LOADING_TIMEOUT_MS);
+      
+      setLoadingTimeout(timeout);
+      
+      // Start role check
       checkSuperAdmin();
+      
+      // Cleanup
+      return () => {
+        if (timeout) clearTimeout(timeout);
+      };
+    } else if (!isUserLoading) {
+      setIsPageLoading(false);
     }
-  }, [user]);
+  }, [user, isUserLoading, roleCheckAttempts]);
 
   // Callback handlers
   const handleTabChange = useCallback((tab: string) => {
@@ -601,7 +741,6 @@ const ProfileSettingsPage: React.FC = () => {
       [field]: value
     }));
   }, []);
-  const toggleEditing = useCallback(() => setIsEditing(prev => !prev), []);
   const handleProfilePictureChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setProfilePictureError('');
     const file = e.target.files ? e.target.files[0] : null;
@@ -627,33 +766,56 @@ const ProfileSettingsPage: React.FC = () => {
     setProfilePicture(null);
     setProfilePicturePreview('');
   }, []);
-  const handlePasswordChange = useCallback((field: keyof PasswordState, value: string) => {
-    setPasswordState(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handlePasswordFieldChange = useCallback((field: keyof PasswordState, value: string) => {
+    setPasswordState(prev => {
+      const newState = { ...prev, [field]: value };
+      
+      // Update validation flags if the field is newPassword
+      if (field === 'newPassword') {
+        newState.hasMinLength = value.length >= 8;
+        newState.hasUpperCase = /[A-Z]/.test(value);
+        newState.hasLowerCase = /[a-z]/.test(value);
+        newState.hasNumber = /[0-9]/.test(value);
+      }
+      
+      return newState;
+    });
   }, []);
   const handlePasswordSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
-    setPasswordError('');
-    setPasswordSuccess('');
+    setError('');
+    setSuccess('');
+    
+    if (!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword) {
+      setError('Please fill in all password fields');
+      return;
+    }
+    
     if (passwordState.newPassword !== passwordState.confirmNewPassword) {
-      setPasswordError('Error: Passwords do not match.');
+      setError('New passwords do not match');
       return;
     }
-    if (!validatePassword(passwordState.newPassword)) {
-      setPasswordError('Error: Password does not meet security requirements.');
+    
+    if (!passwordState.hasMinLength || !passwordState.hasUpperCase || 
+        !passwordState.hasLowerCase || !passwordState.hasNumber) {
+      setError('New password does not meet all requirements');
       return;
     }
-    setPasswordSuccess('Password updated successfully!');
+    
+    // Here you would typically make an API call to update the password
+    setSuccess('Password updated successfully!');
     setPasswordState({
       currentPassword: '',
       newPassword: '',
-      confirmNewPassword: ''
+      confirmNewPassword: '',
+      hasMinLength: false,
+      hasUpperCase: false,
+      hasLowerCase: false,
+      hasNumber: false
     });
   }, [passwordState]);
   const handleTogglePreference = useCallback((field: keyof NotificationPreferences, value: boolean) => {
-    setPreferences(prev => ({
+    setNotificationPreferences(prev => ({
       ...prev,
       [field]: value
     }));
@@ -677,18 +839,20 @@ const ProfileSettingsPage: React.FC = () => {
   }, []);
   const handleCancel = useCallback(() => {
     setPersonalInfo({
-      firstName: 'Ed',
-      surname: 'Addams',
-      companyName: 'The Write Company',
-      email: 'edaddams@domain.com'
+      firstName: '',
+      surname: '',
+      email: '',
+      phone: '',
+      address: '',
+      companyName: ''
     });
     setIsEditing(false);
     setProfilePicture(null);
     setProfilePicturePreview('');
-    setPreferences({
-      campaignUpdates: false,
-      brandHealthAlerts: false,
-      aiInsightNotifications: false
+    setNotificationPreferences({
+      emailNotifications: true,
+      pushNotifications: true,
+      marketingEmails: false
     });
     setHasChanges(false);
   }, []);
@@ -696,51 +860,98 @@ const ProfileSettingsPage: React.FC = () => {
     window.location.href = '/api/auth/logout';
   }, []);
 
-  // Render loading state
-  if (isLoading || isPageLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-color)]"></div>
-          <p className="text-[var(--secondary-color)] animate-pulse">Loading settings...</p>
-        </div>
-      </div>;
+  // Render loading state with progress indicator
+  if (isUserLoading || isPageLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <SvgIcon name="faCircle" className="w-12 h-12 text-[var(--accent-color)] animate-spin" iconType="static" solid={false} />
+          <p className="mt-4 text-gray-600">
+            {isUserLoading ? 'Loading your profile...' : 'Verifying your access...'}
+          </p>
+          {roleCheckAttempts > 0 && (
+            <p className="mt-2 text-sm text-gray-500">
+              Attempt {roleCheckAttempts} of {MAX_ROLE_CHECK_ATTEMPTS}...
+            </p>
+          )}
+        </motion.div>
+      </div>
+    );
   }
 
-  // Render error state
-  if (error || !user) {
-    return <div className="flex items-center justify-center min-h-screen">
-        <motion.div initial={{
-        opacity: 0,
-        y: 20
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} className="bg-red-50 text-red-800 rounded-xl p-6 max-w-md w-full 
-            shadow-lg flex items-center">
-
-
-
-          <Icon name="faXCircle" className="w-12 h-12 text-red-400 mr-4" solid={false} />
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Access Error</h3>
-            <p className="text-red-600">
-              {error?.message || 'Please log in to access settings'}
-            </p>
-            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg
-                  mt-4 hover:bg-opacity-90 transition-all duration-200
-                  flex items-center">
-
-
-
-
-
-              <Icon name="faArrowRight" className="w-5 h-5 mr-2" solid={false} />
-              Retry
-            </button>
+  // Render error state with retry button
+  if (userError || error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-50 text-red-800 rounded-xl p-6 max-w-md w-full shadow-lg"
+        >
+          <div className="flex items-start">
+            <SvgIcon name="faXCircle" className="w-12 h-12 text-red-400 mr-4 flex-shrink-0" iconType="static" solid={false} />
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Access Error</h3>
+              <p className="text-red-600 mb-4">
+                {userError?.message || error || 'An unexpected error occurred'}
+              </p>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center"
+                >
+                  <SvgIcon name="faRotate" className="w-5 h-5 mr-2" iconType="static" solid={false} />
+                  Retry
+                </button>
+                <button
+                  onClick={() => window.location.href = '/api/auth/login'}
+                  className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center"
+                >
+                  <SvgIcon name="faArrowRight" className="w-5 h-5 mr-2" iconType="static" solid={false} />
+                  Log In Again
+                </button>
+              </div>
+            </div>
           </div>
         </motion.div>
-      </div>;
+      </div>
+    );
   }
+
+  // Render unauthorized state with clear call-to-action
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-yellow-50 text-yellow-800 rounded-xl p-6 max-w-md w-full shadow-lg"
+        >
+          <div className="flex items-start">
+            <SvgIcon name="faLock" className="w-12 h-12 text-yellow-400 mr-4 flex-shrink-0" iconType="static" solid={false} />
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
+              <p className="text-yellow-600 mb-4">
+                Please log in to access your settings
+              </p>
+              <button
+                onClick={() => window.location.href = '/api/auth/login'}
+                className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center"
+              >
+                <SvgIcon name="faArrowRight" className="w-5 h-5 mr-2" iconType="static" solid={false} />
+                Log In
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return <motion.div initial={{
     opacity: 0
   }} animate={{
@@ -779,12 +990,12 @@ const ProfileSettingsPage: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        <NavigationTabs activeTab={activeTab} isSuperAdmin={isSuperAdmin} onTabChange={handleTabChange} />
+        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isSuperAdmin={isSuperAdmin} />
 
 
         {/* Main Content */}
         <div className="space-y-8">
-          <PersonalInfoSection personalInfo={personalInfo} isEditing={isEditing} onChange={handlePersonalInfoChangeWithMark} onToggleEdit={toggleEditing} />
+          <PersonalInfoSection personalInfo={personalInfo} isEditing={isEditing} onChange={handlePersonalInfoChangeWithMark} onToggleEdit={() => setIsEditing(!isEditing)} />
 
 
           <ProfilePicture profilePicturePreview={profilePicturePreview} onFileChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -792,10 +1003,16 @@ const ProfileSettingsPage: React.FC = () => {
         }} onRemove={removeProfilePicture} error={profilePictureError} />
 
 
-          <PasswordManagementSection passwordState={passwordState} onChange={handlePasswordChange} onSubmit={handlePasswordSubmit} error={passwordError} success={passwordSuccess} />
+          <PasswordManagementSection 
+            passwordState={passwordState}
+            onChange={handlePasswordFieldChange}
+            onSubmit={handlePasswordSubmit}
+            error={error || ''}
+            success={success || ''}
+          />
 
 
-          <NotificationPreferencesSection preferences={preferences} onToggle={handleTogglePreferenceWithMark} />
+          <NotificationPreferencesSection preferences={notificationPreferences} onToggle={handleTogglePreferenceWithMark} />
 
 
           {/* Debug Information (only visible in development) */}

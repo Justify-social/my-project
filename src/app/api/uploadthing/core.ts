@@ -1,9 +1,18 @@
 import { createUploadthing } from "uploadthing/next";
 import type { FileRouter } from "uploadthing/next";
-import { getServerSession } from "next-auth/next";
-import { prisma } from "@/lib/prisma";
 
+// For SDK v7+ configuration - no need to decode token or configure manually
+// UploadThing automatically reads UPLOADTHING_TOKEN from environment variables
 const f = createUploadthing();
+
+// Always verify the environment variables exist
+if (!process.env.UPLOADTHING_TOKEN) {
+  console.error("Missing required UPLOADTHING_TOKEN environment variable");
+  throw new Error('Missing required UPLOADTHING_TOKEN environment variable');
+}
+
+// Log that we're using SDK v7+ configuration for debugging
+console.log("UploadThing initialized with SDK v7+ configuration");
 
 export const ourFileRouter = {
   // General media uploader for various content
@@ -51,25 +60,24 @@ export const ourFileRouter = {
     image: { maxFileSize: "8MB", maxFileCount: 10 },
     video: { maxFileSize: "16MB", maxFileCount: 5 },
   })
-    .middleware(async ({ req }) => {
-      // Simplify the middleware to reduce potential issues with Effect
-      const campaignId = req.headers.get("x-campaign-id") || "unknown";
-      
+    .middleware(async () => {
+      // Simplified middleware with minimal processing
+      console.log("Processing campaign asset upload");
       return { 
-        campaignId,
+        campaignId: "temp-id", // Will be replaced client-side
         uploadedAt: new Date().toISOString()
       };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
-      // Simplify the completion handler
+    .onUploadComplete(async ({ file }) => {
+      // Return minimal data to avoid serialization issues
+      console.log("Campaign asset upload complete:", file.url);
       return { 
         url: file.url,
         name: file.name,
         size: file.size,
-        type: file.type,
-        campaignId: metadata.campaignId
+        type: file.type
       };
-    })
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter; 

@@ -2,12 +2,14 @@ import { Inter } from 'next/font/google'
 import { UserProvider } from '@auth0/nextjs-auth0/client'
 import ClientLayout from '@/components/layouts/client-layout'
 import './globals.css'
-// Re-enable UploadThing with correct imports for Next.js 15
-import { generateUploadDropzone, generateUploadButton } from "@uploadthing/react";
-import { ourFileRouter } from "@/lib/uploadthing";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Toaster } from 'react-hot-toast';
 import { ToastProvider } from '@/components/ui/toast';
 import { FormStyleReset } from '@/components/ui';
+import { Suspense } from 'react';
+import { connection } from 'next/server';
 
 // Import diagnostic script for legacy compatibility
 import '@/lib/icon-diagnostic';
@@ -25,6 +27,12 @@ export const metadata = {
   },
 }
 
+// SSR component for UploadThing
+async function UTSSR() {
+  await connection();
+  return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -37,15 +45,16 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
-          {/* UploadThing is now properly configured via the utility functions import */}
-          <Toaster />
           <ToastProvider>
-            <FormStyleReset />
+            <Suspense>
+              <UTSSR />
+            </Suspense>
             <ClientLayout>
               <main className="min-h-screen bg-gray-100">
                 {children}
               </main>
             </ClientLayout>
+            <Toaster />
           </ToastProvider>
         </UserProvider>
       </body>
