@@ -1762,7 +1762,7 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
   }
 }
 
-// Add this custom Step4AssetPreview component based on Step5AssetPreview
+// Fix Step4AssetPreview component to match Step5AssetPreview behavior
 const Step4AssetPreview = ({
   url,
   fileName,
@@ -1787,17 +1787,16 @@ const Step4AssetPreview = ({
   // Toggle play/pause when the button is clicked or video area is clicked
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
+    
     if (!videoRef.current) return;
     
     if (isPlaying) {
       videoRef.current.pause();
-      setIsPlaying(false);
     } else {
-      videoRef.current.play()
-        .catch(error => {
-          console.warn('Play was prevented:', error);
-        });
-      setIsPlaying(true);
+      videoRef.current.play().catch(error => {
+        console.warn('Play was prevented:', error);
+      });
     }
   };
 
@@ -1808,82 +1807,33 @@ const Step4AssetPreview = ({
       
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
-      
-      video.addEventListener('play', handlePlay);
-      video.addEventListener('pause', handlePause);
-      
-      return () => {
-        video.removeEventListener('play', handlePlay);
-        video.removeEventListener('pause', handlePause);
-      };
-    }
-  }, [isVideo]);
-
-  // Effect to handle video autoplay and looping
-  useEffect(() => {
-    if (isVideo && videoRef.current) {
-      const video = videoRef.current;
-
-      // Auto-play the video when component mounts
-      const playVideo = () => {
-        video.play().catch(error => {
-          console.warn('Auto-play was prevented:', error);
-          setIsPlaying(false);
-        });
-        setIsPlaying(true);
-      };
-
-      // Handle video looping - restart after 5 seconds or when ended
-      const handleTimeUpdate = () => {
-        if (video.currentTime >= 5) {
-          video.currentTime = 0;
-          if (isPlaying) {
-            video.play().catch(err => {
-              console.error('Error replaying video:', err);
-              setIsPlaying(false);
-            });
-          }
-        }
-      };
-      
-      const handleEnded = () => {
-        video.currentTime = 0;
-        if (isPlaying) {
-          video.play().catch(err => {
-            console.error('Error replaying video:', err);
-            setIsPlaying(false);
-          });
-        }
-      };
-      
-      const handleLoadedMetadata = () => {
-        setStatus('loaded');
-      };
-      
       const handleError = () => {
         setStatus('error');
         setError(new Error(`Failed to load video: ${fileName}`));
       };
-
-      // Add event listeners
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('ended', handleEnded);
-      video.addEventListener('error', handleError);
+      const handleLoadedMetadata = () => {
+        setStatus('loaded');
+        // Autoplay when metadata is loaded
+        video.play().catch(error => {
+          console.warn('Autoplay was prevented:', error);
+          setIsPlaying(false);
+        });
+      };
       
-      // Start loading
-      video.load();
-
-      // Remove event listeners on cleanup
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('pause', handlePause);
+      video.addEventListener('error', handleError);
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      
       return () => {
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('ended', handleEnded);
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('pause', handlePause);
         video.removeEventListener('error', handleError);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       };
     }
-  }, [isVideo, url, isPlaying, fileName]);
-  
+  }, [isVideo, fileName]);
+
   // Handle image loading
   useEffect(() => {
     if (isImage && url) {
@@ -1921,7 +1871,14 @@ const Step4AssetPreview = ({
       
       {/* Image preview */}
       {isImage && status === 'loaded' && (
-        <img src={url} alt={fileName} className="w-full h-full object-cover" />
+        <>
+          <img src={url} alt={fileName} className="w-full h-full object-cover" />
+          {/* Image badge */}
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+            <Icon name="faImage" className="h-3 w-3 mr-1 inline-block" iconType="static" solid={true} />
+            Image
+          </div>
+        </>
       )}
       
       {/* Video preview with play/pause button */}
@@ -1932,27 +1889,28 @@ const Step4AssetPreview = ({
             src={url} 
             className="w-full h-full object-cover" 
             muted 
+            autoPlay
             playsInline 
             loop 
           />
           
-          {/* Play/Pause button that appears on hover */}
-          {isVideo && isHovering && (
-            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
-              <button
-                onClick={togglePlayPause}
-                className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
-                aria-label={isPlaying ? "Pause video" : "Play video"}
-              >
-                <Icon 
-                  name={isPlaying ? "faPause" : "faPlay"} 
-                  className="h-6 w-6 text-white" 
-                  iconType="button" 
-                  solid={true} 
-                />
-              </button>
-            </div>
-          )}
+          {/* Play/Pause button that appears on hover or when paused */}
+          <div 
+            className={`absolute inset-0 bg-black ${isHovering ? 'bg-opacity-20' : 'bg-opacity-0'} flex items-center justify-center transition-opacity duration-200 ${!isHovering && isPlaying ? 'opacity-0' : 'opacity-100'}`}
+          >
+            <button
+              onClick={togglePlayPause}
+              className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10"
+              aria-label={isPlaying ? "Pause video" : "Play video"}
+            >
+              <Icon 
+                name={isPlaying ? "faPause" : "faPlay"} 
+                className="h-6 w-6 text-white" 
+                iconType="button" 
+                solid={true} 
+              />
+            </button>
+          </div>
           
           {/* Video label in bottom corner */}
           <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
