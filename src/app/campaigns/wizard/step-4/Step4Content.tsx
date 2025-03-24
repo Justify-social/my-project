@@ -390,24 +390,30 @@ const UploadArea: React.FC<UploadAreaProps> = ({
           toast(t => <div>
               <p>You have a pending upload. Would you like to retry?</p>
               <div className="mt-2">
-                <button className="px-2 py-1 bg-blue-500 text-white rounded mr-2" onClick={() => {
-                toast.dismiss(t.id);
-                // User needs to reselect files - can't recover File objects from storage
-                if (inputRef.current) {
-                  inputRef.current.click();
-                }
-              }}>
-
+                <button 
+                  type="button"
+                  className="px-2 py-1 bg-blue-500 text-white rounded mr-2" 
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                    // User needs to reselect files - can't recover File objects from storage
+                    if (inputRef.current) {
+                      inputRef.current.click();
+                    }
+                  }}
+                >
                   Retry Upload
                 </button>
-                <button className="px-2 py-1 bg-gray-300 rounded" onClick={() => {
-                localStorage.removeItem(`pendingUpload_${campaignId}`);
-                toast.dismiss(t.id);
-              }}>
-
+                <button 
+                  type="button"
+                  className="px-2 py-1 bg-gray-300 rounded" 
+                  onClick={() => {
+                    localStorage.removeItem(`pendingUpload_${campaignId}`);
+                    toast.dismiss(t.id);
+                  }}
+                >
                   Discard
                 </button>
-      </div>
+              </div>
             </div>, {
             duration: 10000
           });
@@ -724,12 +730,12 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
       <CardContent className="p-4">
         <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
           <div className="w-full md:w-1/3 lg:w-1/4">
-            <EnhancedAssetPreview 
+            <Step4AssetPreview 
               url={asset.url} 
               fileName={asset.fileName} 
               type={asset.type}
               id={asset.id}
-              className="w-full h-auto max-h-[200px] md:max-h-[160px] rounded-lg" 
+              className="w-full h-auto rounded-lg shadow-sm border border-gray-200" 
             />
           </div>
           
@@ -745,13 +751,22 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
                     {isEditingName ? <div className="flex w-full">
                         <input type="text" value={assetName} onChange={e => setAssetName(e.target.value)} onBlur={toggleNameEdit} onKeyDown={handleKeyDown} className="w-full p-2 border border-blue-300 rounded-l-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] bg-blue-50" autoFocus />
 
-                        <button className="px-2 py-2 bg-[var(--accent-color)] text-white rounded-r-md hover:opacity-90" onClick={toggleNameEdit} title="Save asset name">
-
+                        <button 
+                          type="button"
+                          className="px-2 py-2 bg-[var(--accent-color)] text-white rounded-r-md hover:opacity-90" 
+                          onClick={toggleNameEdit} 
+                          title="Save asset name"
+                        >
                           <Icon name="faCheck" className="h-5 w-5" solid={false} />
                         </button>
                       </div> : <div className="flex items-center w-full border border-gray-200 rounded-md p-2 bg-gray-50">
                         <span className="text-gray-700 font-medium truncate max-w-xs">{assetName}</span>
-                        <button onClick={toggleNameEdit} className="text-gray-400 hover:text-[var(--accent-color)] transition-colors ml-3 group" title="Edit asset name">
+                        <button 
+                          type="button"
+                          onClick={toggleNameEdit} 
+                          className="text-gray-400 hover:text-[var(--accent-color)] transition-colors ml-3 group" 
+                          title="Edit asset name"
+                        >
                           <Icon name="faEdit" className="h-4 w-4 group-hover:hidden" solid={false} />
                           <Icon name="faEdit" className="h-4 w-4 hidden group-hover:block" solid={true} />
                         </button>
@@ -760,7 +775,12 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
                 </div>
               </div>
 
-              <button onClick={handleDeleteAsset} className="ml-2 text-[var(--secondary-color)] hover:text-red-600 transition-colors group" aria-label="Delete asset">
+              <button 
+                type="button"
+                onClick={handleDeleteAsset} 
+                className="ml-2 text-[var(--secondary-color)] hover:text-red-600 transition-colors group" 
+                aria-label="Delete asset"
+              >
                 <Icon name="faTrashCan" className="w-5 h-5 group-hover:hidden" solid={false} />
                 <Icon name="faTrashCan" className="w-5 h-5 hidden group-hover:block" solid={true} />
               </button>
@@ -829,10 +849,6 @@ const Modal: React.FC<ModalProps> = ({
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full" onClick={e => e.stopPropagation()}>
 
         {children}
-        <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-
-          Close
-        </button>
       </div>
     </div>;
 };
@@ -1745,3 +1761,213 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
     return null;
   }
 }
+
+// Add this custom Step4AssetPreview component based on Step5AssetPreview
+const Step4AssetPreview = ({
+  url,
+  fileName,
+  type,
+  id,
+  className = ''
+}: {
+  url: string;
+  fileName: string;
+  type: string;
+  id?: string;
+  className?: string;
+}) => {
+  const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
+  const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error' | 'ready'>('loading');
+  const [error, setError] = useState<Error | null>(null);
+
+  // Toggle play/pause when the button is clicked or video area is clicked
+  const togglePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play()
+        .catch(error => {
+          console.warn('Play was prevented:', error);
+        });
+      setIsPlaying(true);
+    }
+  };
+
+  // Update play state based on video events
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      const video = videoRef.current;
+      
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+      
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('pause', handlePause);
+      
+      return () => {
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('pause', handlePause);
+      };
+    }
+  }, [isVideo]);
+
+  // Effect to handle video autoplay and looping
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      const video = videoRef.current;
+
+      // Auto-play the video when component mounts
+      const playVideo = () => {
+        video.play().catch(error => {
+          console.warn('Auto-play was prevented:', error);
+          setIsPlaying(false);
+        });
+        setIsPlaying(true);
+      };
+
+      // Handle video looping - restart after 5 seconds or when ended
+      const handleTimeUpdate = () => {
+        if (video.currentTime >= 5) {
+          video.currentTime = 0;
+          if (isPlaying) {
+            video.play().catch(err => {
+              console.error('Error replaying video:', err);
+              setIsPlaying(false);
+            });
+          }
+        }
+      };
+      
+      const handleEnded = () => {
+        video.currentTime = 0;
+        if (isPlaying) {
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
+            setIsPlaying(false);
+          });
+        }
+      };
+      
+      const handleLoadedMetadata = () => {
+        setStatus('loaded');
+      };
+      
+      const handleError = () => {
+        setStatus('error');
+        setError(new Error(`Failed to load video: ${fileName}`));
+      };
+
+      // Add event listeners
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('ended', handleEnded);
+      video.addEventListener('error', handleError);
+      
+      // Start loading
+      video.load();
+
+      // Remove event listeners on cleanup
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('timeupdate', handleTimeUpdate);
+        video.removeEventListener('ended', handleEnded);
+        video.removeEventListener('error', handleError);
+      };
+    }
+  }, [isVideo, url, isPlaying, fileName]);
+  
+  // Handle image loading
+  useEffect(() => {
+    if (isImage && url) {
+      setStatus('loading');
+      const img = new Image();
+      img.onload = () => setStatus('loaded');
+      img.onerror = () => {
+        setStatus('error');
+        setError(new Error(`Failed to load image: ${fileName}`));
+      };
+      img.src = url;
+    }
+  }, [isImage, url, fileName]);
+  
+  return (
+    <div 
+      className={`relative rounded-lg overflow-hidden bg-gray-100 aspect-square ${className}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Loading state */}
+      {status === 'loading' && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <Icon name="faSpinner" className="h-8 w-8 text-gray-400 animate-spin" iconType="static" solid={false} />
+        </div>
+      )}
+      
+      {/* Error state */}
+      {status === 'error' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100">
+          <Icon name="faExclamationTriangle" className="h-8 w-8 text-amber-500 mb-2" iconType="static" solid={false} />
+          <p className="text-center text-gray-600 text-sm">Failed to load {fileName}</p>
+        </div>
+      )}
+      
+      {/* Image preview */}
+      {isImage && status === 'loaded' && (
+        <img src={url} alt={fileName} className="w-full h-full object-cover" />
+      )}
+      
+      {/* Video preview with play/pause button */}
+      {isVideo && (
+        <div className="relative w-full h-full" onClick={togglePlayPause}>
+          <video 
+            ref={videoRef} 
+            src={url} 
+            className="w-full h-full object-cover" 
+            muted 
+            playsInline 
+            loop 
+          />
+          
+          {/* Play/Pause button that appears on hover */}
+          {isVideo && isHovering && (
+            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
+              <button
+                onClick={togglePlayPause}
+                className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
+                aria-label={isPlaying ? "Pause video" : "Play video"}
+              >
+                <Icon 
+                  name={isPlaying ? "faPause" : "faPlay"} 
+                  className="h-6 w-6 text-white" 
+                  iconType="button" 
+                  solid={true} 
+                />
+              </button>
+            </div>
+          )}
+          
+          {/* Video label in bottom corner */}
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+            <Icon name="faVideo" className="h-3 w-3 mr-1 inline-block" iconType="static" solid={true} />
+            Video
+          </div>
+        </div>
+      )}
+      
+      {/* Fallback for unsupported file types */}
+      {!isImage && !isVideo && (
+        <div className="flex items-center justify-center p-8">
+          <Icon name="faInfo" className="h-12 w-12 text-gray-400" iconType="static" solid={false} />
+        </div>
+      )}
+    </div>
+  );
+};
