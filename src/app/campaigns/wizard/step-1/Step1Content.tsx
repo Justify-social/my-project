@@ -176,7 +176,7 @@ const StyledField = ({
         {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
             {icon}
           </div>}
-        {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props}>
+        {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon ${as === "select" ? "appearance-none" : ""}`} {...props}>
 
             {children}
           </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
@@ -206,9 +206,7 @@ const DateField = ({
         {required && <span className="text-[var(--accent-color)] ml-1">*</span>}
       </label>
       <div className="relative">
-        <Field type="date" id={name} name={name} className="w-full p-2.5 pr-10 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
-
-        <Icon name="faCalendar" className="absolute right-3 top-2.5 w-5 h-5 text-[var(--secondary-color)]" solid={false} />
+        <Field type="date" id={name} name={name} className="w-full p-2.5 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
     </div>;
@@ -395,21 +393,18 @@ const DateRangePicker = ({
     return nextDay.toISOString().split('T')[0];
   })() : '';
   return <div className="mb-5">
-      <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+      <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-sora">
         {label} <span className="text-[var(--accent-color)]">*</span>
       </label>
       
-      <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4">
+      <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1">
               Start Date
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
-                <Icon name="faCalendar" className="w-5 h-5" solid={false} />
-              </div>
-              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] form-input-with-icon ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-gray-300'}`} min={new Date().toISOString().split('T')[0]} // Minimum is today
+              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'}`} min={new Date().toISOString().split('T')[0]} // Minimum is today
             />
             </div>
             {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1">
@@ -422,10 +417,7 @@ const DateRangePicker = ({
               End Date
             </label>
             <div className="relative">
-              <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
-                <Icon name="faCalendar" className="w-5 h-5" solid={false} />
-              </div>
-              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={e => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] form-input-with-icon ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-gray-300'}`} min={minEndDate} // End date must be at least the day after start date
+              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={e => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'}`} min={minEndDate} // End date must be at least the day after start date
             disabled={!startDate} // Disable until start date is selected
             />
             </div>
@@ -435,7 +427,7 @@ const DateRangePicker = ({
           </div>
         </div>
         
-        {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
+        {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded">
             <div className="flex items-center">
               <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-[var(--accent-color)]" solid={false} />
               <span>Campaign Duration: {calculateDuration(startDate, endDate)}</span>
@@ -644,58 +636,54 @@ const InfluencerEntry = ({
     }
   }, [influencer.platform, influencer.handle, debouncedValidate]);
   const hasError = touched.influencers?.[index] && ((errors.influencers?.[index] as any)?.platform || (errors.influencers?.[index] as any)?.handle);
-  return <div className="bg-white rounded-lg border border-[var(--divider-color)] p-4 mb-4">
+  return <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 mb-4">
       <div className="flex justify-between items-center mb-3">
-        <h4 className="text-[var(--primary-color)] font-medium">Influencer #{index + 1}</h4>
-        {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700">
-
+        <h4 className="text-[var(--primary-color)] font-medium font-sora">Influencer #{index + 1}</h4>
+        {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200">
             <Icon name="faClose" className="h-5 w-5" solid={false} />
           </button>}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2">
+          <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
             Platform <span className="text-[var(--accent-color)]">*</span>
           </label>
-          <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-gray-300'}`}>
-
+          <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] appearance-none ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-[var(--divider-color)]'}`}>
             <option value="">Select platform</option>
             <option value={Platform.Instagram}>Instagram</option>
             <option value={Platform.YouTube}>YouTube</option>
             <option value={Platform.TikTok}>TikTok</option>
           </Field>
           <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-red-500 text-sm mt-1" />
-
         </div>
         
         <div>
-          <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2">
+          <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
             Influencer Handle <span className="text-[var(--accent-color)]">*</span>
           </label>
           <div className="relative">
-            <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-gray-300'}`} />
+            <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-[var(--divider-color)]'}`} />
 
             {isValidating && <div className="absolute right-2 top-2">
-                <Icon name="faInfo" className="h-5 w-5 text-[var(--primary-color)] animate-spin" solid={false} />
+                <img src="/ui-icons/light/spinner.svg" className="h-5 w-5 text-[var(--primary-color)] animate-spin" alt="Loading" />
               </div>}
           </div>
           <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1" />
 
-          {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-gray-500 mt-1">Type at least 3 characters to search</div>}
+          {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-[var(--secondary-color)] mt-1">Type at least 3 characters to search</div>}
         </div>
       </div>
       
       {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center">
-          <span className="animate-spin mr-2">
-            <Icon name="faInfo" className="h-4 w-4" solid={false} />
-          </span>
+          <div className="animate-spin mr-2">
+            <img src="/ui-icons/light/spinner.svg" className="h-4 w-4" alt="Loading" />
+          </div>
           Validating influencer...
         </div>}
       
       {validationResult && <div className="mt-3">
           <InfluencerPreview platform={influencer.platform} handle={influencer.handle} data={validationResult} />
-
         </div>}
       
       {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-amber-600 text-sm">
@@ -741,7 +729,7 @@ const InfluencerPreview = ({
   if (isLoading) {
     return <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center">
         <div className="animate-spin mr-2">
-          <Icon name="faInfo" className="h-4 w-4 text-[var(--primary-color)]" solid={false} />
+          <img src="/ui-icons/light/spinner.svg" className="h-4 w-4 text-[var(--primary-color)]" alt="Loading" />
         </div>
         <p className="text-sm text-gray-600">Validating influencer...</p>
       </div>;
@@ -758,10 +746,28 @@ const InfluencerPreview = ({
         </p>
       </div>;
   }
+  
+  // Convert platform name to lowercase for standard format
+  const getPlatformName = (platformName: string): string => {
+    const name = platformName.toLowerCase();
+    if (name.includes('instagram')) return 'instagram';
+    if (name.includes('tiktok')) return 'tiktok';
+    if (name.includes('youtube')) return 'youtube';
+    if (name.includes('facebook')) return 'facebook';
+    if (name.includes('twitter') || name.includes('x')) return 'x-twitter';
+    if (name.includes('linkedin')) return 'linkedin';
+    if (name.includes('pinterest')) return 'pinterest';
+    if (name.includes('reddit')) return 'reddit';
+    return 'instagram'; // Default fallback
+  };
+  
+  // Get normalized platform name
+  const platformName = getPlatformName(platform);
+  
   return <div className="bg-blue-50 rounded-md p-3">
       <div className="flex items-start">
         {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-            <Icon name="faInfo" className="h-6 w-6 text-gray-500" solid={false} />
+            <Icon name="faUserLight" className="h-6 w-6 text-gray-500" solid={false} />
           </div>}
         <div>
           <div className="flex items-center">
@@ -769,10 +775,18 @@ const InfluencerPreview = ({
               {influencerData.displayName || handle}
             </p>
             {influencerData.verified && <span className="ml-1 text-blue-500">
-                <Icon name="faInfo" className="h-4 w-4" solid={false} />
+                <Icon name="faCircleCheck" className="h-4 w-4" solid={true} />
               </span>}
           </div>
-          <p className="text-sm text-gray-600">@{handle}</p>
+          <p className="text-sm text-gray-600 flex items-center">
+            <img 
+              src={`/ui-icons/brands/${platformName}.svg`} 
+              alt={platformName}
+              className="h-4 w-4 mr-1.5 inline-block"
+              style={{ position: 'relative', top: '-1px' }}
+            />
+            @{handle}
+          </p>
           <div className="mt-1 flex space-x-3 text-xs text-gray-500">
             <span>{influencerData.followerCount?.toLocaleString() || 'Unknown'} followers</span>
             {influencerData.engagementRate && <span>{influencerData.engagementRate.toFixed(2)}% engagement</span>}
@@ -1320,7 +1334,7 @@ function FormContent() {
         </button>
       </div>;
   }
-  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white">
+  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-[var(--background-color)]">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-2 font-sora">Campaign Creation</h1>
         <p className="text-[var(--secondary-color)] font-work-sans">Complete all required fields to create your campaign</p>
@@ -1349,7 +1363,7 @@ function FormContent() {
         return <>
               <Form className="space-y-8">
                 {/* Campaign Details */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
                     <Image src="/app/Campaigns.svg" alt="Campaigns" width={16} height={16} className="mr-2 text-black" />
 
@@ -1385,7 +1399,7 @@ function FormContent() {
                 </div>
 
                 {/* Primary Contact */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
                     <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Primary Contact
@@ -1410,7 +1424,7 @@ function FormContent() {
                 </div>
 
                 {/* Secondary Contact */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
                     <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
@@ -1435,22 +1449,21 @@ function FormContent() {
                 </div>
 
                 {/* Additional Contacts */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <div className="flex justify-between items-center mb-5">
                     <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] flex items-center">
                       <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                       Additional Contacts <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                     </h2>
                     <button type="button" onClick={() => {
-                  const contacts = [...values.additionalContacts, {
-                    firstName: '',
-                    surname: '',
-                    email: '',
-                    position: ''
-                  }];
-                  setFieldValue('additionalContacts', contacts);
-                }} className="flex items-center text-sm font-medium bg-white border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
-
+                      const contacts = [...values.additionalContacts, {
+                        firstName: '',
+                        surname: '',
+                        email: '',
+                        position: ''
+                      }];
+                      setFieldValue('additionalContacts', contacts);
+                    }} className="flex items-center text-sm font-medium bg-[var(--background-color)] border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
                       <Icon name="faPlus" className="w-5 h-5 mr-1" solid={false} />
                       Add Contact
                     </button>
@@ -1458,10 +1471,10 @@ function FormContent() {
 
                   {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-[var(--divider-color)] rounded-lg p-4 relative shadow-sm bg-white">
                         <button type="button" onClick={() => {
-                  const contacts = [...values.additionalContacts];
-                  contacts.splice(index, 1);
-                  setFieldValue('additionalContacts', contacts);
-                }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200" aria-label="Remove contact">
+                          const contacts = [...values.additionalContacts];
+                          contacts.splice(index, 1);
+                          setFieldValue('additionalContacts', contacts);
+                        }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200" aria-label="Remove contact">
 
                           <Icon name="faClose" className="h-5 w-5" solid={false} />
                         </button>
@@ -1493,7 +1506,7 @@ function FormContent() {
                 </div>
 
                 {/* Influencers */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
                     <Icon name="faStar" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Influencer Details
@@ -1528,7 +1541,7 @@ function FormContent() {
                 </div>
 
                 {/* Budget Section */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
                     <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
                     Budget
