@@ -648,21 +648,21 @@ const HashtagMetric: React.FC<HashtagMetricProps> = ({
   reach,
   engagement,
   sentiment
-}) => <div className="p-4 border rounded-lg hover:bg-gray-50">
-    <div className="flex items-center justify-between mb-2">
-      <h4 className="font-medium text-gray-900">{tag}</h4>
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${sentiment >= 85 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+}) => <div className="p-4 border rounded-lg hover:bg-gray-50 font-work-sans">
+    <div className="flex items-center justify-between mb-2 font-work-sans">
+      <h4 className="font-medium text-gray-900 font-sora">{tag}</h4>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${sentiment >= 85 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'} font-work-sans`}>
         {sentiment}% Positive
       </span>
     </div>
-    <div className="grid grid-cols-2 gap-4 text-sm">
-      <div>
-        <p className="text-gray-500">Reach</p>
-        <p className="font-medium">{reach}</p>
+    <div className="grid grid-cols-2 gap-4 text-sm font-work-sans">
+      <div className="font-work-sans">
+        <p className="text-gray-500 font-work-sans">Reach</p>
+        <p className="font-medium font-work-sans">{reach}</p>
     </div>
-      <div>
-        <p className="text-gray-500">Engagement</p>
-        <p className="font-medium">{engagement}</p>
+      <div className="font-work-sans">
+        <p className="text-gray-500 font-work-sans">Engagement</p>
+        <p className="font-medium font-work-sans">{engagement}</p>
     </div>
     </div>
   </div>;
@@ -681,18 +681,18 @@ const MetricCard = ({
     if (format === 'currency') return `$${value.toLocaleString()}`;
     return value.toLocaleString();
   }, [value, format]);
-  return <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
-      <div className="flex items-center mb-4">
-        <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg">
+  return <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 font-work-sans">
+      <div className="flex items-center mb-4 font-work-sans">
+        <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg font-work-sans">
           {icon ? icon({
           className: "w-6 h-6 text-[var(--accent-color)]"
-        }) : <Icon name="faInfo" className="w-6 h-6 text-[var(--accent-color)]" solid={false} />}
+        }) : <Icon name="faInfo" className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />}
         </div>
         <h3 className="text-lg font-semibold ml-3 font-sora">{title}</h3>
       </div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-3xl font-bold font-sora">{formattedValue}</span>
-        {change !== undefined && <div className={`flex items-center ${changeType === 'increase' ? 'text-green-500' : changeType === 'decrease' ? 'text-red-500' : 'text-gray-500'}`}>
+      <div className="flex items-baseline justify-between font-work-sans">
+        <span className="text-3xl font-bold font-work-sans">{formattedValue}</span>
+        {change !== undefined && <div className={`flex items-center ${changeType === 'increase' ? 'text-green-500' : changeType === 'decrease' ? 'text-red-500' : 'text-gray-500'} font-work-sans`}>
             {changeType === 'increase' ? <Icon name="faArrowUp" className="w-4 h-4" solid={false} /> : changeType === 'decrease' ? <Icon name="faArrowDown" className="w-4 h-4" solid={false} /> : <Icon name="faMinus" className="w-4 h-4" solid={false} />}
             <span className="text-sm font-medium font-work-sans">{Math.abs(change)}%</span>
           </div>}
@@ -716,16 +716,16 @@ const ChartCard: React.FC<ChartCardProps> = ({
   border: '1px solid var(--divider-color)'
 }}>
 
-    <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center">
-        <div className="rounded-lg mr-4 p-3" style={{
+    <div className="flex items-center justify-between mb-6 font-work-sans">
+      <div className="flex items-center font-work-sans">
+        <div className="rounded-lg mr-4 p-3 font-work-sans" style={{
         backgroundColor: 'rgba(0, 191, 255, 0.1)'
       }}>
           <Icon className="w-6 h-6" style={{
           color: 'var(--accent-color)'
         }} solid={false} />
         </div>
-        <div>
+        <div className="font-work-sans">
           <h3 className="text-lg font-semibold font-sora" style={{
           color: 'var(--primary-color)'
         }}>{title}</h3>
@@ -734,7 +734,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
         }}>{description}</p>}
         </div>
       </div>
-      {actions && <div className="flex space-x-2">
+      {actions && <div className="flex space-x-2 font-work-sans">
           {actions}
         </div>}
     </div>
@@ -770,7 +770,7 @@ const RadarChartCard: React.FC<RadarChartCardProps> = ({
   icon: Icon,
   data
 }) => <ChartCard title={title} description={description} icon={Icon}>
-    <div className="h-80">
+    <div className="h-80 font-work-sans">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
           <PolarGrid />
@@ -783,27 +783,27 @@ const RadarChartCard: React.FC<RadarChartCardProps> = ({
   </ChartCard>;
 const SegmentCard: React.FC<SegmentCardProps> = ({
   segment
-}) => <div className="p-4 border rounded-lg hover:bg-gray-50">
-    <div className="flex items-center justify-between mb-4">
-      <h4 className="font-medium text-gray-900">{segment.name}</h4>
-      <span className="text-sm text-green-600 font-medium">{segment.growth}</span>
+}) => <div className="p-4 border rounded-lg hover:bg-gray-50 font-work-sans">
+    <div className="flex items-center justify-between mb-4 font-work-sans">
+      <h4 className="font-medium text-gray-900 font-sora">{segment.name}</h4>
+      <span className="text-sm text-green-600 font-medium font-work-sans">{segment.growth}</span>
     </div>
-    <div className="grid grid-cols-2 gap-4 text-sm">
-      <div>
-        <p className="text-gray-500">Size</p>
-        <p className="font-medium">{segment.size.toLocaleString()}</p>
+    <div className="grid grid-cols-2 gap-4 text-sm font-work-sans">
+      <div className="font-work-sans">
+        <p className="text-gray-500 font-work-sans">Size</p>
+        <p className="font-medium font-work-sans">{segment.size.toLocaleString()}</p>
       </div>
-      <div>
-        <p className="text-gray-500">LTV</p>
-        <p className="font-medium">${segment.lifetime_value.toLocaleString()}</p>
+      <div className="font-work-sans">
+        <p className="text-gray-500 font-work-sans">LTV</p>
+        <p className="font-medium font-work-sans">${segment.lifetime_value.toLocaleString()}</p>
       </div>
-      <div>
-        <p className="text-gray-500">Engagement</p>
-        <p className="font-medium">{segment.engagement}%</p>
+      <div className="font-work-sans">
+        <p className="text-gray-500 font-work-sans">Engagement</p>
+        <p className="font-medium font-work-sans">{segment.engagement}%</p>
       </div>
-      <div>
-        <p className="text-gray-500">Sentiment</p>
-        <p className="font-medium">{segment.sentiment}%</p>
+      <div className="font-work-sans">
+        <p className="text-gray-500 font-work-sans">Sentiment</p>
+        <p className="font-medium font-work-sans">{segment.sentiment}%</p>
       </div>
     </div>
   </div>;
@@ -821,7 +821,7 @@ export default function BrandHealthDashboard() {
     setIsExporting(true);
 
     // Simulate export process with a delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsExporting(false);
     setShowExportModal(true);
   };
@@ -854,18 +854,18 @@ export default function BrandHealthDashboard() {
     value: brandMetrics.currentPeriod.brandEquity.value,
     fullMark: 100
   }];
-  return <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white font-work-sans">
       {/* Export Modal */}
-      {showExportModal && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
-            <button onClick={() => setShowExportModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+      {showExportModal && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 font-work-sans">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative font-work-sans">
+            <button onClick={() => setShowExportModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-work-sans">
 
               <Icon name="faClose" className="w-5 h-5" solid={false} />
             </button>
             
-            {exportComplete ? <div className="text-center py-6">
-                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <Icon name="faCheck" className="w-8 h-8 text-green-600" solid={false} />
+            {exportComplete ? <div className="text-center py-6 font-work-sans">
+                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 font-work-sans">
+                  <Icon name="faCheck" className="w-8 h-8 text-green-600 font-work-sans" solid={false} />
                 </div>
                 <h3 className="text-xl font-semibold text-var(--primary-color) mb-2 font-sora">Export Complete</h3>
                 <p className="text-var(--secondary-color) mb-6 font-work-sans">Your {selectedExportFormat.toUpperCase()} report has been generated successfully.</p>
@@ -885,19 +885,19 @@ export default function BrandHealthDashboard() {
                 <h3 className="text-xl font-semibold text-var(--primary-color) mb-2 font-sora">Export Brand Health Report</h3>
                 <p className="text-var(--secondary-color) mb-6 font-work-sans">Choose from the available formats below:</p>
                 
-                <div className="space-y-3">
-                  <div onClick={() => handleDownload('pdf')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{
+                <div className="space-y-3 font-work-sans">
+                  <div onClick={() => handleDownload('pdf')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
 
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" style={{
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4 font-work-sans" style={{
                 backgroundColor: 'rgba(0, 191, 255, 0.1)'
               }}>
                       <Icon name="faDocumentText" className="w-6 h-6" style={{
                   color: 'var(--accent-color)'
                 }} solid={false} />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 font-work-sans">
                       <h4 className="font-medium font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Complete Brand Health Analysis</h4>
@@ -907,18 +907,18 @@ export default function BrandHealthDashboard() {
                     </div>
                   </div>
                   
-                  <div onClick={() => handleDownload('pptx')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{
+                  <div onClick={() => handleDownload('pptx')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
 
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" style={{
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4 font-work-sans" style={{
                 backgroundColor: 'rgba(0, 191, 255, 0.1)'
               }}>
                       <Icon name="faPresentationChartBar" className="w-6 h-6" style={{
                   color: 'var(--accent-color)'
                 }} solid={false} />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 font-work-sans">
                       <h4 className="font-medium font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Executive Summary</h4>
@@ -928,18 +928,18 @@ export default function BrandHealthDashboard() {
                     </div>
                   </div>
                   
-                  <div onClick={() => handleDownload('csv')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{
+                  <div onClick={() => handleDownload('csv')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
 
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" style={{
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4 font-work-sans" style={{
                 backgroundColor: 'rgba(0, 191, 255, 0.1)'
               }}>
                       <Icon name="faTableCells" className="w-6 h-6" style={{
                   color: 'var(--accent-color)'
                 }} solid={false} />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 font-work-sans">
                       <h4 className="font-medium font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Raw Data Export</h4>
@@ -949,18 +949,18 @@ export default function BrandHealthDashboard() {
                     </div>
                   </div>
                   
-                  <div onClick={() => handleDownload('xlsx')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{
+                  <div onClick={() => handleDownload('xlsx')} className="flex items-center p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
 
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4" style={{
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4 font-work-sans" style={{
                 backgroundColor: 'rgba(0, 191, 255, 0.1)'
               }}>
                       <Icon name="faChartBar" className="w-6 h-6" style={{
                   color: 'var(--accent-color)'
                 }} solid={false} />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 font-work-sans">
                       <h4 className="font-medium font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Competitor Analysis</h4>
@@ -975,16 +975,16 @@ export default function BrandHealthDashboard() {
         </div>}
 
       {/* Dashboard Content */}
-      <div className="p-6 md:p-8">
+      <div className="p-6 md:p-8 font-work-sans">
         {/* Header */}
-        <div id="overview" className="mb-10">
-          <div className="flex justify-between items-center mb-4">
-            <div>
+        <div id="overview" className="mb-10 font-work-sans">
+          <div className="flex justify-between items-center mb-4 font-work-sans">
+            <div className="font-work-sans">
               <h1 className="text-2xl font-semibold font-sora text-var(--primary-color)">Brand Health Monitoring</h1>
               <p className="text-var(--secondary-color) font-work-sans">Sentiment across brand activity in your campaign. Recommendations pinpoint what to amplify and where trends.</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <select className="border border-var(--divider-color) rounded-lg px-3 py-2 bg-white text-var(--secondary-color) font-work-sans text-sm focus:outline-none focus:ring-1 focus:ring-var(--accent-color)" value={dateRange} onChange={e => setDateRange(e.target.value)}>
+            <div className="flex items-center space-x-4 font-work-sans">
+              <select className="border border-var(--divider-color) rounded-lg px-3 py-2 bg-white text-var(--secondary-color) font-work-sans text-sm focus:outline-none focus:ring-1 focus:ring-var(--accent-color)" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
 
                 <option value="7d">Last 7 Days</option>
                 <option value="30d">Last 30 Days</option>
@@ -1008,20 +1008,20 @@ export default function BrandHealthDashboard() {
         </div>
 
         {/* Track Individual Campaigns */}
-        <div id="overview" className="mb-12">
+        <div id="overview" className="mb-12 font-work-sans">
           {/* Main Dashboard Grid - 2 columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-work-sans">
             {/* Left Column - 2/3 width */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6 font-work-sans">
               {/* Overall Sentiment Score */}
-              <div id="sentiment" className="bg-white rounded-xl shadow-sm p-6" style={{
+              <div id="sentiment" className="bg-white rounded-xl shadow-sm p-6 font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-4 font-work-sans">
                   <h3 className="text-lg font-semibold font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Brand Sentiment Overview</h3>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 font-work-sans">
                     <select className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 bg-white font-work-sans">
                       <option>Last 7 Days</option>
                       <option>Last 30 Days</option>
@@ -1029,24 +1029,24 @@ export default function BrandHealthDashboard() {
                     </select>
                   </div>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex flex-col">
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-bold font-sora" style={{
+                <div className="flex items-center justify-between mt-2 font-work-sans">
+                  <div className="flex flex-col font-work-sans">
+                    <div className="flex items-baseline font-work-sans">
+                      <span className="text-4xl font-bold font-work-sans" style={{
                       color: 'var(--primary-color)'
                     }}>{brandMetrics.currentPeriod.sentiment.positive}</span>
-                      <span className="text-4xl font-bold font-sora" style={{
+                      <span className="text-4xl font-bold font-work-sans" style={{
                       color: 'var(--secondary-color)'
                     }}>/100</span>
                     </div>
-                    <span className="text-sm font-medium mt-1 flex items-center" style={{
+                    <span className="text-sm font-medium mt-1 flex items-center font-work-sans" style={{
                     color: '#22C55E'
                   }}>
                       <Icon name="faArrowUp" className="w-4 h-4 mr-1" solid={false} />
                       +4% from previous period
                     </span>
                   </div>
-                  <div className="w-32 h-32">
+                  <div className="w-32 h-32 font-work-sans">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={[{
@@ -1068,47 +1068,47 @@ export default function BrandHealthDashboard() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-4">
-                  <div className="rounded-lg p-3" style={{
+                <div className="mt-4 grid grid-cols-3 gap-4 font-work-sans">
+                  <div className="rounded-lg p-3 font-work-sans" style={{
                   backgroundColor: 'rgba(0, 191, 255, 0.05)'
                 }}>
-                    <div className="flex items-center mb-1">
-                      <div className="w-3 h-3 rounded-full mr-2" style={{
+                    <div className="flex items-center mb-1 font-work-sans">
+                      <div className="w-3 h-3 rounded-full mr-2 font-work-sans" style={{
                       backgroundColor: 'var(--accent-color)'
                     }}></div>
                       <span className="text-sm font-semibold font-work-sans" style={{
                       color: 'var(--secondary-color)'
                     }}>Positive</span>
                     </div>
-                    <span className="text-xl font-bold font-sora" style={{
+                    <span className="text-xl font-bold font-work-sans" style={{
                     color: 'var(--primary-color)'
                   }}>{brandMetrics.currentPeriod.sentiment.positive}%</span>
                   </div>
-                  <div className="rounded-lg p-3" style={{
+                  <div className="rounded-lg p-3 font-work-sans" style={{
                   backgroundColor: 'rgba(0, 191, 255, 0.05)'
                 }}>
-                    <div className="flex items-center mb-1">
-                      <div className="w-3 h-3 rounded-full mr-2" style={{
+                    <div className="flex items-center mb-1 font-work-sans">
+                      <div className="w-3 h-3 rounded-full mr-2 font-work-sans" style={{
                       backgroundColor: 'var(--divider-color)'
                     }}></div>
                       <span className="text-sm font-semibold font-work-sans" style={{
                       color: 'var(--secondary-color)'
                     }}>Neutral</span>
                     </div>
-                    <span className="text-xl font-bold font-sora" style={{
+                    <span className="text-xl font-bold font-work-sans" style={{
                     color: 'var(--primary-color)'
                   }}>{brandMetrics.currentPeriod.sentiment.neutral}%</span>
                   </div>
-                  <div className="rounded-lg p-3" style={{
+                  <div className="rounded-lg p-3 font-work-sans" style={{
                   backgroundColor: 'rgba(0, 191, 255, 0.05)'
                 }}>
-                    <div className="flex items-center mb-1">
-                      <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                    <div className="flex items-center mb-1 font-work-sans">
+                      <div className="w-3 h-3 rounded-full bg-red-500 mr-2 font-work-sans"></div>
                       <span className="text-sm font-semibold font-work-sans" style={{
                       color: 'var(--secondary-color)'
                     }}>Negative</span>
                     </div>
-                    <span className="text-xl font-bold font-sora" style={{
+                    <span className="text-xl font-bold font-work-sans" style={{
                     color: 'var(--primary-color)'
                   }}>{brandMetrics.currentPeriod.sentiment.negative}%</span>
                   </div>
@@ -1116,29 +1116,29 @@ export default function BrandHealthDashboard() {
               </div>
 
               {/* Sentiment Over Time */}
-              <div id="sentiment" className="bg-white rounded-xl shadow-sm p-6" style={{
+              <div id="sentiment" className="bg-white rounded-xl shadow-sm p-6 font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-4 font-work-sans">
                   <h3 className="text-lg font-semibold font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Sentiment Over Time</h3>
-                  <div className="flex space-x-2">
-                    <button className="text-xs px-3 py-1 rounded-full font-medium" style={{
+                  <div className="flex space-x-2 font-work-sans">
+                    <button className="text-xs px-3 py-1 rounded-full font-medium font-work-sans" style={{
                     backgroundColor: 'rgba(0, 191, 255, 0.1)',
                     color: 'var(--secondary-color)'
                   }}>Daily</button>
-                    <button className="text-xs px-3 py-1 rounded-full font-medium" style={{
+                    <button className="text-xs px-3 py-1 rounded-full font-medium font-work-sans" style={{
                     backgroundColor: 'var(--accent-color)',
                     color: 'white'
                   }}>Weekly</button>
-                    <button className="text-xs px-3 py-1 rounded-full font-medium" style={{
+                    <button className="text-xs px-3 py-1 rounded-full font-medium font-work-sans" style={{
                     backgroundColor: 'rgba(0, 191, 255, 0.1)',
                     color: 'var(--secondary-color)'
                   }}>Monthly</button>
                   </div>
                 </div>
-                <div className="h-64">
+                <div className="h-64 font-work-sans">
               <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={brandMetrics.historical.weekly}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--divider-color)" />
@@ -1161,10 +1161,10 @@ export default function BrandHealthDashboard() {
             </div>
 
                 {/* Top Mentions */}
-                <div id="mentions" className="bg-white rounded-xl shadow-sm p-6" style={{
+                <div id="mentions" className="bg-white rounded-xl shadow-sm p-6 font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-4 font-work-sans">
                     <h3 className="text-lg font-semibold font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Top Mentions</h3>
@@ -1175,31 +1175,31 @@ export default function BrandHealthDashboard() {
                       <Icon name="faChevronRight" className="w-4 h-4 ml-1" solid={false} />
                     </button>
                   </div>
-            <div className="space-y-4">
+            <div className="space-y-4 font-work-sans">
                     {/* Sample mentions */}
-                    <div className="p-4 rounded-lg hover:bg-gray-50 transition-colors" style={{
+                    <div className="p-4 rounded-lg hover:bg-gray-50 transition-colors font-work-sans" style={{
                   border: '1px solid var(--divider-color)'
                 }}>
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 mr-3">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{
+                      <div className="flex items-start font-work-sans">
+                        <div className="flex-shrink-0 mr-3 font-work-sans">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center font-work-sans" style={{
                         backgroundColor: 'rgba(0, 191, 255, 0.1)'
                       }}>
                             <Icon name="faCheck" className="w-6 h-6" solid={false} />
                           </div>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
+                        <div className="flex-1 font-work-sans">
+                          <div className="flex items-center justify-between font-work-sans">
+                            <div className="flex items-center font-work-sans">
                               <span className="font-medium font-work-sans" style={{
                             color: 'var(--primary-color)'
                           }}>@TechAnalyst</span>
-                              <span className="mx-2 text-gray-500">•</span>
+                              <span className="mx-2 text-gray-500 font-work-sans">•</span>
                               <span className="text-sm font-work-sans" style={{
                             color: 'var(--secondary-color)'
                           }}>2 days ago</span>
                             </div>
-                            <span className="px-2 py-1 text-xs font-medium rounded-full" style={{
+                            <span className="px-2 py-1 text-xs font-medium rounded-full font-work-sans" style={{
                           backgroundColor: 'rgba(0, 191, 255, 0.1)',
                           color: 'var(--accent-color)'
                         }}>Positive</span>
@@ -1207,12 +1207,12 @@ export default function BrandHealthDashboard() {
                           <p className="mt-1 font-work-sans" style={{
                         color: 'var(--secondary-color)'
                       }}>The new Enterprise AI integration from @TheWriteCompany is impressive - finally a tool that genuinely helps content teams be more productive! #productivity #AI</p>
-                          <div className="mt-2 flex items-center text-sm text-gray-500">
-                            <span className="flex items-center mr-4">
+                          <div className="mt-2 flex items-center text-sm text-gray-500 font-work-sans">
+                            <span className="flex items-center mr-4 font-work-sans">
                               <Icon name="faCheck" className="w-4 h-4 mr-1" solid={false} />
                               256
                     </span>
-                            <span className="flex items-center">
+                            <span className="flex items-center font-work-sans">
                               <Icon name="faUserGroup" className="w-4 h-4 mr-1" solid={false} />
                               42
                             </span>
@@ -1221,29 +1221,29 @@ export default function BrandHealthDashboard() {
                       </div>
                     </div>
                     
-                    <div className="p-4 rounded-lg hover:bg-gray-50 transition-colors" style={{
+                    <div className="p-4 rounded-lg hover:bg-gray-50 transition-colors font-work-sans" style={{
                   border: '1px solid var(--divider-color)'
                 }}>
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 mr-3">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{
+                      <div className="flex items-start font-work-sans">
+                        <div className="flex-shrink-0 mr-3 font-work-sans">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center font-work-sans" style={{
                         backgroundColor: 'rgba(0, 191, 255, 0.1)'
                       }}>
                             <Icon name="faCheck" className="w-6 h-6" solid={false} />
                           </div>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
+                        <div className="flex-1 font-work-sans">
+                          <div className="flex items-center justify-between font-work-sans">
+                            <div className="flex items-center font-work-sans">
                               <span className="font-medium font-work-sans" style={{
                             color: 'var(--primary-color)'
                           }}>Sarah Johnson, Content Director</span>
-                    <span className="mx-2 text-gray-500">•</span>
+                    <span className="mx-2 text-gray-500 font-work-sans">•</span>
                               <span className="text-sm font-work-sans" style={{
                             color: 'var(--secondary-color)'
                           }}>3 days ago</span>
                   </div>
-                            <span className="px-2 py-1 text-xs font-medium rounded-full" style={{
+                            <span className="px-2 py-1 text-xs font-medium rounded-full font-work-sans" style={{
                           backgroundColor: 'rgba(0, 191, 255, 0.1)',
                           color: 'var(--accent-color)'
                         }}>Positive</span>
@@ -1251,12 +1251,12 @@ export default function BrandHealthDashboard() {
                           <p className="mt-1 font-work-sans" style={{
                         color: 'var(--secondary-color)'
                       }}>Just implemented @TheWriteCompany&apos;s brand health monitoring tools across our marketing department. The insights are helping us pivot our messaging strategy in real-time. Highly recommend for enterprise marketing teams.</p>
-                          <div className="mt-2 flex items-center text-sm text-gray-500">
-                            <span className="flex items-center mr-4">
+                          <div className="mt-2 flex items-center text-sm text-gray-500 font-work-sans">
+                            <span className="flex items-center mr-4 font-work-sans">
                               <Icon name="faCheck" className="w-4 h-4 mr-1" solid={false} />
                               187
                             </span>
-                            <span className="flex items-center">
+                            <span className="flex items-center font-work-sans">
                               <Icon name="faUserGroup" className="w-4 h-4 mr-1" solid={false} />
                               32
                             </span>
@@ -1265,7 +1265,7 @@ export default function BrandHealthDashboard() {
                       </div>
                     </div>
                     
-                    <button className="w-full py-2 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                    <button className="w-full py-2 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors font-work-sans">
                       View all mentions
                     </button>
                   </div>
@@ -1273,12 +1273,12 @@ export default function BrandHealthDashboard() {
               </div>
 
               {/* Right Column - 1/3 width */}
-              <div className="space-y-6">
+              <div className="space-y-6 font-work-sans">
                 {/* Sentiment by Platform */}
-                <div id="platforms" className="bg-white rounded-xl shadow-sm p-6" style={{
+                <div id="platforms" className="bg-white rounded-xl shadow-sm p-6 font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-4 font-work-sans">
                     <h3 className="text-lg font-semibold font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Sentiment by Platform</h3>
@@ -1291,54 +1291,54 @@ export default function BrandHealthDashboard() {
                       <option>Last Quarter</option>
                     </select>
                   </div>
-            <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{
+            <div className="space-y-4 font-work-sans">
+                    <div className="flex items-center justify-between font-work-sans">
+                      <div className="flex items-center font-work-sans">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 font-work-sans" style={{
                       backgroundColor: 'rgba(0, 191, 255, 0.1)'
                     }}>
-                          <Icon name="faLightning" solid className="w-6 h-6 text-white" />
+                          <Icon name="faLightning" solid className="w-6 h-6 text-white font-work-sans" />
                         </div>
-                        <span className="font-medium text-gray-900">X</span>
+                        <span className="font-medium text-gray-900 font-work-sans">X</span>
                       </div>
-                      <span className="text-lg font-bold text-gray-900">75%</span>
+                      <span className="text-lg font-bold text-gray-900 font-work-sans">75%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div className="h-2.5 rounded-full" style={{
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 font-work-sans">
+                      <div className="h-2.5 rounded-full font-work-sans" style={{
                     width: "75%",
                     backgroundColor: 'var(--accent-color)'
                   }}></div>
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{
+                    <div className="flex items-center justify-between font-work-sans">
+                      <div className="flex items-center font-work-sans">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 font-work-sans" style={{
                       backgroundColor: 'rgba(0, 191, 255, 0.1)'
                     }}>
                           <Icon name="faCheck" className="w-6 h-6" solid={false} />
                         </div>
-                        <span className="font-medium text-gray-900">Instagram</span>
+                        <span className="font-medium text-gray-900 font-work-sans">Instagram</span>
                       </div>
-                      <span className="text-lg font-bold text-gray-900">82%</span>
+                      <span className="text-lg font-bold text-gray-900 font-work-sans">82%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div className="h-2.5 rounded-full" style={{
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 font-work-sans">
+                      <div className="h-2.5 rounded-full font-work-sans" style={{
                     width: "82%",
                     backgroundColor: 'var(--accent-color)'
                   }}></div>
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                          <Icon name="faCheck" className="w-5 h-5 text-blue-500" solid={false} />
+                    <div className="flex items-center justify-between font-work-sans">
+                      <div className="flex items-center font-work-sans">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 font-work-sans">
+                          <Icon name="faCheck" className="w-5 h-5 text-blue-500 font-work-sans" solid={false} />
                         </div>
-                        <span className="font-medium text-gray-900">YouTube</span>
+                        <span className="font-medium text-gray-900 font-work-sans">YouTube</span>
                       </div>
-                      <span className="text-lg font-bold text-gray-900">68%</span>
+                      <span className="text-lg font-bold text-gray-900 font-work-sans">68%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div className="bg-indigo-600 h-2.5 rounded-full" style={{
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 font-work-sans">
+                      <div className="bg-indigo-600 h-2.5 rounded-full font-work-sans" style={{
                     width: "68%"
                   }}></div>
                     </div>
@@ -1346,10 +1346,10 @@ export default function BrandHealthDashboard() {
                 </div>
 
                 {/* Competitor Benchmarking */}
-                <div id="competitors" className="bg-white rounded-xl shadow-sm p-6" style={{
+                <div id="competitors" className="bg-white rounded-xl shadow-sm p-6 font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-4 font-work-sans">
                     <h3 className="text-lg font-semibold font-sora" style={{
                   color: 'var(--primary-color)'
                 }}>Competitor Benchmarking</h3>
@@ -1362,7 +1362,7 @@ export default function BrandHealthDashboard() {
                       <option>YTD</option>
                     </select>
                   </div>
-                  <div className="h-64">
+                  <div className="h-64 font-work-sans">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={brandMetrics.competitors} margin={{
                     top: 5,
@@ -1379,52 +1379,52 @@ export default function BrandHealthDashboard() {
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
-                  <div>
-                        <span className="text-xs text-gray-500 block">Overall Position</span>
-                        <span className="text-lg font-bold text-gray-900">#1 in Sentiment</span>
+                  <div className="mt-4 font-work-sans">
+                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg font-work-sans">
+                  <div className="font-work-sans">
+                        <span className="text-xs text-gray-500 block font-work-sans">Overall Position</span>
+                        <span className="text-lg font-bold text-gray-900 font-work-sans">#1 in Sentiment</span>
                   </div>
-                  <div className="text-right">
-                        <span className="text-xs text-gray-500 block">Ahead by</span>
-                        <span className="text-lg font-bold text-green-600">+8%</span>
+                  <div className="text-right font-work-sans">
+                        <span className="text-xs text-gray-500 block font-work-sans">Ahead by</span>
+                        <span className="text-lg font-bold text-green-600 font-work-sans">+8%</span>
                   </div>
                 </div>
             </div>
                 </div>
 
                 {/* Mentions count */}
-                <div id="trends" className="bg-white rounded-xl shadow-sm p-6" style={{
+                <div id="trends" className="bg-white rounded-xl shadow-sm p-6 font-work-sans" style={{
               border: '1px solid var(--divider-color)'
             }}>
                   <h3 className="text-lg font-semibold text-gray-900 font-sora mb-4">Mentions</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Total Mentions</h4>
-                      <div className="flex items-baseline">
-                        <span className="text-2xl font-bold text-gray-900 mr-2">24,521</span>
-                        <span className="text-sm text-green-600 font-medium">+12%</span>
+                  <div className="grid grid-cols-2 gap-4 font-work-sans">
+                    <div className="bg-gray-50 rounded-lg p-4 font-work-sans">
+                      <h4 className="text-sm font-medium text-gray-500 mb-1 font-sora">Total Mentions</h4>
+                      <div className="flex items-baseline font-work-sans">
+                        <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">24,521</span>
+                        <span className="text-sm text-green-600 font-medium font-work-sans">+12%</span>
                   </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Positive</h4>
-                      <div className="flex items-baseline">
-                        <span className="text-2xl font-bold text-gray-900 mr-2">18,391</span>
-                        <span className="text-sm text-green-600 font-medium">+15%</span>
+                    <div className="bg-gray-50 rounded-lg p-4 font-work-sans">
+                      <h4 className="text-sm font-medium text-gray-500 mb-1 font-sora">Positive</h4>
+                      <div className="flex items-baseline font-work-sans">
+                        <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">18,391</span>
+                        <span className="text-sm text-green-600 font-medium font-work-sans">+15%</span>
                     </div>
                   </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Neutral</h4>
-                      <div className="flex items-baseline">
-                        <span className="text-2xl font-bold text-gray-900 mr-2">4,904</span>
-                        <span className="text-sm text-yellow-600 font-medium">+5%</span>
+                    <div className="bg-gray-50 rounded-lg p-4 font-work-sans">
+                      <h4 className="text-sm font-medium text-gray-500 mb-1 font-sora">Neutral</h4>
+                      <div className="flex items-baseline font-work-sans">
+                        <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">4,904</span>
+                        <span className="text-sm text-yellow-600 font-medium font-work-sans">+5%</span>
                 </div>
             </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-500 mb-1">Negative</h4>
-                      <div className="flex items-baseline">
-                        <span className="text-2xl font-bold text-gray-900 mr-2">1,226</span>
-                        <span className="text-sm text-red-600 font-medium">+2%</span>
+                    <div className="bg-gray-50 rounded-lg p-4 font-work-sans">
+                      <h4 className="text-sm font-medium text-gray-500 mb-1 font-sora">Negative</h4>
+                      <div className="flex items-baseline font-work-sans">
+                        <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">1,226</span>
+                        <span className="text-sm text-red-600 font-medium font-work-sans">+2%</span>
                       </div>
                     </div>
                   </div>
@@ -1434,13 +1434,13 @@ export default function BrandHealthDashboard() {
         </div>
 
           {/* Track Competition */}
-          <div id="competition" className="mb-12">
-            <div className="flex justify-between items-center mb-6">
-              <div>
+          <div id="competition" className="mb-12 font-work-sans">
+            <div className="flex justify-between items-center mb-6 font-work-sans">
+              <div className="font-work-sans">
                 <h3 className="text-lg font-semibold text-gray-900 font-sora">Track Competition</h3>
                 <p className="text-sm text-gray-500 font-work-sans">Monitor your brand performance against key competitors</p>
               </div>
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 font-work-sans">
                 <select className="border border-gray-200 rounded-lg text-sm px-3 py-1.5 bg-white font-work-sans">
                   <option>All Regions</option>
                   <option>North America</option>
@@ -1456,11 +1456,11 @@ export default function BrandHealthDashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 font-work-sans">
               {/* Market Share Trends */}
-              <div>
-                <h4 className="text-base font-medium text-gray-800 mb-4">Market Share Trends</h4>
-              <div className="h-80">
+              <div className="font-work-sans">
+                <h4 className="text-base font-medium text-gray-800 mb-4 font-sora">Market Share Trends</h4>
+              <div className="h-80 font-work-sans">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={brandMetrics.historical.quarterly}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--divider-color)" />
@@ -1489,9 +1489,9 @@ export default function BrandHealthDashboard() {
                     </div>
               
               {/* Share of Voice Comparison */}
-                      <div>
-                <h4 className="text-base font-medium text-gray-800 mb-4">Share of Voice</h4>
-                <div className="h-80">
+                      <div className="font-work-sans">
+                <h4 className="text-base font-medium text-gray-800 mb-4 font-sora">Share of Voice</h4>
+                <div className="h-80 font-work-sans">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={[{
                   channel: 'X',
@@ -1529,55 +1529,55 @@ export default function BrandHealthDashboard() {
                       </div>
                     </div>
             
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-indigo-50 rounded-lg p-4">
-                <h5 className="text-sm font-medium text-gray-700 mb-1">Position vs Competitors</h5>
-                <div className="flex items-center">
-                  <span className="text-2xl font-bold text-gray-900 mr-2">#1</span>
-                  <span className="text-sm text-green-600 font-medium">Leader in 3 of 5 channels</span>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 font-work-sans">
+              <div className="bg-indigo-50 rounded-lg p-4 font-work-sans">
+                <h5 className="text-sm font-medium text-gray-700 mb-1 font-sora">Position vs Competitors</h5>
+                <div className="flex items-center font-work-sans">
+                  <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">#1</span>
+                  <span className="text-sm text-green-600 font-medium font-work-sans">Leader in 3 of 5 channels</span>
                   </div>
               </div>
-              <div className="bg-indigo-50 rounded-lg p-4">
-                <h5 className="text-sm font-medium text-gray-700 mb-1">Growth Rate Difference</h5>
-                <div className="flex items-center">
-                  <span className="text-2xl font-bold text-gray-900 mr-2">+12%</span>
-                  <span className="text-sm text-green-600 font-medium">vs competitor average</span>
+              <div className="bg-indigo-50 rounded-lg p-4 font-work-sans">
+                <h5 className="text-sm font-medium text-gray-700 mb-1 font-sora">Growth Rate Difference</h5>
+                <div className="flex items-center font-work-sans">
+                  <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">+12%</span>
+                  <span className="text-sm text-green-600 font-medium font-work-sans">vs competitor average</span>
             </div>
               </div>
-              <div className="bg-indigo-50 rounded-lg p-4">
-                <h5 className="text-sm font-medium text-gray-700 mb-1">Brand Strength Index</h5>
-                <div className="flex items-center">
-                  <span className="text-2xl font-bold text-gray-900 mr-2">72/100</span>
-                  <span className="text-sm text-green-600 font-medium">+4 pts this quarter</span>
+              <div className="bg-indigo-50 rounded-lg p-4 font-work-sans">
+                <h5 className="text-sm font-medium text-gray-700 mb-1 font-sora">Brand Strength Index</h5>
+                <div className="flex items-center font-work-sans">
+                  <span className="text-2xl font-bold text-gray-900 mr-2 font-work-sans">72/100</span>
+                  <span className="text-sm text-green-600 font-medium font-work-sans">+4 pts this quarter</span>
                 </div>
               </div>
             </div>
         </div>
 
         {/* AI Insights Section */}
-        <div className="mt-8 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-6 text-white">
-          <div className="flex items-start space-x-4">
-            <div className="bg-white/10 p-3 rounded-lg">
-              <Icon name="faLightning" solid className="w-6 h-6 text-white" />
+        <div className="mt-8 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-6 text-white font-work-sans">
+          <div className="flex items-start space-x-4 font-work-sans">
+            <div className="bg-white/10 p-3 rounded-lg font-work-sans">
+              <Icon name="faLightning" solid className="w-6 h-6 text-white font-work-sans" />
             </div>
-            <div>
+            <div className="font-work-sans">
               <h3 className="text-lg font-semibold mb-2 font-sora">AI-Powered Strategic Insights</h3>
               <ul className="space-y-3 font-work-sans">
-                <li className="flex items-start">
+                <li className="flex items-start font-work-sans">
                   <Icon name="faArrowUp" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" solid={false} />
-                  <span>Your brand sentiment is consistently higher on Instagram (82%) than other platforms. Consider shifting more resources to this channel for enterprise messaging.</span>
+                  <span className="font-work-sans">Your brand sentiment is consistently higher on Instagram (82%) than other platforms. Consider shifting more resources to this channel for enterprise messaging.</span>
                 </li>
-                <li className="flex items-start">
+                <li className="flex items-start font-work-sans">
                   <Icon name="faUserGroup" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" solid={false} />
-                  <span>Product announcements receive 3.2x more positive engagement than industry news. Recommend incorporating more product-focused content in your social media mix.</span>
+                  <span className="font-work-sans">Product announcements receive 3.2x more positive engagement than industry news. Recommend incorporating more product-focused content in your social media mix.</span>
                 </li>
-                <li className="flex items-start">
+                <li className="flex items-start font-work-sans">
                   <Icon name="faShield" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" solid={false} />
-                  <span>Competitor B is gaining traction in Forums (40% share of voice). Consider strengthening your presence in developer and technical communities.</span>
+                  <span className="font-work-sans">Competitor B is gaining traction in Forums (40% share of voice). Consider strengthening your presence in developer and technical communities.</span>
                 </li>
-                <li className="flex items-start">
+                <li className="flex items-start font-work-sans">
                   <Icon name="faChartBar" className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" solid={false} />
-                  <span>Your recent Enterprise AI campaign drove a 15% increase in positive mentions. This messaging resonates strongly with your target audience.</span>
+                  <span className="font-work-sans">Your recent Enterprise AI campaign drove a 15% increase in positive mentions. This messaging resonates strongly with your target audience.</span>
                 </li>
               </ul>
             </div>

@@ -13,8 +13,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
-} from 'chart.js';
+  Filler } from
+'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 
 // Register ChartJS components
@@ -34,11 +34,11 @@ ChartJS.register(
 export default function BrandLiftCharts() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // ... rest of your existing component code
   return (
-    <div className="p-4 md:p-8 lg:p-12">
+    <div className="p-4 md:p-8 lg:p-12 font-work-sans">
       {/* Your existing chart JSX */}
-    </div>
-  );
-} 
+    </div>);
+
+}

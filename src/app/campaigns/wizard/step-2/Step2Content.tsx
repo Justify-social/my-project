@@ -134,20 +134,20 @@ const StyledField = ({
   icon,
   ...props
 }: any) => {
-  return <div className="mb-5">
-      <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2">
+  return <div className="mb-5 font-work-sans">
+      <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
         {label}
-        {required && <span className="text-[var(--accent-color)] ml-1">*</span>}
+        {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
       </label>
-      <div className="relative">
-        {icon && <div className="absolute left-3 top-2.5 text-[var(--secondary-color)]">
+      <div className="relative font-work-sans">
+        {icon && <div className="absolute left-3 top-2.5 text-[var(--secondary-color)] font-work-sans">
             {icon}
           </div>}
         {as ? <Field as={as} id={name} name={name} className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] shadow-sm bg-white`} {...props}>
 
             {children}
           </Field> : <Field type={type} id={name} name={name} className={`w-full p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] shadow-sm bg-white`} {...props} />}
-        <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
+        <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
       </div>
     </div>;
 };
@@ -376,17 +376,17 @@ function FormContent() {
     return <WizardSkeleton step={2} />;
   }
   if (error) {
-    return <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-red-800 font-semibold">Error</h3>
-        <p className="text-red-600">{error}</p>
-        <button onClick={() => router.push('/campaigns')} className="mt-4 btn btn-secondary">
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-md font-work-sans">
+        <h3 className="text-red-800 font-semibold font-sora">Error</h3>
+        <p className="text-red-600 font-work-sans">{error}</p>
+        <button onClick={() => router.push('/campaigns')} className="mt-4 btn btn-secondary font-work-sans">
 
           Return to Campaigns
         </button>
       </div>;
   }
-  return <div className="max-w-5xl mx-auto p-4 pb-16 bg-white">
-      <h1 className="text-2xl font-bold mb-6">Campaign Creation</h1>
+  return <div className="max-w-5xl mx-auto p-4 pb-16 bg-white font-work-sans">
+      <h1 className="text-2xl font-bold mb-6 font-sora">Campaign Creation</h1>
       
       <Formik enableReinitialize initialValues={{
       primaryKPI: null,
@@ -433,28 +433,28 @@ function FormContent() {
         });
         return <Form className="space-y-8">
               {/* KPIs Section */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
-                <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center">
-                  <Icon name="faChartBar" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+                <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center font-sora">
+                  <Icon name="faChartBar" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                   Key Performance Indicators
                 </h2>
-                <p className="mb-4 text-sm text-[var(--secondary-color)]">
+                <p className="mb-4 text-sm text-[var(--secondary-color)] font-work-sans">
                   Select 1 Primary KPI and up to 4 Secondary KPIs. A Primary KPI cannot be selected as a Secondary KPI.
                 </p>
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="border p-2 text-left">KPI</th>
-                      <th className="border p-2 text-left">Explanation</th>
-                      <th className="border p-2 text-center">Primary KPI</th>
-                      <th className="border p-2 text-center">Secondary KPI</th>
+                      <th className="border p-2 text-left font-work-sans">KPI</th>
+                      <th className="border p-2 text-left font-work-sans">Explanation</th>
+                      <th className="border p-2 text-center font-work-sans">Primary KPI</th>
+                      <th className="border p-2 text-center font-work-sans">Secondary KPI</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {kpis.map(kpi => <tr key={kpi.key} className="hover:bg-gray-50">
+                    {kpis.map((kpi) => <tr key={kpi.key} className="hover:bg-gray-50">
                         <td className="border p-2 font-medium">
-                          <div className="flex items-center">
-                            <div className="w-6 h-6 mr-2 flex-shrink-0">
+                          <div className="flex items-center font-work-sans">
+                            <div className="w-6 h-6 mr-2 flex-shrink-0 font-work-sans">
                               <Image src={kpi.icon} alt={kpi.title} width={24} height={24} />
 
                             </div>
@@ -462,66 +462,66 @@ function FormContent() {
                           </div>
                         </td>
                         <td className="border p-2">
-                          <div className="text-sm text-[var(--secondary-color)]">{kpi.definition}</div>
-                          <div className="text-xs text-[var(--secondary-color)] mt-1">Example: {kpi.example}</div>
+                          <div className="text-sm text-[var(--secondary-color)] font-work-sans">{kpi.definition}</div>
+                          <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">Example: {kpi.example}</div>
                         </td>
-                        <td className="border p-2 text-center">
-                          <Field type="radio" name="primaryKPI" value={kpi.key} className="w-4 h-4 text-secondary focus:ring-secondary" />
+                        <td className="border p-2 text-center font-work-sans">
+                          <Field type="radio" name="primaryKPI" value={kpi.key} className="w-4 h-4 text-secondary focus:ring-secondary font-work-sans" />
 
                         </td>
-                        <td className="border p-2 text-center">
-                          <Field type="checkbox" name="secondaryKPIs" value={kpi.key} className="w-4 h-4 text-secondary focus:ring-secondary" disabled={values.primaryKPI === kpi.key || Array.isArray(values.secondaryKPIs) && !values.secondaryKPIs.includes(kpi.key) && values.secondaryKPIs.length >= 4} />
+                        <td className="border p-2 text-center font-work-sans">
+                          <Field type="checkbox" name="secondaryKPIs" value={kpi.key} className="w-4 h-4 text-secondary focus:ring-secondary font-work-sans" disabled={values.primaryKPI === kpi.key || Array.isArray(values.secondaryKPIs) && !values.secondaryKPIs.includes(kpi.key) && values.secondaryKPIs.length >= 4} />
 
                         </td>
                       </tr>)}
                   </tbody>
                 </table>
-                <ErrorMessage name="primaryKPI" component="p" className="mt-2 text-sm text-red-600" />
-                <ErrorMessage name="secondaryKPIs" component="p" className="mt-2 text-sm text-red-600" />
+                <ErrorMessage name="primaryKPI" component="p" className="mt-2 text-sm text-red-600 font-work-sans" />
+                <ErrorMessage name="secondaryKPIs" component="p" className="mt-2 text-sm text-red-600 font-work-sans" />
               </div>
 
               {/* Primary and Secondary KPIs */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
-                <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center">
-                  <Icon name="faChartLine" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+                <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center font-sora">
+                  <Icon name="faChartLine" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                   Primary and Secondary KPIs
                 </h2>
-                <p className="mb-4 text-sm text-[var(--secondary-color)]">
+                <p className="mb-4 text-sm text-[var(--secondary-color)] font-work-sans">
                   Pick up to one Primary KPI and up to any Secondary KPIs (max 4).
                 </p>
                 
-                <div className="mt-4 grid grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-md font-medium mb-2">Primary KPI</h3>
-                    <div className="grid grid-cols-1 gap-2">
-                      {values.primaryKPI && <div className="bg-[var(--accent-color)] p-2 rounded border border-[var(--accent-color)] border-opacity-20 flex items-center text-white">
-                          <div className="w-5 h-5 mr-2 filter brightness-0 invert">
-                            <Image src={kpis.find(k => k.key === values.primaryKPI)?.icon || "/KPIs/Ad_Recall.svg"} alt="Primary KPI" width={20} height={20} />
+                <div className="mt-4 grid grid-cols-2 gap-6 font-work-sans">
+                  <div className="font-work-sans">
+                    <h3 className="text-md font-medium mb-2 font-sora">Primary KPI</h3>
+                    <div className="grid grid-cols-1 gap-2 font-work-sans">
+                      {values.primaryKPI && <div className="bg-[var(--accent-color)] p-2 rounded border border-[var(--accent-color)] border-opacity-20 flex items-center text-white font-work-sans">
+                          <div className="w-5 h-5 mr-2 filter brightness-0 invert font-work-sans">
+                            <Image src={kpis.find((k) => k.key === values.primaryKPI)?.icon || "/KPIs/Ad_Recall.svg"} alt="Primary KPI" width={20} height={20} />
                           </div>
-                          <span className="font-medium">
-                            {kpis.find(k => k.key === values.primaryKPI)?.title || values.primaryKPI}
+                          <span className="font-medium font-work-sans">
+                            {kpis.find((k) => k.key === values.primaryKPI)?.title || values.primaryKPI}
                           </span>
                         </div>}
                     </div>
                   </div>
                   
-                  <div>
-                    <h3 className="text-md font-medium mb-2">Secondary KPIs {Array.isArray(values.secondaryKPIs) && values.secondaryKPIs.length > 0 && `(${values.secondaryKPIs.length})`}</h3>
-                    <div className="grid grid-cols-1 gap-2">
-                      {Array.isArray(values.secondaryKPIs) && values.secondaryKPIs.map((kpiKey: KPI) => <div key={kpiKey} className="bg-gray-50 p-2 rounded border border-[var(--divider-color)] flex items-center">
-                          <div className="w-5 h-5 mr-2">
-                            <Image src={kpis.find(k => k.key === kpiKey)?.icon || ''} alt={kpiKey} width={20} height={20} />
+                  <div className="font-work-sans">
+                    <h3 className="text-md font-medium mb-2 font-sora">Secondary KPIs {Array.isArray(values.secondaryKPIs) && values.secondaryKPIs.length > 0 && `(${values.secondaryKPIs.length})`}</h3>
+                    <div className="grid grid-cols-1 gap-2 font-work-sans">
+                      {Array.isArray(values.secondaryKPIs) && values.secondaryKPIs.map((kpiKey: KPI) => <div key={kpiKey} className="bg-gray-50 p-2 rounded border border-[var(--divider-color)] flex items-center font-work-sans">
+                          <div className="w-5 h-5 mr-2 font-work-sans">
+                            <Image src={kpis.find((k) => k.key === kpiKey)?.icon || ''} alt={kpiKey} width={20} height={20} />
 
                           </div>
-                          <span className="flex-grow">{kpis.find(k => k.key === kpiKey)?.title || kpiKey}</span>
-                          <button 
-                            type="button" 
-                            className="group text-[var(--secondary-color)] hover:text-red-500" 
-                            onClick={() => {
-                              const updatedKpis = values.secondaryKPIs.filter((k: KPI) => k !== kpiKey);
-                              setFieldValue('secondaryKPIs', updatedKpis);
-                            }}
-                          >
+                          <span className="flex-grow font-work-sans">{kpis.find((k) => k.key === kpiKey)?.title || kpiKey}</span>
+                          <button
+                      type="button"
+                      className="group text-[var(--secondary-color)] hover:text-red-500 font-work-sans"
+                      onClick={() => {
+                        const updatedKpis = values.secondaryKPIs.filter((k: KPI) => k !== kpiKey);
+                        setFieldValue('secondaryKPIs', updatedKpis);
+                      }}>
+
                             <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
                             <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
                           </button>
@@ -532,16 +532,16 @@ function FormContent() {
               </div>
 
               {/* Messaging Section */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Icon name="faComments" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+                <h2 className="text-xl font-semibold mb-4 flex items-center font-sora">
+                  <Icon name="faComments" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                   Messaging
                 </h2>
-                <p className="text-[var(--secondary-color)] mb-6">
+                <p className="text-[var(--secondary-color)] mb-6 font-work-sans">
                   Define the key messages and value propositions for your campaign.
                 </p>
                 
-                <div className="space-y-4">
+                <div className="space-y-4 font-work-sans">
                   <StyledField label="What is the main message of your campaign?" name="mainMessage" as="textarea" rows={3} required icon={<Icon name="faCommentDots" className="h-5 w-5" solid={false} />} placeholder="Discover sustainable living with our eco-friendly products." />
 
                   
@@ -557,16 +557,16 @@ function FormContent() {
               </div>
 
               {/* Hypotheses Section */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Icon name="faLightbulb" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+                <h2 className="text-xl font-semibold mb-4 flex items-center font-sora">
+                  <Icon name="faLightbulb" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                   Hypotheses
                 </h2>
-                <p className="text-[var(--secondary-color)] mb-6">
+                <p className="text-[var(--secondary-color)] mb-6 font-work-sans">
                   Outline the expected outcomes of your campaign based on your objectives and KPIs.
                 </p>
                 
-                <div className="space-y-4">
+                <div className="space-y-4 font-work-sans">
                   <StyledField label="What do you expect to achieve with this campaign?" name="expectedAchievements" as="textarea" rows={2} required icon={<Icon name="faArrowTrendUp" className="h-5 w-5" solid={false} />} placeholder="We expect a 20% increase in brand awareness within three months." />
 
                   
@@ -579,87 +579,87 @@ function FormContent() {
               </div>
 
               {/* Features Section */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
-                <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center">
-                  <Icon name="faList" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+                <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center font-sora">
+                  <Icon name="faList" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                   Features to Include
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {features.map(feature => (
-                    <div 
-                      key={feature.key} 
-                      className={`
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-work-sans">
+                  {features.map((feature) =>
+              <div
+                key={feature.key}
+                className={`
                         cursor-pointer rounded-lg border p-4 transition-all duration-200 
-                        ${Array.isArray(values.features) && values.features.includes(feature.key) 
-                          ? 'bg-[var(--accent-color)] border-[var(--accent-color)] border-opacity-40 shadow-md text-white transform scale-[1.02]' 
-                          : 'bg-white border-[var(--divider-color)] hover:border-[var(--accent-color)] hover:border-opacity-20 hover:bg-[var(--accent-color)] hover:bg-opacity-5 hover:shadow-sm'}
-                        focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-opacity-50
-                      `}
-                      onClick={() => {
-                        if (!Array.isArray(values.features)) {
-                          setFieldValue('features', [feature.key]);
-                          return;
-                        }
-                        const updatedFeatures = values.features.includes(feature.key)
-                          ? values.features.filter((f: Feature) => f !== feature.key)
-                          : [...values.features, feature.key];
-                        setFieldValue('features', updatedFeatures);
-                      }}
-                      tabIndex={0}
-                      role="checkbox"
-                      aria-checked={Array.isArray(values.features) && values.features.includes(feature.key)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          if (!Array.isArray(values.features)) {
-                            setFieldValue('features', [feature.key]);
-                            return;
-                          }
-                          const updatedFeatures = values.features.includes(feature.key)
-                            ? values.features.filter((f: Feature) => f !== feature.key)
-                            : [...values.features, feature.key];
-                          setFieldValue('features', updatedFeatures);
-                        }
-                      }}
-                    >
+                        ${Array.isArray(values.features) && values.features.includes(feature.key) ?
+                'bg-[var(--accent-color)] border-[var(--accent-color)] border-opacity-40 shadow-md text-white transform scale-[1.02]' :
+                'bg-white border-[var(--divider-color)] hover:border-[var(--accent-color)] hover:border-opacity-20 hover:bg-[var(--accent-color)] hover:bg-opacity-5 hover:shadow-sm'}
+                        focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-opacity-50 font-work-sans`
+                }
+                onClick={() => {
+                  if (!Array.isArray(values.features)) {
+                    setFieldValue('features', [feature.key]);
+                    return;
+                  }
+                  const updatedFeatures = values.features.includes(feature.key) ?
+                  values.features.filter((f: Feature) => f !== feature.key) :
+                  [...values.features, feature.key];
+                  setFieldValue('features', updatedFeatures);
+                }}
+                tabIndex={0}
+                role="checkbox"
+                aria-checked={Array.isArray(values.features) && values.features.includes(feature.key)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (!Array.isArray(values.features)) {
+                      setFieldValue('features', [feature.key]);
+                      return;
+                    }
+                    const updatedFeatures = values.features.includes(feature.key) ?
+                    values.features.filter((f: Feature) => f !== feature.key) :
+                    [...values.features, feature.key];
+                    setFieldValue('features', updatedFeatures);
+                  }
+                }}>
+
                       {/* Hidden Formik field to properly track the value for this feature */}
                       <Field
-                        type="checkbox"
-                        name="features"
-                        value={feature.key}
-                        checked={Array.isArray(values.features) && values.features.includes(feature.key)}
-                        className="hidden"
-                      />
+                  type="checkbox"
+                  name="features"
+                  value={feature.key}
+                  checked={Array.isArray(values.features) && values.features.includes(feature.key)}
+                  className="hidden" />
+
                       
-                      <div className="flex items-center mb-3">
-                        <div className="mr-3 w-6 h-6 flex items-center justify-center">
-                          <Image 
-                            src={feature.icon} 
-                            alt={feature.title} 
-                            width={28} 
-                            height={28} 
-                            className={`transition-all duration-200 ${Array.isArray(values.features) && values.features.includes(feature.key) ? 'filter brightness-0 invert' : ''}`}
-                          />
+                      <div className="flex items-center mb-3 font-work-sans">
+                        <div className="mr-3 w-6 h-6 flex items-center justify-center font-work-sans">
+                          <Image
+                      src={feature.icon}
+                      alt={feature.title}
+                      width={28}
+                      height={28}
+                      className={`transition-all duration-200 ${Array.isArray(values.features) && values.features.includes(feature.key) ? 'filter brightness-0 invert' : ''}`} />
+
                         </div>
-                        <span className="font-medium">{feature.title}</span>
+                        <span className="font-medium font-work-sans">{feature.title}</span>
                       </div>
-                      <div className="flex justify-end mt-3">
-                        {Array.isArray(values.features) && values.features.includes(feature.key) && (
-                          <Icon name="faCheckCircle" className="w-5 h-5" solid={true} />
-                        )}
-                        {!(Array.isArray(values.features) && values.features.includes(feature.key)) && (
-                          <div className="text-[var(--secondary-color)] text-xs">Click to select</div>
-                        )}
+                      <div className="flex justify-end mt-3 font-work-sans">
+                        {Array.isArray(values.features) && values.features.includes(feature.key) &&
+                  <Icon name="faCheckCircle" className="w-5 h-5" solid={true} />
+                  }
+                        {!(Array.isArray(values.features) && values.features.includes(feature.key)) &&
+                  <div className="text-[var(--secondary-color)] text-xs font-work-sans">Click to select</div>
+                  }
                       </div>
                     </div>
-                  ))}
+              )}
                 </div>
               </div>
               
               {/* Add bottom padding to prevent progress bar overlap - reduced from pb-8 to pb-4 */}
-              <div className="pb-4"></div>
+              <div className="pb-4 font-work-sans"></div>
               
-              <ProgressBar currentStep={2} onStepClick={step => router.push(`/campaigns/wizard/step-${step}?id=${campaignId || (data as any)?.id}`)} onBack={() => router.push(`/campaigns/wizard/step-1?id=${campaignId || (data as any)?.id}`)} onNext={() => handleSubmit(values)} onSaveDraft={() => handleSaveDraft(values)} disableNext={disableNext} isFormValid={isValid} isDirty={dirty} isSaving={isSaving} />
+              <ProgressBar currentStep={2} onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId || (data as any)?.id}`)} onBack={() => router.push(`/campaigns/wizard/step-1?id=${campaignId || (data as any)?.id}`)} onNext={() => handleSubmit(values)} onSaveDraft={() => handleSaveDraft(values)} disableNext={disableNext} isFormValid={isValid} isDirty={dirty} isSaving={isSaving} />
 
             </Form>;
       }}
@@ -668,18 +668,18 @@ function FormContent() {
 }
 export default function Step2Content() {
   const [isClientSide, setIsClientSide] = useState(false);
-  
+
   useEffect(() => {
     setIsClientSide(true);
   }, []);
-  
+
   if (!isClientSide) {
     return <WizardSkeleton step={2} />;
   }
-  
+
   return (
     <Suspense fallback={<WizardSkeleton step={2} />}>
       <FormContent />
-    </Suspense>
-  );
+    </Suspense>);
+
 }

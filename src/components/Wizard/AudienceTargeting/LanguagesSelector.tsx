@@ -9,10 +9,10 @@ interface LanguagesSelectorProps {
 
 export default function LanguagesSelector({ selected, onChange }: LanguagesSelectorProps) {
   const languages = ["English", "Spanish", "French", "German", "Mandarin"];
-  
+
   return (
-    <div className="mb-4">
-      <label className="block font-semibold mb-1">Select language</label>
+    <div className="mb-4 font-work-sans">
+      <label className="block font-semibold mb-1 font-work-sans">Select language</label>
       <select
         multiple
         value={selected}
@@ -22,15 +22,15 @@ export default function LanguagesSelector({ selected, onChange }: LanguagesSelec
           );
           onChange(selectedOptions);
         }}
-        className="w-full p-2 border rounded"
-        aria-label="Select languages"
-      >
-        {languages.map((lang) => (
-          <option key={lang} value={lang}>
+        className="w-full p-2 border rounded font-work-sans"
+        aria-label="Select languages">
+
+        {languages.map((lang) =>
+        <option key={lang} value={lang}>
             {lang}
           </option>
-        ))}
+        )}
       </select>
-    </div>
-  );
-} 
+    </div>);
+
+}

@@ -36,7 +36,7 @@ export default function GifGallery({ onSelect }: GifGalleryProps) {
         const json = await response.json();
         const gifsData: Gif[] = json.data.map((item: any) => ({
           id: item.id,
-          url: item.images.fixed_height.url,
+          url: item.images.fixed_height.url
         }));
         setGifs(gifsData);
       } catch (error) {
@@ -48,25 +48,25 @@ export default function GifGallery({ onSelect }: GifGalleryProps) {
   }, [searchTerm]);
 
   return (
-    <div>
+    <div className="font-work-sans">
       <input
         type="text"
         placeholder="Search GIFs..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="border p-2 rounded mb-2 w-full"
-      />
-      <div className="grid grid-cols-3 gap-2">
-        {gifs.map((gif) => (
-          <img
-            key={gif.id}
-            src={gif.url}
-            alt="gif"
-            className="cursor-pointer rounded"
-            onClick={() => onSelect(gif.url)}
-          />
-        ))}
+        className="border p-2 rounded mb-2 w-full font-work-sans" />
+
+      <div className="grid grid-cols-3 gap-2 font-work-sans">
+        {gifs.map((gif) =>
+        <img
+          key={gif.id}
+          src={gif.url}
+          alt="gif"
+          className="cursor-pointer rounded"
+          onClick={() => onSelect(gif.url)} />
+
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }

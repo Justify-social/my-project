@@ -41,28 +41,28 @@ export default function InfluencerCard() {
   }, []);
 
   if (loading) {
-    return <div>Loading Influencer Metrics...</div>;
+    return <div className="font-work-sans">Loading Influencer Metrics...</div>;
   }
 
   if (!data) {
-    return <div>Error loading data.</div>;
+    return <div className="font-work-sans">Error loading data.</div>;
   }
 
   return (
-    <div className="p-4 bg-white shadow rounded">
+    <div className="p-4 bg-white shadow rounded font-work-sans">
       {/* Header for testing purposes */}
-      <h2 data-testid="influencer-card-header" className="text-xl font-bold mb-2">
+      <h2 data-testid="influencer-card-header" className="text-xl font-bold mb-2 font-sora">
         Influencer Management
       </h2>
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-      <div className="flex items-center mb-1">
-        <span className="text-lg">Total Influencers:</span>
-        <span className="ml-2 text-green-600 font-semibold">{data.totalInfluencers}</span>
+      {error && <p className="text-red-500 text-sm mb-2 font-work-sans">{error}</p>}
+      <div className="flex items-center mb-1 font-work-sans">
+        <span className="text-lg font-work-sans">Total Influencers:</span>
+        <span className="ml-2 text-green-600 font-semibold font-work-sans">{data.totalInfluencers}</span>
       </div>
-      <div className="flex items-center">
-        <span className="text-lg">Avg Engagement:</span>
-        <span className="ml-2 text-blue-600 font-semibold">{data.averageEngagement}%</span>
+      <div className="flex items-center font-work-sans">
+        <span className="text-lg font-work-sans">Avg Engagement:</span>
+        <span className="ml-2 text-blue-600 font-semibold font-work-sans">{data.averageEngagement}%</span>
       </div>
-    </div>
-  );
+    </div>);
+
 }

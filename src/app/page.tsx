@@ -24,23 +24,23 @@ export default function Home() {
   }, [user, isLoading, router]);
 
   // Show loading state while checking authentication
-  return <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
+  return <div className="min-h-screen flex items-center justify-center font-work-sans">
+      <div className="text-center font-work-sans">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto font-work-sans"></div>
+        <p className="mt-4 text-gray-600 font-work-sans">Loading...</p>
       </div>
     </div>;
 }
 const features = [{
   name: 'Campaign Creation',
   description: 'Create and manage campaigns with our intuitive wizard interface. Set objectives, target audience, and creative requirements.',
-  icon: (props: React.SVGProps<SVGSVGElement>) => <Icon name="faChevronRight" {...props} solid={false} className="text-[var(--secondary-color)]" />
+  icon: (props: React.SVGProps<SVGSVGElement>) => <Icon name="faChevronRight" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
 }, {
   name: 'Asset Management',
   description: 'Upload, organize, and review creative assets. Collaborate with influencers and team members efficiently.',
-  icon: (props: React.SVGProps<SVGSVGElement>) => <Icon name="faChevronRight" {...props} solid={false} className="text-[var(--secondary-color)]" />
+  icon: (props: React.SVGProps<SVGSVGElement>) => <Icon name="faChevronRight" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
 }, {
   name: 'Analytics & Reporting',
   description: 'Track campaign performance, measure ROI, and generate comprehensive reports for stakeholders.',
-  icon: (props: React.SVGProps<SVGSVGElement>) => <Icon name="faChevronRight" {...props} solid={false} className="text-[var(--secondary-color)]" />
+  icon: (props: React.SVGProps<SVGSVGElement>) => <Icon name="faChevronRight" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
 }];

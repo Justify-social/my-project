@@ -240,17 +240,17 @@ const TableHeader = <T,>() => {
   const paddingClass = compact ? 'px-3 py-2' : 'px-4 py-3';
   return <thead className={cn(headerBgColorClass.white, 'border-b border-gray-200')}>
       <tr>
-        {columns.map(column => {
+        {columns.map((column) => {
         const isSorted = sortState.column === column.id;
         const sortDirection = sortState.direction;
         return <th key={column.id} style={{
           width: column.width
         }} className={cn(paddingClass, 'text-left text-xs font-medium text-gray-500 uppercase tracking-wider', column.sortable && 'cursor-pointer', column.align === 'center' && 'text-center', column.align === 'right' && 'text-right', column.className, column.hideOnMobile && 'hidden sm:table-cell')} onClick={() => column.sortable && handleSort(column)} aria-sort={!isSorted ? 'none' : sortDirection === 'asc' ? 'ascending' : 'descending'}>
 
-              <div className={`flex items-center ${column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-between'}`}>
-                {typeof column.header === 'string' ? <span>{column.header}</span> : column.header}
+              <div className={`flex items-center ${column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-between'} font-work-sans`}>
+                {typeof column.header === 'string' ? <span className="font-work-sans">{column.header}</span> : column.header}
                 
-                {column.sortable && <div className="ml-2 flex flex-col">
+                {column.sortable && <div className="ml-2 flex flex-col font-work-sans">
                     <Icon name="faChevronUp" className={cn('h-2 w-2 -mb-0.5', isSorted && sortDirection === 'asc' ? 'text-blue-600' : 'text-gray-400')} solid={false} />
 
                     <Icon name="faChevronDown" className={cn('h-2 w-2', isSorted && sortDirection === 'desc' ? 'text-blue-600' : 'text-gray-400')} solid={false} />
@@ -293,7 +293,7 @@ const TableBody = <T,>() => {
   if (paginatedData.length === 0) {
     return <tbody>
         <tr>
-          <td colSpan={columns.length} className={`${paddingClass} text-center text-sm text-gray-500`}>
+          <td colSpan={columns.length} className={`${paddingClass} text-center text-sm text-gray-500 font-work-sans`}>
             No data available
           </td>
         </tr>
@@ -304,7 +304,7 @@ const TableBody = <T,>() => {
       const isHighlighted = highlightedRowIndex !== undefined && rowIndex === highlightedRowIndex;
       return <tr key={rowIndex} className={cn(hoverable && 'hover:bg-gray-50', striped && rowIndex % 2 === 1 && 'bg-gray-50', isHighlighted && 'bg-blue-50', onRowClick && 'cursor-pointer')} onClick={() => onRowClick && onRowClick(row)}>
 
-            {columns.map(column => {
+            {columns.map((column) => {
           const value = getCellValue(row, column);
           return <td key={column.id} className={cn(paddingClass, 'text-sm whitespace-nowrap', column.align === 'center' && 'text-center', column.align === 'right' && 'text-right', column.className, column.hideOnMobile && 'hidden sm:table-cell')}>
 
@@ -332,34 +332,34 @@ const TablePagination = <T,>() => {
   const totalPages = Math.ceil(data.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize + 1;
   const endIndex = Math.min(startIndex + pageSize - 1, data.length);
-  return <div className={`${compact ? 'px-3 py-2' : 'px-4 py-3'} flex items-center justify-between border-t border-gray-200 bg-white`}>
-      <div className="flex-1 flex justify-between sm:hidden">
-        <button onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+  return <div className={`${compact ? 'px-3 py-2' : 'px-4 py-3'} flex items-center justify-between border-t border-gray-200 bg-white font-work-sans`}>
+      <div className="flex-1 flex justify-between sm:hidden font-work-sans">
+        <button onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
 
           Previous
         </button>
-        <button onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
 
           Next
         </button>
       </div>
-      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">{data.length > 0 ? startIndex : 0}</span> to{' '}
-            <span className="font-medium">{endIndex}</span> of{' '}
-            <span className="font-medium">{data.length}</span> results
+      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between font-work-sans">
+        <div className="font-work-sans">
+          <p className="text-sm text-gray-700 font-work-sans">
+            Showing <span className="font-medium font-work-sans">{data.length > 0 ? startIndex : 0}</span> to{' '}
+            <span className="font-medium font-work-sans">{endIndex}</span> of{' '}
+            <span className="font-medium font-work-sans">{data.length}</span> results
           </p>
         </div>
-        <div className="flex items-center">
-          <div className="mr-4">
-            <label htmlFor="pageSize" className="mr-2 text-sm text-gray-700">
+        <div className="flex items-center font-work-sans">
+          <div className="mr-4 font-work-sans">
+            <label htmlFor="pageSize" className="mr-2 text-sm text-gray-700 font-work-sans">
               Rows per page:
             </label>
-            <select id="pageSize" value={pageSize} onChange={e => {
+            <select id="pageSize" value={pageSize} onChange={(e) => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1); // Reset to first page when changing page size
-          }} className="border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          }} className="border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-work-sans">
 
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -367,21 +367,21 @@ const TablePagination = <T,>() => {
               <option value={50}>50</option>
             </select>
           </div>
-          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <button onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px font-work-sans" aria-label="Pagination">
+            <button onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
 
-              <span className="sr-only">Previous</span>
+              <span className="sr-only font-work-sans">Previous</span>
               <Icon name="faChevronLeft" className="h-5 w-5" solid={false} />
             </button>
             
             {/* Simple pagination for simplicity, could be expanded to show page numbers */}
-            <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+            <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 font-work-sans">
               {currentPage} / {totalPages || 1}
             </span>
             
-            <button onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
 
-              <span className="sr-only">Next</span>
+              <span className="sr-only font-work-sans">Next</span>
               <Icon name="faChevronRight" className="h-5 w-5" solid={false} />
             </button>
           </nav>
@@ -433,7 +433,7 @@ export const Table = <T,>({
       return [...data];
     }
     return [...data].sort((a, b) => {
-      const column = columns.find(col => col.id === sortState.column);
+      const column = columns.find((col) => col.id === sortState.column);
       if (column?.sortFn) {
         return column.sortFn(a, b, sortState.direction);
       }
@@ -486,13 +486,13 @@ export const Table = <T,>({
     headerBgColor
   };
   if (isLoading && loadingState) {
-    return <div className="min-w-full">{loadingState}</div>;
+    return <div className="min-w-full font-work-sans">{loadingState}</div>;
   }
   if (data.length === 0 && emptyState) {
-    return <div className="min-w-full">{emptyState}</div>;
+    return <div className="min-w-full font-work-sans">{emptyState}</div>;
   }
   return <TableContext.Provider value={contextValue}>
-      <div className={cn('overflow-x-auto rounded-lg', containerClassName)}>
+      <div className={`${cn('overflow-x-auto rounded-lg', containerClassName)} font-work-sans`}>
         <table className={cn('min-w-full divide-y divide-gray-200', bordered && 'border border-gray-200', className)} aria-label={ariaLabel}>
 
           <TableHeader<T> />
@@ -569,7 +569,7 @@ export function TableExample() {
     sortable: true,
     cell: ({
       value
-    }) => <span className="text-blue-600 hover:underline cursor-pointer">{value}</span>
+    }) => <span className="text-blue-600 hover:underline cursor-pointer font-work-sans">{value}</span>
   }, {
     id: 'email',
     header: 'Email',
@@ -587,26 +587,26 @@ export function TableExample() {
     sortable: true,
     cell: ({
       value
-    }) => <span className={cn('px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', value === 'Active' && 'bg-green-100 text-green-800', value === 'Inactive' && 'bg-red-100 text-red-800', value === 'Pending' && 'bg-yellow-100 text-yellow-800')}>
+    }) => <span className={`${cn('px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', value === 'Active' && 'bg-green-100 text-green-800', value === 'Inactive' && 'bg-red-100 text-red-800', value === 'Pending' && 'bg-yellow-100 text-yellow-800')} font-work-sans`}>
 
           {value}
         </span>
   }];
-  return <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Basic Table</h2>
-        <Table data={data} columns={columns} sortable={true} pagination={true} pageSize={2} hoverable={true} bordered={true} onRowClick={row => console.log('Row clicked:', row)} />
+  return <div className="space-y-6 font-work-sans">
+      <div className="font-work-sans">
+        <h2 className="text-lg font-semibold mb-2 font-sora">Basic Table</h2>
+        <Table data={data} columns={columns} sortable={true} pagination={true} pageSize={2} hoverable={true} bordered={true} onRowClick={(row) => console.log('Row clicked:', row)} />
 
       </div>
       
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Striped Table</h2>
+      <div className="font-work-sans">
+        <h2 className="text-lg font-semibold mb-2 font-sora">Striped Table</h2>
         <Table data={data} columns={columns} sortable={true} striped={true} hoverable={true} bordered={true} />
 
       </div>
       
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Compact Table</h2>
+      <div className="font-work-sans">
+        <h2 className="text-lg font-semibold mb-2 font-sora">Compact Table</h2>
         <Table data={data} columns={columns} sortable={true} compact={true} hoverable={true} bordered={true} />
 
       </div>

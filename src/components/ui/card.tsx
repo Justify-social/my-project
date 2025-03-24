@@ -10,13 +10,13 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default "default"
    */
   variant?: CardVariant;
-  
+
   /**
    * Whether the card should have hover effects
    * @default false
    */
   hoverable?: boolean;
-  
+
   /**
    * Content to render inside the card
    */
@@ -51,10 +51,10 @@ export function Card({
 }: CardProps) {
   // Prepare class based on variant
   let cardClasses = '';
-  
+
   // Base styling for all cards
   cardClasses = 'bg-white rounded-lg';
-  
+
   // Variant-specific styling
   if (variant === 'default') {
     cardClasses += ' border border-gray-200 shadow-sm';
@@ -65,7 +65,7 @@ export function Card({
   } else if (variant === 'raised') {
     cardClasses += ' border border-gray-200 shadow-md';
   }
-  
+
   // Add hover effects if enabled
   if (hoverable) {
     if (variant === 'default') {
@@ -78,17 +78,17 @@ export function Card({
       cardClasses += ' hover:shadow-lg';
     }
   }
-  
+
   // Add user's custom className
   if (className) {
     cardClasses += ` ${className}`;
   }
-  
+
   return (
-    <div className={cardClasses} {...props}>
+    <div className={`${cardClasses} font-work-sans`} {...props}>
       {children}
-    </div>
-  );
+    </div>);
+
 }
 
 export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -96,12 +96,12 @@ export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
    * Icon to display in the header (component or ReactNode)
    */
   icon?: React.ReactNode;
-  
+
   /**
    * Actions to display in the header (typically buttons)
    */
   actions?: React.ReactNode;
-  
+
   /**
    * Content of the header
    */
@@ -119,29 +119,29 @@ export function CardHeader({
   ...props
 }: CardHeaderProps) {
   let headerClasses = 'px-6 py-4 border-b border-gray-200 flex items-center justify-between';
-  
+
   if (className) {
     headerClasses += ` ${className}`;
   }
-  
+
   return (
-    <div className={headerClasses} {...props}>
-      <div className="flex items-center">
-        {icon && (
-          <div className="mr-3 flex-shrink-0">
+    <div className={`${headerClasses} font-sora`} {...props}>
+      <div className="flex items-center font-work-sans">
+        {icon &&
+        <div className="mr-3 flex-shrink-0 font-work-sans">
             {icon}
           </div>
-        )}
-        <div>{children}</div>
+        }
+        <div className="font-work-sans">{children}</div>
       </div>
       
-      {actions && (
-        <div className="flex items-center space-x-2 ml-4">
+      {actions &&
+      <div className="flex items-center space-x-2 ml-4 font-work-sans">
           {actions}
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -150,7 +150,7 @@ export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default true
    */
   withPadding?: boolean;
-  
+
   /**
    * Content of the card body
    */
@@ -167,16 +167,16 @@ export function CardContent({
   ...props
 }: CardContentProps) {
   let contentClasses = withPadding ? 'px-6 py-4' : '';
-  
+
   if (className) {
     contentClasses += ` ${className}`;
   }
-  
+
   return (
-    <div className={contentClasses} {...props}>
+    <div className={`${contentClasses} font-work-sans`} {...props}>
       {children}
-    </div>
-  );
+    </div>);
+
 }
 
 export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -185,13 +185,13 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default "right"
    */
   align?: 'left' | 'center' | 'right' | 'between';
-  
+
   /**
    * Whether to show a border at the top of the footer
    * @default true
    */
   withBorder?: boolean;
-  
+
   /**
    * Content of the footer
    */
@@ -210,12 +210,12 @@ export function CardFooter({
 }: CardFooterProps) {
   // Build classes
   let footerClasses = 'px-6 py-4 flex items-center';
-  
+
   // Add border if enabled
   if (withBorder) {
     footerClasses += ' border-t border-gray-200';
   }
-  
+
   // Add alignment class
   if (align === 'left') {
     footerClasses += ' justify-start';
@@ -226,17 +226,17 @@ export function CardFooter({
   } else if (align === 'between') {
     footerClasses += ' justify-between';
   }
-  
+
   // Add user's custom className
   if (className) {
     footerClasses += ` ${className}`;
   }
-  
+
   return (
-    <div className={footerClasses} {...props}>
+    <div className={`${footerClasses} font-work-sans`} {...props}>
       {children}
-    </div>
-  );
+    </div>);
+
 }
 
 export interface MetricCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -244,22 +244,22 @@ export interface MetricCardProps extends Omit<React.HTMLAttributes<HTMLDivElemen
    * Title of the metric
    */
   title: React.ReactNode;
-  
+
   /**
    * Primary value to display
    */
   value: React.ReactNode;
-  
+
   /**
    * Optional secondary/description text
    */
   description?: React.ReactNode;
-  
+
   /**
    * Optional icon for the card
    */
   icon?: React.ReactNode;
-  
+
   /**
    * Optional trend indicator (positive or negative)
    */
@@ -289,38 +289,38 @@ export function MetricCard({
   className,
   ...props
 }: MetricCardProps) {
-  const trendColor = trend === undefined 
-    ? '' 
-    : trend >= 0 
-      ? 'text-green-600' 
-      : 'text-red-600';
-  
+  const trendColor = trend === undefined ?
+  '' :
+  trend >= 0 ?
+  'text-green-600' :
+  'text-red-600';
+
   const metricCardClasses = `bg-white rounded-lg border border-gray-200 overflow-hidden ${className || ''}`;
-  
+
   return (
-    <div className={metricCardClasses} {...props}>
-      <div className="px-6 py-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
-            <div className="text-2xl font-semibold">{value}</div>
+    <div className={`${metricCardClasses} font-work-sans`} {...props}>
+      <div className="px-6 py-4 font-work-sans">
+        <div className="flex items-start justify-between font-work-sans">
+          <div className="font-work-sans">
+            <h3 className="text-sm font-medium text-gray-500 mb-1 font-sora">{title}</h3>
+            <div className="text-2xl font-semibold font-work-sans">{value}</div>
             
-            {description && (
-              <div className={`text-sm mt-1 ${trendColor}`}>
+            {description &&
+            <div className={`text-sm mt-1 ${trendColor} font-work-sans`}>
                 {description}
               </div>
-            )}
+            }
           </div>
           
-          {icon && (
-            <div className="p-2 bg-[var(--accent-color)] bg-opacity-10 rounded-lg">
+          {icon &&
+          <div className="p-2 bg-[var(--accent-color)] bg-opacity-10 rounded-lg font-work-sans">
               {icon}
             </div>
-          )}
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
-export default Card; 
+export default Card;

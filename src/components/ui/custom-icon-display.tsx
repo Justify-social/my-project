@@ -9,17 +9,17 @@ import { IconTester } from './icons/test/IconTester';
  */
 export const CustomIconDisplay = () => {
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium mb-4">Icon Library Preview</h3>
-      <p className="text-sm text-gray-500 mb-4">
+    <div className="space-y-4 font-work-sans">
+      <h3 className="text-lg font-medium mb-4 font-sora">Icon Library Preview</h3>
+      <p className="text-sm text-gray-500 mb-4 font-work-sans">
         This component displays all available FontAwesome icons in the system.
         Hover over an icon to see its solid variant.
       </p>
-      <div className="p-4 border rounded-md">
+      <div className="p-4 border rounded-md font-work-sans">
         <IconTester />
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-export default CustomIconDisplay; 
+export default CustomIconDisplay;

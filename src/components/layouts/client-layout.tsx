@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useEffect } from "react";
 import Header from "@/components/Navigation/Header";
@@ -34,18 +34,18 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   // Show error with login button if authentication fails
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-red-600">
-          <p>Authentication error. Please try again.</p>
-          <button 
+      <div className="min-h-screen flex items-center justify-center font-work-sans">
+        <div className="text-center text-red-600 font-work-sans">
+          <p className="font-work-sans">Authentication error. Please try again.</p>
+          <button
             onClick={() => router.push('/api/auth/login')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-work-sans">
+
             Back to Login
           </button>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // Only render the layout if we have a user
@@ -56,22 +56,22 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
       <SearchProvider>
-        <div className="min-h-screen bg-white">
-          <Header 
+        <div className="min-h-screen bg-white font-work-sans">
+          <Header
             companyName="Justify"
             remainingCredits={100}
-            notificationsCount={3}
-          />
+            notificationsCount={3} className="font-sora" />
+
           <Sidebar />
-          <div className="md:ml-64 pt-16">
+          <div className="md:ml-64 pt-16 font-work-sans">
             <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
               {children}
             </main>
           </div>
         </div>
       </SearchProvider>
-    </SidebarProvider>
-  );
+    </SidebarProvider>);
+
 };
 
-export default ClientLayout; 
+export default ClientLayout;

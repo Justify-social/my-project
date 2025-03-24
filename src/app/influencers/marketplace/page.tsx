@@ -26,10 +26,10 @@ function useDebounce<T>(value: T, delay: number): T {
 // Error Boundary Component
 // ---------------------------
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode }) {
+  {children: React.ReactNode;},
+  {hasError: boolean;}>
+{
+  constructor(props: {children: React.ReactNode;}) {
     super(props);
     this.state = { hasError: false };
   }
@@ -42,10 +42,10 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-4 text-red-600" role="alert">
+        <div className="p-4 text-red-600 font-work-sans" role="alert">
           Oops! Something went wrong. Please try again later.
-        </div>
-      );
+        </div>);
+
     }
     return this.props.children;
   }
@@ -54,12 +54,12 @@ class ErrorBoundary extends React.Component<
 // ---------------------------
 // Spinner Component
 // ---------------------------
-const Spinner: React.FC = () => (
-  <div className="flex justify-center items-center py-10" role="status" aria-live="polite">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
-    <span className="sr-only">Loading...</span>
-  </div>
-);
+const Spinner: React.FC = () =>
+<div className="flex justify-center items-center py-10 font-work-sans" role="status" aria-live="polite">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 font-work-sans"></div>
+    <span className="sr-only font-work-sans">Loading...</span>
+  </div>;
+
 
 // ---------------------------
 // API Response & Dummy Data
@@ -71,33 +71,33 @@ interface MarketplaceResponse {
 const ITEMS_PER_PAGE = 12;
 
 const dummyInfluencers: Influencer[] = [
-  {
-    id: "dummy-1",
-    name: "Olivia Bennett",
-    bio: "Lifestyle & Travel influencer with a highly engaged audience.",
-    avatar: "/profile-image.svg",
-    dynamicScore: 92,
-    tier: "Platinum",
-    platform: "Instagram",
-    featuredCampaignImage: "/images/campaigns/campaign1.jpg",
-  },
-  {
-    id: "dummy-2",
-    name: "John Smith",
-    bio: "Tech reviewer and gadget enthusiast.",
-    avatar: "/profile-image.svg",
-    dynamicScore: 80,
-    tier: "Silver",
-    platform: "YouTube",
-    featuredCampaignImage: "/images/campaigns/campaign2.jpg",
-  },
-];
+{
+  id: "dummy-1",
+  name: "Olivia Bennett",
+  bio: "Lifestyle & Travel influencer with a highly engaged audience.",
+  avatar: "/profile-image.svg",
+  dynamicScore: 92,
+  tier: "Platinum",
+  platform: "Instagram",
+  featuredCampaignImage: "/images/campaigns/campaign1.jpg"
+},
+{
+  id: "dummy-2",
+  name: "John Smith",
+  bio: "Tech reviewer and gadget enthusiast.",
+  avatar: "/profile-image.svg",
+  dynamicScore: 80,
+  tier: "Silver",
+  platform: "YouTube",
+  featuredCampaignImage: "/images/campaigns/campaign2.jpg"
+}];
+
 
 // Local filter & sort for dummy data
 function localFilterAndSort(
-  data: Influencer[],
-  f: { platform: string; tier: string; sortBy: string }
-) {
+data: Influencer[],
+f: {platform: string;tier: string;sortBy: string;})
+{
   let filtered = data;
   if (f.platform) {
     filtered = filtered.filter(
@@ -139,10 +139,10 @@ const InfluencerMarketplacePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [filters, setFilters] = useState<{ platform: string; tier: string; sortBy: string }>({
+  const [filters, setFilters] = useState<{platform: string;tier: string;sortBy: string;}>({
     platform: "",
     tier: "",
-    sortBy: "",
+    sortBy: ""
   });
   const [page, setPage] = useState<number>(1);
 
@@ -159,8 +159,8 @@ const InfluencerMarketplacePage: React.FC = () => {
           itemsPerPage: ITEMS_PER_PAGE,
           platform: debouncedFilters.platform,
           tier: debouncedFilters.tier,
-          sortBy: debouncedFilters.sortBy,
-        },
+          sortBy: debouncedFilters.sortBy
+        }
       });
       setInfluencers(response.data.influencers);
       setTotal(response.data.total);
@@ -184,7 +184,7 @@ const InfluencerMarketplacePage: React.FC = () => {
     fetchInfluencers();
   }, [fetchInfluencers]);
 
-  const handleFilterChange = (newFilters: { platform: string; tier: string; sortBy: string }) => {
+  const handleFilterChange = (newFilters: {platform: string;tier: string;sortBy: string;}) => {
     setFilters(newFilters);
     setPage(1);
   };
@@ -195,60 +195,60 @@ const InfluencerMarketplacePage: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        <h1 className="text-3xl font-bold">Influencer Marketplace</h1>
-        <div className="bg-white shadow p-4 rounded">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 font-work-sans">
+        <h1 className="text-3xl font-bold font-sora">Influencer Marketplace</h1>
+        <div className="bg-white shadow p-4 rounded font-work-sans">
           <FilterPanel filters={filters} onFilterChange={handleFilterChange} showSorting />
         </div>
-        {loading ? (
-          <Spinner />
-        ) : error ? (
-          <div className="p-4 text-red-600" role="alert">{error}</div>
-        ) : influencers.length === 0 ? (
-          <div className="p-4">No influencers found matching your criteria.</div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-            {influencers.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).map((inf) => (
-              <div
-                key={inf.id}
-                onClick={() => handleCardClick(inf.id)}
-                className="cursor-pointer bg-white shadow p-4 rounded hover:shadow-lg transition"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleCardClick(inf.id);
-                }}
-                aria-label={`View details for ${inf.name}`}
-              >
+        {loading ?
+        <Spinner /> :
+        error ?
+        <div className="p-4 text-red-600 font-work-sans" role="alert">{error}</div> :
+        influencers.length === 0 ?
+        <div className="p-4 font-work-sans">No influencers found matching your criteria.</div> :
+
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 font-work-sans">
+            {influencers.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).map((inf) =>
+          <div
+            key={inf.id}
+            onClick={() => handleCardClick(inf.id)}
+            className="cursor-pointer bg-white shadow p-4 rounded hover:shadow-lg transition font-work-sans"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCardClick(inf.id);
+            }}
+            aria-label={`View details for ${inf.name}`}>
+
                 <InfluencerCard influencer={inf} />
               </div>
-            ))}
+          )}
           </div>
-        )}
-        <div className="flex flex-col sm:flex-row items-center justify-between">
+        }
+        <div className="flex flex-col sm:flex-row items-center justify-between font-work-sans">
           <button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             disabled={page === 1}
-            className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50"
-            aria-label="Previous page"
-          >
+            className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50 font-work-sans"
+            aria-label="Previous page">
+
             Previous
           </button>
-          <div className="my-2 sm:my-0" aria-live="polite">
+          <div className="my-2 sm:my-0 font-work-sans" aria-live="polite">
             Page {page} of {totalPages || 1}
           </div>
           <button
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages || 1))}
             disabled={page === totalPages || totalPages === 0}
-            className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50"
-            aria-label="Next page"
-          >
+            className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50 font-work-sans"
+            aria-label="Next page">
+
             Next
           </button>
         </div>
       </div>
-    </ErrorBoundary>
-  );
+    </ErrorBoundary>);
+
 };
 
 export default InfluencerMarketplacePage;

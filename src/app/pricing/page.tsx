@@ -14,17 +14,17 @@ export default function Page() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[var(--background-color)] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-[var(--secondary-color)]">Loading pricing page...</p>
+      <div className="min-h-screen bg-[var(--background-color)] flex items-center justify-center font-work-sans">
+        <div className="text-center font-work-sans">
+          <p className="text-lg text-[var(--secondary-color)] font-work-sans">Loading pricing page...</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <ErrorBoundary>
       <PricingContent />
-    </ErrorBoundary>
-  );
+    </ErrorBoundary>);
+
 }

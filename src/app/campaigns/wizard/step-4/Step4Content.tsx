@@ -254,12 +254,12 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   const {
     startUpload
   } = useUploadThing("campaignAssetUploader", {
-    onClientUploadComplete: res => {
+    onClientUploadComplete: (res) => {
       if (res) {
         handleUploadComplete(res);
       }
     },
-    onUploadError: error => {
+    onUploadError: (error) => {
       console.error('Upload error:', error);
       toast.error(`Upload failed: ${error.message}`);
     },
@@ -290,7 +290,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
     setIsCompressing(true);
     try {
       // Process files with compression for images
-      const compressedFiles = await Promise.all(selectedFiles.map(async file => {
+      const compressedFiles = await Promise.all(selectedFiles.map(async (file) => {
         return await compressImageIfNeeded(file);
       }));
       setIsCompressing(false);
@@ -310,7 +310,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
       // Cache failed upload for potential recovery
       try {
         localStorage.setItem(`pendingUpload_${campaignId}`, JSON.stringify({
-          files: selectedFiles.map(f => ({
+          files: selectedFiles.map((f) => ({
             name: f.name,
             size: f.size,
             type: f.type
@@ -387,30 +387,30 @@ const UploadArea: React.FC<UploadAreaProps> = ({
 
         // Only offer recovery for recent uploads (last 5 minutes)
         if (timestamp > fiveMinutesAgo) {
-          toast(t => <div>
-              <p>You have a pending upload. Would you like to retry?</p>
-              <div className="mt-2">
-                <button 
-                  type="button"
-                  className="px-2 py-1 bg-blue-500 text-white rounded mr-2" 
-                  onClick={() => {
-                    toast.dismiss(t.id);
-                    // User needs to reselect files - can't recover File objects from storage
-                    if (inputRef.current) {
-                      inputRef.current.click();
-                    }
-                  }}
-                >
+          toast((t) => <div className="font-work-sans">
+              <p className="font-work-sans">You have a pending upload. Would you like to retry?</p>
+              <div className="mt-2 font-work-sans">
+                <button
+                type="button"
+                className="px-2 py-1 bg-blue-500 text-white rounded mr-2 font-work-sans"
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  // User needs to reselect files - can't recover File objects from storage
+                  if (inputRef.current) {
+                    inputRef.current.click();
+                  }
+                }}>
+
                   Retry Upload
                 </button>
-                <button 
-                  type="button"
-                  className="px-2 py-1 bg-gray-300 rounded" 
-                  onClick={() => {
-                    localStorage.removeItem(`pendingUpload_${campaignId}`);
-                    toast.dismiss(t.id);
-                  }}
-                >
+                <button
+                type="button"
+                className="px-2 py-1 bg-gray-300 rounded font-work-sans"
+                onClick={() => {
+                  localStorage.removeItem(`pendingUpload_${campaignId}`);
+                  toast.dismiss(t.id);
+                }}>
+
                   Discard
                 </button>
               </div>
@@ -426,7 +426,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
       console.error('Error checking recoverable uploads:', e);
     }
   }, [campaignId]);
-  return <div className="relative w-full transition-all duration-300">
+  return <div className="relative w-full transition-all duration-300 font-work-sans">
       <CampaignAssetUploader campaignId={campaignId} onUploadComplete={handleUploadComplete} onUploadError={(error: Error) => {
       console.error('Upload error:', error);
       toast.error(`Upload failed: ${error.message}`);
@@ -451,11 +451,11 @@ const BudgetInput: React.FC<BudgetInputProps> = ({
   onChange,
   onBlur,
   currencySymbol
-}) => <div className="relative flex items-center max-w-[150px]">
-    <div className="absolute left-2 inset-y-0 flex items-center pointer-events-none">
-      <span className="text-gray-500 text-sm">{currencySymbol}</span>
+}) => <div className="relative flex items-center max-w-[150px] font-work-sans">
+    <div className="absolute left-2 inset-y-0 flex items-center pointer-events-none font-work-sans">
+      <span className="text-gray-500 text-sm font-work-sans">{currencySymbol}</span>
       </div>
-      <input type="number" value={value} onChange={onChange} onBlur={onBlur} className="w-full pl-6 py-1.5 px-2 border border-gray-300 rounded-md text-sm" placeholder="500" min="0" step="10" />
+      <input type="number" value={value} onChange={onChange} onBlur={onBlur} className="w-full pl-6 py-1.5 px-2 border border-gray-300 rounded-md text-sm font-work-sans" placeholder="500" min="0" step="10" />
 
   </div>;
 
@@ -481,14 +481,14 @@ const InfluencerSelector: React.FC<InfluencerSelectorProps> = ({
   // Filter influencers based on query
   const filteredInfluencers = useMemo(() => {
     if (!query) return influencers;
-    return influencers.filter(inf => inf.handle.toLowerCase().includes(query.toLowerCase()));
+    return influencers.filter((inf) => inf.handle.toLowerCase().includes(query.toLowerCase()));
   }, [influencers, query]);
-  return <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+  return <div className="font-work-sans">
+      <label className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
         Start typing influencer's handle
       </label>
-      <div className="relative">
-        <input type="text" value={query} onChange={e => {
+      <div className="relative font-work-sans">
+        <input type="text" value={query} onChange={(e) => {
         setQuery(e.target.value);
         setShowDropdown(true);
       }} onFocus={() => setShowDropdown(true)} onBlur={() => {
@@ -496,48 +496,48 @@ const InfluencerSelector: React.FC<InfluencerSelectorProps> = ({
         setTimeout(() => setShowDropdown(false), 200);
 
         // Update if matches an influencer
-        const match = influencers.find(inf => inf.handle.toLowerCase() === query.toLowerCase());
+        const match = influencers.find((inf) => inf.handle.toLowerCase() === query.toLowerCase());
         if (match) {
           onChange(match.handle);
         }
-      }} className="w-full p-2.5 pl-10 border border-gray-300 rounded-md" placeholder="@username" />
+      }} className="w-full p-2.5 pl-10 border border-gray-300 rounded-md font-work-sans" placeholder="@username" />
 
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon name="faSearch" className="h-5 w-5 text-gray-400" solid={false} />
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none font-work-sans">
+          <Icon name="faSearch" className="h-5 w-5 text-gray-400 font-work-sans" solid={false} />
         </div>
         
         {/* Show filtered influencers */}
-        {showDropdown && filteredInfluencers.length > 0 && <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
-            {filteredInfluencers.map(inf => <div key={inf.id} className="p-2 hover:bg-gray-50 cursor-pointer" onClick={() => {
+        {showDropdown && filteredInfluencers.length > 0 && <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto font-work-sans">
+            {filteredInfluencers.map((inf) => <div key={inf.id} className="p-2 hover:bg-gray-50 cursor-pointer font-work-sans" onClick={() => {
           setQuery(inf.handle);
           onChange(inf.handle);
           setShowDropdown(false);
         }}>
 
-                <div className="flex items-center">
-                  <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
-                    <span className="text-xs text-white">
+                <div className="flex items-center font-work-sans">
+                  <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center font-work-sans">
+                    <span className="text-xs text-white font-work-sans">
                       {inf.handle.substring(1, 3).toUpperCase()}
                     </span>
                   </div>
-                  <p className="ml-2 text-sm text-gray-700">{inf.handle}</p>
-                  <span className="ml-2 text-xs text-gray-500">{inf.followers || '7k'}</span>
+                  <p className="ml-2 text-sm text-gray-700 font-work-sans">{inf.handle}</p>
+                  <span className="ml-2 text-xs text-gray-500 font-work-sans">{inf.followers || '7k'}</span>
                 </div>
               </div>)}
           </div>}
       </div>
       
       {/* Display selected influencer */}
-      {value && <div className="mt-2 p-2 bg-gray-50 rounded-md">
-          <div className="flex items-center">
-            <div className="flex-shrink-0 mr-2">
-              <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
-                <span className="text-xs text-white">{value.substring(1, 3).toUpperCase()}</span>
+      {value && <div className="mt-2 p-2 bg-gray-50 rounded-md font-work-sans">
+          <div className="flex items-center font-work-sans">
+            <div className="flex-shrink-0 mr-2 font-work-sans">
+              <div className="h-7 w-7 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center font-work-sans">
+                <span className="text-xs text-white font-work-sans">{value.substring(1, 3).toUpperCase()}</span>
               </div>
             </div>
-            <p className="text-sm text-gray-700">{value}</p>
-            <span className="ml-2 text-xs text-gray-500">
-              {influencers.find(inf => inf.handle === value)?.followers || '7k'}
+            <p className="text-sm text-gray-700 font-work-sans">{value}</p>
+            <span className="ml-2 text-xs text-gray-500 font-work-sans">
+              {influencers.find((inf) => inf.handle === value)?.followers || '7k'}
             </span>
           </div>
         </div>}
@@ -628,7 +628,7 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
             // Exponential backoff with jitter
             const delay = Math.floor(Math.random() * 100) + Math.pow(2, attempt) * 300;
             console.log(`[${correlationId}] Retrying in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
           }
         }
       }
@@ -639,7 +639,7 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
   };
   const handleInfluencerChange = (influencerHandle: string) => {
     // Find the selected influencer to get its platform
-    const selectedInfluencer = influencers.find(inf => inf.handle === influencerHandle);
+    const selectedInfluencer = influencers.find((inf) => inf.handle === influencerHandle);
     onUpdate({
       ...asset,
       details: {
@@ -728,99 +728,99 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
   };
   return <Card className="mb-4">
       <CardContent className="p-4">
-        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
-          <div className="w-full md:w-1/3 lg:w-1/4">
-            <Step4AssetPreview 
-              url={asset.url} 
-              fileName={asset.fileName} 
-              type={asset.type}
-              id={asset.id}
-              className="w-full h-auto rounded-lg shadow-sm border border-gray-200" 
-            />
+        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 font-work-sans">
+          <div className="w-full md:w-1/3 lg:w-1/4 font-work-sans">
+            <Step4AssetPreview
+            url={asset.url}
+            fileName={asset.fileName}
+            type={asset.type}
+            id={asset.id}
+            className="w-full h-auto rounded-lg shadow-sm border border-gray-200" />
+
           </div>
           
-          <div className="flex-1">
-            <div className="flex justify-between items-start">
-              <div className="w-full">
+          <div className="flex-1 font-work-sans">
+            <div className="flex justify-between items-start font-work-sans">
+              <div className="w-full font-work-sans">
                 {/* Single unified asset name field that updates both properties */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-3 font-work-sans">
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
                     Asset Name
                   </label>
-                  <div className="flex items-center">
-                    {isEditingName ? <div className="flex w-full">
-                        <input type="text" value={assetName} onChange={e => setAssetName(e.target.value)} onBlur={toggleNameEdit} onKeyDown={handleKeyDown} className="w-full p-2 border border-blue-300 rounded-l-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] bg-blue-50" autoFocus />
+                  <div className="flex items-center font-work-sans">
+                    {isEditingName ? <div className="flex w-full font-work-sans">
+                        <input type="text" value={assetName} onChange={(e) => setAssetName(e.target.value)} onBlur={toggleNameEdit} onKeyDown={handleKeyDown} className="w-full p-2 border border-blue-300 rounded-l-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] bg-blue-50 font-work-sans" autoFocus />
 
-                        <button 
-                          type="button"
-                          className="px-2 py-2 bg-[var(--accent-color)] text-white rounded-r-md hover:opacity-90" 
-                          onClick={toggleNameEdit} 
-                          title="Save asset name"
-                        >
+                        <button
+                      type="button"
+                      className="px-2 py-2 bg-[var(--accent-color)] text-white rounded-r-md hover:opacity-90 font-work-sans"
+                      onClick={toggleNameEdit}
+                      title="Save asset name">
+
                           <Icon name="faCheck" className="h-5 w-5" solid={false} />
                         </button>
-                      </div> : <div className="flex items-center w-full border border-gray-200 rounded-md p-2 bg-gray-50">
-                        <span className="text-gray-700 font-medium truncate max-w-xs">{assetName}</span>
-                        <button 
-                          type="button"
-                          onClick={toggleNameEdit} 
-                          className="text-gray-400 hover:text-[var(--accent-color)] transition-colors ml-3 group" 
-                          title="Edit asset name"
-                        >
-                          <Icon name="faEdit" className="h-4 w-4 group-hover:hidden" solid={false} />
-                          <Icon name="faEdit" className="h-4 w-4 hidden group-hover:block" solid={true} />
+                      </div> : <div className="flex items-center w-full border border-gray-200 rounded-md p-2 bg-gray-50 font-work-sans">
+                        <span className="text-gray-700 font-medium truncate max-w-xs font-work-sans">{assetName}</span>
+                        <button
+                      type="button"
+                      onClick={toggleNameEdit}
+                      className="text-gray-400 hover:text-[var(--accent-color)] transition-colors ml-3 group font-work-sans"
+                      title="Edit asset name">
+
+                          <Icon name="faPenToSquare" className="h-4 w-4 group-hover:hidden" solid={false} />
+                          <Icon name="faPenToSquare" className="h-4 w-4 hidden group-hover:block" solid={true} />
                         </button>
                       </div>}
                   </div>
                 </div>
               </div>
 
-              <button 
-                type="button"
-                onClick={handleDeleteAsset} 
-                className="ml-2 text-[var(--secondary-color)] hover:text-red-600 transition-colors group" 
-                aria-label="Delete asset"
-              >
+              <button
+              type="button"
+              onClick={handleDeleteAsset}
+              className="ml-2 text-[var(--secondary-color)] hover:text-red-600 transition-colors group font-work-sans"
+              aria-label="Delete asset">
+
                 <Icon name="faTrashCan" className="w-5 h-5 group-hover:hidden" solid={false} />
                 <Icon name="faTrashCan" className="w-5 h-5 hidden group-hover:block" solid={true} />
               </button>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor={`influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+              <div className="font-work-sans">
+                <label htmlFor={`influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
                   Influencer
                 </label>
-                {influencers.length > 0 ? <select id={`influencer-${asset.id}`} value={asset.details.influencerHandle || ''} onChange={e => handleInfluencerChange(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                {influencers.length > 0 ? <select id={`influencer-${asset.id}`} value={asset.details.influencerHandle || ''} onChange={(e) => handleInfluencerChange(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-work-sans">
 
                     <option value="">Select an influencer</option>
-                    {influencers.map(inf => <option key={inf.id} value={inf.handle}>
+                    {influencers.map((inf) => <option key={inf.id} value={inf.handle}>
                         {inf.handle} ({inf.platform})
                       </option>)}
-                  </select> : <div className="p-2 bg-yellow-50 text-yellow-700 text-sm rounded-md">
+                  </select> : <div className="p-2 bg-yellow-50 text-yellow-700 text-sm rounded-md font-work-sans">
                     No influencers found. Add influencers in Step 1.
                   </div>}
               </div>
 
-              <div>
-                <label htmlFor={`budget-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="font-work-sans">
+                <label htmlFor={`budget-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
                   Budget
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">{currencySymbol}</span>
+                <div className="relative font-work-sans">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none font-work-sans">
+                    <span className="text-gray-500 sm:text-sm font-work-sans">{currencySymbol}</span>
                   </div>
-                  <input id={`budget-${asset.id}`} type="number" value={budget} onChange={e => setBudget(e.target.value)} onBlur={saveChanges} className="w-full pl-7 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="0.00" min="0" step="0.01" />
+                  <input id={`budget-${asset.id}`} type="number" value={budget} onChange={(e) => setBudget(e.target.value)} onBlur={saveChanges} className="w-full pl-7 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-work-sans" placeholder="0.00" min="0" step="0.01" />
 
                 </div>
               </div>
             </div>
 
-            <div className="mt-4">
-              <label htmlFor={`why-influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="mt-4 font-work-sans">
+              <label htmlFor={`why-influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
                 Why this influencer?
               </label>
-              <textarea id={`why-influencer-${asset.id}`} value={whyInfluencer} onChange={e => setWhyInfluencer(e.target.value)} onBlur={saveChanges} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Why is this influencer a good fit?" rows={2} />
+              <textarea id={`why-influencer-${asset.id}`} value={whyInfluencer} onChange={(e) => setWhyInfluencer(e.target.value)} onBlur={saveChanges} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-work-sans" placeholder="Why is this influencer a good fit?" rows={2} />
 
             </div>
           </div>
@@ -844,9 +844,9 @@ const Modal: React.FC<ModalProps> = ({
   children
 }) => {
   if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+  return <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 font-work-sans" onClick={onClose}>
 
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full" onClick={e => e.stopPropagation()}>
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full font-work-sans" onClick={(e) => e.stopPropagation()}>
 
         {children}
       </div>
@@ -890,7 +890,7 @@ function FormContent() {
     // Get influencers directly from API data if available
     if (campaignData?.influencers && Array.isArray(campaignData.influencers)) {
       setIsLoadingInfluencers(false);
-      return campaignData.influencers.map(inf => ({
+      return campaignData.influencers.map((inf) => ({
         id: inf.id || `inf-${inf.handle}`,
         handle: inf.handle,
         platform: inf.platform,
@@ -949,24 +949,24 @@ function FormContent() {
     const handleAssetDeleted = (event: CustomEvent) => {
       const { id, url, fileId, reason } = event.detail;
       console.log(`Asset deletion event received: ${id} (${fileId}) - ${reason}`);
-      
+
       // Find the asset in our local state
-      const assetToRemove = assets.find(asset => 
-        asset.id === id || 
-        (asset.url && asset.url.includes(fileId))
+      const assetToRemove = assets.find((asset) =>
+      asset.id === id ||
+      asset.url && asset.url.includes(fileId)
       );
-      
+
       if (assetToRemove) {
         console.log(`Removing deleted asset from UI and database: ${assetToRemove.fileName}`);
-        
+
         // Remove from local state
-        const updatedAssets = assets.filter(asset => asset.id !== assetToRemove.id);
+        const updatedAssets = assets.filter((asset) => asset.id !== assetToRemove.id);
         setAssets(updatedAssets);
-        
+
         // Update wizard context to persist the change
         updateCampaignData({
           assets: {
-            files: updatedAssets.map(asset => ({
+            files: updatedAssets.map((asset) => ({
               id: asset.id,
               url: asset.url,
               fileName: asset.fileName,
@@ -977,7 +977,7 @@ function FormContent() {
             }))
           }
         });
-        
+
         // Show notification that asset was removed
         toast.success("Asset removed", {
           description: `"${assetToRemove.fileName}" has been removed from this campaign.`
@@ -986,10 +986,10 @@ function FormContent() {
         console.warn(`Asset deletion event received but asset not found in state: ${id} / ${fileId}`);
       }
     };
-    
+
     // Add event listener
     document.addEventListener(ASSET_DELETED_EVENT, handleAssetDeleted as EventListener);
-    
+
     // Remove event listener on cleanup
     return () => {
       document.removeEventListener(ASSET_DELETED_EVENT, handleAssetDeleted as EventListener);
@@ -1019,10 +1019,10 @@ function FormContent() {
             }
 
             // For UploadThing URLs, verify the asset exists using our proxy
-            const isUploadThingUrl = 
-              asset.url.includes('utfs.io') || 
-              asset.url.includes('uploadthing') || 
-              asset.url.includes('ufs.sh');
+            const isUploadThingUrl =
+            asset.url.includes('utfs.io') ||
+            asset.url.includes('uploadthing') ||
+            asset.url.includes('ufs.sh');
 
             if (isUploadThingUrl) {
               // Extract file ID for more accurate checking
@@ -1033,7 +1033,7 @@ function FormContent() {
 
               // Use our asset proxy with HEAD request to quickly check existence
               const proxyUrl = `/api/asset-proxy?url=${encodeURIComponent(asset.url)}${fileId ? `&fileId=${fileId}` : ''}`;
-              
+
               console.log(`Validating asset: ${asset.fileName} (${asset.id})`);
               const response = await fetch(proxyUrl, { method: 'HEAD' });
 
@@ -1083,11 +1083,11 @@ function FormContent() {
   useEffect(() => {
     async function checkExistingAssets() {
       if (!wizardData || !wizardData.assets) return;
-      
+
       // Only validate if we have assets to check
       if (wizardData.assets.files && wizardData.assets.files.length > 0) {
         // Map campaign assets to our internal Asset format for validation
-        const assetsToValidate: Asset[] = wizardData.assets.files.map(file => ({
+        const assetsToValidate: Asset[] = wizardData.assets.files.map((file) => ({
           id: file.id || generateCorrelationId(),
           url: file.url,
           fileName: file.fileName || 'Unnamed file',
@@ -1100,21 +1100,21 @@ function FormContent() {
             description: ''
           }
         }));
-        
+
         // Validate all assets
         const validatedAssets = await validateAssets(assetsToValidate);
-        
+
         // Update local state with validated assets
         setAssets(validatedAssets);
-        
+
         // If any assets were invalid (removed), update wizard data too
         if (validatedAssets.length !== assetsToValidate.length) {
           console.log(`Updating wizard data with ${validatedAssets.length} valid assets`);
-          
+
           // Update the assets in the campaign data
           updateCampaignData({
             assets: {
-              files: validatedAssets.map(asset => ({
+              files: validatedAssets.map((asset) => ({
                 id: asset.id,
                 url: asset.url,
                 fileName: asset.fileName,
@@ -1130,28 +1130,28 @@ function FormContent() {
         }
       }
     }
-    
+
     checkExistingAssets();
   }, [wizardData, updateCampaignData]);
 
   // Update context with new assets
   const handleAssetsAdded = useCallback((newAssets: Asset[]) => {
     // Log asset info for diagnostics
-    console.log('Adding new assets to state:', newAssets.map(a => ({
+    console.log('Adding new assets to state:', newAssets.map((a) => ({
       id: a.id,
       url: a.url,
       type: a.type,
       details: a.details
     })));
-    
+
     // Create unique IDs for each asset
-    const assetsWithIds = newAssets.map(asset => ({
+    const assetsWithIds = newAssets.map((asset) => ({
       ...asset,
       id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
     }));
-      
+
     // Auto-assign influencers if we have them from step 1
-    const assetsWithInfluencers = assetsWithIds.map(asset => {
+    const assetsWithInfluencers = assetsWithIds.map((asset) => {
       // If we have influencers and this asset doesn't have one yet
       if (campaignInfluencers.length > 0 && (!asset.details || !asset.details.influencerHandle)) {
         const defaultInfluencer = campaignInfluencers[0];
@@ -1169,7 +1169,7 @@ function FormContent() {
       }
       return asset;
     });
-    
+
     // Combine existing and new assets
     const updatedAssets = [...assets, ...assetsWithInfluencers];
     setAssets(updatedAssets);
@@ -1177,7 +1177,7 @@ function FormContent() {
     // Update wizard context with the correct section name and data structure
     // Following database schema best practices
     updateData('assets', {
-      files: updatedAssets.map(asset => ({
+      files: updatedAssets.map((asset) => ({
         id: asset.id,
         url: asset.url,
         fileName: asset.fileName,
@@ -1187,10 +1187,10 @@ function FormContent() {
         tags: []
       }))
     });
-      
+
     // Also update the creative section for better DB compatibility
     (updateData as any)('creative', {
-      creativeAssets: updatedAssets.map(asset => ({
+      creativeAssets: updatedAssets.map((asset) => ({
         id: asset.id,
         name: asset.details?.assetName,
         description: asset.details?.description || '',
@@ -1215,20 +1215,20 @@ function FormContent() {
   const handleRemoveAsset = useCallback((assetId: string) => {
     try {
       // Get the asset details for the confirmation message
-      const assetToRemove = assets.find(asset => asset.id === assetId);
+      const assetToRemove = assets.find((asset) => asset.id === assetId);
       const assetName = assetToRemove?.fileName || 'this asset';
-      
+
       // Confirm with the user
       if (window.confirm(`Are you sure you want to remove ${assetName}?`)) {
         // Filter out the asset with the specified ID
-        const updatedAssets = assets.filter(asset => asset.id !== assetId);
-        
+        const updatedAssets = assets.filter((asset) => asset.id !== assetId);
+
         // Update state
         setAssets(updatedAssets);
-        
+
         // Update wizard context
         updateData('assets', {
-          files: updatedAssets.map(asset => ({
+          files: updatedAssets.map((asset) => ({
             id: asset.id,
             url: asset.url,
             fileName: asset.fileName,
@@ -1238,10 +1238,10 @@ function FormContent() {
             tags: []
           }))
         });
-        
+
         // Also update the creative section
         (updateData as any)('creative', {
-          creativeAssets: updatedAssets.map(asset => ({
+          creativeAssets: updatedAssets.map((asset) => ({
             id: asset.id,
             name: asset.details?.assetName,
             description: asset.details?.description || '',
@@ -1254,7 +1254,7 @@ function FormContent() {
             whyInfluencer: asset.details?.whyInfluencer || ''
           }))
         });
-        
+
         // Show success message
         toast.success(`Asset "${assetName}" removed successfully`);
       }
@@ -1263,40 +1263,40 @@ function FormContent() {
       toast.error('Failed to remove asset');
     }
   }, [assets, updateData]);
-  
+
   // Modified submit function to validate assets before submission
   const handleFormSubmit = async (values: any) => {
     setIsSaving(true);
-    
+
     try {
       // Validate assets before submitting to ensure all assets exist
       if (values.assets && Array.isArray(values.assets)) {
         const validAssets = await validateAssets(values.assets as Asset[]);
-        
+
         // If any assets were removed, show a warning
         if (validAssets.length !== values.assets.length) {
           const removedCount = values.assets.length - validAssets.length;
           toast.error(`${removedCount} asset(s) were removed because they no longer exist on the server.`);
-          
+
           // Update the form values with only the valid assets
           values.assets = validAssets;
         }
       }
-      
+
       // Continue with existing submit logic from original function
       const correlationId = generateCorrelationId();
       console.log(`[${correlationId}] Starting form submission with validated assets`);
-      
+
       // Set the redirect destination to step-5 (Review) instead of submission
       setRedirect(`/campaigns/wizard/step-5?id=${campaignId}`);
-      
+
       // Process and validate assets using existing function
       const processedAssets = processAssetsForSubmission();
       if (processedAssets.length === 0) {
         toast.error("Please add at least one asset before submitting.");
         return;
       }
-      
+
       // Rest of the original submission logic
       // ... 
     } catch (error) {
@@ -1317,10 +1317,10 @@ function FormContent() {
       }
 
       // First filter out any invalid assets
-      const validAssets = assets.filter(asset => asset && typeof asset === 'object' && asset.url);
+      const validAssets = assets.filter((asset) => asset && typeof asset === 'object' && asset.url);
 
       // Then map the valid assets
-      return validAssets.map(asset => {
+      return validAssets.map((asset) => {
         // Use our enhanced type detection for consistency
         const { type, format } = enhancedFileTypeDetection(asset.url, asset.type);
 
@@ -1482,7 +1482,7 @@ function FormContent() {
         }
 
         // Remove from local state
-        setAssets(prev => prev.filter(a => a.id !== confirmDeleteAsset.id));
+        setAssets((prev) => prev.filter((a) => a.id !== confirmDeleteAsset.id));
         setConfirmDeleteAsset(null);
 
         // Show success message
@@ -1519,7 +1519,7 @@ function FormContent() {
         // Add empty values even if not used
         creativeNotes: "",
         // The essential creativeAssets data
-        creativeAssets: processedAssets.map(asset => ({
+        creativeAssets: processedAssets.map((asset) => ({
           id: asset.id,
           // Include ID for tracking
           type: asset.type.includes('video') ? 'video' : 'image',
@@ -1569,7 +1569,7 @@ function FormContent() {
       if (updateData) {
         // Update assets section for wizard context (standard interface)
         updateData('assets', {
-          files: processedAssets.map(asset => ({
+          files: processedAssets.map((asset) => ({
             id: asset.id,
             url: asset.url,
             fileName: asset.fileName,
@@ -1604,42 +1604,42 @@ function FormContent() {
   // Show loading UI while validating assets
   if (isValidatingAssets) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
-        <div className="mb-4">
-          <Spinner 
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-8 font-work-sans">
+        <div className="mb-4 font-work-sans">
+          <Spinner
             type="svg"
             size="lg"
             variant="accent"
-            className="text-[var(--accent-color)]"
-          />
+            className="text-[var(--accent-color)] font-work-sans" />
+
         </div>
-        <h3 className="text-lg font-semibold mb-2 text-[var(--primary-color)]">Validating Campaign Assets</h3>
-        <p className="text-[var(--secondary-color)] text-center">
+        <h3 className="text-lg font-semibold mb-2 text-[var(--primary-color)] font-sora">Validating Campaign Assets</h3>
+        <p className="text-[var(--secondary-color)] text-center font-work-sans">
           Checking that all assets are still available...
         </p>
-      </div>
-    );
+      </div>);
+
   }
 
   if (wizardLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
+    return <div className="flex items-center justify-center min-h-screen font-work-sans">
         <WizardSkeleton step={4} />
       </div>;
   }
   if (error) {
-    return <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-red-800 font-semibold">Error</h3>
-        <p className="text-red-600">{error}</p>
-        <button onClick={() => router.push('/campaigns')} className="mt-4 btn btn-secondary">
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-md font-work-sans">
+        <h3 className="text-red-800 font-semibold font-sora">Error</h3>
+        <p className="text-red-600 font-work-sans">{error}</p>
+        <button onClick={() => router.push('/campaigns')} className="mt-4 btn btn-secondary font-work-sans">
 
           Return to Campaigns
         </button>
       </div>;
   }
-  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Campaign Creation</h1>
-        <p className="text-gray-500">Complete all required fields to create your campaign</p>
+  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-white min-h-screen font-work-sans">
+      <div className="mb-8 font-work-sans">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2 font-sora">Campaign Creation</h1>
+        <p className="text-gray-500 font-work-sans">Complete all required fields to create your campaign</p>
       </div>
       
       <Formik initialValues={initialValues} validationSchema={CreativeSchema} onSubmit={handleFormSubmit} enableReinitialize={true}>
@@ -1654,19 +1654,19 @@ function FormContent() {
         return <>
               <Form className="space-y-6">
                 {/* Asset Upload Section */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Asset Upload</h2>
-                  {campaignId ? <UploadArea campaignId={campaignId} onAssetsAdded={handleAssetsAdded} /> : <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-yellow-800">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 font-work-sans">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sora">Asset Upload</h2>
+                  {campaignId ? <UploadArea campaignId={campaignId} onAssetsAdded={handleAssetsAdded} /> : <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md font-work-sans">
+                      <p className="text-yellow-800 font-work-sans">
                         Campaign ID is required to upload assets. Please save the campaign first.
                       </p>
                     </div>}
                   
                   {/* Uploaded Files Area */}
-                  {assets.length > 0 && <div className="mt-6 space-y-2">
-                      {assets.map(asset => <div key={asset.id} className="mb-2">
-                            <UploadedFile asset={asset} onDelete={() => handleDeleteAsset(asset)} onUpdate={updatedAsset => {
-                    setAssets(assets.map(a => a.id === updatedAsset.id ? updatedAsset : a));
+                  {assets.length > 0 && <div className="mt-6 space-y-2 font-work-sans">
+                      {assets.map((asset) => <div key={asset.id} className="mb-2 font-work-sans">
+                            <UploadedFile asset={asset} onDelete={() => handleDeleteAsset(asset)} onUpdate={(updatedAsset) => {
+                    setAssets(assets.map((a) => a.id === updatedAsset.id ? updatedAsset : a));
                   }} currencySymbol={currencySymbol} influencers={campaignInfluencers} />
 
                         </div>)}
@@ -1676,15 +1676,15 @@ function FormContent() {
                 {/* Asset Details Section - removed as per Figma design */}
                 
                 {/* Add bottom padding to prevent progress bar overlap */}
-                <div className="pb-24"></div>
+                <div className="pb-24 font-work-sans"></div>
               </Form>
               
-              <ProgressBar currentStep={4} onStepClick={step => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)} onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)} onNext={() => {
+              <ProgressBar currentStep={4} onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)} onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)} onNext={() => {
             // First save the form data
             handleSaveDraft(values);
             // Then navigate directly to step 5
             router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
-          }} onSaveDraft={() => handleSaveDraft(values)} disableNext={assets.length === 0 || assets.some(a => !a.details.assetName || !a.details.influencerHandle || !a.details.budget || a.details.budget <= 0)} isFormValid={isValid} isDirty={dirty} isSaving={isSaving} />
+          }} onSaveDraft={() => handleSaveDraft(values)} disableNext={assets.length === 0 || assets.some((a) => !a.details.assetName || !a.details.influencerHandle || !a.details.budget || a.details.budget <= 0)} isFormValid={isValid} isDirty={dirty} isSaving={isSaving} />
 
             </>;
       }}
@@ -1693,34 +1693,34 @@ function FormContent() {
       {/* Preview Modal */}
       <Modal isOpen={!!previewAsset} onClose={() => setPreviewAsset(null)}>
 
-        {previewAsset && <div>
-            <h2 className="text-xl font-bold mb-4">Preview: {previewAsset.fileName || previewAsset.details.assetName}</h2>
-            {previewAsset.url ? <div className="w-full max-h-[70vh] overflow-hidden rounded-lg">
+        {previewAsset && <div className="font-work-sans">
+            <h2 className="text-xl font-bold mb-4 font-sora">Preview: {previewAsset.fileName || previewAsset.details.assetName}</h2>
+            {previewAsset.url ? <div className="w-full max-h-[70vh] overflow-hidden rounded-lg font-work-sans">
                 <AssetPreview url={previewAsset.url} fileName={previewAsset.fileName || previewAsset.details.assetName} type={previewAsset.type} className="w-full h-full object-contain" />
 
-              </div> : <p className="mb-4">No preview available.</p>}
+              </div> : <p className="mb-4 font-work-sans">No preview available.</p>}
           </div>}
       </Modal>
       
       {/* Delete Confirmation Modal */}
       <Modal isOpen={!!confirmDeleteAsset} onClose={() => setConfirmDeleteAsset(null)}>
 
-        <div>
-          <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
-          <p className="mb-4">Are you sure you want to delete this asset? This action cannot be undone.</p>
-          <div className="flex space-x-4">
-            <button 
-              type="button" 
-              onClick={() => setConfirmDeleteAsset(null)} 
-              className="px-4 py-2 bg-[var(--divider-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-400"
-            >
+        <div className="font-work-sans">
+          <h2 className="text-xl font-bold mb-4 font-sora">Confirm Delete</h2>
+          <p className="mb-4 font-work-sans">Are you sure you want to delete this asset? This action cannot be undone.</p>
+          <div className="flex space-x-4 font-work-sans">
+            <button
+            type="button"
+            onClick={() => setConfirmDeleteAsset(null)}
+            className="px-4 py-2 bg-[var(--divider-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-400 font-work-sans">
+
               Cancel
             </button>
-            <button 
-              type="button" 
-              onClick={confirmDelete} 
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-            >
+            <button
+            type="button"
+            onClick={confirmDelete}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-work-sans">
+
               Delete
             </button>
           </div>
@@ -1730,16 +1730,16 @@ function FormContent() {
 }
 export default function Step4Content() {
   const [isClientSide, setIsClientSide] = useState(false);
-  
+
   useEffect(() => {
     setIsClientSide(true);
   }, []);
-  
+
   if (!isClientSide) {
     return <WizardSkeleton step={4} />;
   }
-  
-  return <div className="min-h-screen bg-white">
+
+  return <div className="min-h-screen bg-white font-work-sans">
       <Suspense fallback={<WizardSkeleton step={4} />}>
         <FormContent />
       </Suspense>
@@ -1769,13 +1769,13 @@ const Step4AssetPreview = ({
   type,
   id,
   className = ''
-}: {
-  url: string;
-  fileName: string;
-  type: string;
-  id?: string;
-  className?: string;
-}) => {
+
+
+
+
+
+
+}: {url: string;fileName: string;type: string;id?: string;className?: string;}) => {
   const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
   const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -1788,13 +1788,13 @@ const Step4AssetPreview = ({
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     if (!videoRef.current) return;
-    
+
     if (isPlaying) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play().catch(error => {
+      videoRef.current.play().catch((error) => {
         console.warn('Play was prevented:', error);
       });
     }
@@ -1804,7 +1804,7 @@ const Step4AssetPreview = ({
   useEffect(() => {
     if (isVideo && videoRef.current) {
       const video = videoRef.current;
-      
+
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
       const handleError = () => {
@@ -1814,17 +1814,17 @@ const Step4AssetPreview = ({
       const handleLoadedMetadata = () => {
         setStatus('loaded');
         // Autoplay when metadata is loaded
-        video.play().catch(error => {
+        video.play().catch((error) => {
           console.warn('Autoplay was prevented:', error);
           setIsPlaying(false);
         });
       };
-      
+
       video.addEventListener('play', handlePlay);
       video.addEventListener('pause', handlePause);
       video.addEventListener('error', handleError);
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      
+
       return () => {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
@@ -1847,85 +1847,85 @@ const Step4AssetPreview = ({
       img.src = url;
     }
   }, [isImage, url, fileName]);
-  
+
   return (
-    <div 
-      className={`relative rounded-lg overflow-hidden bg-gray-100 aspect-square ${className}`}
+    <div
+      className={`relative rounded-lg overflow-hidden bg-gray-100 aspect-square ${className} font-work-sans`}
       onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
+      onMouseLeave={() => setIsHovering(false)}>
+
       {/* Loading state */}
-      {status === 'loading' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <Icon name="faSpinner" className="h-8 w-8 text-gray-400 animate-spin" iconType="static" solid={false} />
+      {status === 'loading' &&
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 font-work-sans">
+          <Icon name="faSpinner" className="h-8 w-8 text-gray-400 animate-spin font-work-sans" iconType="static" solid={false} />
         </div>
-      )}
+      }
       
       {/* Error state */}
-      {status === 'error' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100">
-          <Icon name="faExclamationTriangle" className="h-8 w-8 text-amber-500 mb-2" iconType="static" solid={false} />
-          <p className="text-center text-gray-600 text-sm">Failed to load {fileName}</p>
+      {status === 'error' &&
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
+          <Icon name="faExclamationTriangle" className="h-8 w-8 text-amber-500 mb-2 font-work-sans" iconType="static" solid={false} />
+          <p className="text-center text-gray-600 text-sm font-work-sans">Failed to load {fileName}</p>
         </div>
-      )}
+      }
       
       {/* Image preview */}
-      {isImage && status === 'loaded' && (
-        <>
+      {isImage && status === 'loaded' &&
+      <>
           <img src={url} alt={fileName} className="w-full h-full object-cover" />
           {/* Image badge */}
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-work-sans">
             <Icon name="faImage" className="h-3 w-3 mr-1 inline-block" iconType="static" solid={true} />
             Image
           </div>
         </>
-      )}
+      }
       
       {/* Video preview with play/pause button */}
-      {isVideo && (
-        <div className="relative w-full h-full" onClick={togglePlayPause}>
-          <video 
-            ref={videoRef} 
-            src={url} 
-            className="w-full h-full object-cover" 
-            muted 
-            autoPlay
-            playsInline 
-            loop 
-          />
+      {isVideo &&
+      <div className="relative w-full h-full font-work-sans" onClick={togglePlayPause}>
+          <video
+          ref={videoRef}
+          src={url}
+          className="w-full h-full object-cover"
+          muted
+          autoPlay
+          playsInline
+          loop />
+
           
           {/* Play/Pause button that appears on hover or when paused */}
-          <div 
-            className={`absolute inset-0 bg-black ${isHovering ? 'bg-opacity-20' : 'bg-opacity-0'} flex items-center justify-center transition-opacity duration-200 ${!isHovering && isPlaying ? 'opacity-0' : 'opacity-100'}`}
-          >
+          <div
+          className={`absolute inset-0 bg-black ${isHovering ? 'bg-opacity-20' : 'bg-opacity-0'} flex items-center justify-center transition-opacity duration-200 ${!isHovering && isPlaying ? 'opacity-0' : 'opacity-100'} font-work-sans`}>
+
             <button
-              onClick={togglePlayPause}
-              className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10"
-              aria-label={isPlaying ? "Pause video" : "Play video"}
-            >
-              <Icon 
-                name={isPlaying ? "faPause" : "faPlay"} 
-                className="h-6 w-6 text-white" 
-                iconType="button" 
-                solid={true} 
-              />
+            onClick={togglePlayPause}
+            className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 font-work-sans"
+            aria-label={isPlaying ? "Pause video" : "Play video"}>
+
+              <Icon
+              name={isPlaying ? "faPause" : "faPlay"}
+              className="h-6 w-6 text-white font-work-sans"
+              iconType="button"
+              solid={true} />
+
             </button>
           </div>
           
           {/* Video label in bottom corner */}
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-work-sans">
             <Icon name="faVideo" className="h-3 w-3 mr-1 inline-block" iconType="static" solid={true} />
             Video
           </div>
         </div>
-      )}
+      }
       
       {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo && (
-        <div className="flex items-center justify-center p-8">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400" iconType="static" solid={false} />
+      {!isImage && !isVideo &&
+      <div className="flex items-center justify-center p-8 font-work-sans">
+          <Icon name="faInfo" className="h-12 w-12 text-gray-400 font-work-sans" iconType="static" solid={false} />
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };

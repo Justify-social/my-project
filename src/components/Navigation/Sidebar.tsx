@@ -41,8 +41,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       if (childHref === "/influencers/marketplace") {
         return (
           pathname === "/influencers/marketplace" ||
-          pathname.startsWith("/influencers/marketplace/")
-        );
+          pathname.startsWith("/influencers/marketplace/"));
+
       } else if (childHref === "/influencers") {
         if (pathname.startsWith("/influencers/marketplace")) {
           return false;
@@ -76,93 +76,93 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         transition-all duration-300 ease-in-out
         hidden md:flex
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}
-    >
-      <nav aria-label="Sidebar Navigation" className="p-2 sm:p-3 lg:p-4 flex-grow overflow-auto">
-        <ul className="list-none space-y-1 sm:space-y-2">
+      `}>
+
+      <nav aria-label="Sidebar Navigation" className="p-2 sm:p-3 lg:p-4 flex-grow overflow-auto font-work-sans">
+        <ul className="list-none space-y-1 sm:space-y-2 font-work-sans">
           {navItems.map((item, index) => {
             const active = isNavItemActive(item.href);
             return (
-              <li key={index}>
+              <li key={index} className="font-work-sans">
                 <Link
                   href={item.href}
                   className={`flex items-center gap-1.5 sm:gap-2 no-underline ${
-                    active ? activeClasses : defaultClasses
-                  }`}
-                >
-                  {item.icon && (
-                    <img
-                      src={item.icon}
-                      alt={`${item.label} icon`}
-                      className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200"
-                      style={{
-                        filter: active
-                          ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
-                          : "none",
-                      }}
-                    />
-                  )}
-                  <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+                  active ? activeClasses : defaultClasses}`
+                  }>
+
+                  {item.icon &&
+                  <img
+                    src={item.icon}
+                    alt={`${item.label} icon`}
+                    className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200"
+                    style={{
+                      filter: active ?
+                      "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)" :
+                      "none"
+                    }} />
+
+                  }
+                  <span className="whitespace-nowrap overflow-hidden text-ellipsis font-work-sans">
                     {item.label}
                   </span>
                 </Link>
-                {item.children && active && (
-                  <ul className="list-none mt-1 space-y-1">
+                {item.children && active &&
+                <ul className="list-none mt-1 space-y-1 font-work-sans">
                     {item.children.map((child, childIndex) => {
-                      const childActive = isChildActive(item.href, child.href);
-                      return (
-                        <li key={childIndex}>
+                    const childActive = isChildActive(item.href, child.href);
+                    return (
+                      <li key={childIndex} className="font-work-sans">
                           <Link
-                            href={child.href}
-                            className={`no-underline block py-1 ${
-                              childActive ? activeSubmenuClasses : defaultSubmenuClasses
-                            }`}
-                          >
-                            <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+                          href={child.href}
+                          className={`no-underline block py-1 ${
+                          childActive ? activeSubmenuClasses : defaultSubmenuClasses}`
+                          }>
+
+                            <span className="whitespace-nowrap overflow-hidden text-ellipsis font-work-sans">
                               {child.label}
                             </span>
                           </Link>
-                        </li>
-                      );
-                    })}
+                        </li>);
+
+                  })}
                   </ul>
-                )}
-              </li>
-            );
+                }
+              </li>);
+
           })}
         </ul>
       </nav>
       
       {/* Settings section */}
-      <div 
+      <div
         ref={setSettingsRef}
-        className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 border-t border-gray-300"
-      >
+        className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 border-t border-gray-300 font-work-sans">
+
         <Link
           href={settingsNavItem.href}
           className={`flex items-center gap-1.5 sm:gap-2 no-underline ${
-            isNavItemActive(settingsNavItem.href) ? activeClasses : defaultClasses
-          }`}
-        >
-          {settingsNavItem.icon && (
-            <img
-              src={settingsNavItem.icon}
-              alt={`${settingsNavItem.label} icon`}
-              className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200"
-              style={{
-                filter: isNavItemActive(settingsNavItem.href)
-                  ? "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)"
-                  : "none",
-              }}
-            />
-          )}
-          <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+          isNavItemActive(settingsNavItem.href) ? activeClasses : defaultClasses}`
+          }>
+
+          {settingsNavItem.icon &&
+          <img
+            src={settingsNavItem.icon}
+            alt={`${settingsNavItem.label} icon`}
+            className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-200"
+            style={{
+              filter: isNavItemActive(settingsNavItem.href) ?
+              "invert(62%) sepia(96%) saturate(3318%) hue-rotate(179deg) brightness(97%) contrast(101%)" :
+              "none"
+            }} />
+
+          }
+          <span className="whitespace-nowrap overflow-hidden text-ellipsis font-work-sans">
             {settingsNavItem.label}
           </span>
         </Link>
       </div>
-    </aside>
-  );
+    </aside>);
+
 };
 
 export default Sidebar;

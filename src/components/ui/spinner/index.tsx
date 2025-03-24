@@ -7,7 +7,7 @@ export interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default "md"
    */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  
+
   /**
    * The color of the spinner
    * @default "primary"
@@ -77,25 +77,25 @@ export function Spinner({
     sm: 'h-4 w-4 border-2',
     md: 'h-6 w-6 border-2',
     lg: 'h-8 w-8 border-3',
-    xl: 'h-12 w-12 border-4',
+    xl: 'h-12 w-12 border-4'
   };
-  
+
   // Size classes for SVG spinner
   const svgSizeClasses = {
     xs: 'h-3 w-3',
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
     lg: 'h-8 w-8',
-    xl: 'h-12 w-12',
+    xl: 'h-12 w-12'
   };
-  
+
   // Variant classes for border spinner
   const borderVariantClasses = {
     primary: 'border-primary border-t-transparent text-primary',
     secondary: 'border-secondary border-t-transparent text-secondary',
     accent: 'border-accent border-t-transparent text-accent',
     white: 'border-white border-t-transparent text-white',
-    current: 'border-current border-t-transparent',
+    current: 'border-current border-t-transparent'
   };
 
   // If no label or showLabel is false, just render the spinner
@@ -103,31 +103,31 @@ export function Spinner({
     // If using SVG spinner
     if (type === 'svg') {
       return (
-        <SVGSpinner 
-          size={size} 
-          variant={variant} 
+        <SVGSpinner
+          size={size}
+          variant={variant}
           className={className}
-          aria-label="Loading"
-        />
-      );
+          aria-label="Loading" />);
+
+
     }
-    
+
     // Default border spinner
     return (
       <div
-        className={cn(
+        className={`${cn(
           'inline-block animate-spin rounded-full',
           borderSizeClasses[size],
           borderVariantClasses[variant],
           className
-        )}
+        )} font-work-sans`}
         role="status"
         aria-label="Loading"
-        {...props}
-      >
-        <span className="sr-only">Loading...</span>
-      </div>
-    );
+        {...props}>
+
+        <span className="sr-only font-work-sans">Loading...</span>
+      </div>);
+
   }
 
   // Layout classes based on label position
@@ -135,38 +135,38 @@ export function Spinner({
     top: 'flex flex-col-reverse items-center gap-2',
     right: 'flex flex-row items-center gap-2',
     bottom: 'flex flex-col items-center gap-2',
-    left: 'flex flex-row-reverse items-center gap-2',
+    left: 'flex flex-row-reverse items-center gap-2'
   };
 
   return (
-    <div className={cn(layoutClasses[labelPosition], className)} {...props}>
-      {type === 'svg' ? (
-        <SVGSpinner 
-          size={size} 
-          variant={variant} 
-          aria-label={label}
-        />
-      ) : (
-        <div
-          className={cn(
-            'inline-block animate-spin rounded-full',
-            borderSizeClasses[size],
-            borderVariantClasses[variant]
-          )}
-          role="status"
-          aria-label={label}
-        >
-          <span className="sr-only">{label}</span>
+    <div className={`${cn(layoutClasses[labelPosition], className)} font-work-sans`} {...props}>
+      {type === 'svg' ?
+      <SVGSpinner
+        size={size}
+        variant={variant}
+        aria-label={label} /> :
+
+
+      <div
+        className={`${cn(
+          'inline-block animate-spin rounded-full',
+          borderSizeClasses[size],
+          borderVariantClasses[variant]
+        )} font-work-sans`}
+        role="status"
+        aria-label={label}>
+
+          <span className="sr-only font-work-sans">{label}</span>
         </div>
-      )}
-      <span className="text-sm text-gray-600">{label}</span>
-    </div>
-  );
+      }
+      <span className="text-sm text-gray-600 font-work-sans">{label}</span>
+    </div>);
+
 }
 
-const SVGSpinner = ({ 
-  size = 'md', 
-  variant = 'primary', 
+const SVGSpinner = ({
+  size = 'md',
+  variant = 'primary',
   className,
   ...props
 }: SVGSpinnerProps) => {
@@ -176,9 +176,9 @@ const SVGSpinner = ({
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
     lg: 'h-8 w-8',
-    xl: 'h-12 w-12',
+    xl: 'h-12 w-12'
   };
-  
+
   return (
     <svg
       className={cn(
@@ -191,82 +191,82 @@ const SVGSpinner = ({
       fill="none"
       viewBox="0 0 24 24"
       role="status"
-      {...props}
-    >
+      {...props}>
+
       <circle
         className="opacity-25"
         cx="12"
         cy="12"
         r="10"
         stroke="currentColor"
-        strokeWidth="4"
-      />
+        strokeWidth="4" />
+
       <path
         className="opacity-75"
         fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      />
-      <span className="sr-only">Loading...</span>
-    </svg>
-  );
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+
+      <span className="sr-only font-work-sans">Loading...</span>
+    </svg>);
+
 };
 
 /**
  * Authentication spinner with centered layout and label
  */
-export function AuthSpinner({ 
-  label = "Authenticating...", 
-  size = "lg", 
-  className, 
-  ...props 
+export function AuthSpinner({
+  label = "Authenticating...",
+  size = "lg",
+  className,
+  ...props
 }: SpinnerProps) {
   return (
-    <div className={cn("min-h-[200px] flex items-center justify-center", className)} {...props}>
-      <div className="text-center">
+    <div className={`${cn("min-h-[200px] flex items-center justify-center", className)} font-work-sans`} {...props}>
+      <div className="text-center font-work-sans">
         <Spinner size={size} variant="primary" showLabel={false} />
-        <p className="mt-4 text-gray-600">{label}</p>
+        <p className="mt-4 text-gray-600 font-work-sans">{label}</p>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 /**
  * Button spinner for use within buttons
  */
-export function ButtonSpinner({ 
-  size = "sm", 
-  className, 
-  ...props 
+export function ButtonSpinner({
+  size = "sm",
+  className,
+  ...props
 }: SpinnerProps) {
   return (
-    <Spinner 
-      size={size} 
-      variant="current" 
-      className={cn("mr-2", className)} 
+    <Spinner
+      size={size}
+      variant="current"
+      className={cn("mr-2", className)}
       showLabel={false}
-      {...props} 
-    />
-  );
+      {...props} />);
+
+
 }
 
 /**
  * Inline spinner for use within text
  */
-export function InlineSpinner({ 
-  size = "xs", 
-  variant = "current", 
-  className, 
-  ...props 
+export function InlineSpinner({
+  size = "xs",
+  variant = "current",
+  className,
+  ...props
 }: SpinnerProps) {
   return (
-    <Spinner 
-      size={size} 
-      variant={variant} 
-      className={cn("inline-block align-middle", className)} 
+    <Spinner
+      size={size}
+      variant={variant}
+      className={cn("inline-block align-middle", className)}
       showLabel={false}
-      {...props} 
-    />
-  );
+      {...props} />);
+
+
 }
 
 /**
@@ -274,38 +274,38 @@ export function InlineSpinner({
  */
 export function DotsSpinner({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex space-x-1", className)} role="status" aria-label="Loading" {...props}>
-      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
-      <span className="sr-only">Loading...</span>
-    </div>
-  );
+    <div className={`${cn("flex space-x-1", className)} font-work-sans`} role="status" aria-label="Loading" {...props}>
+      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce font-work-sans" style={{ animationDelay: "0ms" }} />
+      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce font-work-sans" style={{ animationDelay: "150ms" }} />
+      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce font-work-sans" style={{ animationDelay: "300ms" }} />
+      <span className="sr-only font-work-sans">Loading...</span>
+    </div>);
+
 }
 
 /**
  * Fullscreen spinner with overlay
  */
-export function FullscreenSpinner({ 
-  label = "Loading...", 
-  size = "xl", 
-  className, 
-  ...props 
+export function FullscreenSpinner({
+  label = "Loading...",
+  size = "xl",
+  className,
+  ...props
 }: SpinnerProps) {
   return (
-    <div 
-      className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm", 
+    <div
+      className={`${cn(
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm",
         className
-      )} 
-      {...props}
-    >
-      <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+      )} font-work-sans`}
+      {...props}>
+
+      <div className="bg-white p-6 rounded-lg shadow-lg text-center font-work-sans">
         <Spinner size={size} showLabel={false} />
-        <p className="mt-4 text-gray-600">{label}</p>
+        <p className="mt-4 text-gray-600 font-work-sans">{label}</p>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
-export default Spinner; 
+export default Spinner;

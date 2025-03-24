@@ -82,20 +82,20 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
 
   // Error styles
   const errorStyles = error ? 'border-red-300 focus:border-red-500 focus:ring-red-500 text-red-900 placeholder-red-300' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500';
-  return <div className={cn('relative', fullWidth ? 'w-full' : '', containerClassName)}>
-        <select ref={ref} className={cn('block w-full appearance-none rounded-md border bg-white px-3 shadow-sm', 'focus:outline-none focus:ring-2 focus:ring-opacity-50', sizeClasses[size], errorStyles, showChevron && 'pr-10', className)} aria-invalid={error} {...props}>
+  return <div className={`${cn('relative', fullWidth ? 'w-full' : '', containerClassName)} font-work-sans`}>
+        <select ref={ref} className={`${cn('block w-full appearance-none rounded-md border bg-white px-3 shadow-sm', 'focus:outline-none focus:ring-2 focus:ring-opacity-50', sizeClasses[size], errorStyles, showChevron && 'pr-10', className)} font-work-sans`} aria-invalid={error} {...props}>
 
           {placeholder && <option value="" disabled={props.required}>
               {placeholder}
             </option>}
           
-          {options ? options.map(option => <option key={option.value} value={option.value} disabled={option.disabled}>
+          {options ? options.map((option) => <option key={option.value} value={option.value} disabled={option.disabled}>
 
                 {option.label}
               </option>) : children}
         </select>
         
-        {showChevron && <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3" style={{
+        {showChevron && <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 font-work-sans" style={{
       margin: '1px'
     }}>
             <Icon name="faChevronDown" className={cn('h-5 w-5', error ? 'text-red-500' : 'text-gray-500')} aria-hidden="true" solid={false} />

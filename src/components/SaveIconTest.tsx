@@ -44,61 +44,61 @@ const dateInputStyle = `
 
 const SaveIconTest: React.FC = () => {
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">Date Input Test</h1>
+    <div className="p-6 font-work-sans">
+      <h1 className="text-xl font-bold mb-4 font-sora">Date Input Test</h1>
       
       {/* Add the CSS to the page */}
       <style>{dateInputStyle}</style>
       
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Problem: Native Calendar Icon Shows</h2>
-          <input 
-            type="date" 
+      <div className="space-y-6 font-work-sans">
+        <div className="font-work-sans">
+          <h2 className="text-lg font-semibold mb-2 font-sora">Problem: Native Calendar Icon Shows</h2>
+          <input
+            type="date"
             defaultValue="2023-10-15"
-            className="border border-gray-300 rounded-md p-2"
-          />
+            className="border border-gray-300 rounded-md p-2 font-work-sans" />
+
         </div>
         
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Solution: Custom Calendar Icon</h2>
-          <div className="date-input-container">
-            <input 
-              type="date" 
+        <div className="font-work-sans">
+          <h2 className="text-lg font-semibold mb-2 font-sora">Solution: Custom Calendar Icon</h2>
+          <div className="date-input-container font-work-sans">
+            <input
+              type="date"
               defaultValue="2023-10-15"
-              className="border border-gray-300 rounded-md p-2 w-full"
-            />
-            <div className="calendar-icon">
-              <Icon name="faCalendar" className="h-4 w-4 text-gray-500" solid={false} />
+              className="border border-gray-300 rounded-md p-2 w-full font-work-sans" />
+
+            <div className="calendar-icon font-work-sans">
+              <Icon name="faCalendar" className="h-4 w-4 text-gray-500 font-work-sans" solid={false} />
             </div>
           </div>
         </div>
         
-        <div className="mt-6 p-4 bg-blue-50 rounded-md">
-          <h2 className="text-lg font-semibold mb-2">Implementation Guide</h2>
-          <ol className="list-decimal pl-5 space-y-2">
-            <li>Add the CSS style block to your global CSS</li>
-            <li>Wrap your date inputs in a <code>.date-input-container</code> div</li>
-            <li>Add the custom icon inside the container</li>
+        <div className="mt-6 p-4 bg-blue-50 rounded-md font-work-sans">
+          <h2 className="text-lg font-semibold mb-2 font-sora">Implementation Guide</h2>
+          <ol className="list-decimal pl-5 space-y-2 font-work-sans">
+            <li className="font-work-sans">Add the CSS style block to your global CSS</li>
+            <li className="font-work-sans">Wrap your date inputs in a <code>.date-input-container</code> div</li>
+            <li className="font-work-sans">Add the custom icon inside the container</li>
           </ol>
         </div>
         
-        <div className="mt-6 p-4 bg-gray-50 rounded-md">
-          <h3 className="font-medium mb-2">Test Save Icon:</h3>
-          <div className="flex space-x-4">
-            <div>
-              <p>Light Save Icon:</p>
+        <div className="mt-6 p-4 bg-gray-50 rounded-md font-work-sans">
+          <h3 className="font-medium mb-2 font-sora">Test Save Icon:</h3>
+          <div className="flex space-x-4 font-work-sans">
+            <div className="font-work-sans">
+              <p className="font-work-sans">Light Save Icon:</p>
               <Icon name="faSaveLight" className="h-6 w-6" />
             </div>
-            <div>
-              <p>Solid Save Icon:</p>
+            <div className="font-work-sans">
+              <p className="font-work-sans">Solid Save Icon:</p>
               <Icon name="faSave" className="h-6 w-6" />
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-export default SaveIconTest; 
+export default SaveIconTest;

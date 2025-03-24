@@ -32,7 +32,7 @@ export default function BrandHealthCard() {
         setData({
           sentiment: "Positive",
           score: 85,
-          trend: "up",
+          trend: "up"
         });
         setError("Displaying placeholder data due to an error.");
       } finally {
@@ -44,46 +44,46 @@ export default function BrandHealthCard() {
   }, []);
 
   if (loading) {
-    return <div>Loading Brand Health Metrics...</div>;
+    return <div className="font-work-sans">Loading Brand Health Metrics...</div>;
   }
 
   if (!data) {
-    return <div>Error loading data.</div>;
+    return <div className="font-work-sans">Error loading data.</div>;
   }
 
   return (
-    <div className="p-4 bg-white shadow rounded">
+    <div className="p-4 bg-white shadow rounded font-work-sans">
       {/* Add a data-testid attribute for reliable testing */}
-      <h2 data-testid="brand-health-header" className="text-xl font-bold mb-2">
+      <h2 data-testid="brand-health-header" className="text-xl font-bold mb-2 font-sora">
         Brand Health
       </h2>
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-      <div className="flex items-center mb-1">
-        <span className="text-lg">Sentiment:</span>
-        <span className="ml-2 text-green-600 font-semibold">{data.sentiment}</span>
+      {error && <p className="text-red-500 text-sm mb-2 font-work-sans">{error}</p>}
+      <div className="flex items-center mb-1 font-work-sans">
+        <span className="text-lg font-work-sans">Sentiment:</span>
+        <span className="ml-2 text-green-600 font-semibold font-work-sans">{data.sentiment}</span>
       </div>
-      <div className="flex items-center mb-1">
-        <span className="text-lg">Score:</span>
-        <span className="ml-2 text-blue-600 font-semibold">{data.score}</span>
+      <div className="flex items-center mb-1 font-work-sans">
+        <span className="text-lg font-work-sans">Score:</span>
+        <span className="ml-2 text-blue-600 font-semibold font-work-sans">{data.score}</span>
       </div>
-      <div className="flex items-center">
-        <span className="text-lg">Trend:</span>
+      <div className="flex items-center font-work-sans">
+        <span className="text-lg font-work-sans">Trend:</span>
         <span
           className={`ml-2 font-semibold ${
-            data.trend === "up"
-              ? "text-green-500"
-              : data.trend === "down"
-              ? "text-red-500"
-              : "text-gray-500"
-          }`}
-        >
-          {data.trend === "up"
-            ? "Increasing"
-            : data.trend === "down"
-            ? "Decreasing"
-            : "Stable"}
+          data.trend === "up" ?
+          "text-green-500" :
+          data.trend === "down" ?
+          "text-red-500" :
+          "text-gray-500"} font-work-sans`
+          }>
+
+          {data.trend === "up" ?
+          "Increasing" :
+          data.trend === "down" ?
+          "Decreasing" :
+          "Stable"}
         </span>
       </div>
-    </div>
-  );
+    </div>);
+
 }

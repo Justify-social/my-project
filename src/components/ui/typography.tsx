@@ -12,30 +12,30 @@ interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
    * @default 2
    */
   level?: HeadingLevel;
-  
+
   /**
    * The size of the heading
    * @default Set based on level 
    */
   size?: HeadingSize;
-  
+
   /**
    * The font weight of the heading
    * @default 'semibold'
    */
   weight?: HeadingWeight;
-  
+
   /**
    * Whether to truncate the text with an ellipsis
    * @default false
    */
   truncate?: boolean;
-  
+
   /**
    * Additional class names
    */
   className?: string;
-  
+
   /**
    * The content of the heading
    */
@@ -52,14 +52,14 @@ interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
  * <Heading level={3} weight="medium">Subsection Title</Heading>
  * ```
  */
-export const Heading = ({ 
-  level = 2, 
-  size, 
-  weight = 'semibold', 
+export const Heading = ({
+  level = 2,
+  size,
+  weight = 'semibold',
   truncate = false,
-  className, 
+  className,
   children,
-  ...props 
+  ...props
 }: HeadingProps) => {
   // Default size based on heading level
   const defaultSizes: Record<HeadingLevel, HeadingSize> = {
@@ -68,9 +68,9 @@ export const Heading = ({
     3: 'xl',
     4: 'lg',
     5: 'md',
-    6: 'sm',
+    6: 'sm'
   };
-  
+
   // Size class mapping
   const sizeClasses: Record<HeadingSize, string> = {
     'xs': 'text-xs',
@@ -80,9 +80,9 @@ export const Heading = ({
     'xl': 'text-xl',
     '2xl': 'text-2xl',
     '3xl': 'text-3xl',
-    '4xl': 'text-4xl',
+    '4xl': 'text-4xl'
   };
-  
+
   // Weight class mapping
   const weightClasses: Record<HeadingWeight, string> = {
     'light': 'font-light',
@@ -90,13 +90,13 @@ export const Heading = ({
     'medium': 'font-medium',
     'semibold': 'font-semibold',
     'bold': 'font-bold',
-    'extrabold': 'font-extrabold',
+    'extrabold': 'font-extrabold'
   };
-  
+
   const headingSize = size || defaultSizes[level];
-  
+
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
-  
+
   return (
     <HeadingTag
       className={cn(
@@ -105,11 +105,11 @@ export const Heading = ({
         truncate && 'truncate',
         className
       )}
-      {...props}
-    >
+      {...props}>
+
       {children}
-    </HeadingTag>
-  );
+    </HeadingTag>);
+
 };
 
 /* ----------------------------------- Text ----------------------------------- */
@@ -123,36 +123,36 @@ interface TextProps extends React.HTMLAttributes<HTMLSpanElement> {
    * @default 'span'
    */
   as?: 'span' | 'div' | 'p' | 'label';
-  
+
   /**
    * The size of the text
    * @default 'base'
    */
   size?: TextSize;
-  
+
   /**
    * The font weight of the text
    * @default 'normal'
    */
   weight?: TextWeight;
-  
+
   /**
    * The color variant of the text
    * @default 'default'
    */
   color?: TextColor;
-  
+
   /**
    * Whether to truncate the text with an ellipsis
    * @default false
    */
   truncate?: boolean;
-  
+
   /**
    * Additional class names
    */
   className?: string;
-  
+
   /**
    * The content of the text
    */
@@ -185,18 +185,18 @@ export const Text = ({
     'sm': 'text-sm',
     'base': 'text-base',
     'lg': 'text-lg',
-    'xl': 'text-xl',
+    'xl': 'text-xl'
   };
-  
+
   // Weight class mapping
   const weightClasses: Record<TextWeight, string> = {
     'light': 'font-light',
     'normal': 'font-normal',
     'medium': 'font-medium',
     'semibold': 'font-semibold',
-    'bold': 'font-bold',
+    'bold': 'font-bold'
   };
-  
+
   // Color class mapping
   const colorClasses: Record<TextColor, string> = {
     'default': 'text-gray-900',
@@ -206,9 +206,9 @@ export const Text = ({
     'accent': 'text-accent-color',
     'success': 'text-green-600',
     'warning': 'text-yellow-600',
-    'danger': 'text-red-600',
+    'danger': 'text-red-600'
   };
-  
+
   return (
     <Component
       className={cn(
@@ -218,11 +218,11 @@ export const Text = ({
         truncate && 'truncate',
         className
       )}
-      {...props}
-    >
+      {...props}>
+
       {children}
-    </Component>
-  );
+    </Component>);
+
 };
 
 /* --------------------------------- Paragraph -------------------------------- */
@@ -235,24 +235,24 @@ interface ParagraphProps extends React.HTMLAttributes<HTMLParagraphElement> {
    * @default 'base'
    */
   size?: ParagraphSize;
-  
+
   /**
    * The color variant of the paragraph
    * @default 'default'
    */
   color?: ParagraphColor;
-  
+
   /**
    * The spacing between paragraphs
    * @default true
    */
   spaced?: boolean;
-  
+
   /**
    * Additional class names
    */
   className?: string;
-  
+
   /**
    * The content of the paragraph
    */
@@ -281,28 +281,28 @@ export const Paragraph = ({
   const sizeClasses: Record<ParagraphSize, string> = {
     'sm': 'text-sm',
     'base': 'text-base',
-    'lg': 'text-lg',
+    'lg': 'text-lg'
   };
-  
+
   // Color class mapping
   const colorClasses: Record<ParagraphColor, string> = {
     'default': 'text-gray-700',
     'muted': 'text-gray-500',
     'primary': 'text-primary-color',
-    'secondary': 'text-secondary-color',
+    'secondary': 'text-secondary-color'
   };
-  
+
   return (
     <p
-      className={cn(
+      className={`${cn(
         sizeClasses[size],
         colorClasses[color],
         spaced && 'mb-4',
         className
-      )}
-      {...props}
-    >
+      )} font-work-sans`}
+      {...props}>
+
       {children}
-    </p>
-  );
-}; 
+    </p>);
+
+};

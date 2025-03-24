@@ -14,93 +14,93 @@ export function Skeleton({
   width,
   height,
   variant = 'rectangular',
-  animation = 'pulse',
+  animation = 'pulse'
 }: SkeletonProps) {
-  const animationClass = 
-    animation === 'pulse' ? 'animate-pulse' :
-    animation === 'wave' ? 'animate-shimmer' : '';
+  const animationClass =
+  animation === 'pulse' ? 'animate-pulse' :
+  animation === 'wave' ? 'animate-shimmer' : '';
 
-  const variantClass = 
-    variant === 'circular' ? 'rounded-full' :
-    variant === 'text' ? 'h-4 rounded w-3/4' :
-    variant === 'card' ? 'rounded-lg' : 'rounded';
+  const variantClass =
+  variant === 'circular' ? 'rounded-full' :
+  variant === 'text' ? 'h-4 rounded w-3/4' :
+  variant === 'card' ? 'rounded-lg' : 'rounded';
 
   const styles: React.CSSProperties = {
     width: width,
-    height: height,
+    height: height
   };
 
   return (
-    <div 
-      className={cn(
+    <div
+      className={`${cn(
         'bg-gray-200',
         variantClass,
         animationClass,
         className
-      )}
+      )} font-work-sans`}
       style={styles}
       role="status"
       aria-busy="true"
-      aria-label="Loading"
-    />
-  );
+      aria-label="Loading" />);
+
+
 }
 
 // Predefined skeletons for common use cases
-export function TextSkeleton({ className, width = '100%', lines = 1 }: { className?: string, width?: string | number, lines?: number }) {
+export function TextSkeleton({ className, width = '100%', lines = 1 }: {className?: string;width?: string | number;lines?: number;}) {
   return (
-    <div className={cn("space-y-2", className)}>
-      {Array(lines).fill(0).map((_, i) => (
-        <Skeleton 
-          key={i} 
-          variant="text" 
-          width={i === lines - 1 && lines > 1 ? '80%' : width} 
-          className="h-4"
-        />
-      ))}
-    </div>
-  );
+    <div className={`${cn("space-y-2", className)} font-work-sans`}>
+      {Array(lines).fill(0).map((_, i) =>
+      <Skeleton
+        key={i}
+        variant="text"
+        width={i === lines - 1 && lines > 1 ? '80%' : width}
+        className="h-4" />
+
+      )}
+    </div>);
+
 }
 
-export function AvatarSkeleton({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg', className?: string }) {
+export function AvatarSkeleton({ size = 'md', className }: {size?: 'sm' | 'md' | 'lg';className?: string;}) {
   const sizeClass = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
-    lg: 'w-16 h-16',
+    lg: 'w-16 h-16'
   };
-  
+
   return (
-    <Skeleton 
-      variant="circular" 
-      className={cn(sizeClass[size], className)}
-    />
-  );
+    <Skeleton
+      variant="circular"
+      className={cn(sizeClass[size], className)} />);
+
+
 }
 
-export function CardSkeleton({ className }: { className?: string }) {
+export function CardSkeleton({ className }: {className?: string;}) {
   return (
-    <div className={cn("space-y-3 p-4 border rounded-lg", className)}>
+    <div className={`${cn("space-y-3 p-4 border rounded-lg", className)} font-work-sans`}>
       <Skeleton variant="text" className="h-6 w-1/2" />
       <Skeleton variant="text" className="h-4" />
       <Skeleton variant="text" className="h-4" />
       <Skeleton variant="text" className="h-4 w-2/3" />
-    </div>
-  );
+    </div>);
+
 }
 
-export function TableRowSkeleton({ cols = 4, className }: { cols?: number, className?: string }) {
+export function TableRowSkeleton({ cols = 4, className }: {cols?: number;className?: string;}) {
   return (
-    <div className={cn("flex items-center space-x-4", className)}>
-      {Array(cols).fill(0).map((_, i) => (
-        <Skeleton 
-          key={i} 
-          variant="text" 
-          width={`${100 / cols}%`}
-          className="h-4"
-        />
-      ))}
-    </div>
-  );
+    <div className={`${cn("flex items-center space-x-4", className)} font-work-sans`}>
+      {Array(cols).fill(0).map((_, i) =>
+      <Skeleton
+        key={i}
+        variant="text"
+        width={`${100 / cols}%`}
+        className="h-4" />
+
+      )}
+    </div>);
+
 }
 
 // Add shimmer animation to global CSS
@@ -136,4 +136,4 @@ const globalStyles = `
 }
 `;
 
-export default Skeleton; 
+export default Skeleton;

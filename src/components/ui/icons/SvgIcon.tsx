@@ -229,7 +229,7 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
 }, ref) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const resolvedRef = (ref || svgRef) as React.RefObject<SVGSVGElement>;
-  
+
   // Figure out which type of icon we're rendering
   const hasName = Boolean(name);
   const hasPlatformName = Boolean(platformName);
@@ -238,11 +238,11 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
 
   // Make sure at least one icon type is specified
   const isValidIcon = hasName || hasPlatformName || hasKpiName || hasAppName;
-  
+
   // For platform specific icons, look up the name
-  const iconName = hasPlatformName ? PLATFORM_ICON_MAP[platformName as PlatformName] : 
-                  (name || '');
-                  
+  const iconName = hasPlatformName ? PLATFORM_ICON_MAP[platformName as PlatformName] :
+  name || '';
+
   // Normalize icon name (handle special cases like icons from UI_ICON_MAP)
   const normalizedIconName = SEMANTIC_TO_FA_MAP[iconName] || iconName;
 
@@ -250,7 +250,7 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   if (process.env.NODE_ENV === 'development') {
     // Validate icon name and properties, suppressing console warnings
     useIconValidation({
-      name: normalizedIconName, 
+      name: normalizedIconName,
       solid,
       iconType,
       className
@@ -259,26 +259,26 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     // Check if button icons have proper parent elements with group class
     useButtonIconValidation(resolvedRef as unknown as React.RefObject<HTMLElement>, iconType);
   }
-  
+
   // Extract prefix (fa, fas, far, fal, fab) and base name
   const baseName = getIconBaseName(normalizedIconName);
   const defaultPrefix = getIconPrefix(normalizedIconName);
-  
+
   // Determine which prefix to use based on props and defaults
   const useExplicitStyle = style ? `fa${style.charAt(0).toUpperCase()}${style.slice(1)}` : '';
   const useSolidStyle = solid || active; // Use solid style when active or explicitly requested
   const finalPrefix = useExplicitStyle || (useSolidStyle ? 'fas' : defaultPrefix);
-  
+
   // Size class based on the size prop
   const sizeClass = SIZE_CLASSES[size as IconSize] || SIZE_CLASSES.md;
-  
+
   // Helper for hover effects
   const getHoverClasses = () => {
     if (iconType !== 'button') return '';
-    
+
     // For button icons, add transition effects
     const baseHoverClass = 'transition-colors duration-200';
-    
+
     // Different classes based on the action type
     switch (action) {
       case 'delete':
@@ -291,14 +291,14 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
         return `${baseHoverClass} group-hover:text-[var(--accent-color)]`;
     }
   };
-  
+
   // Transform classes for spin, pulse, flip, and rotation
   const getTransformClasses = () => {
     const classes = [];
-    
+
     if (spin) classes.push('animate-spin');
     if (pulse) classes.push('animate-pulse');
-    
+
     // Flip transformations
     if (flipHorizontal && flipVertical) {
       classes.push('scale-x-[-1] scale-y-[-1]');
@@ -307,7 +307,7 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     } else if (flipVertical) {
       classes.push('scale-y-[-1]');
     }
-    
+
     // Rotation
     if (rotation) {
       switch (rotation) {
@@ -322,25 +322,25 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
           break;
       }
     }
-    
+
     return classes.join(' ');
   };
-  
+
   // Compute CSS classes for the icon
   // Safely handling className which could be a string or dynamic value
   const cssClasses = useMemo(() => {
     // Start with base classes that are always applied
     const baseClasses = 'inline-block';
-    
+
     // Add transformation classes
     const transformClasses = getTransformClasses();
-    
+
     // Add hover effect classes if this is a button icon
     const hoverClasses = getHoverClasses();
 
     // Size classes based on the size prop
     const sizeClasses = SIZE_CLASSES[size as IconSize] || SIZE_CLASSES.md;
-    
+
     // Special handling for className to safely handle dynamic values
     let safeClassName = '';
     try {
@@ -355,7 +355,7 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       // If anything goes wrong, just use an empty string
       console.warn('Error processing className in Icon component', e);
     }
-    
+
     // Combine all classes, handling dynamic className safely
     return cn(
       baseClasses,
@@ -365,23 +365,23 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       safeClassName
     );
   }, [size, spin, pulse, flipHorizontal, flipVertical, rotation, iconType, action, className]);
-  
+
   // Determine if we need to use SVG or Next.js Image component
   const useNextImage = false; // Currently not using Next.js Image for icons
-  
+
   // Check if icon exists in our icon-data.ts file
   // For button icons, we need to handle both the default (light) and hover (solid) states
   const isButtonIcon = iconType === 'button';
-  const iconKey = `${normalizedIconName}${solid ? '' : 'Light'}`; 
+  const iconKey = `${normalizedIconName}${solid ? '' : 'Light'}`;
   const iconExists = Boolean(iconData[iconKey]?.path);
-  
+
   // If icon data is not found, use a fallback question mark icon
   const finalIconName = iconExists ? normalizedIconName : 'faQuestion';
-  
+
   // For button icons, we need a different approach to handle hover
   let finalIconKey;
   let hoverIconKey;
-  
+
   if (isButtonIcon) {
     // Button icons use Light variant by default and Solid on hover
     finalIconKey = `${finalIconName}Light`;
@@ -390,57 +390,57 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     // Static icons just use whatever was specified (solid or light)
     finalIconKey = `${finalIconName}${solid ? '' : 'Light'}`;
   }
-  
+
   const finalIconData = iconData[finalIconKey] || {
     width: 512,
     height: 512,
     path: '', // Will use file path instead
     url: getIconPath(finalIconName, solid ? 'solid' : 'light')
   };
-  
+
   // For button icons, also get the hover (solid) icon data
-  const hoverIconData = isButtonIcon ? (iconData[hoverIconKey || ''] || {
+  const hoverIconData = isButtonIcon ? iconData[hoverIconKey || ''] || {
     width: 512,
     height: 512,
     path: '',
     url: getIconPath(finalIconName, 'solid')
-  }) : null;
-  
+  } : null;
+
   // Get the correct icon URL based on the style
   const iconStyle = solid ? 'solid' : 'light';
   const iconUrl = getIconPath(normalizedIconName, iconStyle);
-  
+
   // Pass the appropriate CSS classes and SVG path to svg element
   return (
-    <svg 
+    <svg
       ref={resolvedRef}
       className={cssClasses}
-      xmlns="http://www.w3.org/2000/svg" 
+      xmlns="http://www.w3.org/2000/svg"
       viewBox={`0 0 ${finalIconData.width} ${finalIconData.height}`}
       fill="currentColor"
       aria-hidden={!title}
       role={title ? 'img' : 'presentation'}
       onClick={onClick}
-      {...rest}
-    >
-      {title && <title>{title}</title>}
+      {...rest}>
+
+      {title && <title className="font-sora">{title}</title>}
       {/* For button icons, use two paths - one for default state, one for hover */}
-      {isButtonIcon ? (
-        <>
-          <path 
-            d={finalIconData.path || ''} 
-            className="group-hover:opacity-0 transition-opacity duration-200"
-          />
-          <path 
-            d={hoverIconData?.path || ''} 
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          />
-        </>
-      ) : (
-        <path d={finalIconData.path || ''} />
-      )}
-    </svg>
-  );
+      {isButtonIcon ?
+      <>
+          <path
+          d={finalIconData.path || ''}
+          className="group-hover:opacity-0 transition-opacity duration-200" />
+
+          <path
+          d={hoverIconData?.path || ''}
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+        </> :
+
+      <path d={finalIconData.path || ''} />
+      }
+    </svg>);
+
 });
 SvgIcon.displayName = 'SvgIcon';
 

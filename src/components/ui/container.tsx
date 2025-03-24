@@ -9,19 +9,19 @@ export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default "lg"
    */
   size?: ContainerSize;
-  
+
   /**
    * Center content of the container (applies mx-auto)
    * @default true
    */
   centered?: boolean;
-  
+
   /**
    * Control padding for the container
    * @default true
    */
   withPadding?: boolean;
-  
+
   /**
    * The content to be contained
    */
@@ -59,22 +59,22 @@ export function Container({
     md: 'max-w-screen-md',
     lg: 'max-w-screen-lg',
     xl: 'max-w-screen-xl',
-    full: 'max-w-full',
+    full: 'max-w-full'
   };
-  
+
   return (
     <div
-      className={cn(
+      className={`${cn(
         sizeClasses[size],
         centered && 'mx-auto',
         withPadding && 'px-4 sm:px-6 md:px-8',
         className
-      )}
-      {...props}
-    >
+      )} font-work-sans`}
+      {...props}>
+
       {children}
-    </div>
-  );
+    </div>);
+
 }
 
-export default Container; 
+export default Container;

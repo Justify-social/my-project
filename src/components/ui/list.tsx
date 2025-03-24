@@ -155,7 +155,7 @@ export const List = forwardRef<HTMLDivElement, ListProps>(({
     blue: 'bg-blue-50',
     transparent: 'bg-transparent'
   };
-  return <div ref={ref} className={cn(bordered && 'rounded-md border border-gray-200', bgColorClasses[bgColor], className)} {...props}>
+  return <div ref={ref} className={`${cn(bordered && 'rounded-md border border-gray-200', bgColorClasses[bgColor], className)} font-work-sans`} {...props}>
       <ListTag className={cn('list-none m-0 p-0', sizeClasses[size], layoutClasses[layout])}>
         {items.length > 0 ? items.map((item, index) => <ListItem key={index} {...item} divider={item.divider ?? (dividers && index < items.length - 1)} interactive={interactive} hoverable={hoverable} size={size} icon={item.icon || icon} layout={layout} highlighted={striped && index % 2 === 1} />) : children}
       </ListTag>
@@ -217,32 +217,32 @@ export const ListItem = forwardRef<HTMLLIElement, ListItemProps & {
 
     // If icon is a React element, render it directly
     if (React.isValidElement(icon)) {
-      return <div className="mr-3 flex-shrink-0">{icon}</div>;
+      return <div className="mr-3 flex-shrink-0 font-work-sans">{icon}</div>;
     }
 
     // If icon is an IconName string, use the Icon component
     if (typeof icon === 'string') {
       // Ensure the icon name is properly formatted with 'fa' prefix
       const iconName = (icon as string).startsWith('fa') ? icon as IconName : `fa${icon.charAt(0).toUpperCase() + icon.slice(1)}` as IconName;
-      
-      return <div className="mr-3 flex-shrink-0">
-          <Icon name={iconName} className="h-5 w-5 text-gray-400" solid={false} />
+
+      return <div className="mr-3 flex-shrink-0 font-work-sans">
+          <Icon name={iconName} className="h-5 w-5 text-gray-400 font-work-sans" solid={false} />
         </div>;
     }
     return null;
   };
-  return <li ref={ref} className={cn(paddingClasses[size], layoutClasses[layout], divider && layout === 'vertical' && 'border-b border-gray-200 last:border-b-0', divider && layout === 'horizontal' && 'border-r border-gray-200 last:border-r-0', interactive && 'cursor-pointer', hoverable && !disabled && 'hover:bg-gray-50', active && 'bg-blue-50', highlighted && 'bg-gray-50', disabled && 'opacity-50 cursor-not-allowed', className)} onClick={handleClick} aria-disabled={disabled} {...props}>
-      <div className="flex items-center">
+  return <li ref={ref} className={`${cn(paddingClasses[size], layoutClasses[layout], divider && layout === 'vertical' && 'border-b border-gray-200 last:border-b-0', divider && layout === 'horizontal' && 'border-r border-gray-200 last:border-r-0', interactive && 'cursor-pointer', hoverable && !disabled && 'hover:bg-gray-50', active && 'bg-blue-50', highlighted && 'bg-gray-50', disabled && 'opacity-50 cursor-not-allowed', className)} font-work-sans`} onClick={handleClick} aria-disabled={disabled} {...props}>
+      <div className="flex items-center font-work-sans">
         {renderIcon()}
         
-        <div className="flex-grow min-w-0">
-          {content ? <div>{content}</div> : <>
-              {primary && <div className="text-gray-900 truncate">{primary}</div>}
-              {secondary && <div className="text-gray-500 text-xs mt-0.5 truncate">{secondary}</div>}
+        <div className="flex-grow min-w-0 font-work-sans">
+          {content ? <div className="font-work-sans">{content}</div> : <>
+              {primary && <div className="text-gray-900 truncate font-work-sans">{primary}</div>}
+              {secondary && <div className="text-gray-500 text-xs mt-0.5 truncate font-work-sans">{secondary}</div>}
             </>}
         </div>
         
-        {action && <div className="ml-3 flex-shrink-0">{action}</div>}
+        {action && <div className="ml-3 flex-shrink-0 font-work-sans">{action}</div>}
         
         {children}
       </div>
@@ -274,39 +274,39 @@ export function ListExample() {
     primary: 'Project Alpha',
     secondary: 'Due in 3 days',
     icon: 'faFileLines',
-    action: <span className="text-xs font-medium text-blue-600">View</span>
+    action: <span className="text-xs font-medium text-blue-600 font-work-sans">View</span>
   }, {
     primary: 'Team Meeting',
     secondary: 'Tomorrow at 10:00 AM',
     icon: 'faCalendar',
-    action: <span className="text-xs font-medium text-blue-600">Join</span>,
+    action: <span className="text-xs font-medium text-blue-600 font-work-sans">Join</span>,
     active: true,
     highlighted: true
   }, {
     primary: 'Client Report',
     secondary: 'Ready for review',
     icon: 'faFileLines',
-    action: <span className="text-xs font-medium text-blue-600">Review</span>
+    action: <span className="text-xs font-medium text-blue-600 font-work-sans">Review</span>
   }, {
     primary: 'System Update',
     secondary: 'Scheduled for next week',
     icon: 'faGear',
-    action: <span className="text-xs font-medium text-blue-600">Details</span>,
+    action: <span className="text-xs font-medium text-blue-600 font-work-sans">Details</span>,
     disabled: true
   }];
-  return <div className="space-y-8">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Basic List</h3>
+  return <div className="space-y-8 font-work-sans">
+      <div className="font-work-sans">
+        <h3 className="text-lg font-medium mb-2 font-sora">Basic List</h3>
         <List items={basicItems} dividers bordered hoverable interactive bgColor="white" />
       </div>
       
-      <div>
-        <h3 className="text-lg font-medium mb-2">Detailed List</h3>
+      <div className="font-work-sans">
+        <h3 className="text-lg font-medium mb-2 font-sora">Detailed List</h3>
         <List items={detailedItems} dividers bordered hoverable interactive size="md" bgColor="white" />
       </div>
       
-      <div>
-        <h3 className="text-lg font-medium mb-2">Horizontal List</h3>
+      <div className="font-work-sans">
+        <h3 className="text-lg font-medium mb-2 font-sora">Horizontal List</h3>
         <List layout="horizontal" bordered bgColor="white" className="inline-block">
           <ListItem primary="Home" className="py-2 px-4" icon="faHouse" />
           <ListItem primary="Products" className="py-2 px-4" icon="faGlobe" />

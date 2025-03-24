@@ -44,7 +44,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
           inputRef.current?.focus();
         }, 100);
       }
-      
+
       // Escape key to close search
       if (e.key === 'Escape' && isOpen) {
         closeSearch();
@@ -69,12 +69,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
-    
+
     // Clear any existing timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     // Set a new timeout for debouncing
     searchTimeoutRef.current = setTimeout(() => {
       handleSearch(value);
@@ -91,29 +91,29 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   };
 
   return (
-    <div className={`relative ${className}`} ref={searchBarRef}>
+    <div className={`relative ${className} font-work-sans`} ref={searchBarRef}>
       <form onSubmit={handleSubmit}>
-        <div 
-          className={`w-full bg-gray-200 rounded-md px-4 py-2 flex items-center transition-all ${isOpen ? 'bg-white border border-gray-300 shadow-sm' : 'hover:bg-gray-300'}`}
-          onClick={openSearch}
-        >
+        <div
+          className={`w-full bg-gray-200 rounded-md px-4 py-2 flex items-center transition-all ${isOpen ? 'bg-white border border-gray-300 shadow-sm' : 'hover:bg-gray-300'} font-work-sans`}
+          onClick={openSearch}>
+
           <Image src="/app/magnifying-glass.svg" alt="Search" width={20} height={20} />
           <input
             ref={inputRef}
             type="text"
             placeholder="Search campaigns, influencers, or reports."
-            className="flex-grow bg-transparent focus:outline-none px-2 text-sm"
+            className="flex-grow bg-transparent focus:outline-none px-2 text-sm font-work-sans"
             value={inputValue}
             onChange={handleInputChange}
-            onFocus={openSearch}
-          />
-          <span className="text-gray-500 text-xs">⌘ K</span>
+            onFocus={openSearch} />
+
+          <span className="text-gray-500 text-xs font-work-sans">⌘ K</span>
         </div>
       </form>
       
       <SearchResults />
-    </div>
-  );
+    </div>);
+
 };
 
-export default SearchBar; 
+export default SearchBar;

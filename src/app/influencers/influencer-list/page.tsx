@@ -14,43 +14,43 @@ interface Influencer {
 }
 
 const sampleInfluencers: Influencer[] = [
-  {
-    id: 1,
-    name: "Emily Carter",
-    platforms: ["Instagram", "TikTok"],
-    audience: "35-44, 70% Male, 20% Australia",
-    nextSecurityCheckDue: "2",
-    riskLevel: "High",
-    engagement: 45,
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    platforms: ["YouTube", "Twitter"],
-    audience: "18-24, 65% Male, 65% UK",
-    nextSecurityCheckDue: "12",
-    riskLevel: "Low",
-    engagement: 30,
-  },
-  {
-    id: 3,
-    name: "Michael Green",
-    platforms: ["Instagram", "Facebook"],
-    audience: "25-34, 72% Female, 53% US",
-    nextSecurityCheckDue: "5",
-    riskLevel: "Medium",
-    engagement: 55,
-  },
-  {
-    id: 4,
-    name: "David Martinez",
-    platforms: ["TikTok"],
-    audience: "18-24, 65% Male, 65% UK",
-    nextSecurityCheckDue: "8",
-    riskLevel: "Low",
-    engagement: 65,
-  },
-  // Additional sample entries can be added here
+{
+  id: 1,
+  name: "Emily Carter",
+  platforms: ["Instagram", "TikTok"],
+  audience: "35-44, 70% Male, 20% Australia",
+  nextSecurityCheckDue: "2",
+  riskLevel: "High",
+  engagement: 45
+},
+{
+  id: 2,
+  name: "Sarah Johnson",
+  platforms: ["YouTube", "Twitter"],
+  audience: "18-24, 65% Male, 65% UK",
+  nextSecurityCheckDue: "12",
+  riskLevel: "Low",
+  engagement: 30
+},
+{
+  id: 3,
+  name: "Michael Green",
+  platforms: ["Instagram", "Facebook"],
+  audience: "25-34, 72% Female, 53% US",
+  nextSecurityCheckDue: "5",
+  riskLevel: "Medium",
+  engagement: 55
+},
+{
+  id: 4,
+  name: "David Martinez",
+  platforms: ["TikTok"],
+  audience: "18-24, 65% Male, 65% UK",
+  nextSecurityCheckDue: "8",
+  riskLevel: "Low",
+  engagement: 65
+}
+// Additional sample entries can be added here
 ];
 
 export default function InfluencerListView() {
@@ -100,26 +100,26 @@ export default function InfluencerListView() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 font-work-sans">
       {/* Page Title */}
-      <h1 className="text-2xl font-bold text-[#333333] mb-4">Influencer Safety</h1>
+      <h1 className="text-2xl font-bold text-[#333333] mb-4 font-sora">Influencer Safety</h1>
 
       {/* Reset Filters Button */}
-      <div className="mb-4">
+      <div className="mb-4 font-work-sans">
         <button
           onClick={resetFilters}
-          className="w-[150px] h-[45px] bg-[#6C757D] text-white rounded"
-          aria-label="Reset all filters"
-        >
+          className="w-[150px] h-[45px] bg-[#6C757D] text-white rounded font-work-sans"
+          aria-label="Reset all filters">
+
           Reset Filters
         </button>
       </div>
 
       {/* Search and Filter Options */}
-      <div className="mb-6 space-y-4">
+      <div className="mb-6 space-y-4 font-work-sans">
         {/* Search Bar */}
-        <div>
-          <label htmlFor="search" className="block font-medium mb-1">
+        <div className="font-work-sans">
+          <label htmlFor="search" className="block font-medium mb-1 font-work-sans">
             Search influencers by name
           </label>
           <input
@@ -128,24 +128,24 @@ export default function InfluencerListView() {
             placeholder="Search influencers..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border p-2 rounded w-[400px]"
-            aria-label="Search influencers by name"
-          />
+            className="border p-2 rounded w-[400px] font-work-sans"
+            aria-label="Search influencers by name" />
+
         </div>
 
         {/* Filter Options */}
-        <div className="flex space-x-4">
-          <div>
-            <label htmlFor="platform" className="block font-medium mb-1">
+        <div className="flex space-x-4 font-work-sans">
+          <div className="font-work-sans">
+            <label htmlFor="platform" className="block font-medium mb-1 font-work-sans">
               Platform
             </label>
             <select
               id="platform"
               value={platformFilter}
               onChange={(e) => setPlatformFilter(e.target.value)}
-              className="border p-2 rounded w-[200px]"
-              aria-label="Filter influencers by platform"
-            >
+              className="border p-2 rounded w-[200px] font-work-sans"
+              aria-label="Filter influencers by platform">
+
               <option value="">All</option>
               <option value="Instagram">Instagram</option>
               <option value="TikTok">TikTok</option>
@@ -154,74 +154,74 @@ export default function InfluencerListView() {
               <option value="Facebook">Facebook</option>
             </select>
           </div>
-          <div>
-            <label htmlFor="risk" className="block font-medium mb-1">
+          <div className="font-work-sans">
+            <label htmlFor="risk" className="block font-medium mb-1 font-work-sans">
               Risk Level
             </label>
             <select
               id="risk"
               value={riskFilter}
               onChange={(e) => setRiskFilter(e.target.value)}
-              className="border p-2 rounded w-[200px]"
-              aria-label="Filter influencers by risk level"
-            >
+              className="border p-2 rounded w-[200px] font-work-sans"
+              aria-label="Filter influencers by risk level">
+
               <option value="">All</option>
               <option value="Low">Low</option>
               <option value="Medium">Medium</option>
               <option value="High">High</option>
             </select>
           </div>
-          <div>
-            <label className="block font-medium mb-1">Engagement Rate (%)</label>
-            <div className="flex space-x-2">
+          <div className="font-work-sans">
+            <label className="block font-medium mb-1 font-work-sans">Engagement Rate (%)</label>
+            <div className="flex space-x-2 font-work-sans">
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={minEngagement}
                 onChange={(e) => setMinEngagement(Number(e.target.value))}
-                className="border p-2 rounded w-[90px]"
-                aria-label="Minimum engagement rate"
-              />
-              <span className="self-center">-</span>
+                className="border p-2 rounded w-[90px] font-work-sans"
+                aria-label="Minimum engagement rate" />
+
+              <span className="self-center font-work-sans">-</span>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={maxEngagement}
                 onChange={(e) => setMaxEngagement(Number(e.target.value))}
-                className="border p-2 rounded w-[90px]"
-                aria-label="Maximum engagement rate"
-              />
+                className="border p-2 rounded w-[90px] font-work-sans"
+                aria-label="Maximum engagement rate" />
+
             </div>
           </div>
         </div>
       </div>
 
       {/* Influencer List Table */}
-      <div className="overflow-x-auto mb-6">
+      <div className="overflow-x-auto mb-6 font-work-sans">
         <table className="min-w-full border">
           <thead>
             <tr>
-              <th className="p-2 text-left font-bold border">Name</th>
-              <th className="p-2 text-left font-bold border">Platform(s)</th>
-              <th className="p-2 text-left font-bold border">Audience Demographics</th>
-              <th className="p-2 text-left font-bold border">Next Security Check Due (days)</th>
-              <th className="p-2 text-left font-bold border">Risk Assessment Score</th>
+              <th className="p-2 text-left font-bold border font-work-sans">Name</th>
+              <th className="p-2 text-left font-bold border font-work-sans">Platform(s)</th>
+              <th className="p-2 text-left font-bold border font-work-sans">Audience Demographics</th>
+              <th className="p-2 text-left font-bold border font-work-sans">Next Security Check Due (days)</th>
+              <th className="p-2 text-left font-bold border font-work-sans">Risk Assessment Score</th>
             </tr>
           </thead>
           <tbody>
-            {currentInfluencers.length > 0 ? (
-              currentInfluencers.map((inf) => (
-                <tr key={inf.id} className="hover:bg-gray-100">
+            {currentInfluencers.length > 0 ?
+            currentInfluencers.map((inf) =>
+            <tr key={inf.id} className="hover:bg-gray-100">
                   <td className="p-2 border">
                     <button
-                      onClick={() =>
-                        router.push(`/influencers/influencer-list/profile?id=${inf.id}`)
-                      }
-                      className="text-blue-500 hover:underline"
-                      aria-label={`View profile for ${inf.name}`}
-                    >
+                  onClick={() =>
+                  router.push(`/influencers/influencer-list/profile?id=${inf.id}`)
+                  }
+                  className="text-blue-500 hover:underline font-work-sans"
+                  aria-label={`View profile for ${inf.name}`}>
+
                       {inf.name}
                     </button>
                   </td>
@@ -229,51 +229,51 @@ export default function InfluencerListView() {
                   <td className="p-2 border">{inf.audience}</td>
                   <td className="p-2 border">{inf.nextSecurityCheckDue} days</td>
                   <td className="p-2 border">
-                    <span style={{ color: getRiskColor(inf.riskLevel) }}>
+                    <span style={{ color: getRiskColor(inf.riskLevel) }} className="font-work-sans">
                       {inf.riskLevel}
                     </span>
                     {inf.riskLevel === "High" &&
-                      Number(inf.nextSecurityCheckDue) <= 2 && (
-                        <span className="ml-2 text-red-500 text-sm">
+                Number(inf.nextSecurityCheckDue) <= 2 &&
+                <span className="ml-2 text-red-500 text-sm font-work-sans">
                           Security check overdue! Immediate review required.
                         </span>
-                      )}
+                }
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="p-2 text-center">
+            ) :
+
+            <tr>
+                <td colSpan={5} className="p-2 text-center font-work-sans">
                   No influencers found. Try adjusting your search term or filters.
                 </td>
               </tr>
-            )}
+            }
           </tbody>
         </table>
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 font-work-sans">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-          aria-label="Previous page"
-        >
+          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50 font-work-sans"
+          aria-label="Previous page">
+
           Previous
         </button>
-        <span>
+        <span className="font-work-sans">
           Page {currentPage} of {totalPages}
         </span>
         <button
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-          aria-label="Next page"
-        >
+          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50 font-work-sans"
+          aria-label="Next page">
+
           Next
         </button>
       </div>
-    </div>
-  );
+    </div>);
+
 }

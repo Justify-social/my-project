@@ -9,7 +9,7 @@ interface OnboardingModalProps {
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) => {
   return (
     <div
-      className="onboarding-modal"
+      className="onboarding-modal font-work-sans"
       role="dialog"
       aria-modal="true"
       aria-label="User Onboarding"
@@ -23,26 +23,26 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 1000,
-      }}
-    >
+        zIndex: 1000
+      }}>
+
       <div
         style={{
           background: "white",
           padding: "2rem",
           borderRadius: "8px",
           maxWidth: "400px",
-          textAlign: "center",
-        }}
-      >
-        <h2>Welcome to the Dashboard!</h2>
-        <p>Here’s a quick guide to get you started.</p>
-        <button onClick={onComplete} aria-label="Complete onboarding">
+          textAlign: "center"
+        }} className="font-work-sans">
+
+        <h2 className="font-sora">Welcome to the Dashboard!</h2>
+        <p className="font-work-sans">Here’s a quick guide to get you started.</p>
+        <button onClick={onComplete} aria-label="Complete onboarding" className="font-work-sans">
           Got it!
         </button>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default OnboardingModal;

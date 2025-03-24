@@ -34,13 +34,13 @@ interface IconProps {
 }
 
 // Spinner for loading states
-const Spinner: React.FC = () => (
-  <div className="animate-pulse space-y-2 w-full">
-    <div className="h-5 bg-gray-200 rounded w-1/3 mb-2"></div>
-    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-    <div className="h-4 bg-gray-200 rounded w-2/3 mt-2"></div>
-  </div>
-);
+const Spinner: React.FC = () =>
+<div className="animate-pulse space-y-2 w-full font-work-sans">
+    <div className="h-5 bg-gray-200 rounded w-1/3 mb-2 font-work-sans"></div>
+    <div className="h-4 bg-gray-200 rounded w-1/2 font-work-sans"></div>
+    <div className="h-4 bg-gray-200 rounded w-2/3 mt-2 font-work-sans"></div>
+  </div>;
+
 
 // Toast component for non-blocking notifications
 interface ToastProps {
@@ -54,15 +54,15 @@ const Toast: React.FC<ToastProps> = ({
   const config = {
     error: {
       bg: "bg-red-600",
-      icon: (props: IconProps) => <Icon name="faXCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
+      icon: (props: IconProps) => <Icon name="faXCircle" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
     },
     success: {
       bg: "bg-green-600",
-      icon: (props: IconProps) => <Icon name="faCheckCircle" {...props} solid={false} className="text-[var(--secondary-color)]" />
+      icon: (props: IconProps) => <Icon name="faCheckCircle" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
     },
     info: {
       bg: "bg-[var(--accent-color)]",
-      icon: (props: IconProps) => <Icon name="faBellAlert" {...props} solid={false} className="text-[var(--secondary-color)]" />
+      icon: (props: IconProps) => <Icon name="faBellAlert" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
     }
   }[type];
   const Icon = config.icon;
@@ -75,10 +75,10 @@ const Toast: React.FC<ToastProps> = ({
   }} exit={{
     opacity: 0,
     y: 20
-  }} className={`fixed bottom-4 right-4 ${config.bg} text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center space-x-2 z-50`}>
+  }} className={`fixed bottom-4 right-4 ${config.bg} text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center space-x-2 z-50 font-work-sans`}>
 
       <Icon className="w-4 h-4 sm:w-5 sm:h-5" solid={false} />
-      <span className="font-medium text-sm">{message}</span>
+      <span className="font-medium text-sm font-work-sans">{message}</span>
     </motion.div>;
 };
 
@@ -89,18 +89,18 @@ const ErrorDisplay: React.FC<{
 }> = ({
   message,
   onRetry
-}) => <div className="bg-white rounded-lg border border-red-200 p-6 text-center">
-    <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
-      <Icon name="faXCircle" className="w-8 h-8 text-red-500" solid={false} />
+}) => <div className="bg-white rounded-lg border border-red-200 p-6 text-center font-work-sans">
+    <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4 font-work-sans">
+      <Icon name="faXCircle" className="w-8 h-8 text-red-500 font-work-sans" solid={false} />
     </div>
-    <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2">Something went wrong!</h3>
-    <p className="text-sm text-[var(--secondary-color)] mb-4">
+    <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2 font-sora">Something went wrong!</h3>
+    <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">
       {message}
     </p>
-    {onRetry && <button onClick={onRetry} className="group inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors">
+    {onRetry && <button onClick={onRetry} className="group inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors font-work-sans">
 
         <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
-        <span>Try again</span>
+        <span className="font-work-sans">Try again</span>
       </button>}
     </div>;
 
@@ -126,21 +126,21 @@ const Card: React.FC<CardProps> = ({
   y: 0
 }} className="bg-white shadow-sm rounded-xl p-5 hover:shadow-md transition-all duration-300 border border-[var(--divider-color)]">
 
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
-      <div className="flex items-center">
-        {iconName && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3">
-            <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)]" solid={false} />
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3 font-work-sans">
+      <div className="flex items-center font-work-sans">
+        {iconName && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3 font-work-sans">
+            <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />
           </div>}
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
-          {description && <p className="text-sm text-[var(--secondary-color)] mt-0.5">{description}</p>}
+        <div className="font-work-sans">
+          <h2 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h2>
+          {description && <p className="text-sm text-[var(--secondary-color)] mt-0.5 font-work-sans">{description}</p>}
         </div>
       </div>
-      {actions && <div className="flex space-x-2 ml-auto sm:ml-0">
+      {actions && <div className="flex space-x-2 ml-auto sm:ml-0 font-work-sans">
           {actions}
         </div>}
     </div>
-    <div className="space-y-4">
+    <div className="space-y-4 font-work-sans">
       {children}
     </div>
   </motion.div>;
@@ -189,7 +189,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
     label: status
   };
   return <span className={`inline-flex items-center ${sizeClasses} rounded-full font-medium 
-      ${config.color} border shadow-sm`}>
+      ${config.color} border shadow-sm font-work-sans`}>
       <Icon name={config.iconName} className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} solid={false} />
       {config.label}
     </span>;
@@ -259,11 +259,11 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     y: 0
   }} className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer" onClick={() => onClick ? onClick() : router.push(`/campaigns/${campaign.id}`)}>
 
-      <div className="p-3 sm:p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 mr-2">
-            <h3 className="text-sm sm:text-base font-medium text-[var(--primary-color)]">{campaign.campaignName}</h3>
-            <p className="text-xs text-[var(--secondary-color)] mt-1">
+      <div className="p-3 sm:p-4 font-work-sans">
+        <div className="flex items-start justify-between font-work-sans">
+          <div className="flex-1 mr-2 font-work-sans">
+            <h3 className="text-sm sm:text-base font-medium text-[var(--primary-color)] font-sora">{campaign.campaignName}</h3>
+            <p className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
               {new Date(campaign.startDate).toLocaleDateString('en-US', {
               day: 'numeric',
               month: 'short'
@@ -274,17 +274,17 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             })}`}
             </p>
           </div>
-          <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center ${campaign.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 to-pink-500' : campaign.platform === 'TikTok' ? 'bg-black' : 'bg-red-600'}`}>
-            {campaign.platform === 'Instagram' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>}
-            {campaign.platform === 'TikTok' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg>}
-            {campaign.platform === 'YouTube' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg>}
+          <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center ${campaign.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 to-pink-500' : campaign.platform === 'TikTok' ? 'bg-black' : 'bg-red-600'} font-work-sans`}>
+            {campaign.platform === 'Instagram' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white font-work-sans" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>}
+            {campaign.platform === 'TikTok' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white font-work-sans" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg>}
+            {campaign.platform === 'YouTube' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white font-work-sans" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg>}
           </div>
         </div>
         
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-4 text-xs">
-          <div>
-            <p className="text-[var(--secondary-color)]">Budget</p>
-            <p className="font-medium text-[var(--primary-color)]">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-4 text-xs font-work-sans">
+          <div className="font-work-sans">
+            <p className="text-[var(--secondary-color)] font-work-sans">Budget</p>
+            <p className="font-medium text-[var(--primary-color)] font-work-sans">
               {new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'USD',
@@ -292,12 +292,12 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             }).format(campaign.totalBudget)}
             </p>
           </div>
-          <div>
-            <p className="text-[var(--secondary-color)]">Primary KPI</p>
-            <div className="flex items-center gap-1.5">
+          <div className="font-work-sans">
+            <p className="text-[var(--secondary-color)] font-work-sans">Primary KPI</p>
+            <div className="flex items-center gap-1.5 font-work-sans">
               <img src={kpiInfo.icon} alt={kpiInfo.title} className="w-4 h-4" />
 
-              <p className="font-medium text-[var(--primary-color)]">{kpiInfo.title}</p>
+              <p className="font-medium text-[var(--primary-color)] font-work-sans">{kpiInfo.title}</p>
             </div>
           </div>
         </div>
@@ -325,37 +325,37 @@ const MetricCard: React.FC<MetricCardProps> = ({
   imageSrc,
   description,
   format = "number"
-}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow p-4">
-    <div className="flex justify-between items-start">
-      <div className="flex items-center">
-        <div className="mr-3 p-2 bg-[var(--accent-color)] rounded-lg flex items-center justify-center w-9 h-9">
-          {imageSrc ? (
-            <img 
-              src={imageSrc} 
-              alt={title} 
-              className="w-5 h-5" 
-              style={{ filter: 'brightness(0) invert(1)' }} 
-            />
-          ) : (
-            <Icon name={iconName!} className="w-5 h-5 text-white" solid={true} />
-          )}
+}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow p-4 font-work-sans">
+    <div className="flex justify-between items-start font-work-sans">
+      <div className="flex items-center font-work-sans">
+        <div className="mr-3 p-2 bg-[var(--accent-color)] rounded-lg flex items-center justify-center w-9 h-9 font-work-sans">
+          {imageSrc ?
+        <img
+          src={imageSrc}
+          alt={title}
+          className="w-5 h-5"
+          style={{ filter: 'brightness(0) invert(1)' }} /> :
+
+
+        <Icon name={iconName!} className="w-5 h-5 text-white font-work-sans" solid={true} />
+        }
         </div>
-        <h3 className="text-sm font-medium text-[var(--secondary-color)]">{title}</h3>
+        <h3 className="text-sm font-medium text-[var(--secondary-color)] font-sora">{title}</h3>
       </div>
       
-      {trend !== undefined && <span className={`inline-flex items-center mr-2 ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+      {trend !== undefined && <span className={`inline-flex items-center mr-2 ${trend >= 0 ? 'text-green-600' : 'text-red-600'} font-work-sans`}>
           {trend >= 0 ? <Icon name="faChevronUp" className="w-3 h-3 mr-1" solid={false} /> : <Icon name="faChevronDown" className="w-3 h-3 mr-1" solid={false} />}
           {Math.abs(trend)}%
         </span>}
     </div>
     
-    <div className="mt-1 pl-11">
-      <div className="text-2xl font-bold text-[var(--primary-color)]">
+    <div className="mt-1 pl-11 font-work-sans">
+      <div className="text-2xl font-bold text-[var(--primary-color)] font-work-sans">
         {format === "currency" && "$"}
         {typeof value === "number" ? value.toLocaleString() : value}
         {format === "percent" && "%"}
       </div>
-      {description && <div className="text-xs text-[var(--tertiary-color)] mt-1">{description}</div>}
+      {description && <div className="text-xs text-[var(--tertiary-color)] mt-1 font-work-sans">{description}</div>}
     </div>
   </div>;
 
@@ -522,18 +522,18 @@ const ChartCard: React.FC<ChartCardProps> = ({
   children,
   iconName,
   actions
-}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6">
-    <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-3">
-      <div className="flex items-center">
-        <div className="p-2 bg-[var(--light-background)] rounded-lg mr-3">
-          <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)]" solid={false} />
+}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6 font-work-sans">
+    <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-3 font-work-sans">
+      <div className="flex items-center font-work-sans">
+        <div className="p-2 bg-[var(--light-background)] rounded-lg mr-3 font-work-sans">
+          <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h3>
-          {description && <p className="text-sm text-[var(--secondary-color)]">{description}</p>}
+        <div className="font-work-sans">
+          <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h3>
+          {description && <p className="text-sm text-[var(--secondary-color)] font-work-sans">{description}</p>}
         </div>
       </div>
-      {actions && <div className="sm:ml-auto">{actions}</div>}
+      {actions && <div className="sm:ml-auto font-work-sans">{actions}</div>}
     </div>
     {children}
   </div>;
@@ -965,38 +965,38 @@ const CalendarMonthView: React.FC<{
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   for (let i = 1; i <= daysInMonth; i++) {
     const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
-    const dayEvents = events.filter(event => new Date(event.start).getDate() === i && new Date(event.start).getMonth() === currentMonth.getMonth() && new Date(event.start).getFullYear() === currentMonth.getFullYear());
+    const dayEvents = events.filter((event) => new Date(event.start).getDate() === i && new Date(event.start).getMonth() === currentMonth.getMonth() && new Date(event.start).getFullYear() === currentMonth.getFullYear());
     days.push({
       day: i,
       events: dayEvents,
       date: currentDate
     });
   }
-  return <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full">
-      <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)]">
-        <h3 className="text-base font-semibold text-center">{format(month, 'MMMM yyyy')}</h3>
-        <div className="flex space-x-2">
-          <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)]">
-            <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)]" iconType="button" />
+  return <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full font-work-sans">
+      <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)] font-work-sans">
+        <h3 className="text-base font-semibold text-center font-sora">{format(month, 'MMMM yyyy')}</h3>
+        <div className="flex space-x-2 font-work-sans">
+          <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
+            <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
           </button>
-          <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)]">
-            <Icon name="faChevronRight" className="w-5 h-5 text-[var(--secondary-color)]" iconType="button" />
+          <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
+            <Icon name="faChevronRight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
           </button>
         </div>
       </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto font-work-sans">
         {/* Day headers with consistent width */}
-        <div className="min-w-full grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)]">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(day => <div key={day} className="flex justify-center items-center py-1">{day}</div>)}
+        <div className="min-w-full grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)] font-work-sans">
+          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => <div key={day} className="flex justify-center items-center py-1 font-work-sans">{day}</div>)}
         </div>
         
         {/* Calendar grid with fixed size cells for consistent spacing */}
-        <div className="min-w-full grid grid-cols-7 gap-1 px-1 pb-2">
+        <div className="min-w-full grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans">
           {/* Placeholder cells for days before the 1st of the month */}
           {Array.from({
           length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() === 0 ? 6 : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() - 1
-        }).map((_, index) => <div key={`empty-${index}`} className="aspect-square w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px]"></div>)}
+        }).map((_, index) => <div key={`empty-${index}`} className="aspect-square w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] font-work-sans"></div>)}
           
           {/* Actual days of the month */}
           {days.map(({
@@ -1006,21 +1006,21 @@ const CalendarMonthView: React.FC<{
         }) => {
           const isToday = new Date().toDateString() === date.toDateString();
           return <div key={day} className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center justify-center
-                ${isToday ? 'bg-[var(--accent-color)] bg-opacity-5 rounded-md' : ''}`}>
+                ${isToday ? 'bg-[var(--accent-color)] bg-opacity-5 rounded-md' : ''} font-work-sans`}>
 
-                <div className="flex justify-center items-center">
+                <div className="flex justify-center items-center font-work-sans">
                   <div className={`text-xs w-7 h-7 flex items-center justify-center rounded-full 
-                    ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'}`}>
+                    ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'} font-work-sans`}>
                     {day}
                   </div>
                 </div>
                 
-                {events.length > 0 && <div className="mt-0.5 w-full space-y-0.5 overflow-hidden">
-                    {events.slice(0, 2).map(event => <div key={event.id} className="text-[8px] sm:text-[9px] truncate rounded px-0.5 py-px bg-[var(--accent-color)] bg-opacity-10 text-[var(--accent-color)]" title={event.title}>
+                {events.length > 0 && <div className="mt-0.5 w-full space-y-0.5 overflow-hidden font-work-sans">
+                    {events.slice(0, 2).map((event) => <div key={event.id} className="text-[8px] sm:text-[9px] truncate rounded px-0.5 py-px bg-[var(--accent-color)] bg-opacity-10 text-[var(--accent-color)] font-work-sans" title={event.title}>
 
                         {event.title.length > 8 ? `${event.title.substring(0, 6)}...` : event.title}
                       </div>)}
-                    {events.length > 2 && <div className="text-[8px] text-[var(--secondary-color)]">+{events.length - 2} more</div>}
+                    {events.length > 2 && <div className="text-[8px] text-[var(--secondary-color)] font-work-sans">+{events.length - 2} more</div>}
                   </div>}
               </div>;
         })}
@@ -1044,7 +1044,7 @@ const generateChartPath = (dataPoints: Array<{
   }
 
   // Normalize the values to fit within our SVG viewport (0-100)
-  const maxValue = Math.max(...dataPoints.map(point => point.value));
+  const maxValue = Math.max(...dataPoints.map((point) => point.value));
   const normalizedPoints = dataPoints.map((point, index) => {
     const x = index / (dataPoints.length - 1) * 300;
     // Invert Y axis and scale to 80% of height, leaving space at top and bottom
@@ -1081,30 +1081,30 @@ const generateAreaPath = (linePath: string): string => {
 // (if they were removed, add them back)
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case 'Performance': return 'bg-blue-500';
-    case 'Audience': return 'bg-purple-500';
-    case 'Content': return 'bg-green-500';
-    case 'Strategy': return 'bg-yellow-500';
-    default: return 'bg-gray-500';
+    case 'Performance':return 'bg-blue-500';
+    case 'Audience':return 'bg-purple-500';
+    case 'Content':return 'bg-green-500';
+    case 'Strategy':return 'bg-yellow-500';
+    default:return 'bg-gray-500';
   }
 };
 
 const getCategoryTextColor = (category: string) => {
   switch (category) {
-    case 'Performance': return 'text-blue-500 bg-blue-100';
-    case 'Audience': return 'text-purple-500 bg-purple-100';
-    case 'Content': return 'text-green-500 bg-green-100';
-    case 'Strategy': return 'text-yellow-500 bg-yellow-100';
-    default: return 'text-gray-500 bg-gray-100';
+    case 'Performance':return 'text-blue-500 bg-blue-100';
+    case 'Audience':return 'text-purple-500 bg-purple-100';
+    case 'Content':return 'text-green-500 bg-green-100';
+    case 'Strategy':return 'text-yellow-500 bg-yellow-100';
+    default:return 'text-gray-500 bg-gray-100';
   }
 };
 
 const getImpactBadgeColor = (impact: string) => {
   switch (impact) {
-    case 'High': return 'bg-red-100 text-red-700';
-    case 'Medium': return 'bg-yellow-100 text-yellow-700';
-    case 'Low': return 'bg-green-100 text-green-700';
-    default: return 'bg-gray-100 text-gray-700';
+    case 'High':return 'bg-red-100 text-red-700';
+    case 'Medium':return 'bg-yellow-100 text-yellow-700';
+    case 'Low':return 'bg-green-100 text-green-700';
+    default:return 'bg-gray-100 text-gray-700';
   }
 };
 
@@ -1128,7 +1128,7 @@ export default function DashboardContent({
     error: fetchError,
     isLoading: isLoadingCampaigns
   } = useSWR<CampaignsResponse>('/api/campaigns', fetcher, {
-    onError: error => {
+    onError: (error) => {
       console.error('SWR error:', error);
       handleError(new Error('Failed to fetch campaign data. Please try refreshing the page.'));
     },
@@ -1139,10 +1139,10 @@ export default function DashboardContent({
 
   // Process campaigns for different views
   const activeCampaigns = useMemo(() => {
-    return campaignsData?.campaigns?.filter(campaign => campaign.submissionStatus === "submitted" && new Date(campaign.startDate) <= new Date() && (!campaign.endDate || new Date(campaign.endDate) >= new Date())) || [];
+    return campaignsData?.campaigns?.filter((campaign) => campaign.submissionStatus === "submitted" && new Date(campaign.startDate) <= new Date() && (!campaign.endDate || new Date(campaign.endDate) >= new Date())) || [];
   }, [campaignsData?.campaigns]);
   const upcomingCampaigns = useMemo(() => {
-    return campaignsData?.campaigns?.filter(campaign =>
+    return campaignsData?.campaigns?.filter((campaign) =>
     // Include any campaign with a status that is not "DRAFT" (case-insensitive)
     campaign.status && campaign.status.toUpperCase() !== "DRAFT" ||
     // Also keep the existing logic for backward compatibility 
@@ -1151,7 +1151,7 @@ export default function DashboardContent({
 
   // Calendar events for the upcoming campaigns
   const calendarEvents = useMemo(() => {
-    return upcomingCampaigns.map(campaign => ({
+    return upcomingCampaigns.map((campaign) => ({
       id: campaign.id,
       title: campaign.campaignName,
       start: new Date(campaign.startDate),
@@ -1252,7 +1252,7 @@ export default function DashboardContent({
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setToastMessage('Dashboard data exported successfully');
     } catch (error) {
       handleError(error instanceof Error ? error : new Error('Export failed'));
@@ -1306,20 +1306,20 @@ export default function DashboardContent({
     opacity: 1,
     y: 0
   }} className="bg-white rounded-xl border border-[var(--divider-color)] overflow-hidden shadow-sm">
-    <div className={`h-2 ${getCategoryColor(insight.category)}`} />
-    <div className="p-5">
-      <div className="flex items-center mb-3">
-        <span className={`${getCategoryTextColor(insight.category)} text-xs font-medium px-2.5 py-0.5 rounded-full bg-opacity-15`}>
+    <div className={`h-2 ${getCategoryColor(insight.category)} font-work-sans`} />
+    <div className="p-5 font-work-sans">
+      <div className="flex items-center mb-3 font-work-sans">
+        <span className={`${getCategoryTextColor(insight.category)} text-xs font-medium px-2.5 py-0.5 rounded-full bg-opacity-15 font-work-sans`}>
           {insight.category}
         </span>
-        <span className={`ml-2 ${getImpactBadgeColor(insight.impact)} text-xs font-medium px-2 py-0.5 rounded-full`}>
+        <span className={`ml-2 ${getImpactBadgeColor(insight.impact)} text-xs font-medium px-2 py-0.5 rounded-full font-work-sans`}>
           {insight.impact} Impact
         </span>
       </div>
-      <h3 className="text-base font-semibold text-[var(--primary-color)] mb-2">{insight.title}</h3>
-      <p className="text-sm text-[var(--secondary-color)] mb-4">{insight.description}</p>
-      <button onClick={() => onAction(insight.action)} className="group w-full px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center">
-        <span>Take Action</span>
+      <h3 className="text-base font-semibold text-[var(--primary-color)] mb-2 font-sora">{insight.title}</h3>
+      <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">{insight.description}</p>
+      <button onClick={() => onAction(insight.action)} className="group w-full px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center font-work-sans">
+        <span className="font-work-sans">Take Action</span>
         <Icon name="faArrowRight" className="w-4 h-4 ml-2" iconType="button" />
       </button>
     </div>
@@ -1327,57 +1327,57 @@ export default function DashboardContent({
 
   // Return the JSX for the dashboard
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6">
+    <div className="min-h-screen bg-white font-work-sans">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6 font-work-sans">
         {toastMessage && <Toast message={toastMessage} type="info" />}
 
         {/* Campaigns Overview Section */}
-        <div className="mb-4 sm:mb-6">
-          <div className="flex justify-between items-center mb-3 sm:mb-5">
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)]">
-              <span className="block sm:hidden">Overview</span>
-              <span className="hidden sm:block">Campaigns Overview</span>
+        <div className="mb-4 sm:mb-6 font-work-sans">
+          <div className="flex justify-between items-center mb-3 sm:mb-5 font-work-sans">
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">
+              <span className="block sm:hidden font-work-sans">Overview</span>
+              <span className="hidden sm:block font-work-sans">Campaigns Overview</span>
             </h2>
-            <button onClick={() => router.push('/campaigns/wizard/step-1')} className="group px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all">
+            <button onClick={() => router.push('/campaigns/wizard/step-1')} className="group px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all font-work-sans">
               <Icon name="faPlus" className="w-4 h-4 mr-2" iconType="button" />
-              <span>New Campaign</span>
+              <span className="font-work-sans">New Campaign</span>
             </button>
           </div>
           
           {/* Calendar and Campaign Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 font-work-sans">
             {/* Calendar */}
-            <div className="col-span-12 lg:col-span-6">
+            <div className="col-span-12 lg:col-span-6 font-work-sans">
               <CalendarMonthView month={currentDate} events={calendarEvents} />
             </div>
             
             {/* Campaign Cards - Align with calendar */}
-            <div className="col-span-12 lg:col-span-6">
-              <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden">
-                <div className="p-3 sm:p-4 border-b border-[var(--divider-color)]">
-                  <h3 className="text-sm font-medium text-[var(--secondary-color)]">Upcoming</h3>
+            <div className="col-span-12 lg:col-span-6 font-work-sans">
+              <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden font-work-sans">
+                <div className="p-3 sm:p-4 border-b border-[var(--divider-color)] font-work-sans">
+                  <h3 className="text-sm font-medium text-[var(--secondary-color)] font-sora">Upcoming</h3>
                 </div>
                 
-                <div className="p-3 sm:p-4">
-                  {isLoadingCampaigns ? (
-                    <div className="py-4 sm:py-6">
+                <div className="p-3 sm:p-4 font-work-sans">
+                  {isLoadingCampaigns ?
+                  <div className="py-4 sm:py-6 font-work-sans">
                       <TableSkeleton rows={3} cols={3} hasHeader={false} />
-                    </div>
-                  ) : upcomingCampaigns.length === 0 ? (
-                    <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg">
-                      <p className="text-sm text-[var(--secondary-color)]">No upcoming campaigns</p>
-                      <button onClick={handleNewCampaign} className="group mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
+                    </div> :
+                  upcomingCampaigns.length === 0 ?
+                  <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg font-work-sans">
+                      <p className="text-sm text-[var(--secondary-color)] font-work-sans">No upcoming campaigns</p>
+                      <button onClick={handleNewCampaign} className="group mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
                         <Icon name="faPlus" className="w-3 h-3 mr-1" iconType="button" />
-                        <span>Create Your First Campaign</span>
+                        <span className="font-work-sans">Create Your First Campaign</span>
                       </button>
+                    </div> :
+
+                  <div className="space-y-3 overflow-y-auto max-h-[300px] font-work-sans">
+                      {upcomingCampaigns.map((campaign) =>
+                    <CampaignCard key={campaign.id} campaign={campaign} onClick={() => router.push(`/campaigns/${campaign.id}`)} />
+                    )}
                     </div>
-                  ) : (
-                    <div className="space-y-3 overflow-y-auto max-h-[300px]">
-                      {upcomingCampaigns.map(campaign => (
-                        <CampaignCard key={campaign.id} campaign={campaign} onClick={() => router.push(`/campaigns/${campaign.id}`)} />
-                      ))}
-                    </div>
-                  )}
+                  }
                 </div>
               </div>
             </div>
@@ -1385,153 +1385,153 @@ export default function DashboardContent({
         </div>
         
         {/* Performance Metrics Section */}
-        <div className="mb-5 sm:mb-8">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)]">Performance</h2>
+        <div className="mb-5 sm:mb-8 font-work-sans">
+          <div className="flex items-center justify-between mb-3 sm:mb-4 font-work-sans">
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">Performance</h2>
           </div>
           
           {/* Performance Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <MetricCard 
-              title="Total Campaigns" 
-              value={metrics.stats.totalCampaigns} 
-              trend={metrics.stats.campaignChange} 
-              imageSrc="/app/Campaigns.svg" 
-              description={`+${metrics.stats.campaignChange} campaigns`} 
-            />
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-work-sans">
+            <MetricCard
+              title="Total Campaigns"
+              value={metrics.stats.totalCampaigns}
+              trend={metrics.stats.campaignChange}
+              imageSrc="/app/Campaigns.svg"
+              description={`+${metrics.stats.campaignChange} campaigns`} />
+
             
-            <MetricCard 
-              title="Survey Responses" 
-              value={metrics.stats.surveyResponses} 
-              trend={metrics.stats.surveyChange} 
-              iconName="faCommentDots" 
-              description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} 
-            />
+            <MetricCard
+              title="Survey Responses"
+              value={metrics.stats.surveyResponses}
+              trend={metrics.stats.surveyChange}
+              iconName="faCommentDots"
+              description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
+
             
-            <MetricCard 
-              title="Live Campaigns" 
-              value={metrics.stats.liveCampaigns} 
-              trend={metrics.stats.liveChange} 
-              iconName="faPlay" 
-              description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} 
-            />
+            <MetricCard
+              title="Live Campaigns"
+              value={metrics.stats.liveCampaigns}
+              trend={metrics.stats.liveChange}
+              iconName="faPlay"
+              description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} />
+
             
-            <MetricCard 
-              title="Credits Available" 
-              value={metrics.stats.creditsAvailable} 
-              trend={metrics.stats.creditsChange} 
-              imageSrc="/coins.svg" 
-              description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} 
-            />
+            <MetricCard
+              title="Credits Available"
+              value={metrics.stats.creditsAvailable}
+              trend={metrics.stats.creditsChange}
+              imageSrc="/coins.svg"
+              description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} />
+
           </div>
         </div>
 
         {/* Influencers Overview */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Influencers Overview</h2>
-            <div className="flex space-x-3">
-              <button onClick={() => router.push('/influencers/reports')} className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
+        <div className="mb-8 font-work-sans">
+          <div className="flex justify-between items-center mb-4 font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 font-sora">Influencers Overview</h2>
+            <div className="flex space-x-3 font-work-sans">
+              <button onClick={() => router.push('/influencers/reports')} className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
                 <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
-                <span>View Detailed Report</span>
+                <span className="font-work-sans">View Detailed Report</span>
               </button>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg border border-[var(--divider-color)]">
-            <div className="flex border-b border-[var(--divider-color)]">
-              <button className="group px-4 py-3 text-sm font-medium text-[var(--accent-color)] border-b-2 border-[var(--accent-color)]">
-                <span>Social Profiles</span>
+          <div className="bg-white rounded-lg border border-[var(--divider-color)] font-work-sans">
+            <div className="flex border-b border-[var(--divider-color)] font-work-sans">
+              <button className="group px-4 py-3 text-sm font-medium text-[var(--accent-color)] border-b-2 border-[var(--accent-color)] font-work-sans">
+                <span className="font-work-sans">Social Profiles</span>
               </button>
-              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
-                <span>Engagement</span>
+              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
+                <span className="font-work-sans">Engagement</span>
               </button>
-              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
-                <span>Likes</span>
+              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
+                <span className="font-work-sans">Likes</span>
               </button>
-              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)]">
-                <span>Comments</span>
+              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
+                <span className="font-work-sans">Comments</span>
               </button>
             </div>
             
             {/* Social profiles content */}
-            <div className="overflow-hidden p-4">
+            <div className="overflow-hidden p-4 font-work-sans">
               <table className="min-w-full">
                 <tbody className="divide-y divide-gray-100">
                   <tr className="hover:bg-gray-50">
                     <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
+                      <div className="flex items-center font-work-sans">
+                        <div className="h-10 w-10 flex-shrink-0 font-work-sans">
                           <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="" />
                         </div>
-                        <div className="ml-4">
-                          <div className="flex items-center">
-                            <div className="font-medium text-gray-900">Ethan Edge</div>
-                            <svg className="ml-1 w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                        <div className="ml-4 font-work-sans">
+                          <div className="flex items-center font-work-sans">
+                            <div className="font-medium text-gray-900 font-work-sans">Ethan Edge</div>
+                            <svg className="ml-1 w-4 h-4 text-blue-500 font-work-sans" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M8.21 10.08c-.02 0-.04 0-.06-.02-.67-.9-.84-2.44-.89-3.03 0-.11-.13-.18-.23-.12C4.93 8.08 3 10.86 3 13.54 3 18.14 6.2 22 11.7 22c5.15 0 8.7-3.98 8.7-8.46 0-5.87-4.2-9.77-7.93-11.53a.13.13 0 0 0-.19.14c.48 3.16-.18 6.6-4.07 7.93z" fill="#38bdf8" />
                             </svg>
                           </div>
-                          <div className="text-sm text-gray-500 flex items-center">
-                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <div className="text-sm text-gray-500 flex items-center font-work-sans">
+                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400 font-work-sans" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                               <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <span>Back to Inspiration</span>
+                            <span className="font-work-sans">Back to Inspiration</span>
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
-                        width: '90%'
-                      }}></div>
+                    <td className="py-3 px-4 text-right font-work-sans">
+                      <div className="w-full bg-gray-100 rounded-full h-1.5 font-work-sans">
+                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                          width: '90%'
+                        }}></div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">3K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">12</td>
+                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">3K</td>
+                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">12</td>
                   </tr>
                   <tr className="hover:bg-gray-50">
                     <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
+                      <div className="flex items-center font-work-sans">
+                        <div className="h-10 w-10 flex-shrink-0 font-work-sans">
                           <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="" />
                         </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-gray-900">Olivia Wave</div>
-                          <div className="text-sm text-gray-500 flex items-center">
-                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <div className="ml-4 font-work-sans">
+                          <div className="font-medium text-gray-900 font-work-sans">Olivia Wave</div>
+                          <div className="text-sm text-gray-500 flex items-center font-work-sans">
+                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400 font-work-sans" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                               <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
                             </svg>
-                            <span>New Beginnings</span>
+                            <span className="font-work-sans">New Beginnings</span>
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
-                        width: '85%'
-                      }}></div>
+                    <td className="py-3 px-4 text-right font-work-sans">
+                      <div className="w-full bg-gray-100 rounded-full h-1.5 font-work-sans">
+                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                          width: '85%'
+                        }}></div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">3K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm">52</td>
+                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">3K</td>
+                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">52</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             
             {/* Security check box */}
-            <div className="mt-1 border-t border-gray-200 p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium">Security Check</p>
-                  <p className="text-xs text-gray-500 mt-1">Maintain safety. Complete your security check on time.</p>
+            <div className="mt-1 border-t border-gray-200 p-4 font-work-sans">
+              <div className="flex justify-between items-center font-work-sans">
+                <div className="font-work-sans">
+                  <p className="text-sm font-medium font-work-sans">Security Check</p>
+                  <p className="text-xs text-gray-500 mt-1 font-work-sans">Maintain safety. Complete your security check on time.</p>
                 </div>
-                <div className="flex space-x-3">
-                  <div className="bg-red-50 text-red-600 text-xs font-medium px-3 py-1 rounded-md">Next in 5 Days</div>
-                  <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-3 py-1 rounded-md">
-                    <span>Run Check</span>
+                <div className="flex space-x-3 font-work-sans">
+                  <div className="bg-red-50 text-red-600 text-xs font-medium px-3 py-1 rounded-md font-work-sans">Next in 5 Days</div>
+                  <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-3 py-1 rounded-md font-work-sans">
+                    <span className="font-work-sans">Run Check</span>
                   </button>
                 </div>
               </div>
@@ -1540,52 +1540,52 @@ export default function DashboardContent({
         </div>
 
         {/* Insights Summary Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Insights Summary</h2>
-            <a href="#" className="group text-[var(--accent-color)] text-sm font-medium flex items-center hover:underline">
-              <span>View All Insights</span>
+        <div className="mb-8 font-work-sans">
+          <div className="flex justify-between items-center mb-4 font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 font-sora">Insights Summary</h2>
+            <a href="#" className="group text-[var(--accent-color)] text-sm font-medium flex items-center hover:underline font-work-sans">
+              <span className="font-work-sans">View All Insights</span>
               <Icon name="faArrowRight" className="w-4 h-4 ml-1" iconType="button" />
             </a>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
             {/* Youth Momentum Insight Card */}
-            <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden">
-              <div className="flex items-start mb-3">
-                <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3">
-                  <Icon name="faChartLine" className="w-5 h-5 text-white" solid={false} />
+            <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden font-work-sans">
+              <div className="flex items-start mb-3 font-work-sans">
+                <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3 font-work-sans">
+                  <Icon name="faChartLine" className="w-5 h-5 text-white font-work-sans" solid={false} />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-semibold text-[#0c4a6e]">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
+                <div className="flex-1 font-work-sans">
+                  <h3 className="text-base font-semibold text-[#0c4a6e] font-sora">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
                 </div>
               </div>
-              <p className="text-sm text-[#0c4a6e] mb-4">
+              <p className="text-sm text-[#0c4a6e] mb-4 font-work-sans">
                 Campaign "NextGen Focus: Amplify Impact" is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.
               </p>
-              <div className="flex justify-end">
-                <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90">
-                  <span>Read</span>
+              <div className="flex justify-end font-work-sans">
+                <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90 font-work-sans">
+                  <span className="font-work-sans">Read</span>
                 </button>
               </div>
             </div>
             
             {/* Low Engagement Alert Card */}
-            <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-1">
-                <button className="group text-gray-400 hover:text-gray-600">
+            <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden font-work-sans">
+              <div className="absolute top-0 right-0 p-1 font-work-sans">
+                <button className="group text-gray-400 hover:text-gray-600 font-work-sans">
                   <Icon name="faXmark" className="w-4 h-4" iconType="button" />
                 </button>
               </div>
-              <div className="flex items-start mb-3">
-                <div className="bg-gray-300 p-2 rounded-md mr-3">
-                  <Icon name="faTriangleExclamation" className="w-5 h-5 text-gray-600" solid={false} />
+              <div className="flex items-start mb-3 font-work-sans">
+                <div className="bg-gray-300 p-2 rounded-md mr-3 font-work-sans">
+                  <Icon name="faTriangleExclamation" className="w-5 h-5 text-gray-600 font-work-sans" solid={false} />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-semibold text-gray-700">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
+                <div className="flex-1 font-work-sans">
+                  <h3 className="text-base font-semibold text-gray-700 font-sora">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 mb-4 font-work-sans">
                 Engagement rate is 15% below average. Consider revising the call-to-action.
               </p>
             </div>
@@ -1593,93 +1593,93 @@ export default function DashboardContent({
         </div>
 
         {/* Latest Campaigns List */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Latest Campaigns List</h2>
-            <button className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors">
-              <span>Manage</span>
+        <div className="mb-8 font-work-sans">
+          <div className="flex justify-between items-center mb-4 font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 font-sora">Latest Campaigns List</h2>
+            <button className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
+              <span className="font-work-sans">Manage</span>
             </button>
           </div>
           
           {/* Campaigns table */}
-          <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden font-work-sans">
+            <div className="overflow-x-auto font-work-sans">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider">Campaign</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider">Status</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider">Budget</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider">Users</th>
+                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Campaign</th>
+                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Status</th>
+                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Budget</th>
+                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Users</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {isLoadingCampaigns ? (
-                    <tr>
+                  {isLoadingCampaigns ?
+                  <tr>
                       <td colSpan={4} className="py-8">
                         <TableSkeleton rows={3} cols={4} hasHeader={false} />
                       </td>
-                    </tr>
-                  ) : (
-                    <>
+                    </tr> :
+
+                  <>
                       <tr className="hover:bg-gray-50 cursor-pointer">
                         <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">Clicks & Connections</div>
+                          <div className="flex items-center font-work-sans">
+                            <div className="text-sm font-medium text-gray-900 font-work-sans">Clicks & Connections</div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 font-work-sans">
                             Live
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex flex-col">
-                            <div className="text-xs font-medium text-gray-600">Budget</div>
-                            <div className="flex items-center">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
-                              width: '75%'
-                            }}></div>
+                          <div className="flex flex-col font-work-sans">
+                            <div className="text-xs font-medium text-gray-600 font-work-sans">Budget</div>
+                            <div className="flex items-center font-work-sans">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
+                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                                width: '75%'
+                              }}></div>
                               </div>
-                              <span className="text-xs font-medium">12,314$</span>
+                              <span className="text-xs font-medium font-work-sans">12,314$</span>
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="text-sm font-medium">12 of 100 Users</div>
+                          <div className="text-sm font-medium font-work-sans">12 of 100 Users</div>
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50 cursor-pointer">
                         <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">Beyond the Horizon</div>
+                          <div className="flex items-center font-work-sans">
+                            <div className="text-sm font-medium text-gray-900 font-work-sans">Beyond the Horizon</div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 font-work-sans">
                             Live
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex flex-col">
-                            <div className="text-xs font-medium text-gray-600">Budget</div>
-                            <div className="flex items-center">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2">
-                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full" style={{
-                              width: '60%'
-                            }}></div>
+                          <div className="flex flex-col font-work-sans">
+                            <div className="text-xs font-medium text-gray-600 font-work-sans">Budget</div>
+                            <div className="flex items-center font-work-sans">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
+                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                                width: '60%'
+                              }}></div>
                               </div>
-                              <span className="text-xs font-medium">10,461$</span>
+                              <span className="text-xs font-medium font-work-sans">10,461$</span>
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="text-sm font-medium">46 of 413 Users</div>
+                          <div className="text-sm font-medium font-work-sans">46 of 413 Users</div>
                         </td>
                       </tr>
                     </>
-                  )}
+                  }
                 </tbody>
               </table>
             </div>
@@ -1687,48 +1687,48 @@ export default function DashboardContent({
         </div>
 
         {/* Brand health card - Moved to bottom of page */}
-        <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Brand Health</h2>
+        <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5 mb-6 font-work-sans">
+          <div className="flex justify-between items-center mb-4 font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 font-sora">Brand Health</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
             {/* Left side - Sentiment Score */}
-            <div>
-              <div className="mb-3 flex justify-between items-center">
-                <div>
-                  <h3 className="text-sm text-gray-500 mb-1">Sentiment Score</h3>
-                  <div className="flex items-baseline">
-                    <span className="text-2xl font-bold">76% Positive Score</span>
+            <div className="font-work-sans">
+              <div className="mb-3 flex justify-between items-center font-work-sans">
+                <div className="font-work-sans">
+                  <h3 className="text-sm text-gray-500 mb-1 font-sora">Sentiment Score</h3>
+                  <div className="flex items-baseline font-work-sans">
+                    <span className="text-2xl font-bold font-work-sans">76% Positive Score</span>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
-                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
+                <div className="flex items-center font-work-sans">
+                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium font-work-sans">90D</span>
+                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
                 </div>
               </div>
               
               {/* Chart */}
-              <div className="mt-4 h-48 relative">
+              <div className="mt-4 h-48 relative font-work-sans">
                 {/* Simulated chart with lines */}
-                <div className="absolute top-0 left-0 w-full h-full">
-                  <div className="relative w-full h-full">
+                <div className="absolute top-0 left-0 w-full h-full font-work-sans">
+                  <div className="relative w-full h-full font-work-sans">
                     {/* Y-axis labels */}
-                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
-                      <span>20k</span>
-                      <span>15k</span>
-                      <span>10k</span>
-                      <span>5k</span>
-                      <span>1k</span>
-                      <span>0</span>
+                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-work-sans">
+                      <span className="font-work-sans">20k</span>
+                      <span className="font-work-sans">15k</span>
+                      <span className="font-work-sans">10k</span>
+                      <span className="font-work-sans">5k</span>
+                      <span className="font-work-sans">1k</span>
+                      <span className="font-work-sans">0</span>
                     </div>
                     
                     {/* X-axis grid lines */}
-                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200">
-                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100"></div>
+                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
+                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
                     </div>
                     
                     {/* Line chart with actual data */}
@@ -1744,66 +1744,66 @@ export default function DashboardContent({
                     </svg>
                     
                     {/* X-axis labels */}
-                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
-                      <span>01 Aug</span>
-                      <span>05 Aug</span>
-                      <span>10 Aug</span>
-                      <span>15 Aug</span>
-                      <span>20 Aug</span>
-                      <span>25 Aug</span>
-                      <span>30 Aug</span>
+                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
+                      <span className="font-work-sans">01 Aug</span>
+                      <span className="font-work-sans">05 Aug</span>
+                      <span className="font-work-sans">10 Aug</span>
+                      <span className="font-work-sans">15 Aug</span>
+                      <span className="font-work-sans">20 Aug</span>
+                      <span className="font-work-sans">25 Aug</span>
+                      <span className="font-work-sans">30 Aug</span>
                     </div>
                   </div>
                 </div>
               </div>
               
               {/* Event marker */}
-              <div className="mt-6 flex items-center">
-                <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center">
-                  <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1"></span>
-                  <span>Senior Travellers Campaign launch</span>
+              <div className="mt-6 flex items-center font-work-sans">
+                <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center font-work-sans">
+                  <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1 font-work-sans"></span>
+                  <span className="font-work-sans">Senior Travellers Campaign launch</span>
                 </div>
               </div>
             </div>
             
             {/* Right side - Latest mentions */}
-            <div>
-              <div className="mb-3 flex justify-between items-center">
-                <div>
-                  <h3 className="text-sm text-gray-500 mb-1">Latest Mentions</h3>
-                  <div className="flex items-baseline">
-                    <span className="text-2xl font-bold">1,561 Mentions</span>
-                    <span className="ml-2 text-xs text-green-600 font-medium">+47% More than last week</span>
+            <div className="font-work-sans">
+              <div className="mb-3 flex justify-between items-center font-work-sans">
+                <div className="font-work-sans">
+                  <h3 className="text-sm text-gray-500 mb-1 font-sora">Latest Mentions</h3>
+                  <div className="flex items-baseline font-work-sans">
+                    <span className="text-2xl font-bold font-work-sans">1,561 Mentions</span>
+                    <span className="ml-2 text-xs text-green-600 font-medium font-work-sans">+47% More than last week</span>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium">90D</span>
-                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md">3M</span>
+                <div className="flex items-center font-work-sans">
+                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium font-work-sans">90D</span>
+                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
                 </div>
               </div>
               
               {/* Chart */}
-              <div className="mt-4 h-48 relative">
+              <div className="mt-4 h-48 relative font-work-sans">
                 {/* Simulated chart with lines */}
-                <div className="absolute top-0 left-0 w-full h-full">
-                  <div className="relative w-full h-full">
+                <div className="absolute top-0 left-0 w-full h-full font-work-sans">
+                  <div className="relative w-full h-full font-work-sans">
                     {/* Y-axis labels */}
-                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
-                      <span>20k</span>
-                      <span>15k</span>
-                      <span>10k</span>
-                      <span>5k</span>
-                      <span>1k</span>
-                      <span>0</span>
+                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-work-sans">
+                      <span className="font-work-sans">20k</span>
+                      <span className="font-work-sans">15k</span>
+                      <span className="font-work-sans">10k</span>
+                      <span className="font-work-sans">5k</span>
+                      <span className="font-work-sans">1k</span>
+                      <span className="font-work-sans">0</span>
                     </div>
                     
                     {/* X-axis grid lines */}
-                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200">
-                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100"></div>
-                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100"></div>
+                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
+                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
                     </div>
                     
                     {/* Line chart (simulated with SVG path) */}
@@ -1819,14 +1819,14 @@ export default function DashboardContent({
                     </svg>
                     
                     {/* X-axis labels */}
-                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2">
-                      <span>01 Aug</span>
-                      <span>05 Aug</span>
-                      <span>10 Aug</span>
-                      <span>15 Aug</span>
-                      <span>20 Aug</span>
-                      <span>25 Aug</span>
-                      <span>30 Aug</span>
+                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
+                      <span className="font-work-sans">01 Aug</span>
+                      <span className="font-work-sans">05 Aug</span>
+                      <span className="font-work-sans">10 Aug</span>
+                      <span className="font-work-sans">15 Aug</span>
+                      <span className="font-work-sans">20 Aug</span>
+                      <span className="font-work-sans">25 Aug</span>
+                      <span className="font-work-sans">30 Aug</span>
                     </div>
                   </div>
                 </div>
@@ -1835,6 +1835,6 @@ export default function DashboardContent({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

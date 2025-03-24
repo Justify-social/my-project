@@ -167,9 +167,9 @@ interface APICampaignResponse {
   };
   audience: null | {
 
+
     // ... audience fields if needed ...
-  };
-  creativeAssets: any[];
+  };creativeAssets: any[];
   creativeRequirements: any[];
 }
 
@@ -266,14 +266,14 @@ const featureIconsMap = {
 // Format feature name for display
 const formatFeatureName = (feature: string): string => {
   if (!feature) return "N/A";
-  return featureIconsMap[feature as keyof typeof featureIconsMap]?.title || feature.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+  return featureIconsMap[feature as keyof typeof featureIconsMap]?.title || feature.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 // Format KPI name for display
 const formatKpiName = (kpi: string): string => {
   if (!kpi) return "N/A";
   // Get from map or format manually
-  return kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.title || kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  return kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.title || kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 };
 
 // Updated MetricCard component
@@ -316,23 +316,23 @@ const MetricCard = ({
     trendIcon = <Icon name="faArrowDown" className="inline-block h-4 w-4 ml-1" solid={false} />;
     trendColor = "text-red-600";
   }
-  return <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)]">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="text-[var(--secondary-color)] text-sm mb-2">{title}</div>
-          <div className="text-2xl font-semibold text-[var(--primary-color)] flex items-center">
+  return <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)] font-work-sans">
+      <div className="flex justify-between items-start font-work-sans">
+        <div className="font-work-sans">
+          <div className="text-[var(--secondary-color)] text-sm mb-2 font-work-sans">{title}</div>
+          <div className="text-2xl font-semibold text-[var(--primary-color)] flex items-center font-work-sans">
             {formattedValue}
-            <span className={trendColor}>{trendIcon}</span>
+            <span className={`${trendColor} font-work-sans`}>{trendIcon}</span>
           </div>
-          {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1">{subtext}</div>}
+          {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">{subtext}</div>}
         </div>
-        <div className="p-3 bg-[var(--accent-light)] rounded-full">
-          <Icon 
-            name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
-            className="h-5 w-5 text-[var(--accent-color)]" 
-            iconType="static" 
-            solid={false} 
-          />
+        <div className="p-3 bg-[var(--accent-light)] rounded-full font-work-sans">
+          <Icon
+          name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`}
+          className="h-5 w-5 text-[var(--accent-color)] font-work-sans"
+          iconType="static"
+          solid={false} />
+
         </div>
       </div>
     </div>;
@@ -354,28 +354,28 @@ const DataCard: React.FC<DataCardProps> = ({
   children,
   className = '',
   actions
-}) => <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden ${className}`}>
-    <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
-      <div className="flex items-center">
-        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon 
-            name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
-            className="h-5 w-5 text-[var(--accent-color)]" 
-            aria-hidden="true" 
-            iconType="static" 
-            solid={false} 
-          />
+}) => <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden ${className} font-work-sans`}>
+    <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between font-work-sans">
+      <div className="flex items-center font-work-sans">
+        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3 font-work-sans">
+          <Icon
+          name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`}
+          className="h-5 w-5 text-[var(--accent-color)] font-work-sans"
+          aria-hidden="true"
+          iconType="static"
+          solid={false} />
+
         </div>
-        <div>
-          <h3 className="text-[var(--primary-color)] font-semibold">{title}</h3>
-          {description && <p className="text-[var(--secondary-color)] text-sm mt-1">{description}</p>}
+        <div className="font-work-sans">
+          <h3 className="text-[var(--primary-color)] font-semibold font-sora">{title}</h3>
+          {description && <p className="text-[var(--secondary-color)] text-sm mt-1 font-work-sans">{description}</p>}
         </div>
       </div>
-      {actions && <div className="flex space-x-2">
+      {actions && <div className="flex space-x-2 font-work-sans">
           {actions}
         </div>}
     </div>
-    <div className="px-4 py-5 sm:p-6 bg-white">
+    <div className="px-4 py-5 sm:p-6 bg-white font-work-sans">
       {children}
     </div>
   </div>;
@@ -394,24 +394,24 @@ const DataRow = ({
   iconName,
   tooltip,
   featured = false
-}: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'}`}>
-    <div className="w-1/3 flex-shrink-0">
-      <div className="flex items-center text-[var(--secondary-color)]">
-        {iconName && <span className="mr-2 flex-shrink-0">
-            <Icon 
-              name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
-              className="h-4 w-4" 
-              iconType="static" 
-              solid={false} 
-            />
+}: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'} font-work-sans`}>
+    <div className="w-1/3 flex-shrink-0 font-work-sans">
+      <div className="flex items-center text-[var(--secondary-color)] font-work-sans">
+        {iconName && <span className="mr-2 flex-shrink-0 font-work-sans">
+            <Icon
+          name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`}
+          className="h-4 w-4"
+          iconType="static"
+          solid={false} />
+
           </span>}
-        <span className={featured ? 'font-medium' : ''}>{label}</span>
-        {tooltip && <span className="ml-1 cursor-help" title={tooltip}>
-            {<Icon name="faCircleInfo" className="h-4 w-4 text-gray-400" solid={false} />}
+        <span className={`${featured ? 'font-medium' : ''} font-work-sans`}>{label}</span>
+        {tooltip && <span className="ml-1 cursor-help font-work-sans" title={tooltip}>
+            {<Icon name="faCircleInfo" className="h-4 w-4 text-gray-400 font-work-sans" solid={false} />}
           </span>}
       </div>
     </div>
-    <div className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'}`}>
+    <div className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'} font-work-sans`}>
       {value}
     </div>
   </div>;
@@ -438,60 +438,60 @@ const AudienceSection: React.FC<{
   const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort((a, b) => getNumericValue(a) - getNumericValue(b));
   return <DataCard title="Audience Demographics" iconName="faUserGroup" description="Target audience information for this campaign">
 
-      <div className="space-y-5">
-        <div>
-          <h4 className="text-[var(--primary-color)] font-medium mb-3">Location</h4>
-          <div className="flex flex-wrap gap-2">
-            {audience.demographics.locations.map((location, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+      <div className="space-y-5 font-work-sans">
+        <div className="font-work-sans">
+          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Location</h4>
+          <div className="flex flex-wrap gap-2 font-work-sans">
+            {audience.demographics.locations.map((location, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
                 {location}
               </span>)}
-            {audience.demographics.locations.length === 0 && <span className="text-[var(--secondary-color)]">No locations specified</span>}
+            {audience.demographics.locations.length === 0 && <span className="text-[var(--secondary-color)] font-work-sans">No locations specified</span>}
           </div>
         </div>
 
-        <div>
-          <h4 className="text-[var(--primary-color)] font-medium mb-3">Age Range</h4>
-          <div className="grid grid-cols-6 gap-1 mb-2">
-            {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => <div key={range} className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range) ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
+        <div className="font-work-sans">
+          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Age Range</h4>
+          <div className="grid grid-cols-6 gap-1 mb-2 font-work-sans">
+            {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range) => <div key={range} className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range) ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'} font-work-sans`}>
 
                 {range}
               </div>)}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <h4 className="text-[var(--primary-color)] font-medium mb-3">Gender</h4>
-            <div className="flex flex-wrap gap-2">
-              {audience.demographics.gender.map((gender, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+        <div className="grid grid-cols-2 gap-6 font-work-sans">
+          <div className="font-work-sans">
+            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Gender</h4>
+            <div className="flex flex-wrap gap-2 font-work-sans">
+              {audience.demographics.gender.map((gender, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
                   {gender}
                 </span>)}
             </div>
           </div>
 
-          <div>
-            <h4 className="text-[var(--primary-color)] font-medium mb-3">Languages</h4>
-            <div className="flex flex-wrap gap-2">
-              {audience.demographics.languages.map((language, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+          <div className="font-work-sans">
+            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Languages</h4>
+            <div className="flex flex-wrap gap-2 font-work-sans">
+              {audience.demographics.languages.map((language, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
                   {language}
                 </span>)}
             </div>
           </div>
         </div>
 
-        <div>
-          <h4 className="text-[var(--primary-color)] font-medium mb-3">Education Level</h4>
-          <div className="flex flex-wrap gap-2">
-            {audience.demographics.education.map((education, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+        <div className="font-work-sans">
+          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Education Level</h4>
+          <div className="flex flex-wrap gap-2 font-work-sans">
+            {audience.demographics.education.map((education, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
                 {education === 'some_college' ? 'Some College' : education === 'professional' ? 'Professional Degree' : education === 'bachelors' ? 'Bachelor\'s Degree' : education === 'associates' ? 'Associate\'s Degree' : education === 'high_school' ? 'High School' : education === 'graduate' ? 'Graduate Degree' : education}
               </span>)}
           </div>
         </div>
 
-        {audience.demographics.interests.length > 0 && <div>
-            <h4 className="text-[var(--primary-color)] font-medium mb-3">Interests/Job Titles</h4>
-            <div className="flex flex-wrap gap-2">
-              {audience.demographics.interests.map((interest, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+        {audience.demographics.interests.length > 0 && <div className="font-work-sans">
+            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Interests/Job Titles</h4>
+            <div className="flex flex-wrap gap-2 font-work-sans">
+              {audience.demographics.interests.map((interest, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm font-work-sans">
                   {interest}
                 </span>)}
             </div>
@@ -506,12 +506,12 @@ const CampaignDetailAssetPreview = ({
   fileName,
   type,
   className = ''
-}: {
-  url: string;
-  fileName: string;
-  type: string;
-  className?: string;
-}) => {
+
+
+
+
+
+}: {url: string;fileName: string;type: string;className?: string;}) => {
   const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
   const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -523,7 +523,7 @@ const CampaignDetailAssetPreview = ({
 
       // Auto-play the video when component mounts
       const playVideo = () => {
-        video.play().catch(error => {
+        video.play().catch((error) => {
           console.warn('Auto-play was prevented:', error);
         });
       };
@@ -532,14 +532,14 @@ const CampaignDetailAssetPreview = ({
       const handleTimeUpdate = () => {
         if (video.currentTime >= 5) {
           video.currentTime = 0;
-          video.play().catch(err => {
+          video.play().catch((err) => {
             console.error('Error replaying video:', err);
           });
         }
       };
       const handleEnded = () => {
         video.currentTime = 0;
-        video.play().catch(err => {
+        video.play().catch((err) => {
           console.error('Error replaying video:', err);
         });
       };
@@ -557,19 +557,19 @@ const CampaignDetailAssetPreview = ({
       };
     }
   }, [isVideo, url]);
-  return <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+  return <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className} font-work-sans`}>
       {/* Image preview */}
       {isImage && <img src={url} alt={fileName} className="w-full h-full object-cover" />}
       
       {/* Video preview (with autoplay and loop) */}
-      {isVideo && <div className="relative">
+      {isVideo && <div className="relative font-work-sans">
           <video ref={videoRef} src={url} className="w-full h-full object-cover" muted playsInline loop autoPlay />
 
         </div>}
       
       {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo && <div className="flex items-center justify-center p-8">
-          {<Icon name="faDocument" className="h-12 w-12 text-gray-400" solid={false} />}
+      {!isImage && !isVideo && <div className="flex items-center justify-center p-8 font-work-sans">
+          {<Icon name="faDocument" className="h-12 w-12 text-gray-400 font-work-sans" solid={false} />}
         </div>}
     </div>;
 };
@@ -581,12 +581,12 @@ const ObjectivesSection: React.FC<{
   campaign
 }) => <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
 
-    <div className="space-y-5">
-      <div>
-        <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
-        <div className="flex items-center text-lg font-medium text-[var(--accent-color)]">
-          {campaign.primaryKPI && <div className="flex items-center">
-              <div className="w-6 h-6 mr-2" style={{
+    <div className="space-y-5 font-work-sans">
+      <div className="font-work-sans">
+        <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
+        <div className="flex items-center text-lg font-medium text-[var(--accent-color)] font-work-sans">
+          {campaign.primaryKPI && <div className="flex items-center font-work-sans">
+              <div className="w-6 h-6 mr-2 font-work-sans" style={{
             filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)'
           }}>
                 <Image src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} alt={formatKpiName(campaign.primaryKPI)} width={24} height={24} />
@@ -598,11 +598,11 @@ const ObjectivesSection: React.FC<{
         </div>
       </div>
 
-      {campaign.secondaryKPIs.length > 0 && <div>
-          <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary KPIs</h4>
-          <div className="flex flex-wrap gap-2">
-            {campaign.secondaryKPIs.map((kpi, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm flex items-center">
-                <div className="w-4 h-4 mr-1" style={{
+      {campaign.secondaryKPIs.length > 0 && <div className="font-work-sans">
+          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
+          <div className="flex flex-wrap gap-2 font-work-sans">
+            {campaign.secondaryKPIs.map((kpi, index) => <span key={index} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm flex items-center font-work-sans">
+                <div className="w-4 h-4 mr-1 font-work-sans" style={{
             filter: 'invert(57%) sepia(94%) saturate(1752%) hue-rotate(180deg) brightness(101%) contrast(103%)'
           }}>
                   <Image src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/KPIs/Brand_Awareness.svg"} alt={formatKpiName(kpi)} width={16} height={16} />
@@ -613,7 +613,7 @@ const ObjectivesSection: React.FC<{
           </div>
         </div>}
 
-      <div className="space-y-3 pt-2">
+      <div className="space-y-3 pt-2 font-work-sans">
         <DataRow label="Main Message" value={campaign.mainMessage} iconName="lightBulb" />
         <DataRow label="Brand Perception" value={campaign.brandPerception} iconName="chart" />
         <DataRow label="Hashtags" value={campaign.hashtags} iconName="tag" />
@@ -632,22 +632,22 @@ const AudienceInsightsSection: React.FC<{
   if (!audience) return null; // Early return if no audience data
 
   return <DataCard title="Audience Insights" iconName="userCircle" className="col-span-2">
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-8 font-work-sans">
         {/* Screening Questions */}
-        <div>
-          <h3 className="text-lg font-medium mb-4">Screening Questions</h3>
-          <div className="space-y-2">
-            {audience.demographics.interests.map(interest => <div key={interest} className="p-3 bg-gray-50 rounded-lg">
+        <div className="font-work-sans">
+          <h3 className="text-lg font-medium mb-4 font-sora">Screening Questions</h3>
+          <div className="space-y-2 font-work-sans">
+            {audience.demographics.interests.map((interest) => <div key={interest} className="p-3 bg-gray-50 rounded-lg font-work-sans">
                 {interest}
               </div>)}
           </div>
         </div>
         
         {/* Competitors */}
-        <div>
-          <h3 className="text-lg font-medium mb-4">Competitors</h3>
-          <div className="flex flex-wrap gap-2">
-            {audience.demographics.interests.map(interest => <span key={interest} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+        <div className="font-work-sans">
+          <h3 className="text-lg font-medium mb-4 font-sora">Competitors</h3>
+          <div className="flex flex-wrap gap-2 font-work-sans">
+            {audience.demographics.interests.map((interest) => <span key={interest} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-work-sans">
                 {interest}
               </span>)}
           </div>
@@ -663,12 +663,12 @@ const CreativeRequirementsSection: React.FC<{
   requirements
 }) => <DataCard title="Creative Requirements" iconName="documentText" description="Campaign creative specifications">
 
-    <div className="space-y-2">
-      {requirements && requirements.length > 0 ? requirements.map(req => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start">
-            {<Icon name="faDocumentText" className="w-5 h-5 text-gray-400 mr-3 mt-0.5" solid={false} />}
-            <span className="text-gray-700">{req.requirement}</span>
-          </div>) : <div className="p-3 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 italic">No requirements specified</p>
+    <div className="space-y-2 font-work-sans">
+      {requirements && requirements.length > 0 ? requirements.map((req) => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start font-work-sans">
+            {<Icon name="faDocumentText" className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-work-sans" solid={false} />}
+            <span className="text-gray-700 font-work-sans">{req.requirement}</span>
+          </div>) : <div className="p-3 bg-gray-50 rounded-lg font-work-sans">
+          <p className="text-gray-500 italic font-work-sans">No requirements specified</p>
         </div>}
     </div>
   </DataCard>;
@@ -828,7 +828,7 @@ function validateCampaignData(data: any): CampaignValidation {
 
   // Required fields
   const requiredFields = ['id', 'campaignName', 'startDate', 'endDate', 'currency', 'totalBudget', 'platform', 'submissionStatus'];
-  requiredFields.forEach(field => {
+  requiredFields.forEach((field) => {
     if (!data[field]) {
       errors.push(`Missing required field: ${field}`);
     }
@@ -845,10 +845,10 @@ const capitalize = (str: string): string => {
 };
 
 // StatusBadge component with semantic icons
-const StatusBadge = ({ status }: { status?: string }) => {
+const StatusBadge = ({ status }: {status?: string;}) => {
   let statusColor = "bg-gray-100 text-gray-700";
   let statusIcon = <Icon name="faCircleQuestion" className="h-4 w-4 mr-1" solid={false} />;
-  
+
   switch (status?.toLowerCase()) {
     case 'draft':
       statusColor = "bg-yellow-50 text-yellow-700";
@@ -886,8 +886,8 @@ const StatusBadge = ({ status }: { status?: string }) => {
       statusColor = "bg-gray-100 text-gray-700";
       statusIcon = <Icon name="faCircleQuestion" className="h-4 w-4 mr-1" solid={false} />;
   }
-  
-  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
+
+  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor} font-work-sans`}>
       {statusIcon}
       {capitalize(status || 'Unknown')}
     </span>;
@@ -937,10 +937,10 @@ const safeCurrency = (value: Currency | string | undefined | null): string => {
 };
 
 // Error status badge for displaying API errors
-const ErrorStatusBadge = ({ message }: { message: string }) => {
-  return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm">
+const ErrorStatusBadge = ({ message }: {message: string;}) => {
+  return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm font-work-sans">
       <Icon name="faTriangleExclamation" className="h-4 w-4 mr-2" solid={false} />
-      <span>{message}</span>
+      <span className="font-work-sans">{message}</span>
     </div>;
 };
 
@@ -1277,87 +1277,87 @@ export default function CampaignDetail() {
   // Ensure we have data before rendering the component
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-5 animate-pulse">
+      <div className="max-w-4xl mx-auto p-5 animate-pulse font-work-sans">
         {/* Header Skeleton */}
-        <div className="h-8 bg-gray-200 rounded w-1/3 mb-8" />
+        <div className="h-8 bg-gray-200 rounded w-1/3 mb-8 font-work-sans" />
         
         {/* Campaign Details Section */}
-        <SkeletonSection 
-          title={true} 
-          titleWidth="w-1/4" 
+        <SkeletonSection
+          title={true}
+          titleWidth="w-1/4"
           actionButton={true}
           lines={3}
-          className="mb-6"
-        />
+          className="mb-6" />
+
 
         {/* Objectives Section */}
-        <SkeletonSection 
-          title={true} 
-          titleWidth="w-1/3" 
+        <SkeletonSection
+          title={true}
+          titleWidth="w-1/3"
           actionButton={true}
           lines={4}
-          className="mb-6"
-        />
+          className="mb-6" />
+
 
         {/* Audience Section */}
-        <SkeletonSection 
-          title={true} 
-          titleWidth="w-1/4" 
+        <SkeletonSection
+          title={true}
+          titleWidth="w-1/4"
           actionButton={true}
           lines={3}
-          className="mb-6"
-        />
+          className="mb-6" />
+
 
         {/* Creative Assets Section */}
-        <SkeletonSection 
-          title={true} 
-          titleWidth="w-1/4" 
+        <SkeletonSection
+          title={true}
+          titleWidth="w-1/4"
           actionButton={true}
           lines={3}
-          className="mb-6"
-        />
-      </div>
-    );
+          className="mb-6" />
+
+      </div>);
+
   }
   if (error && !data) {
-    return <div className="py-10">
+    return <div className="py-10 font-work-sans">
         <ErrorFallback error={new Error(error)} />
       </div>;
   }
-  return <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50 font-work-sans">
       {/* Header Section */}
-      <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)]`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {error && <div className="mb-4">
+      <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-work-sans">
+          {error && <div className="mb-4 font-work-sans">
               <ErrorStatusBadge message={error} />
             </div>}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center space-x-3">
-              <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Go back">
-                <Icon name="faChevronLeft" className="h-5 w-5 text-[var(--secondary-color)]" solid={false} />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between font-work-sans">
+            <div className="flex items-center space-x-3 font-work-sans">
+              <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100 transition-colors font-work-sans" aria-label="Go back">
+                <Icon name="faChevronLeft" className="h-5 w-5 text-[var(--secondary-color)] font-work-sans" solid={false} />
               </button>
-              <div>
-                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl">{data?.campaignName || "N/A"}</h1>
-                <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1">
+              <div className="font-work-sans">
+                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
+                <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-work-sans">
                   <StatusBadge status={error ? "error" : data?.submissionStatus} />
-                  <span className="mx-2">•</span>
-                  <span>Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
+                  <span className="mx-2 font-work-sans">•</span>
+                  <span className="font-work-sans">Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
                 </div>
               </div>
             </div>
             
-            <div className="flex space-x-3 mt-4 md:mt-0">
-              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
+            <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
+              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 group font-work-sans">
                 <Icon name="faPrint" className="h-4 w-4 mr-2" solid={false} iconType="button" />
-                <span>Print</span>
+                <span className="font-work-sans">Print</span>
               </button>
-              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50">
+              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 group font-work-sans">
                 <Icon name="faShare" className="h-4 w-4 mr-2" solid={false} iconType="button" />
-                <span>Share</span>
+                <span className="font-work-sans">Share</span>
               </button>
-              <button onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)} className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222]" disabled={!!error}>
-                <Icon name="faEdit" className="h-4 w-4 mr-2" solid={false} iconType="button" />
-                <span>Edit</span>
+              <button onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)} className="inline-flex items-center px-3 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] group font-work-sans" disabled={!!error}>
+                <Icon name="faPenToSquare" className="h-4 w-4 mr-2" solid={false} iconType="button" />
+                <span className="font-work-sans">Edit</span>
               </button>
             </div>
           </div>
@@ -1365,18 +1365,18 @@ export default function CampaignDetail() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
         {/* Key Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 font-work-sans">
           <MetricCard title="Total Budget" value={error ? "N/A" : data?.totalBudget || "N/A"} iconName="dollarSign" format={error ? "text" : "currency"} />
           <MetricCard title="Campaign Duration" value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} iconName="calendar" />
           <MetricCard title="Platform" value={error ? "N/A" : data?.platform || "N/A"} iconName="globe" />
         </div>
 
         {/* Campaign Details & Primary Contact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
           <DataCard title="Campaign Details" iconName="documentText" description="Basic campaign information">
-            <div className="space-y-3">
+            <div className="space-y-3 font-work-sans">
               <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
               <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
               <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
@@ -1391,31 +1391,31 @@ export default function CampaignDetail() {
           </DataCard>
 
           <DataCard title="Primary Contact" iconName="userCircle" description="Primary point of contact for this campaign">
-            <div className="space-y-3">
-              <div className="flex items-center mb-4">
-                <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold">
+            <div className="space-y-3 font-work-sans">
+              <div className="flex items-center mb-4 font-work-sans">
+                <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
                   {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
                 </div>
-                <div>
-                  <h4 className="text-[var(--primary-color)] font-semibold">
+                <div className="font-work-sans">
+                  <h4 className="text-[var(--primary-color)] font-semibold font-sora">
                     {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
                   </h4>
-                  <p className="text-[var(--secondary-color)] text-sm">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
+                  <p className="text-[var(--secondary-color)] text-sm font-work-sans">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
                 </div>
               </div>
               
-              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center">
+              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
                     {data?.primaryContact?.email || "N/A"}
                   </a>} iconName="mail" />
 
               <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconName="building" />
             </div>
 
-            {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)]">
-                <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary Contact</h4>
-                <div className="space-y-3">
+            {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
+                <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
+                <div className="space-y-3 font-work-sans">
                   <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconName="userCircle" />
-                  <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline">
+                  <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
                         {data.secondaryContact.email}
                       </a>} iconName="mail" />
                   <DataRow label="Position" value={data.secondaryContact.position} iconName="building" />
@@ -1425,18 +1425,18 @@ export default function CampaignDetail() {
         </div>
 
         {/* Objectives & Audience */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
           {error ? <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
-              <div className="space-y-5">
-                <div>
-                  <h4 className="text-[var(--primary-color)] font-medium mb-3">Primary KPI</h4>
-                  <div className="text-[var(--secondary-color)]">N/A</div>
+              <div className="space-y-5 font-work-sans">
+                <div className="font-work-sans">
+                  <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
+                  <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
                 </div>
-                <div>
-                  <h4 className="text-[var(--primary-color)] font-medium mb-3">Secondary KPIs</h4>
-                  <div className="text-[var(--secondary-color)]">N/A</div>
+                <div className="font-work-sans">
+                  <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
+                  <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
                 </div>
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3 pt-2 font-work-sans">
                   <DataRow label="Main Message" value="N/A" iconName="lightBulb" />
                   <DataRow label="Brand Perception" value="N/A" iconName="chart" />
                   <DataRow label="Hashtags" value="N/A" iconName="tag" />
@@ -1449,71 +1449,71 @@ export default function CampaignDetail() {
             </DataCard> : data && <ObjectivesSection campaign={data} />}
           
           {error ? <DataCard title="Target Audience" iconName="userGroup" description="Detailed audience targeting information">
-              <div className="text-center py-10 text-[var(--secondary-color)]">
-                <p>N/A</p>
+              <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
+                <p className="font-work-sans">N/A</p>
               </div>
             </DataCard> : data && <AudienceSection audience={data.audience} />}
         </div>
 
         {/* Creative Assets */}
-        <div className="mb-6">
-          <DataCard title="Creative Assets" iconName="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline">View All</button>}>
-            {error ? <div className="text-center py-10 text-[var(--secondary-color)]">
+        <div className="mb-6 font-work-sans">
+          <DataCard title="Creative Assets" iconName="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
+            {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
                 {<Icon name="faImage" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
-                <p>No creative assets available</p>
-              </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {(data?.creativeAssets || []).slice(0, 3).map((asset: any, index: number) => <div key={index} className="border border-[var(--divider-color)] rounded-md overflow-hidden">
-                      {asset.type === "image" ? <div className="h-32 bg-gray-100 relative">
-                          {asset.url ? <Image src={asset.url} alt={asset.name || 'Creative asset'} className="object-cover" fill sizes="(max-width: 768px) 100vw, 33vw" /> : <div className="flex items-center justify-center h-full">
-                              <Icon name="faImage" className="h-10 w-10 text-gray-300" solid={false} />
+                <p className="font-work-sans">No creative assets available</p>
+              </div> : <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-work-sans">
+                  {(data?.creativeAssets || []).slice(0, 3).map((asset: any, index: number) => <div key={index} className="border border-[var(--divider-color)] rounded-md overflow-hidden font-work-sans">
+                      {asset.type === "image" ? <div className="h-32 bg-gray-100 relative font-work-sans">
+                          {asset.url ? <Image src={asset.url} alt={asset.name || 'Creative asset'} className="object-cover" fill sizes="(max-width: 768px) 100vw, 33vw" /> : <div className="flex items-center justify-center h-full font-work-sans">
+                              <Icon name="faImage" className="h-10 w-10 text-gray-300 font-work-sans" solid={false} />
                             </div>}
-                        </div> : <div className="h-32 bg-black flex items-center justify-center relative">
-                          <Icon name="faVideo" className="h-10 w-10 text-white opacity-70" solid={false} />
-                          {asset.url && <div className="absolute inset-0 opacity-40 bg-gradient-to-t from-black to-transparent" />}
+                        </div> : <div className="h-32 bg-black flex items-center justify-center relative font-work-sans">
+                          <Icon name="faVideo" className="h-10 w-10 text-white opacity-70 font-work-sans" solid={false} />
+                          {asset.url && <div className="absolute inset-0 opacity-40 bg-gradient-to-t from-black to-transparent font-work-sans" />}
                         </div>}
-                      <div className="p-3">
-                        <h4 className="font-medium text-[var(--primary-color)] truncate">{asset.name || 'Untitled'}</h4>
-                        <p className="text-xs text-[var(--secondary-color)] mt-1 flex items-center">
+                      <div className="p-3 font-work-sans">
+                        <h4 className="font-medium text-[var(--primary-color)] truncate font-sora">{asset.name || 'Untitled'}</h4>
+                        <p className="text-xs text-[var(--secondary-color)] mt-1 flex items-center font-work-sans">
                           <Icon name={asset.type === "image" ? "faImage" : "faVideo"} className="h-3 w-3 mr-1" solid={false} />
-                          <span>{asset.type === "image" ? "Image" : "Video"}</span>
-                          {asset.size && <span className="ml-2">{formatFileSize(asset.size)}</span>}
+                          <span className="font-work-sans">{asset.type === "image" ? "Image" : "Video"}</span>
+                          {asset.size && <span className="ml-2 font-work-sans">{formatFileSize(asset.size)}</span>}
                         </p>
                       </div>
                     </div>)}
-                  {(data?.creativeAssets || []).length === 0 && <div className="col-span-3 text-center py-8 text-[var(--secondary-color)]">
+                  {(data?.creativeAssets || []).length === 0 && <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
                       <Icon name="faImage" className="h-8 w-8 mx-auto mb-2 opacity-50" solid={false} />
-                      <p>No creative assets uploaded yet</p>
+                      <p className="font-work-sans">No creative assets uploaded yet</p>
                     </div>}
                 </div>}
           </DataCard>
         </div>
 
         {/* Campaign Features */}
-        <div className="mb-6">
+        <div className="mb-6 font-work-sans">
           <DataCard title="Campaign Features" iconName="bolt" description="Additional features enabled for this campaign">
-            {error ? <div className="text-center py-8 text-[var(--secondary-color)]">
-                <p>N/A</p>
-              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
+                <p className="font-work-sans">N/A</p>
+              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 font-work-sans">
                   {data?.features && data.features.length > 0 ? data.features.map((feature: string, index: number) => {
-                    const featureKey = feature as keyof typeof featureIconsMap;
-                    return <div key={index} className="bg-[rgba(0,191,255,0.05)] p-4 rounded-lg">
-                        <div className="flex items-start">
-                          <div className="rounded-md flex-shrink-0 p-2">
-                            {featureIconsMap[featureKey] ? <Image src={featureIconsMap[featureKey].icon} width={24} height={24} alt={featureIconsMap[featureKey].title} className="w-6 h-6" /> : <Icon name="faBolt" className="h-6 w-6 text-[var(--accent-color)]" solid={false} />}
+              const featureKey = feature as keyof typeof featureIconsMap;
+              return <div key={index} className="bg-[rgba(0,191,255,0.05)] p-4 rounded-lg font-work-sans">
+                        <div className="flex items-start font-work-sans">
+                          <div className="rounded-md flex-shrink-0 p-2 font-work-sans">
+                            {featureIconsMap[featureKey] ? <Image src={featureIconsMap[featureKey].icon} width={24} height={24} alt={featureIconsMap[featureKey].title} className="w-6 h-6" /> : <Icon name="faBolt" className="h-6 w-6 text-[var(--accent-color)] font-work-sans" solid={false} />}
                           </div>
-                          <div className="ml-3">
-                            <h4 className="font-medium text-[var(--primary-color)]">
+                          <div className="ml-3 font-work-sans">
+                            <h4 className="font-medium text-[var(--primary-color)] font-sora">
                               {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
                             </h4>
-                            <p className="text-xs text-[var(--secondary-color)] mt-1">
+                            <p className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
                               {getFeatureDescription(feature)}
                             </p>
                           </div>
                         </div>
                       </div>;
-                  }) : <div className="col-span-3 text-center py-8 text-[var(--secondary-color)]">
+            }) : <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
                       <Icon name="faBolt" className="h-8 w-8 mx-auto mb-2 opacity-50" solid={false} />
-                      <p>No features enabled for this campaign</p>
+                      <p className="font-work-sans">No features enabled for this campaign</p>
                     </div>}
                 </div>}
           </DataCard>

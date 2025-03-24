@@ -27,22 +27,22 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="text-center p-8" role="alert">
-          <h2 className="text-xl font-bold text-red-600">Something went wrong</h2>
-          <p className="mt-2 text-gray-600">
+      return this.props.fallback ||
+      <div className="text-center p-8 font-work-sans" role="alert">
+          <h2 className="text-xl font-bold text-red-600 font-sora">Something went wrong</h2>
+          <p className="mt-2 text-gray-600 font-work-sans">
             {this.state.error?.message || 'An unexpected error occurred'}
           </p>
           <button
-            onClick={() => this.setState({ hasError: false })}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          onClick={() => this.setState({ hasError: false })}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-work-sans">
+
             Try Again
           </button>
-        </div>
-      );
+        </div>;
+
     }
 
     return this.props.children;
   }
-} 
+}

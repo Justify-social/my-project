@@ -19,23 +19,23 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   // Show error with login button if authentication fails
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-md">
-          <div className="text-center">
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">Authentication Error</h2>
-            <p className="mt-2 text-sm text-gray-600">{error.message}</p>
-            <div className="mt-6">
-              <a 
-                href="/api/auth/login" 
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 font-work-sans">
+        <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-md font-work-sans">
+          <div className="text-center font-work-sans">
+            <h2 className="mt-6 text-3xl font-bold text-gray-900 font-sora">Authentication Error</h2>
+            <p className="mt-2 text-sm text-gray-600 font-work-sans">{error.message}</p>
+            <div className="mt-6 font-work-sans">
+              <a
+                href="/api/auth/login"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-work-sans">
+
                 Go to Login
               </a>
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // Only render the layout if the user is authenticated
@@ -44,16 +44,16 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
+    <div className="min-h-screen bg-gray-50 font-work-sans">
+      <Header className="font-sora" />
+      <div className="flex font-work-sans">
         <Sidebar />
         <main className="flex-1 p-6">
           {children}
         </main>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-export default ClientLayout; 
+export default ClientLayout;

@@ -28,7 +28,7 @@ export function AssetPreview({
       const handleCanPlay = () => {
         setHasLoaded(true);
         if (video.paused) {
-          video.play().catch(err => {
+          video.play().catch((err) => {
             console.error('Error auto-playing video:', err);
           });
         }
@@ -38,7 +38,7 @@ export function AssetPreview({
       const handleTimeUpdate = () => {
         if (video.currentTime >= 5) {
           video.currentTime = 0;
-          video.play().catch(err => {
+          video.play().catch((err) => {
             console.error('Error replaying video:', err);
           });
         }
@@ -58,7 +58,7 @@ export function AssetPreview({
     if (videoRef.current.paused) {
       videoRef.current.play().then(() => {
         setIsPlaying(true);
-      }).catch(err => {
+      }).catch((err) => {
         console.error('Error playing video:', err);
       });
     } else {
@@ -71,12 +71,12 @@ export function AssetPreview({
   const handleImageLoad = () => {
     setHasLoaded(true);
   };
-  return <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+  return <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className} font-work-sans`}>
       {/* Loading state */}
-      {!hasLoaded && <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="animate-pulse flex flex-col items-center">
-            <Icon name="faInfo" className="h-8 w-8 text-gray-400" solid={false} />
-            <span className="mt-2 text-xs text-gray-500">Loading...</span>
+      {!hasLoaded && <div className="absolute inset-0 flex items-center justify-center bg-gray-100 font-work-sans">
+          <div className="animate-pulse flex flex-col items-center font-work-sans">
+            <Icon name="faInfo" className="h-8 w-8 text-gray-400 font-work-sans" solid={false} />
+            <span className="mt-2 text-xs text-gray-500 font-work-sans">Loading...</span>
           </div>
         </div>}
       
@@ -86,25 +86,25 @@ export function AssetPreview({
     }} onLoad={handleImageLoad} />}
       
       {/* Video preview */}
-      {isVideo && <div className="relative">
+      {isVideo && <div className="relative font-work-sans">
           <video ref={videoRef} src={url} className={`w-full h-full object-contain ${hasLoaded ? 'opacity-100' : 'opacity-0'}`} style={{
         transition: 'opacity 0.3s ease-in-out'
       }} muted playsInline loop />
 
           
           {/* Video control overlay */}
-          <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-20 transition-all" onClick={togglePlay}>
+          <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-20 transition-all font-work-sans" onClick={togglePlay}>
 
-            {hasLoaded && <div className="p-2 rounded-full bg-white bg-opacity-70">
-                {isPlaying ? <Icon name="faMinus" className="h-6 w-6 text-gray-800" solid={false} /> : <Icon name="faPlus" className="h-6 w-6 text-gray-800" solid={false} />}
+            {hasLoaded && <div className="p-2 rounded-full bg-white bg-opacity-70 font-work-sans">
+                {isPlaying ? <Icon name="faMinus" className="h-6 w-6 text-gray-800 font-work-sans" solid={false} /> : <Icon name="faPlus" className="h-6 w-6 text-gray-800 font-work-sans" solid={false} />}
               </div>}
           </div>
         </div>}
       
       {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo && <div className="flex items-center justify-center p-8">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400" solid={false} />
-          <span className="ml-2 text-gray-700">{fileName}</span>
+      {!isImage && !isVideo && <div className="flex items-center justify-center p-8 font-work-sans">
+          <Icon name="faInfo" className="h-12 w-12 text-gray-400 font-work-sans" solid={false} />
+          <span className="ml-2 text-gray-700 font-work-sans">{fileName}</span>
         </div>}
     </div>;
 }

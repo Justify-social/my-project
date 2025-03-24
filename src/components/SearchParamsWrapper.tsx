@@ -7,12 +7,12 @@ export function useSearchParamsHook() {
   return searchParams.get('id');
 }
 
-export default function SearchParamsWrapper({ children }: { children: React.ReactNode }) {
+export default function SearchParamsWrapper({ children }: {children: React.ReactNode;}) {
   const campaignId = useSearchParamsHook();
-  
+
   return (
-    <div data-campaign-id={campaignId}>
+    <div data-campaign-id={campaignId} className="font-work-sans">
       {children}
-    </div>
-  );
-} 
+    </div>);
+
+}

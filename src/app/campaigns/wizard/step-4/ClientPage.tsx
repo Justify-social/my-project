@@ -6,10 +6,10 @@ import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 
 export default function ClientPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-work-sans">
       <Suspense fallback={<WizardSkeleton step={4} />}>
         <Step4Content />
       </Suspense>
-    </div>
-  );
-} 
+    </div>);
+
+}

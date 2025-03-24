@@ -184,7 +184,7 @@ export function LocalIcon({
   // First, find the icon data by name in our iconData registry
   const normalizedName = name.replace(/Light$/, '');
   const iconKey = isLightIcon(name) ? `${normalizedName}Light` : normalizedName;
-  
+
   // Try to find icon data, fallback to a placeholder if not found
   const iconInfo = iconData[iconKey as IconName] || {
     width: 512,
@@ -194,21 +194,21 @@ export function LocalIcon({
   };
 
   return (
-    <span className={cn('inline-flex shrink-0', SIZE_CLASSES[size], className)} aria-hidden={!title} {...props}>
-      <svg 
+    <span className={`${cn('inline-flex shrink-0', SIZE_CLASSES[size], className)} font-work-sans`} aria-hidden={!title} {...props}>
+      <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox={`0 0 ${iconInfo.width} ${iconInfo.height}`}
         className={cn('w-full h-full', transformClasses)}
         fill="currentColor"
         aria-hidden={!title}
         role={title ? 'img' : 'presentation'}
-        onClick={onClick as any}
-      >
-        {title && <title>{title}</title>}
+        onClick={onClick as any}>
+
+        {title && <title className="font-sora">{title}</title>}
         <path d={iconInfo.path} />
       </svg>
-    </span>
-  );
+    </span>);
+
 }
 
 /**

@@ -11,9 +11,9 @@ import toast from 'react-hot-toast';
 // Enhanced UI Components
 const Card = memo(({
   children
-}: {
-  children: React.ReactNode;
-}) => <motion.div initial={{
+
+
+}: {children: React.ReactNode;}) => <motion.div initial={{
   opacity: 0,
   y: 20
 }} animate={{
@@ -35,13 +35,13 @@ const SectionHeader: React.FC<{
   icon: Icon,
   title,
   description
-}) => <div className="flex items-center mb-6">
-    <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-[var(--accent-color)]" solid={false} />
+}) => <div className="flex items-center mb-6 font-work-sans">
+    <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg font-work-sans">
+      <Icon className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
     </div>
-    <div className="ml-4">
-      <h2 className="text-xl font-semibold text-[var(--primary-color)]">{title}</h2>
-      {description && <p className="mt-1 text-sm text-[var(--secondary-color)]">{description}</p>}
+    <div className="ml-4 font-work-sans">
+      <h2 className="text-xl font-semibold text-[var(--primary-color)] font-sora">{title}</h2>
+      {description && <p className="mt-1 text-sm text-[var(--secondary-color)] font-work-sans">{description}</p>}
     </div>
   </div>);
 const BrandingSettingsPage: React.FC = () => {
@@ -387,9 +387,9 @@ const BrandingSettingsPage: React.FC = () => {
 
   // Loading state
   if (isFetching) {
-    return <div className="min-h-screen bg-white flex items-center justify-center">
-        <Icon name="faArrowRight" className="w-8 h-8 text-[var(--accent-color)] animate-spin" solid={false} />
-        <span className="ml-2 text-[var(--primary-color)]">Loading branding settings...</span>
+    return <div className="min-h-screen bg-white flex items-center justify-center font-work-sans">
+        <Icon name="faArrowRight" className="w-8 h-8 text-[var(--accent-color)] animate-spin font-work-sans" solid={false} />
+        <span className="ml-2 text-[var(--primary-color)] font-work-sans">Loading branding settings...</span>
       </div>;
   }
   return <motion.div initial={{
@@ -398,17 +398,17 @@ const BrandingSettingsPage: React.FC = () => {
     opacity: 1
   }} className="min-h-screen bg-white">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
         {/* Header Section */}
-        <div className="flex justify-between items-start mb-8">
-          <div>
+        <div className="flex justify-between items-start mb-8 font-work-sans">
+          <div className="font-work-sans">
             <motion.h1 initial={{
             opacity: 0,
             y: -20
           }} animate={{
             opacity: 1,
             y: 0
-          }} className="text-3xl font-bold text-[var(--primary-color)]">
+          }} className="text-3xl font-bold text-[var(--primary-color)] font-work-sans">
 
               Branding Settings
             </motion.h1>
@@ -420,18 +420,18 @@ const BrandingSettingsPage: React.FC = () => {
             y: 0
           }} transition={{
             delay: 0.1
-          }} className="mt-2 text-[var(--secondary-color)]">
+          }} className="mt-2 text-[var(--secondary-color)] font-work-sans">
 
               Customize your brand appearance and identity
             </motion.p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 font-work-sans">
             <motion.button whileHover={{
             scale: 1.02
           }} whileTap={{
             scale: 0.98
-          }} onClick={handleCancel} disabled={isLoading} className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 
-                transition-colors duration-200 font-medium flex items-center">
+          }} onClick={handleCancel} disabled={isLoading} className="px-4 py-2 text-[var(--primary-color)] bg-[var(--background-color)] rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium flex items-center font-work-sans">
+
 
 
 
@@ -457,7 +457,7 @@ const BrandingSettingsPage: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <NavigationTabs activeTab="branding" isSuperAdmin={true} onTabChange={tab => {
+        <NavigationTabs activeTab="branding" isSuperAdmin={true} onTabChange={(tab) => {
         switch (tab) {
           case 'profile':
             router.push('/settings');
@@ -473,47 +473,47 @@ const BrandingSettingsPage: React.FC = () => {
 
 
         {/* Main Content */}
-        <div className="space-y-8">
+        <div className="space-y-8 font-work-sans">
           {/* Logo Section */}
           <Card>
-            <SectionHeader icon={props => <Icon name="faPhoto" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Logo" description="Upload and manage your brand logo" />
+            <SectionHeader icon={(props) => <Icon name="faPhoto" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Logo" description="Upload and manage your brand logo" />
 
-            <div className="flex items-start space-x-8">
-              <div className="flex-shrink-0">
-                {logoPreview ? <div className="relative">
+            <div className="flex items-start space-x-8 font-work-sans">
+              <div className="flex-shrink-0 font-work-sans">
+                {logoPreview ? <div className="relative font-work-sans">
                     <img src={logoPreview} alt="Logo preview" className="w-32 h-32 object-contain bg-gray-50 rounded-lg" />
 
                     <motion.button whileHover={{
                   scale: 1.1
                 }} whileTap={{
                   scale: 0.9
-                }} onClick={handleRemoveLogo} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1
-                        hover:bg-red-600 transition-colors duration-200" aria-label="Remove logo">
+                }} onClick={handleRemoveLogo} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-200 font-work-sans"
+                aria-label="Remove logo">
 
                       <Icon name="faXCircle" className="w-5 h-5" solid={false} />
                     </motion.button>
-                  </div> : <div className="w-32 h-32 bg-[var(--background-color)] rounded-lg flex items-center justify-center">
-                    <Icon name="faPhoto" className="w-12 h-12 text-[var(--secondary-color)]" solid={false} />
+                  </div> : <div className="w-32 h-32 bg-[var(--background-color)] rounded-lg flex items-center justify-center font-work-sans">
+                    <Icon name="faPhoto" className="w-12 h-12 text-[var(--secondary-color)] font-work-sans" solid={false} />
                   </div>}
               </div>
-              <div className="flex-grow">
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="logo" className="relative cursor-pointer inline-flex items-center px-4 py-2 
-                        bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 
-                        transition-colors duration-200 font-medium group">
+              <div className="flex-grow font-work-sans">
+                <div className="space-y-4 font-work-sans">
+                  <div className="font-work-sans">
+                    <label htmlFor="logo" className="relative cursor-pointer inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors duration-200 font-medium group font-work-sans">
+
+
 
 
 
 
 
                       <Icon name="faPhoto" className="w-5 h-5 mr-2" solid={false} />
-                      <span>Upload New Logo</span>
-                      <input id="logo" type="file" accept="image/jpeg, image/png" onChange={handleLogoUpload} className="hidden" />
+                      <span className="font-work-sans">Upload New Logo</span>
+                      <input id="logo" type="file" accept="image/jpeg, image/png" onChange={handleLogoUpload} className="hidden font-work-sans" />
 
                     </label>
                   </div>
-                  <p className="text-sm text-[var(--secondary-color)]">
+                  <p className="text-sm text-[var(--secondary-color)] font-work-sans">
                     Supported formats: JPG, PNG. Maximum file size: 5MB
                   </p>
                   {logoError && <motion.p initial={{
@@ -522,7 +522,7 @@ const BrandingSettingsPage: React.FC = () => {
                 }} animate={{
                   opacity: 1,
                   y: 0
-                }} className="text-red-500 text-sm flex items-center">
+                }} className="text-red-500 text-sm flex items-center font-work-sans">
 
                       <Icon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
                       {logoError}
@@ -534,50 +534,50 @@ const BrandingSettingsPage: React.FC = () => {
 
           {/* Colors Section */}
           <Card>
-            <SectionHeader icon={props => <Icon name="faSwatch" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Brand Colors" description="Define your brand's color palette" />
+            <SectionHeader icon={(props) => <Icon name="faSwatch" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Brand Colors" description="Define your brand's color palette" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+              <div className="font-work-sans">
+                <label className="block text-sm font-medium text-[var(--primary-color)] mb-1 font-work-sans">
                   Primary Color
                 </label>
-                <div className="flex items-center space-x-4">
-                  <input type="color" value={primaryColor} onChange={handlePrimaryColorChange} className="h-10 w-20 rounded cursor-pointer" />
+                <div className="flex items-center space-x-4 font-work-sans">
+                  <input type="color" value={primaryColor} onChange={handlePrimaryColorChange} className="h-10 w-20 rounded cursor-pointer font-work-sans" />
 
-                  <input type="text" value={primaryColor} onChange={handlePrimaryColorChange} className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="#000000" />
+                  <input type="text" value={primaryColor} onChange={handlePrimaryColorChange} className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans"
+                placeholder="#000000" />
 
                 </div>
-                {primaryColorError && <p className="mt-1 text-sm text-red-600">{primaryColorError}</p>}
+                {primaryColorError && <p className="mt-1 text-sm text-red-600 font-work-sans">{primaryColorError}</p>}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
+              <div className="font-work-sans">
+                <label className="block text-sm font-medium text-[var(--primary-color)] mb-1 font-work-sans">
                   Secondary Color
                 </label>
-                <div className="flex items-center space-x-4">
-                  <input type="color" value={secondaryColor} onChange={handleSecondaryColorChange} className="h-10 w-20 rounded cursor-pointer" />
+                <div className="flex items-center space-x-4 font-work-sans">
+                  <input type="color" value={secondaryColor} onChange={handleSecondaryColorChange} className="h-10 w-20 rounded cursor-pointer font-work-sans" />
 
-                  <input type="text" value={secondaryColor} onChange={handleSecondaryColorChange} className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="#000000" />
+                  <input type="text" value={secondaryColor} onChange={handleSecondaryColorChange} className="flex-grow px-3 py-2 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans"
+                placeholder="#000000" />
 
                 </div>
-                {secondaryColorError && <p className="mt-1 text-sm text-red-600">{secondaryColorError}</p>}
+                {secondaryColorError && <p className="mt-1 text-sm text-red-600 font-work-sans">{secondaryColorError}</p>}
               </div>
             </div>
           </Card>
 
           {/* Typography Section */}
           <Card>
-            <SectionHeader icon={props => <Icon name="faDocumentText" {...props} solid={false} className="text-[var(--secondary-color)]" />} title="Typography" description="Configure your brand's typography settings" />
+            <SectionHeader icon={(props) => <Icon name="faDocumentText" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Typography" description="Configure your brand's typography settings" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+              <div className="space-y-4 font-work-sans">
+                <div className="font-work-sans">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1 font-work-sans">
                     Header Font
                   </label>
-                  <select value={headerFont} onChange={handleHeaderFontChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
+                  <select value={headerFont} onChange={handleHeaderFontChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans">
+
 
 
 
@@ -587,23 +587,23 @@ const BrandingSettingsPage: React.FC = () => {
                     <option value="Open Sans">Open Sans</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
+                <div className="font-work-sans">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1 font-work-sans">
                     Header Font Size
                   </label>
-                  <input type="text" value={headerFontSize} onChange={handleHeaderFontSizeChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="18px" />
+                  <input type="text" value={headerFontSize} onChange={handleHeaderFontSizeChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans"
+                placeholder="18px" />
 
-                  {headerFontSizeError && <p className="mt-1 text-sm text-red-600">{headerFontSizeError}</p>}
+                  {headerFontSizeError && <p className="mt-1 text-sm text-red-600 font-work-sans">{headerFontSizeError}</p>}
                 </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
+              <div className="space-y-4 font-work-sans">
+                <div className="font-work-sans">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1 font-work-sans">
                     Body Font
                   </label>
-                  <select value={bodyFont} onChange={handleBodyFontChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]">
+                  <select value={bodyFont} onChange={handleBodyFontChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans">
+
 
 
 
@@ -613,14 +613,14 @@ const BrandingSettingsPage: React.FC = () => {
                     <option value="Open Sans">Open Sans</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1">
+                <div className="font-work-sans">
+                  <label className="block text-sm font-medium text-[var(--primary-color)] mb-1 font-work-sans">
                     Body Font Size
                   </label>
-                  <input type="text" value={bodyFontSize} onChange={handleBodyFontSizeChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md 
-                      focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)]" placeholder="14px" />
+                  <input type="text" value={bodyFontSize} onChange={handleBodyFontSizeChange} className="w-full px-3 py-2 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans"
+                placeholder="14px" />
 
-                  {bodyFontSizeError && <p className="mt-1 text-sm text-red-600">{bodyFontSizeError}</p>}
+                  {bodyFontSizeError && <p className="mt-1 text-sm text-red-600 font-work-sans">{bodyFontSizeError}</p>}
                 </div>
               </div>
             </div>

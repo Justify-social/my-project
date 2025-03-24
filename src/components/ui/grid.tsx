@@ -10,33 +10,33 @@ export interface GridProps extends React.HTMLAttributes<HTMLDivElement> {
    * @default 1
    */
   cols?: GridColumns;
-  
+
   /**
    * Number of columns at the sm breakpoint (640px)
    */
   colsSm?: GridColumns;
-  
+
   /**
    * Number of columns at the md breakpoint (768px)
    */
   colsMd?: GridColumns;
-  
+
   /**
    * Number of columns at the lg breakpoint (1024px)
    */
   colsLg?: GridColumns;
-  
+
   /**
    * Number of columns at the xl breakpoint (1280px)
    */
   colsXl?: GridColumns;
-  
+
   /**
    * Gap between grid items
    * @default "md"
    */
   gap?: GridGap;
-  
+
   /**
    * The grid items
    */
@@ -82,7 +82,7 @@ export function Grid({
 }: GridProps) {
   // Convert columns to grid-template-columns utility classes
   const getColumnClass = (columns: GridColumns) => `grid-cols-${columns}`;
-  
+
   // Map gap size to Tailwind's gap utilities
   const gapClasses = {
     none: 'gap-0',
@@ -90,12 +90,12 @@ export function Grid({
     sm: 'gap-2',
     md: 'gap-4',
     lg: 'gap-6',
-    xl: 'gap-8',
+    xl: 'gap-8'
   };
-  
+
   return (
     <div
-      className={cn(
+      className={`${cn(
         'grid',
         getColumnClass(cols),
         colsSm && `sm:${getColumnClass(colsSm)}`,
@@ -104,12 +104,12 @@ export function Grid({
         colsXl && `xl:${getColumnClass(colsXl)}`,
         gapClasses[gap],
         className
-      )}
-      {...props}
-    >
+      )} font-work-sans`}
+      {...props}>
+
       {children}
-    </div>
-  );
+    </div>);
+
 }
 
-export default Grid; 
+export default Grid;

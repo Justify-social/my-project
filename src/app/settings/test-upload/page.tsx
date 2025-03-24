@@ -109,59 +109,59 @@ export default function TestUploadPage() {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen bg-[var(--background-color)] p-8">
-      <div className="max-w-2xl mx-auto bg-[var(--background-color)] p-6 rounded-lg border border-[var(--divider-color)] shadow-sm">
-        <h1 className="text-2xl font-bold mb-6 text-[var(--primary-color)]">UploadThing Test</h1>
+  return <div className="min-h-screen bg-[var(--background-color)] p-8 font-work-sans">
+      <div className="max-w-2xl mx-auto bg-[var(--background-color)] p-6 rounded-lg border border-[var(--divider-color)] shadow-sm font-work-sans">
+        <h1 className="text-2xl font-bold mb-6 text-[var(--primary-color)] font-sora">UploadThing Test</h1>
         
-        <div className="mb-4">
-          <Link href="/debug-tools" className="text-[var(--accent-color)] hover:underline">
+        <div className="mb-4 font-work-sans">
+          <Link href="/debug-tools" className="text-[var(--accent-color)] hover:underline font-work-sans">
 
             ← Back to Debug Tools
           </Link>
         </div>
         
         {/* API Status Check */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)]">API Status</h2>
-          <button onClick={checkApiStatus} disabled={isLoading} className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50">
+        <div className="mb-8 font-work-sans">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)] font-sora">API Status</h2>
+          <button onClick={checkApiStatus} disabled={isLoading} className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50 font-work-sans">
 
-            {isLoading ? <span className="flex items-center">
+            {isLoading ? <span className="flex items-center font-work-sans">
                 {<Icon name="faRotate" className="w-5 h-5 mr-2 animate-spin" solid={false} />}
                 Checking...
               </span> : 'Check API Status'}
           </button>
           
-          {apiStatus && <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
-              <pre className="text-sm text-[var(--secondary-color)]">{JSON.stringify(apiStatus, null, 2)}</pre>
+          {apiStatus && <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto font-work-sans">
+              <pre className="text-sm text-[var(--secondary-color)] font-work-sans">{JSON.stringify(apiStatus, null, 2)}</pre>
             </div>}
         </div>
         
         {/* File Upload */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)]">Test File Upload</h2>
+        <div className="font-work-sans">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)] font-sora">Test File Upload</h2>
           
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-[var(--secondary-color)]">Select File</label>
-            <input type="file" onChange={handleFileSelect} className="mt-1 block w-full text-sm text-[var(--secondary-color)] border border-[var(--divider-color)] rounded-md" />
+          <div className="mb-4 font-work-sans">
+            <label className="block text-sm font-medium text-[var(--secondary-color)] font-work-sans">Select File</label>
+            <input type="file" onChange={handleFileSelect} className="mt-1 block w-full text-sm text-[var(--secondary-color)] border border-[var(--divider-color)] rounded-md font-work-sans" />
 
           </div>
           
-          {preview && <div className="mb-4">
-              <p className="text-sm font-medium text-[var(--secondary-color)]">Preview:</p>
+          {preview && <div className="mb-4 font-work-sans">
+              <p className="text-sm font-medium text-[var(--secondary-color)] font-work-sans">Preview:</p>
               <img src={preview} alt="Preview" className="mt-2 max-h-40 rounded" />
             </div>}
           
-          <button onClick={uploadFile} disabled={isLoading || !file} className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50">
+          <button onClick={uploadFile} disabled={isLoading || !file} className="bg-[var(--accent-color)] text-white px-4 py-2 rounded-md hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:opacity-50 font-work-sans">
 
-            {isLoading ? <span className="flex items-center">
+            {isLoading ? <span className="flex items-center font-work-sans">
                 {<Icon name="faRotate" className="w-5 h-5 mr-2 animate-spin" solid={false} />}
                 Uploading...
               </span> : 'Upload File'}
           </button>
           
-          {uploadResult && <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto">
-              <h3 className="font-medium mb-2 text-[var(--primary-color)]">Upload Result:</h3>
-              <pre className="text-sm text-[var(--secondary-color)]">{JSON.stringify(uploadResult, null, 2)}</pre>
+          {uploadResult && <div className="mt-4 p-4 bg-[var(--background-color)] border border-[var(--divider-color)] rounded overflow-auto font-work-sans">
+              <h3 className="font-medium mb-2 text-[var(--primary-color)] font-sora">Upload Result:</h3>
+              <pre className="text-sm text-[var(--secondary-color)] font-work-sans">{JSON.stringify(uploadResult, null, 2)}</pre>
             </div>}
         </div>
       </div>

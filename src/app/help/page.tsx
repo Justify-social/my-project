@@ -41,23 +41,23 @@ const Accordion = ({
   isOpen,
   onToggle,
   className = ""
-}: {
-  title: string;
-  children: React.ReactNode;
-  isOpen: boolean;
-  onToggle: () => void;
-  className?: string;
-}) => <div className={`border border-gray-200 rounded-lg overflow-hidden ${className}`}>
-    <button className="w-full px-4 py-3 flex items-center justify-between text-left bg-white hover:bg-gray-50 transition-colors" onClick={onToggle}>
 
-      <span className="font-medium text-sm sm:text-base">{title}</span>
+
+
+
+
+
+}: {title: string;children: React.ReactNode;isOpen: boolean;onToggle: () => void;className?: string;}) => <div className={`border border-gray-200 rounded-lg overflow-hidden ${className} font-work-sans`}>
+    <button className="w-full px-4 py-3 flex items-center justify-between text-left bg-white hover:bg-gray-50 transition-colors font-work-sans" onClick={onToggle}>
+
+      <span className="font-medium text-sm sm:text-base font-work-sans">{title}</span>
       <motion.div animate={{
       rotate: isOpen ? 180 : 0
     }} transition={{
       duration: 0.2
     }} className="flex-shrink-0">
 
-        {isOpen ? <Icon name="faClose" className="w-5 h-5 text-gray-500" solid={false} /> : <Icon name="faPlus" className="w-5 h-5 text-gray-500" solid={false} />}
+        {isOpen ? <Icon name="faClose" className="w-5 h-5 text-gray-500 font-work-sans" solid={false} /> : <Icon name="faPlus" className="w-5 h-5 text-gray-500 font-work-sans" solid={false} />}
       </motion.div>
     </button>
     <AnimatePresence>
@@ -81,10 +81,10 @@ const Accordion = ({
 const Badge = ({
   children,
   color = "blue"
-}: {
-  children: React.ReactNode;
-  color?: string;
-}) => {
+
+
+
+}: {children: React.ReactNode;color?: string;}) => {
   const colorClasses = {
     blue: "bg-blue-100 text-blue-800",
     green: "bg-green-100 text-green-800",
@@ -92,7 +92,7 @@ const Badge = ({
     red: "bg-red-100 text-red-800",
     purple: "bg-purple-100 text-purple-800"
   }[color] || "bg-gray-100 text-gray-800";
-  return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClasses}`}>
+  return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClasses} font-work-sans`}>
       {children}
     </span>;
 };
@@ -207,19 +207,19 @@ const HelpPage: React.FC = () => {
       // Simulate search delay
       const timer = setTimeout(() => {
         // Search logic implementation
-        const results: SearchResult[] = [...faqs.filter(faq => faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || faq.answer.toLowerCase().includes(searchQuery.toLowerCase())).map((faq, index) => ({
+        const results: SearchResult[] = [...faqs.filter((faq) => faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || faq.answer.toLowerCase().includes(searchQuery.toLowerCase())).map((faq, index) => ({
           id: `faq-${index}`,
           title: faq.question,
           content: faq.answer.substring(0, 100) + "...",
           section: "faqs",
           relevance: 0.95
-        })), ...glossaryTerms.filter(term => term.term.toLowerCase().includes(searchQuery.toLowerCase()) || term.definition.toLowerCase().includes(searchQuery.toLowerCase())).map((term, index) => ({
+        })), ...glossaryTerms.filter((term) => term.term.toLowerCase().includes(searchQuery.toLowerCase()) || term.definition.toLowerCase().includes(searchQuery.toLowerCase())).map((term, index) => ({
           id: `glossary-${index}`,
           title: term.term,
           content: term.definition.substring(0, 100) + "...",
           section: "glossary",
           relevance: 0.90
-        })), ...tutorials.filter(tutorial => tutorial.title.toLowerCase().includes(searchQuery.toLowerCase()) || tutorial.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))).map((tutorial, index) => ({
+        })), ...tutorials.filter((tutorial) => tutorial.title.toLowerCase().includes(searchQuery.toLowerCase()) || tutorial.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))).map((tutorial, index) => ({
           id: `tutorial-${index}`,
           title: tutorial.title,
           content: `${tutorial.difficulty} level tutorial (${tutorial.duration})`,
@@ -237,7 +237,7 @@ const HelpPage: React.FC = () => {
 
   // Handlers
   const toggleAccordion = (id: string) => {
-    setOpenAccordions(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+    setOpenAccordions((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
   };
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -250,52 +250,52 @@ const HelpPage: React.FC = () => {
   // Filtered content based on search
   const filteredFAQs = useMemo(() => {
     if (!searchQuery) return faqs;
-    return faqs.filter(faq => faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || faq.answer.toLowerCase().includes(searchQuery.toLowerCase()));
+    return faqs.filter((faq) => faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || faq.answer.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [searchQuery, faqs]);
 
   // Content rendering based on active tab
   const renderContent = () => {
     switch (activeTab) {
       case "faq":
-        return <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        return <div className="space-y-4 font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 font-sora">Frequently Asked Questions</h2>
             {filteredFAQs.map((faq, index) => <Accordion key={`faq-${index}`} title={faq.question} isOpen={openAccordions.includes(`faq-${index}`)} onToggle={() => toggleAccordion(`faq-${index}`)}>
 
-                <p className="text-gray-600 text-sm sm:text-base">{faq.answer}</p>
+                <p className="text-gray-600 text-sm sm:text-base font-work-sans">{faq.answer}</p>
               </Accordion>)}
           </div>;
       case "tutorials":
-        return <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Video Tutorials</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tutorials.map((tutorial, index) => <div key={`tutorial-${index}`} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="aspect-video bg-gray-100 relative">
+        return <div className="font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 font-sora">Video Tutorials</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+              {tutorials.map((tutorial, index) => <div key={`tutorial-${index}`} className="bg-white border border-gray-200 rounded-lg overflow-hidden font-work-sans">
+                  <div className="aspect-video bg-gray-100 relative font-work-sans">
                     <img src={tutorial.thumbnail || "https://via.placeholder.com/640x360/f3f4f6/94a3b8?text=Justify+Tutorial"} alt={tutorial.title} className="object-cover w-full h-full" />
 
-                    <span className="absolute bottom-2 right-2 bg-black/75 text-white px-2 py-1 rounded text-xs">
+                    <span className="absolute bottom-2 right-2 bg-black/75 text-white px-2 py-1 rounded text-xs font-work-sans">
                       {tutorial.duration}
                     </span>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-medium mb-2 text-sm sm:text-base line-clamp-2">{tutorial.title}</h3>
-                    <div className="flex items-center justify-between">
+                  <div className="p-4 font-work-sans">
+                    <h3 className="font-medium mb-2 text-sm sm:text-base line-clamp-2 font-sora">{tutorial.title}</h3>
+                    <div className="flex items-center justify-between font-work-sans">
                       <Badge color={tutorial.difficulty === 'Advanced' ? 'red' : tutorial.difficulty === 'Intermediate' ? 'yellow' : 'green'}>
                         {tutorial.difficulty}
                       </Badge>
-                      <button className="text-sm text-[var(--accent-color)] hover:underline">Watch</button>
+                      <button className="text-sm text-[var(--accent-color)] hover:underline font-work-sans">Watch</button>
                     </div>
                   </div>
                 </div>)}
             </div>
           </div>;
       case "glossary":
-        return <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Influencer Marketing Glossary</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {glossaryTerms.map((term, index) => <div key={`glossary-${index}`} className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2 text-[var(--accent-color)] text-sm sm:text-base">{term.term}</h3>
-                  <p className="text-gray-600 mb-3 text-xs sm:text-sm">{term.definition}</p>
-                  <div className="flex flex-wrap gap-2">
+        return <div className="font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 font-sora">Influencer Marketing Glossary</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+              {glossaryTerms.map((term, index) => <div key={`glossary-${index}`} className="bg-white border border-gray-200 rounded-lg p-4 font-work-sans">
+                  <h3 className="font-semibold mb-2 text-[var(--accent-color)] text-sm sm:text-base font-sora">{term.term}</h3>
+                  <p className="text-gray-600 mb-3 text-xs sm:text-sm font-work-sans">{term.definition}</p>
+                  <div className="flex flex-wrap gap-2 font-work-sans">
                     {term.relatedTerms.slice(0, 2).map((relatedTerm, rtIndex) => <Badge key={rtIndex} color="blue">{relatedTerm}</Badge>)}
                     {term.relatedTerms.length > 2 && <Badge color="blue">+{term.relatedTerms.length - 2} more</Badge>}
                   </div>
@@ -303,87 +303,87 @@ const HelpPage: React.FC = () => {
             </div>
           </div>;
       case "contact":
-        return <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Support</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-                <div className="bg-blue-50 p-3 rounded-full mb-4">
-                  <Icon name="faInfo" className="w-6 h-6 text-[var(--accent-color)]" solid={false} />
+        return <div className="font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 font-sora">Contact Support</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-work-sans">
+              <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center font-work-sans">
+                <div className="bg-blue-50 p-3 rounded-full mb-4 font-work-sans">
+                  <Icon name="faInfo" className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
                 </div>
-                <h3 className="font-medium mb-2">Call Us</h3>
-                <p className="text-gray-600 text-sm mb-4">Available Mon-Fri, 9am-6pm ET</p>
-                <a href="tel:+18005551234" className="text-[var(--accent-color)] font-medium hover:underline">+1 (800) 555-1234</a>
+                <h3 className="font-medium mb-2 font-sora">Call Us</h3>
+                <p className="text-gray-600 text-sm mb-4 font-work-sans">Available Mon-Fri, 9am-6pm ET</p>
+                <a href="tel:+18005551234" className="text-[var(--accent-color)] font-medium hover:underline font-work-sans">+1 (800) 555-1234</a>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-                <div className="bg-blue-50 p-3 rounded-full mb-4">
-                  <Icon name="faMail" className="w-6 h-6 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center font-work-sans">
+                <div className="bg-blue-50 p-3 rounded-full mb-4 font-work-sans">
+                  <Icon name="faMail" className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
                 </div>
-                <h3 className="font-medium mb-2">Email Support</h3>
-                <p className="text-gray-600 text-sm mb-4">We'll respond within 24 hours</p>
-                <a href="mailto:support@justify.com" className="text-[var(--accent-color)] font-medium hover:underline">support@justify.com</a>
+                <h3 className="font-medium mb-2 font-sora">Email Support</h3>
+                <p className="text-gray-600 text-sm mb-4 font-work-sans">We'll respond within 24 hours</p>
+                <a href="mailto:support@justify.com" className="text-[var(--accent-color)] font-medium hover:underline font-work-sans">support@justify.com</a>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-                <div className="bg-blue-50 p-3 rounded-full mb-4">
-                  <Icon name="faChatBubble" className="w-6 h-6 text-[var(--accent-color)]" solid={false} />
+              <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center font-work-sans">
+                <div className="bg-blue-50 p-3 rounded-full mb-4 font-work-sans">
+                  <Icon name="faChatBubble" className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
                 </div>
-                <h3 className="font-medium mb-2">Live Chat</h3>
-                <p className="text-gray-600 text-sm mb-4">Chat with our support team</p>
-                <button className="text-[var(--accent-color)] font-medium hover:underline">Start Chat</button>
+                <h3 className="font-medium mb-2 font-sora">Live Chat</h3>
+                <p className="text-gray-600 text-sm mb-4 font-work-sans">Chat with our support team</p>
+                <button className="text-[var(--accent-color)] font-medium hover:underline font-work-sans">Start Chat</button>
               </div>
             </div>
           </div>;
       default:
-        return <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        return <div className="space-y-4 font-work-sans">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 font-sora">Frequently Asked Questions</h2>
             {filteredFAQs.slice(0, 5).map((faq, index) => <Accordion key={`faq-${index}`} title={faq.question} isOpen={openAccordions.includes(`faq-${index}`)} onToggle={() => toggleAccordion(`faq-${index}`)}>
 
-                <p className="text-gray-600 text-sm sm:text-base">{faq.answer}</p>
+                <p className="text-gray-600 text-sm sm:text-base font-work-sans">{faq.answer}</p>
               </Accordion>)}
           </div>;
     }
   };
-  return <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50 font-work-sans">
       {/* Mobile Header - Matching the screenshot */}
-      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="p-4">
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setActiveTab("faq")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "faq" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"}`}>
+      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm font-work-sans">
+        <div className="p-4 font-work-sans">
+          <div className="grid grid-cols-2 gap-2 font-work-sans">
+            <button onClick={() => setActiveTab("faq")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "faq" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"} font-work-sans`}>
 
               <Icon name="faInfo" className="w-5 h-5 mr-2" solid={false} />
-              <span className="text-sm">FAQs</span>
+              <span className="text-sm font-work-sans">FAQs</span>
             </button>
-            <button onClick={() => setActiveTab("tutorials")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "tutorials" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"}`}>
+            <button onClick={() => setActiveTab("tutorials")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "tutorials" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"} font-work-sans`}>
 
               <Icon name="faInfo" className="w-5 h-5 mr-2" solid={false} />
-              <span className="text-sm">Tutorials</span>
+              <span className="text-sm font-work-sans">Tutorials</span>
             </button>
-            <button onClick={() => setActiveTab("glossary")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "glossary" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"}`}>
+            <button onClick={() => setActiveTab("glossary")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "glossary" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"} font-work-sans`}>
 
               <Icon name="faBookmark" className="w-5 h-5 mr-2" solid={false} />
-              <span className="text-sm">Glossary</span>
+              <span className="text-sm font-work-sans">Glossary</span>
             </button>
-            <button onClick={() => setActiveTab("contact")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "contact" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"}`}>
+            <button onClick={() => setActiveTab("contact")} className={`flex items-center justify-center p-3 rounded-lg border ${activeTab === "contact" ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)]" : "border-gray-200 text-gray-700"} font-work-sans`}>
 
               <Icon name="faChatBubble" className="w-5 h-5 mr-2" solid={false} />
-              <span className="text-sm">Contact</span>
+              <span className="text-sm font-work-sans">Contact</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-work-sans">
         {/* Search Header for Both Mobile and Desktop */}
-        <div className="mb-8">
+        <div className="mb-8 font-work-sans">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-2 font-sora">
             How can we help?
           </h1>
-          <div className="max-w-2xl mx-auto relative">
-            <Icon name="faSearch" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" solid={false} />
-            <input type="text" placeholder="Search for help..." value={searchQuery} onChange={handleSearch} className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:border-transparent shadow-sm" />
+          <div className="max-w-2xl mx-auto relative font-work-sans">
+            <Icon name="faSearch" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 font-work-sans" solid={false} />
+            <input type="text" placeholder="Search for help..." value={searchQuery} onChange={handleSearch} className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:border-transparent shadow-sm font-work-sans" />
 
-            {searchQuery && <button onClick={clearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            {searchQuery && <button onClick={clearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2 font-work-sans">
 
-                <Icon name="faClose" className="w-5 h-5 text-gray-400 hover:text-gray-600" solid={false} />
+                <Icon name="faClose" className="w-5 h-5 text-gray-400 hover:text-gray-600 font-work-sans" solid={false} />
               </button>}
           </div>
         </div>
@@ -401,23 +401,23 @@ const HelpPage: React.FC = () => {
           y: -10
         }} className="max-w-3xl mx-auto mb-8 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
 
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h2 className="font-medium text-gray-900">
+              <div className="p-4 border-b border-gray-200 bg-gray-50 font-work-sans">
+                <h2 className="font-medium text-gray-900 font-sora">
                   {searchResults.length} results for "{searchQuery}"
                 </h2>
               </div>
-              <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-                {searchResults.map(result => <div key={result.id} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+              <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto font-work-sans">
+                {searchResults.map((result) => <div key={result.id} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors font-work-sans">
 
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 mt-1">
-                        {result.section === "faqs" && <Icon name="faInfo" className="w-5 h-5 text-[var(--accent-color)]" solid={false} />}
-                        {result.section === "glossary" && <Icon name="faBookmark" className="w-5 h-5 text-[var(--accent-color)]" solid={false} />}
-                        {result.section === "tutorials" && <Icon name="faInfo" className="w-5 h-5 text-[var(--accent-color)]" solid={false} />}
+                    <div className="flex items-start font-work-sans">
+                      <div className="flex-shrink-0 mt-1 font-work-sans">
+                        {result.section === "faqs" && <Icon name="faInfo" className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />}
+                        {result.section === "glossary" && <Icon name="faBookmark" className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />}
+                        {result.section === "tutorials" && <Icon name="faInfo" className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />}
                       </div>
-                      <div className="ml-3">
-                        <h3 className="font-medium text-gray-900 text-sm">{result.title}</h3>
-                        <p className="text-gray-600 text-xs mt-1">{result.content}</p>
+                      <div className="ml-3 font-work-sans">
+                        <h3 className="font-medium text-gray-900 text-sm font-sora">{result.title}</h3>
+                        <p className="text-gray-600 text-xs mt-1 font-work-sans">{result.content}</p>
                       </div>
                     </div>
                   </div>)}
@@ -426,40 +426,40 @@ const HelpPage: React.FC = () => {
         </AnimatePresence>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 font-work-sans">
           {/* Desktop Sidebar */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden sticky top-4">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="font-semibold text-gray-900">Help Topics</h2>
+          <div className="hidden lg:block lg:col-span-1 font-work-sans">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden sticky top-4 font-work-sans">
+              <div className="p-4 border-b border-gray-200 font-work-sans">
+                <h2 className="font-semibold text-gray-900 font-sora">Help Topics</h2>
               </div>
-              <nav className="p-2">
-                <button onClick={() => setActiveTab("faq")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "faq" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"}`}>
+              <nav className="p-2 font-work-sans">
+                <button onClick={() => setActiveTab("faq")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "faq" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"} font-work-sans`}>
 
                   <Icon name="faInfo" className="w-5 h-5 mr-3" solid={false} />
-                  <span className="font-medium text-sm">FAQs</span>
+                  <span className="font-medium text-sm font-work-sans">FAQs</span>
                 </button>
-                <button onClick={() => setActiveTab("tutorials")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "tutorials" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("tutorials")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "tutorials" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"} font-work-sans`}>
 
                   <Icon name="faInfo" className="w-5 h-5 mr-3" solid={false} />
-                  <span className="font-medium text-sm">Video Tutorials</span>
+                  <span className="font-medium text-sm font-work-sans">Video Tutorials</span>
                 </button>
-                <button onClick={() => setActiveTab("glossary")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "glossary" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("glossary")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "glossary" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"} font-work-sans`}>
 
                   <Icon name="faBookmark" className="w-5 h-5 mr-3" solid={false} />
-                  <span className="font-medium text-sm">Glossary</span>
+                  <span className="font-medium text-sm font-work-sans">Glossary</span>
                 </button>
-                <button onClick={() => setActiveTab("contact")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "contact" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("contact")} className={`w-full flex items-center px-4 py-2 rounded-md mb-1 text-left ${activeTab === "contact" ? "bg-blue-50 text-[var(--accent-color)]" : "text-gray-700 hover:bg-gray-50"} font-work-sans`}>
 
                   <Icon name="faChatBubble" className="w-5 h-5 mr-3" solid={false} />
-                  <span className="font-medium text-sm">Contact Support</span>
+                  <span className="font-medium text-sm font-work-sans">Contact Support</span>
                 </button>
               </nav>
               
-              <div className="p-4 mt-4 bg-blue-50 mx-4 mb-4 rounded-lg">
-                <h3 className="font-medium text-[var(--accent-color)] text-sm mb-2">Need more help?</h3>
-                <p className="text-gray-600 text-xs mb-3">Our support team is ready to assist you with any questions.</p>
-                <a href="/support" className="text-xs font-medium text-[var(--accent-color)] hover:underline flex items-center">
+              <div className="p-4 mt-4 bg-blue-50 mx-4 mb-4 rounded-lg font-work-sans">
+                <h3 className="font-medium text-[var(--accent-color)] text-sm mb-2 font-sora">Need more help?</h3>
+                <p className="text-gray-600 text-xs mb-3 font-work-sans">Our support team is ready to assist you with any questions.</p>
+                <a href="/support" className="text-xs font-medium text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
 
                   Contact us
                   <Icon name="faShare" className="w-3 h-3 ml-1" solid={false} />
@@ -469,55 +469,55 @@ const HelpPage: React.FC = () => {
           </div>
 
           {/* Main Content Area */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="lg:col-span-3 font-work-sans">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 font-work-sans">
               {renderContent()}
             </div>
             
             {/* Quick Links Section */}
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Popular Resources</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="mt-8 font-work-sans">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sora">Popular Resources</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-work-sans">
                 <Link href="/getting-started">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <Icon name="faStar" className="w-6 h-6 text-[var(--accent-color)] mb-2" solid={false} />
-                    <h3 className="font-medium text-sm mb-1">Getting Started</h3>
-                    <p className="text-gray-600 text-xs">Set up your account and first campaign</p>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow font-work-sans">
+                    <Icon name="faStar" className="w-6 h-6 text-[var(--accent-color)] mb-2 font-work-sans" solid={false} />
+                    <h3 className="font-medium text-sm mb-1 font-sora">Getting Started</h3>
+                    <p className="text-gray-600 text-xs font-work-sans">Set up your account and first campaign</p>
                   </div>
                 </Link>
                 <Link href="/analytics-guide">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <Icon name="faView" className="w-6 h-6 text-[var(--accent-color)] mb-2" solid={false} />
-                    <h3 className="font-medium text-sm mb-1">Analytics Guide</h3>
-                    <p className="text-gray-600 text-xs">Understand your campaign performance</p>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow font-work-sans">
+                    <Icon name="faView" className="w-6 h-6 text-[var(--accent-color)] mb-2 font-work-sans" solid={false} />
+                    <h3 className="font-medium text-sm mb-1 font-sora">Analytics Guide</h3>
+                    <p className="text-gray-600 text-xs font-work-sans">Understand your campaign performance</p>
                   </div>
                 </Link>
                 <Link href="/creators">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <Icon name="faUser" className="w-6 h-6 text-[var(--accent-color)] mb-2" solid={false} />
-                    <h3 className="font-medium text-sm mb-1">Creator Management</h3>
-                    <p className="text-gray-600 text-xs">Find and manage your influencer partnerships</p>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow font-work-sans">
+                    <Icon name="faUser" className="w-6 h-6 text-[var(--accent-color)] mb-2 font-work-sans" solid={false} />
+                    <h3 className="font-medium text-sm mb-1 font-sora">Creator Management</h3>
+                    <p className="text-gray-600 text-xs font-work-sans">Find and manage your influencer partnerships</p>
                   </div>
                 </Link>
                 <Link href="/reports">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <Icon name="faInfo" className="w-6 h-6 text-[var(--accent-color)] mb-2" solid={false} />
-                    <h3 className="font-medium text-sm mb-1">Report Templates</h3>
-                    <p className="text-gray-600 text-xs">Ready-to-use report templates for stakeholders</p>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow font-work-sans">
+                    <Icon name="faInfo" className="w-6 h-6 text-[var(--accent-color)] mb-2 font-work-sans" solid={false} />
+                    <h3 className="font-medium text-sm mb-1 font-sora">Report Templates</h3>
+                    <p className="text-gray-600 text-xs font-work-sans">Ready-to-use report templates for stakeholders</p>
                   </div>
                 </Link>
                 <Link href="/brand-safety">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <Icon name="faCheck" className="w-6 h-6 text-[var(--accent-color)] mb-2" solid={false} />
-                    <h3 className="font-medium text-sm mb-1">Brand Safety</h3>
-                    <p className="text-gray-600 text-xs">Protect your brand with creator verification</p>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow font-work-sans">
+                    <Icon name="faCheck" className="w-6 h-6 text-[var(--accent-color)] mb-2 font-work-sans" solid={false} />
+                    <h3 className="font-medium text-sm mb-1 font-sora">Brand Safety</h3>
+                    <p className="text-gray-600 text-xs font-work-sans">Protect your brand with creator verification</p>
                   </div>
                 </Link>
                 <Link href="/platform-updates">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                    <Icon name="faStar" className="w-6 h-6 text-[var(--accent-color)] mb-2" solid={false} />
-                    <h3 className="font-medium text-sm mb-1">What's New</h3>
-                    <p className="text-gray-600 text-xs">Latest platform features and updates</p>
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow font-work-sans">
+                    <Icon name="faStar" className="w-6 h-6 text-[var(--accent-color)] mb-2 font-work-sans" solid={false} />
+                    <h3 className="font-medium text-sm mb-1 font-sora">What's New</h3>
+                    <p className="text-gray-600 text-xs font-work-sans">Latest platform features and updates</p>
                   </div>
                 </Link>
               </div>
@@ -527,11 +527,11 @@ const HelpPage: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-12 py-3 border-t border-gray-200 bg-white max-h-[65px] flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="text-center">
-            <p className="text-gray-600 text-sm">
-              Can't find what you're looking for? <a href="/contact" className="text-[var(--accent-color)] font-medium hover:underline">Contact our support team</a>
+      <div className="mt-12 py-3 border-t border-gray-200 bg-white max-h-[65px] flex items-center font-work-sans">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full font-work-sans">
+          <div className="text-center font-work-sans">
+            <p className="text-gray-600 text-sm font-work-sans">
+              Can't find what you're looking for? <a href="/contact" className="text-[var(--accent-color)] font-medium hover:underline font-work-sans">Contact our support team</a>
             </p>
           </div>
         </div>

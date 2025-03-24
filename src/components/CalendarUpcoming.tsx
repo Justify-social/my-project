@@ -39,7 +39,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
 
   // Get events for a specific day
   const getEventsForDay = (day: number) => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDate = new Date(event.start);
       return eventDate.getDate() === day && eventDate.getMonth() === currentDate.getMonth() && eventDate.getFullYear() === currentDate.getFullYear();
     });
@@ -51,7 +51,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-24 bg-gray-50 rounded-lg"></div>);
+      days.push(<div key={`empty-${i}`} className="h-24 bg-gray-50 rounded-lg font-work-sans"></div>);
     }
 
     // Add cells for each day of the month
@@ -61,40 +61,40 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
         scale: 1.02
       }}>
 
-          <div className="flex justify-between items-start">
-            <span className="font-medium text-gray-900">{day}</span>
-            {dayEvents.length > 0 && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <div className="flex justify-between items-start font-work-sans">
+            <span className="font-medium text-gray-900 font-work-sans">{day}</span>
+            {dayEvents.length > 0 && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 font-work-sans">
                 {dayEvents.length}
               </span>}
           </div>
-          <div className="mt-1 space-y-1">
-            {dayEvents.map(event => <div key={event.id} className="text-xs truncate text-gray-600 bg-white rounded px-1 py-0.5">
+          <div className="mt-1 space-y-1 font-work-sans">
+            {dayEvents.map((event) => <div key={event.id} className="text-xs truncate text-gray-600 bg-white rounded px-1 py-0.5 font-work-sans">
 
                 {event.title}
               </div>)}
           </div>
         </motion.div>);
     }
-    return <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button onClick={prevMonth} className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors">
+    return <div className="space-y-4 font-work-sans">
+        <div className="flex items-center justify-between font-work-sans">
+          <div className="flex items-center gap-2 font-work-sans">
+            <button onClick={prevMonth} className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors font-work-sans">
 
               <Icon name="faChevronLeft" className="w-5 h-5" solid={false} />
             </button>
-            <div className="text-xl font-semibold">
+            <div className="text-xl font-semibold font-work-sans">
               {currentDate.toLocaleString('default', {
               month: 'long'
             })} {currentDate.getFullYear()}
             </div>
-            <button onClick={nextMonth} className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors">
+            <button onClick={nextMonth} className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors font-work-sans">
 
               <Icon name="faChevronRight" className="w-5 h-5" solid={false} />
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-7 gap-2">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day} className="text-center text-sm font-medium text-gray-600">
+        <div className="grid grid-cols-7 gap-2 font-work-sans">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <div key={day} className="text-center text-sm font-medium text-gray-600 font-work-sans">
               {day}
             </div>)}
           {days}
@@ -114,9 +114,9 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
       acc[monthYear].push(event);
       return acc;
     }, {} as Record<string, CalendarEvent[]>);
-    return <div className="space-y-4">
-        <div className="flex justify-end">
-          <button onClick={() => setView('calendar')} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+    return <div className="space-y-4 font-work-sans">
+        <div className="flex justify-end font-work-sans">
+          <button onClick={() => setView('calendar')} className="text-blue-600 hover:text-blue-800 text-sm font-medium font-work-sans">
 
             Switch to Calendar
           </button>
@@ -129,34 +129,34 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
         y: 0
       }} className="bg-white rounded-lg p-4">
 
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Icon name="faCalendar" className="w-5 h-5 mr-2 text-blue-600" solid={false} />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center font-sora">
+              <Icon name="faCalendar" className="w-5 h-5 mr-2 text-blue-600 font-work-sans" solid={false} />
               {monthYear}
             </h3>
-            <div className="space-y-3">
-              {monthEvents.map(event => <motion.div key={event.id} whileHover={{
+            <div className="space-y-3 font-work-sans">
+              {monthEvents.map((event) => <motion.div key={event.id} whileHover={{
             scale: 1.02
           }} className="bg-gradient-to-r from-blue-50 to-white rounded-lg p-4 border border-blue-100">
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{event.title}</h4>
-                      <p className="text-sm text-gray-600">
+                  <div className="flex items-center justify-between font-work-sans">
+                    <div className="flex-1 font-work-sans">
+                      <h4 className="font-medium text-gray-900 font-sora">{event.title}</h4>
+                      <p className="text-sm text-gray-600 font-work-sans">
                         {event.start.toLocaleDateString()} - {event.end?.toLocaleDateString() || 'Ongoing'}
                       </p>
-                      <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600 font-work-sans">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 font-work-sans">
                           {event.platform}
                         </span>
-                        <span className="flex items-center">
+                        <span className="flex items-center font-work-sans">
                           <Icon name="faChatBubble" className="w-4 h-4 mr-1" solid={false} />
                           {event.kpi}
                         </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="flex flex-col space-y-1">
-                        <span className="flex items-center justify-end text-sm text-gray-600">
+                    <div className="text-right font-work-sans">
+                      <div className="flex flex-col space-y-1 font-work-sans">
+                        <span className="flex items-center justify-end text-sm text-gray-600 font-work-sans">
                           <Icon name="faMoney" className="w-4 h-4 mr-1" solid={false} />
                           ${event.budget.toLocaleString()}
                         </span>

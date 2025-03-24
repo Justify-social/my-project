@@ -10,51 +10,51 @@ interface AudienceContentProps {
 }
 
 const AudienceContent: React.FC<AudienceContentProps> = ({ data }) => {
-  if (!data) return <p className="text-gray-500">No audience targeting data available</p>;
+  if (!data) return <p className="text-gray-500 font-work-sans">No audience targeting data available</p>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-work-sans">
       {/* Locations */}
-      <div>
-        <span className="font-medium">Locations: </span>
-        {data.locations?.length > 0 ? (
-          <span className="text-gray-700">{data.locations.join(', ')}</span>
-        ) : (
-          <span className="text-gray-500">No locations selected</span>
-        )}
+      <div className="font-work-sans">
+        <span className="font-medium font-work-sans">Locations: </span>
+        {data.locations?.length > 0 ?
+        <span className="text-gray-700 font-work-sans">{data.locations.join(', ')}</span> :
+
+        <span className="text-gray-500 font-work-sans">No locations selected</span>
+        }
       </div>
 
       {/* Age Groups */}
-      <div>
-        <span className="font-medium">Age Groups: </span>
-        {data.ageRanges?.length > 0 ? (
-          <span className="text-gray-700">{data.ageRanges.join(', ')}</span>
-        ) : (
-          <span className="text-gray-500">No age groups selected</span>
-        )}
+      <div className="font-work-sans">
+        <span className="font-medium font-work-sans">Age Groups: </span>
+        {data.ageRanges?.length > 0 ?
+        <span className="text-gray-700 font-work-sans">{data.ageRanges.join(', ')}</span> :
+
+        <span className="text-gray-500 font-work-sans">No age groups selected</span>
+        }
       </div>
 
       {/* Genders */}
-      <div>
-        <span className="font-medium">Genders: </span>
-        {data.genders?.length > 0 ? (
-          <span className="text-gray-700">{data.genders.join(', ')}</span>
-        ) : (
-          <span className="text-gray-500">No genders selected</span>
-        )}
+      <div className="font-work-sans">
+        <span className="font-medium font-work-sans">Genders: </span>
+        {data.genders?.length > 0 ?
+        <span className="text-gray-700 font-work-sans">{data.genders.join(', ')}</span> :
+
+        <span className="text-gray-500 font-work-sans">No genders selected</span>
+        }
       </div>
 
       {/* Languages */}
-      <div>
-        <span className="font-medium">Languages: </span>
-        {data.languages?.length > 0 ? (
-          <span className="text-gray-700">{data.languages.join(', ')}</span>
-        ) : (
-          <span className="text-gray-500">No languages selected</span>
-        )}
+      <div className="font-work-sans">
+        <span className="font-medium font-work-sans">Languages: </span>
+        {data.languages?.length > 0 ?
+        <span className="text-gray-700 font-work-sans">{data.languages.join(', ')}</span> :
+
+        <span className="text-gray-500 font-work-sans">No languages selected</span>
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-export default AudienceContent; 
+export default AudienceContent;
