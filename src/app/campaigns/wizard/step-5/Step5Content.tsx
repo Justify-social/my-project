@@ -171,7 +171,7 @@ const DataItem: React.FC<DataItemProps> = ({
         <div className="flex-1">
           <p className={`text-sm text-[var(--secondary-color)] mb-1 font-medium ${className.includes('text-lg') ? 'text-base' : ''}`}>{label}</p>
           <div className={`font-medium text-[var(--primary-color)] ${featured ? className.includes('text-lg') ? 'text-xl' : 'text-lg' : ''}`}>
-            {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
+        {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
           </div>
         </div>
       </div>
@@ -228,11 +228,47 @@ interface MergedData {
   brandPerception: string;
   creativeAssets: CreativeAsset[];
   creativeRequirements: any[];
+  // Add missing properties to fix linter errors
+  contacts?: Array<Record<string, any>>;
+  influencers?: Array<{
+    id?: string;
+    handle: string;
+    name?: string;
+    platform?: string;
+    followers?: number | string;
+    engagement?: string;
+    avatarUrl?: string;
+    description?: string;
+  }>;
 
   // Add nested data structures
   overview: Record<string, any>;
   objectives: Record<string, any>;
   audience: AudienceData;
+  
+  // Add property to store step-specific data for handling different data schemas
+  step1?: {
+    influencers?: Array<{
+      id?: string;
+      handle?: string;
+      name?: string;
+      platform?: string;
+      followers?: number | string;
+      engagement?: string;
+      avatarUrl?: string;
+      description?: string;
+      // Support properties from Step1 schema
+      influencerHandle?: string;
+      username?: string;
+      influencerName?: string;
+      avatar?: string;
+      bio?: string;
+    }>;
+    [key: string]: any;
+  };
+  
+  // Allow for any other properties that might exist
+  [key: string]: any;
 }
 
 // Add a robust fallback data object
@@ -546,7 +582,12 @@ const normalizeApiData = (data: any): MergedData => {
     creativeAssets: creativeAssets,
     creativeRequirements: Array.isArray(data.creativeRequirements) ? data.creativeRequirements : isWizardSchema && Array.isArray(data.requirements) ? data.requirements.map((req: any) => ({
       requirement: req
-    })) : []
+    })) : [],
+    contacts: data.contacts || [],
+    influencers: Array.isArray(data.influencers) ? data.influencers :
+      (data.overview && Array.isArray(data.overview.influencers) ? data.overview.influencers :
+      (data.step1 && Array.isArray(data.step1.influencers) ? data.step1.influencers :
+      (data.influencer ? [data.influencer] : []))),
   };
 };
 
@@ -671,9 +712,9 @@ const FeatureIcon: React.FC<FeatureIconProps> = ({
         height={20}
         className="object-contain"
       />
-    </div>
-    <span>{altText}</span>
-  </div>;
+      </div>
+      <span>{altText}</span>
+    </div>;
 };
 
 // Custom Asset Preview component for Step 5 (with play/pause controls)
@@ -748,10 +789,10 @@ const Step5AssetPreview = ({
         if (video.currentTime >= 5) {
           video.currentTime = 0;
           if (isPlaying) {
-            video.play().catch(err => {
-              console.error('Error replaying video:', err);
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
               setIsPlaying(false);
-            });
+          });
           }
         }
       };
@@ -759,10 +800,10 @@ const Step5AssetPreview = ({
       const handleEnded = () => {
         video.currentTime = 0;
         if (isPlaying) {
-          video.play().catch(err => {
-            console.error('Error replaying video:', err);
+        video.play().catch(err => {
+          console.error('Error replaying video:', err);
             setIsPlaying(false);
-          });
+        });
         }
       };
 
@@ -922,19 +963,31 @@ function Step5Content() {
     // No validation messages will be set, allowing submission to proceed
   };
 
+  // Add a type-safe check for properties
+  const enhanceNormalizeApiData = (data: any): MergedData => {
+    const baseData = normalizeApiData(data);
+    
+    // Check if we should add the step1 property for later use - only if it exists in source data
+    if (data?.step1) {
+      baseData.step1 = data.step1;
+    }
+    
+    return baseData;
+  };
+
   // Update the displayData useMemo to use the normalizeApiData function
   const displayData = useMemo(() => {
     // If we have explicit campaign data from API, use it first
     if (campaignData && Object.keys(campaignData).length > 0) {
       console.log("Using campaign data from direct API fetch");
-      return normalizeApiData(campaignData);
+      return enhanceNormalizeApiData(campaignData);
     }
 
     // Otherwise fall back to context data if available
     if (contextData && Object.keys(contextData).length > 0) {
       console.log("Using campaign data from WizardContext");
       // Convert context data to the expected shape with safeguards
-      return normalizeApiData(contextData);
+      return enhanceNormalizeApiData(contextData);
     }
 
     // If we have no data at all and there's an error, use fallback
@@ -1016,6 +1069,62 @@ function Step5Content() {
   useEffect(() => {
     if (displayData && Object.keys(displayData).length > 0) {
       validateCampaignData(displayData);
+    }
+  }, [displayData]);
+
+  // In the Step5Content function, add a useEffect to print the influencer data for debugging
+  // Add this after the existing useEffects
+  useEffect(() => {
+    if (displayData && displayData.influencers) {
+      console.log('Loaded influencer data:', displayData.influencers);
+      
+      // If influencers data exists but in a different format than expected, attempt to normalize it
+      if (Array.isArray(displayData.influencers) && displayData.influencers.length > 0) {
+        // Check if we need to transform the data
+        const firstInfluencer = displayData.influencers[0] as any; // Use 'any' type for safe access
+        if (!firstInfluencer.handle && (firstInfluencer.influencerHandle || firstInfluencer.username)) {
+          // Transform the data to the expected format
+          const normalizedInfluencers = displayData.influencers.map((inf: any) => ({
+            id: inf.id || inf._id || `inf-${Math.random().toString(36).substring(2, 9)}`,
+            handle: inf.influencerHandle || inf.username || inf.handle || 'unknown',
+            name: inf.name || inf.influencerName || inf.handle || 'Unknown Influencer',
+            platform: inf.platform || 'Not specified',
+            followers: inf.followers || inf.influencerFollowers || '0',
+            engagement: inf.engagement || '0.01%',
+            avatarUrl: inf.avatarUrl || inf.avatar || '',
+            description: inf.description || inf.bio || 'No description available.'
+          }));
+          
+          // Update the display data with the normalized influencers
+          setCampaignData(prev => ({
+            ...prev,
+            influencers: normalizedInfluencers
+          }));
+        }
+      } else if (!Array.isArray(displayData.influencers)) {
+        // Handle the case where influencers might not be an array
+        console.warn('Influencer data is not in expected array format:', displayData.influencers);
+        
+        // Safely check if step1 exists using optional chaining
+        const step1Influencers = displayData?.step1?.influencers;
+        if (Array.isArray(step1Influencers) && step1Influencers.length > 0) {
+          console.log('Found influencers in step1 data:', step1Influencers);
+          setCampaignData(prev => ({
+            ...prev,
+            influencers: step1Influencers
+          }));
+        }
+      }
+    } else {
+      // Check if influencers exist in step1 data using optional chaining
+      const step1Influencers = displayData?.step1?.influencers;
+      if (Array.isArray(step1Influencers) && step1Influencers.length > 0) {
+        console.log('Found influencers in step1 data:', step1Influencers);
+        setCampaignData(prev => ({
+          ...prev,
+          influencers: step1Influencers
+        }));
+      }
     }
   }, [displayData]);
 
@@ -1283,26 +1392,34 @@ function Step5Content() {
       <div className="space-y-6">
         {/* Step 1: Campaign Details */}
         <SummarySection title="Campaign Details" stepNumber={1} onEdit={() => navigateToStep(1)}>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          {/* Basic Information Section */}
               <h3 className="font-medium text-gray-800 mb-4">Basic Information</h3>
-              
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
               <div className="space-y-4">
                 <DataItem 
                   label="Campaign Name" 
                   value={displayData.campaignName || 'Not specified'} 
-                  icon={<Image src="/app/Campaigns.svg" alt="Campaigns" width={22} height={22} className="mr-3" />}
+                  icon={
+                    <div className="relative mr-3">
+                      <Image 
+                        src="/app/Campaigns.svg" 
+                        alt="Campaigns" 
+                        width={22} 
+                        height={22} 
+                        className="filter brightness-0"
+                        style={{ filter: 'invert(32%) sepia(9%) saturate(1265%) hue-rotate(182deg) brightness(91%) contrast(88%)' }}
+                      />
+                    </div>
+                  }
                   featured={true} 
                   className="text-lg p-4 border-l-4 border-[var(--accent-color)] bg-[rgba(0,191,255,0.08)]"
                 />
-
                 
                 <DataItem 
                   label="Business Goal for this Campaign" 
                   value={displayData.description || 'Not specified'} 
                 />
-
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                   <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
@@ -1315,7 +1432,7 @@ function Step5Content() {
                     <div className="flex items-start">
                       <Icon name="faCircleInfo" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]" iconType="static" solid={false} />
                       <span className="flex-1">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
-                    </div>
+                </div>
                   </div>
                 )}
               </div>
@@ -1333,6 +1450,185 @@ function Step5Content() {
                 <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
               </div>
             </div>
+          </div>
+          
+          {/* Contact Information Section */}
+          <h3 className="font-medium text-gray-800 mb-4">Contact Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Primary Contact */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Primary Contact</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Name</span>
+                    <span className="text-base text-gray-800 block font-medium">
+                      {`${displayData.primaryContact?.firstName || ''} ${displayData.primaryContact?.surname || displayData.primaryContact?.lastName || ''}`}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Email</span>
+                    <span className="text-base text-gray-800 block font-medium">
+                      {displayData.primaryContact?.email || 'Not specified'}
+                    </span>
+              </div>
+            </div>
+                
+                <div className="flex items-start">
+                  <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Position</span>
+                    <span className="text-base text-gray-800 block font-medium">
+                      {displayData.primaryContact?.position || 'Not specified'}
+                    </span>
+          </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Secondary Contact */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span></h3>
+              
+              {displayData.secondaryContact?.firstName || displayData.secondaryContact?.email ? (
+              <div className="space-y-4">
+                  <div className="flex items-start">
+                    <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <div className="flex-1">
+                      <span className="text-sm text-gray-500 mb-1 block">Name</span>
+                      <span className="text-base text-gray-800 block font-medium">
+                        {`${displayData.secondaryContact?.firstName || ''} ${displayData.secondaryContact?.surname || displayData.secondaryContact?.lastName || ''}`}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <div className="flex-1">
+                      <span className="text-sm text-gray-500 mb-1 block">Email</span>
+                      <span className="text-base text-gray-800 block font-medium">
+                        {displayData.secondaryContact?.email || 'Not specified'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <div className="flex-1">
+                      <span className="text-sm text-gray-500 mb-1 block">Position</span>
+                      <span className="text-base text-gray-800 block font-medium">
+                        {displayData.secondaryContact?.position || 'Not specified'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500 italic">No secondary contact added</div>
+              )}
+            </div>
+          </div>
+          
+          {/* Influencer Details Section */}
+          <h3 className="font-medium text-gray-800 mb-4">Influencer Details</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 className="font-medium text-gray-800 mb-4">Influencers</h3>
+            
+            {displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0 ? (
+              <div className="space-y-6">
+                {displayData.influencers.map((influencer, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.05)] to-white border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-gray-800">Influencer #{index + 1}</h4>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex items-center">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full overflow-hidden mr-4 flex-shrink-0">
+                          {influencer.avatarUrl ? (
+                            <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)]">
+                              <Icon name="faUser" className="h-8 w-8" iconType="static" solid={false} />
+                    </div>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <p className="font-medium text-gray-800 mb-1">{influencer.name || influencer.handle}</p>
+                          <p className="text-[var(--accent-color)] mb-1">@{influencer.handle}</p>
+                          {influencer.followers && (
+                            <p className="text-sm text-gray-500">
+                              {typeof influencer.followers === 'number' 
+                                ? `${new Intl.NumberFormat().format(influencer.followers)} followers` 
+                                : influencer.followers}
+                            </p>
+                          )}
+                          {influencer.engagement && (
+                            <p className="text-sm text-gray-500">
+                              {influencer.engagement} engagement
+                            </p>
+                          )}
+                  </div>
+                </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-start">
+                          <Icon name="faBrandsfab" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                          <div className="flex-1">
+                            <span className="text-sm text-gray-500 mb-1 block">Platform</span>
+                            <span className="text-base text-gray-800 block">
+                              <div className="flex items-center">
+                                <Icon 
+                                  name={
+                                    (influencer.platform || '').toLowerCase().includes('instagram') ? 'faInstagram' :
+                                    (influencer.platform || '').toLowerCase().includes('facebook') ? 'faFacebook' :
+                                    (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? 'faTwitter' :
+                                    (influencer.platform || '').toLowerCase().includes('tiktok') ? 'faTiktok' :
+                                    (influencer.platform || '').toLowerCase().includes('youtube') ? 'faYoutube' :
+                                    (influencer.platform || '').toLowerCase().includes('linkedin') ? 'faLinkedin' :
+                                    'faGlobe'
+                                  } 
+                                  className="h-4 w-4 mr-2 text-[var(--secondary-color)]" 
+                                  iconType="static" 
+                                  solid={true} 
+                                />
+                                {influencer.platform || 'Not specified'}
+                              </div>
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {influencer.description && (
+                          <div className="flex items-start">
+                            <Icon name="faInfoCircle" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                            <div className="flex-1">
+                              <span className="text-sm text-gray-500 mb-1 block">Description</span>
+                              <span className="text-base text-gray-800 block">{influencer.description}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                      </div>
+                    ))}
+                  </div>
+            ) : (
+              // Check for influencers in different possible locations in the data object
+              <div className="bg-gray-50 p-6 rounded-md text-center">
+                <div className="mb-3">
+                  <Icon name="faUserGroup" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+                </div>
+                <p className="text-gray-600 mb-2">No influencers added to this campaign yet.</p>
+              </div>
+            )}
           </div>
         </SummarySection>
 
@@ -1379,8 +1675,8 @@ function Step5Content() {
                 ) : (
                   <div className="text-gray-500">None selected</div>
                 )}
-              </div>
-              
+                </div>
+
               {/* Secondary KPIs */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-600 mb-2 block">Secondary KPIs</label>
@@ -1404,7 +1700,7 @@ function Step5Content() {
                             height={20}
                             className="object-contain"
                           />
-                        </div>
+                      </div>
                         <span>{kpi === 'adRecall' ? 'Ad Recall' : 
                               kpi === 'brandAwareness' ? 'Brand Awareness' : 
                               kpi === 'consideration' ? 'Consideration' : 
@@ -1420,9 +1716,9 @@ function Step5Content() {
                   ) : (
                     <div className="text-gray-500">None selected</div>
                   )}
+                  </div>
                 </div>
-              </div>
-              
+
               {/* Features */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-600 mb-2 block">Features</label>
@@ -1544,8 +1840,8 @@ function Step5Content() {
                   <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
                   <div className="grid grid-cols-6 gap-1">
                     {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range, index) => {
-                      // Check if this age range is selected
-                      const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
+                  // Check if this age range is selected
+                  const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
                       const percentage = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience] 
                                        ? Number(displayData.audience[ageKey as keyof typeof displayData.audience]) 
                                        : 0;
@@ -1554,7 +1850,7 @@ function Step5Content() {
                           {range}
                         </div>
                       );
-                    })}
+                })}
                   </div>
                 </div>
 
@@ -1727,7 +2023,7 @@ function Step5Content() {
                   {/* Asset Preview - Square/Tiled */}
                   <div className="aspect-square w-full overflow-hidden relative bg-gray-50">
                     <Step5AssetPreview url={asset.url} fileName={asset.assetName || asset.name || 'Asset preview'} type={asset.type} className="w-full h-full" />
-                    
+
                     {/* Asset Type Badge */}
                     <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs font-medium">
                       {asset.type === 'video' || (typeof asset.type === 'string' && asset.type.includes('video')) 
