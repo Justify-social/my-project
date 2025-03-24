@@ -30,6 +30,7 @@ interface CreativeAsset {
   whyInfluencer?: string;
   budget?: number;
   description?: string;
+  platform?: string;
 }
 
 // Additional type definitions aligned with WizardContext
@@ -57,9 +58,8 @@ const SummarySection: React.FC<SummarySectionProps> = ({
           </div>
           <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
         </div>
-        <button onClick={onEdit} className="text-[var(--accent-color)] text-sm flex items-center hover:text-[var(--accent-hover)] transition-colors" aria-label={`Edit ${title}`}>
-
-          <Icon name="faEdit" className="h-4 w-4 mr-1" solid={false} />
+        <button onClick={onEdit} className="group text-[var(--accent-color)] text-sm flex items-center hover:text-[var(--accent-color)] transition-colors" aria-label={`Edit ${title}`}>
+          <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
           <span>Edit</span>
         </button>
       </div>
@@ -138,13 +138,15 @@ interface DataItemProps {
   icon?: JSX.Element;
   featured?: boolean;
   isKPI?: boolean;
+  className?: string;
 }
 const DataItem: React.FC<DataItemProps> = ({
   label,
   value,
   icon,
   featured = false,
-  isKPI = false
+  isKPI = false,
+  className = ''
 }) => {
   // Convert objects or other non-primitive values to strings
   const displayValue = () => {
@@ -162,13 +164,16 @@ const DataItem: React.FC<DataItemProps> = ({
     }
     return value;
   };
-  return <div className={`mb-4 ${featured ? 'bg-[rgba(0,191,255,0.05)] p-3 rounded-md' : ''}`}>
-      <div className="flex items-center">
-        {icon}
-        <p className="text-sm text-[var(--secondary-color)] mb-1 font-medium">{label}</p>
-      </div>
-      <div className={`font-medium text-[var(--primary-color)] ${featured ? 'text-lg' : ''}`}>
-        {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
+  
+  return <div className={`mb-4 ${featured ? 'bg-[rgba(0,191,255,0.05)] p-3 rounded-md' : ''} ${className}`}>
+      <div className="flex items-start">
+        {icon && <div className="mr-2 mt-0.5 flex-shrink-0">{icon}</div>}
+        <div className="flex-1">
+          <p className={`text-sm text-[var(--secondary-color)] mb-1 font-medium ${className.includes('text-lg') ? 'text-base' : ''}`}>{label}</p>
+          <div className={`font-medium text-[var(--primary-color)] ${featured ? className.includes('text-lg') ? 'text-xl' : 'text-lg' : ''}`}>
+            {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
+          </div>
+        </div>
       </div>
     </div>;
 };
@@ -218,6 +223,8 @@ interface MergedData {
   hashtags: string;
   keyBenefits: string;
   expectedAchievements: string;
+  memorability: string;
+  purchaseIntent: string;
   brandPerception: string;
   creativeAssets: CreativeAsset[];
   creativeRequirements: any[];
@@ -260,6 +267,8 @@ const fallbackData: MergedData = {
   hashtags: '#demo #campaign',
   keyBenefits: 'Key benefits of the product',
   expectedAchievements: 'Expected achievements',
+  memorability: '8/10',
+  purchaseIntent: 'Increase purchase intent by 15%',
   brandPerception: 'How the brand is perceived',
   creativeAssets: [{
     id: '1',
@@ -283,7 +292,9 @@ const fallbackData: MergedData = {
   objectives: {
     primaryKPI: 'brandAwareness',
     secondaryKPIs: ['adRecall', 'messageAssociation'],
-    features: ['CREATIVE_ASSET_TESTING', 'BRAND_LIFT']
+    features: ['CREATIVE_ASSET_TESTING', 'BRAND_LIFT'],
+    memorability: '8/10',
+    purchaseIntent: 'Increase purchase intent by 15%'
   },
   audience: {
     demographics: {
@@ -473,6 +484,8 @@ const normalizeApiData = (data: any): MergedData => {
     hashtags: isWizardSchema ? data.messaging?.hashtags || '' : data.hashtags || '',
     keyBenefits: isWizardSchema ? data.messaging?.keyBenefits || '' : data.keyBenefits || '',
     expectedAchievements: isWizardSchema ? data.expectedOutcomes?.achievements || '' : data.expectedAchievements || '',
+    memorability: isWizardSchema ? data.messaging?.memorability || '' : data.memorability || '',
+    purchaseIntent: isWizardSchema ? data.messaging?.purchaseIntent || '' : data.purchaseIntent || '',
     brandPerception: isWizardSchema ? data.expectedOutcomes?.brandPerception || data.brandPerception || '' : data.brandPerception || '',
     // Nested structure for compatibility with the UI
     overview: {
@@ -493,7 +506,9 @@ const normalizeApiData = (data: any): MergedData => {
       mainMessage: isWizardSchema ? data.messaging?.mainMessage || '' : data.mainMessage || '',
       hashtags: isWizardSchema ? data.messaging?.hashtags || '' : data.hashtags || '',
       keyBenefits: isWizardSchema ? data.messaging?.keyBenefits || '' : data.keyBenefits || '',
-      expectedAchievements: isWizardSchema ? data.expectedOutcomes?.achievements || '' : data.expectedAchievements || ''
+      expectedAchievements: isWizardSchema ? data.expectedOutcomes?.achievements || '' : data.expectedAchievements || '',
+      memorability: isWizardSchema ? data.messaging?.memorability || '' : data.memorability || '',
+      purchaseIntent: isWizardSchema ? data.messaging?.purchaseIntent || '' : data.purchaseIntent || ''
     },
     audience: isWizardSchema ? {
       demographics: audienceData.demographics || {},
@@ -620,6 +635,8 @@ interface FeatureIconProps {
   feature: string;
   className?: string;
 }
+
+// Fix the FeatureIcon component to properly display the app icons
 const FeatureIcon: React.FC<FeatureIconProps> = ({
   feature,
   className = ""
@@ -628,34 +645,38 @@ const FeatureIcon: React.FC<FeatureIconProps> = ({
   let iconPath = '';
   const altText = formatFeature(feature);
 
-  // Map feature to icon path
+  // Map feature to icon path - ensure we include the /app/ prefix
   if (normalizedFeature.includes('brand_health') || normalizedFeature.includes('brandhealth')) {
-    iconPath = '/Brand_Health.svg';
+    iconPath = '/app/Brand_Health.svg';
   } else if (normalizedFeature.includes('brand_lift') || normalizedFeature.includes('brandlift')) {
-    iconPath = '/Brand_Lift.svg';
+    iconPath = '/app/Brand_Lift.svg';
   } else if (normalizedFeature.includes('creative_asset_testing') || normalizedFeature.includes('creativeasset')) {
-    iconPath = '/Creative_Asset_Testing.svg';
+    iconPath = '/app/Creative_Asset_Testing.svg';
   } else if (normalizedFeature.includes('mixed_media_modelling') || normalizedFeature.includes('mmm')) {
-    iconPath = '/MMM.svg';
+    iconPath = '/app/MMM.svg';
   } else if (normalizedFeature.includes('influencer')) {
-    iconPath = '/Influencers.svg';
+    iconPath = '/app/Influencers.svg';
   } else if (normalizedFeature.includes('reports') || normalizedFeature.includes('reporting')) {
-    iconPath = '/Reports.svg';
+    iconPath = '/app/Reports.svg';
   } else {
-    iconPath = '/Campaigns.svg'; // Default icon
+    iconPath = '/app/Campaigns.svg'; // Default icon
   }
+  
   return <div className="flex items-center">
-      <div className="mr-2 relative w-5 h-5 flex-shrink-0">
-        <Image src={iconPath} alt={altText} fill className="object-contain blue-icon" style={{
-        filter: 'brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%)'
-      }} />
-
-      </div>
-      <span>{altText}</span>
-    </div>;
+    <div className="w-5 h-5 mr-2 flex-shrink-0">
+      <Image 
+        src={iconPath} 
+        alt={altText} 
+        width={20}
+        height={20}
+        className="object-contain"
+      />
+    </div>
+    <span>{altText}</span>
+  </div>;
 };
 
-// Custom Asset Preview component for Step 5 (without play/pause controls)
+// Custom Asset Preview component for Step 5 (with play/pause controls)
 const Step5AssetPreview = ({
   url,
   fileName,
@@ -670,6 +691,43 @@ const Step5AssetPreview = ({
   const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
   const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Toggle play/pause when the button is clicked or video area is clicked
+  const togglePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play()
+        .catch(error => {
+          console.warn('Play was prevented:', error);
+        });
+      setIsPlaying(true);
+    }
+  };
+
+  // Update play state based on video events
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      const video = videoRef.current;
+      
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+      
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('pause', handlePause);
+      
+      return () => {
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('pause', handlePause);
+      };
+    }
+  }, [isVideo]);
 
   // Effect to handle video autoplay and looping
   useEffect(() => {
@@ -680,23 +738,32 @@ const Step5AssetPreview = ({
       const playVideo = () => {
         video.play().catch(error => {
           console.warn('Auto-play was prevented:', error);
+          setIsPlaying(false);
         });
+        setIsPlaying(true);
       };
 
       // Handle video looping - restart after 5 seconds or when ended
       const handleTimeUpdate = () => {
         if (video.currentTime >= 5) {
           video.currentTime = 0;
-          video.play().catch(err => {
-            console.error('Error replaying video:', err);
-          });
+          if (isPlaying) {
+            video.play().catch(err => {
+              console.error('Error replaying video:', err);
+              setIsPlaying(false);
+            });
+          }
         }
       };
+      
       const handleEnded = () => {
         video.currentTime = 0;
-        video.play().catch(err => {
-          console.error('Error replaying video:', err);
-        });
+        if (isPlaying) {
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
+            setIsPlaying(false);
+          });
+        }
       };
 
       // Add event listeners
@@ -711,22 +778,86 @@ const Step5AssetPreview = ({
         video.removeEventListener('ended', handleEnded);
       };
     }
-  }, [isVideo, url]);
-  return <div className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+  }, [isVideo, url, isPlaying]);
+  
+  return (
+    <div 
+      className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       {/* Image preview */}
       {isImage && <img src={url} alt={fileName} className="w-full h-full object-cover" />}
       
-      {/* Video preview (with autoplay and loop) */}
-      {isVideo && <div className="relative">
-          <video ref={videoRef} src={url} className="w-full h-full object-cover" muted playsInline loop autoPlay />
-
-        </div>}
+      {/* Video preview with play/pause button */}
+      {isVideo && (
+        <div className="relative w-full h-full" onClick={togglePlayPause}>
+          <video 
+            ref={videoRef} 
+            src={url} 
+            className="w-full h-full object-cover" 
+            muted 
+            playsInline 
+            loop 
+          />
+          
+          {/* Play/Pause button that appears on hover */}
+          {isVideo && isHovering && (
+            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
+              <button
+                onClick={togglePlayPause}
+                className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
+                aria-label={isPlaying ? "Pause video" : "Play video"}
+              >
+                <Icon 
+                  name={isPlaying ? "faPause" : "faPlay"} 
+                  className="h-6 w-6 text-white" 
+                  iconType="button" 
+                  solid={true} 
+                />
+              </button>
+            </div>
+          )}
+          
+          {/* Video label in bottom corner if we want to add it */}
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+            <Icon name="faVideo" className="h-3 w-3 mr-1 inline-block" iconType="static" solid={true} />
+            Video
+          </div>
+        </div>
+      )}
       
       {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo && <div className="flex items-center justify-center p-8">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400" solid={false} />
-        </div>}
-    </div>;
+      {!isImage && !isVideo && (
+        <div className="flex items-center justify-center p-8">
+          <Icon name="faInfo" className="h-12 w-12 text-gray-400" iconType="static" solid={false} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Helper function to calculate duration between dates
+const calculateDuration = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (diffDays === 1) return '1 day';
+  if (diffDays < 7) return `${diffDays} days`;
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    const days = diffDays % 7;
+    return `${weeks} week${weeks > 1 ? 's' : ''}${days ? ` and ${days} day${days > 1 ? 's' : ''}` : ''}`;
+  }
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    const days = diffDays % 30;
+    return `${months} month${months > 1 ? 's' : ''}${days ? ` and ${days} day${days > 1 ? 's' : ''}` : ''}`;
+  }
+  const years = Math.floor(diffDays / 365);
+  const days = diffDays % 365;
+  return `${years} year${years > 1 ? 's' : ''}${days ? ` and ${days} day${days > 1 ? 's' : ''}` : ''}`;
 };
 
 // Main Component
@@ -1158,19 +1289,35 @@ function Step5Content() {
               <h3 className="font-medium text-gray-800 mb-4">Basic Information</h3>
               
               <div className="space-y-4">
-                <DataItem label="Campaign Name" value={displayData.campaignName || 'Not specified'} featured={true} />
+                <DataItem 
+                  label="Campaign Name" 
+                  value={displayData.campaignName || 'Not specified'} 
+                  icon={<Image src="/app/Campaigns.svg" alt="Campaigns" width={22} height={22} className="mr-3" />}
+                  featured={true} 
+                  className="text-lg p-4 border-l-4 border-[var(--accent-color)] bg-[rgba(0,191,255,0.08)]"
+                />
 
                 
-                <DataItem label="Description" value={displayData.description || 'Not specified'} />
+                <DataItem 
+                  label="Business Goal for this Campaign" 
+                  value={displayData.description || 'Not specified'} 
+                />
 
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" solid={false} />} />
-
+                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
                   
-                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" solid={false} />} />
-
+                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
                 </div>
+
+                {displayData.startDate && displayData.endDate && (
+                  <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
+                    <div className="flex items-start">
+                      <Icon name="faCircleInfo" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]" iconType="static" solid={false} />
+                      <span className="flex-1">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -1179,14 +1326,11 @@ function Step5Content() {
               <h3 className="font-medium text-gray-800 mb-4">Budget Information</h3>
               
               <div className="space-y-4">
-                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon name="faInfo" className="h-4 w-4 text-[var(--secondary-color)] mr-2" solid={false} />} />
-
+                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
                 
-                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon name="faInfo" className="h-4 w-4 text-[var(--secondary-color)] mr-2" solid={false} />} featured={true} />
-
+                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} featured={true} />
                 
-                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon name="faInfo" className="h-4 w-4 text-[var(--secondary-color)] mr-2" solid={false} />} />
-
+                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
               </div>
             </div>
           </div>
@@ -1194,63 +1338,190 @@ function Step5Content() {
 
         {/* Step 2: Objectives & Messaging */}
         <SummarySection title="Objectives & Messaging" stepNumber={2} onEdit={() => navigateToStep(2)}>
-
-          {/* Campaign Objectives Section */}
-          <div className="bg-white rounded-lg overflow-hidden">
-            <div className="px-4 py-4">
-              <h3 className="font-medium text-gray-700 mb-4">Objectives</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column - Objectives */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-800 mb-4">Objectives</h3>
               
-              <div className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <DataItem label="Primary KPI" value={displayData.primaryKPI || displayData?.objectives?.primaryKPI || ''} isKPI={true} featured={true} />
-
-                  
-                  {/* For secondary KPIs, we'll display them in a more visual way */}
-                  <div className="mb-4">
-                    <p className="text-sm text-[var(--secondary-color)] mb-2 font-medium">Secondary KPIs</p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {displayData.secondaryKPIs && displayData.secondaryKPIs.length > 0 ? displayData.secondaryKPIs.map((kpi, idx) => <div key={idx} className="bg-[rgba(0,191,255,0.1)] px-3 py-1.5 rounded-full inline-flex items-center">
-
-                            <KPIDisplay kpi={kpi} />
-                          </div>) : displayData?.objectives?.secondaryKPIs && Array.isArray(displayData?.objectives?.secondaryKPIs) && displayData?.objectives?.secondaryKPIs.length > 0 ? displayData.objectives.secondaryKPIs.map((kpi, idx) => <div key={idx} className="bg-[rgba(0,191,255,0.1)] px-3 py-1.5 rounded-full inline-flex items-center">
-
-                            <KPIDisplay kpi={kpi} />
-                          </div>) : <span className="text-[var(--secondary-color)]">None specified</span>}
+              {/* Primary KPI */}
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-600 mb-2 block">Primary KPI</label>
+                {displayData.primaryKPI ? (
+                  <div className="bg-[var(--accent-color)] text-white px-3 py-1.5 rounded-md inline-flex items-center">
+                    <div className="w-5 h-5 mr-2 filter brightness-0 invert">
+                      <Image 
+                        src={`/KPIs/${displayData.primaryKPI === 'adRecall' ? 'Ad_Recall' : 
+                                displayData.primaryKPI === 'brandAwareness' ? 'Brand_Awareness' : 
+                                displayData.primaryKPI === 'consideration' ? 'Consideration' : 
+                                displayData.primaryKPI === 'messageAssociation' ? 'Message_Association' : 
+                                displayData.primaryKPI === 'brandPreference' ? 'Brand_Preference' : 
+                                displayData.primaryKPI === 'purchaseIntent' ? 'Purchase_Intent' : 
+                                displayData.primaryKPI === 'actionIntent' ? 'Action_Intent' : 
+                                displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation_Intent' : 
+                                displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`} 
+                        alt={formatKPI(displayData.primaryKPI)}
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
                     </div>
+                    <span>{displayData.primaryKPI === 'adRecall' ? 'Ad Recall' : 
+                          displayData.primaryKPI === 'brandAwareness' ? 'Brand Awareness' : 
+                          displayData.primaryKPI === 'consideration' ? 'Consideration' : 
+                          displayData.primaryKPI === 'messageAssociation' ? 'Message Association' : 
+                          displayData.primaryKPI === 'brandPreference' ? 'Brand Preference' : 
+                          displayData.primaryKPI === 'purchaseIntent' ? 'Purchase Intent' : 
+                          displayData.primaryKPI === 'actionIntent' ? 'Action Intent' : 
+                          displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation Intent' : 
+                          displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 
+                          formatKPI(displayData.primaryKPI)}</span>
                   </div>
-                </div>
-
-                <div className="bg-[rgba(0,191,255,0.03)] p-4 rounded-lg border border-[var(--divider-color)]">
-                  <h4 className="text-sm font-medium text-[var(--secondary-color)] mb-3">Features</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3">
-                    {displayData.features?.map((feature, i) => (
-                      <div 
-                        key={i} 
-                        className="flex items-center bg-blue-50 rounded-lg p-3"
-                      >
-                        <FeatureIcon 
-                          feature={feature} 
-                          className="text-blue-500 mr-2"
-                        />
-                        <span>{formatFeature(feature)}</span>
+                ) : (
+                  <div className="text-gray-500">None selected</div>
+                )}
+              </div>
+              
+              {/* Secondary KPIs */}
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-600 mb-2 block">Secondary KPIs</label>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.secondaryKPIs && displayData.secondaryKPIs.length > 0 ? (
+                    displayData.secondaryKPIs.map((kpi, index) => (
+                      <div key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
+                        <div className="w-5 h-5 mr-2">
+                          <Image 
+                            src={`/KPIs/${kpi === 'adRecall' ? 'Ad_Recall' : 
+                                  kpi === 'brandAwareness' ? 'Brand_Awareness' : 
+                                  kpi === 'consideration' ? 'Consideration' : 
+                                  kpi === 'messageAssociation' ? 'Message_Association' : 
+                                  kpi === 'brandPreference' ? 'Brand_Preference' : 
+                                  kpi === 'purchaseIntent' ? 'Purchase_Intent' : 
+                                  kpi === 'actionIntent' ? 'Action_Intent' : 
+                                  kpi === 'recommendationIntent' ? 'Recommendation_Intent' : 
+                                  kpi === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`} 
+                            alt={formatKPI(kpi)}
+                            width={20}
+                            height={20}
+                            className="object-contain"
+                          />
+                        </div>
+                        <span>{kpi === 'adRecall' ? 'Ad Recall' : 
+                              kpi === 'brandAwareness' ? 'Brand Awareness' : 
+                              kpi === 'consideration' ? 'Consideration' : 
+                              kpi === 'messageAssociation' ? 'Message Association' : 
+                              kpi === 'brandPreference' ? 'Brand Preference' : 
+                              kpi === 'purchaseIntent' ? 'Purchase Intent' : 
+                              kpi === 'actionIntent' ? 'Action Intent' : 
+                              kpi === 'recommendationIntent' ? 'Recommendation Intent' : 
+                              kpi === 'advocacy' ? 'Advocacy' : 
+                              formatKPI(kpi)}</span>
                       </div>
-                    ))}
+                    ))
+                  ) : (
+                    <div className="text-gray-500">None selected</div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Features */}
+              <div className="mb-6">
+                <label className="text-sm font-medium text-gray-600 mb-2 block">Features</label>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.features && displayData.features.length > 0 ? (
+                    displayData.features.map((feature: string, index: number) => (
+                      <div key={index} className="inline-flex items-center p-2 bg-gray-50 rounded-md">
+                        <FeatureIcon feature={feature} className="flex-shrink-0" />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-500">No features selected</div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Right Column - Messaging */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <div className="space-y-6">
+                <h3 className="font-medium text-gray-800 mb-4">Messaging</h3>
+                
+                {/* Main Message */}
+                <div className="flex items-start">
+                  <Icon name="faCommentDots" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.mainMessage || displayData?.objectives?.mainMessage || 'Not specified'}
+                    </span>
                   </div>
                 </div>
-
-                <div className="mt-6">
-                  <DataItem label="Main Message" value={displayData.mainMessage || displayData?.objectives?.mainMessage || 'Not specified'} />
-
-                  
-                  <DataItem label="Hashtags" value={displayData.hashtags || displayData?.objectives?.hashtags || 'Not specified'} />
-
-                  
-                  <DataItem label="Key Benefits" value={displayData.keyBenefits || displayData?.objectives?.keyBenefits || 'Not specified'} />
-
-                  
-                  <DataItem label="Expected Achievements" value={displayData.expectedAchievements || displayData?.objectives?.expectedAchievements || 'Not specified'} />
-
+                
+                {/* Hashtags */}
+                <div className="flex items-start">
+                  <Icon name="faTag" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.hashtags || displayData?.objectives?.hashtags || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Memorability Score */}
+                <div className="flex items-start">
+                  <Icon name="faStar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.memorability || displayData?.objectives?.memorability || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Key Benefits */}
+                <div className="flex items-start">
+                  <Icon name="faCircleCheck" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.keyBenefits || displayData?.objectives?.keyBenefits || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+                
+                <h3 className="font-medium text-gray-800 mb-4 mt-8">Expected Outcomes</h3>
+                
+                {/* Expected Achievements */}
+                <div className="flex items-start">
+                  <Icon name="faArrowTrendUp" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.expectedAchievements || displayData?.objectives?.expectedAchievements || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Impact on Purchase Intent */}
+                <div className="flex items-start">
+                  <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.purchaseIntent || displayData?.objectives?.purchaseIntent || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Brand Perception Change */}
+                <div className="flex items-start">
+                  <Icon name="faChartBar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
+                    <span className="text-base text-gray-800 block">
+                      {displayData.brandPerception || displayData?.objectives?.brandPerception || 'Not specified'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1259,12 +1530,12 @@ function Step5Content() {
 
         {/* Step 3: Audience & Competitors */}
         <SummarySection title="Audience Targeting" stepNumber={3} onEdit={() => navigateToStep(3)}>
-
-          {displayData.audience || displayData?.audience ? <div className="space-y-6">
+          {displayData.audience || displayData?.audience ? (
+            <div className="space-y-6">
               {/* Demographics Section */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-2" solid={false} />
+                <div className="flex items-start mb-4">
+                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
                   <h3 className="font-medium text-gray-800">Demographics</h3>
                 </div>
 
@@ -1272,15 +1543,18 @@ function Step5Content() {
                 <div className="mb-5">
                   <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
                   <div className="grid grid-cols-6 gap-1">
-                    {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => {
-                  // Check if this age range is selected
-                  const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
-                  const isSelected = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience] && Number(displayData.audience[ageKey as keyof typeof displayData.audience]) > 0;
-                  return <div key={range} className={`text-center py-1.5 text-xs rounded ${isSelected ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
-
+                    {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range, index) => {
+                      // Check if this age range is selected
+                      const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
+                      const percentage = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience] 
+                                       ? Number(displayData.audience[ageKey as keyof typeof displayData.audience]) 
+                                       : 0;
+                      return (
+                        <div key={range} className={`text-center py-1.5 text-xs rounded ${percentage > 0 ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
                           {range}
-                        </div>;
-                })}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -1288,17 +1562,23 @@ function Step5Content() {
                 <div className="mb-5">
                   <h4 className="text-gray-700 font-medium mb-3 text-sm">Gender</h4>
                   <div className="flex flex-wrap gap-2">
-                    {displayData.audience?.genders && Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ? displayData.audience.genders.map((g: any, idx: number) => <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                    {displayData.audience?.genders && Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ? (
+                      displayData.audience.genders.map((g: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                           {g.gender || g.toString()}
-                        </span>) : <span className="text-gray-500 text-sm">Not specified</span>}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Location Section */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <Icon name="faInfo" className="h-5 w-5 text-[var(--accent-color)] mr-2" solid={false} />
+                <div className="flex items-start mb-4">
+                  <Icon name="faMap" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
                   <h3 className="font-medium text-gray-800">Location</h3>
                 </div>
 
@@ -1306,9 +1586,15 @@ function Step5Content() {
                 <div className="mb-5">
                   <h4 className="text-gray-700 font-medium mb-3 text-sm">Locations</h4>
                   <div className="flex flex-wrap gap-2">
-                    {displayData.audience?.locations && Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ? displayData.audience.locations.map((l: any, idx: number) => <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                    {displayData.audience?.locations && Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ? (
+                      displayData.audience.locations.map((l: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                           {typeof l === 'string' ? l : l.location || l.name || ''}
-                        </span>) : <span className="text-gray-500 text-sm">Not specified</span>}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
 
@@ -1316,17 +1602,42 @@ function Step5Content() {
                 <div className="mb-4">
                   <h4 className="text-gray-700 font-medium mb-3 text-sm">Languages</h4>
                   <div className="flex flex-wrap gap-2">
-                    {displayData.audience?.languages && Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ? displayData.audience.languages.map((l: any, idx: number) => <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                    {displayData.audience?.languages && Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ? (
+                      displayData.audience.languages.map((l: any, idx: number) => (
+                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                           {typeof l === 'string' ? l : l.language || l.toString()}
-                        </span>) : <span className="text-gray-500 text-sm">Not specified</span>}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
               </div>
 
+              {/* Screening Questions */}
+              {displayData.audience?.screeningQuestions && Array.isArray(displayData.audience.screeningQuestions) && displayData.audience.screeningQuestions.length > 0 && (
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                  <div className="flex items-start mb-4">
+                    <Icon name="faQuestionCircle" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                    <h3 className="font-medium text-gray-800">Screening Questions</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {displayData.audience.screeningQuestions.map((q: any, idx: number) => (
+                      <div key={idx} className="pl-2 border-l-2 border-[rgba(0,191,255,0.3)]">
+                        <p className="text-gray-700">
+                          {typeof q === 'string' ? q : q.question || q.toString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Advanced Targeting */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <Icon name="faInfo" className="h-5 w-5 text-[var(--accent-color)] mr-2" solid={false} />
+                <div className="flex items-start mb-4">
+                  <Icon name="faFilter" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
                   <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
                 </div>
 
@@ -1334,76 +1645,122 @@ function Step5Content() {
                   {/* Education Level */}
                   <div>
                     <h4 className="text-gray-700 font-medium mb-3 text-sm">Education Level</h4>
-                    {displayData.audience?.educationLevel ? <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
+                    {displayData.audience?.educationLevel ? (
+                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
                         {String(displayData.audience.educationLevel)}
-                      </span> : <span className="text-gray-500 text-sm">Not specified</span>}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
 
-                  {/* Income Level - with proper currency formatting */}
+                  {/* Income Level */}
                   <div>
                     <h4 className="text-gray-700 font-medium mb-3 text-sm">Income Level</h4>
-                    {displayData.audience?.incomeLevel ? <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
+                    {displayData.audience?.incomeLevel ? (
+                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
                         {formatCurrency(Number(displayData.audience.incomeLevel) || 0, displayData.currency || 'USD')}
-                      </span> : <span className="text-gray-500 text-sm">Not specified</span>}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
 
                   {/* Job Titles */}
                   <div>
                     <h4 className="text-gray-700 font-medium mb-3 text-sm">Job Titles</h4>
                     <div className="flex flex-wrap gap-2">
-                      {displayData.audience?.jobTitles ? Array.isArray(displayData.audience.jobTitles) ? displayData.audience.jobTitles.map((title: string, idx: number) => <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                      {displayData.audience?.jobTitles ? (
+                        Array.isArray(displayData.audience.jobTitles) ? (
+                          displayData.audience.jobTitles.map((title: string, idx: number) => (
+                            <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                               {title}
-                            </span>) : <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                            </span>
+                          ))
+                        ) : (
+                          <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
                             {String(displayData.audience.jobTitles)}
-                          </span> : <span className="text-gray-500 text-sm">Not specified</span>}
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-gray-500 text-sm">Not specified</span>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Competitors Section (if available) */}
-              {displayData.audience?.competitors && Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 && <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                  <h3 className="font-medium text-gray-800 mb-3">Competitors</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {displayData.audience.competitors.map((item: any, index: number) => <span key={index} className="inline-block px-3 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full text-sm font-medium">
-                        {typeof item === 'string' ? item : item.competitor || item.name || ''}
-                      </span>)}
+              {displayData.audience?.competitors && Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 && (
+                <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                  <div className="flex items-start mb-4">
+                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                    <h3 className="font-medium text-gray-800">Competitors to Monitor</h3>
                   </div>
-                </div>}
-
-              {/* Brand Perception (if available) */}
-              {(displayData.brandPerception || displayData?.audience?.brandPerception) && <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                  <h3 className="font-medium text-gray-800 mb-3">Brand Perception</h3>
-                  <p className="text-gray-800">
-                    {displayData.brandPerception || displayData?.audience?.brandPerception}
-                  </p>
-                </div>}
-            </div> : <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <Icon name="faUser" className="h-10 w-10 text-gray-400 mx-auto mb-2" solid={false} />
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience.competitors.map((item: any, index: number) => (
+                      <span key={index} className="inline-block px-3 py-1 bg-[rgba(255,0,0,0.05)] text-red-600 border border-red-100 rounded-full text-sm font-medium">
+                        {typeof item === 'string' ? item : item.competitor || item.name || ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <Icon name="faUser" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
               <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
               <button onClick={() => navigateToStep(3)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto">
-
-                <Icon name="faEdit" className="h-4 w-4 mr-1" solid={false} />
-                Add audience targeting
+                <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
+                Edit audience targeting
               </button>
-            </div>}
+            </div>
+          )}
         </SummarySection>
 
         {/* Step 4: Creative Assets */}
         <SummarySection title="Creative Assets" stepNumber={4} onEdit={() => navigateToStep(4)}>
 
           {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => <div key={asset.id || index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+              {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => <div key={asset.id || index} className="border border-gray-200 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all flex flex-col transform hover:-translate-y-1 hover:border-[var(--accent-color)]">
                   {/* Asset Preview - Square/Tiled */}
                   <div className="aspect-square w-full overflow-hidden relative bg-gray-50">
                     <Step5AssetPreview url={asset.url} fileName={asset.assetName || asset.name || 'Asset preview'} type={asset.type} className="w-full h-full" />
-
                     
-                    {/* Asset Name Overlay at Top */}
-                    <div className="absolute top-0 left-0 right-0 bg-white bg-opacity-90 py-2 px-3 border-b border-gray-200">
-                      <h3 className="font-medium text-gray-800 truncate text-sm">
+                    {/* Asset Type Badge */}
+                    <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs font-medium">
+                      {asset.type === 'video' || (typeof asset.type === 'string' && asset.type.includes('video')) 
+                        ? <div className="flex items-center"><Icon name="faVideo" className="h-3 w-3 mr-1" iconType="static" solid={false} /> Video</div> 
+                        : <div className="flex items-center"><Icon name="faImage" className="h-3 w-3 mr-1" iconType="static" solid={false} /> Image</div>}
+                    </div>
+                  </div>
+                  
+                  {/* Asset Name - Made more prominent */}
+                  <div className="px-4 pt-4 pb-2 bg-gradient-to-r from-[rgba(0,191,255,0.05)] to-white border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-800 text-lg leading-tight truncate pr-2" style={{ fontFamily: 'Sora, sans-serif' }}>
                         {asset.assetName || asset.name || 'Untitled Asset'}
                       </h3>
+                      {/* Platform Icon */}
+                      {(asset.platform || displayData.platform) && (
+                        <div className="flex-shrink-0 bg-[rgba(0,191,255,0.1)] rounded-full p-1.5 ml-1">
+                          <Icon 
+                            name={
+                              (asset.platform || displayData.platform || '').toLowerCase().includes('instagram') ? 'faInstagram' :
+                              (asset.platform || displayData.platform || '').toLowerCase().includes('facebook') ? 'faFacebook' :
+                              (asset.platform || displayData.platform || '').toLowerCase().includes('twitter') || (asset.platform || displayData.platform || '').toLowerCase().includes('x') ? 'faTwitter' :
+                              (asset.platform || displayData.platform || '').toLowerCase().includes('tiktok') ? 'faTiktok' :
+                              (asset.platform || displayData.platform || '').toLowerCase().includes('youtube') ? 'faYoutube' :
+                              (asset.platform || displayData.platform || '').toLowerCase().includes('linkedin') ? 'faLinkedin' :
+                              'faGlobe'
+                            } 
+                            className="h-4 w-4 text-[var(--accent-color)]" 
+                            iconType="static" 
+                            solid={true} 
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -1412,17 +1769,28 @@ function Step5Content() {
                     <div className="space-y-4">
                       {/* Influencer */}
                       <div className="flex items-start">
-                        <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />
-                        <div>
+                        <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0" iconType="static" solid={false} />
+                        <div className="flex-1">
                           <p className="text-xs text-gray-500 mb-1">Influencer</p>
                           <p className="text-sm text-gray-800 font-medium">{asset.influencerHandle || 'Not specified'}</p>
                         </div>
                       </div>
                       
+                      {/* Platform (if not shown next to title) */}
+                      {!(asset.platform || displayData.platform) && (
+                        <div className="flex items-start">
+                          <Icon name="faGlobe" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0" iconType="static" solid={false} />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500 mb-1">Platform</p>
+                            <p className="text-sm text-gray-800 font-medium">Not specified</p>
+                          </div>
+                        </div>
+                      )}
+                      
                       {/* Why this influencer */}
                       <div className="flex items-start">
-                        <Icon name="faInfo" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />
-                        <div>
+                        <Icon name="faCircleInfo" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0" iconType="static" solid={false} />
+                        <div className="flex-1">
                           <p className="text-xs text-gray-500 mb-1">Why this influencer</p>
                           <p className="text-sm text-gray-800">{asset.whyInfluencer || 'No details provided'}</p>
                         </div>
@@ -1430,8 +1798,8 @@ function Step5Content() {
                       
                       {/* Budget */}
                       <div className="flex items-start">
-                        <Icon name="faInfo" className="h-5 w-5 text-[var(--accent-color)] mr-2 mt-0.5 flex-shrink-0" solid={false} />
-                        <div>
+                        <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-1 flex-shrink-0" iconType="static" solid={false} />
+                        <div className="flex-1">
                           <p className="text-xs text-gray-500 mb-1">Budget</p>
                           <p className="text-sm text-gray-800 font-medium">
                             {asset.budget ? formatCurrency(asset.budget, displayData.currency || 'USD') : 'Not specified'}
@@ -1442,11 +1810,10 @@ function Step5Content() {
                   </div>
                 </div>)}
             </div> : <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <Icon name="faInfo" className="h-10 w-10 text-gray-400 mx-auto mb-2" solid={false} />
+              <Icon name="faImage" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
               <p className="text-gray-500">No creative assets have been added yet.</p>
-              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto">
-
-                <Icon name="faEdit" className="h-4 w-4 mr-1" solid={false} />
+              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto group">
+                <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
                 Add creative assets
               </button>
             </div>}
