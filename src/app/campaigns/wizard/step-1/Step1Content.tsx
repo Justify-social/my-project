@@ -167,13 +167,13 @@ const StyledField = ({
   icon,
   ...props
 }: any) => {
-  return <div className="mb-5">
+  return <div className="mb-5 font-work-sans">
       <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
         {label}
-        {required && <span className="text-[var(--accent-color)] ml-1">*</span>}
+        {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
       </label>
-      <div className="relative">
-        {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
+      <div className="relative font-work-sans">
+        {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
             {icon}
           </div>}
         {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon ${as === "select" ? "appearance-none" : ""}`} {...props}>
@@ -181,15 +181,15 @@ const StyledField = ({
             {children}
           </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
         {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
-        {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container">
-            <Icon name="faCalendar" className="w-5 h-5" solid={false} />
+        {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
+            <Icon name="faCalendar" className="w-5 h-5 font-work-sans" solid={false} />
           </div>}
         {/* Add chevron only for select elements */}
-        {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container">
-            <Icon name="faChevronDown" className="w-5 h-5" solid={false} />
+        {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container font-work-sans">
+            <Icon name="faChevronDown" className="w-5 h-5 font-work-sans" solid={false} />
           </div>}
       </div>
-      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
+      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
     </div>;
 };
 
@@ -200,15 +200,15 @@ const DateField = ({
   required = false,
   ...props
 }: any) => {
-  return <div className="mb-5">
+  return <div className="mb-5 font-work-sans">
       <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
         {label}
-        {required && <span className="text-[var(--accent-color)] ml-1">*</span>}
+        {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
       </label>
-      <div className="relative">
+      <div className="relative font-work-sans">
         <Field type="date" id={name} name={name} className="w-full p-2.5 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
       </div>
-      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600" />
+      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
     </div>;
 };
 
@@ -340,17 +340,17 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<{
 const ExchangeRateHandler = ({
   currency,
   onRatesFetched
-}: {
-  currency: string;
-  onRatesFetched: (data: any) => void;
-}) => {
+
+
+
+}: {currency: string;onRatesFetched: (data: any) => void;}) => {
   useEffect(() => {
     if (!currency) return;
-    fetchExchangeRates(currency).then(data => {
+    fetchExchangeRates(currency).then((data) => {
       if (data) {
         onRatesFetched(data);
       }
-    }).catch(err => console.warn('Error fetching exchange rates:', err));
+    }).catch((err) => console.warn('Error fetching exchange rates:', err));
   }, [currency, onRatesFetched]);
   return null; // This component doesn't render anything
 };
@@ -360,11 +360,11 @@ const DateRangePicker = ({
   startFieldName,
   endFieldName,
   label
-}: {
-  startFieldName: string;
-  endFieldName: string;
-  label: string;
-}) => {
+
+
+
+
+}: {startFieldName: string;endFieldName: string;label: string;}) => {
   const {
     values,
     setFieldValue,
@@ -392,45 +392,45 @@ const DateRangePicker = ({
     nextDay.setDate(nextDay.getDate() + 1);
     return nextDay.toISOString().split('T')[0];
   })() : '';
-  return <div className="mb-5">
-      <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-sora">
-        {label} <span className="text-[var(--accent-color)]">*</span>
+  return <div className="mb-5 font-work-sans">
+      <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+        {label} <span className="text-[var(--accent-color)] font-work-sans">*</span>
       </label>
       
-      <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1">
+      <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 font-work-sans">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+          <div className="font-work-sans">
+            <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
               Start Date
             </label>
-            <div className="relative">
-              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'}`} min={new Date().toISOString().split('T')[0]} // Minimum is today
+            <div className="relative font-work-sans">
+              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={new Date().toISOString().split('T')[0]} // Minimum is today
             />
             </div>
-            {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1">
+            {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
                 {errors[startFieldName as keyof FormValues] as string}
               </div>}
           </div>
           
-          <div>
-            <label htmlFor={endFieldName} className="block text-sm text-[var(--secondary-color)] mb-1">
+          <div className="font-work-sans">
+            <label htmlFor={endFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
               End Date
             </label>
-            <div className="relative">
-              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={e => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'}`} min={minEndDate} // End date must be at least the day after start date
+            <div className="relative font-work-sans">
+              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={(e) => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={minEndDate} // End date must be at least the day after start date
             disabled={!startDate} // Disable until start date is selected
             />
             </div>
-            {errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1">
+            {errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
                 {errors[endFieldName as keyof FormValues] as string}
               </div>}
           </div>
         </div>
         
-        {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded">
-            <div className="flex items-center">
-              <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-[var(--accent-color)]" solid={false} />
-              <span>Campaign Duration: {calculateDuration(startDate, endDate)}</span>
+        {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded font-work-sans">
+            <div className="flex items-center font-work-sans">
+              <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-[var(--accent-color)] font-work-sans" solid={false} />
+              <span className="font-work-sans">Campaign Duration: {calculateDuration(startDate, endDate)}</span>
             </div>
           </div>}
       </div>
@@ -500,7 +500,7 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
       console.warn('Phyllo API credentials missing. Using simulated data.');
 
       // Return simulated data after a delay to simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Generate a consistent but fake follower count based on handle length
       // Just for demo purposes
@@ -532,7 +532,7 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
     // 3. Fetch profile data if account is connected
 
     // For now, we'll use simulated data
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     // Randomly generate some realistic data for demo purposes
     const followerCount = Math.floor(100000 + Math.random() * 900000);
@@ -578,11 +578,11 @@ const InfluencerEntry = ({
   index,
   remove,
   arrayHelpers
-}: {
-  index: number;
-  remove: () => void;
-  arrayHelpers: any;
-}) => {
+
+
+
+
+}: {index: number;remove: () => void;arrayHelpers: any;}) => {
   const {
     values,
     setFieldValue,
@@ -636,18 +636,18 @@ const InfluencerEntry = ({
     }
   }, [influencer.platform, influencer.handle, debouncedValidate]);
   const hasError = touched.influencers?.[index] && ((errors.influencers?.[index] as any)?.platform || (errors.influencers?.[index] as any)?.handle);
-  return <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 mb-4">
-      <div className="flex justify-between items-center mb-3">
+  return <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 mb-4 font-work-sans">
+      <div className="flex justify-between items-center mb-3 font-work-sans">
         <h4 className="text-[var(--primary-color)] font-medium font-sora">Influencer #{index + 1}</h4>
-        {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200">
+        {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200 font-work-sans">
             <Icon name="faClose" className="h-5 w-5" solid={false} />
           </button>}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+        <div className="font-work-sans">
           <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-            Platform <span className="text-[var(--accent-color)]">*</span>
+            Platform <span className="text-[var(--accent-color)] font-work-sans">*</span>
           </label>
           <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] appearance-none ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-[var(--divider-color)]'}`}>
             <option value="">Select platform</option>
@@ -655,38 +655,38 @@ const InfluencerEntry = ({
             <option value={Platform.YouTube}>YouTube</option>
             <option value={Platform.TikTok}>TikTok</option>
           </Field>
-          <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-red-500 text-sm mt-1" />
+          <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
         </div>
         
-        <div>
+        <div className="font-work-sans">
           <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-            Influencer Handle <span className="text-[var(--accent-color)]">*</span>
+            Influencer Handle <span className="text-[var(--accent-color)] font-work-sans">*</span>
           </label>
-          <div className="relative">
+          <div className="relative font-work-sans">
             <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-[var(--divider-color)]'}`} />
 
-            {isValidating && <div className="absolute right-2 top-2">
-                <img src="/ui-icons/light/spinner.svg" className="h-5 w-5 text-[var(--primary-color)] animate-spin" alt="Loading" />
+            {isValidating && <div className="absolute right-2 top-2 font-work-sans">
+                <img src="/ui-icons/light/spinner.svg" className="h-5 w-5 text-[var(--primary-color)] animate-spin font-work-sans" alt="Loading" />
               </div>}
           </div>
-          <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1" />
+          <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
 
-          {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-[var(--secondary-color)] mt-1">Type at least 3 characters to search</div>}
+          {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">Type at least 3 characters to search</div>}
         </div>
       </div>
       
-      {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center">
-          <div className="animate-spin mr-2">
+      {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center font-work-sans">
+          <div className="animate-spin mr-2 font-work-sans">
             <img src="/ui-icons/light/spinner.svg" className="h-4 w-4" alt="Loading" />
           </div>
           Validating influencer...
         </div>}
       
-      {validationResult && <div className="mt-3">
+      {validationResult && <div className="mt-3 font-work-sans">
           <InfluencerPreview platform={influencer.platform} handle={influencer.handle} data={validationResult} />
         </div>}
       
-      {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-amber-600 text-sm">
+      {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-amber-600 text-sm font-work-sans">
           No data found for this influencer.
         </div>}
     </div>;
@@ -697,11 +697,11 @@ const InfluencerPreview = ({
   platform,
   handle,
   data
-}: {
-  platform: string;
-  handle: string;
-  data?: InfluencerData;
-}) => {
+
+
+
+
+}: {platform: string;handle: string;data?: InfluencerData;}) => {
   const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -727,26 +727,26 @@ const InfluencerPreview = ({
     fetchData();
   }, [platform, handle, data]);
   if (isLoading) {
-    return <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center">
-        <div className="animate-spin mr-2">
-          <img src="/ui-icons/light/spinner.svg" className="h-4 w-4 text-[var(--primary-color)]" alt="Loading" />
+    return <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center font-work-sans">
+        <div className="animate-spin mr-2 font-work-sans">
+          <img src="/ui-icons/light/spinner.svg" className="h-4 w-4 text-[var(--primary-color)] font-work-sans" alt="Loading" />
         </div>
-        <p className="text-sm text-gray-600">Validating influencer...</p>
+        <p className="text-sm text-gray-600 font-work-sans">Validating influencer...</p>
       </div>;
   }
   if (error) {
-    return <div className="bg-red-50 rounded-md p-3">
-        <p className="text-sm text-red-600">{error}</p>
+    return <div className="bg-red-50 rounded-md p-3 font-work-sans">
+        <p className="text-sm text-red-600 font-work-sans">{error}</p>
       </div>;
   }
   if (!influencerData) {
-    return <div className="bg-amber-50 rounded-md p-3">
-        <p className="text-sm text-amber-600">
+    return <div className="bg-amber-50 rounded-md p-3 font-work-sans">
+        <p className="text-sm text-amber-600 font-work-sans">
           No data available for this influencer.
         </p>
       </div>;
   }
-  
+
   // Convert platform name to lowercase for standard format
   const getPlatformName = (platformName: string): string => {
     const name = platformName.toLowerCase();
@@ -760,40 +760,40 @@ const InfluencerPreview = ({
     if (name.includes('reddit')) return 'reddit';
     return 'instagram'; // Default fallback
   };
-  
+
   // Get normalized platform name
   const platformName = getPlatformName(platform);
-  
-  return <div className="bg-blue-50 rounded-md p-3">
-      <div className="flex items-start">
-        {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-            <Icon name="faUserLight" className="h-6 w-6 text-gray-500" solid={false} />
+
+  return <div className="bg-blue-50 rounded-md p-3 font-work-sans">
+      <div className="flex items-start font-work-sans">
+        {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center font-work-sans">
+            <Icon name="faUserLight" className="h-6 w-6 text-gray-500 font-work-sans" solid={false} />
           </div>}
-        <div>
-          <div className="flex items-center">
-            <p className="font-medium text-[var(--primary-color)]">
+        <div className="font-work-sans">
+          <div className="flex items-center font-work-sans">
+            <p className="font-medium text-[var(--primary-color)] font-work-sans">
               {influencerData.displayName || handle}
             </p>
-            {influencerData.verified && <span className="ml-1 text-blue-500">
+            {influencerData.verified && <span className="ml-1 text-blue-500 font-work-sans">
                 <Icon name="faCircleCheck" className="h-4 w-4" solid={true} />
               </span>}
           </div>
-          <p className="text-sm text-gray-600 flex items-center">
-            <img 
-              src={`/ui-icons/brands/${platformName}.svg`} 
-              alt={platformName}
-              className="h-4 w-4 mr-1.5 inline-block"
-              style={{ position: 'relative', top: '-1px' }}
-            />
+          <p className="text-sm text-gray-600 flex items-center font-work-sans">
+            <img
+            src={`/ui-icons/brands/${platformName}.svg`}
+            alt={platformName}
+            className="h-4 w-4 mr-1.5 inline-block"
+            style={{ position: 'relative', top: '-1px' }} />
+
             @{handle}
           </p>
-          <div className="mt-1 flex space-x-3 text-xs text-gray-500">
-            <span>{influencerData.followerCount?.toLocaleString() || 'Unknown'} followers</span>
-            {influencerData.engagementRate && <span>{influencerData.engagementRate.toFixed(2)}% engagement</span>}
+          <div className="mt-1 flex space-x-3 text-xs text-gray-500 font-work-sans">
+            <span className="font-work-sans">{influencerData.followerCount?.toLocaleString() || 'Unknown'} followers</span>
+            {influencerData.engagementRate && <span className="font-work-sans">{influencerData.engagementRate.toFixed(2)}% engagement</span>}
           </div>
         </div>
       </div>
-      {influencerData.description && <p className="mt-2 text-sm text-gray-600 line-clamp-2">{influencerData.description}</p>}
+      {influencerData.description && <p className="mt-2 text-sm text-gray-600 line-clamp-2 font-work-sans">{influencerData.description}</p>}
     </div>;
 };
 
@@ -917,7 +917,7 @@ function FormContent() {
 
       // Validate required fields client-side before submission
       const requiredFields = ['name', 'businessGoal', 'startDate', 'endDate', 'timeZone', 'currency'];
-      const missingFields = requiredFields.filter(field => !values[field as keyof FormValues]);
+      const missingFields = requiredFields.filter((field) => !values[field as keyof FormValues]);
       if (missingFields.length > 0) {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
@@ -965,13 +965,13 @@ function FormContent() {
         currency: values.currency,
         totalBudget: parseFloat(values.totalBudget.toString() || '0'),
         socialMediaBudget: parseFloat(values.socialMediaBudget.toString() || '0'),
-        influencers: values.influencers?.filter(i => i.handle) || []
+        influencers: values.influencers?.filter((i) => i.handle) || []
       };
       const formattedValues = {
         ...cleanValues,
         currency: EnumTransformers.currencyToBackend(values.currency),
         // Transform influencers if they exist
-        influencers: cleanValues.influencers.map(influencer => ({
+        influencers: cleanValues.influencers.map((influencer) => ({
           ...influencer,
           platform: EnumTransformers.platformToBackend(influencer.platform)
         })),
@@ -1325,7 +1325,7 @@ function FormContent() {
     return <WizardSkeleton step={1} />;
   }
   if (error) {
-    return <div className="p-6 bg-red-50 border border-red-200 rounded-md shadow-sm">
+    return <div className="p-6 bg-red-50 border border-red-200 rounded-md shadow-sm font-work-sans">
         <h3 className="text-red-800 font-semibold font-sora">Error</h3>
         <p className="text-red-600 font-work-sans">{error}</p>
         <button onClick={() => router.push('/campaigns')} className="mt-4 px-4 py-2 bg-accent-color text-white rounded-md hover:bg-accent-color/90 transition-colors duration-200 font-work-sans">
@@ -1334,8 +1334,8 @@ function FormContent() {
         </button>
       </div>;
   }
-  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-[var(--background-color)]">
-      <div className="mb-8">
+  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-[var(--background-color)] font-work-sans">
+      <div className="mb-8 font-work-sans">
         <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-2 font-sora">Campaign Creation</h1>
         <p className="text-[var(--secondary-color)] font-work-sans">Complete all required fields to create your campaign</p>
       </div>
@@ -1363,9 +1363,9 @@ function FormContent() {
         return <>
               <Form className="space-y-8">
                 {/* Campaign Details */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Image src="/app/Campaigns.svg" alt="Campaigns" width={16} height={16} className="mr-2 text-black" />
+                    <Image src="/app/Campaigns.svg" alt="Campaigns" width={16} height={16} className="mr-2 text-black font-work-sans" />
 
                     Campaign Details
                   </h2>
@@ -1376,7 +1376,7 @@ function FormContent() {
                   <StyledField label="What business goals does this campaign support?" name="businessGoal" as="textarea" rows={4} placeholder="e.g. Increase market share by 5% in the next quarter. Launch a new product line targeting millennials." required />
 
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 font-work-sans">
                     <DateRangePicker startFieldName="startDate" endFieldName="endDate" label="Campaign Duration" />
 
                     <StyledField label="Time Zone" name="timeZone" as="select" required icon={<Icon name="faGlobe" className="w-5 h-5" solid={false} />}>
@@ -1399,18 +1399,18 @@ function FormContent() {
                 </div>
 
                 {/* Primary Contact */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                    <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                     Primary Contact
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
                     <StyledField label="First Name" name="primaryContact.firstName" placeholder="Enter first name" required icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
 
                     <StyledField label="Last Name" name="primaryContact.surname" placeholder="Enter last name" required icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
 
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
                     <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
 
                     <StyledField label="Position" name="primaryContact.position" as="select" required icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
@@ -1424,18 +1424,18 @@ function FormContent() {
                 </div>
 
                 {/* Secondary Contact */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                     Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
                     <StyledField label="First Name" name="secondaryContact.firstName" placeholder="Enter first name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
 
                     <StyledField label="Last Name" name="secondaryContact.surname" placeholder="Enter last name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
 
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
                     <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
 
                     <StyledField label="Position" name="secondaryContact.position" as="select" icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
@@ -1449,45 +1449,45 @@ function FormContent() {
                 </div>
 
                 {/* Additional Contacts */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
-                  <div className="flex justify-between items-center mb-5">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+                  <div className="flex justify-between items-center mb-5 font-work-sans">
                     <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] flex items-center">
-                      <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                      <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                       Additional Contacts <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                     </h2>
                     <button type="button" onClick={() => {
-                      const contacts = [...values.additionalContacts, {
-                        firstName: '',
-                        surname: '',
-                        email: '',
-                        position: ''
-                      }];
-                      setFieldValue('additionalContacts', contacts);
-                    }} className="flex items-center text-sm font-medium bg-[var(--background-color)] border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
+                  const contacts = [...values.additionalContacts, {
+                    firstName: '',
+                    surname: '',
+                    email: '',
+                    position: ''
+                  }];
+                  setFieldValue('additionalContacts', contacts);
+                }} className="flex items-center text-sm font-medium bg-[var(--background-color)] border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
                       <Icon name="faPlus" className="w-5 h-5 mr-1" solid={false} />
                       Add Contact
                     </button>
                   </div>
 
-                  {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-[var(--divider-color)] rounded-lg p-4 relative shadow-sm bg-white">
+                  {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-[var(--divider-color)] rounded-lg p-4 relative shadow-sm bg-white font-work-sans">
                         <button type="button" onClick={() => {
-                          const contacts = [...values.additionalContacts];
-                          contacts.splice(index, 1);
-                          setFieldValue('additionalContacts', contacts);
-                        }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200" aria-label="Remove contact">
+                  const contacts = [...values.additionalContacts];
+                  contacts.splice(index, 1);
+                  setFieldValue('additionalContacts', contacts);
+                }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200 font-work-sans" aria-label="Remove contact">
 
                           <Icon name="faClose" className="h-5 w-5" solid={false} />
                         </button>
 
                         <h3 className="text-md font-medium text-[var(--primary-color)] mb-3 font-sora">Contact {index + 3}</h3>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
                           <StyledField label="First Name" name={`additionalContacts.${index}.firstName`} placeholder="Enter first name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
 
                           <StyledField label="Last Name" name={`additionalContacts.${index}.surname`} placeholder="Enter last name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
 
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
                           <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
 
                           <StyledField label="Position" name={`additionalContacts.${index}.position`} as="select" icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
@@ -1498,21 +1498,21 @@ function FormContent() {
                             <option value={Position.VP}>{Position.VP}</option>
                           </StyledField>
                         </div>
-                      </div>) : <div className="text-center py-8 border border-dashed border-[var(--divider-color)] rounded-lg bg-gray-50">
-                      <Icon name="faUser" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70" solid={false} />
-                      <p className="mt-2 text-[var(--primary-color)] font-sora">No additional contacts added yet.</p>
+                      </div>) : <div className="text-center py-8 border border-dashed border-[var(--divider-color)] rounded-lg bg-gray-50 font-work-sans">
+                      <Icon name="faUser" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70 font-work-sans" solid={false} />
+                      <p className="mt-2 text-[var(--primary-color)] font-work-sans">No additional contacts added yet.</p>
                       <p className="text-sm text-[var(--secondary-color)] font-work-sans">Click "Add Contact" to include more team members.</p>
                     </div>}
                 </div>
 
                 {/* Influencers */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faStar" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                    <Icon name="faStar" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                     Influencer Details
                   </h2>
-                  <div className="mb-4">
-                    <p className="text-gray-600 text-sm mb-4">
+                  <div className="mb-4 font-work-sans">
+                    <p className="text-gray-600 text-sm mb-4 font-work-sans">
                       Add the influencers you want to work with for this campaign. You can add multiple influencers.
                     </p>
                     
@@ -1521,7 +1521,7 @@ function FormContent() {
                     push,
                     remove,
                     form
-                  }: any) => <div>
+                  }: any) => <div className="font-work-sans">
                           {values.influencers && values.influencers.length > 0 ? values.influencers.map((influencer: Influencer, index: number) => <InfluencerEntry key={index} index={index} remove={() => remove(index)} arrayHelpers={{
                       push,
                       remove
@@ -1530,7 +1530,7 @@ function FormContent() {
                           <button type="button" onClick={() => push({
                       platform: '',
                       handle: ''
-                    })} className="mt-3 flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)]">
+                    })} className="mt-3 flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)] font-work-sans">
 
                             <Icon name="faPlus" className="h-5 w-5 mr-2" solid={false} />
                             Add Another Influencer
@@ -1541,13 +1541,13 @@ function FormContent() {
                 </div>
 
                 {/* Budget Section */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)]">
+                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-[var(--accent-color)]" solid={false} />
+                    <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
                     Budget
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-work-sans">
+                    <div className="font-work-sans">
                       <StyledField label="Currency" name="currency" as="select" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />}>
 
                         <option value="">Select currency</option>
@@ -1558,9 +1558,9 @@ function FormContent() {
                       <Field name="currency">
                         {({
                       field
-                    }: {
-                      field: any;
-                    }) => <ExchangeRateHandler currency={field.value} onRatesFetched={setExchangeRateData} />}
+
+
+                    }: {field: any;}) => <ExchangeRateHandler currency={field.value} onRatesFetched={setExchangeRateData} />}
                       </Field>
                     </div>
                     
@@ -1574,9 +1574,9 @@ function FormContent() {
               </Form>
 
               {/* Add extra bottom padding to prevent progress bar overlap */}
-              <div className="pb-24"></div>
+              <div className="pb-24 font-work-sans"></div>
 
-              <ProgressBar currentStep={1} onStepClick={step => router.push(`/campaigns/wizard/step-${step}`)} onBack={null} onNext={handleNextStep} onSaveDraft={() => handleSaveDraft(values)} disableNext={isSubmitting || !isValid} isFormValid={isValid} isDirty={dirty} isSaving={isSubmitting} />
+              <ProgressBar currentStep={1} onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)} onBack={null} onNext={handleNextStep} onSaveDraft={() => handleSaveDraft(values)} disableNext={isSubmitting || !isValid} isFormValid={isValid} isDirty={dirty} isSaving={isSubmitting} />
 
             </>;
       }}
