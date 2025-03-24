@@ -21,7 +21,7 @@ export async function deleteAssetFromStorage(url: string): Promise<boolean> {
   
   try {
     const response = await fetch('/api/uploadthing/delete', {
-      method: 'POST',
+      method: 'DELETE',
       headers: { 
         'Content-Type': 'application/json',
         'X-Correlation-ID': correlationId
@@ -30,12 +30,28 @@ export async function deleteAssetFromStorage(url: string): Promise<boolean> {
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`[${correlationId}] Failed to delete from storage:`, errorData);
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          const errorData = await response.json();
+          console.error(`[${correlationId}] Failed to delete from storage:`, errorData);
+        } catch (parseError) {
+          console.error(`[${correlationId}] Failed to delete from storage: ${response.status} ${response.statusText}`);
+        }
+      } else {
+        console.error(`[${correlationId}] Failed to delete from storage: ${response.status} ${response.statusText}`);
+      }
       return false;
     }
     
-    console.log(`[${correlationId}] Successfully deleted asset from storage`);
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const result = await response.json();
+      console.log(`[${correlationId}] Successfully deleted asset from storage`, result);
+    } else {
+      console.log(`[${correlationId}] Successfully deleted asset from storage`);
+    }
+    
     return true;
   } catch (error) {
     console.error(`[${correlationId}] Error deleting asset from storage:`, error);

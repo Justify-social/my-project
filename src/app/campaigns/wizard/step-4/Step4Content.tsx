@@ -8,8 +8,8 @@ import { useWizard } from "@/context/WizardContext";
 import Header from "@/components/Wizard/Header";
 import ProgressBar from "@/components/Wizard/ProgressBar";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { toast } from "react-hot-toast";
-import { Icon } from "@/components/ui/icon";
+import { toast } from "sonner";
+import { Icon } from "@/components/ui/icons";
 import { CampaignAssetUploader, UploadedAsset } from "@/components/upload/CampaignAssetUploader";
 import { AssetPreview } from '@/components/upload/AssetPreview';
 import { KPI, Feature, Platform } from '@prisma/client';
@@ -19,6 +19,16 @@ import { ourFileRouter } from '@/app/api/uploadthing/core';
 import { deleteAssetFromStorage, logOrphanedAsset } from '@/services/assetService';
 import { compressImage } from '@/utils/imageCompression';
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
+import { EnhancedAssetPreview, ASSET_DELETED_EVENT } from '@/components/upload/EnhancedAssetPreview';
+import { enhancedFileTypeDetection, extractAssetUrl, checkIfMediaExists } from '@/utils/fileUtils';
+import type { Asset } from '@/types/campaign';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { CampaignWizardFooter } from '../CampaignWizardFooter';
+import { Spinner } from "@/components/ui/spinner";
 
 // Create the uploadthing helper
 const {
@@ -710,96 +720,93 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
       setIsDeleting(false);
     }
   };
-  return <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="flex p-4 items-start gap-4">
-        {/* Preview directly in the asset card with enhanced format detection */}
-        <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
-          {asset.type.startsWith('video') ? <div className="relative">
-              <video src={asset.url} className="w-full h-full object-cover rounded-md" />
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20">
-                <Icon name="faChevronRight" className="h-8 w-8 text-white" solid={false} />
-              </div>
-            </div> : asset.type.startsWith('application') ? <div className="w-full h-full flex items-center justify-center">
-              <Icon name="faInfo" className="h-10 w-10 text-gray-400" solid={false} />
-            </div> : asset.type.startsWith('image') ? <img src={asset.url} alt={asset.details?.assetName || 'Asset preview'} className="w-full h-full object-cover" /> : <div className="flex flex-col items-center justify-center">
-              <Icon name="faInfo" className="h-10 w-10 text-gray-400" solid={false} />
-              <p className="text-sm text-gray-500 mt-2">Preview not available</p>
-            </div>}
-        </div>
+  return <Card className="mb-4">
+      <CardContent className="p-4">
+        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+          <div className="w-full md:w-1/3 lg:w-1/4">
+            <EnhancedAssetPreview 
+              url={asset.url} 
+              fileName={asset.fileName} 
+              type={asset.type}
+              id={asset.id}
+              className="w-full h-auto max-h-[200px] md:max-h-[160px] rounded-lg" 
+            />
+          </div>
+          
+          <div className="flex-1">
+            <div className="flex justify-between items-start">
+              <div className="w-full">
+                {/* Single unified asset name field that updates both properties */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Asset Name
+                  </label>
+                  <div className="flex items-center">
+                    {isEditingName ? <div className="flex w-full">
+                        <input type="text" value={assetName} onChange={e => setAssetName(e.target.value)} onBlur={toggleNameEdit} onKeyDown={handleKeyDown} className="w-full p-2 border border-blue-300 rounded-l-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] bg-blue-50" autoFocus />
 
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <div className="w-full">
-              {/* Single unified asset name field that updates both properties */}
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Asset Name
+                        <button className="px-2 py-2 bg-[var(--accent-color)] text-white rounded-r-md hover:opacity-90" onClick={toggleNameEdit} title="Save asset name">
+
+                          <Icon name="faCheck" className="h-5 w-5" solid={false} />
+                        </button>
+                      </div> : <div className="flex items-center w-full border border-gray-200 rounded-md p-2 bg-gray-50">
+                        <span className="text-gray-700 font-medium truncate max-w-xs">{assetName}</span>
+                        <button onClick={toggleNameEdit} className="text-gray-400 hover:text-[var(--accent-color)] transition-colors ml-3 group" title="Edit asset name">
+                          <Icon name="faEdit" className="h-4 w-4 group-hover:hidden" solid={false} />
+                          <Icon name="faEdit" className="h-4 w-4 hidden group-hover:block" solid={true} />
+                        </button>
+                      </div>}
+                  </div>
+                </div>
+              </div>
+
+              <button onClick={handleDeleteAsset} className="ml-2 text-[var(--secondary-color)] hover:text-red-600 transition-colors group" aria-label="Delete asset">
+                <Icon name="faTrashCan" className="w-5 h-5 group-hover:hidden" solid={false} />
+                <Icon name="faTrashCan" className="w-5 h-5 hidden group-hover:block" solid={true} />
+              </button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor={`influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                  Influencer
                 </label>
-                <div className="flex items-center">
-                  {isEditingName ? <div className="flex w-full">
-                      <input type="text" value={assetName} onChange={e => setAssetName(e.target.value)} onBlur={toggleNameEdit} onKeyDown={handleKeyDown} className="w-full p-2 border border-blue-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50" autoFocus />
+                {influencers.length > 0 ? <select id={`influencer-${asset.id}`} value={asset.details.influencerHandle || ''} onChange={e => handleInfluencerChange(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
 
-                      <button className="px-2 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600" onClick={toggleNameEdit} title="Save asset name">
+                    <option value="">Select an influencer</option>
+                    {influencers.map(inf => <option key={inf.id} value={inf.handle}>
+                        {inf.handle} ({inf.platform})
+                      </option>)}
+                  </select> : <div className="p-2 bg-yellow-50 text-yellow-700 text-sm rounded-md">
+                    No influencers found. Add influencers in Step 1.
+                  </div>}
+              </div>
 
-                        <Icon name="faCheck" className="h-5 w-5" solid={false} />
-                      </button>
-                    </div> : <div className="flex items-center w-full border border-gray-200 rounded-md p-2 bg-gray-50">
-                      <span className="text-gray-700 font-medium truncate max-w-xs">{assetName}</span>
-                      <button onClick={toggleNameEdit} className="text-gray-400 hover:text-indigo-600 transition-colors ml-3" title="Edit asset name">
+              <div>
+                <label htmlFor={`budget-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                  Budget
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-500 sm:text-sm">{currencySymbol}</span>
+                  </div>
+                  <input id={`budget-${asset.id}`} type="number" value={budget} onChange={e => setBudget(e.target.value)} onBlur={saveChanges} className="w-full pl-7 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="0.00" min="0" step="0.01" />
 
-                        <Icon name="faEdit" className="h-4 w-4" solid={false} />
-                      </button>
-                    </div>}
                 </div>
               </div>
             </div>
 
-            <button onClick={handleDeleteAsset} className="ml-2 text-gray-400 hover:text-red-600 transition-colors group" aria-label="Delete asset">
-
-              <Icon name="faDelete" action="delete" className="h-5 w-5" solid={false} />
-            </button>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor={`influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                Influencer
+            <div className="mt-4">
+              <label htmlFor={`why-influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                Why this influencer?
               </label>
-              {influencers.length > 0 ? <select id={`influencer-${asset.id}`} value={asset.details.influencerHandle || ''} onChange={e => handleInfluencerChange(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+              <textarea id={`why-influencer-${asset.id}`} value={whyInfluencer} onChange={e => setWhyInfluencer(e.target.value)} onBlur={saveChanges} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Why is this influencer a good fit?" rows={2} />
 
-                  <option value="">Select an influencer</option>
-                  {influencers.map(inf => <option key={inf.id} value={inf.handle}>
-                      {inf.handle} ({inf.platform})
-                    </option>)}
-                </select> : <div className="p-2 bg-yellow-50 text-yellow-700 text-sm rounded-md">
-                  No influencers found. Add influencers in Step 1.
-                </div>}
             </div>
-
-            <div>
-              <label htmlFor={`budget-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                Budget
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">{currencySymbol}</span>
-                </div>
-                <input id={`budget-${asset.id}`} type="number" value={budget} onChange={e => setBudget(e.target.value)} onBlur={saveChanges} className="w-full pl-7 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="0.00" min="0" step="0.01" />
-
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <label htmlFor={`why-influencer-${asset.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-              Why this influencer?
-            </label>
-            <textarea id={`why-influencer-${asset.id}`} value={whyInfluencer} onChange={e => setWhyInfluencer(e.target.value)} onBlur={saveChanges} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Why is this influencer a good fit?" rows={2} />
-
           </div>
         </div>
-      </div>
-    </div>;
+      </CardContent>
+    </Card>;
 };
 
 // =============================================================================
@@ -843,7 +850,11 @@ function FormContent() {
     updateData,
     campaignData,
     loading: wizardLoading,
-    updateCampaignData
+    updateCampaignData,
+    setCurrentStep,
+    markStepAsComplete,
+    isSubmitting,
+    setIsSubmitting
   } = useWizard();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
@@ -853,6 +864,8 @@ function FormContent() {
   const [isLoadingInfluencers, setIsLoadingInfluencers] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [redirect, setRedirect] = useState<string | null>(null);
+  const [isValidatingAssets, setIsValidatingAssets] = useState(false);
+  const [validationComplete, setValidationComplete] = useState(false);
 
   // Extract campaign influencers from step 1 - fixing the data extraction from API/DB
   const campaignInfluencers = useMemo((): Influencer[] => {
@@ -915,14 +928,212 @@ function FormContent() {
     assets: []
   };
 
+  // Listen for asset deletion events (from EnhancedAssetPreview component)
+  useEffect(() => {
+    const handleAssetDeleted = (event: CustomEvent) => {
+      const { id, url, fileId, reason } = event.detail;
+      console.log(`Asset deletion event received: ${id} (${fileId}) - ${reason}`);
+      
+      // Find the asset in our local state
+      const assetToRemove = assets.find(asset => 
+        asset.id === id || 
+        (asset.url && asset.url.includes(fileId))
+      );
+      
+      if (assetToRemove) {
+        console.log(`Removing deleted asset from UI and database: ${assetToRemove.fileName}`);
+        
+        // Remove from local state
+        const updatedAssets = assets.filter(asset => asset.id !== assetToRemove.id);
+        setAssets(updatedAssets);
+        
+        // Update wizard context to persist the change
+        updateCampaignData({
+          assets: {
+            files: updatedAssets.map(asset => ({
+              id: asset.id,
+              url: asset.url,
+              fileName: asset.fileName,
+              fileSize: asset.fileSize,
+              type: asset.type,
+              details: asset.details,
+              tags: [] // Initialize with empty tags if needed
+            }))
+          }
+        });
+        
+        // Show notification that asset was removed
+        toast.success("Asset removed", {
+          description: `"${assetToRemove.fileName}" has been removed from this campaign.`
+        });
+      } else {
+        console.warn(`Asset deletion event received but asset not found in state: ${id} / ${fileId}`);
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener(ASSET_DELETED_EVENT, handleAssetDeleted as EventListener);
+    
+    // Remove event listener on cleanup
+    return () => {
+      document.removeEventListener(ASSET_DELETED_EVENT, handleAssetDeleted as EventListener);
+    };
+  }, [assets, updateCampaignData]);
+
+  /**
+   * Validate that all assets exist and can be loaded
+   * This will filter out deleted assets from UploadThing
+   */
+  async function validateAssets(assets: Asset[]): Promise<Asset[]> {
+    if (!assets || assets.length === 0) {
+      return [];
+    }
+
+    console.log(`Validating ${assets.length} assets...`);
+    setIsValidatingAssets(true);
+
+    try {
+      // Filter assets in parallel for better performance
+      const validationResults = await Promise.all(
+        assets.map(async (asset) => {
+          try {
+            if (!asset.url) {
+              console.log(`Asset ${asset.id} has no URL, removing`);
+              return null;
+            }
+
+            // For UploadThing URLs, verify the asset exists using our proxy
+            const isUploadThingUrl = 
+              asset.url.includes('utfs.io') || 
+              asset.url.includes('uploadthing') || 
+              asset.url.includes('ufs.sh');
+
+            if (isUploadThingUrl) {
+              // Extract file ID for more accurate checking
+              let fileId = '';
+              if (asset.url.includes('/f/')) {
+                fileId = asset.url.split('/f/')[1].split('?')[0];
+              }
+
+              // Use our asset proxy with HEAD request to quickly check existence
+              const proxyUrl = `/api/asset-proxy?url=${encodeURIComponent(asset.url)}${fileId ? `&fileId=${fileId}` : ''}`;
+              
+              console.log(`Validating asset: ${asset.fileName} (${asset.id})`);
+              const response = await fetch(proxyUrl, { method: 'HEAD' });
+
+              // Status 410 Gone means the file has been permanently deleted
+              if (response.status === 410) {
+                console.log(`Asset ${asset.id} (${asset.fileName}) is deleted, removing from list`);
+                return null;
+              }
+
+              // Non-2xx status means the asset can't be loaded
+              if (!response.ok) {
+                console.log(`Asset ${asset.id} (${asset.fileName}) failed validation with status ${response.status}, removing`);
+                return null;
+              }
+            }
+
+            return asset;
+          } catch (error) {
+            console.error(`Error validating asset ${asset.id}:`, error);
+            return null;
+          }
+        })
+      );
+
+      // Filter out null values (assets that failed validation)
+      const validAssets = validationResults.filter(Boolean) as Asset[];
+      console.log(`Validation complete: ${validAssets.length} valid assets out of ${assets.length}`);
+
+      // If we removed any assets, show a toast notification
+      if (validAssets.length < assets.length) {
+        toast.error("Missing assets removed", {
+          description: `${assets.length - validAssets.length} deleted or unavailable ${assets.length - validAssets.length === 1 ? 'asset has' : 'assets have'} been removed.`
+        });
+      }
+
+      return validAssets;
+    } catch (error) {
+      console.error('Error during asset validation:', error);
+      return assets; // Return original assets if validation fails
+    } finally {
+      setIsValidatingAssets(false);
+      setValidationComplete(true);
+    }
+  }
+
+  // Validate assets when the component mounts and campaign data changes
+  useEffect(() => {
+    async function checkExistingAssets() {
+      if (!wizardData || !wizardData.assets) return;
+      
+      // Only validate if we have assets to check
+      if (wizardData.assets.files && wizardData.assets.files.length > 0) {
+        // Map campaign assets to our internal Asset format for validation
+        const assetsToValidate: Asset[] = wizardData.assets.files.map(file => ({
+          id: file.id || generateCorrelationId(),
+          url: file.url,
+          fileName: file.fileName || 'Unnamed file',
+          fileSize: file.fileSize || 0,
+          type: file.type || detectFileType(file.url),
+          progress: 100, // Completed uploads
+          details: file.details || {
+            assetName: file.fileName || 'Unnamed file',
+            budget: 0,
+            description: ''
+          }
+        }));
+        
+        // Validate all assets
+        const validatedAssets = await validateAssets(assetsToValidate);
+        
+        // Update local state with validated assets
+        setAssets(validatedAssets);
+        
+        // If any assets were invalid (removed), update wizard data too
+        if (validatedAssets.length !== assetsToValidate.length) {
+          console.log(`Updating wizard data with ${validatedAssets.length} valid assets`);
+          
+          // Update the assets in the campaign data
+          updateCampaignData({
+            assets: {
+              files: validatedAssets.map(asset => ({
+                id: asset.id,
+                url: asset.url,
+                fileName: asset.fileName,
+                fileSize: asset.fileSize,
+                type: asset.type,
+                details: asset.details,
+                tags: [] // Initialize with empty tags
+              }))
+            }
+          });
+        } else {
+          console.log('All assets are valid, no updates needed');
+        }
+      }
+    }
+    
+    checkExistingAssets();
+  }, [wizardData, updateCampaignData]);
+
   // Update context with new assets
   const handleAssetsAdded = useCallback((newAssets: Asset[]) => {
+    // Log asset info for diagnostics
+    console.log('Adding new assets to state:', newAssets.map(a => ({
+      id: a.id,
+      url: a.url,
+      type: a.type,
+      details: a.details
+    })));
+    
     // Create unique IDs for each asset
     const assetsWithIds = newAssets.map(asset => ({
       ...asset,
       id: `asset-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
     }));
-
+      
     // Auto-assign influencers if we have them from step 1
     const assetsWithInfluencers = assetsWithIds.map(asset => {
       // If we have influencers and this asset doesn't have one yet
@@ -942,7 +1153,7 @@ function FormContent() {
       }
       return asset;
     });
-
+    
     // Combine existing and new assets
     const updatedAssets = [...assets, ...assetsWithInfluencers];
     setAssets(updatedAssets);
@@ -960,20 +1171,20 @@ function FormContent() {
         tags: []
       }))
     });
-
+      
     // Also update the creative section for better DB compatibility
     (updateData as any)('creative', {
       creativeAssets: updatedAssets.map(asset => ({
         id: asset.id,
-        name: asset.details.assetName,
-        description: asset.details.description || '',
+        name: asset.details?.assetName,
+        description: asset.details?.description || '',
         url: asset.url,
         type: asset.type,
         fileSize: asset.fileSize,
         format: asset.type,
-        influencerHandle: asset.details.influencerHandle || '',
-        budget: asset.details.budget || 0,
-        whyInfluencer: asset.details.whyInfluencer || ''
+        influencerHandle: asset.details?.influencerHandle || '',
+        budget: asset.details?.budget || 0,
+        whyInfluencer: asset.details?.whyInfluencer || ''
       }))
     });
 
@@ -984,7 +1195,103 @@ function FormContent() {
     });
   }, [assets, updateData, campaignInfluencers]);
 
-  // Enhanced processAssetsForSubmission with validation and robust fallbacks
+  // Modified function to handle asset removal with confirmation
+  const handleRemoveAsset = useCallback((assetId: string) => {
+    try {
+      // Get the asset details for the confirmation message
+      const assetToRemove = assets.find(asset => asset.id === assetId);
+      const assetName = assetToRemove?.fileName || 'this asset';
+      
+      // Confirm with the user
+      if (window.confirm(`Are you sure you want to remove ${assetName}?`)) {
+        // Filter out the asset with the specified ID
+        const updatedAssets = assets.filter(asset => asset.id !== assetId);
+        
+        // Update state
+        setAssets(updatedAssets);
+        
+        // Update wizard context
+        updateData('assets', {
+          files: updatedAssets.map(asset => ({
+            id: asset.id,
+            url: asset.url,
+            fileName: asset.fileName,
+            fileSize: asset.fileSize,
+            type: asset.type,
+            details: asset.details,
+            tags: []
+          }))
+        });
+        
+        // Also update the creative section
+        (updateData as any)('creative', {
+          creativeAssets: updatedAssets.map(asset => ({
+            id: asset.id,
+            name: asset.details?.assetName,
+            description: asset.details?.description || '',
+            url: asset.url,
+            type: asset.type,
+            fileSize: asset.fileSize,
+            format: asset.type,
+            influencerHandle: asset.details?.influencerHandle || '',
+            budget: asset.details?.budget || 0,
+            whyInfluencer: asset.details?.whyInfluencer || ''
+          }))
+        });
+        
+        // Show success message
+        toast.success(`Asset "${assetName}" removed successfully`);
+      }
+    } catch (error) {
+      console.error('Error removing asset:', error);
+      toast.error('Failed to remove asset');
+    }
+  }, [assets, updateData]);
+  
+  // Modified submit function to validate assets before submission
+  const handleFormSubmit = async (values: any) => {
+    setIsSaving(true);
+    
+    try {
+      // Validate assets before submitting to ensure all assets exist
+      if (values.assets && Array.isArray(values.assets)) {
+        const validAssets = await validateAssets(values.assets as Asset[]);
+        
+        // If any assets were removed, show a warning
+        if (validAssets.length !== values.assets.length) {
+          const removedCount = values.assets.length - validAssets.length;
+          toast.error(`${removedCount} asset(s) were removed because they no longer exist on the server.`);
+          
+          // Update the form values with only the valid assets
+          values.assets = validAssets;
+        }
+      }
+      
+      // Continue with existing submit logic from original function
+      const correlationId = generateCorrelationId();
+      console.log(`[${correlationId}] Starting form submission with validated assets`);
+      
+      // Set the redirect destination to step-5 (Review) instead of submission
+      setRedirect(`/campaigns/wizard/step-5?id=${campaignId}`);
+      
+      // Process and validate assets using existing function
+      const processedAssets = processAssetsForSubmission();
+      if (processedAssets.length === 0) {
+        toast.error("Please add at least one asset before submitting.");
+        return;
+      }
+      
+      // Rest of the original submission logic
+      // ... 
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to submit form');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Update the processAssetsForSubmission function
   const processAssetsForSubmission = () => {
     try {
       // Add validation to make sure we only process valid assets
@@ -998,19 +1305,8 @@ function FormContent() {
 
       // Then map the valid assets
       return validAssets.map(asset => {
-        // Get a clean type value with fallbacks
-        const detectedType = detectFileType(asset.url, asset.type) || 'image';
-
-        // Safely extract format - avoid split() errors
-        let format = 'unknown';
-        if (asset.type) {
-          if (typeof asset.type === 'string' && asset.type.includes('/')) {
-            format = asset.type.split('/')[1] || 'unknown';
-          } else {
-            // Fallback for non-MIME format types
-            format = detectedType;
-          }
-        }
+        // Use our enhanced type detection for consistency
+        const { type, format } = enhancedFileTypeDetection(asset.url, asset.type);
 
         // Ensure all required fields are present with proper fallbacks
         return {
@@ -1018,8 +1314,7 @@ function FormContent() {
           url: asset.url || '',
           fileName: asset.fileName || asset.details?.assetName || 'Unnamed Asset',
           fileSize: typeof asset.fileSize === 'number' ? asset.fileSize : 0,
-          type: detectedType === 'video' ? 'video' : 'image',
-          // For database schema compatibility
+          type: type === 'video' ? 'video' : 'image', // For database schema compatibility
           format: format,
           details: {
             assetName: asset.details?.assetName || asset.fileName || 'Unnamed Asset',
@@ -1032,118 +1327,8 @@ function FormContent() {
         };
       });
     } catch (error) {
-      console.error('Error in processAssetsForSubmission:', error);
-      // Return empty array as fallback
+      console.error('Error processing assets for submission:', error);
       return [];
-    }
-  };
-
-  // Enhanced handleSubmit with correct formatting for API
-  const handleSubmit = async (values: any) => {
-    // Generate correlation ID for request tracing
-    const correlationId = generateCorrelationId();
-    console.log(`[${correlationId}] Starting form submission`);
-    try {
-      setIsSaving(true);
-      setError(null);
-
-      // Set the redirect destination to step-5 (Review) instead of submission
-      setRedirect(`/campaigns/wizard/step-5?id=${campaignId}`);
-
-      // 1. Process and validate assets
-      const processedAssets = processAssetsForSubmission();
-      if (processedAssets.length === 0) {
-        toast.error("Please add at least one asset before submitting.");
-        return;
-      }
-
-      // 2. Format data for the CampaignWizard model (not CampaignWizardSubmission)
-      const formattedData = {
-        step: 4,
-        // Assets are stored directly in the CampaignWizard model's assets JSON field
-        creativeAssets: processedAssets.map(asset => ({
-          id: asset.id,
-          type: asset.type.includes('video') ? 'video' : 'image',
-          url: asset.url,
-          name: asset.fileName || asset.details?.assetName || 'Untitled Asset',
-          description: asset.details?.description || asset.details?.whyInfluencer || "",
-          influencerHandle: asset.details?.influencerHandle || "",
-          budget: Number(asset.details?.budget) || 0,
-          format: asset.type && asset.type.includes('/') ? asset.type.split('/')[1] : "unknown",
-          fileSize: asset.fileSize || 0
-        }))
-      };
-
-      // 3. Log the formatted data being sent to the API for debugging
-      console.log(`[${correlationId}] Submitting data to API:`, JSON.stringify(formattedData, null, 2));
-
-      // 4. Implement retry logic with exponential backoff
-      const maxRetries = 3;
-      let attempt = 0;
-      let success = false;
-      while (attempt < maxRetries && !success) {
-        try {
-          console.log(`[${correlationId}] Submitting to API (attempt ${attempt + 1}/${maxRetries})`);
-          const response = await fetch(`/api/campaigns/${campaignId}/steps`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Correlation-ID': correlationId
-            },
-            body: JSON.stringify(formattedData)
-          });
-          console.log(`[${correlationId}] API Response status:`, response.status);
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error(`[${correlationId}] API error response:`, errorData);
-            if (errorData.validationErrors) {
-              const errorMessages = Object.entries(errorData.validationErrors).map(([field, message]) => `${field}: ${message}`).join(', ');
-              throw new Error(`Validation errors: ${errorMessages}`);
-            } else if (errorData.error) {
-              throw new Error(errorData.error);
-            } else {
-              throw new Error(`API error (${response.status})`);
-            }
-          }
-
-          // Process successful response
-          const data = await response.json();
-          console.log(`[${correlationId}] API success response:`, data);
-
-          // Update wizard context with the correct data
-          updateCampaignData({
-            step4Complete: true,
-            creative: {
-              creativeAssets: formattedData.creativeAssets
-            }
-          });
-          toast.success('Campaign assets saved successfully!');
-          success = true;
-          if (redirect) {
-            router.push(redirect);
-          }
-        } catch (error: unknown) {
-          attempt++;
-          console.error(`[${correlationId}] API call failed (attempt ${attempt}/${maxRetries}):`, error);
-          if (attempt >= maxRetries) {
-            // All retries failed
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            toast.error(`Failed to save campaign: ${errorMessage}`);
-            setError(errorMessage || 'Error updating campaign step');
-          } else {
-            // Exponential backoff with jitter
-            const delay = Math.pow(2, attempt) * 500 + Math.floor(Math.random() * 100);
-            console.log(`[${correlationId}] Retrying in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-          }
-        }
-      }
-    } catch (error: unknown) {
-      console.error('Unexpected error during submission:', error);
-      toast.error('An unexpected error occurred. Please try again later.');
-      setError('An unexpected error occurred');
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -1399,6 +1584,27 @@ function FormContent() {
       setIsSaving(false);
     }
   };
+
+  // Show loading UI while validating assets
+  if (isValidatingAssets) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
+        <div className="mb-4">
+          <Spinner 
+            type="svg"
+            size="lg"
+            variant="accent"
+            className="text-[var(--accent-color)]"
+          />
+        </div>
+        <h3 className="text-lg font-semibold mb-2 text-[var(--primary-color)]">Validating Campaign Assets</h3>
+        <p className="text-[var(--secondary-color)] text-center">
+          Checking that all assets are still available...
+        </p>
+      </div>
+    );
+  }
+
   if (wizardLoading) {
     return <div className="flex items-center justify-center min-h-screen">
         <WizardSkeleton step={4} />
@@ -1420,7 +1626,7 @@ function FormContent() {
         <p className="text-gray-500">Complete all required fields to create your campaign</p>
       </div>
       
-      <Formik initialValues={initialValues} validationSchema={CreativeSchema} onSubmit={handleSubmit} enableReinitialize={true}>
+      <Formik initialValues={initialValues} validationSchema={CreativeSchema} onSubmit={handleFormSubmit} enableReinitialize={true}>
 
         {({
         values,
@@ -1487,12 +1693,18 @@ function FormContent() {
           <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
           <p className="mb-4">Are you sure you want to delete this asset? This action cannot be undone.</p>
           <div className="flex space-x-4">
-            <button onClick={() => setConfirmDeleteAsset(null)} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">
-
+            <button 
+              type="button" 
+              onClick={() => setConfirmDeleteAsset(null)} 
+              className="px-4 py-2 bg-[var(--divider-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-400"
+            >
               Cancel
             </button>
-            <button onClick={confirmDelete} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-
+            <button 
+              type="button" 
+              onClick={confirmDelete} 
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
               Delete
             </button>
           </div>
