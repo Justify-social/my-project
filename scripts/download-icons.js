@@ -293,7 +293,8 @@ const REQUIRED_LIGHT_ICONS = {
   'faPlay': '@fortawesome/pro-light-svg-icons',
   'faPause': '@fortawesome/pro-light-svg-icons',
   'faHouse': '@fortawesome/pro-light-svg-icons',
-  'faPenToSquare': '@fortawesome/pro-light-svg-icons'
+  'faPenToSquare': '@fortawesome/pro-light-svg-icons',
+  'faMenu': '@fortawesome/pro-light-svg-icons'
 };
 
 // Required solid icons - always include these common solid icons
@@ -303,7 +304,8 @@ const REQUIRED_SOLID_ICONS = {
   'faFileAudio': '@fortawesome/pro-solid-svg-icons',
   'faFileImage': '@fortawesome/pro-solid-svg-icons',
   'faFileVideo': '@fortawesome/pro-solid-svg-icons',
-  'faRotateRight': '@fortawesome/pro-solid-svg-icons'
+  'faRotateRight': '@fortawesome/pro-solid-svg-icons',
+  'faMenu': '@fortawesome/pro-solid-svg-icons'
 };
 
 // Add any required icons

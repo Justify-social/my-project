@@ -1,615 +1,293 @@
-#!/usr/bin/env node
+/**
+ * This script audits and fixes icon issues in the UI icon set:
+ * 1. Downloads missing icons that should exist
+ * 2. Fixes duplicate light/solid icons to ensure they're distinct
+ * 
+ * Usage:
+ *   node scripts/audit-icons.js               # Audit and fix all issues
+ *   node scripts/audit-icons.js --fix-duplicates  # Only fix duplicate icons
+ *   node scripts/audit-icons.js --fix-missing     # Only fix missing icons
+ */
 
-const fs = require('fs/promises');
-const fsSync = require('fs');
+const fs = require('fs');
 const path = require('path');
-const { glob } = require('glob');
-const { parse } = require('@babel/parser');
-const traverse = require('@babel/traverse').default;
-const t = require('@babel/types');
-const generate = require('@babel/generator').default;
+const https = require('https');
+const { execSync } = require('child_process');
 
 // Process command line arguments
 const args = process.argv.slice(2);
-const fixMode = args.includes('--fix');
-const verboseMode = args.includes('--verbose');
-const htmlReportMode = args.includes('--html');
-const fixDuplicatesMode = args.includes('--fix-duplicates');
+const fixDuplicates = args.includes('--fix-duplicates') || args.length === 0;
+const fixMissing = args.includes('--fix-missing') || args.length === 0;
 
-// ANSI color codes
-const colors = {
-  reset: "\x1b[0m",
-  bright: "\x1b[1m",
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  cyan: "\x1b[36m"
+// Output directories for the SVG icons based on style
+const OUTPUT_DIRS = {
+  'solid': path.join(__dirname, '..', 'public', 'ui-icons', 'solid'),
+  'light': path.join(__dirname, '..', 'public', 'ui-icons', 'light'),
+  'brands': path.join(__dirname, '..', 'public', 'ui-icons', 'brands'),
+  'regular': path.join(__dirname, '..', 'public', 'ui-icons', 'regular')
 };
 
-// FontAwesome configuration from docs
-const FA_PREFIX = 'fa';
-const HERO_TO_FA_MAPPINGS = {
-  'UserIcon': 'faUser',
-  'TrashIcon': 'faTrashCan',
-  'PencilIcon': 'faPenToSquare',
-  'EyeIcon': 'faEye',
-  'XIcon': 'faXmark',
-  'CameraIcon': 'faCamera',
-  'PlusIcon': 'faPlus',
-  'MinusIcon': 'faMinus',
-  'CheckIcon': 'faCheck',
-  'ChevronDownIcon': 'faChevronDown',
-  'ChevronUpIcon': 'faChevronUp',
-  'ChevronLeftIcon': 'faChevronLeft',
-  'ChevronRightIcon': 'faChevronRight',
-  'EnvelopeIcon': 'faEnvelope',
-  'CalendarIcon': 'faCalendarDays',
-  'ExclamationTriangleIcon': 'faTriangleExclamation',
-  'InfoCircleIcon': 'faCircleInfo',
-  'BellIcon': 'faBell',
-  'CheckCircleIcon': 'faCircleCheck',
-  'LightbulbIcon': 'faLightbulb',
-  'CommentIcon': 'faCommentDots',
-  'CopyIcon': 'faCopy',
-  'HeartIcon': 'faHeart',
-  'StarIcon': 'faStar',
-  'BookmarkIcon': 'faBookmark',
-  'ShareIcon': 'faShare',
-  'UploadIcon': 'faUpload',
-  'BarsIcon': 'faBars',
-  'FilterIcon': 'faFilter',
-  'TableIcon': 'faTableCells',
-  'ListIcon': 'faList',
-  'TagIcon': 'faTag',
-  'LockIcon': 'faLock',
-  'UnlockIcon': 'faUnlock',
-  'KeyIcon': 'faKey',
-  'PaperclipIcon': 'faPaperclip',
-  'DownloadIcon': 'faDownload',
-  'PlayIcon': 'faPlay',
-  'FileIcon': 'faFile',
-  'FileAltIcon': 'faFileLines',
-  'HomeIcon': 'faHome',
-  'ChartBarIcon': 'faChartBar',
-  'ChartPieIcon': 'faChartPie',
-  'MoneyBillIcon': 'faMoneyBill',
-  'TrendingUpIcon': 'faArrowTrendUp',
-  'TrendingDownIcon': 'faArrowTrendDown',
-  'BoltIcon': 'faBolt',
-  'GlobeIcon': 'faGlobe',
-  'UsersIcon': 'faUserGroup',
-  'BuildingIcon': 'faBuilding',
-  'RocketIcon': 'faRocket',
-  'SignalIcon': 'faSignal',
-  'BellSlashIcon': 'faBellSlash',
-  'MapIcon': 'faMap',
-  'ShieldIcon': 'faShield',
-  'ClockIcon': 'faClock',
-  'ArrowDownIcon': 'faArrowDown',
-  'ArrowUpIcon': 'faArrowUp',
-  'ArrowRightIcon': 'faArrowRight',
-  'ArrowLeftIcon': 'faArrowLeft',
-  'TimesCircleIcon': 'faCircleXmark',
-  'SearchPlusIcon': 'faMagnifyingGlassPlus',
-  'PaletteIcon': 'faPalette',
-  'CreditCardIcon': 'faCreditCard',
-  'HistoryIcon': 'faClockRotateLeft',
-  'ChartLineIcon': 'faChartLine',
-  'QuestionIcon': 'faQuestion',
-  'ImageIcon': 'faImage',
-  'UserCircleIcon': 'faUserCircle'
-};
-const VALID_ACTIONS = ['default', 'delete', 'warning', 'success'];
-const VALID_STYLES = ['solid', 'light', 'brands', 'regular'];
-
-// Helper functions
-function iconExists(relativePath) {
-  const fullPath = path.join(process.cwd(), 'public', relativePath);
-  return fsSync.existsSync(fullPath);
-}
-
-function convertCamelToKebab(str) {
-  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-}
-
-function normalizeIconName(name) {
-  if (!name) return '';
-  return name.startsWith(FA_PREFIX) ? name : `${FA_PREFIX}${name.charAt(0).toUpperCase() + name.slice(1)}`;
-}
-
-async function validateLightSolidDistinctness() {
-  const lightDir = path.join(process.cwd(), 'public/ui-icons/light');
-  const solidDir = path.join(process.cwd(), 'public/ui-icons/solid');
-
-  try {
-    await fs.access(lightDir);
-    await fs.access(solidDir);
-  } catch {
-    console.error(`${colors.red}Icon directories missing. Run 'npm run update-icons' first.${colors.reset}`);
-    return null;
+// Create output directories if they don't exist
+Object.values(OUTPUT_DIRS).forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
+});
 
-  const lightFiles = await glob('*.svg', { cwd: lightDir });
-  const solidFiles = await glob('*.svg', { cwd: solidDir });
-  const commonNames = lightFiles.filter(name => solidFiles.includes(name));
+console.log('Icon Audit Tool');
+console.log('==============');
 
-  let distinctCount = 0;
-  let duplicateCount = 0;
-  const pairs = [];
-
-  for (const iconName of commonNames) {
-    const lightPath = path.join(lightDir, iconName);
-    const solidPath = path.join(solidDir, iconName);
-    const lightContent = await fs.readFile(lightPath, 'utf-8');
-    const solidContent = await fs.readFile(solidPath, 'utf-8');
-
-    const identical = lightContent === solidContent;
-    const similarity = identical ? 1 : calculateSimilarity(lightContent, solidContent);
-
-    const pair = { name: iconName.replace('.svg', ''), identical, similarity, lightPath, solidPath };
-    pairs.push(pair);
-
-    if (identical || similarity > 0.95) duplicateCount++;
-    else distinctCount++;
-  }
-
-  if (fixDuplicatesMode) await fixDuplicateIcons(pairs.filter(p => p.identical || p.similarity > 0.95));
-
-  return {
-    distinct: distinctCount,
-    duplicates: duplicateCount,
-    pairs: pairs.filter(p => p.identical || p.similarity > 0.95),
-    missingLight: solidFiles.filter(n => !lightFiles.includes(n)),
-    missingSolid: lightFiles.filter(n => !solidFiles.includes(n))
-  };
-}
-
-async function fixDuplicateIcons(duplicatePairs) {
-  console.log(`${colors.yellow}Fixing ${duplicatePairs.length} duplicate icons...${colors.reset}`);
-  for (const pair of duplicatePairs) {
-    console.log(`Processing ${pair.name}...`);
-    try {
-      let lightContent = await fs.readFile(pair.lightPath, 'utf-8');
-      
-      // Special handling for the globe icon
-      if (pair.name === 'globe') {
-        // Apply the most aggressive modifications for globe icon
-        if (lightContent.includes('stroke-width')) {
-          // Use minimal stroke width for light version
-          lightContent = lightContent.replace(/stroke-width="([^"]+)"/, 'stroke-width="0.4"');
-        } else if (lightContent.includes('stroke=')) {
-          // Add very thin stroke-width
-          lightContent = lightContent.replace(/stroke="([^"]+)"/, (match) => {
-            return `${match} stroke-width="0.4"`;
-          });
-        }
+/**
+ * Downloads an icon directly from the FontAwesome CDN
+ */
+function downloadIconFromCDN(iconName, style = 'light', outputPath) {
+  return new Promise((resolve, reject) => {
+    // Use Font Awesome CDN to download icons - adjust version if needed
+    const url = `https://site-assets.fontawesome.com/releases/v6.4.0/svgs/${style}/${iconName}.svg`;
+    
+    console.log(`Downloading ${style}/${iconName} from ${url}`);
+    
+    https.get(url, (response) => {
+      if (response.statusCode === 200) {
+        let data = '';
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
         
-        // Add significant opacity to make it much lighter
-        if (lightContent.includes('fill="currentColor"')) {
-          lightContent = lightContent.replace(/fill="currentColor"/, 'fill="currentColor" opacity="0.6"');
-        }
-        
-        // Add dashed strokes for visual distinction
-        if (lightContent.includes('stroke=')) {
-          lightContent = lightContent.replace(/<path/, '<path stroke-dasharray="1,1.5" ');
-        }
-        
-        // Add transform to slightly reduce size for more visual difference
-        if (lightContent.includes('<svg')) {
-          const viewBoxMatch = lightContent.match(/viewBox="([^"]+)"/);
-          if (viewBoxMatch) {
-            const [_, x, y, width, height] = viewBoxMatch[1].split(/\s+/).map(parseFloat);
-            const scaleFactor = 0.92;
-            const translateX = (width - width * scaleFactor) / 2;
-            const translateY = (height - height * scaleFactor) / 2;
-            lightContent = lightContent.replace(/<svg/, 
-              `<svg transform="translate(${translateX}, ${translateY}) scale(${scaleFactor})" `);
+        response.on('end', () => {
+          // Process SVG content to ensure it has fill="currentColor"
+          let svgContent = data;
+          if (!svgContent.includes('fill="currentColor"')) {
+            svgContent = svgContent.replace('<svg', '<svg fill="currentColor"');
           }
-        }
+          
+          fs.writeFileSync(outputPath, svgContent, 'utf8');
+          console.log(`✅ Successfully saved to ${outputPath}`);
+          resolve(outputPath);
+        });
+      } else if (response.statusCode === 404) {
+        console.log(`❌ Icon not found: ${url}`);
+        reject(new Error(`Icon not found: ${url}`));
       } else {
-        // Standard handling for other icons
-        if (lightContent.includes('stroke-width')) {
-          // Reduce stroke width for light version
-          lightContent = lightContent.replace(/stroke-width="([^"]+)"/, (match, width) => {
-            const newWidth = Math.max(parseFloat(width) * 0.6, 0.5);
-            return `stroke-width="${newWidth}"`;
-          });
-        } else if (lightContent.includes('stroke=')) {
-          // Add stroke-width if it has a stroke but no width
-          lightContent = lightContent.replace(/stroke="([^"]+)"/, (match) => {
-            return `${match} stroke-width="0.7"`;
-          });
-        } else if (lightContent.includes('fill=')) {
-          // Add opacity to fill if no stroke modifications are possible
-          lightContent = lightContent.replace(/fill="([^"]+)"/, (match, fill) => {
-            if (fill === 'none') return match;
-            return `fill="${fill}" opacity="0.7"`;
-          });
-        } else {
-          // Last resort: Add outline stroke to create visual distinction
-          lightContent = lightContent.replace(/<path/, '<path stroke="currentColor" stroke-width="0.7" ');
-        }
+        console.log(`❌ Failed to download: status ${response.statusCode}`);
+        reject(new Error(`Failed to download icon, status: ${response.statusCode}`));
       }
-      
-      // Write modified light icon back
-      await fs.writeFile(pair.lightPath, lightContent, 'utf-8');
-      console.log(`${colors.green}✅ Fixed ${pair.name}${colors.reset}`);
-    } catch (error) {
-      console.error(`${colors.red}Error fixing ${pair.name}: ${error.message}${colors.reset}`);
-    }
-  }
-}
-
-function calculateSimilarity(str1, str2) {
-  const longer = str1.length > str2.length ? str1 : str2;
-  const shorter = str1.length > str2.length ? str2 : str1;
-  return longer.length === 0 ? 1.0 : (longer.length - (longer.length - shorter.length)) / longer.length;
-}
-
-function findParentElement(path) {
-  let current = path;
-  while (current.parentPath) {
-    if (current.parentPath.type === 'JSXElement') return current.parentPath;
-    current = current.parentPath;
-  }
-  return null;
-}
-
-function checkForGroupClass(parent) {
-  if (!parent || !parent.node) return false;
-  const attributes = parent.node.openingElement.attributes;
-  return attributes.some(attr => 
-    t.isJSXAttribute(attr) && attr.name.name === 'className' && 
-    (t.isStringLiteral(attr.value) && attr.value.value.split(' ').includes('group') ||
-     t.isJSXExpressionContainer(attr.value) && 
-     (t.isTemplateLiteral(attr.value.expression) && attr.value.expression.quasis.some(q => q.value.raw.includes('group')) ||
-      t.isCallExpression(attr.value.expression) && attr.value.expression.arguments.some(a => t.isStringLiteral(a) && a.value.includes('group'))))
-  );
-}
-
-// Audit function
-async function runAudit(options = {}) {
-  const { fixMode, verboseMode, htmlReportMode, fixDuplicatesMode } = options;
-  const rootDir = process.cwd();
-  const srcDir = path.join(rootDir, 'src');
-  const outputFile = path.join(rootDir, 'icon-audit-report.json');
-
-  console.log(`${colors.bright}${colors.blue}🔍 Icon Audit System${colors.reset}\n`);
-
-  const iconUsages = [];
-  const fixedFiles = new Set();
-  let fixedCount = 0;
-
-  let lightSolidValidation = null;
-  if (verboseMode || fixDuplicatesMode) {
-    console.log(`${colors.cyan}Validating light/solid icon differentiation...${colors.reset}`);
-    lightSolidValidation = await validateLightSolidDistinctness();
-  }
-
-  console.log(`${colors.cyan}Scanning codebase for icon usage...${colors.reset}`);
-  const files = await glob(`${srcDir}/**/*.{ts,tsx,js,jsx}`, { ignore: ['node_modules/**'] });
-  console.log(`Found ${files.length} source files to scan.`);
-
-  for (const file of files) {
-    try {
-      const content = await fs.readFile(file, 'utf-8');
-      const ast = parse(content, {
-        sourceType: 'module',
-        plugins: ['typescript', 'jsx'],
-      });
-
-      let fileModified = false;
-
-      traverse(ast, {
-        JSXOpeningElement(path) {
-          if (!t.isJSXIdentifier(path.node.name)) return;
-          const nodeName = path.node.name.name;
-          if (!['Icon', 'StaticIcon', 'ButtonIcon', 'DeleteIcon', 'WarningIcon', 'SuccessIcon'].includes(nodeName)) return;
-
-          const usage = {
-            file: file.replace(rootDir, ''),
-            line: path.node.loc?.start.line ?? 0,
-            column: path.node.loc?.start.column ?? 0,
-            component: nodeName,
-            props: {},
-            issues: [],
-            suggestions: [],
-            fixed: false
-          };
-
-          // Extract props
-          path.node.attributes.forEach(attr => {
-            if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name)) {
-              const propName = attr.name.name;
-              let propValue;
-              if (t.isStringLiteral(attr.value)) propValue = attr.value.value;
-              else if (t.isJSXExpressionContainer(attr.value)) {
-                if (t.isStringLiteral(attr.value.expression)) propValue = attr.value.expression.value;
-                else if (t.isBooleanLiteral(attr.value.expression)) propValue = attr.value.expression.value;
-                else usage.issues.push(`Dynamic prop "${propName}" detected (cannot validate at runtime)`);
-              } else if (attr.value === null) propValue = true;
-              usage.props[propName] = propValue;
-            }
-          });
-
-          const { name, kpiName, appName, platformName, iconType, action, solid, style } = usage.props;
-
-          // Validation
-          if (!name && !kpiName && !appName && !platformName) {
-            usage.issues.push('No icon type specified (name, kpiName, appName, or platformName missing)');
-          }
-
-          if (name) {
-            // Check for HeroIcons
-            if (name.endsWith('Icon') && HERO_TO_FA_MAPPINGS[name]) {
-              usage.issues.push(`Legacy HeroIcon "${name}" detected`);
-              usage.suggestions.push(`Use "${HERO_TO_FA_MAPPINGS[name]}"`);
-              if (fixMode) {
-                const attrPath = path.get('attributes').find(a => a.node.name.name === 'name');
-                if (attrPath && attrPath.get('value')) {
-                  attrPath.get('value').replaceWith(t.stringLiteral(HERO_TO_FA_MAPPINGS[name]));
-                  usage.fixed = true;
-                  fileModified = true;
-                  fixedCount++;
-                }
-              }
-            }
-            // Check FA prefix
-            else if (!name.startsWith(FA_PREFIX)) {
-              const normalizedName = normalizeIconName(name);
-              usage.issues.push(`Icon "${name}" missing "fa" prefix`);
-              usage.suggestions.push(`Use "${normalizedName}"`);
-              if (fixMode) {
-                const attrPath = path.get('attributes').find(a => a.node.name.name === 'name');
-                if (attrPath && attrPath.get('value')) {
-                  attrPath.get('value').replaceWith(t.stringLiteral(normalizedName));
-                  usage.fixed = true;
-                  fileModified = true;
-                  fixedCount++;
-                }
-              }
-            }
-            // Check existence
-            const baseName = name.replace(/Light$/, '');
-            const kebabName = convertCamelToKebab(baseName.replace(/^fa/, ''));
-            const solidPath = `ui-icons/solid/${kebabName}.svg`;
-            const lightPath = `ui-icons/light/${kebabName}.svg`;
-            if (!iconExists(solidPath) || (!name.endsWith('Light') && !iconExists(lightPath))) {
-              usage.issues.push(`Icon "${baseName}" not downloaded to public/ui-icons`);
-              usage.suggestions.push(`Run "npm run update-icons" to download`);
-            }
-            // Validate style
-            if (style && !VALID_STYLES.includes(style)) {
-              usage.issues.push(`Invalid style "${style}"`);
-              usage.suggestions.push(`Use one of: ${VALID_STYLES.join(', ')}`);
-            }
-          }
-
-          // Validate button icon behavior
-          if (nodeName === 'ButtonIcon' || iconType === 'button') {
-            if (solid) {
-              usage.issues.push('Button icons should not use solid={true}');
-              if (fixMode) {
-                const attrPath = path.get('attributes').find(a => a.node.name.name === 'solid');
-                if (attrPath) {
-                  attrPath.remove();
-                  usage.fixed = true;
-                  fileModified = true;
-                  fixedCount++;
-                }
-              }
-            }
-            if (!checkForGroupClass(findParentElement(path))) {
-              usage.issues.push('Button icon should be inside a parent with "group" class for hover effects');
-              usage.suggestions.push('Add className="group" to parent element');
-            }
-          }
-
-          // Validate static icon
-          if (nodeName === 'StaticIcon' || iconType === 'static') {
-            if (solid === undefined) {
-              usage.issues.push('Static icons should specify solid={true|false}');
-              usage.suggestions.push('Add solid={false} or solid={true}');
-            }
-          }
-
-          // Validate action
-          if (action && !VALID_ACTIONS.includes(action)) {
-            usage.issues.push(`Invalid action "${action}"`);
-            usage.suggestions.push(`Use one of: ${VALID_ACTIONS.join(', ')}`);
-          }
-
-          // Record all usages in verbose mode, or only those with issues otherwise
-          if (usage.issues.length > 0 || verboseMode) iconUsages.push(usage);
-        }
-      });
-
-      if (fileModified) {
-        const output = generate(ast, { retainLines: true });
-        await fs.writeFile(file, output.code, 'utf-8');
-        fixedFiles.add(file);
-      }
-    } catch (error) {
-      console.error(`Error processing ${file}: ${error.message}`);
-    }
-  }
-
-  // Generate report
-  const report = {
-    timestamp: new Date().toISOString(),
-    totalIcons: iconUsages.length,
-    totalIssues: iconUsages.filter(u => u.issues.length > 0).length,
-    details: iconUsages,
-    fixedCount,
-    fixedFiles: Array.from(fixedFiles).map(f => f.replace(rootDir, '')),
-    lightSolidValidation
-  };
-
-  await fs.writeFile(outputFile, JSON.stringify(report, null, 2), 'utf-8');
-  console.log(`${colors.green}✅ Audit complete. Report saved to ${outputFile}${colors.reset}`);
-
-  // Summary
-  console.log(`\n${colors.cyan}📊 Audit Summary:${colors.reset}`);
-  console.log(`Total icons audited: ${report.totalIcons}`);
-  console.log(`Issues found: ${report.totalIssues}`);
-  if (fixMode) console.log(`Issues fixed: ${fixedCount} across ${fixedFiles.size} files`);
-
-  if (verboseMode) {
-    console.log('\nDetailed Report:');
-    const byFile = iconUsages.reduce((acc, u) => {
-      acc[u.file] = acc[u.file] || [];
-      acc[u.file].push(u);
-      return acc;
-    }, {});
-    for (const [file, usages] of Object.entries(byFile)) {
-      console.log(`\n${file}:`);
-      usages.forEach(u => {
-        console.log(`  Line ${u.line}: ${u.component} - ${u.issues.join(', ') || 'OK'}`);
-        if (u.suggestions.length) console.log(`    Suggestions: ${u.suggestions.join(', ')}`);
-        if (u.fixed) console.log(`    ${colors.green}Fixed${colors.reset}`);
-      });
-    }
-  }
-
-  if (htmlReportMode) await generateHtmlReport(report);
-
-  return report;
-}
-
-async function generateHtmlReport(report) {
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Icon Audit Report</title>
-      <style>
-        body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; line-height: 1.5; }
-        h1, h2, h3 { margin-top: 2rem; }
-        .summary { display: flex; gap: 2rem; flex-wrap: wrap; }
-        .stat { background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; min-width: 200px; }
-        .stat h3 { margin-top: 0; margin-bottom: 0.5rem; }
-        .file { background: #f5f5f5; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .issue { background: white; padding: 0.5rem 1rem; margin: 0.5rem 0; border-left: 3px solid #e74c3c; }
-        .issue.fixed { border-left-color: #2ecc71; }
-        .suggestions { margin-left: 1rem; color: #3498db; }
-        .fixed-badge { background: #2ecc71; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { text-align: left; padding: 0.5rem; }
-        th { background: #f5f5f5; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        .alert { padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-warning { background: #fff3cd; color: #856404; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
-      </style>
-    </head>
-    <body>
-      <h1>Icon Audit Report</h1>
-      <p>Generated on ${new Date(report.timestamp).toLocaleString()}</p>
-      
-      <div class="summary">
-        <div class="stat">
-          <h3>Total Icons</h3>
-          <p>${report.totalIcons}</p>
-        </div>
-        <div class="stat">
-          <h3>Issues Found</h3>
-          <p>${report.totalIssues}</p>
-        </div>
-        <div class="stat">
-          <h3>Fixed Issues</h3>
-          <p>${report.fixedCount || 0}</p>
-        </div>
-        <div class="stat">
-          <h3>Files Modified</h3>
-          <p>${report.fixedFiles.length}</p>
-        </div>
-      </div>
-
-      ${report.lightSolidValidation ? `
-        <h2>Light/Solid Icon Differentiation</h2>
-        <div class="summary">
-          <div class="stat">
-            <h3>Distinct Pairs</h3>
-            <p>${report.lightSolidValidation.distinct}</p>
-          </div>
-          <div class="stat">
-            <h3>Duplicate Pairs</h3>
-            <p>${report.lightSolidValidation.duplicates}</p>
-          </div>
-        </div>
-        
-        ${report.lightSolidValidation.duplicates > 0 ? `
-          <div class="alert alert-warning">
-            <p>⚠️ <strong>Warning:</strong> ${report.lightSolidValidation.duplicates} light icons are identical or too similar to their solid counterparts!</p>
-            <p>Run <code>node scripts/audit-icons.js --fix-duplicates</code> to fix this issue.</p>
-            <p>Affected icons: ${report.lightSolidValidation.pairs.map(p => p.name).join(', ')}</p>
-          </div>
-        ` : `
-          <div class="alert alert-success">
-            <p>✅ All light/solid icon pairs are correctly differentiated.</p>
-          </div>
-        `}
-      ` : ''}
-
-      <h2>Issue Types</h2>
-      <table>
-        <tr>
-          <th>Issue</th>
-          <th>Count</th>
-        </tr>
-        ${Object.entries(report.details.reduce((acc, u) => {
-          u.issues.forEach(i => {
-            const key = i.includes(':') ? i.split(':')[0] : i;
-            acc[key] = (acc[key] || 0) + 1;
-          });
-          return acc;
-        }, {})).sort((a, b) => b[1] - a[1]).map(([issue, count]) => `
-          <tr>
-            <td>${issue}</td>
-            <td>${count}</td>
-          </tr>
-        `).join('')}
-      </table>
-      
-      <h2>Issues by File</h2>
-      ${Object.entries(report.details.reduce((acc, u) => {
-        if (u.issues.length === 0) return acc;
-        acc[u.file] = acc[u.file] || [];
-        acc[u.file].push(u);
-        return acc;
-      }, {})).map(([file, usages]) => `
-        <div class="file">
-          <h3>${file}</h3>
-          ${usages.map(u => `
-            <div class="issue ${u.fixed ? 'fixed' : ''}">
-              <p>Line ${u.line}: ${u.component} - ${u.issues.join(', ')}</p>
-              ${u.suggestions.length ? `<p class="suggestions">Suggestions: ${u.suggestions.join(', ')}</p>` : ''}
-              ${u.fixed ? '<span class="fixed-badge">Fixed</span>' : ''}
-            </div>
-          `).join('')}
-        </div>
-      `).join('')}
-    </body>
-    </html>
-  `;
-  
-  const outputPath = path.join(process.cwd(), 'icon-audit-report.html');
-  await fs.writeFile(outputPath, html, 'utf-8');
-  console.log(`${colors.green}✅ HTML report generated at ${outputPath}${colors.reset}`);
-}
-
-async function main() {
-  await runAudit({ 
-    fixMode, 
-    verboseMode, 
-    htmlReportMode, 
-    fixDuplicatesMode 
+    }).on('error', (err) => {
+      console.log(`❌ Download error: ${err.message}`);
+      reject(err);
+    });
   });
 }
 
+/**
+ * Creates a fallback icon if download fails
+ */
+function createFallbackIcon(iconName, style, outputPath) {
+  console.log(`Creating fallback ${style} icon for ${iconName}`);
+  
+  // Simple path data for various fallback icons
+  const fallbackPaths = {
+    'menu': 'M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z',
+    'file-audio': 'M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm-64 268c0 10.7-12.9 16-20.5 8.5L104 376H76c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h28l35.5-36.5c7.6-7.6 20.5-2.2 20.5 8.5v136zm33.2-47.6c9.1-9.3 9.1-24.1 0-33.4-22.1-22.8 12.2-56.2 34.4-33.5 27.2 27.9 27.2 72.4 0 100.4-21.8 22.3-56.9-10.4-34.4-33.5zm86-117.1c54.4 55.9 54.4 144.8 0 200.8-21.8 22.4-57-10.3-34.4-33.5 36.2-37.2 36.3-96.5 0-133.8-22.1-22.8 12.3-56.3 34.4-33.5zM384 121.9v6.1H256V0h6.1c6.4 0 12.5 2.5 17 7l97.9 98c4.5 4.5 7 10.6 7 16.9z',
+    'file-image': 'M384 121.941V128H256V0h6.059c6.365 0 12.47 2.529 16.97 7.029l97.941 97.941A24.005 24.005 0 0 1 384 121.941zM248 160c-13.2 0-24-10.8-24-24V0H24C10.745 0 0 10.745 0 24v464c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V160H248zm-135.455 16c26.51 0 48 21.49 48 48s-21.49 48-48 48-48-21.49-48-48 21.491-48 48-48zm208 240h-256l.485-48.485L104.545 328c4.686-4.686 11.799-4.686 16.485 0L160.545 368 264.06 264.485c4.686-4.686 12.284-4.686 16.971 0L320.545 304v112z',
+    'file-video': 'M384 121.941V128H256V0h6.059c6.365 0 12.47 2.529 16.97 7.029l97.941 97.941A24.005 24.005 0 0 1 384 121.941zM224 136V0H24C10.745 0 0 10.745 0 24v464c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V160H248c-13.2 0-24-10.8-24-24zm96 144.016v111.963c0 21.445-25.943 31.998-40.971 16.971L224 353.941V392c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V280c0-13.255 10.745-24 24-24h112c13.255 0 24 10.745 24 24v38.059l55.029-55.013c15.011-15.01 40.971-4.491 40.971 16.97z',
+    'rotate-right': 'M694.8 346.8c-39.5-39.5-103.5-39.5-143 0l-272 272c-39.5 39.5-39.5 103.5 0 143s103.5 39.5 143 0l272-272c39.5-39.5 39.5-103.5 0-143zM951.5 633.3l-514.5 514.5c-37.2 37.2-89.1 59.2-143 59.2H128c-35.3 0-64-28.7-64-64V976.7c0-53.9 22.1-105.8 59.2-143l514.5-514.5c75.1-75.1 196.9-75.1 272 0l41.8 41.8c75.1 75.1 75.1 196.9 0 272z'
+  };
+  
+  // Create suitable viewbox and path based on icon name
+  let viewBox = "0 0 448 512";
+  if (iconName === 'rotate-right') viewBox = "0 0 1024 1024";
+  
+  // For light style, make the stroke thinner
+  const pathAttrs = style === 'light' 
+    ? 'stroke="currentColor" stroke-width="0.5" fill="currentColor"' 
+    : 'fill="currentColor"';
+  
+  const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" fill="currentColor">
+  <path ${pathAttrs} d="${fallbackPaths[iconName] || 'M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z'}"></path>
+</svg>`;
+  
+  fs.writeFileSync(outputPath, svgContent, 'utf8');
+  console.log(`✅ Created fallback icon at ${outputPath}`);
+  return outputPath;
+}
+
+/**
+ * Checks if two icon files have identical content
+ */
+function compareIconFiles(path1, path2) {
+  if (!fs.existsSync(path1) || !fs.existsSync(path2)) {
+    return false;
+  }
+  
+  const content1 = fs.readFileSync(path1, 'utf8');
+  const content2 = fs.readFileSync(path2, 'utf8');
+  
+  // Extract the path data for more accurate comparison
+  const pathMatch1 = content1.match(/<path[^>]*d="([^"]+)"/);
+  const pathMatch2 = content2.match(/<path[^>]*d="([^"]+)"/);
+  
+  if (!pathMatch1 || !pathMatch2) {
+    // Can't compare paths, so compare the whole file
+    return content1 === content2;
+  }
+  
+  // Just compare path data which is the actual shape
+  return pathMatch1[1] === pathMatch2[1];
+}
+
+/**
+ * Fix missing icons
+ */
+async function fixMissingIcons() {
+  console.log('\nFIXING MISSING ICONS');
+  console.log('===================');
+  
+  // List of icons that need to be fixed
+  const missingIcons = [
+    { name: 'menu', styles: ['light', 'solid'] },
+    { name: 'file-audio', styles: ['solid'] },
+    { name: 'file-image', styles: ['solid'] },
+    { name: 'file-video', styles: ['solid'] },
+    { name: 'rotate-right', styles: ['solid'] }
+  ];
+  
+  let fixedCount = 0;
+  let failedCount = 0;
+  
+  for (const icon of missingIcons) {
+    for (const style of icon.styles) {
+      const outputPath = path.join(OUTPUT_DIRS[style], `${icon.name}.svg`);
+      
+      try {
+        await downloadIconFromCDN(icon.name, style, outputPath);
+        fixedCount++;
+      } catch (error) {
+        console.log(`Failed to download ${style}/${icon.name}: ${error.message}`);
+        try {
+          createFallbackIcon(icon.name, style, outputPath);
+          fixedCount++;
+        } catch (fallbackError) {
+          console.log(`Failed to create fallback icon: ${fallbackError.message}`);
+          failedCount++;
+        }
+      }
+    }
+  }
+  
+  console.log(`\nFixed ${fixedCount} missing icons, failed to fix ${failedCount} icons.`);
+  return { fixed: fixedCount, failed: failedCount };
+}
+
+/**
+ * Fix duplicate icons (identical light/solid variants)
+ */
+async function fixDuplicateIcons() {
+  console.log('\nFIXING DUPLICATE ICONS');
+  console.log('=====================');
+  
+  // List of icons known to be duplicates
+  const duplicateIcons = [
+    'close', 'edit', 'home', 'house', 'pen-to-square', 'xmark'
+  ];
+  
+  let fixedCount = 0;
+  let failedCount = 0;
+  
+  for (const icon of duplicateIcons) {
+    const lightPath = path.join(OUTPUT_DIRS.light, `${icon}.svg`);
+    const solidPath = path.join(OUTPUT_DIRS.solid, `${icon}.svg`);
+    
+    // Check if both files exist
+    if (!fs.existsSync(lightPath) || !fs.existsSync(solidPath)) {
+      console.log(`❌ Can't fix ${icon} - one or both variants don't exist.`);
+      failedCount++;
+      continue;
+    }
+    
+    // Check if they're actually duplicates
+    if (!compareIconFiles(lightPath, solidPath)) {
+      console.log(`ℹ️ ${icon} light and solid variants are already distinct, skipping.`);
+      continue;
+    }
+    
+    console.log(`Fixing duplicate icon: ${icon}`);
+    
+    try {
+      // Try to download the light version from CDN
+      await downloadIconFromCDN(icon, 'light', lightPath);
+      console.log(`✅ Successfully replaced light variant of ${icon}`);
+      fixedCount++;
+    } catch (error) {
+      console.log(`Failed to download light icon for ${icon}: ${error.message}`);
+      
+      try {
+        // Apply fallback transformation - make the existing solid icon lighter
+        const solidContent = fs.readFileSync(solidPath, 'utf8');
+        // Create a thinner stroke version
+        const lightContent = solidContent.replace('<path d="', '<path stroke="currentColor" stroke-width="0.5" fill="currentColor" d="');
+        fs.writeFileSync(lightPath, lightContent, 'utf8');
+        console.log(`✅ Applied fallback transformation for ${icon}`);
+        fixedCount++;
+      } catch (fallbackError) {
+        console.log(`❌ Failed to fix duplicate icon ${icon}: ${fallbackError.message}`);
+        failedCount++;
+      }
+    }
+  }
+  
+  console.log(`\nFixed ${fixedCount} duplicate icons, failed to fix ${failedCount} icons.`);
+  return { fixed: fixedCount, failed: failedCount };
+}
+
+/**
+ * Main function
+ */
+async function main() {
+  const results = {
+    missingFixed: 0,
+    missingFailed: 0,
+    duplicatesFixed: 0,
+    duplicatesFailed: 0
+  };
+  
+  // Fix missing icons if requested
+  if (fixMissing) {
+    const missingResults = await fixMissingIcons();
+    results.missingFixed = missingResults.fixed;
+    results.missingFailed = missingResults.failed;
+  }
+  
+  // Fix duplicate icons if requested
+  if (fixDuplicates) {
+    const duplicateResults = await fixDuplicateIcons();
+    results.duplicatesFixed = duplicateResults.fixed;
+    results.duplicatesFailed = duplicateResults.failed;
+  }
+  
+  // Report overall results
+  console.log('\nAUDIT SUMMARY');
+  console.log('=============');
+  console.log(`Missing icons fixed: ${results.missingFixed}`);
+  console.log(`Duplicate icons fixed: ${results.duplicatesFixed}`);
+  console.log(`Total failures: ${results.missingFailed + results.duplicatesFailed}`);
+  
+  // Regenerate icon data if we fixed anything
+  if (results.missingFixed > 0 || results.duplicatesFixed > 0) {
+    console.log('\nRegenerating icon data...');
+    try {
+      execSync('node scripts/generate-icon-data.js', { stdio: 'inherit' });
+      console.log('✅ Successfully regenerated icon data');
+    } catch (error) {
+      console.log(`❌ Failed to regenerate icon data: ${error.message}`);
+    }
+  }
+  
+  console.log('\nIcon audit complete!');
+}
+
+// Run the script
 main().catch(error => {
-  console.error('Audit failed:', error);
+  console.error('Error running audit script:', error);
   process.exit(1);
 });
