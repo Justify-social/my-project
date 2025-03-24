@@ -159,6 +159,8 @@ export const IconTester = Object.freeze(() => {
   // Add state for dynamic icons and errors
   const [dynamicIcons, setDynamicIcons] = useState<IconData[]>([]);
   const [iconErrors, setIconErrors] = useState<string[]>([]);
+  const [iconWarnings, setIconWarnings] = useState<string[]>([]);
+  const [diagnostics, setDiagnostics] = useState<Record<string, number>>({});
 
   // Refs for keyboard navigation
   const iconGridRef = useRef<HTMLDivElement>(null);
@@ -237,6 +239,8 @@ export const IconTester = Object.freeze(() => {
             console.log('API response data:', {
               iconCount: data?.icons?.length || 0,
               errorCount: data?.errors?.length || 0,
+              warningCount: data?.warnings?.length || 0,
+              diagnostics: data?.diagnostics || {},
               sampleIcons: data?.icons?.slice(0, 5).map((i: any) => i.name) || []
             });
             if (data?.icons?.length > 0) {
@@ -245,6 +249,8 @@ export const IconTester = Object.freeze(() => {
               const sortedIcons = [...data.icons].sort((a, b) => a.name.localeCompare(b.name));
               setDynamicIcons(sortedIcons);
               setIconErrors(data.errors || []);
+              setIconWarnings(data.warnings || []);
+              setDiagnostics(data.diagnostics || {});
             } else {
               console.warn('No icons returned from API');
               if (data?.errors?.length > 0) {
@@ -339,13 +345,96 @@ export const IconTester = Object.freeze(() => {
         </div>
       </div>
 
-      {/* Show errors if any */}
-      {iconErrors.length > 0 && <div className="p-4 rounded bg-red-50 mb-2 border border-red-200">
-          <h3 className="text-lg font-semibold text-red-700 mb-2">Icon Errors Detected</h3>
-          <ul className="list-disc pl-5 space-y-1">
-            {iconErrors.map((error, index) => <li key={index} className="text-red-600">{error}</li>)}
-          </ul>
-        </div>}
+      {/* Show errors and warnings if any */}
+      {(iconErrors.length > 0 || iconWarnings.length > 0) && (
+        <div className="p-4 rounded bg-gray-50 mb-4 border border-gray-200">
+          <h3 className="text-lg font-semibold mb-3">Icon System Status</h3>
+          
+          {diagnostics && Object.keys(diagnostics).length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div className="bg-white p-3 rounded border">
+                <span className="text-sm text-gray-500">Total Icons</span>
+                <p className="text-lg font-semibold">{(diagnostics.totalLight || 0) + (diagnostics.totalSolid || 0) + (diagnostics.totalBrands || 0)}</p>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <span className="text-sm text-gray-500">Valid Pairs</span>
+                <p className={`text-lg font-semibold ${diagnostics.validPairs === 0 ? 'text-red-600' : ''}`}>
+                  {diagnostics.validPairs || 0}
+                </p>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <span className="text-sm text-gray-500">Missing Light</span>
+                <p className={`text-lg font-semibold ${diagnostics.missingLight > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                  {diagnostics.missingLight || 0}
+                </p>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <span className="text-sm text-gray-500">Missing Solid</span>
+                <p className={`text-lg font-semibold ${diagnostics.missingSolid > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                  {diagnostics.missingSolid || 0}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {iconErrors.length > 0 && (
+            <div className="p-4 rounded bg-red-50 mb-3 border border-red-200">
+              <h4 className="text-base font-semibold text-red-700 mb-2 flex items-center">
+                <Icon name="faTriangleExclamation" className="mr-2 text-red-500" solid />
+                Icon Errors Detected
+              </h4>
+              <ul className="list-disc pl-5 space-y-2">
+                {iconErrors.map((error, index) => (
+                  <li key={index} className="text-red-600">
+                    {error}
+                    {error.includes('missing solid variants') && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/download-icons.js</code> to download missing solid variants.
+                      </div>
+                    )}
+                    {error.includes('missing light variants') && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/download-icons.js</code> to generate light variants from solid icons.
+                      </div>
+                    )}
+                    {error.includes('Essential icons') && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        Fix: Edit <code className="bg-gray-100 px-1 rounded">scripts/download-icons.js</code> to add missing icons to REQUIRED_LIGHT_ICONS or REQUIRED_SOLID_ICONS.
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {iconWarnings.length > 0 && (
+            <div className="p-4 rounded bg-amber-50 border border-amber-200">
+              <h4 className="text-base font-semibold text-amber-700 mb-2 flex items-center">
+                <Icon name="faWarning" className="mr-2 text-amber-500" solid />
+                Icon Warnings
+              </h4>
+              <ul className="list-disc pl-5 space-y-2">
+                {iconWarnings.map((warning, index) => (
+                  <li key={index} className="text-amber-600">
+                    {warning}
+                    {warning.includes('identical light/solid variants') && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/audit-icons.js --fix-duplicates</code> to regenerate distinct light versions.
+                      </div>
+                    )}
+                    {warning.includes('Invalid or corrupt') && (
+                      <div className="text-sm text-gray-700 mt-1">
+                        Fix: Re-download the affected icons or manually fix the SVG files to include proper viewBox and path data.
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* UI ICONS SECTION */}
       <section className="pt-2" aria-labelledby="ui-icons-heading">
@@ -362,7 +451,7 @@ export const IconTester = Object.freeze(() => {
           {dynamicIcons.length > 0 ?
         // Use dynamically discovered icons
         dynamicIcons.map((icon, index) => <div key={icon.fileName} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 group focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-opacity-75" role="gridcell" tabIndex={index === 0 ? 0 : -1}>
-                <StableIcon lightName={icon.lightName} solidName={icon.solidName} color="var(--primary-color)" hoverColor="var(--accent-color)" solid={false} className="text-[var(--secondary-color)]" />
+                <StableIcon lightName={icon.lightName} solidName={icon.solidName} color="var(--primary-color)" hoverColor="var(--accent-color)" showSolid={false} className="text-[var(--secondary-color)]" />
                 <span className="text-xs mt-2 text-center text-gray-700">
                   {icon.name}
                 </span>
@@ -374,7 +463,7 @@ export const IconTester = Object.freeze(() => {
           const lightName = `${baseName}Light`;
           const displayName = baseName.replace(/^fa/, '');
           return <div key={iconName} className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 group focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-opacity-75" role="gridcell" tabIndex={index === 0 ? 0 : -1}>
-                    <StableIcon lightName={lightName} solidName={baseName} color="var(--primary-color)" hoverColor="var(--accent-color)" solid={false} className="text-[var(--secondary-color)]" />
+                    <StableIcon lightName={lightName} solidName={baseName} color="var(--primary-color)" hoverColor="var(--accent-color)" showSolid={false} className="text-[var(--secondary-color)]" />
                     <span className="text-xs mt-2 text-center text-gray-700">
                       {displayName}
                     </span>
@@ -404,7 +493,7 @@ export const IconTester = Object.freeze(() => {
                 {demoIcons.variants.map((iconName, idx) => <div key={`${variant}-${iconName}`} className={cn("flex flex-col items-center p-2 border rounded", style.showHover ? "group hover:bg-gray-50" : "hover:bg-gray-50")} role="button" tabIndex={0} aria-label={`${iconName.replace(/^fa/, '')} with ${variant} styling`}>
                     {variant === 'button' ?
               // Use our custom StableIcon for button variants
-              <StableIcon lightName={`${iconName}Light`} solidName={iconName} color="var(--warning-color)" hoverColor="var(--warning-color)" solid={false} className="text-[var(--secondary-color)]" /> : variant === 'colors' ? <Icon name={iconName} size="md" solid className={cn(idx === 0 ? "text-[var(--warning-color)]" : idx === 1 ? "text-[var(--delete-color)]" : "text-[var(--primary-color)]")} iconType="static" /> : variant === 'sizes' ? <Icon name={iconName} size={idx === 0 ? "sm" : idx === 1 ? "md" : "lg"} solid className="text-[var(--warning-color)]" iconType="static" /> : variant === 'animated' ? <div className={cn(idx === 0 ? "animate-pulse" : idx === 1 ? "animate-bounce" : "animate-spin")}>
+              <StableIcon lightName={`${iconName}Light`} solidName={iconName} color="var(--warning-color)" hoverColor="var(--warning-color)" showSolid={false} className="text-[var(--secondary-color)]" /> : variant === 'colors' ? <Icon name={iconName} size="md" solid className={cn(idx === 0 ? "text-[var(--warning-color)]" : idx === 1 ? "text-[var(--delete-color)]" : "text-[var(--primary-color)]")} iconType="static" /> : variant === 'sizes' ? <Icon name={iconName} size={idx === 0 ? "sm" : idx === 1 ? "md" : "lg"} solid className="text-[var(--warning-color)]" iconType="static" /> : variant === 'animated' ? <div className={cn(idx === 0 ? "animate-pulse" : idx === 1 ? "animate-bounce" : "animate-spin")}>
                         <Icon name={iconName} size="md" solid className="text-[var(--warning-color)]" iconType="static" />
                       </div> : variant === 'badges' ? <div className="relative">
                         <Icon name={iconName} size="md" solid className="text-[var(--warning-color)]" iconType="static" />
