@@ -218,7 +218,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   imageSrc,
   description,
   format = "number"
-}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow p-4 font-work-sans">
+}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow p-4 font-work-sans" data-cy="metric-card">
     <div className="flex justify-between items-start font-work-sans">
       <div className="flex items-center font-work-sans">
         <div className="mr-3 p-2 bg-[var(--accent-color)] rounded-lg flex items-center justify-center w-9 h-9 font-work-sans">
@@ -418,7 +418,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
   children,
   iconName,
   actions
-}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6 font-work-sans">
+}) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6 font-work-sans" data-cy="chart-card">
     <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-3 font-work-sans">
       <div className="flex items-center font-work-sans">
         <div className="p-2 bg-[var(--light-background)] rounded-lg mr-3 font-work-sans">
@@ -1655,515 +1655,536 @@ export default function DashboardContent({
 
   // Return the JSX for the dashboard
   return (
-    <div className="min-h-screen bg-white font-work-sans">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6 font-work-sans">
-        {error && <Toast message={error} type="error" />}
-
-        {/* Campaigns Overview Section */}
-        <div className="mb-4 sm:mb-6 font-work-sans">
-          <div className="flex justify-between items-center mb-3 sm:mb-5 font-work-sans">
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">
-              <span className="block sm:hidden font-work-sans">Overview</span>
-              <span className="hidden sm:block font-work-sans">Campaigns Overview</span>
-            </h2>
-            <button onClick={() => router.push('/campaigns/wizard/step-1')} className="group px-3 sm:px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 shadow-sm hover:shadow-md transition-all font-work-sans">
-              <Icon name="faPlus" className="w-4 h-4 mr-2" iconType="button" />
+    <div className="space-y-8 font-work-sans" data-cy="dashboard-content">
+      {/* Campaigns Overview Section */}
+      <div className="mb-4 sm:mb-6 font-work-sans">
+        <div className="flex justify-between items-center mb-3 sm:mb-5 font-work-sans">
+          <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">
+            Campaigns Overview
+          </h2>
+          <div className="flex space-x-3 font-work-sans">
+            <select
+              className="rounded-lg border border-[var(--divider-color)] pl-3 pr-8 py-2 text-sm text-[var(--primary-color)] focus:ring-[var(--accent-color)] font-work-sans" 
+              defaultValue="30"
+              data-cy="time-period-select"
+            >
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 14 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center rounded-lg border border-[var(--divider-color)] px-4 py-2 text-sm text-[var(--primary-color)] hover:bg-gray-50 transition-colors font-work-sans"
+              data-cy="export-button"
+            >
+              <Icon name="faDownload" className="w-4 h-4 mr-2 text-[var(--secondary-color)]" solid={false} />
+              Export
+            </button>
+            
+            <button
+              onClick={handleNewCampaign}
+              className="bg-[var(--accent-color)] hover:bg-[#0096cc] text-white px-4 py-2 rounded-lg flex items-center transition-colors duration-200 font-work-sans"
+              data-cy="new-campaign-button"
+            >
+              <Icon name="faPlus" className="w-4 h-4 mr-2" solid={false} />
               <span className="font-work-sans">New Campaign</span>
             </button>
           </div>
+        </div>
+        
+        {/* Calendar and Campaign Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 font-work-sans">
+          {/* Calendar */}
+          <div className="col-span-12 lg:col-span-6 font-work-sans">
+            <CalendarDashboard month={currentDate} events={calendarEvents} />
+          </div>
           
-          {/* Calendar and Campaign Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 font-work-sans">
-            {/* Calendar */}
-            <div className="col-span-12 lg:col-span-6 font-work-sans">
-              <CalendarDashboard month={currentDate} events={calendarEvents} />
-            </div>
-            
-            {/* Campaign Cards - Align with calendar */}
-            <div className="col-span-12 lg:col-span-6 font-work-sans">
-              <ErrorBoundary
-                fallback={
-                  <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden p-4">
-                    <h3 className="text-sm font-medium text-[var(--secondary-color)] mb-3">Upcoming</h3>
-                    <div className="text-center py-4 border border-dashed border-[var(--divider-color)] rounded-lg">
-                      <p className="text-sm text-red-500 mb-2">Unable to display campaigns</p>
-                      <button 
-                        onClick={() => window.location.reload()} 
-                        className="text-xs px-3 py-1.5 bg-[var(--accent-color)] text-white rounded-md"
-                      >
-                        Refresh
-                      </button>
-                    </div>
+          {/* Campaign Cards - Align with calendar */}
+          <div className="col-span-12 lg:col-span-6 font-work-sans">
+            <ErrorBoundary
+              fallback={
+                <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden p-4">
+                  <h3 className="text-sm font-medium text-[var(--secondary-color)] mb-3">Upcoming</h3>
+                  <div className="text-center py-4 border border-dashed border-[var(--divider-color)] rounded-lg">
+                    <p className="text-sm text-red-500 mb-2">Unable to display campaigns</p>
+                    <button 
+                      onClick={() => window.location.reload()} 
+                      className="text-xs px-3 py-1.5 bg-[var(--accent-color)] text-white rounded-md"
+                    >
+                      Refresh
+                    </button>
                   </div>
+                </div>
+              }
+            >
+              <UpcomingCampaignsCard 
+                campaigns={Array.isArray(campaignsData?.campaigns) ? 
+                  campaignsData.campaigns.map(c => ({
+                    ...c,
+                    id: c.id,
+                    campaignName: c.campaignName,
+                    submissionStatus: c.submissionStatus,
+                    platform: c.platform,
+                    startDate: c.startDate,
+                    endDate: c.endDate,
+                    totalBudget: c.totalBudget,
+                    primaryKPI: c.primaryKPI
+                  })) : []
                 }
-              >
-                <UpcomingCampaignsCard 
-                  campaigns={Array.isArray(campaignsData?.campaigns) ? 
-                    campaignsData.campaigns.map(c => ({
-                      ...c,
-                      id: c.id,
-                      campaignName: c.campaignName,
-                      submissionStatus: c.submissionStatus,
-                      platform: c.platform,
-                      startDate: c.startDate,
-                      endDate: c.endDate,
-                      totalBudget: c.totalBudget,
-                      primaryKPI: c.primaryKPI
-                    })) : []
-                  }
-                  isLoading={isLoadingCampaigns}
-                  onNewCampaign={handleNewCampaign}
-                  onSelectCampaign={(id) => router.push(`/campaigns/${id}`)}
-                />
-              </ErrorBoundary>
-            </div>
+                isLoading={isLoadingCampaigns}
+                onNewCampaign={handleNewCampaign}
+                onSelectCampaign={(id) => router.push(`/campaigns/${id}`)}
+              />
+            </ErrorBoundary>
+          </div>
+        </div>
+      </div>
+      
+      {/* Performance Metrics Section */}
+      <div className="mb-5 sm:mb-8 font-work-sans">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 font-work-sans">
+          <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">Performance</h2>
+        </div>
+        
+        {/* Performance Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-work-sans">
+          <MetricCard
+            title="Total Campaigns"
+            value={metrics.stats.totalCampaigns}
+            trend={metrics.stats.campaignChange}
+            imageSrc="/app/Campaigns.svg"
+            description={`+${metrics.stats.campaignChange} campaigns`} />
+
+          
+          <MetricCard
+            title="Survey Responses"
+            value={metrics.stats.surveyResponses}
+            trend={metrics.stats.surveyChange}
+            iconName="faCommentDots"
+            description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
+
+          
+          <MetricCard
+            title="Live Campaigns"
+            value={metrics.stats.liveCampaigns}
+            trend={metrics.stats.liveChange}
+            iconName="faPlay"
+            description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} />
+
+          
+          <MetricCard
+            title="Credits Available"
+            value={metrics.stats.creditsAvailable}
+            trend={metrics.stats.creditsChange}
+            imageSrc="/coins.svg"
+            description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} />
+
+        </div>
+      </div>
+
+      {/* Influencers Overview */}
+      <div className="mb-8 font-work-sans">
+        <div className="flex justify-between items-center mb-4 font-work-sans">
+          <h2 className="text-xl font-semibold text-gray-900 font-sora">Influencers Overview</h2>
+          <div className="flex space-x-3 font-work-sans">
+            <button onClick={() => router.push('/influencers/reports')} className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
+              <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
+              <span className="font-work-sans">View Detailed Report</span>
+            </button>
           </div>
         </div>
         
-        {/* Performance Metrics Section */}
-        <div className="mb-5 sm:mb-8 font-work-sans">
-          <div className="flex items-center justify-between mb-3 sm:mb-4 font-work-sans">
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">Performance</h2>
-          </div>
-          
-          {/* Performance Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-work-sans">
-            <MetricCard
-              title="Total Campaigns"
-              value={metrics.stats.totalCampaigns}
-              trend={metrics.stats.campaignChange}
-              imageSrc="/app/Campaigns.svg"
-              description={`+${metrics.stats.campaignChange} campaigns`} />
-
-            
-            <MetricCard
-              title="Survey Responses"
-              value={metrics.stats.surveyResponses}
-              trend={metrics.stats.surveyChange}
-              iconName="faCommentDots"
-              description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
-
-            
-            <MetricCard
-              title="Live Campaigns"
-              value={metrics.stats.liveCampaigns}
-              trend={metrics.stats.liveChange}
-              iconName="faPlay"
-              description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} />
-
-            
-            <MetricCard
-              title="Credits Available"
-              value={metrics.stats.creditsAvailable}
-              trend={metrics.stats.creditsChange}
-              imageSrc="/coins.svg"
-              description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} />
-
-          </div>
-        </div>
-
-        {/* Influencers Overview */}
-        <div className="mb-8 font-work-sans">
-          <div className="flex justify-between items-center mb-4 font-work-sans">
-            <h2 className="text-xl font-semibold text-gray-900 font-sora">Influencers Overview</h2>
-            <div className="flex space-x-3 font-work-sans">
-              <button onClick={() => router.push('/influencers/reports')} className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
-                <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
-                <span className="font-work-sans">View Detailed Report</span>
-              </button>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-[var(--divider-color)] font-work-sans">
-            <div className="flex border-b border-[var(--divider-color)] font-work-sans">
-              <button className="group px-4 py-3 text-sm font-medium text-[var(--accent-color)] border-b-2 border-[var(--accent-color)] font-work-sans">
-                <span className="font-work-sans">Social Profiles</span>
-              </button>
-              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
-                <span className="font-work-sans">Engagement</span>
-              </button>
-              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
-                <span className="font-work-sans">Likes</span>
-              </button>
-              <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
-                <span className="font-work-sans">Comments</span>
-              </button>
-            </div>
-            
-            {/* Social profiles content */}
-            <div className="overflow-hidden p-4 font-work-sans">
-              <table className="min-w-full">
-                <tbody className="divide-y divide-gray-100">
-                  <tr className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center font-work-sans">
-                        <div className="h-10 w-10 flex-shrink-0 font-work-sans">
-                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="" />
-                        </div>
-                        <div className="ml-4 font-work-sans">
-                          <div className="flex items-center font-work-sans">
-                            <div className="font-medium text-gray-900 font-work-sans">Ethan Edge</div>
-                            <svg className="ml-1 w-4 h-4 text-blue-500 font-work-sans" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8.21 10.08c-.02 0-.04 0-.06-.02-.67-.9-.84-2.44-.89-3.03 0-.11-.13-.18-.23-.12C4.93 8.08 3 10.86 3 13.54 3 18.14 6.2 22 11.7 22c5.15 0 8.7-3.98 8.7-8.46 0-5.87-4.2-9.77-7.93-11.53a.13.13 0 0 0-.19.14c.48 3.16-.18 6.6-4.07 7.93z" fill="#38bdf8" />
-                            </svg>
-                          </div>
-                          <div className="text-sm text-gray-500 flex items-center font-work-sans">
-                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400 font-work-sans" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <span className="font-work-sans">Back to Inspiration</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-work-sans">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5 font-work-sans">
-                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
-                          width: '90%'
-                        }}></div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">3K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">12</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center font-work-sans">
-                        <div className="h-10 w-10 flex-shrink-0 font-work-sans">
-                          <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="" />
-                        </div>
-                        <div className="ml-4 font-work-sans">
-                          <div className="font-medium text-gray-900 font-work-sans">Olivia Wave</div>
-                          <div className="text-sm text-gray-500 flex items-center font-work-sans">
-                            <svg className="w-3.5 h-3.5 mr-1 text-gray-400 font-work-sans" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
-                            </svg>
-                            <span className="font-work-sans">New Beginnings</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-work-sans">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5 font-work-sans">
-                        <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
-                          width: '85%'
-                        }}></div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">3K</td>
-                    <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">52</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            {/* Security check box */}
-            <div className="mt-1 border-t border-gray-200 p-4 font-work-sans">
-              <div className="flex justify-between items-center font-work-sans">
-                <div className="font-work-sans">
-                  <p className="text-sm font-medium font-work-sans">Security Check</p>
-                  <p className="text-xs text-gray-500 mt-1 font-work-sans">Maintain safety. Complete your security check on time.</p>
-                </div>
-                <div className="flex space-x-3 font-work-sans">
-                  <div className="bg-red-50 text-red-600 text-xs font-medium px-3 py-1 rounded-md font-work-sans">Next in 5 Days</div>
-                  <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-3 py-1 rounded-md font-work-sans">
-                    <span className="font-work-sans">Run Check</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Insights Summary Section */}
-        <div className="mb-8 font-work-sans">
-          <div className="flex justify-between items-center mb-4 font-work-sans">
-            <h2 className="text-xl font-semibold text-gray-900 font-sora">Insights Summary</h2>
-            <a href="#" className="group text-[var(--accent-color)] text-sm font-medium flex items-center hover:underline font-work-sans">
-              <span className="font-work-sans">View All Insights</span>
-              <Icon name="faArrowRight" className="w-4 h-4 ml-1" iconType="button" />
-            </a>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-            {/* Youth Momentum Insight Card */}
-            <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden font-work-sans">
-              <div className="flex items-start mb-3 font-work-sans">
-                <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3 font-work-sans">
-                  <Icon name="faChartLine" className="w-5 h-5 text-white font-work-sans" solid={false} />
-                </div>
-                <div className="flex-1 font-work-sans">
-                  <h3 className="text-base font-semibold text-[#0c4a6e] font-sora">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
-                </div>
-              </div>
-              <p className="text-sm text-[#0c4a6e] mb-4 font-work-sans">
-                Campaign "NextGen Focus: Amplify Impact" is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.
-              </p>
-              <div className="flex justify-end font-work-sans">
-                <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90 font-work-sans">
-                  <span className="font-work-sans">Read</span>
-                </button>
-              </div>
-            </div>
-            
-            {/* Low Engagement Alert Card */}
-            <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden font-work-sans">
-              <div className="absolute top-0 right-0 p-1 font-work-sans">
-                <button className="group text-gray-400 hover:text-gray-600 font-work-sans">
-                  <Icon name="faXmark" className="w-4 h-4" iconType="button" />
-                </button>
-              </div>
-              <div className="flex items-start mb-3 font-work-sans">
-                <div className="bg-gray-300 p-2 rounded-md mr-3 font-work-sans">
-                  <Icon name="faTriangleExclamation" className="w-5 h-5 text-gray-600 font-work-sans" solid={false} />
-                </div>
-                <div className="flex-1 font-work-sans">
-                  <h3 className="text-base font-semibold text-gray-700 font-sora">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-4 font-work-sans">
-                Engagement rate is 15% below average. Consider revising the call-to-action.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Latest Campaigns List */}
-        <div className="mb-8 font-work-sans">
-          <div className="flex justify-between items-center mb-4 font-work-sans">
-            <h2 className="text-xl font-semibold text-gray-900 font-sora">Latest Campaigns List</h2>
-            <button className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
-              <span className="font-work-sans">Manage</span>
+        <div className="bg-white rounded-lg border border-[var(--divider-color)] font-work-sans">
+          <div className="flex border-b border-[var(--divider-color)] font-work-sans">
+            <button className="group px-4 py-3 text-sm font-medium text-[var(--accent-color)] border-b-2 border-[var(--accent-color)] font-work-sans">
+              <span className="font-work-sans">Social Profiles</span>
+            </button>
+            <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
+              <span className="font-work-sans">Engagement</span>
+            </button>
+            <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
+              <span className="font-work-sans">Likes</span>
+            </button>
+            <button className="group px-4 py-3 text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] font-work-sans">
+              <span className="font-work-sans">Comments</span>
             </button>
           </div>
           
-          {/* Campaigns table */}
-          <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden font-work-sans">
-            <div className="overflow-x-auto font-work-sans">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Campaign</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Status</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Budget</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Users</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {isLoadingCampaigns ?
-                  <tr>
-                      <td colSpan={4} className="py-8">
-                        <TableSkeleton rows={3} cols={4} hasHeader={false} />
-                      </td>
-                    </tr> :
-
-                  <>
-                      <tr className="hover:bg-gray-50 cursor-pointer">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center font-work-sans">
-                            <div className="text-sm font-medium text-gray-900 font-work-sans">Clicks & Connections</div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 font-work-sans">
-                            Live
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex flex-col font-work-sans">
-                            <div className="text-xs font-medium text-gray-600 font-work-sans">Budget</div>
-                            <div className="flex items-center font-work-sans">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
-                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
-                                width: '75%'
-                              }}></div>
-                              </div>
-                              <span className="text-xs font-medium font-work-sans">12,314$</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm font-medium font-work-sans">12 of 100 Users</div>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-gray-50 cursor-pointer">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center font-work-sans">
-                            <div className="text-sm font-medium text-gray-900 font-work-sans">Beyond the Horizon</div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 font-work-sans">
-                            Live
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex flex-col font-work-sans">
-                            <div className="text-xs font-medium text-gray-600 font-work-sans">Budget</div>
-                            <div className="flex items-center font-work-sans">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
-                                <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
-                                width: '60%'
-                              }}></div>
-                              </div>
-                              <span className="text-xs font-medium font-work-sans">10,461$</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm font-medium font-work-sans">46 of 413 Users</div>
-                        </td>
-                      </tr>
-                    </>
-                  }
-                </tbody>
-              </table>
+          {/* Social profiles content */}
+          <div className="overflow-hidden p-4 font-work-sans">
+            <table className="min-w-full">
+              <tbody className="divide-y divide-gray-100">
+                <tr className="hover:bg-gray-50">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center font-work-sans">
+                      <div className="h-10 w-10 flex-shrink-0 font-work-sans">
+                        <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="" />
+                      </div>
+                      <div className="ml-4 font-work-sans">
+                        <div className="flex items-center font-work-sans">
+                          <div className="font-medium text-gray-900 font-work-sans">Ethan Edge</div>
+                          <svg className="ml-1 w-4 h-4 text-blue-500 font-work-sans" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8.21 10.08c-.02 0-.04 0-.06-.02-.67-.9-.84-2.44-.89-3.03 0-.11-.13-.18-.23-.12C4.93 8.08 3 10.86 3 13.54 3 18.14 6.2 22 11.7 22c5.15 0 8.7-3.98 8.7-8.46 0-5.87-4.2-9.77-7.93-11.53a.13.13 0 0 0-.19.14c.48 3.16-.18 6.6-4.07 7.93z" fill="#38bdf8" />
+                          </svg>
+                        </div>
+                        <div className="text-sm text-gray-500 flex items-center font-work-sans">
+                          <svg className="w-3.5 h-3.5 mr-1 text-gray-400 font-work-sans" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 2C14.717 2 15.056 2.01 16.122 2.06C17.187 2.11 17.912 2.277 18.55 2.525C19.21 2.779 19.766 3.123 20.322 3.678C20.8305 4.1779 21.224 4.78259 21.475 5.45C21.722 6.087 21.89 6.813 21.94 7.878C21.987 8.944 22 9.283 22 12C22 14.717 21.99 15.056 21.94 16.122C21.89 17.187 21.722 17.912 21.475 18.55C21.2247 19.2178 20.8311 19.8226 20.322 20.322C19.822 20.8303 19.2173 21.2238 18.55 21.475C17.913 21.722 17.187 21.89 16.122 21.94C15.056 21.987 14.717 22 12 22C9.283 22 8.944 21.99 7.878 21.94C6.813 21.89 6.088 21.722 5.45 21.475C4.78233 21.2245 4.17753 20.8309 3.678 20.322C3.16941 19.8222 2.77593 19.2175 2.525 18.55C2.277 17.913 2.11 17.187 2.06 16.122C2.013 15.056 2 14.717 2 12C2 9.283 2.01 8.944 2.06 7.878C2.11 6.812 2.277 6.088 2.525 5.45C2.77524 4.78218 3.1688 4.17732 3.678 3.678C4.17767 3.16923 4.78243 2.77573 5.45 2.525C6.088 2.277 6.812 2.11 7.878 2.06C8.944 2.013 9.283 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          <span className="font-work-sans">Back to Inspiration</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-right font-work-sans">
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 font-work-sans">
+                      <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                        width: '90%'
+                      }}></div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">3K</td>
+                  <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">12</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center font-work-sans">
+                      <div className="h-10 w-10 flex-shrink-0 font-work-sans">
+                        <img className="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="" />
+                      </div>
+                      <div className="ml-4 font-work-sans">
+                        <div className="font-medium text-gray-900 font-work-sans">Olivia Wave</div>
+                        <div className="text-sm text-gray-500 flex items-center font-work-sans">
+                          <svg className="w-3.5 h-3.5 mr-1 text-gray-400 font-work-sans" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
+                          </svg>
+                          <span className="font-work-sans">New Beginnings</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-right font-work-sans">
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 font-work-sans">
+                      <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                        width: '85%'
+                      }}></div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">3K</td>
+                  <td className="py-3 px-4 text-right font-medium text-sm font-work-sans">52</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Security check box */}
+          <div className="mt-1 border-t border-gray-200 p-4 font-work-sans">
+            <div className="flex justify-between items-center font-work-sans">
+              <div className="font-work-sans">
+                <p className="text-sm font-medium font-work-sans">Security Check</p>
+                <p className="text-xs text-gray-500 mt-1 font-work-sans">Maintain safety. Complete your security check on time.</p>
+              </div>
+              <div className="flex space-x-3 font-work-sans">
+                <div className="bg-red-50 text-red-600 text-xs font-medium px-3 py-1 rounded-md font-work-sans">Next in 5 Days</div>
+                <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-3 py-1 rounded-md font-work-sans">
+                  <span className="font-work-sans">Run Check</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Brand health card - Moved to bottom of page */}
-        <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5 mb-6 font-work-sans">
-          <div className="flex justify-between items-center mb-4 font-work-sans">
-            <h2 className="text-xl font-semibold text-gray-900 font-sora">Brand Health</h2>
+      {/* Insights Summary Section */}
+      <div className="mb-8 font-work-sans">
+        <div className="flex justify-between items-center mb-4 font-work-sans">
+          <h2 className="text-xl font-semibold text-gray-900 font-sora">Insights Summary</h2>
+          <a href="#" className="group text-[var(--accent-color)] text-sm font-medium flex items-center hover:underline font-work-sans">
+            <span className="font-work-sans">View All Insights</span>
+            <Icon name="faArrowRight" className="w-4 h-4 ml-1" iconType="button" />
+          </a>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+          {/* Youth Momentum Insight Card */}
+          <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden font-work-sans">
+            <div className="flex items-start mb-3 font-work-sans">
+              <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3 font-work-sans">
+                <Icon name="faChartLine" className="w-5 h-5 text-white font-work-sans" solid={false} />
+              </div>
+              <div className="flex-1 font-work-sans">
+                <h3 className="text-base font-semibold text-[#0c4a6e] font-sora">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
+              </div>
+            </div>
+            <p className="text-sm text-[#0c4a6e] mb-4 font-work-sans">
+              Campaign "NextGen Focus: Amplify Impact" is performing 20% better among 18-24-year-olds. Consider allocating more budget to this segment.
+            </p>
+            <div className="flex justify-end font-work-sans">
+              <button className="group bg-[var(--accent-color)] text-white text-xs font-medium px-4 py-1.5 rounded-md hover:bg-opacity-90 font-work-sans">
+                <span className="font-work-sans">Read</span>
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-            {/* Left side - Sentiment Score */}
-            <div className="font-work-sans">
-              <div className="mb-3 flex justify-between items-center font-work-sans">
-                <div className="font-work-sans">
-                  <h3 className="text-sm text-gray-500 mb-1 font-sora">Sentiment Score</h3>
-                  <div className="flex items-baseline font-work-sans">
-                    <span className="text-2xl font-bold font-work-sans">76% Positive Score</span>
-                  </div>
-                </div>
-                <div className="flex items-center font-work-sans">
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium font-work-sans">90D</span>
-                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
+          
+          {/* Low Engagement Alert Card */}
+          <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden font-work-sans">
+            <div className="absolute top-0 right-0 p-1 font-work-sans">
+              <button className="group text-gray-400 hover:text-gray-600 font-work-sans">
+                <Icon name="faXmark" className="w-4 h-4" iconType="button" />
+              </button>
+            </div>
+            <div className="flex items-start mb-3 font-work-sans">
+              <div className="bg-gray-300 p-2 rounded-md mr-3 font-work-sans">
+                <Icon name="faTriangleExclamation" className="w-5 h-5 text-gray-600 font-work-sans" solid={false} />
+              </div>
+              <div className="flex-1 font-work-sans">
+                <h3 className="text-base font-semibold text-gray-700 font-sora">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-4 font-work-sans">
+              Engagement rate is 15% below average. Consider revising the call-to-action.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Latest Campaigns List */}
+      <div className="mb-8 font-work-sans">
+        <div className="flex justify-between items-center mb-4 font-work-sans">
+          <h2 className="text-xl font-semibold text-gray-900 font-sora">Latest Campaigns List</h2>
+          <button className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
+            <span className="font-work-sans">Manage</span>
+          </button>
+        </div>
+        
+        {/* Campaigns table */}
+        <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden font-work-sans">
+          <div className="overflow-x-auto font-work-sans">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Campaign</th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Status</th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Budget</th>
+                  <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 tracking-wider font-work-sans">Users</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {isLoadingCampaigns ?
+                <tr>
+                    <td colSpan={4} className="py-8">
+                      <TableSkeleton rows={3} cols={4} hasHeader={false} />
+                    </td>
+                  </tr> :
+
+                <>
+                    <tr className="hover:bg-gray-50 cursor-pointer">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center font-work-sans">
+                          <div className="text-sm font-medium text-gray-900 font-work-sans">Clicks & Connections</div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 font-work-sans">
+                          Live
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col font-work-sans">
+                          <div className="text-xs font-medium text-gray-600 font-work-sans">Budget</div>
+                          <div className="flex items-center font-work-sans">
+                            <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
+                              <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                              width: '75%'
+                            }}></div>
+                            </div>
+                            <span className="text-xs font-medium font-work-sans">12,314$</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="text-sm font-medium font-work-sans">12 of 100 Users</div>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-gray-50 cursor-pointer">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center font-work-sans">
+                          <div className="text-sm font-medium text-gray-900 font-work-sans">Beyond the Horizon</div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 font-work-sans">
+                          Live
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col font-work-sans">
+                          <div className="text-xs font-medium text-gray-600 font-work-sans">Budget</div>
+                          <div className="flex items-center font-work-sans">
+                            <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
+                              <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
+                              width: '60%'
+                            }}></div>
+                            </div>
+                            <span className="text-xs font-medium font-work-sans">10,461$</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="text-sm font-medium font-work-sans">46 of 413 Users</div>
+                      </td>
+                    </tr>
+                  </>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Brand health card - Moved to bottom of page */}
+      <div className="bg-white rounded-lg border border-[var(--divider-color)] p-5 mb-6 font-work-sans">
+        <div className="flex justify-between items-center mb-4 font-work-sans">
+          <h2 className="text-xl font-semibold text-gray-900 font-sora">Brand Health</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+          {/* Left side - Sentiment Score */}
+          <div className="font-work-sans">
+            <div className="mb-3 flex justify-between items-center font-work-sans">
+              <div className="font-work-sans">
+                <h3 className="text-sm text-gray-500 mb-1 font-sora">Sentiment Score</h3>
+                <div className="flex items-baseline font-work-sans">
+                  <span className="text-2xl font-bold font-work-sans">76% Positive Score</span>
                 </div>
               </div>
-              
-              {/* Chart */}
-              <div className="mt-4 h-48 relative font-work-sans">
-                {/* Simulated chart with lines */}
-                <div className="absolute top-0 left-0 w-full h-full font-work-sans">
-                  <div className="relative w-full h-full font-work-sans">
-                    {/* Y-axis labels */}
-                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-work-sans">
-                      <span className="font-work-sans">20k</span>
-                      <span className="font-work-sans">15k</span>
-                      <span className="font-work-sans">10k</span>
-                      <span className="font-work-sans">5k</span>
-                      <span className="font-work-sans">1k</span>
-                      <span className="font-work-sans">0</span>
-                    </div>
-                    
-                    {/* X-axis grid lines */}
-                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
-                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                    </div>
-                    
-                    {/* Line chart with actual data */}
-                    <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
-                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,20 280,25 300,20" stroke="#0ea5e9" strokeWidth="2" fill="none" />
-                      <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient)" />
-                    </svg>
-                    
-                    {/* X-axis labels */}
-                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
-                      <span className="font-work-sans">01 Aug</span>
-                      <span className="font-work-sans">05 Aug</span>
-                      <span className="font-work-sans">10 Aug</span>
-                      <span className="font-work-sans">15 Aug</span>
-                      <span className="font-work-sans">20 Aug</span>
-                      <span className="font-work-sans">25 Aug</span>
-                      <span className="font-work-sans">30 Aug</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center font-work-sans">
+                <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium font-work-sans">90D</span>
+                <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
               </div>
-              
-              {/* Event marker */}
-              <div className="mt-6 flex items-center font-work-sans">
-                <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center font-work-sans">
-                  <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1 font-work-sans"></span>
-                  <span className="font-work-sans">Senior Travellers Campaign launch</span>
+            </div>
+            
+            {/* Chart */}
+            <div className="mt-4 h-48 relative font-work-sans">
+              {/* Simulated chart with lines */}
+              <div className="absolute top-0 left-0 w-full h-full font-work-sans">
+                <div className="relative w-full h-full font-work-sans">
+                  {/* Y-axis labels */}
+                  <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-work-sans">
+                    <span className="font-work-sans">20k</span>
+                    <span className="font-work-sans">15k</span>
+                    <span className="font-work-sans">10k</span>
+                    <span className="font-work-sans">5k</span>
+                    <span className="font-work-sans">1k</span>
+                    <span className="font-work-sans">0</span>
+                  </div>
+                  
+                  {/* X-axis grid lines */}
+                  <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
+                    <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                  </div>
+                  
+                  {/* Line chart with actual data */}
+                  <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
+                        <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,20 280,25 300,20" stroke="#0ea5e9" strokeWidth="2" fill="none" />
+                    <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient)" />
+                  </svg>
+                  
+                  {/* X-axis labels */}
+                  <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
+                    <span className="font-work-sans">01 Aug</span>
+                    <span className="font-work-sans">05 Aug</span>
+                    <span className="font-work-sans">10 Aug</span>
+                    <span className="font-work-sans">15 Aug</span>
+                    <span className="font-work-sans">20 Aug</span>
+                    <span className="font-work-sans">25 Aug</span>
+                    <span className="font-work-sans">30 Aug</span>
+                  </div>
                 </div>
               </div>
             </div>
             
-            {/* Right side - Latest mentions */}
-            <div className="font-work-sans">
-              <div className="mb-3 flex justify-between items-center font-work-sans">
-                <div className="font-work-sans">
-                  <h3 className="text-sm text-gray-500 mb-1 font-sora">Latest Mentions</h3>
-                  <div className="flex items-baseline font-work-sans">
-                    <span className="text-2xl font-bold font-work-sans">1,561 Mentions</span>
-                    <span className="ml-2 text-xs text-green-600 font-medium font-work-sans">+47% More than last week</span>
-                  </div>
-                </div>
-                <div className="flex items-center font-work-sans">
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium font-work-sans">90D</span>
-                  <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
+            {/* Event marker */}
+            <div className="mt-6 flex items-center font-work-sans">
+              <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center font-work-sans">
+                <span className="w-2 h-2 bg-[#0ea5e9] rounded-full mr-1 font-work-sans"></span>
+                <span className="font-work-sans">Senior Travellers Campaign launch</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right side - Latest mentions */}
+          <div className="font-work-sans">
+            <div className="mb-3 flex justify-between items-center font-work-sans">
+              <div className="font-work-sans">
+                <h3 className="text-sm text-gray-500 mb-1 font-sora">Latest Mentions</h3>
+                <div className="flex items-baseline font-work-sans">
+                  <span className="text-2xl font-bold font-work-sans">1,561 Mentions</span>
+                  <span className="ml-2 text-xs text-green-600 font-medium font-work-sans">+47% More than last week</span>
                 </div>
               </div>
-              
-              {/* Chart */}
-              <div className="mt-4 h-48 relative font-work-sans">
-                {/* Simulated chart with lines */}
-                <div className="absolute top-0 left-0 w-full h-full font-work-sans">
-                  <div className="relative w-full h-full font-work-sans">
-                    {/* Y-axis labels */}
-                    <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-work-sans">
-                      <span className="font-work-sans">20k</span>
-                      <span className="font-work-sans">15k</span>
-                      <span className="font-work-sans">10k</span>
-                      <span className="font-work-sans">5k</span>
-                      <span className="font-work-sans">1k</span>
-                      <span className="font-work-sans">0</span>
-                    </div>
-                    
-                    {/* X-axis grid lines */}
-                    <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
-                      <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                      <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
-                    </div>
-                    
-                    {/* Line chart (simulated with SVG path) */}
-                    <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="blue-gradient-2" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
-                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15" stroke="#0ea5e9" strokeWidth="2" fill="none" />
-                      <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient-2)" />
-                    </svg>
-                    
-                    {/* X-axis labels */}
-                    <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
-                      <span className="font-work-sans">01 Aug</span>
-                      <span className="font-work-sans">05 Aug</span>
-                      <span className="font-work-sans">10 Aug</span>
-                      <span className="font-work-sans">15 Aug</span>
-                      <span className="font-work-sans">20 Aug</span>
-                      <span className="font-work-sans">25 Aug</span>
-                      <span className="font-work-sans">30 Aug</span>
-                    </div>
+              <div className="flex items-center font-work-sans">
+                <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600 font-medium font-work-sans">90D</span>
+                <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
+              </div>
+            </div>
+            
+            {/* Chart */}
+            <div className="mt-4 h-48 relative font-work-sans">
+              {/* Simulated chart with lines */}
+              <div className="absolute top-0 left-0 w-full h-full font-work-sans">
+                <div className="relative w-full h-full font-work-sans">
+                  {/* Y-axis labels */}
+                  <div className="absolute -left-8 top-0 h-full flex flex-col justify-between text-xs text-gray-500 font-work-sans">
+                    <span className="font-work-sans">20k</span>
+                    <span className="font-work-sans">15k</span>
+                    <span className="font-work-sans">10k</span>
+                    <span className="font-work-sans">5k</span>
+                    <span className="font-work-sans">1k</span>
+                    <span className="font-work-sans">0</span>
+                  </div>
+                  
+                  {/* X-axis grid lines */}
+                  <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
+                    <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-1/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-2/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                    <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
+                  </div>
+                  
+                  {/* Line chart (simulated with SVG path) */}
+                  <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="blue-gradient-2" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.5" />
+                        <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15" stroke="#0ea5e9" strokeWidth="2" fill="none" />
+                    <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient-2)" />
+                  </svg>
+                  
+                  {/* X-axis labels */}
+                  <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
+                    <span className="font-work-sans">01 Aug</span>
+                    <span className="font-work-sans">05 Aug</span>
+                    <span className="font-work-sans">10 Aug</span>
+                    <span className="font-work-sans">15 Aug</span>
+                    <span className="font-work-sans">20 Aug</span>
+                    <span className="font-work-sans">25 Aug</span>
+                    <span className="font-work-sans">30 Aug</span>
                   </div>
                 </div>
               </div>
@@ -2171,6 +2192,6 @@ export default function DashboardContent({
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }

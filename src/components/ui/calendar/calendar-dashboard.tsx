@@ -48,18 +48,6 @@ const CalendarDashboard: React.FC<CalendarDashboardProps> = ({
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const calendarRef = useRef<HTMLDivElement>(null);
   
-  // Add debugging for the events
-  console.group('🔍 DEBUG CALENDAR');
-  console.log('Calendar month:', currentMonth);
-  console.log('Calendar events provided:', events);
-  console.log('Calendar events count:', events.length);
-  if (events.length > 0) {
-    console.log('First calendar event:', events[0]);
-  } else {
-    console.warn('NO CALENDAR EVENTS TO DISPLAY');
-  }
-  console.groupEnd();
-  
   // Also add validation for events to prevent errors
   const validEvents = useMemo(() => {
     return events.filter(event => 
@@ -70,9 +58,6 @@ const CalendarDashboard: React.FC<CalendarDashboardProps> = ({
       !isNaN(event.start.getTime())
     ) as CalendarEvent[];
   }, [events]);
-  
-  // Add debugging for valid events
-  console.log('Valid calendar events after filtering:', validEvents.length);
   
   // Helper function for getting colors based on platform
   const getCampaignColor = (platform: string, status?: string): string => {
@@ -329,14 +314,6 @@ const CalendarDashboard: React.FC<CalendarDashboardProps> = ({
           </button>
         </div>
       </div>
-      
-      {/* Debug info */}
-      {currentMonthEvents.length === 0 && (
-        <div className="p-2 bg-yellow-50 text-xs">
-          <p>DEBUG: No valid calendar events to display for {format(currentMonth, 'MMMM yyyy')}</p>
-          <p>Total events: {events.length}, Valid for this month: {currentMonthEvents.length}</p>
-        </div>
-      )}
       
       <div className="overflow-x-auto flex-grow font-work-sans">
         {/* Day headers with consistent width */}
