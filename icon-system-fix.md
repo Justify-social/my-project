@@ -351,3 +351,138 @@ Once all the above steps are implemented, we expect to have:
 With this comprehensive approach, we'll ensure that all edit icons display correctly throughout the application while building a more robust icon system for the future.
 
 If you encounter any issues with the implementation, please report back for further investigation. 
+
+## Additional Fixes and Troubleshooting
+
+### Duplicate Import Issue
+
+When implementing the SafeIcon component, you may encounter the following error:
+
+```
+Error: ./src/components/ui/safe-icon.tsx:9:8
+Ecmascript file had an error
+[0m [90m  7 |[39m [36mimport[39m [33m*[39m [36mas[39m solidIcons [36mfrom[39m [32m'@fortawesome/pro-solid-svg-icons'[39m[33m;[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { cn } [36mfrom[39m [32m'@/lib/utils'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m cn [36mfrom[39m [32m'classnames'[39m[33m;[39m[0m
+[0m [90m    |[39m        [31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [90m// Map of camelCase names to kebab-case for FA[39m[0m
+[0m [90m 12 |[39m [36mconst[39m iconNameMap[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m string[33m>[39m [33m=[39m {[0m
+
+the name `cn` is defined multiple times
+```
+
+This occurs because the `cn` utility is imported twice - once from the project's utility module and once from the 'classnames' package directly.
+
+**Solution**:
+1. Rename the classnames import to avoid the naming conflict:
+```typescript
+// Before
+import { cn } from '@/lib/utils';
+import cn from 'classnames';
+
+// After
+import { cn } from '@/lib/utils';
+import classNames from 'classnames';
+```
+
+2. Update all references in your component:
+```typescript
+// Before
+<div ref={ref} className={cn('relative', className)}>
+
+// After
+<div ref={ref} className={classNames('relative', className)}>
+```
+
+### TypeScript Type Issues
+
+You may also encounter TypeScript errors related to the `CRITICAL_ICONS` object when using string indexing:
+
+```
+Element implicitly has an 'any' type because expression of type 'string' can't be used to index type...
+No index signature with a parameter of type 'string' was found on type...
+```
+
+**Solution**:
+1. Add proper TypeScript type definition to the `CRITICAL_ICONS` object:
+```typescript
+// Before
+const CRITICAL_ICONS = {
+  // icon definitions
+};
+
+// After
+const CRITICAL_ICONS: Record<string, {
+  path: string;
+  width: number;
+  height: number;
+}> = {
+  // icon definitions
+};
+```
+
+2. Use safer property access with `Object.prototype.hasOwnProperty.call`:
+```typescript
+// Before
+const needsFallback = !icon || (typeof icon === 'string' && CRITICAL_ICONS[iconName]);
+const directIconPath = needsFallback && typeof icon === 'string' ? CRITICAL_ICONS[iconName] : null;
+
+// After
+const needsFallback = !icon || (typeof icon === 'string' && Object.prototype.hasOwnProperty.call(CRITICAL_ICONS, iconName));
+const directIconPath = needsFallback && typeof icon === 'string' && Object.prototype.hasOwnProperty.call(CRITICAL_ICONS, iconName) 
+  ? CRITICAL_ICONS[iconName] 
+  : null;
+```
+
+## Verification Steps
+
+To verify that your icon fixes are working:
+
+1. Check that the SVG files exist in the correct locations
+2. Ensure the SafeIcon component integrates properly with SvgIcon
+3. Verify all critical icons have fallback paths defined
+4. Restart your development server to see changes
+
+You can use the following script to automatically verify your implementation:
+
+```javascript
+// verify-icon-fix.js
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+console.log('===== Icon Fix Verification =====');
+
+// Critical icons that we need to verify
+const CRITICAL_ICONS = [
+  'pen-to-square',   // faPenToSquare, faEdit
+  'eye',             // faEye
+  'copy',            // faCopy
+  'trash-can'        // faTrashCan
+];
+
+// Verification steps
+async function main() {
+  // 1. Check for SVG files in expected locations
+  console.log('\n1. Checking for SVG files in public/ui-icons/ directory...');
+  
+  // 2. Check SafeIcon component for critical icon fallbacks
+  console.log('\n2. Checking for critical icon fallbacks in SafeIcon component...');
+  
+  // 3. Check SvgIcon integration
+  console.log('\n3. Checking SvgIcon integration with SafeIcon...');
+  
+  console.log('\n===== Verification Complete =====');
+}
+
+main();
+```
+
+Execute the script with:
+```bash
+chmod +x verify-icon-fix.js && node verify-icon-fix.js
+```
+
+After implementing these additional fixes, your icon system should be more robust and handle edge cases properly. 
