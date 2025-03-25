@@ -244,6 +244,21 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
   campaign,
   onClick
 }) => {
+  // Add debug logging
+  console.log('Rendering CampaignCard:', campaign.id, campaign.campaignName);
+  
+  // Verify the campaign data is valid
+  const isValid = campaign && campaign.id && campaign.campaignName;
+  
+  if (!isValid) {
+    console.error('Invalid campaign data received by CampaignCard:', campaign);
+    return (
+      <div className="p-4 border border-red-200 rounded-lg bg-red-50">
+        <p className="text-red-500 text-sm">Invalid campaign data</p>
+      </div>
+    );
+  }
+  
   const router = useRouter();
 
   // Get the KPI display info or use fallback if not found
@@ -262,7 +277,10 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
       <div className="p-3 sm:p-4 font-work-sans">
         <div className="flex items-start justify-between font-work-sans">
           <div className="flex-1 mr-2 font-work-sans">
-            <h3 className="text-sm sm:text-base font-medium text-[var(--primary-color)] font-sora">{campaign.campaignName}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm sm:text-base font-medium text-[var(--primary-color)] font-sora">{campaign.campaignName}</h3>
+              <StatusBadge status={campaign.submissionStatus || 'draft'} size="sm" />
+            </div>
             <p className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
               {new Date(campaign.startDate).toLocaleDateString('en-US', {
               day: 'numeric',
@@ -493,14 +511,17 @@ interface DashboardContentProps {
 // Add CalendarUpcoming props interface
 interface CalendarUpcomingProps {
   events: Array<{
-    id: number;
+    id: number | string;
     title: string;
     start: Date;
     end?: Date;
-    platform: string;
-    budget: number;
-    kpi: string;
+    platform?: string;
+    budget?: number;
+    kpi?: string;
+    status?: string;
+    color?: string;
   }>;
+  onEventClick?: (eventId: number | string) => void;
 }
 
 // Update the API response type
@@ -572,41 +593,76 @@ interface InfluencerMetrics {
 // DashboardContent Component
 // -----------------------
 
-// Enhanced fetcher with better error handling
+// Enhanced fetcher with better error handling and debugging
 const fetcher = async (url: string) => {
+  console.group(`🔍 DEBUG FETCHER: ${url}`);
+  console.log('Fetching data from:', url);
   try {
     const response = await fetch(url);
-
-    // Log the response status for debugging
-    console.log(`API response status for ${url}:`, response.status);
+    console.log(`API response status: ${response.status}`);
+    
+    // Check for non-OK response
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`API error (${response.status}):`, errorText);
-
-      // Instead of throwing error, return fallback data with empty campaigns
+      console.groupEnd();
       return {
         success: true,
         campaigns: []
       };
     }
+    
     try {
       const data = await response.json();
-
-      // Validate and ensure we always have campaigns array
-      if (!data) {
-        return {
-          success: true,
-          campaigns: []
-        };
+      console.log('Raw API response:', data);
+      
+      // CRITICAL DEBUG: Examine the actual structure of the API response
+      console.log('API response type:', typeof data);
+      console.log('API response keys:', Object.keys(data));
+      
+      // Check all possible response formats
+      if (data.success && Array.isArray(data.data)) {
+        console.log('Found standard format: {success, data[]}');
+        console.log('Campaign count:', data.data.length);
+      } else if (Array.isArray(data)) {
+        console.log('Found array format: []');
+        console.log('Campaign count:', data.length);
+      } else if (data.campaigns && Array.isArray(data.campaigns)) {
+        console.log('Found campaigns format: {campaigns[]}');
+        console.log('Campaign count:', data.campaigns.length);
+      } else {
+        console.warn('Unknown data format:', data);
       }
-
-      // Ensure campaigns is always an array
-      if (!data.campaigns) {
-        data.campaigns = [];
+      
+      // Transform based on response format
+      let transformedCampaigns = [];
+      
+      if (data.success && Array.isArray(data.data)) {
+        // Standard format
+        transformedCampaigns = data.data.map(mapCampaign);
+      } else if (Array.isArray(data)) {
+        // Direct array format
+        transformedCampaigns = data.map(mapCampaign);
+      } else if (data.campaigns && Array.isArray(data.campaigns)) {
+        // Campaigns property format
+        transformedCampaigns = data.campaigns;
       }
-      return data;
+      
+      console.log('Transformed campaigns:', transformedCampaigns.length);
+      if (transformedCampaigns.length > 0) {
+        console.log('First campaign sample:', transformedCampaigns[0]);
+      } else {
+        console.warn('NO CAMPAIGNS FOUND IN RESPONSE');
+      }
+      
+      console.groupEnd();
+      return {
+        success: true,
+        campaigns: transformedCampaigns
+      };
     } catch (jsonError) {
       console.error('Error parsing JSON response:', jsonError);
+      console.groupEnd();
       return {
         success: true,
         campaigns: []
@@ -614,12 +670,93 @@ const fetcher = async (url: string) => {
     }
   } catch (fetchError) {
     console.error('Fetch error:', fetchError);
-    // Return fallback data with empty campaigns
+    console.groupEnd();
     return {
       success: true,
       campaigns: []
     };
   }
+};
+
+// Helper function to map campaign data consistently
+const mapCampaign = (campaign: any, index: number) => {
+  console.log(`Mapping campaign ${index}:`, campaign);
+  
+  // Parse budget safely
+  let budgetTotal = 0;
+  if (campaign.budget) {
+    try {
+      if (typeof campaign.budget === 'string') {
+        const budgetObj = JSON.parse(campaign.budget);
+        budgetTotal = budgetObj.total || 0;
+      } else if (typeof campaign.budget === 'object') {
+        budgetTotal = campaign.budget.total || 0;
+      }
+    } catch (e) {
+      console.error('Error parsing budget data:', e);
+    }
+  }
+  
+  // Parse primary contact safely
+  let contactData = { firstName: '', surname: '' };
+  if (campaign.primaryContact) {
+    try {
+      if (typeof campaign.primaryContact === 'string') {
+        contactData = JSON.parse(campaign.primaryContact);
+      } else if (typeof campaign.primaryContact === 'object') {
+        contactData = campaign.primaryContact;
+      }
+    } catch (e) {
+      console.error('Error parsing contact data:', e);
+    }
+  }
+  
+  // Ensure valid dates
+  const processDate = (dateInput: any): string => {
+    if (!dateInput) return new Date().toISOString();
+    
+    // If it's already a string ISO date
+    if (typeof dateInput === 'string' && dateInput.includes('T')) {
+      return dateInput;
+    }
+    
+    // If it's a date object
+    if (dateInput instanceof Date) {
+      return dateInput.toISOString();
+    }
+    
+    // If it's a string but not ISO format (convert to ISO)
+    if (typeof dateInput === 'string') {
+      try {
+        const parsedDate = new Date(dateInput);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate.toISOString();
+        }
+      } catch (e) {
+        console.error('Error parsing date:', dateInput, e);
+      }
+    }
+    
+    // Default fallback
+    return new Date().toISOString();
+  };
+  
+  const mappedCampaign = {
+    id: campaign.id || `temp-${index}`,
+    campaignName: campaign.name || campaign.campaignName || 'Untitled Campaign',
+    submissionStatus: (campaign.status || campaign.submissionStatus || 'draft').toLowerCase(),
+    platform: campaign.platform || 'Instagram',
+    startDate: processDate(campaign.startDate),
+    endDate: processDate(campaign.endDate),
+    totalBudget: budgetTotal,
+    primaryKPI: campaign.primaryKPI || '',
+    primaryContact: contactData,
+    createdAt: processDate(campaign.createdAt),
+    status: (campaign.status || 'draft').toLowerCase()
+  };
+  
+  console.log(`Mapped campaign result:`, mappedCampaign);
+  return mappedCampaign;
 };
 
 // Mock data for fallback when API fails
@@ -948,12 +1085,42 @@ const CalendarMonthView: React.FC<{
   events
 }) => {
   const [currentMonth, setCurrentMonth] = useState(month);
+  const [hoverEvent, setHoverEvent] = useState<string | null>(null);
+  
+  // Add debugging for the events
+  console.group('🔍 DEBUG CALENDAR');
+  console.log('Calendar month:', currentMonth);
+  console.log('Calendar events provided:', events);
+  console.log('Calendar events count:', events.length);
+  if (events.length > 0) {
+    console.log('First calendar event:', events[0]);
+  } else {
+    console.warn('NO CALENDAR EVENTS TO DISPLAY');
+  }
+  console.groupEnd();
+  
+  // Also add validation for events to prevent errors
+  const validEvents = useMemo(() => {
+    return events.filter(event => 
+      event && 
+      event.id && 
+      event.title && 
+      event.start instanceof Date && 
+      !isNaN(event.start.getTime())
+    );
+  }, [events]);
+  
+  // Add debugging for valid events
+  console.log('Valid calendar events after filtering:', validEvents.length);
+  
   const prevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
+  
   const nextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
+  
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
   const monthName = monthStart.toLocaleString('default', {
     month: 'long'
@@ -963,18 +1130,69 @@ const CalendarMonthView: React.FC<{
   // Generate calendar days
   const days = [];
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  
+  // Get the first day of the month (0-6, where 0 is Sunday)
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+  // Adjust to make Monday the first day (0-6, where 0 is Monday)
+  const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+  
+  // Build spans for multi-day events
+  const eventSpans: Record<string, {startIdx: number, endIdx: number, event: any}> = {};
+  
+  // Create day objects
   for (let i = 1; i <= daysInMonth; i++) {
     const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
-    const dayEvents = events.filter((event) => new Date(event.start).getDate() === i && new Date(event.start).getMonth() === currentMonth.getMonth() && new Date(event.start).getFullYear() === currentMonth.getFullYear());
+    const isToday = new Date().toDateString() === currentDate.toDateString();
+    
+    // Events that start on this day
+    const startEvents = validEvents.filter((event) => {
+      const eventStart = new Date(event.start);
+      return eventStart.getDate() === i && 
+             eventStart.getMonth() === currentMonth.getMonth() && 
+             eventStart.getFullYear() === currentMonth.getFullYear();
+    });
+    
+    // All events active on this day (start, end, or spanning)
+    const activeEvents = validEvents.filter((event) => {
+      const eventStart = new Date(event.start);
+      const eventEnd = event.end ? new Date(event.end) : new Date(eventStart);
+      const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
+      return dayDate >= eventStart && dayDate <= eventEnd;
+    });
+    
+    // Register spans for multi-day events
+    startEvents.forEach(event => {
+      const eventStart = new Date(event.start);
+      const eventEnd = event.end ? new Date(event.end) : new Date(eventStart);
+      
+      if (eventStart.toDateString() !== eventEnd.toDateString()) {
+        // This is a multi-day event
+        const startDayIdx = i;
+        const endDayIdx = eventEnd.getMonth() === currentMonth.getMonth() && 
+                         eventEnd.getFullYear() === currentMonth.getFullYear() 
+                         ? eventEnd.getDate() 
+                         : daysInMonth;
+                         
+        eventSpans[event.id] = {
+          startIdx: startDayIdx,
+          endIdx: endDayIdx,
+          event: event
+        };
+      }
+    });
+    
     days.push({
       day: i,
-      events: dayEvents,
+      events: activeEvents,
+      isToday,
       date: currentDate
     });
   }
-  return <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full font-work-sans">
+  
+  return (
+    <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans">
       <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)] font-work-sans">
-        <h3 className="text-base font-semibold text-center font-sora">{format(month, 'MMMM yyyy')}</h3>
+        <h3 className="text-base font-semibold text-center font-sora">{format(currentMonth, 'MMMM yyyy')}</h3>
         <div className="flex space-x-2 font-work-sans">
           <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
             <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
@@ -985,48 +1203,90 @@ const CalendarMonthView: React.FC<{
         </div>
       </div>
       
-      <div className="overflow-x-auto font-work-sans">
+      {/* Debug info */}
+      {validEvents.length === 0 && (
+        <div className="p-2 bg-yellow-50 text-xs">
+          <p>DEBUG: No valid calendar events to display</p>
+          <p>Total events: {events.length}, Valid: {validEvents.length}</p>
+        </div>
+      )}
+      
+      <div className="overflow-x-auto flex-grow font-work-sans">
         {/* Day headers with consistent width */}
-        <div className="min-w-full grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)] font-work-sans">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => <div key={day} className="flex justify-center items-center py-1 font-work-sans">{day}</div>)}
+        <div className="grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)] font-work-sans">
+          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => (
+            <div key={day} className="flex justify-center items-center py-1 font-work-sans">{day}</div>
+          ))}
         </div>
         
-        {/* Calendar grid with fixed size cells for consistent spacing */}
-        <div className="min-w-full grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans">
-          {/* Placeholder cells for days before the 1st of the month */}
-          {Array.from({
-          length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() === 0 ? 6 : new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() - 1
-        }).map((_, index) => <div key={`empty-${index}`} className="aspect-square w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] font-work-sans"></div>)}
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans" style={{ minHeight: '300px' }}>
+          {/* Empty cells for days not in this month at the beginning */}
+          {Array.from({ length: adjustedFirstDay }).map((_, index) => (
+            <div key={`empty-start-${index}`} className="h-16 bg-gray-50 rounded-md"></div>
+          ))}
           
-          {/* Actual days of the month */}
-          {days.map(({
-          day,
-          events,
-          date
-        }) => {
-          const isToday = new Date().toDateString() === date.toDateString();
-          return <div key={day} className={`relative p-1 text-center w-full h-[30px] min-h-[30px] sm:h-[40px] sm:min-h-[40px] flex flex-col items-center justify-center
-                ${isToday ? 'bg-[var(--accent-color)] bg-opacity-5 rounded-md' : ''} font-work-sans`}>
-
-                <div className="flex justify-center items-center font-work-sans">
-                  <div className={`text-xs w-7 h-7 flex items-center justify-center rounded-full 
-                    ${isToday ? 'font-bold bg-[var(--accent-color)] text-white' : 'text-[var(--primary-color)]'} font-work-sans`}>
-                    {day}
+          {/* Actual days in the month */}
+          {days.map((day, index) => (
+            <div 
+              key={`day-${day.day}`} 
+              className={`h-16 p-1 rounded-md flex flex-col relative ${
+                day.isToday ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white hover:bg-gray-50'
+              }`}
+            >
+              <div className="text-xs font-medium text-[var(--secondary-color)] mb-1">{day.day}</div>
+              
+              {/* Events on this day */}
+              <div className="flex-1 overflow-y-auto space-y-1">
+                {day.events.slice(0, 3).map((event) => (
+                  <div
+                    key={event.id}
+                    className={`text-xs truncate p-1 rounded ${event.statusClass || 'bg-gray-100'} border cursor-pointer`}
+                    onMouseEnter={() => setHoverEvent(event.id)}
+                    onMouseLeave={() => setHoverEvent(null)}
+                    title={`${event.title} (${event.statusText || 'Draft'})`}
+                  >
+                    {event.title}
                   </div>
-                </div>
-                
-                {events.length > 0 && <div className="mt-0.5 w-full space-y-0.5 overflow-hidden font-work-sans">
-                    {events.slice(0, 2).map((event) => <div key={event.id} className="text-[8px] sm:text-[9px] truncate rounded px-0.5 py-px bg-[var(--accent-color)] bg-opacity-10 text-[var(--accent-color)] font-work-sans" title={event.title}>
-
-                        {event.title.length > 8 ? `${event.title.substring(0, 6)}...` : event.title}
-                      </div>)}
-                    {events.length > 2 && <div className="text-[8px] text-[var(--secondary-color)] font-work-sans">+{events.length - 2} more</div>}
-                  </div>}
-              </div>;
-        })}
+                ))}
+                {day.events.length > 3 && (
+                  <div className="text-xs text-center text-[var(--secondary-color)]">
+                    +{day.events.length - 3} more
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          
+          {/* Empty cells for days not in this month at the end */}
+          {Array.from({ length: (7 - ((adjustedFirstDay + daysInMonth) % 7)) % 7 }).map((_, index) => (
+            <div key={`empty-end-${index}`} className="h-16 bg-gray-50 rounded-md"></div>
+          ))}
         </div>
       </div>
-    </div>;
+      
+      {/* Status legend */}
+      <div className="p-2 flex flex-wrap gap-2 border-t border-[var(--divider-color)]">
+        <span className="text-xs font-medium text-gray-500">Status:</span>
+        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-gray-100 text-gray-800 border border-gray-200">
+          <span className="w-2 h-2 rounded-full bg-gray-500 mr-1"></span>
+          Draft
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-green-100 text-green-800 border border-green-200">
+          <span className="w-2 h-2 rounded-full bg-green-500 mr-1"></span>
+          Active/Approved/Submitted
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+          <span className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></span>
+          In Review/Paused
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">
+          <span className="w-2 h-2 rounded-full bg-blue-500 mr-1"></span>
+          Completed
+        </span>
+      </div>
+    </div>
+  );
 };
 
 // Above the DashboardContent component, right after all interface declarations
@@ -1108,6 +1368,66 @@ const getImpactBadgeColor = (impact: string) => {
   }
 };
 
+// Add a helper function to get colors based on platform
+const getCampaignColor = (platform: string) => {
+  const colorMap: Record<string, string> = {
+    'instagram': '#E1306C',
+    'facebook': '#1877F2',
+    'twitter': '#1DA1F2',
+    'tiktok': '#000000',
+    'linkedin': '#0A66C2',
+    'youtube': '#FF0000',
+    'other': '#00BFFF'
+  };
+  return colorMap[platform.toLowerCase()] || colorMap.other;
+};
+
+// Helper to get status color and text
+const getStatusInfo = (status: string) => {
+  // Normalize status to lowercase for case-insensitive matching
+  const normalizedStatus = (status || '').toLowerCase();
+  switch (normalizedStatus) {
+    case 'approved':
+      return {
+        class: 'bg-green-100 text-green-800 border-green-200',
+        text: 'Approved'
+      };
+    case 'active':
+      return {
+        class: 'bg-green-100 text-green-800 border-green-200',
+        text: 'Active'
+      };
+    case 'submitted':
+      return {
+        class: 'bg-green-100 text-green-800 border-green-200',
+        text: 'Submitted'
+      };
+    case 'in_review':
+    case 'in-review':
+    case 'inreview':
+      return {
+        class: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        text: 'In Review'
+      };
+    case 'paused':
+      return {
+        class: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        text: 'Paused'
+      };
+    case 'completed':
+      return {
+        class: 'bg-blue-100 text-blue-800 border-blue-200',
+        text: 'Completed'
+      };
+    case 'draft':
+    default:
+      return {
+        class: 'bg-gray-100 text-gray-800 border-gray-200',
+        text: 'Draft'
+      };
+  }
+};
+
 export default function DashboardContent({
   user = {
     id: '',
@@ -1137,30 +1457,135 @@ export default function DashboardContent({
     revalidateOnReconnect: true
   });
 
+  // Add this DEBUG section right after the hook
+  console.group('🔍 DEBUG CAMPAIGNS DATA');
+  console.log('isLoading:', isLoadingCampaigns);
+  console.log('hasError:', !!fetchError);
+  console.log('campaignsData:', campaignsData);
+  console.log('campaigns array:', campaignsData?.campaigns);
+  console.log('campaigns count:', campaignsData?.campaigns?.length || 0);
+  console.groupEnd();
+
   // Process campaigns for different views
   const activeCampaigns = useMemo(() => {
     return campaignsData?.campaigns?.filter((campaign) => campaign.submissionStatus === "submitted" && new Date(campaign.startDate) <= new Date() && (!campaign.endDate || new Date(campaign.endDate) >= new Date())) || [];
   }, [campaignsData?.campaigns]);
+
+  // Include ALL campaigns in upcoming view, not just those with future start dates
+  // Remove limit of 3 campaigns to show all available campaigns
   const upcomingCampaigns = useMemo(() => {
-    return campaignsData?.campaigns?.filter((campaign) =>
-    // Include any campaign with a status that is not "DRAFT" (case-insensitive)
-    campaign.status && campaign.status.toUpperCase() !== "DRAFT" ||
-    // Also keep the existing logic for backward compatibility 
-    new Date(campaign.startDate) > new Date()).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).slice(0, 3) || [];
+    console.log('Total campaigns available for upcoming section:', campaignsData?.campaigns?.length || 0);
+    
+    // Make sure we have campaigns data
+    if (!campaignsData?.campaigns || campaignsData.campaigns.length === 0) {
+      console.log('No campaigns data available for upcoming section');
+      return [];
+    }
+    
+    // Get all campaigns, regardless of date or status
+    // Still sort by start date
+    const filteredCampaigns = campaignsData.campaigns
+      .filter(campaign => campaign && campaign.id) // Ensure valid campaign objects
+      .sort((a, b) => {
+        // Parse dates safely for comparison
+        const aDate = new Date(a.startDate).getTime();
+        const bDate = new Date(b.startDate).getTime();
+        
+        // Sort by start date (newest first if dates are invalid)
+        return !isNaN(aDate) && !isNaN(bDate) 
+          ? aDate - bDate 
+          : -1;
+      });
+    
+    console.log('Filtered campaigns for upcoming section:', filteredCampaigns.length);
+    
+    // Log the first few campaigns for debugging
+    filteredCampaigns.slice(0, 3).forEach((campaign, index) => {
+      console.log(`Upcoming campaign ${index}:`, {
+        id: campaign.id,
+        name: campaign.campaignName,
+        status: campaign.submissionStatus,
+        start: campaign.startDate
+      });
+    });
+    
+    return filteredCampaigns;
   }, [campaignsData?.campaigns]);
 
-  // Calendar events for the upcoming campaigns
+  // Calendar events for the upcoming campaigns - include ALL campaigns for the calendar
   const calendarEvents = useMemo(() => {
-    return upcomingCampaigns.map((campaign) => ({
-      id: campaign.id,
-      title: campaign.campaignName,
-      start: new Date(campaign.startDate),
-      end: campaign.endDate ? new Date(campaign.endDate) : undefined,
-      platform: campaign.platform,
-      budget: campaign.totalBudget,
-      kpi: campaign.primaryKPI
-    }));
-  }, [upcomingCampaigns]);
+    console.log('Creating calendar events from campaigns:', campaignsData?.campaigns?.length || 0);
+    
+    // Make sure we have campaigns data
+    if (!campaignsData?.campaigns || campaignsData.campaigns.length === 0) {
+      console.log('No campaigns data available for calendar');
+      return [];
+    }
+    
+    // Map all campaigns to calendar events
+    const events = campaignsData.campaigns
+      .filter(campaign => campaign && campaign.id) // Ensure valid campaign objects
+      .map(campaign => {
+        // Ensure valid dates
+        let start = new Date();
+        try {
+          const startDate = new Date(campaign.startDate);
+          if (!isNaN(startDate.getTime())) {
+            start = startDate;
+          }
+        } catch (e) {
+          console.error('Invalid start date:', campaign.startDate);
+        }
+        
+        // End date defaults to 1 day after start if not provided or invalid
+        let end = new Date(start);
+        end.setDate(end.getDate() + 1);
+        try {
+          if (campaign.endDate) {
+            const endDate = new Date(campaign.endDate);
+            if (!isNaN(endDate.getTime())) {
+              end = endDate;
+            }
+          }
+        } catch (e) {
+          console.error('Invalid end date:', campaign.endDate);
+        }
+        
+        // Get status info for colors
+        const statusInfo = getStatusInfo(campaign.submissionStatus || 'draft');
+        
+        // Create the calendar event
+        return {
+          id: campaign.id,
+          title: campaign.campaignName,
+          start: start,
+          end: end,
+          platform: campaign.platform || 'other',
+          budget: campaign.totalBudget,
+          kpi: campaign.primaryKPI,
+          status: campaign.submissionStatus || 'draft',
+          statusText: statusInfo.text,
+          statusClass: statusInfo.class,
+          color: getCampaignColor(campaign.platform || 'other')
+        };
+      });
+    
+    console.log('Total calendar events created:', events.length);
+    
+    // Log a few events for debugging
+    events.slice(0, 3).forEach((event, index) => {
+      console.log(`Calendar event ${index}:`, {
+        id: event.id,
+        title: event.title,
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+        platform: event.platform,
+        color: event.color
+      });
+    });
+    
+    return events;
+  }, [campaignsData?.campaigns]);
   const metrics = useMemo(() => ({
     ...(campaignsData?.metrics || {
       trends: {
@@ -1359,25 +1784,65 @@ export default function DashboardContent({
                 </div>
                 
                 <div className="p-3 sm:p-4 font-work-sans">
-                  {isLoadingCampaigns ?
-                  <div className="py-4 sm:py-6 font-work-sans">
+                  {isLoadingCampaigns ? (
+                    <div className="py-4 sm:py-6 font-work-sans">
                       <TableSkeleton rows={3} cols={3} hasHeader={false} />
-                    </div> :
-                  upcomingCampaigns.length === 0 ?
-                  <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg font-work-sans">
-                      <p className="text-sm text-[var(--secondary-color)] font-work-sans">No upcoming campaigns</p>
-                      <button onClick={handleNewCampaign} className="group mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
-                        <Icon name="faPlus" className="w-3 h-3 mr-1" iconType="button" />
-                        <span className="font-work-sans">Create Your First Campaign</span>
-                      </button>
-                    </div> :
-
-                  <div className="space-y-3 overflow-y-auto max-h-[300px] font-work-sans">
-                      {upcomingCampaigns.map((campaign) =>
-                    <CampaignCard key={campaign.id} campaign={campaign} onClick={() => router.push(`/campaigns/${campaign.id}`)} />
-                    )}
                     </div>
-                  }
+                  ) : (
+                    <div>
+                      {!campaignsData?.campaigns || campaignsData.campaigns.length === 0 ? (
+                        <div>
+                          <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg font-work-sans">
+                            <p className="text-sm text-[var(--secondary-color)] font-work-sans">
+                              No upcoming campaigns
+                            </p>
+                            <button onClick={handleNewCampaign} className="group mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
+                              <Icon name="faPlus" className="w-3 h-3 mr-1" iconType="button" />
+                              <span className="font-work-sans">Create Your First Campaign</span>
+                            </button>
+                          </div>
+                          <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                            <p className="text-xs text-red-500">DEBUG: {campaignsData ? 'Data received but empty' : 'No data received'}</p>
+                            <p className="text-xs">API Status: {isLoadingCampaigns ? 'Loading...' : 'Completed'}</p>
+                            <p className="text-xs">Has Campaigns: {campaignsData?.campaigns ? 'Yes' : 'No'}</p>
+                            <p className="text-xs">Campaigns Length: {campaignsData?.campaigns?.length || 0}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 overflow-y-auto max-h-[300px] font-work-sans">
+                          <div className="p-2 bg-blue-50 rounded mb-2 text-xs">
+                            <p>DEBUG: Found {campaignsData.campaigns.length} campaigns to display</p>
+                            <p>Upcoming campaigns: {upcomingCampaigns.length}</p>
+                            {upcomingCampaigns.length > 0 && (
+                              <div className="mt-1 border-t border-blue-100 pt-1">
+                                <p>First campaign: {upcomingCampaigns[0]?.campaignName || 'Unknown'}</p>
+                                <p>ID: {upcomingCampaigns[0]?.id || 'Missing'}</p>
+                                <p>Date: {upcomingCampaigns[0]?.startDate ? new Date(upcomingCampaigns[0].startDate).toLocaleDateString() : 'Invalid date'}</p>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Force render at least one campaign for testing */}
+                          {upcomingCampaigns.length > 0 ? (
+                            upcomingCampaigns.map((campaign) => (
+                              <CampaignCard 
+                                key={campaign.id} 
+                                campaign={campaign} 
+                                onClick={() => console.log('Campaign clicked:', campaign.id)}
+                              />
+                            ))
+                          ) : (
+                            <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+                              <p className="text-yellow-700">No campaigns to display.</p>
+                              <pre className="text-xs mt-2 overflow-auto max-h-[100px]">
+                                Data status: {campaignsData ? 'Available' : 'Missing'}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

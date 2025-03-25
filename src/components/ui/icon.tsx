@@ -6,5 +6,5 @@
  * import { Icon } from '@/components/ui/icons';
  */
 
-export * from './icons';
-export { Icon as default } from './icons';
+export * from './icons/index';
+export { Icon as default } from './icons/index';

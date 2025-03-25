@@ -4,7 +4,7 @@ import React, { useState, useCallback, ChangeEvent, FormEvent, memo, useEffect }
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SvgIcon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/icons';
 import type { SvgIconProps } from '@/components/ui/icons';
 import { iconComponentFactory } from '@/components/ui/icons';
 
@@ -88,7 +88,7 @@ const validatePassword = (password: string): boolean => {
 const SectionHeader = memo(({ title, description, iconName }: SectionHeaderProps) =>
 <div className="flex items-start mb-6 font-work-sans">
     <div className="mr-4 font-work-sans">
-      <SvgIcon name={iconName} className="w-6 h-6 text-[var(--accent-color)] font-work-sans" iconType="static" solid={false} />
+      <Icon name={iconName} className="w-6 h-6 text-[var(--accent-color)] font-work-sans" iconType="static" solid={false} />
     </div>
     <div className="font-work-sans">
       <h2 className="text-2xl font-bold text-gray-900 font-sora">{title}</h2>
@@ -157,7 +157,7 @@ const TabNavigation = memo(({ activeTab, onTabChange, isSuperAdmin }: TabNavigat
         'text-gray-500 hover:text-gray-700'} font-work-sans`
         }>
 
-            <SvgIcon name={tab.icon} className="w-5 h-5 mr-2" iconType="static" solid={false} />
+            <Icon name={tab.icon} className="w-5 h-5 mr-2" iconType="static" solid={false} />
             {tab.label}
           </button>
 
@@ -191,7 +191,7 @@ const ActionButtons: React.FC<{
 
 
 
-      <SvgIcon name="faXCircle" className="w-5 h-5 mr-2" solid={false} />
+      <Icon name="faXCircle" className="w-5 h-5 mr-2" solid={false} />
       Cancel
     </motion.button>
     <motion.button whileHover={{
@@ -202,10 +202,10 @@ const ActionButtons: React.FC<{
         flex items-center ${!hasChanges || isSaving ? 'bg-blue-300 cursor-not-allowed text-white' : 'bg-[var(--accent-color)] hover:bg-opacity-90 text-white'}`}>
 
       {isSaving ? <>
-          <SvgIcon name="faArrowRight" className="w-5 h-5 mr-2 animate-spin" solid={false} />
+          <Icon name="faArrowRight" className="w-5 h-5 mr-2 animate-spin" solid={false} />
           Saving...
         </> : <>
-          <SvgIcon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} />
+          <Icon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} />
           Save
         </>}
     </motion.button>
@@ -326,7 +326,7 @@ const ProfilePicture: React.FC<{
               {profilePicturePreview ?
             <img src={profilePicturePreview} alt="Profile Preview" className="w-full h-full object-cover" /> :
 
-            <SvgIcon name="faUserCircle" className="w-16 h-16 text-[var(--secondary-color)] font-work-sans" iconType="static" solid={false} />
+            <Icon name="faUserCircle" className="w-16 h-16 text-[var(--secondary-color)] font-work-sans" iconType="static" solid={false} />
             }
             </div>
           </div>
@@ -335,7 +335,7 @@ const ProfilePicture: React.FC<{
           onClick={onRemove}
           className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-color)] font-work-sans">
 
-            <SvgIcon name="faXCircle" className="w-5 h-5 mr-2 inline-block" iconType="static" solid={false} />
+            <Icon name="faXCircle" className="w-5 h-5 mr-2 inline-block" iconType="static" solid={false} />
             Remove Profile Picture
           </button>
         </div>
@@ -350,7 +350,7 @@ const ProfilePicture: React.FC<{
 
 
 
-            <SvgIcon name="faPhoto" className="w-5 h-5 mr-2" solid={false} />
+            <Icon name="faPhoto" className="w-5 h-5 mr-2" solid={false} />
             <span className="font-work-sans">Upload New Picture</span>
             <input type="file" id="profilePicture" accept="image/*" className="hidden font-work-sans" onChange={onFileChange} />
 
@@ -366,7 +366,7 @@ const ProfilePicture: React.FC<{
           y: 0
         }} className="text-red-500 text-sm flex items-center font-work-sans">
 
-              <SvgIcon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
+              <Icon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
               {error}
             </motion.p>}
         </div>
@@ -434,19 +434,19 @@ const PasswordManagementSection = memo(({
     {/* Password Requirements */}
     <div className="mt-4 space-y-2 text-sm text-gray-600 font-work-sans">
       <div className={`flex items-center ${passwordState.hasMinLength ? 'text-green-500' : ''} font-work-sans`}>
-        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        <Icon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
         At least 8 characters
       </div>
       <div className={`flex items-center ${passwordState.hasUpperCase ? 'text-green-500' : ''} font-work-sans`}>
-        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        <Icon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
         At least one uppercase letter
       </div>
       <div className={`flex items-center ${passwordState.hasLowerCase ? 'text-green-500' : ''} font-work-sans`}>
-        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        <Icon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
         At least one lowercase letter
       </div>
       <div className={`flex items-center ${passwordState.hasNumber ? 'text-green-500' : ''} font-work-sans`}>
-        <SvgIcon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
+        <Icon name="faCheckCircle" className="w-4 h-4 mr-2" iconType="static" solid={false} />
         At least one number
       </div>
     </div>
@@ -454,7 +454,7 @@ const PasswordManagementSection = memo(({
     {/* Error Messages */}
     {error &&
   <div className="mt-4 p-4 bg-red-50 rounded-lg flex items-start font-work-sans">
-        <SvgIcon name="faXCircle" className="w-5 h-5 mr-2 flex-shrink-0 text-red-500 font-work-sans" iconType="static" solid={false} />
+        <Icon name="faXCircle" className="w-5 h-5 mr-2 flex-shrink-0 text-red-500 font-work-sans" iconType="static" solid={false} />
         <p className="text-red-700 font-work-sans">{error}</p>
       </div>
   }
@@ -462,7 +462,7 @@ const PasswordManagementSection = memo(({
     {/* Success Messages */}
     {success &&
   <div className="mt-4 p-4 bg-green-50 rounded-lg flex items-start font-work-sans">
-        <SvgIcon name="faCheckCircle" className="w-5 h-5 mr-2 flex-shrink-0 text-green-500 font-work-sans" iconType="static" solid={false} />
+        <Icon name="faCheckCircle" className="w-5 h-5 mr-2 flex-shrink-0 text-green-500 font-work-sans" iconType="static" solid={false} />
         <p className="text-green-700 font-work-sans">{success}</p>
       </div>
   }
@@ -474,7 +474,7 @@ const PasswordManagementSection = memo(({
     disabled={!passwordState.currentPassword || !passwordState.newPassword || !passwordState.confirmNewPassword}
     className="mt-6 px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
 
-      <SvgIcon name="faKey" className="w-5 h-5 mr-2" iconType="static" solid={false} />
+      <Icon name="faKey" className="w-5 h-5 mr-2" iconType="static" solid={false} />
       Change Password
     </button>
   </div>
@@ -584,7 +584,7 @@ const PasswordInput = memo(({
       onClick={onToggleVisibility}
       className="absolute inset-y-0 right-0 pr-3 flex items-center font-work-sans">
 
-        <SvgIcon
+        <Icon
         name={showPassword ? 'faEyeSlash' : 'faEye'}
         className="w-5 h-5 text-gray-400 font-work-sans"
         iconType="static" />
@@ -610,6 +610,48 @@ const ProfileSettingsPage: React.FC = () => {
   const [roleCheckAttempts, setRoleCheckAttempts] = useState(0);
   const MAX_ROLE_CHECK_ATTEMPTS = 3;
   const LOADING_TIMEOUT_MS = 10000; // 10 seconds
+
+  // Debug state
+  const [debugInfo, setDebugInfo] = useState({
+    component: 'Settings Page',
+    initialized: true,
+    userLoaded: false,
+    userError: null as string | null,
+    roleCheckStatus: 'pending',
+    renderCount: 0,
+    lastUpdated: new Date().toISOString(),
+  });
+
+  // Increment render count on each render
+  useEffect(() => {
+    setDebugInfo(prev => ({
+      ...prev,
+      renderCount: prev.renderCount + 1,
+      lastUpdated: new Date().toISOString()
+    }));
+  });
+
+  // Debug effect for user loading status
+  useEffect(() => {
+    setDebugInfo(prev => ({
+      ...prev,
+      userLoaded: !!user,
+      userError: userError ? String(userError) : null,
+      lastUpdated: new Date().toISOString()
+    }));
+    
+    // Log critical authentication information
+    if (user) {
+      console.log('🔑 User authenticated:', { 
+        email: user.email,
+        sub: user.sub,
+        isLoading: isUserLoading,
+        hasUserObject: !!user
+      });
+    } else if (!isUserLoading) {
+      console.error('❌ User not authenticated but loading complete');
+    }
+  }, [user, isUserLoading, userError]);
 
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: '',
@@ -664,11 +706,22 @@ const ProfileSettingsPage: React.FC = () => {
   useEffect(() => {
     const checkSuperAdmin = async () => {
       try {
+        setDebugInfo(prev => ({
+          ...prev,
+          roleCheckStatus: 'fetching',
+          lastUpdated: new Date().toISOString()
+        }));
+
+        console.log('🔍 Checking role:', { attempt: roleCheckAttempts + 1, maxAttempts: MAX_ROLE_CHECK_ATTEMPTS });
         const response = await fetch('/api/auth/verify-role');
+        
+        console.log('📡 Role API response status:', response.status);
         if (!response.ok) {
           throw new Error(`Failed to verify role: ${response.status}`);
         }
+        
         const data = await response.json();
+        console.log('📊 Role data:', data);
 
         if (!data.success) {
           throw new Error(data.error || 'Role verification failed');
@@ -677,6 +730,13 @@ const ProfileSettingsPage: React.FC = () => {
         setIsSuperAdmin(data?.user?.isSuperAdmin || false);
         setIsPageLoading(false);
         setError('');
+        
+        setDebugInfo(prev => ({
+          ...prev,
+          roleCheckStatus: 'success',
+          roleData: data,
+          lastUpdated: new Date().toISOString()
+        }));
 
         // Clear timeout since we succeeded
         if (loadingTimeout) {
@@ -684,7 +744,14 @@ const ProfileSettingsPage: React.FC = () => {
           setLoadingTimeout(null);
         }
       } catch (error) {
-        console.error('Error checking super admin status:', error);
+        console.error('❌ Error checking super admin status:', error);
+        
+        setDebugInfo(prev => ({
+          ...prev,
+          roleCheckStatus: 'error',
+          roleCheckError: String(error),
+          lastUpdated: new Date().toISOString()
+        }));
 
         // Retry logic
         if (roleCheckAttempts < MAX_ROLE_CHECK_ATTEMPTS) {
@@ -702,6 +769,12 @@ const ProfileSettingsPage: React.FC = () => {
       const timeout = setTimeout(() => {
         setIsPageLoading(false);
         setError('Loading took too long. Please try refreshing the page.');
+        
+        setDebugInfo(prev => ({
+          ...prev,
+          roleCheckStatus: 'timeout',
+          lastUpdated: new Date().toISOString()
+        }));
       }, LOADING_TIMEOUT_MS);
 
       setLoadingTimeout(timeout);
@@ -715,6 +788,12 @@ const ProfileSettingsPage: React.FC = () => {
       };
     } else if (!isUserLoading) {
       setIsPageLoading(false);
+      
+      setDebugInfo(prev => ({
+        ...prev,
+        roleCheckStatus: 'skipped-no-user',
+        lastUpdated: new Date().toISOString()
+      }));
     }
   }, [user, isUserLoading, roleCheckAttempts]);
 
@@ -860,197 +939,221 @@ const ProfileSettingsPage: React.FC = () => {
     window.location.href = '/api/auth/logout';
   }, []);
 
-  // Render loading state with progress indicator
-  if (isUserLoading || isPageLoading) {
+  // Return fallback UI when page is loading or errors occur
+  if (isPageLoading || isUserLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen font-work-sans">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center font-work-sans">
-
-          <SvgIcon name="faCircle" className="w-12 h-12 text-[var(--accent-color)] animate-spin font-work-sans" iconType="static" solid={false} />
-          <p className="mt-4 text-gray-600 font-work-sans">
-            {isUserLoading ? 'Loading your profile...' : 'Verifying your access...'}
-          </p>
-          {roleCheckAttempts > 0 &&
-          <p className="mt-2 text-sm text-gray-500 font-work-sans">
-              Attempt {roleCheckAttempts} of {MAX_ROLE_CHECK_ATTEMPTS}...
-            </p>
-          }
-        </motion.div>
-      </div>);
-
-  }
-
-  // Render error state with retry button
-  if (userError || error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen font-work-sans">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 text-red-800 rounded-xl p-6 max-w-md w-full shadow-lg font-work-sans">
-
-          <div className="flex items-start font-work-sans">
-            <SvgIcon name="faXCircle" className="w-12 h-12 text-red-400 mr-4 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-            <div className="font-work-sans">
-              <h3 className="text-lg font-semibold mb-2 font-sora">Access Error</h3>
-              <p className="text-red-600 mb-4 font-work-sans">
-                {userError?.message || error || 'An unexpected error occurred'}
-              </p>
-              <div className="flex space-x-4 font-work-sans">
-                <button
-                  onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center font-work-sans">
-
-                  <SvgIcon name="faRotate" className="w-5 h-5 mr-2" iconType="static" solid={false} />
-                  Retry
-                </button>
-                <button
-                  onClick={() => window.location.href = '/api/auth/login'}
-                  className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center font-work-sans">
-
-                  <SvgIcon name="faArrowRight" className="w-5 h-5 mr-2" iconType="static" solid={false} />
-                  Log In Again
-                </button>
-              </div>
+      <div className="min-h-screen bg-white p-8">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Settings</h1>
+          <div className="animate-pulse bg-gray-200 h-6 w-3/4 mb-4 rounded"></div>
+          <div className="animate-pulse bg-gray-200 h-40 w-full mb-4 rounded"></div>
+          
+          {/* Debug info during loading */}
+          <details className="mt-8 border rounded p-4">
+            <summary className="font-medium text-blue-600 cursor-pointer">Debug Information (Loading)</summary>
+            <div className="mt-4 bg-gray-100 rounded-lg p-4 overflow-auto">
+              <pre className="text-xs whitespace-pre-wrap">
+                {JSON.stringify({
+                  state: {
+                    isUserLoading,
+                    isPageLoading,
+                    roleCheckAttempts,
+                    error: error || null,
+                  },
+                  debug: debugInfo,
+                  env: {
+                    nodeEnv: process.env.NODE_ENV,
+                    hasAuth0Config: !!process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
+                  }
+                }, null, 2)}
+              </pre>
             </div>
-          </div>
-        </motion.div>
-      </div>);
-
-  }
-
-  // Render unauthorized state with clear call-to-action
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen font-work-sans">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-yellow-50 text-yellow-800 rounded-xl p-6 max-w-md w-full shadow-lg font-work-sans">
-
-          <div className="flex items-start font-work-sans">
-            <SvgIcon name="faLock" className="w-12 h-12 text-yellow-400 mr-4 flex-shrink-0 font-work-sans" iconType="static" solid={false} />
-            <div className="font-work-sans">
-              <h3 className="text-lg font-semibold mb-2 font-sora">Authentication Required</h3>
-              <p className="text-yellow-600 mb-4 font-work-sans">
-                Please log in to access your settings
-              </p>
-              <button
-                onClick={() => window.location.href = '/api/auth/login'}
-                className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 flex items-center font-work-sans">
-
-                <SvgIcon name="faArrowRight" className="w-5 h-5 mr-2" iconType="static" solid={false} />
-                Log In
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </div>);
-
-  }
-
-  return <motion.div initial={{
-    opacity: 0
-  }} animate={{
-    opacity: 1
-  }} className="min-h-screen bg-white">
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
-        {/* Header Section */}
-        <div className="flex justify-between items-start mb-8 font-work-sans">
-          <div className="font-work-sans">
-            <motion.h1 initial={{
-            opacity: 0,
-            y: -20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} className="text-3xl font-bold text-[var(--primary-color)] font-work-sans">
-
-              Settings
-            </motion.h1>
-            <motion.p initial={{
-            opacity: 0,
-            y: -20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            delay: 0.1
-          }} className="mt-2 text-[var(--secondary-color)] font-work-sans">
-
-              Manage your account settings and preferences
-            </motion.p>
-          </div>
-          <ActionButtons hasChanges={hasChanges} isSaving={isSaving} onSave={handleSaveChanges} onCancel={handleCancel} onSignOut={handleSignOut} />
-
-        </div>
-
-        {/* Navigation */}
-        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isSuperAdmin={isSuperAdmin} />
-
-
-        {/* Main Content */}
-        <div className="space-y-8 font-work-sans">
-          <PersonalInfoSection personalInfo={personalInfo} isEditing={isEditing} onChange={handlePersonalInfoChangeWithMark} onToggleEdit={() => setIsEditing(!isEditing)} />
-
-
-          <ProfilePicture profilePicturePreview={profilePicturePreview} onFileChange={(e: ChangeEvent<HTMLInputElement>) => {
-          handleProfilePictureChange(e);
-        }} onRemove={removeProfilePicture} error={profilePictureError} />
-
-
-          <PasswordManagementSection
-          passwordState={passwordState}
-          onChange={handlePasswordFieldChange}
-          onSubmit={handlePasswordSubmit}
-          error={error || ''}
-          success={success || ''} />
-
-
-
-          <NotificationPreferencesSection preferences={notificationPreferences} onToggle={handleTogglePreferenceWithMark} />
-
-
-          {/* Debug Information (only visible in development) */}
-          {process.env.NODE_ENV === 'development' && <motion.details initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} className="mt-8">
-
-              <summary className="cursor-pointer text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans">
-
-
-
-                Debug Information
-              </summary>
-              <div className="mt-4 bg-gray-900 rounded-lg p-4 overflow-auto font-work-sans">
-                <pre className="text-xs text-gray-300 font-work-sans">
-                  {JSON.stringify({
-                user: {
-                  email: user.email,
-                  name: user.name,
-                  isSuperAdmin
-                },
-                auth: {
-                  isAuthenticated: !!user,
-                  lastChecked: new Date().toISOString()
-                },
-                state: {
-                  activeTab,
-                  hasChanges,
-                  isSaving
-                }
-              }, null, 2)}
-                </pre>
-              </div>
-            </motion.details>}
+          </details>
         </div>
       </div>
-    </motion.div>;
+    );
+  }
+
+  if (userError || error) {
+    return (
+      <div className="min-h-screen bg-white p-8">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Settings</h1>
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+            <h2 className="font-bold">Error Loading Settings</h2>
+            <p>{userError ? String(userError) : error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Refresh Page
+            </button>
+          </div>
+          
+          {/* Debug info during error */}
+          <details className="mt-8 border rounded p-4" open>
+            <summary className="font-medium text-red-600 cursor-pointer">Debug Information (Error)</summary>
+            <div className="mt-4 bg-gray-100 rounded-lg p-4 overflow-auto">
+              <pre className="text-xs whitespace-pre-wrap">
+                {JSON.stringify({
+                  state: {
+                    isUserLoading,
+                    isPageLoading,
+                    roleCheckAttempts,
+                    userError: userError ? String(userError) : null,
+                    error: error || null,
+                  },
+                  debug: debugInfo,
+                  user: user ? {
+                    email: user.email,
+                    authenticated: !!user,
+                    roles: user.roles || [],
+                  } : null,
+                  env: {
+                    nodeEnv: process.env.NODE_ENV,
+                    hasAuth0Config: !!process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
+                  }
+                }, null, 2)}
+              </pre>
+            </div>
+          </details>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-white p-8">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Settings</h1>
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4">
+            <h2 className="font-bold">Authentication Required</h2>
+            <p>You need to be logged in to access settings. Please sign in and try again.</p>
+            <button 
+              onClick={() => window.location.href = '/api/auth/login'}
+              className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Sign In
+            </button>
+          </div>
+          
+          {/* Debug info for no user */}
+          <details className="mt-8 border rounded p-4">
+            <summary className="font-medium text-yellow-600 cursor-pointer">Debug Information (No User)</summary>
+            <div className="mt-4 bg-gray-100 rounded-lg p-4 overflow-auto">
+              <pre className="text-xs whitespace-pre-wrap">
+                {JSON.stringify({
+                  state: {
+                    isUserLoading,
+                    isPageLoading,
+                    userAvailable: !!user,
+                  },
+                  debug: debugInfo,
+                  env: {
+                    nodeEnv: process.env.NODE_ENV,
+                    hasAuth0Config: !!process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
+                  }
+                }, null, 2)}
+              </pre>
+            </div>
+          </details>
+        </div>
+      </div>
+    );
+  }
+
+  // Enhanced debug section at the bottom of the rendered page
+  const renderDebugInfo = () => {
+    if (process.env.NODE_ENV !== 'development') return null;
+    
+    return (
+      <motion.details initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
+        <summary className="cursor-pointer text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans">
+          Debug Information
+        </summary>
+        <div className="mt-4 bg-gray-900 rounded-lg p-4 overflow-auto font-work-sans">
+          <pre className="text-xs text-gray-300 font-work-sans">
+            {JSON.stringify({
+              user: {
+                email: user?.email,
+                name: user?.name,
+                isSuperAdmin,
+                sub: user?.sub,
+                hasRoles: !!(user?.roles && Array.isArray(user.roles) && user.roles.length > 0),
+              },
+              auth: {
+                isAuthenticated: !!user,
+                isUserLoading,
+                userError: userError ? String(userError) : null,
+                lastChecked: new Date().toISOString()
+              },
+              state: {
+                activeTab,
+                hasChanges,
+                isSaving,
+                error: error || null,
+                success: success || null,
+              },
+              debug: debugInfo,
+              render: {
+                count: debugInfo.renderCount,
+                time: new Date().toISOString()
+              }
+            }, null, 2)}
+          </pre>
+        </div>
+      </motion.details>
+    );
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="min-h-screen bg-gray-50 p-4 md:p-8 font-work-sans">
+      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden font-work-sans">
+        <div className="p-4 md:p-8 font-work-sans">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 font-work-sans">
+            <h1 className="text-3xl font-bold text-[var(--primary-color)] font-sora">Account Settings</h1>
+            <ActionButtons hasChanges={hasChanges} isSaving={isSaving} onSave={handleSaveChanges} onCancel={handleCancel} onSignOut={handleSignOut} />
+          </div>
+          
+          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isSuperAdmin={isSuperAdmin} />
+          
+          {/* Personal Info Tab */}
+          <AnimatePresence mode="wait">
+            {activeTab === 'personal' && <motion.div key="personal" initial={{
+              opacity: 0
+            }} animate={{
+              opacity: 1
+            }} exit={{
+              opacity: 0
+            }} className="space-y-8 font-work-sans">
+
+                <PersonalInfoSection personalInfo={personalInfo} isEditing={isEditing} onChange={handlePersonalInfoChangeWithMark} onToggleEdit={() => setIsEditing(!isEditing)} />
+
+                <ProfilePicture profilePicturePreview={profilePicturePreview} onFileChange={(e: ChangeEvent<HTMLInputElement>) => {
+                handleProfilePictureChange(e);
+              }} onRemove={removeProfilePicture} error={profilePictureError} />
+
+                <PasswordManagementSection
+                passwordState={passwordState}
+                onChange={handlePasswordFieldChange}
+                onSubmit={handlePasswordSubmit}
+                error={error || ''}
+                success={success || ''} />
+
+                <NotificationPreferencesSection preferences={notificationPreferences} onToggle={handleTogglePreferenceWithMark} />
+            </motion.div>}
+            
+            {/* Other tabs */}
+            {/* ... existing code ... */}
+          </AnimatePresence>
+          
+          {/* Add enhanced debug section */}
+          {renderDebugInfo()}
+        </div>
+      </div>
+    </motion.div>
+  );
 };
+
 export default ProfileSettingsPage;

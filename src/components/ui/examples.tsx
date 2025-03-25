@@ -5,7 +5,12 @@
  * It's meant for documentation and testing purposes only.
  */
 import React, { useState } from 'react';
-import { Card, CardHeader, CardContent, CardFooter, MetricCard, Button, Input, Heading, Text, Paragraph, Avatar, Badge, StatusBadge, Calendar, Progress, CircularProgress, Tabs, TabList, Tab, TabPanels, TabPanel } from './';
+import { Card, CardHeader, CardContent, CardFooter, MetricCard, Input, Heading, Text, Paragraph, Avatar, Badge, StatusBadge, Calendar, Progress, CircularProgress, Tabs, TabList, Tab, TabPanels, TabPanel } from './';
+
+// Import button components from the unified button index
+import { Button } from './button';
+import IconButton from './button/IconButton';
+import { EditButton, ViewButton, CopyButton, DeleteButton } from './button/ActionButtons';
 
 // Import from the new icons structure
 import { Icon, IconName, KpiIconName, AppIconName, PlatformName, UI_ICON_MAP, UI_OUTLINE_ICON_MAP, PLATFORM_ICON_MAP, PLATFORM_COLORS, KPI_ICON_URLS, APP_ICON_URLS } from './icons';
@@ -36,121 +41,215 @@ import { CustomIconDisplay } from './icons/custom-icon-display';
 import { cn } from '@/lib/utils';
 
 export function ButtonExamples() {
-  return <div className="space-y-8 font-work-sans" id="buttons">
-      <div className="font-work-sans">
-        <h2 className="text-lg font-semibold mb-4 font-sora">Button Variants</h2>
-        <div className="flex flex-wrap gap-4 items-center font-work-sans">
-          <div className="font-work-sans">
+  return <div className="space-y-12 font-work-sans" id="buttons">
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Button Variants</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-start font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Primary (default)</p>
             <Button className="font-work-sans">Primary Button</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Secondary</p>
             <Button variant="secondary" className="font-work-sans">Secondary Button</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Outline</p>
             <Button variant="outline" className="font-work-sans">Outline Button</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Ghost</p>
             <Button variant="ghost" className="font-work-sans">Ghost Button</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Link</p>
             <Button variant="link" className="font-work-sans">Link Button</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Danger</p>
             <Button variant="danger" className="font-work-sans">Danger Button</Button>
           </div>
         </div>
       </div>
 
-      <div className="font-work-sans">
-        <h2 className="text-lg font-semibold mb-4 font-sora">Button Sizes</h2>
-        <div className="flex flex-wrap gap-4 items-center font-work-sans">
-          <div className="font-work-sans">
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Button Sizes</h2>
+        <div className="flex flex-wrap gap-6 items-end font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">XS</p>
             <Button size="xs" className="font-work-sans">Extra Small</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">SM</p>
             <Button size="sm" className="font-work-sans">Small</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">MD (default)</p>
             <Button size="md" className="font-work-sans">Medium</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">LG</p>
             <Button size="lg" className="font-work-sans">Large</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">XL</p>
             <Button size="xl" className="font-work-sans">Extra Large</Button>
           </div>
         </div>
       </div>
 
-      <div className="font-work-sans">
-        <h2 className="text-lg font-semibold mb-4 font-sora">Button States</h2>
-        <div className="flex flex-wrap gap-4 items-center font-work-sans">
-          <div className="font-work-sans">
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Button States</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Default</p>
-            <Button className="font-work-sans">Default</Button>
+            <Button className="font-work-sans w-full">Default</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Disabled</p>
-            <Button disabled className="font-work-sans">Disabled</Button>
+            <Button disabled className="font-work-sans w-full">Disabled</Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Loading</p>
-            <Button loading className="font-work-sans">Loading</Button>
+            <Button loading className="font-work-sans w-full">Loading</Button>
           </div>
         </div>
       </div>
 
-      <div className="font-work-sans">
-        <h2 className="text-lg font-semibold mb-4 font-sora">Button with Icons</h2>
-        <div className="flex flex-wrap gap-4 items-center font-work-sans">
-          <div className="font-work-sans">
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Button with Icons</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Left Icon</p>
-            <Button leftIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="16" />
-                  <line x1="8" y1="12" x2="16" y2="12" />
-                </svg>} className="font-work-sans">
-
+            <Button leftIcon="faPlus" className="font-work-sans w-full">
               Add Item
             </Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Right Icon</p>
-            <Button rightIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>} className="font-work-sans">
-
+            <Button rightIcon="faArrowRight" className="font-work-sans w-full">
               Next
             </Button>
           </div>
-          <div className="font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
             <p className="text-sm text-gray-500 mb-2 font-work-sans">Both Icons</p>
-            <Button leftIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                </svg>} rightIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>} className="font-work-sans">
-
+            <Button leftIcon="faCircle" rightIcon="faChevronDown" className="font-work-sans w-full">
               Options
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="font-work-sans">
-        <h2 className="text-lg font-semibold mb-4 font-sora">Full Width Button</h2>
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Icon Buttons</h2>
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-6 items-start font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Default</p>
+            <IconButton icon="faMagnifyingGlass" ariaLabel="Search" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Primary</p>
+            <IconButton icon="faPlus" variant="primary" ariaLabel="Add" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Secondary</p>
+            <IconButton icon="faDownload" variant="secondary" ariaLabel="Download" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Outline</p>
+            <IconButton icon="faUpload" variant="outline" ariaLabel="Upload" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Danger</p>
+            <IconButton icon="faTrashCan" variant="danger" ariaLabel="Delete" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Disabled</p>
+            <IconButton icon="faLock" disabled ariaLabel="Locked" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Loading</p>
+            <IconButton icon="faRotate" isLoading ariaLabel="Refreshing" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Icon Button Sizes</h2>
+        <div className="flex flex-wrap gap-6 items-end font-work-sans justify-center">
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">XS</p>
+            <IconButton icon="faPenToSquare" size="xs" ariaLabel="Edit (XS)" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">SM</p>
+            <IconButton icon="faPenToSquare" size="sm" ariaLabel="Edit (SM)" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">MD (default)</p>
+            <IconButton icon="faPenToSquare" size="md" ariaLabel="Edit (MD)" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">LG</p>
+            <IconButton icon="faPenToSquare" size="lg" ariaLabel="Edit (LG)" />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">XL</p>
+            <IconButton icon="faPenToSquare" size="xl" ariaLabel="Edit (XL)" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Specialized Action Buttons</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-start font-work-sans">
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Edit Button</p>
+            <EditButton />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">View Button</p>
+            <ViewButton />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Copy Button</p>
+            <CopyButton />
+          </div>
+          <div className="flex flex-col items-center font-work-sans">
+            <p className="text-sm text-gray-500 mb-2 font-work-sans">Delete Button</p>
+            <DeleteButton />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Common Action Patterns</h2>
+        <div className="space-y-6 font-work-sans">
+          <div className="border p-4 rounded-md w-full bg-gray-50">
+            <div className="flex justify-between items-center">
+              <h3 className="text-md font-medium font-sora">Campaign Title</h3>
+              <div className="flex space-x-2">
+                <EditButton size="sm" />
+                <ViewButton size="sm" />
+                <DeleteButton size="sm" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="border p-4 rounded-md w-full bg-gray-50">
+            <div className="flex flex-wrap justify-between items-center gap-4">
+              <Button leftIcon="faPlus" variant="primary">Create New</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button leftIcon="faFilter" variant="outline">Filter</Button>
+                <Button leftIcon="faSort" variant="outline">Sort</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 font-work-sans">
+        <h2 className="text-xl font-semibold mb-5 font-sora text-[var(--primary-color)]">Full Width Button</h2>
         <Button fullWidth className="font-work-sans">Full Width Button</Button>
       </div>
     </div>;
@@ -281,7 +380,7 @@ export function InputExamples() {
       </div>
     </div>;
 }
-export const IconExamples = () => {
+export function IconExamples() {
   // General UI Icons (FontAwesome)
   const uiIconNames = Object.keys(UI_ICON_MAP).sort().filter((icon) => typeof icon === 'string' && icon.trim() !== '' && typeof UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== 'undefined' && UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== undefined && UI_ICON_MAP[icon as keyof typeof UI_ICON_MAP] !== null && (
   // Make sure the icon is not an empty object
@@ -484,56 +583,43 @@ export const IconExamples = () => {
         <div className="space-y-4 font-work-sans">
           <h3 className="text-md font-medium font-sora">Icons with Button</h3>
           <div className="flex flex-wrap gap-4 font-work-sans">
-            <Button leftIcon={<Icon name="faMagnifyingGlass" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faMagnifyingGlass" className="font-work-sans">
               Search
             </Button>
-            <Button rightIcon={<Icon name="faChevronRight" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button rightIcon="faChevronRight" className="font-work-sans">
               Next
             </Button>
-            <Button leftIcon={<Icon name="faPlus" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} variant="secondary" className="font-work-sans">
-
+            <Button leftIcon="faPlus" variant="secondary" className="font-work-sans">
               Add Item
             </Button>
-            <Button leftIcon={<Icon appName="home" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} variant="outline" className="font-work-sans">
-
+            <Button leftIcon="faHome" variant="outline" className="font-work-sans">
               Home
             </Button>
-            <Button leftIcon={<Icon name="faTrashCan" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} variant="danger" className="font-work-sans">
-
+            <Button leftIcon="faTrashCan" variant="danger" className="font-work-sans">
               Delete
             </Button>
-            <Button leftIcon={<Icon name="faCalendar" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} variant="ghost" className="font-work-sans">
-
+            <Button leftIcon="faCalendar" variant="ghost" className="font-work-sans">
               Budget
             </Button>
-            <Button leftIcon={<Icon platformName="instagram" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faInstagram" className="font-work-sans">
               Instagram
             </Button>
-            <Button leftIcon={<Icon platformName="youtube" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faYoutube" className="font-work-sans">
               YouTube
             </Button>
-            <Button leftIcon={<Icon platformName="facebook" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faFacebook" className="font-work-sans">
               Facebook
             </Button>
-            <Button leftIcon={<Icon platformName="x" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faXTwitter" className="font-work-sans">
               X
             </Button>
-            <Button leftIcon={<Icon platformName="linkedin" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faLinkedin" className="font-work-sans">
               LinkedIn
             </Button>
-            <Button leftIcon={<Icon platformName="tiktok" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} className="font-work-sans">
-
+            <Button leftIcon="faTiktok" className="font-work-sans">
               TikTok
             </Button>
-            <Button leftIcon={<Icon appName="profile" size="sm" solid={false} className="text-[var(--secondary-color)] font-work-sans" />} variant="link" className="font-work-sans">
-
+            <Button leftIcon="faUser" variant="link" className="font-work-sans">
               Profile
             </Button>
           </div>
@@ -708,7 +794,7 @@ export const IconExamples = () => {
         </div>
       </div>
     </div>;
-};
+}
 export function CardExamples() {
   return <div className="space-y-8 font-work-sans" id="cards">
       <h2 className="text-lg font-semibold mb-4 font-sora">Card Component</h2>

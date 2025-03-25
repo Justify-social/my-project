@@ -3,7 +3,7 @@
 import React, { useState, ChangeEvent, useCallback, FormEvent, memo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icons';
 import { iconComponentFactory } from '@/components/ui/icons';
 import NavigationTabs from '../components/NavigationTabs';
 import { toast } from 'react-hot-toast';
@@ -42,19 +42,22 @@ const Card = memo(({
 
     {children}
   </motion.div>);
-const SectionHeader: React.FC<{
+interface SectionHeaderProps {
   icon: React.ComponentType<{
     className?: string;
+    solid?: boolean;
   }>;
   title: string;
   description?: string;
-}> = memo(({
-  icon: Icon,
+}
+
+const SectionHeader: React.FC<SectionHeaderProps> = memo(({
+  icon: IconComponent,
   title,
   description
 }) => <div className="flex items-center mb-6 font-work-sans">
     <div className="bg-[var(--background-color)] bg-opacity-50 p-3 rounded-lg font-work-sans">
-      <Icon className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
+      <IconComponent className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
     </div>
     <div className="ml-4 font-work-sans">
       <h2 className="text-xl font-semibold text-gray-900 font-sora">{title}</h2>
