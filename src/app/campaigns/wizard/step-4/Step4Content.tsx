@@ -767,8 +767,7 @@ const UploadedFile: React.FC<UploadedFileProps> = ({
                       className="text-gray-400 hover:text-[var(--accent-color)] transition-colors ml-3 group font-work-sans"
                       title="Edit asset name">
 
-                          <Icon name="faPenToSquare" className="h-4 w-4 group-hover:hidden" solid={false} />
-                          <Icon name="faPenToSquare" className="h-4 w-4 hidden group-hover:block" solid={true} />
+                          <Icon name="faPenToSquare" className="h-4 w-4 transition-colors duration-200 group-hover:text-[var(--accent-color)]" iconType="button" solid={false} />
                         </button>
                       </div>}
                   </div>
