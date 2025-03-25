@@ -59,9 +59,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({
           </div>
           <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
         </div>
-        <button onClick={onEdit} className="group text-[var(--accent-color)] text-sm flex items-center hover:text-[var(--accent-color)] transition-colors" aria-label={`Edit ${title}`}>
-          <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
-          <span>Edit</span>
+        <button onClick={onEdit} className="group text-[var(--primary-color)] text-sm flex items-center transition-colors duration-200" aria-label={`Edit ${title}`}>
+          <Icon name="faPenToSquare" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" iconType="button" solid={false} />
+          <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Edit</span>
         </button>
       </div>
       <div className="pl-11">
@@ -2243,9 +2243,9 @@ function Step5Content() {
             </div> : <div className="bg-gray-50 rounded-lg p-6 text-center">
               <Icon name="faImage" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
               <p className="text-gray-500">No creative assets have been added yet.</p>
-              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto group">
-                <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
-                Add creative assets
+              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--primary-color)] flex items-center justify-center mx-auto group transition-colors duration-200">
+                <Icon name="faPenToSquare" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" iconType="button" solid={false} />
+                <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Add creative assets</span>
               </button>
             </div>}
         </SummarySection>

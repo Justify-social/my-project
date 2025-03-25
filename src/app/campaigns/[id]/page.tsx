@@ -1634,7 +1634,7 @@ export default function CampaignDetail() {
                 className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans" 
                 disabled={!!error}
               >
-                <Icon name="faPenToSquare" className="h-4 w-4 mr-2" solid={false} iconType="button" />
+                <Icon name="faPenToSquare" className="h-4 w-4 mr-2 text-white !text-white" solid={true} iconType="static" />
                 <span className="font-work-sans">Edit Campaign</span>
               </button>
             </div>
