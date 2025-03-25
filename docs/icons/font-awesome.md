@@ -18,9 +18,9 @@ The project has been fully migrated from HeroIcons to our FontAwesome-based icon
 3. **Style consistency**: Better visual harmony across the application
 4. **Reduced dependencies**: One less library to maintain
 
-### HeroIcon Backward Compatibility
+### HeroIcon Migration
 
-For backward compatibility, we provide the `migrateHeroIcon` utility function which maps HeroIcon names to their FontAwesome equivalents:
+If you need to migrate from HeroIcons to our icon system, use the following pattern:
 
 ```tsx
 // Old way with HeroIcon
@@ -29,14 +29,8 @@ import { UserIcon } from '@heroicons/react/24/outline';
 
 // New way with our Icon component
 import { Icon } from '@/components/ui/icons';
-<Icon name="faUser" className="h-5 w-5" />
-
-// Migration helper (for backward compatibility)
-import { migrateHeroIcon } from '@/components/ui/icons';
-{migrateHeroIcon('UserIcon', { className: "h-5 w-5" })}
+<Icon name="user" className="h-5 w-5" />
 ```
-
-The migration function handles a wide variety of HeroIcon patterns and provides appropriate FontAwesome replacements.
 
 ## System Architecture
 
@@ -48,6 +42,7 @@ Our icon system is built with a simple, maintainable architecture:
 4. **Data Storage**: `icon-data.ts` - Generated file with embedded SVG data
 5. **Public API**: `index.ts` - The main export file that provides a clean, consistent API
 6. **Validation**: Automated validation ensures light and solid icons remain visually distinct
+7. **Critical Icons**: `SafeIcon.tsx` - Handles critical icons with robust fallback mechanism
 
 ## IMPORTANT: Icons Must Be Downloaded Before Use
 
@@ -340,6 +335,8 @@ If icons are not displaying correctly:
    ```bash
    npm run verify-icons
    ```
+9. For critical icons hover issues, verify that both light and solid paths are defined in the `CRITICAL_ICONS` object
+10. Check if hover transitions work properly by using browser devtools to inspect icon rendering
 
 ## Icon Validation Process
 
@@ -350,6 +347,7 @@ The icon system includes a robust validation mechanism to ensure light and solid
    - First trying to download the correct light version from the Font Awesome CDN
    - If that fails, applying a visual transformation to make the icon distinct (adding stroke)
 3. **Regeneration**: After fixing any issues, icon data is automatically regenerated
+4. **Critical Icon Validation**: The SafeIcon component includes runtime validation to ensure critical icons always have distinct light and solid paths, with console warnings if issues are detected
 
 This process runs automatically as part of the `update-icons` script and helps maintain visual distinctness between light and solid icons, which is essential for proper hover effects.
 
@@ -511,4 +509,44 @@ For historical reference, these aliases were used to map font-awesome icon names
 | `faChatBubble` | `faCommentDots` |
 | `faDelete` | `faTrashCan` |
 | `faMagnifyingGlass` | `faSearch` |
-| `faSettings` | `faGear` | 
+| `faSettings` | `faGear` |
+
+## Critical Icons Implementation
+
+The system includes a robust implementation for critical icons, which are essential icons that must be available even when the icon loading system fails:
+
+### SafeIcon Component
+
+The `SafeIcon` component provides a fail-safe mechanism for rendering critical icons such as Edit, Eye, Copy, and Trash-can:
+
+- **Dual Path Storage**: Each critical icon stores both light and solid path data
+- **Path Validation**: Verifies that light and solid paths are visually distinct
+- **Fallback Logic**: Multiple fallback layers ensure icons always render correctly:
+  - Uses embedded light/solid SVG paths as primary source
+  - Falls back to alternate path variant if one is missing
+  - Attempts dynamic loading from SVG files if needed
+  - Provides placeholder icon as final fallback
+- **Loading State**: Implements a brief loading state to prevent UI flashing
+- **Development Debugging**: Includes data attributes to facilitate debugging
+
+```tsx
+// Example SafeIcon component usage
+<SafeIcon 
+  name="trash-can" 
+  className="h-5 w-5" 
+  iconType="button" 
+  action="delete" 
+/>
+```
+
+### Critical Icon Hover Effects
+
+Critical icons implement the light-to-solid hover transition with a robust approach:
+
+1. **Default State**: Uses the LIGHT variant SVG path
+2. **Hover State**: Transitions to the SOLID variant SVG path
+3. **Group Context**: Responds to parent element's :hover/:focus state when wrapped in a "group" class
+4. **Action Colors**: Applies appropriate action colors based on the icon type (delete, warning, etc.)
+5. **Transition Smoothing**: Implements opacity transitions for smooth state changes
+
+This implementation ensures that critical icons always maintain visual distinctness between states, even when network resources are unavailable. 
