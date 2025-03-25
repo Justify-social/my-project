@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Icon from '../icon';
@@ -98,6 +98,23 @@ interface CampaignCardProps {
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
   const router = useRouter();
+  const [iconError, setIconError] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(true);
+
+  // Ensure the card is visible, even after hydration
+  useLayoutEffect(() => {
+    // Force the card to be visible immediately after mounting
+    if (cardRef.current) {
+      cardRef.current.style.display = 'block';
+      cardRef.current.style.visibility = 'visible';
+      cardRef.current.style.opacity = '1';
+    }
+    
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Verify the campaign data is valid
   const isValid = campaign && campaign.id && campaign.campaignName;
@@ -112,16 +129,23 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
 
   // Get the KPI display info or use fallback if not found
   const kpiInfo = kpiMapping[campaign.primaryKPI as keyof typeof kpiMapping] || {
-    title: campaign.primaryKPI,
+    title: campaign.primaryKPI || 'Brand Awareness',
     icon: "/KPIs/Brand_Awareness.svg"
   };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
+      ref={cardRef}
+      initial={{ opacity: 1, y: 0 }} // Start visible instead of animating from invisible
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer" 
       onClick={() => onClick ? onClick() : router.push(`/campaigns/${campaign.id}`)}
+      style={{ 
+        display: 'block', 
+        visibility: 'visible', 
+        opacity: 1,
+        willChange: 'transform' // Optimization for animation performance
+      }}
     >
       <div className="p-3 sm:p-4 font-work-sans">
         <div className="flex items-start justify-between font-work-sans">
@@ -131,14 +155,26 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
               <StatusBadge status={campaign.submissionStatus || 'draft'} size="sm" />
             </div>
             <p className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
-              {new Date(campaign.startDate).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'short'
-              })}
-              {campaign.endDate && ` - ${new Date(campaign.endDate).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'short'
-              })}`}
+              {(() => {
+                try {
+                  return new Date(campaign.startDate).toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short'
+                  });
+                } catch (e) {
+                  return 'Invalid date';
+                }
+              })()}
+              {campaign.endDate && (() => {
+                try {
+                  return ` - ${new Date(campaign.endDate).toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short'
+                  })}`;
+                } catch (e) {
+                  return '';
+                }
+              })()}
             </p>
           </div>
           <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center ${campaign.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 to-pink-500' : campaign.platform === 'TikTok' ? 'bg-black' : 'bg-red-600'} font-work-sans`}>
@@ -162,7 +198,19 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
           <div className="font-work-sans">
             <p className="text-[var(--secondary-color)] font-work-sans">Primary KPI</p>
             <div className="flex items-center gap-1.5 font-work-sans">
-              <img src={kpiInfo.icon} alt={kpiInfo.title} className="w-4 h-4" />
+              {!iconError ? (
+                <img 
+                  src={kpiInfo.icon} 
+                  alt={kpiInfo.title} 
+                  className="w-4 h-4" 
+                  onError={() => setIconError(true)}
+                  loading="eager"
+                />
+              ) : (
+                <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-500 text-[8px]">KPI</span>
+                </div>
+              )}
               <p className="font-medium text-[var(--primary-color)] font-work-sans">{kpiInfo.title}</p>
             </div>
           </div>
@@ -177,38 +225,133 @@ interface UpcomingCampaignsCardProps {
   campaigns: Campaign[];
   isLoading: boolean;
   onNewCampaign: () => void;
+  onSelectCampaign?: (id: number | string) => void;
 }
 
 const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
   campaigns,
   isLoading,
-  onNewCampaign
+  onNewCampaign,
+  onSelectCampaign
 }) => {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(true);
+  
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  // Preload common KPI icons to avoid loading flickering
+  useEffect(() => {
+    try {
+      const icons = Object.values(kpiMapping).map(item => item.icon);
+      icons.forEach(icon => {
+        const img = new Image();
+        img.src = icon;
+      });
+    } catch (err) {
+      console.error("Error preloading icons:", err);
+    }
+  }, []);
   
   // Always ensure campaigns is an array
-  const validCampaigns = Array.isArray(campaigns) ? campaigns : [];
-  
-  // Sort by start date (soonest first)
-  const sortedCampaigns = [...validCampaigns]
-    // Filter out invalid campaigns (missing required fields)
-    .filter(campaign => 
-      campaign && 
-      campaign.id && 
-      campaign.campaignName && 
-      campaign.startDate
-    )
-    // Sort by start date
-    .sort((a, b) => {
-      const aDate = new Date(a.startDate).getTime();
-      const bDate = new Date(b.startDate).getTime();
-      return !isNaN(aDate) && !isNaN(bDate) ? aDate - bDate : 0;
-    });
+  const validCampaigns = React.useMemo(() => {
+    try {
+      if (!Array.isArray(campaigns)) {
+        console.warn("Campaigns is not an array:", campaigns);
+        if (isMounted.current) {
+          setError("Invalid campaign data format");
+        }
+        return [];
+      }
+      
+      if (campaigns.length === 0) {
+        return [];
+      }
+      
+      // Filter and sort
+      return campaigns
+        .filter(campaign => 
+          campaign && 
+          campaign.id && 
+          campaign.campaignName && 
+          campaign.startDate
+        )
+        .sort((a, b) => {
+          try {
+            const aDate = new Date(a.startDate).getTime();
+            const bDate = new Date(b.startDate).getTime();
+            return !isNaN(aDate) && !isNaN(bDate) ? aDate - bDate : 0;
+          } catch (err) {
+            console.error("Error sorting campaigns:", err);
+            return 0;
+          }
+        });
+    } catch (err) {
+      console.error("Error processing campaigns:", err);
+      if (isMounted.current) {
+        setError("Failed to process campaign data");
+      }
+      return [];
+    }
+  }, [campaigns]);
+
+  const handleCampaignClick = (campaign: Campaign) => {
+    if (onSelectCampaign) {
+      onSelectCampaign(campaign.id);
+    } else {
+      router.push(`/campaigns/${campaign.id}`);
+    }
+  };
+
+  const toggleDebugMode = () => {
+    setDebugMode(!debugMode);
+  };
+
+  // Add effect to ensure campaigns are visible after hydration
+  useLayoutEffect(() => {
+    // Force a redraw to ensure campaign tiles are visible
+    const forceRedraw = () => {
+      if (!containerRef.current || !isMounted.current) return;
+      
+      const campaignElements = containerRef.current.querySelectorAll('.campaign-card-container');
+      campaignElements.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.style.display = 'block';
+          element.style.visibility = 'visible';
+          element.style.opacity = '1';
+        }
+      });
+    };
+    
+    // Run immediately and after a short delay to ensure update after hydration
+    forceRedraw();
+    const timeoutId = setTimeout(forceRedraw, 100);
+    const longTimeoutId = setTimeout(forceRedraw, 500); // Extra safety
+    
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(longTimeoutId);
+    };
+  }, [validCampaigns]);
 
   return (
-    <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden font-work-sans">
-      <div className="p-3 sm:p-4 border-b border-[var(--divider-color)] font-work-sans">
+    <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden font-work-sans relative">
+      <div className="p-3 sm:p-4 border-b border-[var(--divider-color)] font-work-sans flex justify-between items-center">
         <h3 className="text-sm font-medium text-[var(--secondary-color)] font-sora">Upcoming</h3>
+        <button 
+          onClick={toggleDebugMode} 
+          className="text-xs text-gray-400 hover:text-gray-600"
+          title="Toggle debug info"
+        >
+          {debugMode ? "Hide Debug" : ""}
+        </button>
       </div>
       
       <div className="p-3 sm:p-4 font-work-sans">
@@ -217,9 +360,21 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
             <div className="h-24 bg-gray-200 rounded-lg mb-3"></div>
             <div className="h-24 bg-gray-200 rounded-lg"></div>
           </div>
+        ) : error ? (
+          <div className="text-center py-4 sm:py-6 border border-dashed border-red-300 rounded-lg bg-red-50 font-work-sans">
+            <p className="text-sm text-red-500 font-work-sans mb-2">
+              {error}
+            </p>
+            <button 
+              onClick={() => setError(null)} 
+              className="text-xs text-red-600 underline"
+            >
+              Dismiss
+            </button>
+          </div>
         ) : (
           <div>
-            {sortedCampaigns.length === 0 ? (
+            {validCampaigns.length === 0 ? (
               <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg font-work-sans">
                 <p className="text-sm text-[var(--secondary-color)] font-work-sans">
                   No campaigns to display
@@ -233,15 +388,35 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 overflow-y-auto max-h-[420px] font-work-sans">
-                {sortedCampaigns.map((campaign) => (
-                  <CampaignCard 
-                    key={campaign.id} 
-                    campaign={campaign} 
-                    onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                  />
-                ))}
-              </div>
+              <>
+                {debugMode && (
+                  <div className="mb-3 p-2 border border-blue-200 bg-blue-50 rounded-md text-xs">
+                    <p><strong>Total campaigns:</strong> {campaigns?.length || 0}</p>
+                    <p><strong>Valid campaigns:</strong> {validCampaigns.length}</p>
+                    <p><strong>First campaign:</strong> {validCampaigns[0]?.campaignName || 'None'}</p>
+                  </div>
+                )}
+                <div className="space-y-3 overflow-y-auto max-h-[420px] font-work-sans" ref={containerRef}>
+                  {validCampaigns.map((campaign) => (
+                    <div 
+                      key={campaign.id} 
+                      className="campaign-card-container"
+                      style={{ 
+                        display: 'block', 
+                        minHeight: '80px', 
+                        visibility: 'visible', 
+                        opacity: 1,
+                        position: 'relative' // Ensures proper stacking context
+                      }}
+                    >
+                      <CampaignCard 
+                        campaign={campaign} 
+                        onClick={() => handleCampaignClick(campaign)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}

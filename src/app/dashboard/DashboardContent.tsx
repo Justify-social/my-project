@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { TableSkeleton } from '@/components/ui/loading-skeleton';
 import CalendarDashboard from "@/components/ui/calendar/calendar-dashboard";
 import UpcomingCampaignsCard from "@/components/ui/cards/upcoming-campaigns-card";
+import ErrorBoundary from '@/components/ui/error-boundary';
 
 // Import dynamically loaded components and ensure they are exported correctly.
 const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming"), {
@@ -467,19 +468,14 @@ interface InfluencerMetrics {
 // DashboardContent Component
 // -----------------------
 
-// Enhanced fetcher with better error handling and debugging
+// Enhanced fetcher with better error handling
 const fetcher = async (url: string) => {
-  console.group(`🔍 DEBUG FETCHER: ${url}`);
-  console.log('Fetching data from:', url);
   try {
     const response = await fetch(url);
-    console.log(`API response status: ${response.status}`);
     
     // Check for non-OK response
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`API error (${response.status}):`, errorText);
-      console.groupEnd();
       return {
         success: true,
         campaigns: []
@@ -488,25 +484,6 @@ const fetcher = async (url: string) => {
     
     try {
       const data = await response.json();
-      console.log('Raw API response:', data);
-      
-      // CRITICAL DEBUG: Examine the actual structure of the API response
-      console.log('API response type:', typeof data);
-      console.log('API response keys:', Object.keys(data));
-      
-      // Check all possible response formats
-      if (data.success && Array.isArray(data.data)) {
-        console.log('Found standard format: {success, data[]}');
-        console.log('Campaign count:', data.data.length);
-      } else if (Array.isArray(data)) {
-        console.log('Found array format: []');
-        console.log('Campaign count:', data.length);
-      } else if (data.campaigns && Array.isArray(data.campaigns)) {
-        console.log('Found campaigns format: {campaigns[]}');
-        console.log('Campaign count:', data.campaigns.length);
-      } else {
-        console.warn('Unknown data format:', data);
-      }
       
       // Transform based on response format
       let transformedCampaigns = [];
@@ -522,29 +499,17 @@ const fetcher = async (url: string) => {
         transformedCampaigns = data.campaigns;
       }
       
-      console.log('Transformed campaigns:', transformedCampaigns.length);
-      if (transformedCampaigns.length > 0) {
-        console.log('First campaign sample:', transformedCampaigns[0]);
-      } else {
-        console.warn('NO CAMPAIGNS FOUND IN RESPONSE');
-      }
-      
-      console.groupEnd();
       return {
         success: true,
         campaigns: transformedCampaigns
       };
     } catch (jsonError) {
-      console.error('Error parsing JSON response:', jsonError);
-      console.groupEnd();
       return {
         success: true,
         campaigns: []
       };
     }
   } catch (fetchError) {
-    console.error('Fetch error:', fetchError);
-    console.groupEnd();
     return {
       success: true,
       campaigns: []
@@ -554,8 +519,6 @@ const fetcher = async (url: string) => {
 
 // Helper function to map campaign data consistently
 const mapCampaign = (campaign: any, index: number) => {
-  console.log(`Mapping campaign ${index}:`, campaign);
-  
   // Parse budget safely
   let budgetTotal = 0;
   if (campaign.budget) {
@@ -567,7 +530,7 @@ const mapCampaign = (campaign: any, index: number) => {
         budgetTotal = campaign.budget.total || 0;
       }
     } catch (e) {
-      console.error('Error parsing budget data:', e);
+      // Error handling
     }
   }
   
@@ -581,7 +544,7 @@ const mapCampaign = (campaign: any, index: number) => {
         contactData = campaign.primaryContact;
       }
     } catch (e) {
-      console.error('Error parsing contact data:', e);
+      // Error handling
     }
   }
   
@@ -607,7 +570,7 @@ const mapCampaign = (campaign: any, index: number) => {
           return parsedDate.toISOString();
         }
       } catch (e) {
-        console.error('Error parsing date:', dateInput, e);
+        // Error handling
       }
     }
     
@@ -629,7 +592,6 @@ const mapCampaign = (campaign: any, index: number) => {
     status: (campaign.status || 'draft').toLowerCase()
   };
   
-  console.log(`Mapped campaign result:`, mappedCampaign);
   return mappedCampaign;
 };
 
@@ -978,18 +940,6 @@ const CalendarMonthView: React.FC<{
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const calendarRef = useRef<HTMLDivElement>(null);
   
-  // Add debugging for the events
-  console.group('🔍 DEBUG CALENDAR');
-  console.log('Calendar month:', currentMonth);
-  console.log('Calendar events provided:', events);
-  console.log('Calendar events count:', events.length);
-  if (events.length > 0) {
-    console.log('First calendar event:', events[0]);
-  } else {
-    console.warn('NO CALENDAR EVENTS TO DISPLAY');
-  }
-  console.groupEnd();
-  
   // Also add validation for events to prevent errors
   const validEvents = useMemo(() => {
     return events.filter(event => 
@@ -1000,9 +950,6 @@ const CalendarMonthView: React.FC<{
       !isNaN(event.start.getTime())
     ) as CalendarEvent[];
   }, [events]);
-  
-  // Add debugging for valid events
-  console.log('Valid calendar events after filtering:', validEvents.length);
   
   // Calculate campaign positions for timeline bars
   const calculateCampaignRows = (events: CalendarEvent[]) => {
@@ -1160,14 +1107,6 @@ const CalendarMonthView: React.FC<{
           </button>
         </div>
       </div>
-      
-      {/* Debug info */}
-      {validEvents.length === 0 && (
-        <div className="p-2 bg-yellow-50 text-xs">
-          <p>DEBUG: No valid calendar events to display</p>
-          <p>Total events: {events.length}, Valid: {validEvents.length}</p>
-        </div>
-      )}
       
       <div className="overflow-x-auto flex-grow font-work-sans">
         {/* Day headers with consistent width */}
@@ -1484,12 +1423,12 @@ export default function DashboardContent({
   }
 }: DashboardContentProps) {
   const router = useRouter();
-  const [dateRange, setDateRange] = useState('7d');
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('performance');
-  const [currentDate, setCurrentDate] = useState(new Date());
-
+  const [timeframe, setTimeframe] = useState('7d');
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [currentDate] = useState(new Date());
+  
   // Update the SWR hook type with improved configuration
   const {
     data: campaignsData,
@@ -1497,23 +1436,13 @@ export default function DashboardContent({
     isLoading: isLoadingCampaigns
   } = useSWR<CampaignsResponse>('/api/campaigns', fetcher, {
     onError: (error) => {
-      console.error('SWR error:', error);
       handleError(new Error('Failed to fetch campaign data. Please try refreshing the page.'));
     },
     revalidateOnFocus: false,
     revalidateIfStale: true,
     revalidateOnReconnect: true
   });
-
-  // Add this DEBUG section right after the hook
-  console.group('🔍 DEBUG CAMPAIGNS DATA');
-  console.log('isLoading:', isLoadingCampaigns);
-  console.log('hasError:', !!fetchError);
-  console.log('campaignsData:', campaignsData);
-  console.log('campaigns array:', campaignsData?.campaigns);
-  console.log('campaigns count:', campaignsData?.campaigns?.length || 0);
-  console.groupEnd();
-
+  
   // Process campaigns for different views
   const activeCampaigns = useMemo(() => {
     return campaignsData?.campaigns?.filter((campaign) => campaign.submissionStatus === "submitted" && new Date(campaign.startDate) <= new Date() && (!campaign.endDate || new Date(campaign.endDate) >= new Date())) || [];
@@ -1645,18 +1574,18 @@ export default function DashboardContent({
     } else if (message.includes('API error: 404')) {
       message = 'Resource not found: The requested data could not be found.';
     }
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 5000);
+    setError(message);
+    setTimeout(() => setError(null), 5000);
   };
   const handleExport = async () => {
     try {
-      setIsExporting(true);
+      setIsAddingNew(true);
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      setToastMessage('Dashboard data exported successfully');
+      setError('Dashboard data exported successfully');
     } catch (error) {
       handleError(error instanceof Error ? error : new Error('Export failed'));
     } finally {
-      setIsExporting(false);
+      setIsAddingNew(false);
     }
   };
 
@@ -1728,7 +1657,7 @@ export default function DashboardContent({
   return (
     <div className="min-h-screen bg-white font-work-sans">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6 font-work-sans">
-        {toastMessage && <Toast message={toastMessage} type="info" />}
+        {error && <Toast message={error} type="error" />}
 
         {/* Campaigns Overview Section */}
         <div className="mb-4 sm:mb-6 font-work-sans">
@@ -1752,11 +1681,41 @@ export default function DashboardContent({
             
             {/* Campaign Cards - Align with calendar */}
             <div className="col-span-12 lg:col-span-6 font-work-sans">
-              <UpcomingCampaignsCard 
-                campaigns={campaignsData?.campaigns || []}
-                isLoading={isLoadingCampaigns}
-                onNewCampaign={handleNewCampaign}
-              />
+              <ErrorBoundary
+                fallback={
+                  <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden p-4">
+                    <h3 className="text-sm font-medium text-[var(--secondary-color)] mb-3">Upcoming</h3>
+                    <div className="text-center py-4 border border-dashed border-[var(--divider-color)] rounded-lg">
+                      <p className="text-sm text-red-500 mb-2">Unable to display campaigns</p>
+                      <button 
+                        onClick={() => window.location.reload()} 
+                        className="text-xs px-3 py-1.5 bg-[var(--accent-color)] text-white rounded-md"
+                      >
+                        Refresh
+                      </button>
+                    </div>
+                  </div>
+                }
+              >
+                <UpcomingCampaignsCard 
+                  campaigns={Array.isArray(campaignsData?.campaigns) ? 
+                    campaignsData.campaigns.map(c => ({
+                      ...c,
+                      id: c.id,
+                      campaignName: c.campaignName,
+                      submissionStatus: c.submissionStatus,
+                      platform: c.platform,
+                      startDate: c.startDate,
+                      endDate: c.endDate,
+                      totalBudget: c.totalBudget,
+                      primaryKPI: c.primaryKPI
+                    })) : []
+                  }
+                  isLoading={isLoadingCampaigns}
+                  onNewCampaign={handleNewCampaign}
+                  onSelectCampaign={(id) => router.push(`/campaigns/${id}`)}
+                />
+              </ErrorBoundary>
             </div>
           </div>
         </div>
