@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+// Specify Node.js runtime since we're using fs module
+export const runtime = 'nodejs';
+
+// Explicitly mark this route as dynamic since it uses request parameters
+export const dynamic = 'force-dynamic';
+
 // Map of problematic icons to their working alternatives
 const ICON_ALIASES: Record<string, string> = {
   'x-circle': 'circle-xmark',
@@ -10,9 +16,9 @@ const ICON_ALIASES: Record<string, string> = {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const style = searchParams.get('style') || 'light';
-    const name = searchParams.get('name');
+    // Get search params directly from request instead of constructing URL
+    const style = request.nextUrl.searchParams.get('style') || 'light';
+    const name = request.nextUrl.searchParams.get('name');
     
     if (!name) {
       return NextResponse.json({ error: 'Icon name required' }, { status: 400 });
