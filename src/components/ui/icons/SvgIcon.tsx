@@ -5,7 +5,7 @@ import cn from 'classnames';
 import Image from 'next/image';
 import { useIconValidation, useButtonIconValidation, validateDynamicName } from './validation';
 import { SEMANTIC_TO_FA_MAP, getIconBaseName, getIconPath } from './icon-mappings';
-import SafeIcon from '../safe-icon';
+import SafeIcon from './safe-icon';
 
 // Type definitions
 type IconName = string;

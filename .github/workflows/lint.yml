@@ -30,17 +30,17 @@ jobs:
       - name: Check for 'any' type usage
         run: |
           echo "Checking for 'any' type usage..."
-          node src/scripts/find-any-types.js --path=src/
+          node scripts/validation/find-any-types.js --path=src/
           
       - name: Check for <img> tag usage
         run: |
           echo "Checking for <img> tag usage..."
-          node src/scripts/find-img-tags.js --path=src/
+          node scripts/validation/find-img-tags.js --path=src/
           
       - name: Check for React Hook dependency issues
         run: |
           echo "Checking for React Hook dependency issues..."
-          node src/scripts/find-hook-issues.js --path=src/
+          node scripts/validation/find-hook-issues.js --path=src/
 
       - name: Upload linter reports as artifacts
         uses: actions/upload-artifact@v3

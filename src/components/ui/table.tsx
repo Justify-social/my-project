@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
 import { cn } from '@/lib/utils';
-import { Icon } from './icon';
+import { Icon } from './icons';
 
 // Types
 type SortDirection = 'asc' | 'desc' | undefined;

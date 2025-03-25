@@ -3,7 +3,7 @@
 import { createContext, useState, useContext, useCallback, ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Icon } from './icon';
+import { Icon } from './icons';
 
 // Types for Toast functionality
 export type ToastType = 'success' | 'error' | 'info' | 'warning';

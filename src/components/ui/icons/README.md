@@ -91,12 +91,12 @@ For hover effects to work correctly, add a parent element with the `group` class
 
 The icon system uses two main scripts:
 
-1. **Download Icons**: `node scripts/download-icons.js --verbose`
+1. **Download Icons**: `node scripts/icon-management/download-icons.js --verbose`
    - Scans the codebase for icon usage
    - Downloads SVG files for all used icons
    - Creates light variants of solid icons
 
-2. **Audit Icons**: `node scripts/audit-icons.js [--fix] [--html] [--fix-duplicates]` 
+2. **Audit Icons**: `node scripts/icon-management/audit-icons.js [--fix] [--html] [--fix-duplicates]` 
    - Validates icon usage
    - Ensures light/solid differentiation
    - Generates detailed HTML report
@@ -112,4 +112,4 @@ The icon system now uses direct SVG files instead of FontAwesome libraries. We'v
 - `@fortawesome/pro-solid-svg-icons`
 - `@fortawesome/react-fontawesome`
 
-If you need new icons, run `node scripts/download-icons.js --verbose` to download them as SVG files. 
+If you need new icons, run `node scripts/icon-management/download-icons.js --verbose` to download them as SVG files. 

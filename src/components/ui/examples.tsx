@@ -32,7 +32,7 @@ import {
   SkeletonSection,
   DashboardSkeleton } from
 './loading-skeleton';
-import { CustomIconDisplay } from './custom-icon-display';
+import { CustomIconDisplay } from './icons/custom-icon-display';
 import { cn } from '@/lib/utils';
 
 export function ButtonExamples() {

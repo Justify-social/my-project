@@ -7,4 +7,4 @@
  */
 
 export * from './icons';
-export { Icon as default } from './icons'; 
+export { Icon as default } from './icons';

@@ -1,3 +1,35 @@
+# Scripts Have Moved
+
+**IMPORTANT**: The scripts that were in this directory have been moved to a new organized structure in the project root.
+
+Please use the following directories instead:
+
+- **Linter & Validation Scripts**: `/scripts/validation/`
+- **Database Scripts**: `/scripts/database/`
+- **Campaign Scripts**: `/scripts/campaign/`
+- **Testing Scripts**: `/scripts/testing/`
+- **Icon Management Scripts**: `/scripts/icon-management/`
+- **Utility Scripts**: `/scripts/utilities/`
+
+Each directory contains a README.md with details about the scripts it contains.
+
+For a complete overview of available scripts, see `/scripts/README.md`.
+
+## Script Index
+
+For programmatic usage, there is a centralized index.js file at `/scripts/index.js` that exports all scripts by category.
+
+```javascript
+// Import the entire scripts collection
+const scripts = require('./scripts');
+
+// Use a specific script category
+const { validation } = require('./scripts');
+
+// Use a specific script
+const findAnyTypes = require('./scripts').validation.findAnyTypes;
+```
+
 # Linter Fix Scripts
 
 This directory contains utility scripts to help identify and fix common linter issues in the codebase.

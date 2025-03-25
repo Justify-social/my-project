@@ -389,17 +389,17 @@ export const IconTester = Object.freeze(() => {
                     {error}
                     {error.includes('missing solid variants') &&
             <div className="text-sm text-gray-700 mt-1 font-work-sans">
-                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/download-icons.js</code> to download missing solid variants.
+                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/icon-management/download-icons.js</code> to download missing solid variants.
                       </div>
             }
                     {error.includes('missing light variants') &&
             <div className="text-sm text-gray-700 mt-1 font-work-sans">
-                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/download-icons.js</code> to generate light variants from solid icons.
+                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/icon-management/download-icons.js</code> to generate light variants from solid icons.
                       </div>
             }
                     {error.includes('Essential icons') &&
             <div className="text-sm text-gray-700 mt-1 font-work-sans">
-                        Fix: Edit <code className="bg-gray-100 px-1 rounded">scripts/download-icons.js</code> to add missing icons to REQUIRED_LIGHT_ICONS or REQUIRED_SOLID_ICONS.
+                        Fix: Edit <code className="bg-gray-100 px-1 rounded">scripts/icon-management/download-icons.js</code> to add missing icons to REQUIRED_LIGHT_ICONS or REQUIRED_SOLID_ICONS.
                       </div>
             }
                   </li>
@@ -420,7 +420,7 @@ export const IconTester = Object.freeze(() => {
                     {warning}
                     {warning.includes('identical light/solid variants') &&
             <div className="text-sm text-gray-700 mt-1 font-work-sans">
-                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/audit-icons.js --fix-duplicates</code> to regenerate distinct light versions.
+                        Fix: Run <code className="bg-gray-100 px-1 rounded">node scripts/icon-management/audit-icons.js --fix-duplicates</code> to regenerate distinct light versions.
                       </div>
             }
                     {warning.includes('Invalid or corrupt') &&

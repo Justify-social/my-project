@@ -2,7 +2,7 @@
 
 import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { Icon, IconName } from './icon';
+import { Icon, IconName } from './icons';
 
 // Types
 export interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {

@@ -19,6 +19,8 @@ import {
 } from './IconVariants';
 import React from 'react';
 import { SvgIcon, PlatformIcon, SvgIconProps } from './SvgIcon';
+import { SafeIcon } from './safe-icon';
+import { CustomIconDisplay } from './custom-icon-display';
 
 // Re-export the main components
 export { 
@@ -30,7 +32,11 @@ export {
   ButtonIcon,   // Use for interactive icons with blue hover effect
   DeleteIcon,   // Use for delete/remove actions (red hover)
   WarningIcon,  // Use for warning actions (yellow hover)
-  SuccessIcon   // Use for success/confirmation actions (green hover)
+  SuccessIcon,  // Use for success/confirmation actions (green hover)
+  
+  // Additional icon components
+  SafeIcon,     // Fallback implementation for critical icons
+  CustomIconDisplay  // Display test component for icons
 };
 
 // Export the SvgIcon as the default Icon component
