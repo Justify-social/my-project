@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -14,6 +14,8 @@ import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { TableSkeleton } from '@/components/ui/loading-skeleton';
+import CalendarDashboard from "@/components/ui/calendar/calendar-dashboard";
+import UpcomingCampaignsCard from "@/components/ui/cards/upcoming-campaigns-card";
 
 // Import dynamically loaded components and ensure they are exported correctly.
 const CalendarUpcoming = dynamic(() => import("../../components/CalendarUpcoming"), {
@@ -193,134 +195,6 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       <Icon name={config.iconName} className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} solid={false} />
       {config.label}
     </span>;
-};
-
-// Campaign Card Component
-interface CampaignCardProps {
-  campaign: Campaign;
-  onClick?: () => void;
-}
-
-// KPI mapping for display purposes
-const kpiMapping = {
-  adRecall: {
-    title: "Ad Recall",
-    icon: "/KPIs/Ad_Recall.svg"
-  },
-  brandAwareness: {
-    title: "Brand Awareness",
-    icon: "/KPIs/Brand_Awareness.svg"
-  },
-  consideration: {
-    title: "Consideration",
-    icon: "/KPIs/Consideration.svg"
-  },
-  messageAssociation: {
-    title: "Message Association",
-    icon: "/KPIs/Message_Association.svg"
-  },
-  brandPreference: {
-    title: "Brand Preference",
-    icon: "/KPIs/Brand_Preference.svg"
-  },
-  purchaseIntent: {
-    title: "Purchase Intent",
-    icon: "/KPIs/Purchase_Intent.svg"
-  },
-  actionIntent: {
-    title: "Action Intent",
-    icon: "/KPIs/Action_Intent.svg"
-  },
-  recommendationIntent: {
-    title: "Recommendation Intent",
-    icon: "/KPIs/Brand_Preference.svg"
-  },
-  advocacy: {
-    title: "Advocacy",
-    icon: "/KPIs/Advocacy.svg"
-  }
-};
-const CampaignCard: React.FC<CampaignCardProps> = ({
-  campaign,
-  onClick
-}) => {
-  // Add debug logging
-  console.log('Rendering CampaignCard:', campaign.id, campaign.campaignName);
-  
-  // Verify the campaign data is valid
-  const isValid = campaign && campaign.id && campaign.campaignName;
-  
-  if (!isValid) {
-    console.error('Invalid campaign data received by CampaignCard:', campaign);
-    return (
-      <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-        <p className="text-red-500 text-sm">Invalid campaign data</p>
-      </div>
-    );
-  }
-  
-  const router = useRouter();
-
-  // Get the KPI display info or use fallback if not found
-  const kpiInfo = kpiMapping[campaign.primaryKPI as keyof typeof kpiMapping] || {
-    title: campaign.primaryKPI,
-    icon: "/KPIs/Brand_Awareness.svg"
-  };
-  return <motion.div initial={{
-    opacity: 0,
-    y: 10
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden hover:shadow-md transition-all duration-300 cursor-pointer" onClick={() => onClick ? onClick() : router.push(`/campaigns/${campaign.id}`)}>
-
-      <div className="p-3 sm:p-4 font-work-sans">
-        <div className="flex items-start justify-between font-work-sans">
-          <div className="flex-1 mr-2 font-work-sans">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm sm:text-base font-medium text-[var(--primary-color)] font-sora">{campaign.campaignName}</h3>
-              <StatusBadge status={campaign.submissionStatus || 'draft'} size="sm" />
-            </div>
-            <p className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
-              {new Date(campaign.startDate).toLocaleDateString('en-US', {
-              day: 'numeric',
-              month: 'short'
-            })}
-              {campaign.endDate && ` - ${new Date(campaign.endDate).toLocaleDateString('en-US', {
-              day: 'numeric',
-              month: 'short'
-            })}`}
-            </p>
-          </div>
-          <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center ${campaign.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 to-pink-500' : campaign.platform === 'TikTok' ? 'bg-black' : 'bg-red-600'} font-work-sans`}>
-            {campaign.platform === 'Instagram' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white font-work-sans" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>}
-            {campaign.platform === 'TikTok' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white font-work-sans" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg>}
-            {campaign.platform === 'YouTube' && <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white font-work-sans" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg>}
-          </div>
-        </div>
-        
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-4 text-xs font-work-sans">
-          <div className="font-work-sans">
-            <p className="text-[var(--secondary-color)] font-work-sans">Budget</p>
-            <p className="font-medium text-[var(--primary-color)] font-work-sans">
-              {new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-              minimumFractionDigits: 0
-            }).format(campaign.totalBudget)}
-            </p>
-          </div>
-          <div className="font-work-sans">
-            <p className="text-[var(--secondary-color)] font-work-sans">Primary KPI</p>
-            <div className="flex items-center gap-1.5 font-work-sans">
-              <img src={kpiInfo.icon} alt={kpiInfo.title} className="w-4 h-4" />
-
-              <p className="font-medium text-[var(--primary-color)] font-work-sans">{kpiInfo.title}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>;
 };
 
 // Reusable Components
@@ -1084,8 +958,25 @@ const CalendarMonthView: React.FC<{
   month,
   events
 }) => {
+  // Define the event type to include all necessary properties
+  type CalendarEvent = {
+    id: string | number;
+    title: string;
+    start: Date;
+    end?: Date;
+    platform?: string;
+    budget?: number;
+    kpi?: string;
+    status?: string;
+    statusText?: string;
+    statusClass?: string;
+    color?: string;
+  };
+
   const [currentMonth, setCurrentMonth] = useState(month);
-  const [hoverEvent, setHoverEvent] = useState<string | null>(null);
+  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const calendarRef = useRef<HTMLDivElement>(null);
   
   // Add debugging for the events
   console.group('🔍 DEBUG CALENDAR');
@@ -1107,11 +998,77 @@ const CalendarMonthView: React.FC<{
       event.title && 
       event.start instanceof Date && 
       !isNaN(event.start.getTime())
-    );
+    ) as CalendarEvent[];
   }, [events]);
   
   // Add debugging for valid events
   console.log('Valid calendar events after filtering:', validEvents.length);
+  
+  // Calculate campaign positions for timeline bars
+  const calculateCampaignRows = (events: CalendarEvent[]) => {
+    if (!events || events.length === 0) return { rows: [], eventPositions: {} };
+    
+    // Sort events by start date and duration
+    const sortedEvents = [...events].sort((a, b) => {
+      const aStart = new Date(a.start).getTime();
+      const bStart = new Date(b.start).getTime();
+      
+      // First sort by start date
+      if (aStart !== bStart) {
+        return aStart - bStart;
+      }
+      
+      // If start dates are the same, sort by duration (shorter first)
+      const aEnd = a.end ? new Date(a.end).getTime() : aStart + 86400000;
+      const bEnd = b.end ? new Date(b.end).getTime() : bStart + 86400000;
+      return (aEnd - aStart) - (bEnd - bStart);
+    });
+    
+    // Assign row positions (track occupied slots)
+    const rows: Array<Array<CalendarEvent>> = [];
+    const eventPositions: Record<string | number, number> = {};
+    
+    sortedEvents.forEach(event => {
+      // Skip invalid events
+      if (!event || !event.id) return;
+      
+      // Find the first available row
+      let rowIndex = 0;
+      let foundRow = false;
+      
+      while (!foundRow) {
+        if (!rows[rowIndex]) {
+          rows[rowIndex] = [];
+        }
+        
+        // Check if this row has space for the event
+        const hasOverlap = rows[rowIndex].some(existingEvent => {
+          const eventStart = new Date(event.start);
+          const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
+          const existingStart = new Date(existingEvent.start);
+          const existingEnd = existingEvent.end ? new Date(existingEvent.end) : new Date(existingStart.getTime() + 86400000);
+          
+          return (eventStart < existingEnd && eventEnd > existingStart);
+        });
+        
+        if (!hasOverlap) {
+          rows[rowIndex].push(event);
+          eventPositions[event.id] = rowIndex;
+          foundRow = true;
+        } else {
+          rowIndex++;
+        }
+      }
+    });
+    
+    return { rows, eventPositions };
+  };
+  
+  // Calculate event positions
+  const { rows, eventPositions } = useMemo(() => 
+    calculateCampaignRows(validEvents), 
+    [validEvents]
+  );
   
   const prevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -1136,61 +1093,62 @@ const CalendarMonthView: React.FC<{
   // Adjust to make Monday the first day (0-6, where 0 is Monday)
   const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
   
-  // Build spans for multi-day events
-  const eventSpans: Record<string, {startIdx: number, endIdx: number, event: any}> = {};
-  
   // Create day objects
   for (let i = 1; i <= daysInMonth; i++) {
     const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
     const isToday = new Date().toDateString() === currentDate.toDateString();
     
-    // Events that start on this day
-    const startEvents = validEvents.filter((event) => {
-      const eventStart = new Date(event.start);
-      return eventStart.getDate() === i && 
-             eventStart.getMonth() === currentMonth.getMonth() && 
-             eventStart.getFullYear() === currentMonth.getFullYear();
-    });
-    
-    // All events active on this day (start, end, or spanning)
-    const activeEvents = validEvents.filter((event) => {
-      const eventStart = new Date(event.start);
-      const eventEnd = event.end ? new Date(event.end) : new Date(eventStart);
-      const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
-      return dayDate >= eventStart && dayDate <= eventEnd;
-    });
-    
-    // Register spans for multi-day events
-    startEvents.forEach(event => {
-      const eventStart = new Date(event.start);
-      const eventEnd = event.end ? new Date(event.end) : new Date(eventStart);
-      
-      if (eventStart.toDateString() !== eventEnd.toDateString()) {
-        // This is a multi-day event
-        const startDayIdx = i;
-        const endDayIdx = eventEnd.getMonth() === currentMonth.getMonth() && 
-                         eventEnd.getFullYear() === currentMonth.getFullYear() 
-                         ? eventEnd.getDate() 
-                         : daysInMonth;
-                         
-        eventSpans[event.id] = {
-          startIdx: startDayIdx,
-          endIdx: endDayIdx,
-          event: event
-        };
-      }
-    });
-    
     days.push({
       day: i,
-      events: activeEvents,
       isToday,
       date: currentDate
     });
   }
   
+  // Helper function for positioning event bars
+  const getEventBarStyle = (event: CalendarEvent, rowIndex: number) => {
+    if (!calendarRef.current) return {};
+    
+    // Get event dates
+    const eventStart = new Date(event.start);
+    const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
+    
+    // Adjust dates to calendar view
+    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+    
+    const displayStart = eventStart < monthStart ? monthStart : eventStart;
+    const displayEnd = eventEnd > monthEnd ? monthEnd : eventEnd;
+    
+    // Get day cells for calculating positions later
+    return {
+      startDay: displayStart.getDate(),
+      endDay: displayEnd.getDate(),
+      rowIndex: rowIndex,
+      color: event.color || getCampaignColor(event.platform || 'other')
+    };
+  };
+  
+  // Helper function for getting colors based on platform
+  const getCampaignColor = (platform: string): string => {
+    const colors: Record<string, string> = {
+      'instagram': '#E1306C',
+      'facebook': '#3b5998',
+      'twitter': '#1DA1F2',
+      'tiktok': '#000000',
+      'youtube': '#FF0000',
+      'linkedin': '#0077B5',
+      'other': '#00BFFF'
+    };
+    
+    return colors[platform.toLowerCase()] || colors.other;
+  };
+  
   return (
-    <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans">
+    <div 
+      className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans"
+      ref={calendarRef}
+    >
       <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)] font-work-sans">
         <h3 className="text-base font-semibold text-center font-sora">{format(currentMonth, 'MMMM yyyy')}</h3>
         <div className="flex space-x-2 font-work-sans">
@@ -1220,70 +1178,160 @@ const CalendarMonthView: React.FC<{
         </div>
         
         {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans" style={{ minHeight: '300px' }}>
+        <div className="grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans relative" style={{ minHeight: '300px' }}>
           {/* Empty cells for days not in this month at the beginning */}
           {Array.from({ length: adjustedFirstDay }).map((_, index) => (
-            <div key={`empty-start-${index}`} className="h-16 bg-gray-50 rounded-md"></div>
+            <div key={`empty-start-${index}`} className="calendar-cell h-20 bg-gray-50 rounded-md"></div>
           ))}
           
           {/* Actual days in the month */}
-          {days.map((day, index) => (
+          {days.map((day, dayIndex) => (
             <div 
               key={`day-${day.day}`} 
-              className={`h-16 p-1 rounded-md flex flex-col relative ${
+              className={`calendar-cell h-20 p-1 rounded-md relative ${
                 day.isToday ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white hover:bg-gray-50'
               }`}
+              data-day={day.day}
+              data-date={day.date.toISOString()}
+              style={{ minHeight: '80px' }}
             >
-              <div className="text-xs font-medium text-[var(--secondary-color)] mb-1">{day.day}</div>
-              
-              {/* Events on this day */}
-              <div className="flex-1 overflow-y-auto space-y-1">
-                {day.events.slice(0, 3).map((event) => (
-                  <div
-                    key={event.id}
-                    className={`text-xs truncate p-1 rounded ${event.statusClass || 'bg-gray-100'} border cursor-pointer`}
-                    onMouseEnter={() => setHoverEvent(event.id)}
-                    onMouseLeave={() => setHoverEvent(null)}
-                    title={`${event.title} (${event.statusText || 'Draft'})`}
-                  >
-                    {event.title}
-                  </div>
-                ))}
-                {day.events.length > 3 && (
-                  <div className="text-xs text-center text-[var(--secondary-color)]">
-                    +{day.events.length - 3} more
-                  </div>
-                )}
-              </div>
+              <div className="text-xs font-medium text-[var(--secondary-color)]">{day.day}</div>
             </div>
           ))}
           
           {/* Empty cells for days not in this month at the end */}
           {Array.from({ length: (7 - ((adjustedFirstDay + daysInMonth) % 7)) % 7 }).map((_, index) => (
-            <div key={`empty-end-${index}`} className="h-16 bg-gray-50 rounded-md"></div>
+            <div key={`empty-end-${index}`} className="calendar-cell h-20 bg-gray-50 rounded-md"></div>
           ))}
+          
+          {/* Event bars layer */}
+          {validEvents.map((event) => {
+            const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
+            
+            // Skip if required data is missing
+            if (!barStyle.startDay || !barStyle.endDay) return null;
+            
+            // Render once JS initializes with refs
+            const [barPosition, setBarPosition] = useState({ left: 0, top: 0, width: 0 });
+            
+            // Calculate positions after render
+            useEffect(() => {
+              if (!calendarRef.current) return;
+              
+              const startCell = calendarRef.current.querySelector(`[data-day="${barStyle.startDay}"]`);
+              const endCell = calendarRef.current.querySelector(`[data-day="${barStyle.endDay}"]`);
+              
+              if (!startCell || !endCell) return;
+              
+              const calendarRect = calendarRef.current.getBoundingClientRect();
+              const startRect = startCell.getBoundingClientRect();
+              const endRect = endCell.getBoundingClientRect();
+              
+              setBarPosition({
+                left: startRect.left - calendarRect.left + 2,
+                top: startRect.top - calendarRect.top + 18 + (barStyle.rowIndex * 5),
+                width: (endRect.right - startRect.left) - 4
+              });
+            }, [barStyle.startDay, barStyle.endDay, calendarRef.current]);
+            
+            return (
+              <div
+                key={`event-bar-${event.id}`}
+                className="absolute pointer-events-auto rounded-md border px-1 text-xs truncate hover:shadow-md transition-shadow"
+                style={{
+                  left: `${barPosition.left}px`,
+                  top: `${barPosition.top}px`,
+                  width: `${barPosition.width}px`,
+                  height: '18px',
+                  backgroundColor: `${barStyle.color}20`, // 20% opacity
+                  borderColor: barStyle.color,
+                  zIndex: 10 + barStyle.rowIndex,
+                  display: barPosition.width > 0 ? 'block' : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  setHoveredEvent(String(event.id));
+                  setTooltipPosition({
+                    x: e.clientX,
+                    y: e.clientY
+                  });
+                }}
+                onMouseLeave={() => setHoveredEvent(null)}
+              >
+                {event.title}
+              </div>
+            );
+          })}
         </div>
       </div>
       
+      {/* Tooltip for event details */}
+      {hoveredEvent && (
+        <div 
+          className="fixed z-50 bg-white rounded-md shadow-lg border border-[var(--divider-color)] p-3 max-w-xs"
+          style={{
+            left: `${tooltipPosition.x + 10}px`,
+            top: `${tooltipPosition.y + 10}px`
+          }}
+        >
+          {(() => {
+            const event = validEvents.find(e => String(e.id) === hoveredEvent);
+            if (!event) return null;
+            
+            return (
+              <>
+                <h4 className="font-semibold text-sm font-sora">{event.title}</h4>
+                <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
+                  <div className="flex items-center font-work-sans">
+                    <Icon name="faCalendar" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
+                    <span>
+                      {format(new Date(event.start), 'MMM d, yyyy')} 
+                      {event.end && ` - ${format(new Date(event.end), 'MMM d, yyyy')}`}
+                    </span>
+                  </div>
+                  {event.platform && (
+                    <div className="flex items-center mt-1 font-work-sans">
+                      <Icon name="faHashtag" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
+                      <span>{event.platform}</span>
+                    </div>
+                  )}
+                  {event.budget && (
+                    <div className="flex items-center mt-1 font-work-sans">
+                      <Icon name="faDollarSign" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
+                      <span>${event.budget.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {event.status && (
+                    <div className="mt-2 font-work-sans">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${event.statusClass || 'bg-gray-100'}`}>
+                        {event.statusText || event.status}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
+      
       {/* Status legend */}
       <div className="p-2 flex flex-wrap gap-2 border-t border-[var(--divider-color)]">
-        <span className="text-xs font-medium text-gray-500">Status:</span>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-gray-100 text-gray-800 border border-gray-200">
-          <span className="w-2 h-2 rounded-full bg-gray-500 mr-1"></span>
-          Draft
-        </span>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-green-100 text-green-800 border border-green-200">
-          <span className="w-2 h-2 rounded-full bg-green-500 mr-1"></span>
-          Active/Approved/Submitted
-        </span>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-          <span className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></span>
-          In Review/Paused
-        </span>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-blue-100 text-blue-800 border border-blue-200">
-          <span className="w-2 h-2 rounded-full bg-blue-500 mr-1"></span>
-          Completed
-        </span>
+        <div className="flex items-center text-xs text-[var(--secondary-color)]">
+          <span className="w-3 h-3 inline-block mr-1 bg-blue-100 border border-blue-400 rounded-sm"></span>
+          <span>Draft</span>
+        </div>
+        <div className="flex items-center text-xs text-[var(--secondary-color)]">
+          <span className="w-3 h-3 inline-block mr-1 bg-green-100 border border-green-400 rounded-sm"></span>
+          <span>Active</span>
+        </div>
+        <div className="flex items-center text-xs text-[var(--secondary-color)]">
+          <span className="w-3 h-3 inline-block mr-1 bg-yellow-100 border border-yellow-400 rounded-sm"></span>
+          <span>In Review</span>
+        </div>
+        <div className="flex items-center text-xs text-[var(--secondary-color)]">
+          <span className="w-3 h-3 inline-block mr-1 bg-gray-100 border border-gray-400 rounded-sm"></span>
+          <span>Completed</span>
+        </div>
       </div>
     </div>
   );
@@ -1471,121 +1519,47 @@ export default function DashboardContent({
     return campaignsData?.campaigns?.filter((campaign) => campaign.submissionStatus === "submitted" && new Date(campaign.startDate) <= new Date() && (!campaign.endDate || new Date(campaign.endDate) >= new Date())) || [];
   }, [campaignsData?.campaigns]);
 
-  // Include ALL campaigns in upcoming view, not just those with future start dates
-  // Remove limit of 3 campaigns to show all available campaigns
-  const upcomingCampaigns = useMemo(() => {
-    console.log('Total campaigns available for upcoming section:', campaignsData?.campaigns?.length || 0);
-    
-    // Make sure we have campaigns data
-    if (!campaignsData?.campaigns || campaignsData.campaigns.length === 0) {
-      console.log('No campaigns data available for upcoming section');
-      return [];
-    }
-    
-    // Get all campaigns, regardless of date or status
-    // Still sort by start date
-    const filteredCampaigns = campaignsData.campaigns
-      .filter(campaign => campaign && campaign.id) // Ensure valid campaign objects
-      .sort((a, b) => {
-        // Parse dates safely for comparison
-        const aDate = new Date(a.startDate).getTime();
-        const bDate = new Date(b.startDate).getTime();
-        
-        // Sort by start date (newest first if dates are invalid)
-        return !isNaN(aDate) && !isNaN(bDate) 
-          ? aDate - bDate 
-          : -1;
-      });
-    
-    console.log('Filtered campaigns for upcoming section:', filteredCampaigns.length);
-    
-    // Log the first few campaigns for debugging
-    filteredCampaigns.slice(0, 3).forEach((campaign, index) => {
-      console.log(`Upcoming campaign ${index}:`, {
-        id: campaign.id,
-        name: campaign.campaignName,
-        status: campaign.submissionStatus,
-        start: campaign.startDate
-      });
-    });
-    
-    return filteredCampaigns;
-  }, [campaignsData?.campaigns]);
-
-  // Calendar events for the upcoming campaigns - include ALL campaigns for the calendar
+  // Process campaign data for the calendar
   const calendarEvents = useMemo(() => {
-    console.log('Creating calendar events from campaigns:', campaignsData?.campaigns?.length || 0);
+    if (!campaignsData || !campaignsData.campaigns || !campaignsData.campaigns.length) return [];
     
-    // Make sure we have campaigns data
-    if (!campaignsData?.campaigns || campaignsData.campaigns.length === 0) {
-      console.log('No campaigns data available for calendar');
-      return [];
-    }
+    // Helper function to get status text
+    const getStatusText = (status: string): string => {
+      const normalizedStatus = status?.toLowerCase() || 'draft';
+      
+      switch (normalizedStatus) {
+        case 'draft':
+          return 'Draft';
+        case 'in_review':
+        case 'in-review':
+        case 'inreview':
+          return 'In Review';
+        case 'active':
+        case 'approved':
+        case 'submitted':
+          return 'Active';
+        case 'completed':
+          return 'Completed';
+        default:
+          return status || 'Draft';
+      }
+    };
     
-    // Map all campaigns to calendar events
-    const events = campaignsData.campaigns
-      .filter(campaign => campaign && campaign.id) // Ensure valid campaign objects
-      .map(campaign => {
-        // Ensure valid dates
-        let start = new Date();
-        try {
-          const startDate = new Date(campaign.startDate);
-          if (!isNaN(startDate.getTime())) {
-            start = startDate;
-          }
-        } catch (e) {
-          console.error('Invalid start date:', campaign.startDate);
-        }
-        
-        // End date defaults to 1 day after start if not provided or invalid
-        let end = new Date(start);
-        end.setDate(end.getDate() + 1);
-        try {
-          if (campaign.endDate) {
-            const endDate = new Date(campaign.endDate);
-            if (!isNaN(endDate.getTime())) {
-              end = endDate;
-            }
-          }
-        } catch (e) {
-          console.error('Invalid end date:', campaign.endDate);
-        }
-        
-        // Get status info for colors
-        const statusInfo = getStatusInfo(campaign.submissionStatus || 'draft');
-        
-        // Create the calendar event
-        return {
-          id: campaign.id,
-          title: campaign.campaignName,
-          start: start,
-          end: end,
-          platform: campaign.platform || 'other',
-          budget: campaign.totalBudget,
-          kpi: campaign.primaryKPI,
-          status: campaign.submissionStatus || 'draft',
-          statusText: statusInfo.text,
-          statusClass: statusInfo.class,
-          color: getCampaignColor(campaign.platform || 'other')
-        };
-      });
-    
-    console.log('Total calendar events created:', events.length);
-    
-    // Log a few events for debugging
-    events.slice(0, 3).forEach((event, index) => {
-      console.log(`Calendar event ${index}:`, {
-        id: event.id,
-        title: event.title,
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
-        platform: event.platform,
-        color: event.color
-      });
-    });
-    
-    return events;
-  }, [campaignsData?.campaigns]);
+    // Calendar events for the upcoming campaigns - include ALL campaigns for the calendar
+    return campaignsData.campaigns.map(campaign => ({
+      id: campaign.id,
+      title: campaign.campaignName,
+      start: new Date(campaign.startDate),
+      end: campaign.endDate ? new Date(campaign.endDate) : undefined,
+      platform: campaign.platform,
+      budget: campaign.totalBudget,
+      status: campaign.submissionStatus,
+      statusText: getStatusText(campaign.submissionStatus)
+    }));
+  }, [campaignsData]);
+  
+  // No need to maintain separate upcomingCampaigns here since they are filtered in the UpcomingCampaignsCard component
+
   const metrics = useMemo(() => ({
     ...(campaignsData?.metrics || {
       trends: {
@@ -1773,78 +1747,16 @@ export default function DashboardContent({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 font-work-sans">
             {/* Calendar */}
             <div className="col-span-12 lg:col-span-6 font-work-sans">
-              <CalendarMonthView month={currentDate} events={calendarEvents} />
+              <CalendarDashboard month={currentDate} events={calendarEvents} />
             </div>
             
             {/* Campaign Cards - Align with calendar */}
             <div className="col-span-12 lg:col-span-6 font-work-sans">
-              <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden font-work-sans">
-                <div className="p-3 sm:p-4 border-b border-[var(--divider-color)] font-work-sans">
-                  <h3 className="text-sm font-medium text-[var(--secondary-color)] font-sora">Upcoming</h3>
-                </div>
-                
-                <div className="p-3 sm:p-4 font-work-sans">
-                  {isLoadingCampaigns ? (
-                    <div className="py-4 sm:py-6 font-work-sans">
-                      <TableSkeleton rows={3} cols={3} hasHeader={false} />
-                    </div>
-                  ) : (
-                    <div>
-                      {!campaignsData?.campaigns || campaignsData.campaigns.length === 0 ? (
-                        <div>
-                          <div className="text-center py-4 sm:py-6 border border-dashed border-[var(--divider-color)] rounded-lg font-work-sans">
-                            <p className="text-sm text-[var(--secondary-color)] font-work-sans">
-                              No upcoming campaigns
-                            </p>
-                            <button onClick={handleNewCampaign} className="group mt-3 px-3 py-1.5 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
-                              <Icon name="faPlus" className="w-3 h-3 mr-1" iconType="button" />
-                              <span className="font-work-sans">Create Your First Campaign</span>
-                            </button>
-                          </div>
-                          <div className="mt-4 p-3 bg-gray-100 rounded-lg">
-                            <p className="text-xs text-red-500">DEBUG: {campaignsData ? 'Data received but empty' : 'No data received'}</p>
-                            <p className="text-xs">API Status: {isLoadingCampaigns ? 'Loading...' : 'Completed'}</p>
-                            <p className="text-xs">Has Campaigns: {campaignsData?.campaigns ? 'Yes' : 'No'}</p>
-                            <p className="text-xs">Campaigns Length: {campaignsData?.campaigns?.length || 0}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-3 overflow-y-auto max-h-[300px] font-work-sans">
-                          <div className="p-2 bg-blue-50 rounded mb-2 text-xs">
-                            <p>DEBUG: Found {campaignsData.campaigns.length} campaigns to display</p>
-                            <p>Upcoming campaigns: {upcomingCampaigns.length}</p>
-                            {upcomingCampaigns.length > 0 && (
-                              <div className="mt-1 border-t border-blue-100 pt-1">
-                                <p>First campaign: {upcomingCampaigns[0]?.campaignName || 'Unknown'}</p>
-                                <p>ID: {upcomingCampaigns[0]?.id || 'Missing'}</p>
-                                <p>Date: {upcomingCampaigns[0]?.startDate ? new Date(upcomingCampaigns[0].startDate).toLocaleDateString() : 'Invalid date'}</p>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Force render at least one campaign for testing */}
-                          {upcomingCampaigns.length > 0 ? (
-                            upcomingCampaigns.map((campaign) => (
-                              <CampaignCard 
-                                key={campaign.id} 
-                                campaign={campaign} 
-                                onClick={() => console.log('Campaign clicked:', campaign.id)}
-                              />
-                            ))
-                          ) : (
-                            <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
-                              <p className="text-yellow-700">No campaigns to display.</p>
-                              <pre className="text-xs mt-2 overflow-auto max-h-[100px]">
-                                Data status: {campaignsData ? 'Available' : 'Missing'}
-                              </pre>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <UpcomingCampaignsCard 
+                campaigns={campaignsData?.campaigns || []}
+                isLoading={isLoadingCampaigns}
+                onNewCampaign={handleNewCampaign}
+              />
             </div>
           </div>
         </div>

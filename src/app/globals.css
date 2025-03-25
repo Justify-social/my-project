@@ -672,3 +672,16 @@ div[class*='bg-white'] {
 .platform-icon-hover:hover {
   transform: scale(1.1);
 }
+
+/* Add calendar styles for campaign timeline bars */
+.calendar-cell {
+  min-height: 80px;
+  position: relative;
+}
+
+/* For responsive design */
+@media (max-width: 768px) {
+  .calendar-cell {
+    min-height: 60px;
+  }
+}
