@@ -197,4 +197,17 @@ export const isRetryableError = (error: unknown): boolean => {
 export const sanitizeInput = (input: string): string => {
   // Remove any potentially dangerous characters
   return input.replace(/[<>]/g, '');
-}; 
+};
+
+/**
+ * Formats a follower count with appropriate suffix (K, M)
+ */
+export function formatFollowerCount(count: number): string {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`;
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  }
+  return count.toString();
+} 

@@ -1,0 +1,297 @@
+{
+  "success": true,
+  "campaigns": [
+    {
+      "id": 1,
+      "campaignName": "Summer Collection Launch",
+      "submissionStatus": "submitted",
+      "platform": "Instagram",
+      "startDate": "2024-06-01T00:00:00.000Z",
+      "endDate": "2024-06-30T23:59:59.999Z",
+      "totalBudget": 75000,
+      "primaryKPI": "Brand Awareness",
+      "primaryContact": {
+        "firstName": "Jane",
+        "surname": "Smith"
+      },
+      "createdAt": "2024-05-01T12:30:45.000Z",
+      "audience": {
+        "locations": [
+          { "location": "United States" },
+          { "location": "Canada" }
+        ]
+      },
+      "performance": {
+        "engagement": 4.2,
+        "sentiment": 82,
+        "reach": 350000,
+        "conversion": 2.8
+      },
+      "roi": 3.5,
+      "usersEngaged": {
+        "current": 12500,
+        "total": 25000
+      }
+    },
+    {
+      "id": 2,
+      "campaignName": "Back to School Promotion",
+      "submissionStatus": "draft",
+      "platform": "TikTok",
+      "startDate": "2024-08-15T00:00:00.000Z",
+      "endDate": "2024-09-15T23:59:59.999Z",
+      "totalBudget": 50000,
+      "primaryKPI": "Engagement",
+      "primaryContact": {
+        "firstName": "Michael",
+        "surname": "Johnson"
+      },
+      "createdAt": "2024-05-10T09:15:22.000Z",
+      "audience": {
+        "locations": [
+          { "location": "United States" }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "campaignName": "Holiday Season Campaign",
+      "submissionStatus": "submitted",
+      "platform": "YouTube",
+      "startDate": "2024-11-20T00:00:00.000Z",
+      "endDate": "2024-12-31T23:59:59.999Z",
+      "totalBudget": 120000,
+      "primaryKPI": "Conversion",
+      "primaryContact": {
+        "firstName": "David",
+        "surname": "Williams"
+      },
+      "createdAt": "2024-05-15T14:45:33.000Z",
+      "audience": {
+        "locations": [
+          { "location": "United States" },
+          { "location": "United Kingdom" },
+          { "location": "Germany" }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "campaignName": "Fall Fashion Collection",
+      "submissionStatus": "submitted",
+      "platform": "Instagram",
+      "startDate": "2024-09-01T00:00:00.000Z",
+      "endDate": "2024-10-15T23:59:59.999Z",
+      "totalBudget": 85000,
+      "primaryKPI": "Reach",
+      "primaryContact": {
+        "firstName": "Sarah",
+        "surname": "Brown"
+      },
+      "createdAt": "2024-05-20T11:20:18.000Z",
+      "audience": {
+        "locations": [
+          { "location": "United States" },
+          { "location": "Canada" },
+          { "location": "France" }
+        ]
+      },
+      "performance": {
+        "engagement": 3.8,
+        "sentiment": 75,
+        "reach": 280000,
+        "conversion": 2.2
+      },
+      "roi": 2.8,
+      "usersEngaged": {
+        "current": 9800,
+        "total": 18000
+      }
+    }
+  ],
+  "metrics": {
+    "overview": {
+      "totalCampaigns": 154,
+      "activeCampaigns": 31,
+      "totalBudget": 12500000,
+      "totalSpent": 8750000,
+      "averageROI": 3.2,
+      "campaignSuccess": 78
+    },
+    "performance": {
+      "engagement": {
+        "current": 4.5,
+        "trend": 0.8,
+        "byChannel": [
+          { "channel": "Instagram", "value": 5.2 },
+          { "channel": "TikTok", "value": 6.8 },
+          { "channel": "YouTube", "value": 3.1 },
+          { "channel": "Twitter", "value": 2.9 }
+        ]
+      },
+      "reach": {
+        "current": 4200000,
+        "trend": 12.5,
+        "byDemographic": [
+          { "group": "18-24", "value": 1500000 },
+          { "group": "25-34", "value": 1800000 },
+          { "group": "35-44", "value": 650000 },
+          { "group": "45+", "value": 250000 }
+        ]
+      },
+      "sentiment": {
+        "current": 78,
+        "trend": 3.2,
+        "distribution": [
+          { "type": "Positive", "value": 65 },
+          { "type": "Neutral", "value": 25 },
+          { "type": "Negative", "value": 10 }
+        ]
+      },
+      "conversion": {
+        "current": 2.8,
+        "trend": 0.5,
+        "bySource": [
+          { "source": "Direct", "value": 1.2 },
+          { "source": "Social", "value": 3.5 },
+          { "source": "Email", "value": 2.6 },
+          { "source": "Other", "value": 1.9 }
+        ]
+      }
+    },
+    "trends": {
+      "daily": [
+        {
+          "date": "2024-05-01",
+          "engagement": 4.2,
+          "reach": 140000,
+          "sentiment": 76,
+          "conversion": 2.6
+        },
+        {
+          "date": "2024-05-02",
+          "engagement": 4.3,
+          "reach": 145000,
+          "sentiment": 77,
+          "conversion": 2.7
+        },
+        {
+          "date": "2024-05-03",
+          "engagement": 4.1,
+          "reach": 135000,
+          "sentiment": 75,
+          "conversion": 2.5
+        },
+        {
+          "date": "2024-05-04",
+          "engagement": 4.5,
+          "reach": 150000,
+          "sentiment": 78,
+          "conversion": 2.8
+        },
+        {
+          "date": "2024-05-05",
+          "engagement": 4.7,
+          "reach": 155000,
+          "sentiment": 79,
+          "conversion": 2.9
+        },
+        {
+          "date": "2024-05-06",
+          "engagement": 4.8,
+          "reach": 160000,
+          "sentiment": 80,
+          "conversion": 3.0
+        },
+        {
+          "date": "2024-05-07",
+          "engagement": 4.6,
+          "reach": 152000,
+          "sentiment": 78,
+          "conversion": 2.9
+        }
+      ],
+      "weekly": [
+        {
+          "week": "2024-W18",
+          "engagement": 4.4,
+          "reach": 1000000,
+          "sentiment": 77,
+          "conversion": 2.7
+        },
+        {
+          "week": "2024-W19",
+          "engagement": 4.5,
+          "reach": 1050000,
+          "sentiment": 78,
+          "conversion": 2.8
+        },
+        {
+          "week": "2024-W20",
+          "engagement": 4.7,
+          "reach": 1080000,
+          "sentiment": 79,
+          "conversion": 2.9
+        },
+        {
+          "week": "2024-W21",
+          "engagement": 4.9,
+          "reach": 1100000,
+          "sentiment": 80,
+          "conversion": 3.0
+        }
+      ]
+    },
+    "insights": [
+      {
+        "id": "ins-001",
+        "category": "Performance",
+        "title": "Instagram Engagement Surge",
+        "description": "Instagram campaigns are showing 20% higher engagement than platform average.",
+        "impact": "High",
+        "action": "Consider allocating more budget to Instagram",
+        "metrics": {
+          "current": 5.2,
+          "previous": 4.3,
+          "trend": 20.9
+        }
+      },
+      {
+        "id": "ins-002",
+        "category": "Risk",
+        "title": "Declining YouTube Performance",
+        "description": "YouTube campaign engagement has dropped 8% in the past 2 weeks.",
+        "impact": "Medium",
+        "action": "Review creative assets and targeting",
+        "metrics": {
+          "current": 3.1,
+          "previous": 3.4,
+          "trend": -8.8
+        }
+      },
+      {
+        "id": "ins-003",
+        "category": "Opportunity",
+        "title": "18-24 Demographic Response",
+        "description": "18-24 age group showing strongest response to recent campaigns.",
+        "impact": "High",
+        "action": "Develop more content targeted at Gen Z",
+        "metrics": {
+          "current": 6.8,
+          "previous": 5.2,
+          "trend": 30.8
+        }
+      }
+    ],
+    "stats": {
+      "totalCampaigns": 154,
+      "campaignChange": 10,
+      "surveyResponses": 3000,
+      "surveyChange": -81,
+      "liveCampaigns": 31,
+      "liveChange": 5,
+      "creditsAvailable": 135,
+      "creditsChange": -47
+    }
+  }
+} 

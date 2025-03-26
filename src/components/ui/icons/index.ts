@@ -49,7 +49,7 @@ export type {
 };
 
 // Export platform icon types and data
-export type PlatformName = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'x';
+export type PlatformName = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'x' | 'github' | 'pinterest' | 'reddit';
 
 export const PLATFORM_ICON_MAP: Record<PlatformName, string> = {
   'facebook': 'faFacebook',
@@ -57,7 +57,10 @@ export const PLATFORM_ICON_MAP: Record<PlatformName, string> = {
   'linkedin': 'faLinkedin',
   'tiktok': 'faTiktok',
   'youtube': 'faYoutube',
-  'x': 'faXTwitter'
+  'x': 'faXTwitter',
+  'github': 'faGithub',
+  'pinterest': 'faPinterest',
+  'reddit': 'faReddit'
 };
 
 export const PLATFORM_COLORS: Record<PlatformName, string> = {
@@ -66,7 +69,10 @@ export const PLATFORM_COLORS: Record<PlatformName, string> = {
   'linkedin': '#0A66C2',
   'tiktok': '#000000',
   'youtube': '#FF0000',
-  'x': '#000000'
+  'x': '#000000',
+  'github': '#181717',
+  'pinterest': '#E60023',
+  'reddit': '#FF4500'
 };
 
 // Configuration exports for advanced usage

@@ -2,12 +2,13 @@ import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
 export type ButtonVariant =
-'primary' |
-'secondary' |
-'outline' |
-'ghost' |
-'link' |
-'danger';
+  | 'default'
+  | 'destructive'
+  | 'outline'
+  | 'secondary'
+  | 'ghost'
+  | 'link'
+  | 'danger';
 
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -81,46 +82,51 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   children,
   ...props
 }, ref) => {
-  // Base classes
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 box-border';
+  const getButtonClasses = () => {
+    // Base button classes
+    let classes = 'font-medium rounded inline-flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 box-border';
+    
+    // Size variants
+    const sizeClasses = {
+      xs: 'text-xs px-2 py-1',
+      sm: 'text-sm px-3 py-1.5',
+      md: 'text-base px-4 py-2',
+      lg: 'text-lg px-6 py-3',
+      xl: 'text-xl px-8 py-4'
+    };
+    
+    // Variant styles
+    const variantClasses: Record<string, string> = {
+      default: 'bg-blue-600 text-white hover:bg-blue-700 border border-transparent',
+      destructive: 'bg-red-600 text-white hover:bg-red-700 border border-transparent',
+      outline: 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300',
+      secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-transparent',
+      ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 border border-transparent',
+      link: 'bg-transparent text-blue-600 hover:underline p-0 h-auto border-none',
+      danger: 'bg-red-600 text-white hover:bg-red-700 border border-transparent'
+    };
 
-  // Variant classes with inverted hover styles
-  const variantClasses = {
-    primary: 'bg-[var(--accent-color)] text-white border border-[var(--accent-color)] hover:bg-white hover:text-[var(--accent-color)] focus:ring-[var(--accent-color)]',
-    secondary: 'bg-gray-100 text-gray-900 border border-gray-100 hover:bg-white hover:text-gray-900 hover:border-gray-300 focus:ring-gray-300',
-    outline: 'border border-[var(--divider-color)] bg-transparent text-gray-700 hover:bg-gray-700 hover:text-white hover:border-gray-700 focus:ring-gray-300',
-    ghost: 'bg-transparent text-gray-700 border border-transparent hover:bg-gray-700 hover:text-white focus:ring-gray-300',
-    link: 'bg-transparent underline text-[var(--accent-color)] border-0 hover:text-[#008ecb] p-0 focus:ring-0',
-    danger: 'bg-red-600 text-white border border-red-600 hover:bg-white hover:text-red-600 focus:ring-red-500'
-  };
+    // Loading classes
+    const loadingClasses = loading ? 'opacity-70 cursor-not-allowed' : '';
+    
+    // Full width class
+    const fullWidthClass = fullWidth ? 'w-full' : '';
 
-  // Size classes
-  const sizeClasses = {
-    xs: 'text-xs px-2 py-1',
-    sm: 'text-sm px-3 py-1.5',
-    md: 'text-base px-4 py-2',
-    lg: 'text-lg px-5 py-2.5',
-    xl: 'text-xl px-6 py-3'
-  };
-
-  // Loading state classes
-  const loadingClasses = loading ? 'opacity-80 cursor-not-allowed' : '';
-
-  // Full width class
-  const fullWidthClass = fullWidth ? 'w-full' : '';
+    return cn(
+      classes,
+      variantClasses[variant] || variantClasses.default,
+      sizeClasses[size],
+      loadingClasses,
+      fullWidthClass,
+      className
+    );
+  }
 
   return (
     <button
       ref={ref}
       disabled={disabled || loading}
-      className={`${cn(
-        baseClasses,
-        variantClasses[variant],
-        sizeClasses[size],
-        loadingClasses,
-        fullWidthClass,
-        className
-      )} font-work-sans`}
+      className={getButtonClasses()}
       {...props}>
 
       {loading &&

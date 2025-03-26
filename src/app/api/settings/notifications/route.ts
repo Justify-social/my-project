@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/session';
 
+/**
+ * GET /api/settings/notifications
+ * Retrieves the user's notification preferences from the database
+ */
 export async function GET() {
   const session = await getSession();
   console.log('Session in notifications API:', session);
@@ -44,6 +48,10 @@ export async function GET() {
   }
 }
 
+/**
+ * POST /api/settings/notifications
+ * Updates the user's notification preferences in the database
+ */
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session?.user?.sub) {

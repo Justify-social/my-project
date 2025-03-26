@@ -51,3 +51,51 @@ Please read our [Contributing Guidelines](./docs/CONTRIBUTING.md) for details on
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Testing
+
+This project includes comprehensive testing at multiple levels:
+
+### Unit and Integration Tests
+
+Unit and integration tests are implemented using Jest and React Testing Library. To run these tests:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test:watch
+
+# Generate test coverage report
+npm test:coverage
+```
+
+### End-to-End Tests
+
+End-to-end tests are implemented using Cypress. To run these tests:
+
+```bash
+# Open Cypress test runner
+npm run cypress
+
+# Run Cypress tests headlessly
+npm run cypress:run
+
+# Start development server and run e2e tests
+npm run test:e2e
+```
+
+### Test Structure
+
+- **Unit Tests**: Located in `src/__tests__/unit/`
+- **Integration Tests**: Located in `src/__tests__/integration/`
+- **End-to-End Tests**: Located in `cypress/e2e/`
+
+### Test Coverage
+
+The project aims to maintain high test coverage across all components and pages:
+
+- Unit test coverage: 90%+
+- Integration test coverage: 85%+
+- Key user flows covered by E2E tests: 100%
