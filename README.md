@@ -1,101 +1,91 @@
-# Justify.social
+## Codebase Structure and Organization
 
-A platform that captures authentic audience opinions to measure social campaign impact and identify standout influencers for brands.
+This project follows a structured approach to code organization, ensuring maintainability, readability, and developer experience.
 
-## Overview
+### Directory Structure
 
-Justify.social is an enterprise-grade platform that streamlines the process of measuring and analyzing social media campaigns. It provides comprehensive tools for capturing authentic audience opinions, identifying top-performing influencers, and measuring campaign impact.
-
-## Key Features
-
-- **Campaign Creation Wizard**: Step-by-step interface for creating campaigns
-- **Brand Lift Measurement**: Measure the impact of campaigns on brand awareness and perception
-- **Creative Asset Testing**: Test and optimize creative assets before campaign launch
-- **Influencer Analytics**: Discover and analyze top-performing influencers
-- **Brand Health Monitoring**: Track brand sentiment and perception over time
-- **Mixed Media Modeling**: Analyze campaign performance across multiple channels
-- **Comprehensive Reporting**: Generate detailed insights and visualizations
-
-## Technical Stack
-
-- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **Authentication**: NextAuth.js
-- **Testing**: Jest, React Testing Library, Cypress
-- **Deployment**: Vercel
-
-## Getting Started
-
-### For Users
-
-Visit our [User Documentation](./docs/guides/user/getting-started.md) to learn how to use Justify.social.
-
-### For Developers
-
-Check out our [Developer Setup Guide](./docs/guides/developer/setup.md) to set up your local development environment.
-
-## Documentation
-
-Our comprehensive documentation is available in the [docs](./docs) directory, with these main sections:
-
-- [Frontend Features](./docs/features-frontend/README.md)
-- [Backend Features](./docs/features-backend/README.md)
-- [User Guides](./docs/guides/user/README.md)
-- [Developer Guides](./docs/guides/developer/README.md)
-
-## Contributing
-
-Please read our [Contributing Guidelines](./docs/CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Testing
-
-This project includes comprehensive testing at multiple levels:
-
-### Unit and Integration Tests
-
-Unit and integration tests are implemented using Jest and React Testing Library. To run these tests:
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm test:watch
-
-# Generate test coverage report
-npm test:coverage
+```
+/
+├── src/                # Application source code
+│   ├── app/            # Next.js App Router pages and API routes
+│   ├── components/     # React components (UI, features, layouts)
+│   ├── hooks/          # Custom React hooks
+│   ├── contexts/       # React contexts for state management
+│   ├── lib/            # Core libraries and utilities
+│   ├── middlewares/    # Request processing middleware
+│   ├── services/       # External service integrations
+│   ├── types/          # TypeScript type definitions
+│   └── utils/          # Helper utilities
+├── tests/              # Test files
+│   ├── unit/           # Unit tests
+│   ├── integration/    # Integration tests
+│   └── e2e/            # End-to-end tests
+├── docs/               # Documentation
+│   ├── architecture/   # Architectural guides
+│   └── project-history/# Project history and cleanup reports
+└── scripts/            # Utility scripts
+    └── codebase-structure/ # Code organization utilities
 ```
 
-### End-to-End Tests
+### Code Quality Tools
 
-End-to-end tests are implemented using Cypress. To run these tests:
+The project includes several tools to maintain code quality and organization:
 
 ```bash
-# Open Cypress test runner
-npm run cypress
+# Check file naming consistency
+npm run codebase:check-naming
 
-# Run Cypress tests headlessly
-npm run cypress:run
+# Find redundant or deprecated files
+npm run codebase:find-redundant
 
-# Start development server and run e2e tests
-npm run test:e2e
+# Clean up redundant files (use with caution)
+npm run codebase:clean-redundant
+
+# Check overall codebase health
+npm run codebase:health
 ```
 
-### Test Structure
+### Documentation
 
-- **Unit Tests**: Located in `src/__tests__/unit/`
-- **Integration Tests**: Located in `src/__tests__/integration/`
-- **End-to-End Tests**: Located in `cypress/e2e/`
+Comprehensive documentation is available in the `docs` directory:
 
-### Test Coverage
+- **[CODE_STANDARDS.md](docs/CODE_STANDARDS.md)** - Coding standards and best practices
+- **[TESTING.md](docs/TESTING.md)** - Testing guidelines and patterns
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture overview
+- **[MODULES.md](docs/architecture/MODULES.md)** - Module interactions and design
 
-The project aims to maintain high test coverage across all components and pages:
+### Cleanup History
 
-- Unit test coverage: 90%+
-- Integration test coverage: 85%+
-- Key user flows covered by E2E tests: 100%
+This project has undergone a comprehensive cleanup process to improve code organization, maintainability, and developer experience. The cleanup includes:
+
+1. **Standard Directory Structure** - Consistent naming and organization
+2. **Component Responsibility Separation** - UI, Features, and Layout components properly separated
+3. **Test Centralization** - Tests organized in a central location
+4. **API Middleware Organization** - Clear separation between application middleware and API middleware
+5. **Documentation** - READMEs in all major directories
+
+Detailed reports about the cleanup process are available in the `docs/project-history` directory.
+
+### Development Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Run tests
+npm run test
+```
+
+For more specific commands, see the scripts section in `package.json`. 
