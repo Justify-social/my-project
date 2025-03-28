@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 
 // Add a declaration for the global mockBrandingSettings
 declare global {
+  // Using var to be compatible with global object
+  // eslint-disable-next-line no-var
   var mockBrandingSettings: Record<string, any>;
 }
 

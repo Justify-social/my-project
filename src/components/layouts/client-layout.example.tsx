@@ -4,6 +4,7 @@ import { Header } from '@/components/layouts/Header';
 import { Sidebar } from '@/components/layouts/Sidebar';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { AuthSpinner } from '@/components/ui/spinner';
+import Link from 'next/link';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -26,12 +27,11 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             <h2 className="mt-6 text-3xl font-bold text-gray-900 font-sora">Authentication Error</h2>
             <p className="mt-2 text-sm text-gray-600 font-work-sans">{error.message}</p>
             <div className="mt-6 font-work-sans">
-              <a
+              <Link
                 href="/api/auth/login"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-work-sans">
-
                 Go to Login
-              </a>
+              </Link>
             </div>
           </div>
         </div>

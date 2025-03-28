@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import Plot from '../../../types/react-plotly.d';
 import dynamic from 'next/dynamic';
 
 // Dynamically import Plotly to avoid SSR issues

@@ -4,6 +4,42 @@ import { getDbPerformanceStats, getSlowQueries, clearSlowQueries } from '@/utils
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { NextRequest } from 'next/server';
 
+// Define interfaces for type safety
+interface DatabaseHealthStatus {
+  connected: boolean;
+  responseTime: number;
+  timestamp: string;
+}
+
+interface PerformanceMetrics {
+  queryCount?: number;
+  avgQueryTime?: number;
+  maxQueryTime?: number;
+  slowQueries?: number;
+  [key: string]: any;
+}
+
+interface HealthStatus {
+  status: 'healthy' | 'unhealthy';
+  database: DatabaseHealthStatus;
+  performance: PerformanceMetrics;
+  errors: string[];
+  slowQueries?: any[];
+  connectionPool?: {
+    size: number;
+    active: number;
+    idle: number;
+    waitingClients: number;
+  };
+  transactions?: Record<string, any>;
+  tableStats?: Array<{
+    table: string;
+    rowCount: number;
+    sizeBytes: number;
+    lastUpdated: string;
+  }>;
+}
+
 /**
  * GET /api/health/db
  * Database health check endpoint
@@ -20,7 +56,7 @@ export async function GET(request: NextRequest) {
   const extended = searchParams.get('extended') === 'true';
   
   const startTime = performance.now();
-  const healthStatus = {
+  const healthStatus: HealthStatus = {
     status: 'unhealthy',
     database: {
       connected: false,
@@ -28,7 +64,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     },
     performance: {},
-    errors: [] as string[],
+    errors: [],
   };
 
   try {
