@@ -378,4 +378,5 @@ export function PlatformIcon({
  * This is a drop-in replacement for the FontAwesome-based Icon component.
  * Uses local SVG files for maximum reliability.
  */
-export const Icon = SvgIcon; 
+export const Icon = SvgIcon;
+export { SvgIcon }; 
