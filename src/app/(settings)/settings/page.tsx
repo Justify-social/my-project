@@ -1,12 +1,5 @@
 'use client';
 
-// Static content - long-term cache
-export const revalidate = 86400; // Revalidate once per day
-export const fetchCache = 'force-cache'; // Use cache but revalidate according to the revalidate option
-
-// Data fetching optimization
-export const dynamic = 'force-dynamic'; // Force dynamic rendering
-
 import React, { useState, useEffect } from 'react';
 import { redirect } from 'next/navigation';
 import SettingsPageSkeleton from '@/components/settings/shared/SettingsPageSkeleton';
