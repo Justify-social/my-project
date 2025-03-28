@@ -1096,6 +1096,40 @@ const CalendarMonthView: React.FC<{
     return colors[platform.toLowerCase()] || colors.other;
   };
   
+  // Add this state at the component level (around line 1445)
+  const [barPositions, setBarPositions] = useState<Record<string, { left: number; top: number; width: number }>>({});
+
+  // Add this useEffect at the component level
+  useEffect(() => {
+    if (!calendarRef.current) return;
+    
+    const newPositions: Record<string, { left: number; top: number; width: number }> = {};
+    
+    validEvents.forEach((event) => {
+      const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
+      
+      // Skip if required data is missing
+      if (!barStyle.startDay || !barStyle.endDay) return;
+      
+      const startCell = calendarRef.current!.querySelector(`[data-day="${barStyle.startDay}"]`);
+      const endCell = calendarRef.current!.querySelector(`[data-day="${barStyle.endDay}"]`);
+      
+      if (!startCell || !endCell) return;
+      
+      const calendarRect = calendarRef.current!.getBoundingClientRect();
+      const startRect = startCell.getBoundingClientRect();
+      const endRect = endCell.getBoundingClientRect();
+      
+      newPositions[String(event.id)] = {
+        left: startRect.left - calendarRect.left + 2,
+        top: startRect.top - calendarRect.top + 18 + (barStyle.rowIndex * 5),
+        width: (endRect.right - startRect.left) - 4
+      };
+    });
+    
+    setBarPositions(newPositions);
+  }, [validEvents, eventPositions]);
+  
   return (
     <div 
       className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans"
@@ -1149,77 +1183,39 @@ const CalendarMonthView: React.FC<{
           ))}
           
           {/* Event bars layer */}
-          {(() => {
-            // Define the bar positions state for all events
-            const [barPositions, setBarPositions] = useState<Record<string, { left: number; top: number; width: number }>>({});
+          {validEvents.map((event) => {
+            const barPosition = barPositions[String(event.id)];
+            if (!barPosition) return null;
             
-            // Calculate positions for all events
-            useEffect(() => {
-              if (!calendarRef.current) return;
-              
-              const newPositions: Record<string, { left: number; top: number; width: number }> = {};
-              
-              validEvents.forEach((event) => {
-                const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
-                
-                // Skip if required data is missing
-                if (!barStyle.startDay || !barStyle.endDay) return;
-                
-                const startCell = calendarRef.current!.querySelector(`[data-day="${barStyle.startDay}"]`);
-                const endCell = calendarRef.current!.querySelector(`[data-day="${barStyle.endDay}"]`);
-                
-                if (!startCell || !endCell) return;
-                
-                const calendarRect = calendarRef.current!.getBoundingClientRect();
-                const startRect = startCell.getBoundingClientRect();
-                const endRect = endCell.getBoundingClientRect();
-                
-                newPositions[String(event.id)] = {
-                  left: startRect.left - calendarRect.left + 2,
-                  top: startRect.top - calendarRect.top + 18 + (barStyle.rowIndex * 5),
-                  width: (endRect.right - startRect.left) - 4
-                };
-              });
-              
-              setBarPositions(newPositions);
-            }, [validEvents, eventPositions, calendarRef.current]);
+            const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
             
-            // Return the rendered event bars
-            return validEvents.map((event) => {
-              const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
-              const barPosition = barPositions[String(event.id)] || { left: 0, top: 0, width: 0 };
-              
-              // Skip if required data is missing
-              if (!barStyle.startDay || !barStyle.endDay) return null;
-              
-              return (
-                <div
-                  key={`event-bar-${event.id}`}
-                  className="absolute pointer-events-auto rounded-md border px-1 text-xs truncate hover:shadow-md transition-shadow"
-                  style={{
-                    left: `${barPosition.left}px`,
-                    top: `${barPosition.top}px`,
-                    width: `${barPosition.width}px`,
-                    height: '18px',
-                    backgroundColor: `${barStyle.color}20`, // 20% opacity
-                    borderColor: barStyle.color,
-                    zIndex: 10 + barStyle.rowIndex,
-                    display: barPosition.width > 0 ? 'block' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    setHoveredEvent(String(event.id));
-                    setTooltipPosition({
-                      x: e.clientX,
-                      y: e.clientY
-                    });
-                  }}
-                  onMouseLeave={() => setHoveredEvent(null)}
-                >
-                  {event.title}
-                </div>
-              );
-            });
-          })()}
+            return (
+              <div
+                key={`event-${event.id}`}
+                className={`absolute z-10 rounded-sm px-1 py-0.5 text-xs font-medium text-white overflow-hidden whitespace-nowrap cursor-pointer
+                           ${event.status === 'completed' ? 'bg-gray-500' : 
+                             event.status === 'active' ? 'bg-green-500' : 
+                             event.status === 'upcoming' ? 'bg-blue-500' : 'bg-[var(--accent-color)]'}`}
+                style={{
+                  left: `${barPosition.left}px`,
+                  top: `${barPosition.top}px`,
+                  width: `${barPosition.width}px`,
+                  backgroundColor: barStyle.color
+                }}
+                onClick={() => handleEventClick(event)}
+                onMouseEnter={(e) => {
+                  setHoveredEvent(String(event.id));
+                  setTooltipPosition({ 
+                    x: e.clientX, 
+                    y: e.clientY 
+                  });
+                }}
+                onMouseLeave={() => setHoveredEvent(null)}
+              >
+                {event.title}
+              </div>
+            );
+          })}
         </div>
       </div>
       
@@ -1448,6 +1444,10 @@ export default function DashboardContent({
   const [timeframe, setTimeframe] = useState('7d');
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [currentDate] = useState(new Date());
+  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [barPositions, setBarPositions] = useState<Record<string, { left: number; top: number; width: number }>>({});
   
   // Update the SWR hook type with improved configuration
   const {
@@ -2215,3 +2215,8 @@ export default function DashboardContent({
     </div>
   );
 }
+
+const handleEventClick = (event: any) => {
+  console.log('Event clicked:', event);
+  // Add your event handling logic here
+};

@@ -6,21 +6,17 @@ import {
   LineChart, Line, AreaChart, Area } from 'recharts';
 import dynamic from 'next/dynamic';
 
-// Import our Sankey diagram component (with dynamic import to avoid SSR issues)
-const SankeyDiagram = dynamic(() => import('@/components/mmm/customer-journey/SankeyDiagram'), {
-  ssr: false,
-  loading: () =>
-  <div className="bg-[var(--background-color)] rounded-lg p-6 flex flex-col items-center justify-center min-h-[400px] border border-[var(--divider-color)] font-work-sans">
-      <div className="animate-pulse flex flex-col items-center font-work-sans">
-        <div className="h-8 w-64 bg-[var(--divider-color)] rounded mb-4 font-work-sans"></div>
-        <div className="h-80 w-full bg-[var(--divider-color)] rounded font-work-sans"></div>
-      </div>
-    </div>
-
-});
+// Import SankeyDiagram with dynamic import to avoid SSR issues
+const SankeyDiagram = dynamic(
+  () => import('@/components/features/dashboard/SankeyDiagram').then(mod => mod.default),
+  { 
+    loading: () => <div className="bg-gray-100 animate-pulse h-[500px] w-full rounded-md"></div>,
+    ssr: false 
+  }
+);
 
 // Import sample data for Sankey diagram
-import { sampleSankeyData } from '@/components/mmm/customer-journey/SankeyDiagram';
+import { sampleSankeyData } from '@/components/features/dashboard/SankeyDiagram';
 
 // Mock data - would come from API in production
 const channelData = [

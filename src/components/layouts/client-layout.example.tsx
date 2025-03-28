@@ -1,5 +1,4 @@
 import React from 'react';
-import ClientLayoutProps from './client-layout.example';
 import { Header } from '@/components/layouts/Header';
 import { Sidebar } from '@/components/layouts/Sidebar';
 import { useUser } from '@auth0/nextjs-auth0/client';

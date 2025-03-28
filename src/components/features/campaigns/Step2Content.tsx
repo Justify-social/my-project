@@ -164,7 +164,29 @@ function FormContent() {
   const campaignId = searchParams.get('id');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialValues, setInitialValues] = useState({});
+  const [initialValues, setInitialValues] = useState<{
+    primaryKPI: any;
+    secondaryKPIs: any[];
+    features: any[];
+    mainMessage: string;
+    hashtags: string;
+    memorability: string;
+    keyBenefits: string;
+    expectedAchievements: string;
+    purchaseIntent: string;
+    brandPerception: string;
+  }>({
+    primaryKPI: null,
+    secondaryKPIs: [],
+    features: [],
+    mainMessage: '',
+    hashtags: '',
+    memorability: '',
+    keyBenefits: '',
+    expectedAchievements: '',
+    purchaseIntent: '',
+    brandPerception: ''
+  });
   const [hasLoadedData, setHasLoadedData] = useState(false);
   const [disableNext, setDisableNext] = useState(false);
   console.log('Campaign Data:', campaignData); // Debug log
