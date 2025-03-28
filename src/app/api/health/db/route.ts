@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getDbPerformanceStats, getSlowQueries, clearSlowQueries } from '@/utils/db-monitoring';
+import { getDbPerformanceStats, getSlowQueries, clearSlowQueries, QueryMetrics } from '@/utils/db-monitoring';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { NextRequest } from 'next/server';
+
+// Import QueryStats interface
+import { QueryStats } from '@/utils/db-monitoring';
 
 // Define interfaces for type safety
 interface DatabaseHealthStatus {
@@ -16,7 +19,15 @@ interface PerformanceMetrics {
   avgQueryTime?: number;
   maxQueryTime?: number;
   slowQueries?: number;
-  [key: string]: any;
+  totalQueries?: number;
+  cacheHitRate?: number;
+  errorRate?: number;
+  lastUpdated?: string;
+  totalSlowQueries?: number;
+  criticalSlowQueries?: number;
+  verySlowQueries?: number;
+  statsByModelAndOperation?: QueryStats[];
+  [key: string]: number | string | QueryStats[] | undefined;
 }
 
 interface HealthStatus {
@@ -24,14 +35,14 @@ interface HealthStatus {
   database: DatabaseHealthStatus;
   performance: PerformanceMetrics;
   errors: string[];
-  slowQueries?: any[];
+  slowQueries?: QueryMetrics[]; // Use QueryMetrics[] for type safety
   connectionPool?: {
     size: number;
     active: number;
     idle: number;
     waitingClients: number;
   };
-  transactions?: Record<string, any>;
+  transactions?: Record<string, unknown>; // Use Record instead of any
   tableStats?: Array<{
     table: string;
     rowCount: number;

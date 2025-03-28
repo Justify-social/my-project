@@ -11,7 +11,7 @@ export interface QueryMetrics {
 }
 
 // Interface for query statistics
-interface QueryStats {
+export interface QueryStats {
   model: string;
   operation: string;
   count: number;

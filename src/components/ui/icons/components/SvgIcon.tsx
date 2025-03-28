@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect, useState } from 'react';
+import React, { useRef, useMemo, useEffect, useState, forwardRef } from 'react';
 import { SvgIconProps, PlatformIconProps, IconSize, IconName, PlatformName, SIZE_CLASSES, PLATFORM_ICON_MAP } from '../types';
 import cn from 'classnames';
 import { validateDynamicName } from '../utils';
@@ -22,32 +22,37 @@ const ICON_STYLE_FOLDERS = {
  * 2. Different action colors (blue, red, yellow, green)
  * 3. Platform-specific icons
  */
-export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
-  name,
-  platformName,
-  kpiName,
-  appName,
-  size = 'md',
-  className = '',
-  color,
-  iconType = 'static',
-  active = false,
-  solid = false,
-  style,
-  title,
-  explicitStyle,
-  action = 'default',
-  onClick,
-  spin = false,
-  pulse = false,
-  flipHorizontal = false,
-  flipVertical = false,
-  rotation = 0,
-  ...rest
-}, ref) => {
+const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => {
+  const {
+    name,
+    platformName,
+    kpiName,
+    appName,
+    size = 'md',
+    className = '',
+    color,
+    iconType = 'static',
+    active = false,
+    solid = false,
+    style,
+    title,
+    explicitStyle,
+    action = 'default',
+    onClick,
+    spin = false,
+    pulse = false,
+    flipHorizontal = false,
+    flipVertical = false,
+    rotation = 0,
+    ...rest
+  } = props;
+  
   const svgRef = useRef<SVGSVGElement>(null);
   const resolvedRef = (ref || svgRef) as React.RefObject<SVGSVGElement>;
 
+  // IMPORTANT: Always declare hooks at the top level
+  const [svgContent, setSvgContent] = useState<string | null>(null);
+  
   // Figure out which type of icon we're rendering
   const hasName = Boolean(name);
   const hasPlatformName = Boolean(platformName);
@@ -265,9 +270,6 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       element: resolvedRef.current?.parentElement?.tagName || 'unknown'
     });
   }
-
-  // For debugging icons that fail to load - always declare hooks at the top level
-  const [svgContent, setSvgContent] = useState<string | null>(null);
   
   useEffect(() => {
     // Only fetch SVG if we don't have path data and we're in the browser
