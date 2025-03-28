@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import ProgressBarProps from './wizard/ProgressBar';
 import { useSidebar } from "@/providers/SidebarProvider";
 import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
 import { Icon } from "@/components/ui/icons";
@@ -73,9 +72,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     isNextDisabled
   });
 
-  const progressBarHeight = position.topOffset ?
-  Math.max(65, position.topOffset) :
-  65;
+  const progressBarHeight = position?.topOffset 
+    ? Math.max(65, position.topOffset) 
+    : 65;
 
   return (
     <footer
