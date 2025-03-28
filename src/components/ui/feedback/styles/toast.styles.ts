@@ -5,7 +5,7 @@
  */
 
 import { cn } from '@/utils/string/utils';
-import { ToastType, ToastStyle, ToastPosition } from '../types';
+import { ToastType, ToastStyle, ToastPosition } from '../Toast';
 
 /**
  * Get classes for toast container based on position
@@ -90,10 +90,10 @@ export function getToastTypeClasses(type: ToastType): {
  * Get classes for toast animation with Framer Motion
  */
 export function getToastAnimationProps(position: ToastPosition): {
-  initial: Record<string, any>;
-  animate: Record<string, any>;
-  exit: Record<string, any>;
-  transition: Record<string, any>;
+  initial: Record<string, number | string>;
+  animate: Record<string, number | string>;
+  exit: Record<string, number | string>;
+  transition: Record<string, number | string>;
 } {
   const isTop = position.startsWith('top');
   const isCenter = position.endsWith('center');
