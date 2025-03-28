@@ -6,7 +6,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Toaster } from 'react-hot-toast';
-import { ToastProvider } from '@/components/ui/toast';
+import { ToastProvider } from '@/components/ui/feedback';
 import { FormStyleReset } from '@/components/ui';
 import { Suspense } from 'react';
 import { connection } from 'next/server';

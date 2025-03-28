@@ -1,0 +1,102 @@
+{
+  "timestamp": "2025-03-27T13:51:26.269Z",
+  "summary": {
+    "totalFiles": 815,
+    "filesWithIssues": 377,
+    "errorCount": 321,
+    "warningCount": 1167,
+    "totalIssues": 1488
+  },
+  "errorTypes": [
+    {
+      "rule": "@typescript-eslint/no-require-imports",
+      "errors": 280,
+      "warnings": 0
+    },
+    {
+      "rule": "syntax-error",
+      "errors": 12,
+      "warnings": 0
+    },
+    {
+      "rule": "@typescript-eslint/no-unused-expressions",
+      "errors": 8,
+      "warnings": 0
+    },
+    {
+      "rule": "react/jsx-no-undef",
+      "errors": 6,
+      "warnings": 0
+    },
+    {
+      "rule": "@typescript-eslint/no-empty-object-type",
+      "errors": 4,
+      "warnings": 0
+    },
+    {
+      "rule": "react-hooks/rules-of-hooks",
+      "errors": 3,
+      "warnings": 0
+    },
+    {
+      "rule": "@typescript-eslint/ban-ts-comment",
+      "errors": 3,
+      "warnings": 0
+    },
+    {
+      "rule": "@next/next/no-html-link-for-pages",
+      "errors": 2,
+      "warnings": 0
+    },
+    {
+      "rule": "@next/next/no-assign-module-variable",
+      "errors": 1,
+      "warnings": 0
+    },
+    {
+      "rule": "@typescript-eslint/no-unsafe-function-type",
+      "errors": 1,
+      "warnings": 0
+    },
+    {
+      "rule": "no-var",
+      "errors": 1,
+      "warnings": 0
+    },
+    {
+      "rule": "@typescript-eslint/no-unused-vars",
+      "errors": 0,
+      "warnings": 747
+    },
+    {
+      "rule": "@typescript-eslint/no-explicit-any",
+      "errors": 0,
+      "warnings": 314
+    },
+    {
+      "rule": "@next/next/no-img-element",
+      "errors": 0,
+      "warnings": 62
+    },
+    {
+      "rule": "react-hooks/exhaustive-deps",
+      "errors": 0,
+      "warnings": 30
+    },
+    {
+      "rule": "prefer-const",
+      "errors": 0,
+      "warnings": 7
+    },
+    {
+      "rule": "import/no-anonymous-default-export",
+      "errors": 0,
+      "warnings": 6
+    },
+    {
+      "rule": "jsx-a11y/role-supports-aria-props",
+      "errors": 0,
+      "warnings": 1
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { IconButton, IconButtonProps } from './IconButton';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/string/utils';
 
 // Base action button type extending IconButtonProps
 interface ActionButtonProps extends Omit<IconButtonProps, 'icon' | 'action'> {

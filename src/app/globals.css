@@ -165,7 +165,7 @@ div[class*='bg-white'] {
 
 /* 
  * KPI: Brand Awareness
- * SVG: /KPIs/Brand_Awareness.svg
+ * SVG: /icons/kpis/Brand_Awareness.svg
  * Verb: Boost Brand Awareness
  * Description: The increase in recognition of your brand.
  * Example: Your brand name is recognised by 30% more people after the campaign.
@@ -176,14 +176,14 @@ div[class*='bg-white'] {
 }
 .kpi-brand-awareness::before {
   content: "";
-  background-image: url('/KPIs/Brand_Awareness.svg');
+  background-image: url('/icons/kpis/Brand_Awareness.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Ad Recall
- * SVG: /KPIs/Ad_Recall.svg
+ * SVG: /icons/kpis/Ad_Recall.svg
  * Verb: Maximise Ad Recall
  * Description: The percentage of people who remember seeing your advertisement.
  * Example: After a week, 60% of viewers can recall your ad's main message.
@@ -194,14 +194,14 @@ div[class*='bg-white'] {
 }
 .kpi-ad-recall::before {
   content: "";
-  background-image: url('/KPIs/Ad_Recall.svg');
+  background-image: url('/icons/kpis/Ad_Recall.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Consideration
- * SVG: /KPIs/Consideration.svg
+ * SVG: /icons/kpis/Consideration.svg
  * Verb: Drive Consideration
  * Description: The percentage of people considering purchasing from your brand.
  * Example: 25% of your audience considers buying your product after seeing your campaign.
@@ -212,14 +212,14 @@ div[class*='bg-white'] {
 }
 .kpi-consideration::before {
   content: "";
-  background-image: url('/KPIs/Consideration.svg');
+  background-image: url('/icons/kpis/Consideration.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Message Association
- * SVG: /KPIs/Message_Association.svg
+ * SVG: /icons/kpis/Message_Association.svg
  * Verb: Strengthen Message Association
  * Description: How well people link your key messages to your brand.
  * Example: When hearing your slogan, 70% of people associate it directly with your brand.
@@ -230,14 +230,14 @@ div[class*='bg-white'] {
 }
 .kpi-message-association::before {
   content: "";
-  background-image: url('/KPIs/Message_Association.svg');
+  background-image: url('/icons/kpis/Message_Association.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Brand Preference
- * SVG: /KPIs/Brand_Preference.svg
+ * SVG: /icons/kpis/Brand_Preference.svg
  * Verb: Grow Brand Preference
  * Description: Preference for your brand over competitors.
  * Example: 40% of customers prefer your brand when choosing between similar products.
@@ -248,14 +248,14 @@ div[class*='bg-white'] {
 }
 .kpi-brand-preference::before {
   content: "";
-  background-image: url('/KPIs/Brand_Preference.svg');
+  background-image: url('/icons/kpis/Brand_Preference.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Purchase Intent
- * SVG: /KPIs/Purchase_Intent.svg
+ * SVG: /icons/kpis/Purchase_Intent.svg
  * Verb: Drive Purchase Intent
  * Description: Likelihood of purchasing your product or service.
  * Example: 50% of viewers intend to buy your product after seeing the ad.
@@ -266,14 +266,14 @@ div[class*='bg-white'] {
 }
 .kpi-purchase-intent::before {
   content: "";
-  background-image: url('/KPIs/Purchase_Intent.svg');
+  background-image: url('/icons/kpis/Purchase_Intent.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Action Intent
- * SVG: /KPIs/Action_Intent.svg
+ * SVG: /icons/kpis/Action_Intent.svg
  * Verb: Motivate Action
  * Description: Likelihood of taking a specific action related to your brand.
  * Example: 35% of people are motivated to visit your website after the campaign.
@@ -284,14 +284,14 @@ div[class*='bg-white'] {
 }
 .kpi-action-intent::before {
   content: "";
-  background-image: url('/KPIs/Action_Intent.svg');
+  background-image: url('/icons/kpis/Action_Intent.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Recommendation Intent
- * SVG: /KPIs/Recommendation_Intent.svg (fallback to Brand_Preference.svg)
+ * SVG: /icons/kpis/Recommendation_Intent.svg (fallback to Brand_Preference.svg)
  * Verb: Generate Recommendations
  * Description: Likelihood of recommending your brand to others.
  * Example: 45% of customers are willing to recommend your brand to friends and family.
@@ -302,14 +302,14 @@ div[class*='bg-white'] {
 }
 .kpi-recommendation-intent::before {
   content: "";
-  background-image: url('/KPIs/Brand_Preference.svg'); /* Using this as fallback per original code */
+  background-image: url('/icons/kpis/Brand_Preference.svg'); /* Using this as fallback per original code */
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 /* 
  * KPI: Advocacy
- * SVG: /KPIs/Advocacy.svg
+ * SVG: /icons/kpis/Advocacy.svg
  * Verb: Foster Brand Advocacy
  * Description: Willingness to actively promote your brand.
  * Example: 20% of your customers regularly share your brand on social media or write positive reviews.
@@ -320,7 +320,7 @@ div[class*='bg-white'] {
 }
 .kpi-advocacy::before {
   content: "";
-  background-image: url('/KPIs/Advocacy.svg');
+  background-image: url('/icons/kpis/Advocacy.svg');
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -383,11 +383,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Home
- * SVG: /Home.svg
+ * SVG: /icons/app/Home.svg
  * Purpose: Main dashboard/home navigation
  */
 .icon-home {
-  background-image: url('/Home.svg');
+  background-image: url('/icons/app/Home.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -395,11 +395,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Campaigns
- * SVG: /Campaigns.svg
+ * SVG: /icons/app/Campaigns.svg
  * Purpose: Campaign management and overview
  */
 .icon-campaigns {
-  background-image: url('/Campaigns.svg');
+  background-image: url('/icons/app/Campaigns.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -407,11 +407,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Brand Lift
- * SVG: /Brand_Lift.svg
+ * SVG: /icons/app/Brand_Lift.svg
  * Purpose: Brand lift studies and metrics
  */
 .icon-brand-lift {
-  background-image: url('/Brand_Lift.svg');
+  background-image: url('/icons/app/Brand_Lift.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -419,11 +419,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Brand Health
- * SVG: /Brand_Health.svg
+ * SVG: /icons/app/Brand_Health.svg
  * Purpose: Brand health monitoring and metrics
  */
 .icon-brand-health {
-  background-image: url('/Brand_Health.svg');
+  background-image: url('/icons/app/Brand_Health.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -431,11 +431,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Creative Asset Testing
- * SVG: /Creative_Asset_Testing.svg
+ * SVG: /icons/app/Creative_Asset_Testing.svg
  * Purpose: Testing and analysis of creative assets
  */
 .icon-creative-testing {
-  background-image: url('/Creative_Asset_Testing.svg');
+  background-image: url('/icons/app/Creative_Asset_Testing.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -443,11 +443,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: MMM (Marketing Mix Modeling)
- * SVG: /MMM.svg
+ * SVG: /icons/app/MMM.svg
  * Purpose: Marketing mix modeling analytics
  */
 .icon-mmm {
-  background-image: url('/MMM.svg');
+  background-image: url('/icons/app/MMM.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -455,11 +455,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Influencers
- * SVG: /Influencers.svg
+ * SVG: /icons/app/Influencers.svg
  * Purpose: Influencer marketing and management
  */
 .icon-influencers {
-  background-image: url('/Influencers.svg');
+  background-image: url('/icons/app/Influencers.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -467,11 +467,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Reports
- * SVG: /Reports.svg
+ * SVG: /icons/app/Reports.svg
  * Purpose: Analytics and reporting dashboards
  */
 .icon-reports {
-  background-image: url('/Reports.svg');
+  background-image: url('/icons/app/Reports.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -479,11 +479,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Billing
- * SVG: /Billing.svg
+ * SVG: /icons/app/Billing.svg
  * Purpose: Billing and subscription management
  */
 .icon-billing {
-  background-image: url('/Billing.svg');
+  background-image: url('/icons/app/Billing.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -491,11 +491,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Settings
- * SVG: /Settings.svg
+ * SVG: /icons/app/Settings.svg
  * Purpose: Application and user settings
  */
 .icon-settings {
-  background-image: url('/Settings.svg');
+  background-image: url('/icons/app/Settings.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -503,11 +503,11 @@ div[class*='bg-white'] {
 
 /* 
  * Icon: Help
- * SVG: /Help.svg
+ * SVG: /icons/app/Help.svg
  * Purpose: Help resources and documentation
  */
 .icon-help {
-  background-image: url('/Help.svg');
+  background-image: url('/icons/app/Help.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

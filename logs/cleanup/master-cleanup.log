@@ -1,0 +1,29 @@
+[2025-03-27 18:39:58] Starting codebase cleanup process
+[2025-03-27 18:39:58] Creating backup branch for the entire cleanup process
+[2025-03-27 18:39:58] Step 1: Standardizing test file naming
+[2025-03-27 18:39:58] Running: ./scripts/cleanup/standardize-test-filenames.js
+[2025-03-27 18:39:58] Failed: ./scripts/cleanup/standardize-test-filenames.js
+[2025-03-27 18:39:58] Step 2: Standardizing directory naming
+[2025-03-27 18:39:58] Running: ./scripts/cleanup/standardize-directory-names.js
+[2025-03-27 18:39:58] Failed: ./scripts/cleanup/standardize-directory-names.js
+[2025-03-27 18:39:58] Step 3: Adding README files to major directories
+[2025-03-27 18:39:58] Running: ./scripts/cleanup/add-directory-readmes.js
+[2025-03-27 18:39:58] Successfully completed: ./scripts/cleanup/add-directory-readmes.js
+[2025-03-27 18:39:58] Step 4: Refining features directory structure
+[2025-03-27 18:39:58] Running: ./scripts/cleanup/refine-features-directory.js
+[2025-03-27 18:39:59] Successfully completed: ./scripts/cleanup/refine-features-directory.js
+[2025-03-27 18:39:59] Step 5: Relocating UI components to proper locations
+[2025-03-27 18:39:59] Running: ./scripts/cleanup/relocate-ui-components.js
+[2025-03-27 18:39:59] Successfully completed: ./scripts/cleanup/relocate-ui-components.js
+[2025-03-27 18:39:59] Step 6: Centralizing test files
+[2025-03-27 18:39:59] Running: ./scripts/cleanup/centralize-test-files.js
+[2025-03-27 18:39:59] Successfully completed: ./scripts/cleanup/centralize-test-files.js
+[2025-03-27 18:39:59] Step 7: Consolidating middleware functionality
+[2025-03-27 18:39:59] Running: ./scripts/cleanup/consolidate-middleware.js
+[2025-03-27 18:39:59] Successfully completed: ./scripts/cleanup/consolidate-middleware.js
+[2025-03-27 18:39:59] Step 8: Tracking cleanup progress
+[2025-03-27 18:39:59] Running: ./scripts/cleanup/track-cleanup-progress.js
+[2025-03-27 18:39:59] Successfully completed: ./scripts/cleanup/track-cleanup-progress.js
+[2025-03-27 18:39:59] Codebase cleanup completed!
+[2025-03-27 18:39:59] Log files are available in the logs/cleanup directory
+[2025-03-27 18:39:59] Detailed results can be found in the docs/project-history directory

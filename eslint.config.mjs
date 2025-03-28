@@ -17,7 +17,13 @@ const eslintConfig = [
       ".next/**",
       "build/**",
       "dist/**",
-      "public/**"
+      "public/**",
+      "scripts-backup-*/**",
+      "src/components/ui/LoadingSpinner.tsx",
+      "**/*.bak",
+      "**/*.backup",
+      "**/*.old",
+      "**/*.tmp"
     ],
     rules: {
       "@typescript-eslint/no-unused-vars": ["warn", {

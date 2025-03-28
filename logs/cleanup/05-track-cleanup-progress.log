@@ -1,0 +1,82 @@
+[1;33mRunning: track-cleanup-progress.sh[0m
+[0;34m------------------------------------------[0m
+[0;34m==========================================[0m
+[0;34m     Codebase Cleanup Progress Report     [0m
+[0;34m==========================================[0m
+
+[0;34mIssue 1.1: Duplicate Context Directories[0m
+[0;32m✓ src/context has been removed[0m
+[0;32m✓ src/contexts exists with        4 files[0m
+
+[0;34mIssue 1.2: Duplicate Layout Directories[0m
+[0;32m✓ src/components/layout has been removed[0m
+[0;32m✓ src/components/layouts exists with        9 files[0m
+
+[0;34mChecking for imports from old directories...[0m
+[0;31m✗ Found        3 imports from @/context[0m
+[0;31m✗ Found        3 imports from @/components/layout[0m
+
+[0;34mIssue 2.1: Inconsistent Test File Naming[0m
+[1;33mFound       13 files with .test.ts/tsx pattern[0m
+[1;33mFound        0 files with -test.ts/tsx pattern[0m
+[1;33mFound        0 files in __tests__ directories[0m
+[0;32m✓ Test standardization report exists[0m
+[0;32m✓ 1 tests have been standardized[0m
+
+[0;34mIssue 2.2: Inconsistent Component Directory Naming[0m
+[0;32mFound plural directory: src/components[0m
+[0;32mFound plural directory: src/utils[0m
+[0;32mFound plural directory: src/hooks[0m
+[0;32mFound plural directory: src/contexts[0m
+[0;32mFound plural directory: src/providers[0m
+[0;32mFound plural directory: src/services[0m
+[0;32m✓ Directory naming standardization report exists[0m
+[0;32m✓ 1 directories have been renamed[0m
+
+[0;34mIssue 3.1: Scattered Test Files[0m
+[0;32m✓ tests/ directory exists with       26 test files[0m
+[0;32m✓ tests/unit/ contains       16 files[0m
+[0;32m✓ tests/integration/ contains        4 files[0m
+[0;32m✓ 0 tests have been centralized[0m
+
+[0;34mIssue 4.1: Inconsistent or Missing Documentation[0m
+[1;33mFound       46 README.md files in src[0m
+[0;32m✓ README generation report exists[0m
+[0;32m✓ Added 1 README files[0m
+
+[0;34mIssue 4.2: Missing Code Organization Documentation[0m
+[0;32m✓ ARCHITECTURE.md exists with      111 lines[0m
+
+[0;34mIssue 5.1: Overly Complex Features Directory[0m
+[0;32m✓ Features refinement report exists[0m
+[0;32m✓ Refactored 1 components in features directory[0m
+
+[0;34mIssue 5.2: Mixed Component Responsibilities[0m
+[0;32m✓ UI components directory has       57 components[0m
+[0;32m✓ Features directory has       92 components[0m
+[0;32m✓ Component responsibility analysis completed[0m
+[1;33m⚠ 2 components recommended for relocation[0m
+
+[0;34m==========================================[0m
+[0;34m              Summary                     [0m
+[0;34m==========================================[0m
+
+[0;32mCompleted:[0m
+• Issue 2.1: Inconsistent Test File Naming
+• Issue 2.2: Inconsistent Component Directory Naming
+• Issue 4.1: Inconsistent or Missing Documentation
+• Issue 4.2: Missing Code Organization Documentation
+• Issue 5.1: Overly Complex Features Directory
+• Scripts Organization
+
+[1;33mIn Progress:[0m
+• Issue 1.1: Duplicate Context Directories
+• Issue 1.2: Duplicate Layout Directories
+• Issue 3.1: Scattered Test Files
+• Issue 5.2: Mixed Component Responsibilities
+
+[0;31mNot Started:[0m
+
+[0;34mReport saved to cleanup-progress-report.md[0m
+[0;32m✓ Successfully completed: track-cleanup-progress.sh[0m
+

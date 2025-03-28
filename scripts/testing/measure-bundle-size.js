@@ -5,10 +5,10 @@
  * before and after optimization.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
-const chalk = require('chalk');
+import fs from 'fs';
+import path from 'path';
+import exec from 'child_process';
+import chalk from 'chalk';
 
 // Configuration
 const OUTPUT_DIR = path.join(process.cwd(), '.next', 'analyze');

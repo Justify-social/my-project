@@ -50,7 +50,7 @@ export async function PATCH(
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId)
     const numericId = parseInt(campaignId, 10)
     
-    if (!isUuid && isNaN(numericId)) {
+    if (!if (isUuid) isNaN(numericId)) {
       return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 })
     }
     

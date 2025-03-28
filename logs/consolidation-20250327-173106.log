@@ -1,0 +1,126 @@
+Starting component consolidation at Thu Mar 27 17:31:06 GMT 2025
+====================================
+
+Processing: alert → feedback
+Consolidating from alert to feedback
+* Source is a directory: src/components/ui/alert
+* Copying src/components/ui/alert/types/index.ts to src/components/ui/feedback/types/index.ts
+* Skipping copy of src/components/ui/alert/Alert.tsx (target file already exists: src/components/ui/feedback/Alert.tsx)
+* Skipping copy of src/components/ui/alert/README.md (target file already exists: src/components/ui/feedback/README.md)
+* Copying src/components/ui/alert/styles/alert.styles.ts to src/components/ui/feedback/styles/alert.styles.ts
+* Consolidation completed: alert → feedback
+
+Processing: badge → feedback
+Consolidating from badge to feedback
+* Source is a directory: src/components/ui/badge
+* Skipping copy of src/components/ui/badge/Badge.tsx (target file already exists: src/components/ui/feedback/Badge.tsx)
+* Consolidation completed: badge → feedback
+
+Processing: toast → feedback
+Consolidating from toast to feedback
+* Source is a directory: src/components/ui/toast
+* Skipping copy of src/components/ui/toast/types/index.ts (target file already exists: src/components/ui/feedback/types/index.ts)
+* Skipping copy of src/components/ui/toast/README.md (target file already exists: src/components/ui/feedback/README.md)
+* Copying src/components/ui/toast/styles/toast.styles.ts to src/components/ui/feedback/styles/toast.styles.ts
+* Skipping copy of src/components/ui/toast/Toast.tsx (target file already exists: src/components/ui/feedback/Toast.tsx)
+* Consolidation completed: toast → feedback
+
+Processing: card → layout
+Consolidating from card to layout
+* Source is a directory: src/components/ui/card
+* Copying src/components/ui/card/types/index.ts to src/components/ui/layout/types/index.ts
+* Skipping copy of src/components/ui/card/Card.tsx (target file already exists: src/components/ui/layout/Card.tsx)
+* Skipping copy of src/components/ui/card/README.md (target file already exists: src/components/ui/layout/README.md)
+* Copying src/components/ui/card/styles/card.styles.ts to src/components/ui/layout/styles/card.styles.ts
+* Consolidation completed: card → layout
+
+Processing: container → layout
+Consolidating from container to layout
+* Source is a directory: src/components/ui/container
+* Skipping copy of src/components/ui/container/Container.tsx (target file already exists: src/components/ui/layout/Container.tsx)
+* Consolidation completed: container → layout
+
+Processing: grid → layout
+Consolidating from grid to layout
+* Source is a directory: src/components/ui/grid
+* Skipping copy of src/components/ui/grid/Grid.tsx (target file already exists: src/components/ui/layout/Grid.tsx)
+* Consolidation completed: grid → layout
+
+Processing: avatar → layout
+Consolidating from avatar to layout
+* Source is a directory: src/components/ui/avatar
+* Copying src/components/ui/avatar/Avatar.tsx to src/components/ui/layout/Avatar.tsx
+* Adding export for Avatar to src/components/ui/layout/index.ts
+* Consolidation completed: avatar → layout
+
+Processing: input → forms
+Consolidating from input to forms
+* Source is a directory: src/components/ui/input
+* Copying src/components/ui/input/types/index.ts to src/components/ui/forms/types/index.ts
+* Skipping copy of src/components/ui/input/README.md (target file already exists: src/components/ui/forms/README.md)
+* Copying src/components/ui/input/styles/input.styles.ts to src/components/ui/forms/styles/input.styles.ts
+* Skipping copy of src/components/ui/input/Input.tsx (target file already exists: src/components/ui/forms/Input.tsx)
+* Consolidation completed: input → forms
+
+Processing: radio → forms
+Consolidating from radio to forms
+* Source is a directory: src/components/ui/radio
+* Skipping copy of src/components/ui/radio/types/index.ts (target file already exists: src/components/ui/forms/types/index.ts)
+* Skipping copy of src/components/ui/radio/Radio.tsx (target file already exists: src/components/ui/forms/Radio.tsx)
+* Skipping copy of src/components/ui/radio/README.md (target file already exists: src/components/ui/forms/README.md)
+* Copying src/components/ui/radio/styles/radio.styles.ts to src/components/ui/forms/styles/radio.styles.ts
+* Consolidation completed: radio → forms
+
+Processing: select → forms
+Consolidating from select to forms
+* Source is a directory: src/components/ui/select
+* Skipping copy of src/components/ui/select/types/index.ts (target file already exists: src/components/ui/forms/types/index.ts)
+* Skipping copy of src/components/ui/select/README.md (target file already exists: src/components/ui/forms/README.md)
+* Copying src/components/ui/select/styles/select.styles.ts to src/components/ui/forms/styles/select.styles.ts
+* Skipping copy of src/components/ui/select/Select.tsx (target file already exists: src/components/ui/forms/Select.tsx)
+* Consolidation completed: select → forms
+
+Processing: checkbox → forms
+Consolidating from checkbox to forms
+* Source is a directory: src/components/ui/checkbox
+* Skipping copy of src/components/ui/checkbox/types/index.ts (target file already exists: src/components/ui/forms/types/index.ts)
+* Skipping copy of src/components/ui/checkbox/README.md (target file already exists: src/components/ui/forms/README.md)
+* Copying src/components/ui/checkbox/styles/checkbox.styles.ts to src/components/ui/forms/styles/checkbox.styles.ts
+* Skipping copy of src/components/ui/checkbox/Checkbox.tsx (target file already exists: src/components/ui/forms/Checkbox.tsx)
+* Consolidation completed: checkbox → forms
+
+Processing: tabs → navigation
+Consolidating from tabs to navigation
+* Source is a directory: src/components/ui/tabs
+* Copying src/components/ui/tabs/types/index.ts to src/components/ui/navigation/types/index.ts
+* Skipping copy of src/components/ui/tabs/Tabs.tsx (target file already exists: src/components/ui/navigation/Tabs.tsx)
+* Skipping copy of src/components/ui/tabs/README.md (target file already exists: src/components/ui/navigation/README.md)
+* Copying src/components/ui/tabs/styles/tabs.styles.ts to src/components/ui/navigation/styles/tabs.styles.ts
+* Skipping copy of src/components/ui/tabs/CustomTabs.tsx (target file already exists: src/components/ui/navigation/CustomTabs.tsx)
+* Consolidation completed: tabs → navigation
+
+Processing: date-picker → calendar
+Consolidating from date-picker to calendar
+* Source is a directory: src/components/ui/date-picker
+* Copying src/components/ui/date-picker/types/index.ts to src/components/ui/calendar/types/index.ts
+* Copying src/components/ui/date-picker/DatePicker.tsx to src/components/ui/calendar/DatePicker.tsx
+* Adding export for DatePicker to src/components/ui/calendar/index.ts
+* Skipping copy of src/components/ui/date-picker/README.md (target file already exists: src/components/ui/calendar/README.md)
+* Copying src/components/ui/date-picker/styles/date-picker.styles.ts to src/components/ui/calendar/styles/date-picker.styles.ts
+* Consolidation completed: date-picker → calendar
+
+Processing: core → typography
+Consolidating from core to typography
+* Source is a directory: src/components/ui/core
+* Skipping copy of src/components/ui/core/Typography.tsx (target file already exists: src/components/ui/typography/Typography.tsx)
+* Copying src/components/ui/core/README.md to src/components/ui/typography/README.md
+* Consolidation completed: core → typography
+
+Processing: icon.tsx → icons
+Consolidating from icon.tsx to icons
+* Source is a file: src/components/ui/icon.tsx
+* Skipping copy of src/components/ui/icon.tsx (target file already exists: src/components/ui/icons/Icon.tsx)
+* Consolidation completed: icon.tsx → icons
+
+Consolidation process completed at Thu Mar 27 17:31:07 GMT 2025
+====================================

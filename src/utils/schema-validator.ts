@@ -1,6 +1,6 @@
-// Using CommonJS require syntax
-const { PrismaClient } = require('@prisma/client');
-const prisma = require('../lib/prisma');
+// Using ES imports
+import { PrismaClient as _PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 
 /**
  * @typedef {Object} ModelStatus

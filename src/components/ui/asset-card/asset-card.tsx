@@ -113,35 +113,35 @@ const AssetCard: React.FC<AssetCardProps> = ({
                 
                 // Instagram
                 if (platformLower.includes('insta') || platformLower === 'ig') {
-                  return <Image src="/ui-icons/brands/instagram.svg" width={16} height={16} alt="Instagram" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/instagram.svg" width={16} height={16} alt="Instagram" className="h-4 w-4" />;
                 } 
                 // Facebook
                 else if (platformLower.includes('face') || platformLower === 'fb') {
-                  return <Image src="/ui-icons/brands/facebook.svg" width={16} height={16} alt="Facebook" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/facebook.svg" width={16} height={16} alt="Facebook" className="h-4 w-4" />;
                 } 
                 // Twitter/X
                 else if (platformLower.includes('twit') || platformLower === 'x' || platformLower.includes('x-twitter')) {
-                  return <Image src="/ui-icons/brands/x-twitter.svg" width={16} height={16} alt="Twitter" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/x-twitter.svg" width={16} height={16} alt="Twitter" className="h-4 w-4" />;
                 } 
                 // TikTok
                 else if (platformLower.includes('tik') || platformLower.includes('tok')) {
-                  return <Image src="/ui-icons/brands/tiktok.svg" width={16} height={16} alt="TikTok" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/tiktok.svg" width={16} height={16} alt="TikTok" className="h-4 w-4" />;
                 } 
                 // YouTube
                 else if (platformLower.includes('you') || platformLower.includes('tube') || platformLower === 'yt') {
-                  return <Image src="/ui-icons/brands/youtube.svg" width={16} height={16} alt="YouTube" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/youtube.svg" width={16} height={16} alt="YouTube" className="h-4 w-4" />;
                 } 
                 // LinkedIn
                 else if (platformLower.includes('link') || platformLower.includes('lin')) {
-                  return <Image src="/ui-icons/brands/linkedin.svg" width={16} height={16} alt="LinkedIn" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/linkedin.svg" width={16} height={16} alt="LinkedIn" className="h-4 w-4" />;
                 } 
                 // Pinterest
                 else if (platformLower.includes('pin') || platformLower.includes('pint')) {
-                  return <Image src="/ui-icons/brands/pinterest.svg" width={16} height={16} alt="Pinterest" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/pinterest.svg" width={16} height={16} alt="Pinterest" className="h-4 w-4" />;
                 } 
                 // Reddit
                 else if (platformLower.includes('red')) {
-                  return <Image src="/ui-icons/brands/reddit.svg" width={16} height={16} alt="Reddit" className="h-4 w-4" />;
+                  return <Image src="/icons/brands/reddit.svg" width={16} height={16} alt="Reddit" className="h-4 w-4" />;
                 } 
                 // Default: Globe icon
                 else {

@@ -5,7 +5,7 @@ import { z } from 'zod'; // For input validation
 import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 import { getSession } from '@auth0/nextjs-auth0';
 import { connectToDatabase } from '@/lib/db';
-import { tryCatch } from '@/middleware/api';
+import { tryCatch } from '@/middlewares/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 
 type RouteParams = { params: { id: string } }
@@ -248,7 +248,7 @@ export async function GET(
       }
       
       // Also check for dates in Influencer objects
-      if ('Influencer' in campaign && Array.isArray(campaign.Influencer)) {
+      if (campaign && 'Influencer' in campaign && Array.isArray(campaign.Influencer)) {
         console.log('Processing dates in Influencer objects:', campaign.Influencer.length);
         (campaign as any).Influencer = campaign.Influencer.map(influencer => {
           const processedInfluencer = { ...influencer };
@@ -267,7 +267,7 @@ export async function GET(
       }
       
       // Debug logging for assets
-      if ('assets' in campaign && Array.isArray(campaign.assets)) {
+      if (campaign && 'assets' in campaign && Array.isArray(campaign.assets)) {
         console.log('Campaign has assets array with', campaign.assets.length, 'items');
       } else {
         console.log('Campaign has no assets array or assets are not in array format');
@@ -556,7 +556,7 @@ export async function PATCH(
           }
         });
         
-        // Separately handle influencers if present
+        // If there are influencers in the request, create or update them
         if (data.influencers && Array.isArray(data.influencers) && data.influencers.length > 0) {
           console.log('Updating influencers for campaign:', campaignId);
           

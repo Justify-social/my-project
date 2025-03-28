@@ -16,7 +16,7 @@ import { DateService } from './date-service';
  * @returns A formatted date string or empty string for invalid inputs
  * @deprecated Use DateService.toFormDate() instead
  */
-export function formatDate(date: any): string {
+export function formatDate(date: unknown): string {
   return DateService.toFormDate(date) || '';
 }
 
@@ -28,8 +28,10 @@ export function formatDate(date: any): string {
  * @returns A properly formatted date string or null for invalid inputs
  * @deprecated Use DateService.toApiDate() instead
  */
-export function formatDateForApi(date: any): string | null {
-  return DateService.toApiDate(date);
+export function formatDateForApi(date: unknown): string | null {
+  // Convert to formatted date first, then to API date
+  const formattedDate = DateService.toFormDate(date);
+  return DateService.toApiDate(formattedDate);
 }
 
 /**
@@ -40,9 +42,10 @@ export function formatDateForApi(date: any): string | null {
  * @param format Optional format specification ('short', 'medium', 'long', or 'full')
  * @returns A user-friendly formatted date string or empty string for invalid inputs
  */
-export function formatDateForDisplay(date: any, format: 'short' | 'medium' | 'long' | 'full' = 'medium'): string {
+export function formatDateForDisplay(date: unknown, format: 'short' | 'medium' | 'long' | 'full' = 'medium'): string {
   // Get a standardized date
-  const dateString = DateService.toApiDate(date);
+  const formattedDate = DateService.toFormDate(date);
+  const dateString = DateService.toApiDate(formattedDate);
   if (!dateString) return '';
   
   try {

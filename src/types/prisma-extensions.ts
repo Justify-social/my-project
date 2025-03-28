@@ -5,21 +5,25 @@ import { PrismaClient } from '@prisma/client';
  * This is helpful for TypeScript to recognize our models when accessed as properties.
  */
 
+// Define common parameter and return types for Prisma operations
+type PrismaParams = Record<string, unknown>;
+type PrismaReturn<T = unknown> = Promise<T>;
+
 // Generic type for Prisma delegates to avoid type errors
 type PrismaDelegate = {
-  findUnique: Function;
-  findFirst: Function;
-  findMany: Function;
-  create: Function;
-  createMany: Function;
-  update: Function;
-  updateMany: Function;
-  upsert: Function;
-  delete: Function;
-  deleteMany: Function;
-  count: Function;
-  aggregate: Function;
-  groupBy: Function;
+  findUnique: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T | null>;
+  findFirst: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T | null>;
+  findMany: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T[]>;
+  create: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T>;
+  createMany: <_T = unknown>(args: PrismaParams) => PrismaReturn<{ count: number }>;
+  update: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T>;
+  updateMany: <_T = unknown>(args: PrismaParams) => PrismaReturn<{ count: number }>;
+  upsert: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T>;
+  delete: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T>;
+  deleteMany: <_T = unknown>(args: PrismaParams) => PrismaReturn<{ count: number }>;
+  count: (args?: PrismaParams) => PrismaReturn<number>;
+  aggregate: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T>;
+  groupBy: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T[]>;
 }
 
 /**

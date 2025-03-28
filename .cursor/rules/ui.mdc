@@ -1,0 +1,25 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Product and UI Consistency
+Always check UI components before editing UI: /debug-tools/ui-components
+App icons: FontAwesome Pro
+Default: fa-light
+Hover: fa-solid
+
+Brand Colours
+Primary: Jet #333333
+Secondary: Payne’s Grey #4A5568
+Accent: Deep Sky Blue #00BFFF
+Background: White #FFFFFF
+Divider: French Grey #D1D5DB
+Interactive: Medium Blue #3182CE
+
+[globals.css](mdc:src/app/globals.css)
+[font-awesome.md](mdc:docs/icons/font-awesome.md)
+
+see icon Mapping here:
+[icon-registry.json](mdc:src/assets/icon-registry.json)
+[icon-url-map.json](mdc:src/assets/icon-url-map.json)

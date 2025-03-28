@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaMagic } from "react-icons/fa";
 
 // Import the GifModal from the shared components folder
-import GifModal from "../../../components/gif/GifModal";
+import GifModal from "@/components/features/assets/gif/GifModal";
 
 // -----------------------------------------------------------------------------
 // TYPE DEFINITIONS

@@ -1,0 +1,100 @@
+[1;33mRunning: standardize-directory-naming.js[0m
+[0;34m------------------------------------------[0m
+[32m[Success][0m Created backup branch: directory-naming-backup
+[36m[Directory Standardization][0m Found 27 directories to rename
+[33m[Warning][0m Skipping empty directory: src/components/ui/LoadingSkeleton
+[33m[Warning][0m Directory src/components/wizard already exists. Will merge instead of rename.
+[33m[Warning][0m Directory src/components/search already exists. Will merge instead of rename.
+[33m[Warning][0m Directory src/components/navigation already exists. Will merge instead of rename.
+[33m[Warning][0m Directory src/components/influencers already exists. Will merge instead of rename.
+[33m[Warning][0m Skipping empty directory: src/app/(campaigns)/influencer/Marketplace
+[33m[Warning][0m Skipping empty directory: src/app/(campaigns)/influencer/List
+[36m[Directory Standardization][0m 24 directories will be processed
+[36m[Directory Standardization][0m Renaming directory: src/components/features/users/profile/__tests__ -> src/components/features/users/profile/--tests--
+[32m[Success][0m Renamed directory: src/components/features/users/profile/__tests__ -> src/components/features/users/profile/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/components/features/users/authentication/__tests__ -> src/components/features/users/authentication/--tests--
+[32m[Success][0m Renamed directory: src/components/features/users/authentication/__tests__ -> src/components/features/users/authentication/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/components/features/settings/team/__tests__ -> src/components/features/settings/team/--tests--
+[32m[Success][0m Renamed directory: src/components/features/settings/team/__tests__ -> src/components/features/settings/team/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/components/features/settings/branding/__tests__ -> src/components/features/settings/branding/--tests--
+[32m[Success][0m Renamed directory: src/components/features/settings/branding/__tests__ -> src/components/features/settings/branding/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/components/features/dashboard/notifications/__tests__ -> src/components/features/dashboard/notifications/--tests--
+[32m[Success][0m Renamed directory: src/components/features/dashboard/notifications/__tests__ -> src/components/features/dashboard/notifications/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/components/ui/icons/__tests__ -> src/components/ui/icons/--tests--
+[32m[Success][0m Renamed directory: src/components/ui/icons/__tests__ -> src/components/ui/icons/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/app/api/assets/icon -> src/app/api/assets/icons
+[32m[Success][0m Renamed directory: src/app/api/assets/icon -> src/app/api/assets/icons
+[36m[Directory Standardization][0m Renaming directory: src/components/ui/layout -> src/components/ui/layouts
+[36m[Directory Standardization][0m Updated imports in src/components/ui/index.ts
+[36m[Directory Standardization][0m Updated imports in src/components/ui/layout/styles/card.styles.ts
+[32m[Success][0m Renamed directory: src/components/ui/layout -> src/components/ui/layouts
+[36m[Directory Standardization][0m Renaming directory: src/components/mmm/CustomerJourney -> src/components/mmm/customer-journey
+[36m[Directory Standardization][0m Updated imports in src/app/(dashboard)/mmm/page.tsx
+[32m[Success][0m Renamed directory: src/components/mmm/CustomerJourney -> src/components/mmm/customer-journey
+[36m[Directory Standardization][0m Renaming directory: src/components/Wizard/AudienceTargeting -> src/components/Wizard/audience-targeting
+[32m[Success][0m Renamed directory: src/components/Wizard/AudienceTargeting -> src/components/Wizard/audience-targeting
+[36m[Directory Standardization][0m Renaming directory: src/components/Influencers/MarketplaceList -> src/components/Influencers/marketplace-list
+[32m[Success][0m Renamed directory: src/components/Influencers/MarketplaceList -> src/components/Influencers/marketplace-list
+[36m[Directory Standardization][0m Renaming directory: src/components/Influencers/AdvancedSearch -> src/components/Influencers/advanced-search
+[32m[Success][0m Renamed directory: src/components/Influencers/AdvancedSearch -> src/components/Influencers/advanced-search
+[36m[Directory Standardization][0m Renaming directory: src/utils/__tests__ -> src/utils/--tests--
+[32m[Success][0m Renamed directory: src/utils/__tests__ -> src/utils/--tests--
+[36m[Directory Standardization][0m Renaming directory: src/components/Wizard -> src/components/wizard
+[36m[Directory Standardization][0m Updated imports in src/components/Wizard/examples/FormExample.tsx
+[36m[Directory Standardization][0m Updated imports in scripts/testing/final-verification.js
+[36m[Directory Standardization][0m Updated imports in scripts/cleanup/import-path-updater.js
+[32m[Success][0m Merged directory: src/components/Wizard -> src/components/wizard
+[36m[Directory Standardization][0m Renaming directory: src/components/Search -> src/components/search
+[36m[Directory Standardization][0m Updated imports in scripts/testing/final-verification.js
+[32m[Success][0m Merged directory: src/components/Search -> src/components/search
+[36m[Directory Standardization][0m Renaming directory: src/components/ReviewSections -> src/components/review-sections
+[32m[Success][0m Renamed directory: src/components/ReviewSections -> src/components/review-sections
+[36m[Directory Standardization][0m Renaming directory: src/components/Navigation -> src/components/navigation
+[32m[Success][0m Merged directory: src/components/Navigation -> src/components/navigation
+[36m[Directory Standardization][0m Renaming directory: src/components/Influencers -> src/components/influencers
+[36m[Directory Standardization][0m Updated imports in src/components/Influencers/metrics/JustifyScoreDisplay.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/Influencers/marketplace-list/index.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/Influencers/advanced-search/index.tsx
+[36m[Directory Standardization][0m Updated imports in scripts/testing/final-verification.js
+[36m[Directory Standardization][0m Updated imports in scripts/cleanup/import-path-updater.js
+[32m[Success][0m Merged directory: src/components/Influencers -> src/components/influencers
+[36m[Directory Standardization][0m Renaming directory: src/components/ErrorFallback -> src/components/error-fallback
+[36m[Directory Standardization][0m Updated imports in scripts/testing/final-verification.js
+[36m[Directory Standardization][0m Updated imports in scripts/cleanup/import-path-updater.js
+[32m[Success][0m Renamed directory: src/components/ErrorFallback -> src/components/error-fallback
+[36m[Directory Standardization][0m Renaming directory: src/components/ErrorBoundary -> src/components/error-boundary
+[36m[Directory Standardization][0m Updated imports in scripts/testing/final-verification.js
+[32m[Success][0m Renamed directory: src/components/ErrorBoundary -> src/components/error-boundary
+[36m[Directory Standardization][0m Renaming directory: src/components/AssetPreview -> src/components/asset-preview
+[36m[Directory Standardization][0m Updated imports in scripts/testing/final-verification.js
+[32m[Success][0m Renamed directory: src/components/AssetPreview -> src/components/asset-preview
+[36m[Directory Standardization][0m Renaming directory: src/middleware -> src/middlewares
+[36m[Directory Standardization][0m Updated imports in src/middlewares/api/index.ts
+[36m[Directory Standardization][0m Updated imports in src/middleware/api/index.ts
+[36m[Directory Standardization][0m Updated imports in src/components/upload/EnhancedAssetPreview.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/features/campaigns/wizard/CampaignWizardContext.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/features/assets/upload/EnhancedAssetPreview.tsx
+[36m[Directory Standardization][0m Updated imports in src/app/api/wizard/campaign.ts
+[36m[Directory Standardization][0m Updated imports in src/app/api/influencers/route.ts
+[36m[Directory Standardization][0m Updated imports in src/app/api/creative-testing/route.ts
+[36m[Directory Standardization][0m Updated imports in src/app/api/campaigns/route.ts
+[36m[Directory Standardization][0m Updated imports in src/app/api/campaigns/[id]/route.ts
+[36m[Directory Standardization][0m Updated imports in src/app/api/brand-lift/report/route.ts
+[36m[Directory Standardization][0m Updated imports in src/app/api/brand-health/route.ts
+[36m[Directory Standardization][0m Updated imports in src/app/(campaigns)/campaigns/[id]/backup/page.original.tsx
+[32m[Success][0m Renamed directory: src/middleware -> src/middlewares
+[36m[Directory Standardization][0m Renaming directory: src/config -> src/configs
+[36m[Directory Standardization][0m Updated imports in src/components/layouts/Sidebar.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/layouts/Header.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/features/navigation/Sidebar.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/features/navigation/MobileMenu.tsx
+[36m[Directory Standardization][0m Updated imports in src/components/features/navigation/Header.tsx
+[36m[Directory Standardization][0m Updated imports in scripts/icons/update-icon-imports.js
+[32m[Success][0m Renamed directory: src/config -> src/configs
+[36m[Directory Standardization][0m Renaming directory: src/__tests__ -> src/--tests--
+[32m[Success][0m Renamed directory: src/__tests__ -> src/--tests--
+[32m[Success][0m Report written to docs/project-history/directory-naming-report.md
+[36m[Directory Standardization][0m Directory naming standardization completed.
+[32m[Success][0m Successfully renamed 24 directories.
+[0;32m✓ Successfully completed: standardize-directory-naming.js[0m
+

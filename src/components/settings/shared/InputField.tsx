@@ -1,6 +1,7 @@
 "use client";
 
 import React, { forwardRef } from 'react';
+import HTMLInputElement from '../../ui/radio/types/index';
 import Input from '@/components/ui/input';
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {

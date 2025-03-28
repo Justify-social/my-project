@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useEffect } from "react";
-import Header from "@/components/Navigation/Header";
-import Sidebar from "@/components/Navigation/Sidebar";
+import ClientLayoutProps from './client-layout.example';
+import Header from "./Header";
+import Sidebar from "./Sidebar";
 import { SidebarProvider } from "@/providers/SidebarProvider";
-import { SearchProvider } from "@/context/SearchContext";
+import { SearchProvider } from '@/contexts/SearchContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { AuthSpinner } from '@/components/ui/loading-spinner/index';
+import { AuthSpinner } from '@/components/ui/spinner';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -45,7 +46,6 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           </button>
         </div>
       </div>);
-
   }
 
   // Only render the layout if we have a user
@@ -60,7 +60,7 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           <Header
             companyName="Justify"
             remainingCredits={100}
-            notificationsCount={3} className="font-sora" />
+            notificationsCount={3} />
 
           <Sidebar />
           <div className="md:ml-64 pt-16 font-work-sans">
@@ -71,7 +71,6 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
         </div>
       </SearchProvider>
     </SidebarProvider>);
-
 };
 
 export default ClientLayout;

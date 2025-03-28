@@ -1,86 +1,105 @@
-# Table of contents
+# Documentation
 
-* [Introduction](README.md)
-* [Contributing Guidelines](CONTRIBUTING.md)
+## Core Documentation
 
-## Backend Features
+- [Project Overview](guides/project-overview.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Graphiti](graphiti.md)
+- [CursorAI Graphiti Procedure](cursor-ai-graphiti-procedure.md)
 
-* [Overview](features-backend/README.md)
-* [Database](features-backend/database/README.md)
-  * [Schema](features-backend/database/schema.md)
-  * [Operations](features-backend/database/operations.md)
-* [Authentication](features-backend/authentication/README.md)
-  * [Overview](features-backend/authentication/overview.md)
-  * [Implementation](features-backend/authentication/implementation.md)
-* [APIs](features-backend/apis/README.md)
-  * [Overview](features-backend/apis/overview.md)
-  * [Endpoints](features-backend/apis/endpoints.md)
-* [Architecture](features-backend/architecture/README.md)
-  * [Overview](features-backend/architecture/overview.md)
-  * [Design](features-backend/architecture/design.md)
-* [Linting](features-backend/linting/README.md)
-  * [Overview](features-backend/linting/overview.md)
-  * [Rules](features-backend/linting/rules.md)
-* [Testing](features-backend/testing/README.md)
-  * [Overview](features-backend/testing/overview.md)
+## Getting Started
 
-## Frontend Features
+- [Development Setup](guides/developer/setup.md)
+- [Coding Standards](guides/developer/coding-standards.md)
+- [Naming Conventions](guides/naming-conventions.md)
 
-* [Overview](features-frontend/README.md)
-* [Design System](features-frontend/design-system/README.md)
-  * [Brand Guide](features-frontend/design-system/brand-guide.md)
-  * [Loading Components](features-frontend/design-system/loading-components.md)
-* [Dashboard](features-frontend/dashboard/README.md)
-  * [Overview](features-frontend/dashboard/overview.md)
-  * [Usage Guide](features-frontend/dashboard/usage.md)
-  * [Components](features-frontend/dashboard/components.md)
-* [Campaign Wizard](features-frontend/campaign-wizard/README.md)
-  * [Overview](features-frontend/campaign-wizard/overview.md)
-  * [Usage Guide](features-frontend/campaign-wizard/usage.md)
-  * [Workflow](features-frontend/campaign-wizard/workflow.md)
-  * [Form Validation](features-frontend/campaign-wizard/form-validation.md)
-  * [Draft Saving](features-frontend/campaign-wizard/draft-saving.md)
-  * [Data Loading](features-frontend/campaign-wizard/data-loading.md)
-* [Creative Testing](features-frontend/creative-testing/README.md)
-  * [Overview](features-frontend/creative-testing/overview.md)
-  * [Usage Guide](features-frontend/creative-testing/usage.md)
-* [Brand Lift](features-frontend/brand-lift/README.md)
-  * [Overview](features-frontend/brand-lift/overview.md)
-  * [Usage Guide](features-frontend/brand-lift/usage.md)
-* [Brand Health](features-frontend/brand-health/README.md)
-  * [Overview](features-frontend/brand-health/overview.md)
-  * [Usage Guide](features-frontend/brand-health/usage.md)
-* [Influencers](features-frontend/influencers/README.md)
-  * [Overview](features-frontend/influencers/overview.md)
-  * [Usage Guide](features-frontend/influencers/usage.md)
-* [Mixed Media Modeling](features-frontend/mmm/README.md)
-  * [Overview](features-frontend/mmm/overview.md)
-  * [Usage Guide](features-frontend/mmm/usage.md)
-* [Reports](features-frontend/reports/README.md)
-  * [Overview](features-frontend/reports/overview.md)
-  * [Usage Guide](features-frontend/reports/usage.md)
-* [Settings](features-frontend/settings/README.md)
-  * [Overview](features-frontend/settings/overview.md)
-  * [Usage Guide](features-frontend/settings/usage.md)
-  * [Team Management](features-frontend/settings/team-management.md)
-  * [Branding](features-frontend/settings/branding.md)
-* [Admin](features-frontend/admin/README.md)
-  * [Overview](features-frontend/admin/overview.md)
-  * [Usage Guide](features-frontend/admin/usage.md)
+## Architecture
 
-## Guides
+- [Directory Structure](architecture/directory-structure.md)
+- [Data Flow](architecture/data-flow.md)
+- [Authentication](architecture/authentication.md)
+- [State Management](architecture/state-management.md)
 
-* [Overview](guides/README.md)
-* [User Guides](guides/user/README.md)
-  * [Getting Started](guides/user/getting-started.md)
-* [Developer Guides](guides/developer/README.md)
-  * [Setup](guides/developer/setup.md)
-  * [Deployment](guides/developer/deployment.md)
-* [User Journey](guides/user-journey.md)
-* [Roadmap](guides/roadmap.md)
+## Features
 
-## Templates
+### Frontend
 
-* [Overview](templates/README.md)
-* [Feature Documentation Template](templates/feature.md)
-* [Guide Template](templates/guide.md) 
+- [Campaign Wizard](features/frontend/campaign-wizard.md)
+- [Influencer Discovery](features/frontend/influencer-discovery.md)
+- [Reporting Dashboards](features/frontend/reporting-dashboards.md)
+- [Asset Management](features/frontend/asset-management.md)
+
+### Backend
+
+- [API Routes](features/backend/api-routes.md)
+- [Database Structure](features/backend/database-structure.md)
+- [Authentication](features/backend/authentication.md)
+- [Data Processing](features/backend/data-processing.md)
+
+## Reference Materials
+
+### Configuration
+
+- [Environment Variables](reference/configs/environment-variables.md)
+- [Linting Guide](reference/configs/linting-guide.md)
+- [Build Configuration](reference/configs/build-configuration.md)
+
+### Scripts
+
+- [Available Scripts](reference/scripts/index.md)
+
+### Icons
+
+- [Icon System](reference/icons/icon-system.md)
+- [Adding Icons](reference/icons/adding-icons.md)
+
+### API
+
+- [Endpoints Reference](reference/api/endpoints.md)
+- [Error Codes](reference/api/error-codes.md)
+- [Rate Limiting](reference/api/rate-limiting.md)
+
+## Processes
+
+- [Release Process](processes/release-process.md)
+- [Testing Strategy](processes/testing-strategy.md)
+- [Bug Reporting](processes/bug-reporting.md)
+- [Feature Requests](processes/feature-requests.md)
+
+## Routes
+
+- [Overview](routes/README.md)
+- [Admin Routes](routes/admin.md)
+- [Auth Routes](routes/auth.md)
+- [Campaign Routes](routes/campaigns.md)
+- [Dashboard Routes](routes/dashboard.md)
+- [Settings Routes](routes/settings.md)
+
+## Project History
+
+- [Unification Project Summary](project-history/unification-project/summary.md)
+- [Legacy Directories](project-history/unification-project/legacy-directories.md)
+
+### Phases
+
+- [Full Phases Documentation](project-history/unification-project/phases/full-phases-documentation.md)
+- [Final Phase](project-history/unification-project/phases/final-phase.md)
+
+### Reports
+
+- [Progress Report](project-history/unification-project/reports/progress-report.md)
+- [Latest Update](project-history/unification-project/reports/latest-update.md)
+- [Import Verification](project-history/unification-project/reports/import-verification.md)
+- [Script Removal](project-history/unification-project/reports/script-removal.md)
+- [Scripts Consolidation](project-history/unification-project/reports/scripts-consolidation.md)
+- [File Renaming](project-history/unification-project/reports/file-renaming.md)
+- [Final Consolidation Summary](project-history/unification-project/reports/final-consolidation-summary.md)
+- [Final Cleanup](project-history/unification-project/reports/final-cleanup.md)
+- [Script Cleanup Final](project-history/unification-project/reports/script-cleanup-final.md)
+- [Reference Updates](project-history/unification-project/reports/reference-updates.md)
+- [Script Import Verification](project-history/unification-project/reports/script-import-verification.md)
+- [Backup Cleanup](project-history/unification-project/reports/backup-cleanup.md)
+- [Backup Files Manifest](project-history/unification-project/reports/backup-files-manifest.md)
+- [Final Backup Verification](project-history/unification-project/reports/final-backup-verification.md)
+- [Test Migration](project-history/unification-project/reports/test-migration.md)
+- [Config Centralization](project-history/unification-project/reports/config-centralization.md) 

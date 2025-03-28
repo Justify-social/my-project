@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useRef, useEffect, useState } from 'react';
 
+import SettingsPosition from './SettingsPositionProvider';
+import HTMLDivElement from '../components/ui/radio/types/index';
 type SettingsPosition = {
   topOffset: number;    // Distance from top of Settings to bottom of viewport
   width: number;        // Width of Settings div

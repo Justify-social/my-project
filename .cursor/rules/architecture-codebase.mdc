@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Mindset and Engineering Quality
+Think like an MIT professor and a surgeon – precision, clarity and depth.
+Always rate your solution out of /10 – aim for 9+
+Do a deep search of the current Markdown document and codebase before acting.
+The best solutions are robust, scalable 
+
+[directory-structure.md](mdc:docs/architecture/directory-structure.md)

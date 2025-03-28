@@ -1,0 +1,1352 @@
+{
+  "faXmark": {
+    "prefix": "fas",
+    "name": "xmark",
+    "fileName": "xmark.svg",
+    "path": "/ui-icons/solid/xmark.svg"
+  },
+  "faVideo": {
+    "prefix": "fas",
+    "name": "video",
+    "fileName": "video.svg",
+    "path": "/ui-icons/solid/video.svg"
+  },
+  "faUsers": {
+    "prefix": "fas",
+    "name": "users",
+    "fileName": "users.svg",
+    "path": "/ui-icons/solid/users.svg"
+  },
+  "faUser": {
+    "prefix": "fas",
+    "name": "user",
+    "fileName": "user.svg",
+    "path": "/ui-icons/solid/user.svg"
+  },
+  "faUserGroup": {
+    "prefix": "fas",
+    "name": "user-group",
+    "fileName": "user-group.svg",
+    "path": "/ui-icons/solid/user-group.svg"
+  },
+  "faUpload": {
+    "prefix": "fas",
+    "name": "upload",
+    "fileName": "upload.svg",
+    "path": "/ui-icons/solid/upload.svg"
+  },
+  "faUnlock": {
+    "prefix": "fas",
+    "name": "unlock",
+    "fileName": "unlock.svg",
+    "path": "/ui-icons/solid/unlock.svg"
+  },
+  "faTrophy": {
+    "prefix": "fas",
+    "name": "trophy",
+    "fileName": "trophy.svg",
+    "path": "/ui-icons/solid/trophy.svg"
+  },
+  "faTriangleExclamation": {
+    "prefix": "fas",
+    "name": "triangle-exclamation",
+    "fileName": "triangle-exclamation.svg",
+    "path": "/ui-icons/solid/triangle-exclamation.svg"
+  },
+  "faTrash": {
+    "prefix": "fas",
+    "name": "trash",
+    "fileName": "trash.svg",
+    "path": "/ui-icons/solid/trash.svg"
+  },
+  "faTrashCan": {
+    "prefix": "fas",
+    "name": "trash-can",
+    "fileName": "trash-can.svg",
+    "path": "/ui-icons/solid/trash-can.svg"
+  },
+  "faThumbsUp": {
+    "prefix": "fas",
+    "name": "thumbs-up",
+    "fileName": "thumbs-up.svg",
+    "path": "/ui-icons/solid/thumbs-up.svg"
+  },
+  "faTag": {
+    "prefix": "fas",
+    "name": "tag",
+    "fileName": "tag.svg",
+    "path": "/ui-icons/solid/tag.svg"
+  },
+  "faTable": {
+    "prefix": "fas",
+    "name": "table",
+    "fileName": "table.svg",
+    "path": "/ui-icons/solid/table.svg"
+  },
+  "faTableCells": {
+    "prefix": "fas",
+    "name": "table-cells",
+    "fileName": "table-cells.svg",
+    "path": "/ui-icons/solid/table-cells.svg"
+  },
+  "faStar": {
+    "prefix": "fas",
+    "name": "star",
+    "fileName": "star.svg",
+    "path": "/ui-icons/solid/star.svg"
+  },
+  "faSpinner": {
+    "prefix": "fas",
+    "name": "spinner",
+    "fileName": "spinner.svg",
+    "path": "/ui-icons/solid/spinner.svg"
+  },
+  "faSignal": {
+    "prefix": "fas",
+    "name": "signal",
+    "fileName": "signal.svg",
+    "path": "/ui-icons/solid/signal.svg"
+  },
+  "faShield": {
+    "prefix": "fas",
+    "name": "shield",
+    "fileName": "shield.svg",
+    "path": "/ui-icons/solid/shield.svg"
+  },
+  "faShare": {
+    "prefix": "fas",
+    "name": "share",
+    "fileName": "share.svg",
+    "path": "/ui-icons/solid/share.svg"
+  },
+  "faServer": {
+    "prefix": "fas",
+    "name": "server",
+    "fileName": "server.svg",
+    "path": "/ui-icons/solid/server.svg"
+  },
+  "faRotate": {
+    "prefix": "fas",
+    "name": "rotate",
+    "fileName": "rotate.svg",
+    "path": "/ui-icons/solid/rotate.svg"
+  },
+  "faRotateRight": {
+    "prefix": "fas",
+    "name": "rotate-right",
+    "fileName": "rotate-right.svg",
+    "path": "/ui-icons/solid/rotate-right.svg"
+  },
+  "faRocket": {
+    "prefix": "fas",
+    "name": "rocket",
+    "fileName": "rocket.svg",
+    "path": "/ui-icons/solid/rocket.svg"
+  },
+  "faRightToBracket": {
+    "prefix": "fas",
+    "name": "right-to-bracket",
+    "fileName": "right-to-bracket.svg",
+    "path": "/ui-icons/solid/right-to-bracket.svg"
+  },
+  "faRightFromBracket": {
+    "prefix": "fas",
+    "name": "right-from-bracket",
+    "fileName": "right-from-bracket.svg",
+    "path": "/ui-icons/solid/right-from-bracket.svg"
+  },
+  "faQuestion": {
+    "prefix": "fas",
+    "name": "question",
+    "fileName": "question.svg",
+    "path": "/ui-icons/solid/question.svg"
+  },
+  "faPrint": {
+    "prefix": "fas",
+    "name": "print",
+    "fileName": "print.svg",
+    "path": "/ui-icons/solid/print.svg"
+  },
+  "faPresentationScreen": {
+    "prefix": "fas",
+    "name": "presentation-screen",
+    "fileName": "presentation-screen.svg",
+    "path": "/ui-icons/solid/presentation-screen.svg"
+  },
+  "faPlus": {
+    "prefix": "fas",
+    "name": "plus",
+    "fileName": "plus.svg",
+    "path": "/ui-icons/solid/plus.svg"
+  },
+  "faPlay": {
+    "prefix": "fas",
+    "name": "play",
+    "fileName": "play.svg",
+    "path": "/ui-icons/solid/play.svg"
+  },
+  "faPhone": {
+    "prefix": "fas",
+    "name": "phone",
+    "fileName": "phone.svg",
+    "path": "/ui-icons/solid/phone.svg"
+  },
+  "faPencil": {
+    "prefix": "fas",
+    "name": "pencil",
+    "fileName": "pencil.svg",
+    "path": "/ui-icons/solid/pencil.svg"
+  },
+  "faPen": {
+    "prefix": "fas",
+    "name": "pen",
+    "fileName": "pen.svg",
+    "path": "/ui-icons/solid/pen.svg"
+  },
+  "faPenToSquare": {
+    "prefix": "fas",
+    "name": "pen-to-square",
+    "fileName": "pen-to-square.svg",
+    "path": "/ui-icons/solid/pen-to-square.svg"
+  },
+  "faPause": {
+    "prefix": "fas",
+    "name": "pause",
+    "fileName": "pause.svg",
+    "path": "/ui-icons/solid/pause.svg"
+  },
+  "faPaperclip": {
+    "prefix": "fas",
+    "name": "paperclip",
+    "fileName": "paperclip.svg",
+    "path": "/ui-icons/solid/paperclip.svg"
+  },
+  "faPaperPlane": {
+    "prefix": "fas",
+    "name": "paper-plane",
+    "fileName": "paper-plane.svg",
+    "path": "/ui-icons/solid/paper-plane.svg"
+  },
+  "faPalette": {
+    "prefix": "fas",
+    "name": "palette",
+    "fileName": "palette.svg",
+    "path": "/ui-icons/solid/palette.svg"
+  },
+  "faMoneyBill": {
+    "prefix": "fas",
+    "name": "money-bill",
+    "fileName": "money-bill.svg",
+    "path": "/ui-icons/solid/money-bill.svg"
+  },
+  "faMinus": {
+    "prefix": "fas",
+    "name": "minus",
+    "fileName": "minus.svg",
+    "path": "/ui-icons/solid/minus.svg"
+  },
+  "faMegaphone": {
+    "prefix": "fas",
+    "name": "megaphone",
+    "fileName": "megaphone.svg",
+    "path": "/ui-icons/solid/megaphone.svg"
+  },
+  "faMap": {
+    "prefix": "fas",
+    "name": "map",
+    "fileName": "map.svg",
+    "path": "/ui-icons/solid/map.svg"
+  },
+  "faMagnifyingGlass": {
+    "prefix": "fas",
+    "name": "magnifying-glass",
+    "fileName": "magnifying-glass.svg",
+    "path": "/ui-icons/solid/magnifying-glass.svg"
+  },
+  "faMagnifyingGlassPlus": {
+    "prefix": "fas",
+    "name": "magnifying-glass-plus",
+    "fileName": "magnifying-glass-plus.svg",
+    "path": "/ui-icons/solid/magnifying-glass-plus.svg"
+  },
+  "faLock": {
+    "prefix": "fas",
+    "name": "lock",
+    "fileName": "lock.svg",
+    "path": "/ui-icons/solid/lock.svg"
+  },
+  "faList": {
+    "prefix": "fas",
+    "name": "list",
+    "fileName": "list.svg",
+    "path": "/ui-icons/solid/list.svg"
+  },
+  "faLightbulb": {
+    "prefix": "fas",
+    "name": "lightbulb",
+    "fileName": "lightbulb.svg",
+    "path": "/ui-icons/solid/lightbulb.svg"
+  },
+  "faKey": {
+    "prefix": "fas",
+    "name": "key",
+    "fileName": "key.svg",
+    "path": "/ui-icons/solid/key.svg"
+  },
+  "faInfo": {
+    "prefix": "fas",
+    "name": "info",
+    "fileName": "info.svg",
+    "path": "/ui-icons/solid/info.svg"
+  },
+  "faImage": {
+    "prefix": "fas",
+    "name": "image",
+    "fileName": "image.svg",
+    "path": "/ui-icons/solid/image.svg"
+  },
+  "faHouse": {
+    "prefix": "fas",
+    "name": "house",
+    "fileName": "house.svg",
+    "path": "/ui-icons/solid/house.svg"
+  },
+  "faHeart": {
+    "prefix": "fas",
+    "name": "heart",
+    "fileName": "heart.svg",
+    "path": "/ui-icons/solid/heart.svg"
+  },
+  "faGlobe": {
+    "prefix": "fas",
+    "name": "globe",
+    "fileName": "globe.svg",
+    "path": "/ui-icons/solid/globe.svg"
+  },
+  "faGear": {
+    "prefix": "fas",
+    "name": "gear",
+    "fileName": "gear.svg",
+    "path": "/ui-icons/solid/gear.svg"
+  },
+  "faForward": {
+    "prefix": "fas",
+    "name": "forward",
+    "fileName": "forward.svg",
+    "path": "/ui-icons/solid/forward.svg"
+  },
+  "faFloppyDisk": {
+    "prefix": "fas",
+    "name": "floppy-disk",
+    "fileName": "floppy-disk.svg",
+    "path": "/ui-icons/solid/floppy-disk.svg"
+  },
+  "faFlag": {
+    "prefix": "fas",
+    "name": "flag",
+    "fileName": "flag.svg",
+    "path": "/ui-icons/solid/flag.svg"
+  },
+  "faFlagCheckered": {
+    "prefix": "fas",
+    "name": "flag-checkered",
+    "fileName": "flag-checkered.svg",
+    "path": "/ui-icons/solid/flag-checkered.svg"
+  },
+  "faFilter": {
+    "prefix": "fas",
+    "name": "filter",
+    "fileName": "filter.svg",
+    "path": "/ui-icons/solid/filter.svg"
+  },
+  "faFile": {
+    "prefix": "fas",
+    "name": "file",
+    "fileName": "file.svg",
+    "path": "/ui-icons/solid/file.svg"
+  },
+  "faFileVideo": {
+    "prefix": "fas",
+    "name": "file-video",
+    "fileName": "file-video.svg",
+    "path": "/ui-icons/solid/file-video.svg"
+  },
+  "faFileLines": {
+    "prefix": "fas",
+    "name": "file-lines",
+    "fileName": "file-lines.svg",
+    "path": "/ui-icons/solid/file-lines.svg"
+  },
+  "faFileImage": {
+    "prefix": "fas",
+    "name": "file-image",
+    "fileName": "file-image.svg",
+    "path": "/ui-icons/solid/file-image.svg"
+  },
+  "faFileAudio": {
+    "prefix": "fas",
+    "name": "file-audio",
+    "fileName": "file-audio.svg",
+    "path": "/ui-icons/solid/file-audio.svg"
+  },
+  "faEye": {
+    "prefix": "fas",
+    "name": "eye",
+    "fileName": "eye.svg",
+    "path": "/ui-icons/solid/eye.svg"
+  },
+  "faEyeSlash": {
+    "prefix": "fas",
+    "name": "eye-slash",
+    "fileName": "eye-slash.svg",
+    "path": "/ui-icons/solid/eye-slash.svg"
+  },
+  "faExclamation": {
+    "prefix": "fas",
+    "name": "exclamation",
+    "fileName": "exclamation.svg",
+    "path": "/ui-icons/solid/exclamation.svg"
+  },
+  "faEnvelope": {
+    "prefix": "fas",
+    "name": "envelope",
+    "fileName": "envelope.svg",
+    "path": "/ui-icons/solid/envelope.svg"
+  },
+  "faDownload": {
+    "prefix": "fas",
+    "name": "download",
+    "fileName": "download.svg",
+    "path": "/ui-icons/solid/download.svg"
+  },
+  "faDollarSign": {
+    "prefix": "fas",
+    "name": "dollar-sign",
+    "fileName": "dollar-sign.svg",
+    "path": "/ui-icons/solid/dollar-sign.svg"
+  },
+  "faCreditCard": {
+    "prefix": "fas",
+    "name": "credit-card",
+    "fileName": "credit-card.svg",
+    "path": "/ui-icons/solid/credit-card.svg"
+  },
+  "faCopy": {
+    "prefix": "fas",
+    "name": "copy",
+    "fileName": "copy.svg",
+    "path": "/ui-icons/solid/copy.svg"
+  },
+  "faComments": {
+    "prefix": "fas",
+    "name": "comments",
+    "fileName": "comments.svg",
+    "path": "/ui-icons/solid/comments.svg"
+  },
+  "faComment": {
+    "prefix": "fas",
+    "name": "comment",
+    "fileName": "comment.svg",
+    "path": "/ui-icons/solid/comment.svg"
+  },
+  "faCommentDots": {
+    "prefix": "fas",
+    "name": "comment-dots",
+    "fileName": "comment-dots.svg",
+    "path": "/ui-icons/solid/comment-dots.svg"
+  },
+  "faClock": {
+    "prefix": "fas",
+    "name": "clock",
+    "fileName": "clock.svg",
+    "path": "/ui-icons/solid/clock.svg"
+  },
+  "faClockRotateLeft": {
+    "prefix": "fas",
+    "name": "clock-rotate-left",
+    "fileName": "clock-rotate-left.svg",
+    "path": "/ui-icons/solid/clock-rotate-left.svg"
+  },
+  "faCircle": {
+    "prefix": "fas",
+    "name": "circle",
+    "fileName": "circle.svg",
+    "path": "/ui-icons/solid/circle.svg"
+  },
+  "faCircleXmark": {
+    "prefix": "fas",
+    "name": "circle-xmark",
+    "fileName": "circle-xmark.svg",
+    "path": "/ui-icons/solid/circle-xmark.svg"
+  },
+  "faCircleUser": {
+    "prefix": "fas",
+    "name": "circle-user",
+    "fileName": "circle-user.svg",
+    "path": "/ui-icons/solid/circle-user.svg"
+  },
+  "faCircleQuestion": {
+    "prefix": "fas",
+    "name": "circle-question",
+    "fileName": "circle-question.svg",
+    "path": "/ui-icons/solid/circle-question.svg"
+  },
+  "faCircleNotch": {
+    "prefix": "fas",
+    "name": "circle-notch",
+    "fileName": "circle-notch.svg",
+    "path": "/ui-icons/solid/circle-notch.svg"
+  },
+  "faCircleInfo": {
+    "prefix": "fas",
+    "name": "circle-info",
+    "fileName": "circle-info.svg",
+    "path": "/ui-icons/solid/circle-info.svg"
+  },
+  "faCircleCheck": {
+    "prefix": "fas",
+    "name": "circle-check",
+    "fileName": "circle-check.svg",
+    "path": "/ui-icons/solid/circle-check.svg"
+  },
+  "faChevronUp": {
+    "prefix": "fas",
+    "name": "chevron-up",
+    "fileName": "chevron-up.svg",
+    "path": "/ui-icons/solid/chevron-up.svg"
+  },
+  "faChevronRight": {
+    "prefix": "fas",
+    "name": "chevron-right",
+    "fileName": "chevron-right.svg",
+    "path": "/ui-icons/solid/chevron-right.svg"
+  },
+  "faChevronLeft": {
+    "prefix": "fas",
+    "name": "chevron-left",
+    "fileName": "chevron-left.svg",
+    "path": "/ui-icons/solid/chevron-left.svg"
+  },
+  "faChevronDown": {
+    "prefix": "fas",
+    "name": "chevron-down",
+    "fileName": "chevron-down.svg",
+    "path": "/ui-icons/solid/chevron-down.svg"
+  },
+  "faCheck": {
+    "prefix": "fas",
+    "name": "check",
+    "fileName": "check.svg",
+    "path": "/ui-icons/solid/check.svg"
+  },
+  "faChartPie": {
+    "prefix": "fas",
+    "name": "chart-pie",
+    "fileName": "chart-pie.svg",
+    "path": "/ui-icons/solid/chart-pie.svg"
+  },
+  "faChartLine": {
+    "prefix": "fas",
+    "name": "chart-line",
+    "fileName": "chart-line.svg",
+    "path": "/ui-icons/solid/chart-line.svg"
+  },
+  "faChartColumn": {
+    "prefix": "fas",
+    "name": "chart-column",
+    "fileName": "chart-column.svg",
+    "path": "/ui-icons/solid/chart-column.svg"
+  },
+  "faChartBar": {
+    "prefix": "fas",
+    "name": "chart-bar",
+    "fileName": "chart-bar.svg",
+    "path": "/ui-icons/solid/chart-bar.svg"
+  },
+  "faCamera": {
+    "prefix": "fas",
+    "name": "camera",
+    "fileName": "camera.svg",
+    "path": "/ui-icons/solid/camera.svg"
+  },
+  "faCalendar": {
+    "prefix": "fas",
+    "name": "calendar",
+    "fileName": "calendar.svg",
+    "path": "/ui-icons/solid/calendar.svg"
+  },
+  "faCalendarDays": {
+    "prefix": "fas",
+    "name": "calendar-days",
+    "fileName": "calendar-days.svg",
+    "path": "/ui-icons/solid/calendar-days.svg"
+  },
+  "faBurger": {
+    "prefix": "fas",
+    "name": "burger",
+    "fileName": "burger.svg",
+    "path": "/ui-icons/solid/burger.svg"
+  },
+  "faBullseye": {
+    "prefix": "fas",
+    "name": "bullseye",
+    "fileName": "bullseye.svg",
+    "path": "/ui-icons/solid/bullseye.svg"
+  },
+  "faBuilding": {
+    "prefix": "fas",
+    "name": "building",
+    "fileName": "building.svg",
+    "path": "/ui-icons/solid/building.svg"
+  },
+  "faBug": {
+    "prefix": "fas",
+    "name": "bug",
+    "fileName": "bug.svg",
+    "path": "/ui-icons/solid/bug.svg"
+  },
+  "faBookmark": {
+    "prefix": "fas",
+    "name": "bookmark",
+    "fileName": "bookmark.svg",
+    "path": "/ui-icons/solid/bookmark.svg"
+  },
+  "faBolt": {
+    "prefix": "fas",
+    "name": "bolt",
+    "fileName": "bolt.svg",
+    "path": "/ui-icons/solid/bolt.svg"
+  },
+  "faBell": {
+    "prefix": "fas",
+    "name": "bell",
+    "fileName": "bell.svg",
+    "path": "/ui-icons/solid/bell.svg"
+  },
+  "faBellSlash": {
+    "prefix": "fas",
+    "name": "bell-slash",
+    "fileName": "bell-slash.svg",
+    "path": "/ui-icons/solid/bell-slash.svg"
+  },
+  "faBars": {
+    "prefix": "fas",
+    "name": "bars",
+    "fileName": "bars.svg",
+    "path": "/ui-icons/solid/bars.svg"
+  },
+  "faArrowUp": {
+    "prefix": "fas",
+    "name": "arrow-up",
+    "fileName": "arrow-up.svg",
+    "path": "/ui-icons/solid/arrow-up.svg"
+  },
+  "faArrowTrendUp": {
+    "prefix": "fas",
+    "name": "arrow-trend-up",
+    "fileName": "arrow-trend-up.svg",
+    "path": "/ui-icons/solid/arrow-trend-up.svg"
+  },
+  "faArrowTrendDown": {
+    "prefix": "fas",
+    "name": "arrow-trend-down",
+    "fileName": "arrow-trend-down.svg",
+    "path": "/ui-icons/solid/arrow-trend-down.svg"
+  },
+  "faArrowRight": {
+    "prefix": "fas",
+    "name": "arrow-right",
+    "fileName": "arrow-right.svg",
+    "path": "/ui-icons/solid/arrow-right.svg"
+  },
+  "faArrowLeft": {
+    "prefix": "fas",
+    "name": "arrow-left",
+    "fileName": "arrow-left.svg",
+    "path": "/ui-icons/solid/arrow-left.svg"
+  },
+  "faArrowDown": {
+    "prefix": "fas",
+    "name": "arrow-down",
+    "fileName": "arrow-down.svg",
+    "path": "/ui-icons/solid/arrow-down.svg"
+  },
+  "faPauseLight": {
+    "prefix": "fal",
+    "name": "pause",
+    "fileName": "pause.svg",
+    "path": "/ui-icons/light/pause.svg"
+  },
+  "faSignalLight": {
+    "prefix": "fal",
+    "name": "signal",
+    "fileName": "signal.svg",
+    "path": "/ui-icons/light/signal.svg"
+  },
+  "faShieldLight": {
+    "prefix": "fal",
+    "name": "shield",
+    "fileName": "shield.svg",
+    "path": "/ui-icons/light/shield.svg"
+  },
+  "faTrophyLight": {
+    "prefix": "fal",
+    "name": "trophy",
+    "fileName": "trophy.svg",
+    "path": "/ui-icons/light/trophy.svg"
+  },
+  "faChevronLeftLight": {
+    "prefix": "fal",
+    "name": "chevron-left",
+    "fileName": "chevron-left.svg",
+    "path": "/ui-icons/light/chevron-left.svg"
+  },
+  "faUserGroupLight": {
+    "prefix": "fal",
+    "name": "user-group",
+    "fileName": "user-group.svg",
+    "path": "/ui-icons/light/user-group.svg"
+  },
+  "faPenToSquareLight": {
+    "prefix": "fal",
+    "name": "pen-to-square",
+    "fileName": "pen-to-square.svg",
+    "path": "/ui-icons/light/pen-to-square.svg"
+  },
+  "faChevronUpLight": {
+    "prefix": "fal",
+    "name": "chevron-up",
+    "fileName": "chevron-up.svg",
+    "path": "/ui-icons/light/chevron-up.svg"
+  },
+  "faRightToBracketLight": {
+    "prefix": "fal",
+    "name": "right-to-bracket",
+    "fileName": "right-to-bracket.svg",
+    "path": "/ui-icons/light/right-to-bracket.svg"
+  },
+  "faHouseLight": {
+    "prefix": "fal",
+    "name": "house",
+    "fileName": "house.svg",
+    "path": "/ui-icons/light/house.svg"
+  },
+  "faVideoLight": {
+    "prefix": "fal",
+    "name": "video",
+    "fileName": "video.svg",
+    "path": "/ui-icons/light/video.svg"
+  },
+  "faCircleInfoLight": {
+    "prefix": "fal",
+    "name": "circle-info",
+    "fileName": "circle-info.svg",
+    "path": "/ui-icons/light/circle-info.svg"
+  },
+  "faTrashLight": {
+    "prefix": "fal",
+    "name": "trash",
+    "fileName": "trash.svg",
+    "path": "/ui-icons/light/trash.svg"
+  },
+  "faSearchLight": {
+    "prefix": "fal",
+    "name": "magnifying-glass",
+    "fileName": "magnifying-glass.svg",
+    "path": "/ui-icons/light/magnifying-glass.svg"
+  },
+  "faPrintLight": {
+    "prefix": "fal",
+    "name": "print",
+    "fileName": "print.svg",
+    "path": "/ui-icons/light/print.svg"
+  },
+  "faRotateLight": {
+    "prefix": "fal",
+    "name": "rotate",
+    "fileName": "rotate.svg",
+    "path": "/ui-icons/light/rotate.svg"
+  },
+  "faPresentationScreenLight": {
+    "prefix": "fal",
+    "name": "presentation-screen",
+    "fileName": "presentation-screen.svg",
+    "path": "/ui-icons/light/presentation-screen.svg"
+  },
+  "faRotateRightLight": {
+    "prefix": "fal",
+    "name": "rotate-right",
+    "fileName": "rotate-right.svg",
+    "path": "/ui-icons/light/rotate-right.svg"
+  },
+  "faUsersLight": {
+    "prefix": "fal",
+    "name": "users",
+    "fileName": "users.svg",
+    "path": "/ui-icons/light/users.svg"
+  },
+  "faTagLight": {
+    "prefix": "fal",
+    "name": "tag",
+    "fileName": "tag.svg",
+    "path": "/ui-icons/light/tag.svg"
+  },
+  "faMinusLight": {
+    "prefix": "fal",
+    "name": "minus",
+    "fileName": "minus.svg",
+    "path": "/ui-icons/light/minus.svg"
+  },
+  "faPlayLight": {
+    "prefix": "fal",
+    "name": "play",
+    "fileName": "play.svg",
+    "path": "/ui-icons/light/play.svg"
+  },
+  "faCircleCheckLight": {
+    "prefix": "fal",
+    "name": "circle-check",
+    "fileName": "circle-check.svg",
+    "path": "/ui-icons/light/circle-check.svg"
+  },
+  "faChevronDownLight": {
+    "prefix": "fal",
+    "name": "chevron-down",
+    "fileName": "chevron-down.svg",
+    "path": "/ui-icons/light/chevron-down.svg"
+  },
+  "faPlusLight": {
+    "prefix": "fal",
+    "name": "plus",
+    "fileName": "plus.svg",
+    "path": "/ui-icons/light/plus.svg"
+  },
+  "faCalendarLight": {
+    "prefix": "fal",
+    "name": "calendar",
+    "fileName": "calendar.svg",
+    "path": "/ui-icons/light/calendar.svg"
+  },
+  "faBellLight": {
+    "prefix": "fal",
+    "name": "bell",
+    "fileName": "bell.svg",
+    "path": "/ui-icons/light/bell.svg"
+  },
+  "faTrashCanLight": {
+    "prefix": "fal",
+    "name": "trash-can",
+    "fileName": "trash-can.svg",
+    "path": "/ui-icons/light/trash-can.svg"
+  },
+  "faUserLight": {
+    "prefix": "fal",
+    "name": "user",
+    "fileName": "user.svg",
+    "path": "/ui-icons/light/user.svg"
+  },
+  "faCheckLight": {
+    "prefix": "fal",
+    "name": "check",
+    "fileName": "check.svg",
+    "path": "/ui-icons/light/check.svg"
+  },
+  "faPencilLight": {
+    "prefix": "fal",
+    "name": "pencil",
+    "fileName": "pencil.svg",
+    "path": "/ui-icons/light/pencil.svg"
+  },
+  "faMagnifyingGlassPlusLight": {
+    "prefix": "fal",
+    "name": "magnifying-glass-plus",
+    "fileName": "magnifying-glass-plus.svg",
+    "path": "/ui-icons/light/magnifying-glass-plus.svg"
+  },
+  "faPhoneLight": {
+    "prefix": "fal",
+    "name": "phone",
+    "fileName": "phone.svg",
+    "path": "/ui-icons/light/phone.svg"
+  },
+  "faEnvelopeLight": {
+    "prefix": "fal",
+    "name": "envelope",
+    "fileName": "envelope.svg",
+    "path": "/ui-icons/light/envelope.svg"
+  },
+  "faSpinnerLight": {
+    "prefix": "fal",
+    "name": "spinner",
+    "fileName": "spinner.svg",
+    "path": "/ui-icons/light/spinner.svg"
+  },
+  "faRocketLight": {
+    "prefix": "fal",
+    "name": "rocket",
+    "fileName": "rocket.svg",
+    "path": "/ui-icons/light/rocket.svg"
+  },
+  "faUploadLight": {
+    "prefix": "fal",
+    "name": "upload",
+    "fileName": "upload.svg",
+    "path": "/ui-icons/light/upload.svg"
+  },
+  "faThumbsUpLight": {
+    "prefix": "fal",
+    "name": "thumbs-up",
+    "fileName": "thumbs-up.svg",
+    "path": "/ui-icons/light/thumbs-up.svg"
+  },
+  "faServerLight": {
+    "prefix": "fal",
+    "name": "server",
+    "fileName": "server.svg",
+    "path": "/ui-icons/light/server.svg"
+  },
+  "faTriangleExclamationLight": {
+    "prefix": "fal",
+    "name": "triangle-exclamation",
+    "fileName": "triangle-exclamation.svg",
+    "path": "/ui-icons/light/triangle-exclamation.svg"
+  },
+  "faShareLight": {
+    "prefix": "fal",
+    "name": "share",
+    "fileName": "share.svg",
+    "path": "/ui-icons/light/share.svg"
+  },
+  "faLightbulbLight": {
+    "prefix": "fal",
+    "name": "lightbulb",
+    "fileName": "lightbulb.svg",
+    "path": "/ui-icons/light/lightbulb.svg"
+  },
+  "faTableCellsLight": {
+    "prefix": "fal",
+    "name": "table-cells",
+    "fileName": "table-cells.svg",
+    "path": "/ui-icons/light/table-cells.svg"
+  },
+  "faFileLinesLight": {
+    "prefix": "fal",
+    "name": "file-lines",
+    "fileName": "file-lines.svg",
+    "path": "/ui-icons/light/file-lines.svg"
+  },
+  "faStarLight": {
+    "prefix": "fal",
+    "name": "star",
+    "fileName": "star.svg",
+    "path": "/ui-icons/light/star.svg"
+  },
+  "faRightFromBracketLight": {
+    "prefix": "fal",
+    "name": "right-from-bracket",
+    "fileName": "right-from-bracket.svg",
+    "path": "/ui-icons/light/right-from-bracket.svg"
+  },
+  "faCircleXmarkLight": {
+    "prefix": "fal",
+    "name": "circle-xmark",
+    "fileName": "circle-xmark.svg",
+    "path": "/ui-icons/light/circle-xmark.svg"
+  },
+  "faUnlockLight": {
+    "prefix": "fal",
+    "name": "unlock",
+    "fileName": "unlock.svg",
+    "path": "/ui-icons/light/unlock.svg"
+  },
+  "faChevronRightLight": {
+    "prefix": "fal",
+    "name": "chevron-right",
+    "fileName": "chevron-right.svg",
+    "path": "/ui-icons/light/chevron-right.svg"
+  },
+  "faEyeSlashLight": {
+    "prefix": "fal",
+    "name": "eye-slash",
+    "fileName": "eye-slash.svg",
+    "path": "/ui-icons/light/eye-slash.svg"
+  },
+  "faGlobeLight": {
+    "prefix": "fal",
+    "name": "globe",
+    "fileName": "globe.svg",
+    "path": "/ui-icons/light/globe.svg"
+  },
+  "faPaperPlaneLight": {
+    "prefix": "fal",
+    "name": "paper-plane",
+    "fileName": "paper-plane.svg",
+    "path": "/ui-icons/light/paper-plane.svg"
+  },
+  "faForwardLight": {
+    "prefix": "fal",
+    "name": "forward",
+    "fileName": "forward.svg",
+    "path": "/ui-icons/light/forward.svg"
+  },
+  "faInfoLight": {
+    "prefix": "fal",
+    "name": "info",
+    "fileName": "info.svg",
+    "path": "/ui-icons/light/info.svg"
+  },
+  "faFlagLight": {
+    "prefix": "fal",
+    "name": "flag",
+    "fileName": "flag.svg",
+    "path": "/ui-icons/light/flag.svg"
+  },
+  "faCreditCardLight": {
+    "prefix": "fal",
+    "name": "credit-card",
+    "fileName": "credit-card.svg",
+    "path": "/ui-icons/light/credit-card.svg"
+  },
+  "faXmarkLight": {
+    "prefix": "fal",
+    "name": "xmark",
+    "fileName": "xmark.svg",
+    "path": "/ui-icons/light/xmark.svg"
+  },
+  "faPenLight": {
+    "prefix": "fal",
+    "name": "pen",
+    "fileName": "pen.svg",
+    "path": "/ui-icons/light/pen.svg"
+  },
+  "faBookmarkLight": {
+    "prefix": "fal",
+    "name": "bookmark",
+    "fileName": "bookmark.svg",
+    "path": "/ui-icons/light/bookmark.svg"
+  },
+  "faMagnifyingGlassLight": {
+    "prefix": "fal",
+    "name": "magnifying-glass",
+    "fileName": "magnifying-glass.svg",
+    "path": "/ui-icons/light/magnifying-glass.svg"
+  },
+  "faMegaphoneLight": {
+    "prefix": "fal",
+    "name": "megaphone",
+    "fileName": "megaphone.svg",
+    "path": "/ui-icons/light/megaphone.svg"
+  },
+  "faPaletteLight": {
+    "prefix": "fal",
+    "name": "palette",
+    "fileName": "palette.svg",
+    "path": "/ui-icons/light/palette.svg"
+  },
+  "faKeyLight": {
+    "prefix": "fal",
+    "name": "key",
+    "fileName": "key.svg",
+    "path": "/ui-icons/light/key.svg"
+  },
+  "faQuestionLight": {
+    "prefix": "fal",
+    "name": "question",
+    "fileName": "question.svg",
+    "path": "/ui-icons/light/question.svg"
+  },
+  "faMoneyBillLight": {
+    "prefix": "fal",
+    "name": "money-bill",
+    "fileName": "money-bill.svg",
+    "path": "/ui-icons/light/money-bill.svg"
+  },
+  "faCommentLight": {
+    "prefix": "fal",
+    "name": "comment",
+    "fileName": "comment.svg",
+    "path": "/ui-icons/light/comment.svg"
+  },
+  "faFileImageLight": {
+    "prefix": "fal",
+    "name": "file-image",
+    "fileName": "file-image.svg",
+    "path": "/ui-icons/light/file-image.svg"
+  },
+  "faDollarSignLight": {
+    "prefix": "fal",
+    "name": "dollar-sign",
+    "fileName": "dollar-sign.svg",
+    "path": "/ui-icons/light/dollar-sign.svg"
+  },
+  "faTableLight": {
+    "prefix": "fal",
+    "name": "table",
+    "fileName": "table.svg",
+    "path": "/ui-icons/light/table.svg"
+  },
+  "faBugLight": {
+    "prefix": "fal",
+    "name": "bug",
+    "fileName": "bug.svg",
+    "path": "/ui-icons/light/bug.svg"
+  },
+  "faFileVideoLight": {
+    "prefix": "fal",
+    "name": "file-video",
+    "fileName": "file-video.svg",
+    "path": "/ui-icons/light/file-video.svg"
+  },
+  "faGearLight": {
+    "prefix": "fal",
+    "name": "gear",
+    "fileName": "gear.svg",
+    "path": "/ui-icons/light/gear.svg"
+  },
+  "faImageLight": {
+    "prefix": "fal",
+    "name": "image",
+    "fileName": "image.svg",
+    "path": "/ui-icons/light/image.svg"
+  },
+  "faListLight": {
+    "prefix": "fal",
+    "name": "list",
+    "fileName": "list.svg",
+    "path": "/ui-icons/light/list.svg"
+  },
+  "faBoltLight": {
+    "prefix": "fal",
+    "name": "bolt",
+    "fileName": "bolt.svg",
+    "path": "/ui-icons/light/bolt.svg"
+  },
+  "faHeartLight": {
+    "prefix": "fal",
+    "name": "heart",
+    "fileName": "heart.svg",
+    "path": "/ui-icons/light/heart.svg"
+  },
+  "faPaperclipLight": {
+    "prefix": "fal",
+    "name": "paperclip",
+    "fileName": "paperclip.svg",
+    "path": "/ui-icons/light/paperclip.svg"
+  },
+  "faMapLight": {
+    "prefix": "fal",
+    "name": "map",
+    "fileName": "map.svg",
+    "path": "/ui-icons/light/map.svg"
+  },
+  "faDownloadLight": {
+    "prefix": "fal",
+    "name": "download",
+    "fileName": "download.svg",
+    "path": "/ui-icons/light/download.svg"
+  },
+  "faCircleNotchLight": {
+    "prefix": "fal",
+    "name": "circle-notch",
+    "fileName": "circle-notch.svg",
+    "path": "/ui-icons/light/circle-notch.svg"
+  },
+  "faCameraLight": {
+    "prefix": "fal",
+    "name": "camera",
+    "fileName": "camera.svg",
+    "path": "/ui-icons/light/camera.svg"
+  },
+  "faArrowUpLight": {
+    "prefix": "fal",
+    "name": "arrow-up",
+    "fileName": "arrow-up.svg",
+    "path": "/ui-icons/light/arrow-up.svg"
+  },
+  "faCommentDotsLight": {
+    "prefix": "fal",
+    "name": "comment-dots",
+    "fileName": "comment-dots.svg",
+    "path": "/ui-icons/light/comment-dots.svg"
+  },
+  "faClockRotateLeftLight": {
+    "prefix": "fal",
+    "name": "clock-rotate-left",
+    "fileName": "clock-rotate-left.svg",
+    "path": "/ui-icons/light/clock-rotate-left.svg"
+  },
+  "faFileAudioLight": {
+    "prefix": "fal",
+    "name": "file-audio",
+    "fileName": "file-audio.svg",
+    "path": "/ui-icons/light/file-audio.svg"
+  },
+  "faFloppyDiskLight": {
+    "prefix": "fal",
+    "name": "floppy-disk",
+    "fileName": "floppy-disk.svg",
+    "path": "/ui-icons/light/floppy-disk.svg"
+  },
+  "faFileLight": {
+    "prefix": "fal",
+    "name": "file",
+    "fileName": "file.svg",
+    "path": "/ui-icons/light/file.svg"
+  },
+  "faChartLineLight": {
+    "prefix": "fal",
+    "name": "chart-line",
+    "fileName": "chart-line.svg",
+    "path": "/ui-icons/light/chart-line.svg"
+  },
+  "faExclamationLight": {
+    "prefix": "fal",
+    "name": "exclamation",
+    "fileName": "exclamation.svg",
+    "path": "/ui-icons/light/exclamation.svg"
+  },
+  "faFilterLight": {
+    "prefix": "fal",
+    "name": "filter",
+    "fileName": "filter.svg",
+    "path": "/ui-icons/light/filter.svg"
+  },
+  "faChartColumnLight": {
+    "prefix": "fal",
+    "name": "chart-column",
+    "fileName": "chart-column.svg",
+    "path": "/ui-icons/light/chart-column.svg"
+  },
+  "faCircleQuestionLight": {
+    "prefix": "fal",
+    "name": "circle-question",
+    "fileName": "circle-question.svg",
+    "path": "/ui-icons/light/circle-question.svg"
+  },
+  "faArrowLeftLight": {
+    "prefix": "fal",
+    "name": "arrow-left",
+    "fileName": "arrow-left.svg",
+    "path": "/ui-icons/light/arrow-left.svg"
+  },
+  "faEyeLight": {
+    "prefix": "fal",
+    "name": "eye",
+    "fileName": "eye.svg",
+    "path": "/ui-icons/light/eye.svg"
+  },
+  "faLockLight": {
+    "prefix": "fal",
+    "name": "lock",
+    "fileName": "lock.svg",
+    "path": "/ui-icons/light/lock.svg"
+  },
+  "faBarsLight": {
+    "prefix": "fal",
+    "name": "bars",
+    "fileName": "bars.svg",
+    "path": "/ui-icons/light/bars.svg"
+  },
+  "faCopyLight": {
+    "prefix": "fal",
+    "name": "copy",
+    "fileName": "copy.svg",
+    "path": "/ui-icons/light/copy.svg"
+  },
+  "faFlagCheckeredLight": {
+    "prefix": "fal",
+    "name": "flag-checkered",
+    "fileName": "flag-checkered.svg",
+    "path": "/ui-icons/light/flag-checkered.svg"
+  },
+  "faCalendarDaysLight": {
+    "prefix": "fal",
+    "name": "calendar-days",
+    "fileName": "calendar-days.svg",
+    "path": "/ui-icons/light/calendar-days.svg"
+  },
+  "faArrowDownLight": {
+    "prefix": "fal",
+    "name": "arrow-down",
+    "fileName": "arrow-down.svg",
+    "path": "/ui-icons/light/arrow-down.svg"
+  },
+  "faChartBarLight": {
+    "prefix": "fal",
+    "name": "chart-bar",
+    "fileName": "chart-bar.svg",
+    "path": "/ui-icons/light/chart-bar.svg"
+  },
+  "faArrowTrendDownLight": {
+    "prefix": "fal",
+    "name": "arrow-trend-down",
+    "fileName": "arrow-trend-down.svg",
+    "path": "/ui-icons/light/arrow-trend-down.svg"
+  },
+  "faCommentsLight": {
+    "prefix": "fal",
+    "name": "comments",
+    "fileName": "comments.svg",
+    "path": "/ui-icons/light/comments.svg"
+  },
+  "faCircleUserLight": {
+    "prefix": "fal",
+    "name": "circle-user",
+    "fileName": "circle-user.svg",
+    "path": "/ui-icons/light/circle-user.svg"
+  },
+  "faChartPieLight": {
+    "prefix": "fal",
+    "name": "chart-pie",
+    "fileName": "chart-pie.svg",
+    "path": "/ui-icons/light/chart-pie.svg"
+  },
+  "faBuildingLight": {
+    "prefix": "fal",
+    "name": "building",
+    "fileName": "building.svg",
+    "path": "/ui-icons/light/building.svg"
+  },
+  "faClockLight": {
+    "prefix": "fal",
+    "name": "clock",
+    "fileName": "clock.svg",
+    "path": "/ui-icons/light/clock.svg"
+  },
+  "faArrowRightLight": {
+    "prefix": "fal",
+    "name": "arrow-right",
+    "fileName": "arrow-right.svg",
+    "path": "/ui-icons/light/arrow-right.svg"
+  },
+  "faArrowTrendUpLight": {
+    "prefix": "fal",
+    "name": "arrow-trend-up",
+    "fileName": "arrow-trend-up.svg",
+    "path": "/ui-icons/light/arrow-trend-up.svg"
+  },
+  "faBurgerLight": {
+    "prefix": "fal",
+    "name": "burger",
+    "fileName": "burger.svg",
+    "path": "/ui-icons/light/burger.svg"
+  },
+  "faBullseyeLight": {
+    "prefix": "fal",
+    "name": "bullseye",
+    "fileName": "bullseye.svg",
+    "path": "/ui-icons/light/bullseye.svg"
+  },
+  "faCircleLight": {
+    "prefix": "fal",
+    "name": "circle",
+    "fileName": "circle.svg",
+    "path": "/ui-icons/light/circle.svg"
+  },
+  "faBellSlashLight": {
+    "prefix": "fal",
+    "name": "bell-slash",
+    "fileName": "bell-slash.svg",
+    "path": "/ui-icons/light/bell-slash.svg"
+  }
+}

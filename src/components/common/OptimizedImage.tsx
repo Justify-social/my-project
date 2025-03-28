@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import OptimizedImageProps from './OptimizedImage';
 import React from 'react';
 
 interface OptimizedImageProps {

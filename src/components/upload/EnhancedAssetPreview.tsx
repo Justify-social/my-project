@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import Error from '../../middlewares/handle-db-errors';
+import { Icon } from '@/components/ui/icons';
+import { cn } from '@/utils/string/utils';
 import { getSafeAssetUrl } from '@/utils/fileUtils';
 import { toast } from 'sonner';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateRight, faTriangleExclamation, faWarning, faSpinner, faFile, faFileVideo, faFileImage, faFileAudio, faPlay, faPause } from '@fortawesome/pro-light-svg-icons';
 
 // Event to notify parent components when an asset should be removed
 export const ASSET_DELETED_EVENT = 'asset:deleted';
@@ -356,20 +355,57 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
     }
   };
 
+  // Function to render the appropriate icon based on file type and status
+  const renderFileIcon = () => {
+    if (status === 'loading') {
+      return <Icon name="faSpinner" className="w-6 h-6 animate-spin" />;
+    }
+    
+    if (status === 'error' || status === 'deleted') {
+      return <Icon name="faTriangleExclamation" className="w-6 h-6 text-red-500" />;
+    }
+    
+    if (isVideo) {
+      return <Icon name="faFileVideo" className="w-6 h-6" />;
+    } else if (isImage) {
+      return <Icon name="faFileImage" className="w-6 h-6" />;
+    } else if (type?.includes('audio')) {
+      return <Icon name="faFileAudio" className="w-6 h-6" />;
+    } else {
+      return <Icon name="faFile" className="w-6 h-6" />;
+    }
+  };
+
+  // Video player controls
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  const togglePlayPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+    
+    setIsPlaying(!isPlaying);
+  };
+
   // Render the component with appropriate loading/error states
   return (
     <div className={`${cn("relative rounded-lg overflow-hidden bg-gray-100 min-h-[100px]", className)} font-work-sans`} {...props}>
       {/* Loading spinner */}
       {status === 'loading' &&
       <div className="absolute inset-0 flex items-center justify-center font-work-sans">
-          <FontAwesomeIcon icon={faSpinner} className="text-primary animate-spin text-xl font-work-sans" />
+          {renderFileIcon()}
         </div>
       }
       
       {/* Deleted asset state */}
       {status === 'deleted' &&
       <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
-          <FontAwesomeIcon icon={faWarning} className="text-red-600 text-2xl mb-2 font-work-sans" />
+          {renderFileIcon()}
           <p className="text-center text-gray-700 font-medium mb-2 font-work-sans">Asset Deleted</p>
           <p className="text-center text-gray-500 text-sm mb-4 font-work-sans">
             This file has been permanently deleted from storage.
@@ -380,7 +416,7 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
       {/* Error state with retry option */}
       {status === 'error' && !previewUrl &&
       <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
-          <FontAwesomeIcon icon={faTriangleExclamation} className="text-amber-500 text-2xl mb-2 font-work-sans" />
+          {renderFileIcon()}
           <p className="text-center text-gray-700 font-medium mb-2 font-work-sans">Failed to load {fileName}</p>
           <p className="text-center text-gray-500 text-sm mb-4 font-work-sans">
             {error?.message || 'The file could not be loaded'}
@@ -390,7 +426,7 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
             onClick={handleRetry}
             className="px-3 py-1 bg-blue-500 text-white text-sm rounded flex items-center font-work-sans">
 
-              <FontAwesomeIcon icon={faRotateRight} className="mr-1" />
+              <Icon name="faRotateRight" className="mr-1" />
               Retry
             </button>
             <button
@@ -430,20 +466,14 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
           <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 font-work-sans">
             <button
             type="button"
-            onClick={() => {
-              if (videoRef.current) {
-                if (videoRef.current.paused) {
-                  videoRef.current.play();
-                } else {
-                  videoRef.current.pause();
-                }
-              }
-            }}
+            onClick={togglePlayPause}
             className="bg-white bg-opacity-70 rounded-full p-2 text-[var(--primary-color)] hover:text-[var(--accent-color)] transition-colors font-work-sans">
 
-              <FontAwesomeIcon
-              icon={videoRef.current?.paused ? faPlay : faPause}
-              className="fa-light w-5 h-5 group-hover:fa-solid" />
+              {isPlaying ? (
+                <Icon name="faPause" className="w-5 h-5 text-current" />
+              ) : (
+                <Icon name="faPlay" className="w-5 h-5 text-current" />
+              )}
 
             </button>
           </div>
@@ -468,9 +498,7 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
       {/* Generic file preview (for non-media files) */}
       {(status === 'ready' || status === 'loaded') && !isVideo && !isImage &&
       <div className="flex flex-col items-center justify-center py-6 px-4 font-work-sans">
-          <FontAwesomeIcon
-          icon={isVideo ? faFileVideo : isImage ? faFileImage : faFile}
-          className="text-4xl text-gray-400 mb-2 font-work-sans" />
+          {renderFileIcon()}
 
           <p className="text-sm text-gray-600 text-center break-all font-work-sans">{fileName}</p>
         </div>

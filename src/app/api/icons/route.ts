@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { IconData } from '@/components/ui/icons/validation';
+
+// Import from the new icon system
+interface IconData {
+  name: string;
+  lightName: string;
+  solidName: string;
+  fileName: string;
+  valid: boolean;
+}
 
 /**
  * API endpoint to provide the icon data for client-side rendering
@@ -11,11 +19,11 @@ import { IconData } from '@/components/ui/icons/validation';
  */
 export async function GET() {
   try {
-    // Define paths
+    // Define paths to the new icon directory structure
     const publicPath = path.join(process.cwd(), 'public');
-    const lightIconsPath = path.join(publicPath, 'ui-icons/light');
-    const solidIconsPath = path.join(publicPath, 'ui-icons/solid');
-    const brandsIconsPath = path.join(publicPath, 'ui-icons/brands');
+    const lightIconsPath = path.join(publicPath, 'icons/light');
+    const solidIconsPath = path.join(publicPath, 'icons/solid');
+    const brandsIconsPath = path.join(publicPath, 'icons/brands');
     
     // Read directory contents if they exist
     let lightIcons: string[] = [];

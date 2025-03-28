@@ -1,0 +1,15 @@
+[32m[Success][0m Created backup branch: component-relocation-backup
+[36m[Component Relocation][0m Found 6 components to relocate
+[36m[Component Relocation][0m Removed empty directory: src/components/features/users/profile/--tests--
+[36m[Component Relocation][0m Removed empty directory: src/components/features/users/authentication/--tests--
+[36m[Component Relocation][0m Removed empty directory: src/components/features/settings/team/--tests--
+[36m[Component Relocation][0m Removed empty directory: src/components/features/settings/branding/--tests--
+[36m[Component Relocation][0m Removed empty directory: src/components/features/dashboard/notifications/--tests--
+[36m[Component Relocation][0m Removed empty directory: src/components/features/users/profile
+[36m[Component Relocation][0m Removed empty directory: src/components/features/users/authentication
+[36m[Component Relocation][0m Removed empty directory: src/components/features/settings/team
+[36m[Component Relocation][0m Removed empty directory: src/components/features/settings/branding
+[36m[Component Relocation][0m Removed empty directory: src/components/features/dashboard/notifications
+[32m[Success][0m Report written to docs/project-history/component-responsibility-report.md
+[36m[Component Relocation][0m Component relocation completed.
+[32m[Success][0m Successfully relocated 0 components.

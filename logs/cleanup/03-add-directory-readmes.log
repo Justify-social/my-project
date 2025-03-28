@@ -1,0 +1,43 @@
+[1;33mRunning: add-directory-readmes.js[0m
+[0;34m------------------------------------------[0m
+[32m[Success][0m Created backup branch: readme-generation-backup
+[36m[README Generator][0m Found 33 major directories to process
+[32m[Success][0m Added README.md to src
+[32m[Success][0m Added README.md to src/components
+[33m[Warning][0m README.md already exists in src/components/ui
+[33m[Warning][0m README.md already exists in src/components/layouts
+[33m[Warning][0m README.md already exists in src/components/features
+[32m[Success][0m Added README.md to src/hooks
+[32m[Success][0m Added README.md to src/contexts
+[32m[Success][0m Added README.md to src/utils
+[32m[Success][0m Added README.md to src/types
+[32m[Success][0m Added README.md to src/services
+[32m[Success][0m Added README.md to src/providers
+[32m[Success][0m Added README.md to src/app
+[32m[Success][0m Added README.md to src/lib
+[32m[Success][0m Added README.md to src/handlers
+[32m[Success][0m Added README.md to src/assets
+[33m[Warning][0m README.md already exists in scripts
+[33m[Warning][0m README.md already exists in scripts/cleanup
+[33m[Warning][0m README.md already exists in scripts/testing
+[32m[Success][0m Added README.md to scripts/components
+[33m[Warning][0m README.md already exists in scripts/icons
+[33m[Warning][0m README.md already exists in scripts/linting
+[32m[Success][0m Added README.md to tests
+[32m[Success][0m Added README.md to tests/unit
+[32m[Success][0m Added README.md to tests/integration
+[32m[Success][0m Added README.md to tests/e2e
+[33m[Warning][0m README.md already exists in docs
+[33m[Warning][0m README.md already exists in src/components/features/users
+[33m[Warning][0m README.md already exists in src/components/features/settings
+[33m[Warning][0m README.md already exists in src/components/features/navigation
+[33m[Warning][0m README.md already exists in src/components/features/dashboard
+[33m[Warning][0m README.md already exists in src/components/features/core
+[33m[Warning][0m README.md already exists in src/components/features/campaigns
+[33m[Warning][0m README.md already exists in src/components/features/analytics
+[32m[Success][0m Report written to docs/project-history/readme-generation-report.md
+[36m[README Generator][0m README generation completed.
+[32m[Success][0m Added 17 READMEs.
+[33m[Warning][0m Skipped 16 directories (README already exists).
+[0;32m✓ Successfully completed: add-directory-readmes.js[0m
+

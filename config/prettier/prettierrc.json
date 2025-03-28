@@ -1,0 +1,10 @@
+// This file is now located at config/prettier/prettierrc.json
+// This is a redirect file for backward compatibility
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 100,
+  "bracketSpacing": true
+}

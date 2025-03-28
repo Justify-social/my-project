@@ -1,0 +1,8 @@
+[32m[Success][0m Created backup branch: features-refinement-backup
+[36m[Features Refinement][0m Found 87 feature components to analyze
+[36m[Features Refinement][0m Domain analysis complete
+[36m[Features Refinement][0m Dependency graph built
+[36m[Features Refinement][0m Domain refinement complete
+[32m[Success][0m Report written to docs/project-history/features-refinement-report.md
+[36m[Features Refinement][0m Features directory refinement completed.
+[32m[Success][0m Successfully moved 0 components.

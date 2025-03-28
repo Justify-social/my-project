@@ -1,0 +1,108 @@
+# Naming Convention Issues
+
+The following files and folders do not follow kebab-case naming:
+
+- `PROJECT_OVERVIEW.md`
+- `tests/unit/src/__tests__/settings/shared/SettingsPageSkeleton.test.tsx`
+- `tests/unit/components/ui/icons/Icon.test.tsx`
+- `tests/settings/team-management/TeamManagementSkeleton.test.tsx`
+- `tests/settings/shared/SettingsPageSkeleton.test.tsx`
+- `tests/settings/profile/ProfileSettingsSkeleton.test.tsx`
+- `tests/settings/profile/ProfilePictureSection.test.tsx`
+- `tests/settings/profile/PersonalInfoSection.test.tsx`
+- `tests/settings/profile/PasswordManagementSection.test.tsx`
+- `tests/settings/profile/NotificationPreferencesSection.test.tsx`
+- `tests/settings/branding/BrandingSkeleton.test.tsx`
+- `tests/integration/TeamManagementPage.test.tsx`
+- `tests/integration/ProfileSettingsPage.test.tsx`
+- `tests/integration/BrandingPage.test.tsx`
+- `src/utils/surveyMappers.ts`
+- `src/utils/rateLimit.ts`
+- `src/utils/imageCompression.ts`
+- `src/utils/fileUtils.ts`
+- `src/utils/fileMetadata.ts`
+- `src/types/brandLift.ts`
+- `src/services/campaignService.ts`
+- `src/services/brandLiftService.ts`
+- `src/services/assetService.ts`
+- `src/middleware/validateRequest.ts`
+- `src/middleware/handleDbErrors.ts`
+- `src/middleware/checkPermissions.ts`
+- `src/middleware/api/validateApi.ts`
+- `src/middleware/api/handleApiErrors.ts`
+- `src/hooks/usePermissions.ts`
+- `src/hooks/useFormSubmission.ts`
+- `src/hooks/useErrorRecovery.tsx`
+- `src/hooks/useCampaignWizard.ts`
+- `src/hooks/useCampaignDetails.ts`
+- `src/components/Wizard`
+- `src/components/Search`
+- `src/components/ReviewSections`
+- `src/components/Navigation`
+- `src/components/LoadingSkeleton`
+- `src/components/Influencers`
+- `src/components/ErrorFallback`
+- `src/components/ErrorBoundary`
+- `src/components/brand-lift`
+- `src/components/AssetPreview`
+- `src/components/ui/icons/test/IconTester.backup.tsx`
+- `src/components/ui/icons/__tests__/Icon.test.tsx`
+- `src/components/mmm/CustomerJourney`
+- `src/components/features/users/profile/ProfileSettingsSkeleton.test.tsx`
+- `src/components/features/users/profile/ProfileSettingsPage.test.tsx`
+- `src/components/features/users/profile/ProfilePictureSection.test.tsx`
+- `src/components/features/users/profile/PersonalInfoSection.test.tsx`
+- `src/components/features/users/authentication/PasswordManagementSection.test.tsx`
+- `src/components/features/settings/team/TeamManagementSkeleton.test.tsx`
+- `src/components/features/settings/team/TeamManagementPage.test.tsx`
+- `src/components/features/settings/branding/BrandingSkeleton.test.tsx`
+- `src/components/features/settings/branding/BrandingPage.test.tsx`
+- `src/components/features/dashboard/notifications/NotificationPreferencesSection.test.tsx`
+- `src/components/Wizard/AudienceTargeting`
+- `src/components/Influencers/MarketplaceList`
+- `src/components/Influencers/AdvancedSearch`
+- `src/app/api/user/set-onboarding-true`
+- `src/app/api/brand-lift/survey-preview/brandLiftService.ts`
+- `src/app/(campaigns)/influencer/Marketplace`
+- `src/app/(campaigns)/influencer/List`
+- `src/__tests__/settings/shared/SettingsPageSkeleton.test.tsx`
+- `scripts/testing/ui/testCampaign.js`
+- `scripts/testing/ui/createCampaign.js`
+- `scripts/templates/README-template.md`
+- `scripts/icons/ui-migration-backup/backup-2025-03-26-t20-31-05`
+- `scripts/icons/ui-migration-backup/backup-2025-03-26T20-31-05/test/IconTester.backup.tsx`
+- `scripts/icons/old-system-backup/backup-2025-03-26-t20-19-47`
+- `scripts/icons/old-system-backup/backup-2025-03-26-t20-19-40`
+- `scripts/campaign/testCampaign.js`
+- `scripts/campaign/createCampaign.js`
+- `public/icons/KPIs`
+- `public/icons/app/Settings.svg`
+- `public/icons/app/Reports.svg`
+- `public/icons/app/MMM.svg`
+- `public/icons/app/Influencers.svg`
+- `public/icons/app/Home.svg`
+- `public/icons/app/Help.svg`
+- `public/icons/app/Creative_Asset_Testing.svg`
+- `public/icons/app/Campaigns.svg`
+- `public/icons/app/Brand_Lift.svg`
+- `public/icons/app/Brand_Health.svg`
+- `public/icons/app/Billing.svg`
+- `public/icons/KPIs/Purchase_Intent.svg`
+- `public/icons/KPIs/Message_Association.svg`
+- `public/icons/KPIs/Consideration.svg`
+- `public/icons/KPIs/Brand_Preference.svg`
+- `public/icons/KPIs/Brand_Awareness.svg`
+- `public/icons/KPIs/Advocacy.svg`
+- `public/icons/KPIs/Ad_Recall.svg`
+- `public/icons/KPIs/Action_Intent.svg`
+- `docs/BUILD`
+- `docs/BUILD/settings/Team Management.png`
+- `docs/BUILD/settings/Profile Settings.png`
+- `docs/BUILD/settings/Branding.png`
+- `docs/BUILD/influencer/List View.png`
+- `docs/BUILD/influencer/Individual Influencer Profile.png`
+- `docs/BUILD/influencer/IInfluencer Profile - Influencer Perspective.png`
+- `cypress/fixtures/createTestImage.js`
+- `cypress/e2e/layout/noHydrationError.cy.js`
+
+These should be reviewed and renamed manually to ensure consistency.

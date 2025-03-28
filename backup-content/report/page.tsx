@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Bar from '../../src/components/ui/icons/core/icon-data';
+import Line from '../../src/components/ui/icons/core/icon-data';
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, Variants } from "framer-motion";

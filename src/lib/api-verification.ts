@@ -302,7 +302,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
       const latency = Date.now() - startTime;
       const responseData = await response.json().catch(() => ({}));
       
-      if (response.ok && responseData.rates && Object.keys(responseData.rates).length > 0) {
+      if (response.ok && if (responseData.rates) Object.keys(responseData.rates).length > 0) {
         console.info(`${apiName} verification successful with primary service`, { 
           latency, 
           statusCode: response.status,
@@ -349,7 +349,7 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
       const latency = Date.now() - fallbackStartTime;
       const responseData = await response.json().catch(() => ({}));
       
-      if (response.ok && responseData.rates && Object.keys(responseData.rates).length > 0) {
+      if (response.ok && if (responseData.rates) Object.keys(responseData.rates).length > 0) {
         console.info(`${apiName} verification successful with fallback service`, { 
           latency, 
           statusCode: response.status,

@@ -65,7 +65,7 @@ export async function PATCH(
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
     const numericId = parseInt(campaignId, 10);
     
-    if ((!isUuid && isNaN(numericId)) || isNaN(stepNumber)) {
+    if ((isUuid ? false : isNaN(numericId)) || isNaN(stepNumber)) {
       return NextResponse.json({ 
         success: false, 
         message: 'Invalid campaign ID or step number' 
@@ -246,7 +246,7 @@ export async function GET(
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
     const numericId = parseInt(campaignId, 10);
     
-    if ((!isUuid && isNaN(numericId)) || isNaN(stepNumber)) {
+    if ((isUuid ? false : isNaN(numericId)) || isNaN(stepNumber)) {
       return NextResponse.json({ 
         success: false, 
         message: 'Invalid campaign ID or step number' 

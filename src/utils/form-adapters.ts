@@ -8,17 +8,33 @@
 
 import { Platform, Position, KPI, Feature, Currency } from '@prisma/client';
 import { 
-  CampaignFormValues, 
+  CampaignFormValues as _CampaignFormValues, 
   CampaignApiPayload,
-  transformCampaignFormData,
-  transformContactData,
-  transformBudgetData
+  transformCampaignFormData as _transformCampaignFormData,
+  transformContactData as _transformContactData,
+  transformBudgetData as _transformBudgetData
 } from './form-transformers';
 
 /**
  * Type representing the legacy Campaign Wizard form structure
  * This matches the structure used in the existing forms
  */
+type ExtendedTargetAudience = {
+  age1824?: number | string;
+  age2534?: number | string;
+  age3544?: number | string;
+  age4554?: number | string;
+  age5564?: number | string;
+  age65plus?: number | string;
+  locations?: Array<{
+    country: string;
+    region?: string;
+    city?: string;
+  }>;
+  genders?: string[];
+  languages?: string[];
+};
+
 export interface LegacyCampaignForm {
   // Step 1: Campaign Details
   name?: string;
@@ -53,20 +69,7 @@ export interface LegacyCampaignForm {
   features?: Array<Feature | string>;
   
   // Step 3: Target Audience
-  targetAudience?: {
-    age1824?: number | string;
-    age2534?: number | string;
-    age3544?: number | string;
-    age4554?: number | string;
-    age5564?: number | string;
-    age65plus?: number | string;
-    locations?: Array<{
-      country: string;
-      region?: string;
-      city?: string;
-    }>;
-    genders?: string[];
-  };
+  targetAudience?: ExtendedTargetAudience;
   competitors?: string[];
   
   // Step 4: Creative Assets
@@ -86,10 +89,10 @@ export interface LegacyCampaignForm {
     platform?: Platform | string;
     handle?: string; 
   }>;
-  exchangeRateData?: any;
+  exchangeRateData?: unknown;
 
   // Allow for additional properties
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -137,11 +140,14 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
     total: Number(formValues.totalBudget || 0),
     currency: (formValues.currency as Currency) || Currency.USD,
     // Add allocation if available
-    allocation: formValues.budgetAllocation 
-      ? formValues.budgetAllocation.map((item: any) => ({
-          category: item.category,
-          percentage: Number(item.percentage || 0)
-        }))
+    allocation: Array.isArray(formValues.budgetAllocation) 
+      ? formValues.budgetAllocation.map((item: unknown) => {
+          const typedItem = item as Record<string, unknown>;
+          return {
+            category: typedItem.category as string,
+            percentage: Number(typedItem.percentage || 0)
+          };
+        })
       : []
   };
   
@@ -165,7 +171,7 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
     ? formValues.influencers.map(inf => ({
         handle: inf.handle || '',
         platform: inf.platform || Platform.INSTAGRAM,
-        url: inf.url || '',
+        url: (inf as Record<string, unknown>).url as string || '',
       }))
     : formValues.influencerHandle 
       ? [{
@@ -209,7 +215,7 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
     creativeAssets,
     creativeRequirements,
     // Pass through any additional fields that might be needed
-    ...formValues.additionalData
+    ...(formValues.additionalData as Record<string, unknown> || {})
   };
 }
 
@@ -219,93 +225,195 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
  * @param apiData API response data
  * @returns Legacy form compatible data
  */
-export function adaptApiToLegacyForm(apiData: any): LegacyCampaignForm {
+export function adaptApiToLegacyForm(apiData: unknown): LegacyCampaignForm {
+  // Cast the API data to a Record with explicit type checking
+  const typedApiData = apiData as Record<string, unknown>;
+  
   // Handle both name field variations
-  const campaignName = apiData.name || '';
+  const campaignName = typeof typedApiData.name === 'string' ? typedApiData.name : '';
   
   // Handle both description field variations
-  const description = apiData.businessGoal || '';
+  const description = typeof typedApiData.businessGoal === 'string' ? typedApiData.businessGoal : '';
   
   // Process dates
-  const startDate = apiData.startDate 
-    ? new Date(apiData.startDate).toISOString().split('T')[0]
+  const startDate = typedApiData.startDate 
+    ? new Date(String(typedApiData.startDate)).toISOString().split('T')[0]
     : '';
     
-  const endDate = apiData.endDate 
-    ? new Date(apiData.endDate).toISOString().split('T')[0]
+  const endDate = typedApiData.endDate 
+    ? new Date(String(typedApiData.endDate)).toISOString().split('T')[0]
     : '';
   
   // Transform primary contact
-  const primaryContact = apiData.primaryContact 
+  const primaryContact = typedApiData.primaryContact 
     ? {
-        firstName: apiData.primaryContact.name?.split(' ')[0] || '',
-        surname: apiData.primaryContact.name?.split(' ').slice(1).join(' ') || '',
-        email: apiData.primaryContact.email || '',
-        position: apiData.primaryContact.position || ''
+        firstName: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'name')?.split(' ')[0] || '',
+        surname: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'name')?.split(' ').slice(1).join(' ') || '',
+        email: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'email') || '',
+        position: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'position') || ''
       } 
     : undefined;
   
   // Transform secondary contact
-  const secondaryContact = apiData.secondaryContact 
+  const secondaryContact = typedApiData.secondaryContact 
     ? {
-        firstName: apiData.secondaryContact.name?.split(' ')[0] || '',
-        surname: apiData.secondaryContact.name?.split(' ').slice(1).join(' ') || '',
-        email: apiData.secondaryContact.email || '',
-        position: apiData.secondaryContact.position || ''
+        firstName: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'name')?.split(' ')[0] || '',
+        surname: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'name')?.split(' ').slice(1).join(' ') || '',
+        email: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'email') || '',
+        position: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'position') || ''
       } 
     : undefined;
   
   // Extract budget information
-  const currency = apiData.budget?.currency || Currency.USD;
-  const totalBudget = apiData.budget?.total || 0;
-  const socialMediaBudget = apiData.budget?.allocation?.find((a: any) => a.category === 'Social Media')?.value || 0;
+  const budgetData = typedApiData.budget as Record<string, unknown> || {};
+  const currency = getStringProperty(budgetData, 'currency') as Currency || Currency.USD;
+  const totalBudget = getNumberProperty(budgetData, 'total') || 0;
+  
+  // Calculate social media budget from budget allocation
+  let socialMediaBudget = 0;
+  if (Array.isArray(budgetData.allocation)) {
+    const socialMediaAllocation = budgetData.allocation.find(
+      (a: unknown) => (a as Record<string, unknown>).category === 'Social Media'
+    ) as Record<string, unknown> || {};
+    socialMediaBudget = getNumberProperty(socialMediaAllocation, 'value') || 0;
+  }
   
   // Transform audience
-  const targetAudience = apiData.audience 
+  const audienceData = typedApiData.audience as Record<string, unknown> || {};
+  const targetAudience: ExtendedTargetAudience | undefined = audienceData && Object.keys(audienceData).length > 0
     ? {
-        age1824: apiData.audience.age1824 || 0,
-        age2534: apiData.audience.age2534 || 0,
-        age3544: apiData.audience.age3544 || 0,
-        age4554: apiData.audience.age4554 || 0,
-        age5564: apiData.audience.age5564 || 0,
-        age65plus: apiData.audience.age65plus || 0,
-        locations: apiData.audience.locations || [],
-        genders: apiData.audience.genders || []
+        age1824: getNumberProperty(audienceData, 'age1824'),
+        age2534: getNumberProperty(audienceData, 'age2534'),
+        age3544: getNumberProperty(audienceData, 'age3544'),
+        age4554: getNumberProperty(audienceData, 'age4554'),
+        age5564: getNumberProperty(audienceData, 'age5564'),
+        age65plus: getNumberProperty(audienceData, 'age65plus'),
+        locations: Array.isArray(audienceData.locations) 
+          ? audienceData.locations.map((loc: unknown) => convertToLocation(loc))
+          : [],
+        genders: Array.isArray(audienceData.genders) 
+          ? audienceData.genders.map((g: unknown) => String(g))
+          : [],
+        languages: Array.isArray(audienceData.languages) 
+          ? audienceData.languages.map((l: unknown) => String(l))
+          : []
       }
     : undefined;
   
   // Extract influencer information
-  const influencerHandle = apiData.influencers?.[0]?.handle || '';
-  const platform = apiData.influencers?.[0]?.platform || '';
+  const influencers = Array.isArray(typedApiData.influencers) 
+    ? typedApiData.influencers.map((inf: unknown) => {
+        const influencer = inf as Record<string, unknown>;
+        return {
+          handle: getStringProperty(influencer, 'handle') || '',
+          platform: getStringProperty(influencer, 'platform') as Platform || Platform.Instagram,
+          url: getStringProperty(influencer, 'url') || ''
+        };
+      })
+    : [];
+  
+  // Get first influencer for legacy handling
+  const influencerHandleInfo = influencers.length > 0 ? influencers[0] : { handle: '', platform: '' };
+  const influencerHandle = influencerHandleInfo.handle;
+  const platform = influencerHandleInfo.platform;
   
   // Extract creative guidelines
-  const guidelines = apiData.creativeRequirements?.[0]?.description || '';
+  const creativeRequirements = Array.isArray(typedApiData.creativeRequirements) && typedApiData.creativeRequirements.length > 0
+    ? typedApiData.creativeRequirements[0] as Record<string, unknown>
+    : { description: '' };
   
+  const guidelines = getStringProperty(creativeRequirements, 'description') || '';
+  
+  // Get assets
+  const assets = Array.isArray(typedApiData.creativeAssets) 
+    ? typedApiData.creativeAssets.map((asset: unknown) => {
+        const assetData = asset as Record<string, unknown>;
+        return {
+          type: getStringProperty(assetData, 'type') || '',
+          url: getStringProperty(assetData, 'url') || '',
+          description: getStringProperty(assetData, 'description') || ''
+        };
+      })
+    : [];
+  
+  // Construct the competitors array
+  const competitors = Array.isArray(audienceData.competitors) 
+    ? audienceData.competitors.map((comp: unknown) => String(comp))
+    : [];
+  
+  // Build the final legacy form structure
   return {
     campaignName,
     description,
     startDate,
     endDate,
-    timeZone: apiData.timeZone || 'UTC',
+    timeZone: getStringProperty(typedApiData, 'timeZone') || 'UTC',
     currency,
     totalBudget,
     socialMediaBudget,
     primaryContact,
     secondaryContact,
-    primaryKPI: apiData.primaryKPI,
-    secondaryKPIs: apiData.secondaryKPIs || [],
-    features: apiData.features || [],
+    primaryKPI: getStringProperty(typedApiData, 'primaryKPI'),
+    secondaryKPIs: Array.isArray(typedApiData.secondaryKPIs) 
+      ? typedApiData.secondaryKPIs.map((kpi: unknown) => String(kpi))
+      : [],
+    features: Array.isArray(typedApiData.features) 
+      ? typedApiData.features.map((feat: unknown) => String(feat))
+      : [],
     targetAudience,
-    competitors: apiData.audience?.competitors || [],
-    assets: apiData.creativeAssets || [],
+    competitors,
+    assets,
     guidelines,
     influencerHandle,
     platform,
-    influencers: apiData.influencers,
-    status: apiData.status || 'draft',
+    influencers,
+    status: getStringProperty(typedApiData, 'status') || 'draft',
     // Include the original data for reference if needed
-    _originalData: apiData
+    _originalData: typedApiData
   };
+}
+
+/**
+ * Helper function to safely get string properties
+ */
+function getStringProperty(obj: Record<string, unknown> | undefined, key: string): string | undefined {
+  if (!obj) return undefined;
+  const value = obj[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * Helper function to safely get number properties
+ */
+function getNumberProperty(obj: Record<string, unknown> | undefined, key: string): number | undefined {
+  if (!obj) return undefined;
+  const value = obj[key];
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    if (!isNaN(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+/**
+ * Helper to convert location data to expected format
+ */
+function convertToLocation(loc: unknown): { country: string; region?: string; city?: string } {
+  if (typeof loc === 'string') {
+    return { country: loc };
+  }
+  
+  if (loc && typeof loc === 'object') {
+    const locObj = loc as Record<string, unknown>;
+    return {
+      country: getStringProperty(locObj, 'country') || '',
+      region: getStringProperty(locObj, 'region'),
+      city: getStringProperty(locObj, 'city')
+    };
+  }
+  
+  return { country: '' };
 }
 
 /**
@@ -412,14 +520,14 @@ export const enumConverters = {
   positionToEnum(position: string): Position {
     switch (position.toLowerCase()) {
       case 'manager':
-        return Position.MANAGER;
+        return Position.Manager;
       case 'director':
-        return Position.DIRECTOR;
+        return Position.Director;
       case 'vp':
       case 'vice president':
         return Position.VP;
       default:
-        return Position.MANAGER;
+        return Position.Manager;
     }
   },
   
@@ -428,9 +536,9 @@ export const enumConverters = {
    */
   enumToPosition(position: Position): string {
     switch (position) {
-      case Position.MANAGER:
+      case Position.Manager:
         return 'Manager';
-      case Position.DIRECTOR:
+      case Position.Director:
         return 'Director';
       case Position.VP:
         return 'VP';

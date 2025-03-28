@@ -4,61 +4,69 @@
  * This utility provides functions for dynamically loading icons only when needed.
  * It helps with tree-shaking and reducing the initial bundle size by lazy-loading
  * icons that are used less frequently.
+ * 
+ * UPDATED: This version uses the unified icon system rather than direct FontAwesome imports.
  */
 
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { IconName } from '@/components/ui/icon';
+// Remove direct FontAwesome import
+// import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { IconName } from '@/components/ui/icons';
 
-// Cache for loaded icons to prevent duplicate imports
-const iconCache: Record<string, IconDefinition> = {};
+// Define a type for our icon data
+interface IconData {
+  svgPath: string;
+  width: number;
+  height: number;
+  viewBox: string;
+}
+
+// Cache for loaded icons to prevent duplicate requests
+const iconCache: Record<string, IconData> = {};
 
 /**
- * Dynamically load a Font Awesome icon
+ * Dynamically load an icon's SVG data
  * 
- * @param iconName The name of the icon as defined in IconName type
- * @param variant 'solid' | 'regular' | 'light' | 'duotone' | 'brands'
- * @returns Promise that resolves to the icon definition
+ * @param iconName The name of the icon without the 'fa' prefix (e.g., 'user')
+ * @param variant 'solid' | 'light' | 'regular' | 'brands'
+ * @returns Promise that resolves to the icon SVG data
  */
 export async function loadIcon(
   iconName: string, 
-  variant: 'solid' | 'regular' | 'light' | 'duotone' | 'brands' = 'solid'
-): Promise<IconDefinition> {
+  variant: 'solid' | 'light' | 'regular' | 'brands' = 'solid'
+): Promise<IconData> {
+  // Convert to kebab-case
+  const cleanName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase();
+  
   // Create a cache key
-  const cacheKey = `${variant}-${iconName}`;
+  const cacheKey = `${variant}-${cleanName}`;
   
   // Return cached icon if available
   if (iconCache[cacheKey]) {
     return iconCache[cacheKey];
   }
   
-  // Dynamically import the icon based on variant
+  // Load the SVG file for the icon
   try {
-    let icon: IconDefinition;
+    // Create the file path to the SVG
+    const filePath = `/icons/${variant}/${cleanName}.svg`;
     
-    switch (variant) {
-      case 'solid':
-        icon = (await import(`@fortawesome/pro-solid-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
-        break;
-      case 'regular':
-        icon = (await import(`@fortawesome/pro-regular-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
-        break;
-      case 'light':
-        icon = (await import(`@fortawesome/pro-light-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
-        break;
-      case 'duotone':
-        icon = (await import(`@fortawesome/pro-duotone-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
-        break;
-      case 'brands':
-        icon = (await import(`@fortawesome/free-brands-svg-icons/fa${capitalizeFirstLetter(iconName)}`)).default;
-        break;
-      default:
-        throw new Error(`Invalid icon variant: ${variant}`);
+    // Fetch the SVG file
+    const response = await fetch(filePath);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to load icon SVG: ${filePath} (${response.status})`);
     }
     
-    // Cache the icon for future use
-    iconCache[cacheKey] = icon;
+    // Get the SVG text
+    const svgText = await response.text();
     
-    return icon;
+    // Extract the path data, viewBox, and dimensions
+    const svgData = extractSvgData(svgText);
+    
+    // Cache the icon for future use
+    iconCache[cacheKey] = svgData;
+    
+    return svgData;
   } catch (error) {
     console.error(`Failed to load icon: ${iconName} (${variant})`, error);
     throw error;
@@ -66,13 +74,46 @@ export async function loadIcon(
 }
 
 /**
- * Helper function to capitalize the first letter of a string
- * 
- * @param str String to capitalize
- * @returns Capitalized string
+ * Extract SVG path data and attributes from an SVG string
  */
-function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+function extractSvgData(svgText: string): IconData {
+  // Default values
+  let svgPath = '';
+  let width = 24;
+  let height = 24;
+  let viewBox = '0 0 24 24';
+  
+  // Extract viewBox
+  const viewBoxMatch = svgText.match(/viewBox="([^"]*)"/);
+  if (viewBoxMatch && viewBoxMatch[1]) {
+    viewBox = viewBoxMatch[1];
+    
+    // Try to extract width and height from viewBox
+    const viewBoxParts = viewBox.split(' ');
+    if (viewBoxParts.length === 4) {
+      width = parseFloat(viewBoxParts[2]);
+      height = parseFloat(viewBoxParts[3]);
+    }
+  }
+  
+  // Extract width and height if explicitly defined
+  const widthMatch = svgText.match(/width="([^"]*)"/);
+  if (widthMatch && widthMatch[1]) {
+    width = parseFloat(widthMatch[1]);
+  }
+  
+  const heightMatch = svgText.match(/height="([^"]*)"/);
+  if (heightMatch && heightMatch[1]) {
+    height = parseFloat(heightMatch[1]);
+  }
+  
+  // Extract path data
+  const pathMatch = svgText.match(/<path[^>]*d="([^"]*)"[^>]*>/);
+  if (pathMatch && pathMatch[1]) {
+    svgPath = pathMatch[1];
+  }
+  
+  return { svgPath, width, height, viewBox };
 }
 
 /**
@@ -80,7 +121,7 @@ function capitalizeFirstLetter(str: string): string {
  * This can be called during idle time or on component mount
  */
 export async function preloadCommonIcons(): Promise<void> {
-  const commonIcons: [string, 'solid' | 'regular' | 'light' | 'duotone' | 'brands'][] = [
+  const commonIcons: [string, 'solid' | 'light' | 'regular' | 'brands'][] = [
     ['user', 'solid'],
     ['search', 'solid'],
     ['check', 'solid'],
@@ -94,15 +135,28 @@ export async function preloadCommonIcons(): Promise<void> {
 }
 
 /**
- * Get the FontAwesome icon prefix based on variant
+ * Get the icon prefix based on variant
  */
-export function getIconPrefix(variant: 'solid' | 'regular' | 'light' | 'duotone' | 'brands'): string {
+export function getIconPrefix(variant: 'solid' | 'light' | 'regular' | 'brands'): string {
   switch (variant) {
     case 'solid': return 'fas';
     case 'regular': return 'far';
     case 'light': return 'fal';
-    case 'duotone': return 'fad';
     case 'brands': return 'fab';
     default: return 'fas';
   }
+}
+
+/**
+ * Convert our internal icon name format to kebab-case for file paths
+ */
+export function iconNameToFilePath(iconName: string): string {
+  // Remove 'fa' prefix if present
+  const nameWithoutPrefix = iconName.startsWith('fa') ? 
+    iconName.substring(2) : iconName;
+  
+  // Convert camelCase to kebab-case
+  return nameWithoutPrefix
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .toLowerCase();
 } 

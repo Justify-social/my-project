@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactNode, memo } from 'react';
+import CardProps from '../../ui/card/types/index';
 import { motion } from 'framer-motion';
 
 interface CardProps {

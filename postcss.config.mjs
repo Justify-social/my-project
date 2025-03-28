@@ -1,10 +1,8 @@
-// postcss.config.mjs
-/** @type {import('postcss-load-config').Config} */
-const config = {
+// This file is now located at config/postcss/postcss.config.mjs
+// This is a redirect file for backward compatibility
+export default {
   plugins: {
     tailwindcss: {},
-    autoprefixer: {}
-  }
+    autoprefixer: {},
+  },
 };
-
-export default config;

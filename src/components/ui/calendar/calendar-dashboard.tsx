@@ -1,30 +1,10 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef, useLayoutEffect } from "react";
-import { format } from "date-fns";
-import { motion } from "framer-motion";
-import Icon from "../icon";
+import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { format, addMonths, subMonths } from 'date-fns';
 
-// Interface for the calendar events
-export interface CalendarDashboardProps {
-  month: Date;
-  events: Array<{
-    id: string | number;
-    title: string;
-    start: Date;
-    end?: Date;
-    platform?: string;
-    budget?: number;
-    kpi?: string;
-    status?: string;
-    statusText?: string;
-    statusClass?: string;
-    color?: string;
-  }>;
-}
-
-// Define the event type for internal use
-type CalendarEvent = {
+export interface CalendarEvent {
   id: string | number;
   title: string;
   start: Date;
@@ -33,45 +13,36 @@ type CalendarEvent = {
   budget?: number;
   kpi?: string;
   status?: string;
-  statusText?: string;
-  statusClass?: string;
   color?: string;
-};
+}
 
-// Calendar component with timeline view for dashboard
+export interface CalendarDashboardProps {
+  month?: Date;
+  events: CalendarEvent[];
+  onEventClick?: (id: string | number) => void;
+}
+
 const CalendarDashboard: React.FC<CalendarDashboardProps> = ({
-  month,
-  events
+  month = new Date(),
+  events = [],
+  onEventClick
 }) => {
-  const [currentMonth, setCurrentMonth] = useState(() => new Date(month.getFullYear(), month.getMonth(), 1));
-  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const calendarRef = useRef<HTMLDivElement>(null);
-  
-  // Also add validation for events to prevent errors
-  const validEvents = useMemo(() => {
-    return events.filter(event => 
-      event && 
-      event.id && 
-      event.title && 
-      event.start instanceof Date && 
-      !isNaN(event.start.getTime())
-    ) as CalendarEvent[];
-  }, [events]);
+  const [currentDate, setCurrentDate] = useState(new Date(month.getFullYear(), month.getMonth(), 1));
+  const [hoveredEvent, setHoveredEvent] = useState<string | number | null>(null);
   
   // Helper function for getting colors based on platform
-  const getCampaignColor = (platform: string, status?: string): string => {
+  const getCampaignColor = (platform: string = 'other', status?: string): string => {
     // First check for status-based colors
     if (status) {
       const statusColors: Record<string, string> = {
-        'draft': '#9CA3AF', // Grey for Draft
-        'in_review': '#F59E0B', // Yellow for In Review
+        'draft': '#9CA3AF', 
+        'in_review': '#F59E0B',
         'in-review': '#F59E0B',
         'inreview': '#F59E0B',
-        'active': '#10B981', // Green for Active
+        'active': '#10B981',
         'approved': '#10B981',
         'submitted': '#10B981',
-        'completed': '#3B82F6', // Blue for Completed
+        'completed': '#3B82F6',
         'paused': '#F59E0B'
       };
       
@@ -81,7 +52,7 @@ const CalendarDashboard: React.FC<CalendarDashboardProps> = ({
       }
     }
     
-    // Fall back to platform-based colors if no status or unrecognized status
+    // Fall back to platform-based colors
     const platformColors: Record<string, string> = {
       'instagram': '#E1306C',
       'facebook': '#3b5998',
@@ -95,406 +66,201 @@ const CalendarDashboard: React.FC<CalendarDashboardProps> = ({
     return platformColors[platform.toLowerCase()] || platformColors.other;
   };
   
-  // Calculate campaign positions for timeline bars
-  const calculateCampaignRows = (events: CalendarEvent[]) => {
-    if (!events || events.length === 0) return { rows: [], eventPositions: {} };
-    
-    // Sort events by start date and duration
-    const sortedEvents = [...events].sort((a, b) => {
-      const aStart = new Date(a.start).getTime();
-      const bStart = new Date(b.start).getTime();
-      
-      // First sort by start date
-      if (aStart !== bStart) {
-        return aStart - bStart;
-      }
-      
-      // If start dates are the same, sort by duration (shorter first)
-      const aEnd = a.end ? new Date(a.end).getTime() : aStart + 86400000;
-      const bEnd = b.end ? new Date(b.end).getTime() : bStart + 86400000;
-      return (aEnd - aStart) - (bEnd - bStart);
-    });
-    
-    // Assign row positions (track occupied slots)
-    const rows: Array<Array<CalendarEvent>> = [];
-    const eventPositions: Record<string | number, number> = {};
-    
-    sortedEvents.forEach(event => {
-      // Skip invalid events
-      if (!event || !event.id) return;
-      
-      // Find the first available row
-      let rowIndex = 0;
-      let foundRow = false;
-      
-      while (!foundRow) {
-        if (!rows[rowIndex]) {
-          rows[rowIndex] = [];
-        }
-        
-        // Check if this row has space for the event
-        const hasOverlap = rows[rowIndex].some(existingEvent => {
-          const eventStart = new Date(event.start);
-          const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
-          const existingStart = new Date(existingEvent.start);
-          const existingEnd = existingEvent.end ? new Date(existingEvent.end) : new Date(existingStart.getTime() + 86400000);
-          
-          return (eventStart < existingEnd && eventEnd > existingStart);
-        });
-        
-        if (!hasOverlap) {
-          rows[rowIndex].push(event);
-          eventPositions[event.id] = rowIndex;
-          foundRow = true;
-        } else {
-          rowIndex++;
-        }
-      }
-    });
-    
-    return { rows, eventPositions };
+  const handleNextMonth = () => {
+    setCurrentDate(addMonths(currentDate, 1));
   };
   
-  // Calculate event positions
-  const { rows, eventPositions } = useMemo(() => 
-    calculateCampaignRows(validEvents), 
-    [validEvents]
-  );
-  
-  const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  const handlePrevMonth = () => {
+    setCurrentDate(subMonths(currentDate, 1));
   };
   
-  const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-  };
+  // Filter and validate events
+  const validEvents = useMemo(() => {
+    return events.filter(event => 
+      event && 
+      event.id && 
+      event.title && 
+      event.start instanceof Date && 
+      !isNaN(event.start.getTime())
+    );
+  }, [events]);
   
-  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-  const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-  const monthName = monthStart.toLocaleString('default', {
-    month: 'long'
-  });
-  const year = monthStart.getFullYear();
-
-  // Generate calendar days
-  const days = [];
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  // Get the days in the current month
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   
   // Get the first day of the month (0-6, where 0 is Sunday)
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-  // Adjust to make Monday the first day (0-6, where 0 is Monday)
-  const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
   
-  // Create day objects
-  for (let i = 1; i <= daysInMonth; i++) {
-    const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
-    const isToday = new Date().toDateString() === currentDate.toDateString();
-    
-    days.push({
-      day: i,
-      isToday,
-      date: currentDate
+  // Get events for a specific day
+  const getEventsForDay = (day: number) => {
+    return validEvents.filter(event => {
+      const eventDate = new Date(event.start);
+      return eventDate.getDate() === day && 
+             eventDate.getMonth() === currentDate.getMonth() && 
+             eventDate.getFullYear() === currentDate.getFullYear();
     });
+  };
+  
+  // Create days array for the calendar
+  const calendarDays = [];
+  
+  // Add empty cells for days before the first day of the month
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    calendarDays.push(
+      <div key={`empty-${i}`} className="h-24 bg-gray-50 rounded-lg"></div>
+    );
   }
   
-  // Helper function for positioning event bars
-  const getEventBarStyle = (event: CalendarEvent, rowIndex: number) => {
-    if (!calendarRef.current) return {};
+  // Add cells for each day of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayEvents = getEventsForDay(day);
+    const isToday = new Date().getDate() === day && 
+                   new Date().getMonth() === currentDate.getMonth() && 
+                   new Date().getFullYear() === currentDate.getFullYear();
     
-    // Get event dates
-    const eventStart = new Date(event.start);
-    const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
-    
-    // Adjust dates to calendar view
-    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-    
-    const displayStart = eventStart < monthStart ? monthStart : eventStart;
-    const displayEnd = eventEnd > monthEnd ? monthEnd : eventEnd;
-    
-    // Get day cells for calculating positions later
-    return {
-      startDay: displayStart.getDate(),
-      endDay: displayEnd.getDate(),
-      rowIndex: rowIndex,
-      color: event.color || getCampaignColor(event.platform || 'other', event.status)
-    };
-  };
-  
-  // First, add this new state for all bar positions outside any loops
-  const [barPositions, setBarPositions] = useState<Record<string | number, { left: number, top: number, width: number }>>({});
-
-  // Filter events for the current month only
-  const currentMonthEvents = useMemo(() => {
-    return validEvents.filter(event => {
-      const eventStart = new Date(event.start);
-      const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
-      
-      // Check if the event overlaps with the current month
-      return (eventStart <= monthEnd && eventEnd >= monthStart);
-    });
-  }, [validEvents, currentMonth, monthStart, monthEnd]);
-
-  // Then replace the useEffect with useLayoutEffect and add position comparison
-  useLayoutEffect(() => {
-    if (!calendarRef.current || currentMonthEvents.length === 0) return;
-    
-    const newPositions: Record<string | number, { left: number, top: number, width: number }> = {};
-    let hasChanges = false;
-    
-    currentMonthEvents.forEach(event => {
-      const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
-      if (!barStyle.startDay || !barStyle.endDay) return;
-      
-      const startCell = calendarRef.current?.querySelector(`[data-day="${barStyle.startDay}"]`);
-      const endCell = calendarRef.current?.querySelector(`[data-day="${barStyle.endDay}"]`);
-      
-      if (!startCell || !endCell || !calendarRef.current) return;
-      
-      const calendarRect = calendarRef.current.getBoundingClientRect();
-      const startRect = startCell.getBoundingClientRect();
-      const endRect = endCell.getBoundingClientRect();
-      
-      const newPosition = {
-        left: startRect.left - calendarRect.left + 2,
-        top: startRect.top - calendarRect.top + 18 + (barStyle.rowIndex * 5),
-        width: (endRect.right - startRect.left) - 4
-      };
-      
-      newPositions[event.id] = newPosition;
-      
-      // Check if position actually changed
-      const oldPosition = barPositions[event.id];
-      if (!oldPosition || 
-          oldPosition.left !== newPosition.left || 
-          oldPosition.top !== newPosition.top || 
-          oldPosition.width !== newPosition.width) {
-        hasChanges = true;
-      }
-    });
-    
-    // Only update state if positions actually changed
-    if (hasChanges) {
-      setBarPositions(newPositions);
-    }
-  }, [currentMonthEvents, eventPositions, currentMonth]);
-  
-  // Normalize platform values to match file names
-  const normalizePlatform = (platform: string): string => {
-    const platformMap: Record<string, string> = {
-      'twitter': 'x-twitter',
-      'twitter x': 'x-twitter',
-      'x': 'x-twitter'
-    };
-    
-    return platformMap[platform.toLowerCase()] || platform.toLowerCase();
-  };
-  
-  // Update month when prop changes
-  useEffect(() => {
-    const newMonth = new Date(month.getFullYear(), month.getMonth(), 1);
-    if (newMonth.getTime() !== currentMonth.getTime()) {
-      setCurrentMonth(newMonth);
-    }
-  }, [month]);
-  
-  return (
-    <div 
-      className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans"
-      ref={calendarRef}
-    >
-      <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)] font-work-sans">
-        <h3 className="text-base font-semibold text-center font-sora">{format(currentMonth, 'MMMM yyyy')}</h3>
-        <div className="flex space-x-2 font-work-sans">
-          <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
-            <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
-          </button>
-          <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
-            <Icon name="faChevronRight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
-          </button>
-        </div>
-      </div>
-      
-      <div className="overflow-x-auto flex-grow font-work-sans">
-        {/* Day headers with consistent width */}
-        <div className="grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)] font-work-sans">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => (
-            <div key={day} className="flex justify-center items-center py-1 font-work-sans">{day}</div>
-          ))}
+    calendarDays.push(
+      <div 
+        key={`day-${day}`} 
+        className={`h-24 p-2 border relative ${
+          isToday ? 'border-blue-400 bg-blue-50' : 
+          dayEvents.length > 0 ? 'border-gray-200 bg-gray-50' : 
+          'border-gray-100'
+        } rounded-lg`}
+      >
+        <div className="flex justify-between items-start">
+          <span className={`font-medium ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+            {day}
+          </span>
+          {dayEvents.length > 0 && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {dayEvents.length}
+            </span>
+          )}
         </div>
         
-        {/* Calendar grid with fixed height */}
-        <div 
-          className="grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans relative" 
-          style={{ height: '420px' }} // Fixed height for 6 rows (the maximum possible)
-        >
-          {/* Empty cells for days not in this month at the beginning */}
-          {Array.from({ length: adjustedFirstDay }).map((_, index) => (
-            <div key={`empty-start-${index}`} className="calendar-cell h-[60px] bg-gray-50 rounded-md"></div>
-          ))}
-          
-          {/* Actual days in the month */}
-          {days.map((day, dayIndex) => (
-            <div 
-              key={`day-${day.day}`} 
-              className={`calendar-cell h-[60px] p-1 rounded-md relative ${
-                day.isToday ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white hover:bg-gray-50'
-              }`}
-              data-day={day.day}
-              data-date={day.date.toISOString()}
+        <div className="mt-1 space-y-1 overflow-hidden">
+          {dayEvents.slice(0, 2).map(event => (
+            <motion.div
+              key={event.id}
+              whileHover={{ scale: 1.02 }}
+              className="text-xs truncate px-1.5 py-1 rounded cursor-pointer"
+              style={{ 
+                backgroundColor: `${getCampaignColor(event.platform, event.status)}20`,
+                color: getCampaignColor(event.platform, event.status)
+              }}
+              onClick={() => onEventClick && onEventClick(event.id)}
+              onMouseEnter={() => setHoveredEvent(event.id)}
+              onMouseLeave={() => setHoveredEvent(null)}
             >
-              <div className="text-xs font-medium text-[var(--secondary-color)]">{day.day}</div>
+              {event.title}
+            </motion.div>
+          ))}
+          
+          {dayEvents.length > 2 && (
+            <div className="text-xs text-gray-500 text-center">
+              +{dayEvents.length - 2} more
             </div>
-          ))}
-          
-          {/* Empty cells for days not in this month at the end */}
-          {Array.from({ length: (7 - ((adjustedFirstDay + daysInMonth) % 7)) % 7 }).map((_, index) => (
-            <div key={`empty-end-${index}`} className="calendar-cell h-[60px] bg-gray-50 rounded-md"></div>
-          ))}
-          
-          {/* Event bars layer */}
-          {currentMonthEvents.map((event) => {
-            const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
-            
-            // Skip if required data is missing
-            if (!barStyle.startDay || !barStyle.endDay) return null;
-            
-            // Get position from the barPositions state
-            const position = barPositions[event.id] || { left: 0, top: 0, width: 0 };
-            
-            return (
-              <div
-                key={`event-bar-${event.id}`}
-                className="absolute pointer-events-auto rounded-md border px-1 text-xs truncate hover:shadow-md transition-shadow flex items-center"
-                style={{
-                  left: `${position.left}px`,
-                  top: `${position.top}px`,
-                  width: `${position.width}px`,
-                  height: '18px',
-                  backgroundColor: `${barStyle.color}20`, // 20% opacity
-                  borderColor: barStyle.color,
-                  zIndex: 10 + barStyle.rowIndex,
-                  display: position.width > 0 ? 'block' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  setHoveredEvent(String(event.id));
-                  setTooltipPosition({
-                    x: e.clientX,
-                    y: e.clientY
-                  });
-                }}
-                onMouseLeave={() => setHoveredEvent(null)}
-              >
-                {event.platform && (
-                  <span className="inline-flex items-center justify-center mr-1 w-3 h-3" style={{ marginTop: '1px' }}>
-                    <img 
-                      src={`/ui-icons/brands/${normalizePlatform(event.platform)}.svg`} 
-                      alt=""
-                      className="w-3 h-3"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                  </span>
-                )}
-                {event.title}
-              </div>
-            );
-          })}
+          )}
         </div>
       </div>
+    );
+  }
+  
+  // Get the most recent and upcoming events for the timeline view
+  const upcomingEvents = useMemo(() => {
+    const now = new Date();
+    return validEvents
+      .filter(event => new Date(event.start) >= now)
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      .slice(0, 5);
+  }, [validEvents]);
+  
+  return (
+    <div className="bg-white rounded-lg shadow p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium text-gray-900 font-sora">
+          {format(currentDate, 'MMMM yyyy')}
+        </h3>
+        <div className="flex space-x-2">
+          <button 
+            onClick={handlePrevMonth} 
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+            aria-label="Previous month"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <button 
+            onClick={handleNextMonth} 
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+            aria-label="Next month"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          <div key={day} className="text-center text-sm font-medium text-gray-600">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-4">
+        {calendarDays}
+      </div>
       
-      {/* Tooltip for event details */}
-      {hoveredEvent && (
-        (() => {
-          const event = currentMonthEvents.find(e => String(e.id) === hoveredEvent);
-          if (!event) return null;
-          
-          return (
-            <div 
-              className="fixed z-50 bg-white rounded-md shadow-lg border border-[var(--divider-color)] p-3 max-w-xs"
-              style={{
-                left: `${tooltipPosition.x + 10}px`,
-                top: `${tooltipPosition.y + 10}px`
-              }}
-            >
-              <div className="text-left" style={{ border: 'none', outline: 'none' }}>
-                <h4 className="font-semibold text-sm font-sora">{event.title}</h4>
-                <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans" style={{ border: 'none', outline: 'none' }}>
-                  <div className="flex items-center font-work-sans" style={{ border: 'none', outline: 'none' }}>
-                    <Icon name="faCalendar" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
-                    <span>
-                      {format(new Date(event.start), 'MMM d, yyyy')} 
-                      {event.end && ` - ${format(new Date(event.end), 'MMM d, yyyy')}`}
-                    </span>
-                  </div>
-                  {event.platform && (
-                    <div className="flex items-center mt-1 font-work-sans" style={{ border: 'none', outline: 'none' }}>
-                      <span className="mr-1 w-4 h-4 flex items-center justify-center">
-                        <img 
-                          src={`/ui-icons/brands/${normalizePlatform(event.platform)}.svg`} 
-                          alt={event.platform}
-                          className="w-3.5 h-3.5 text-[var(--secondary-color)]"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            (e.currentTarget.nextSibling as HTMLElement).style.display = 'block';
-                          }}
-                        />
-                        <Icon 
-                          name="faHashtag" 
-                          className="w-3 h-3 text-[var(--secondary-color)] hidden" 
-                          iconType="button" 
-                        />
-                      </span>
-                      <span>{event.platform}</span>
-                    </div>
-                  )}
-                  {event.budget && (
-                    <div className="flex items-center mt-1 font-work-sans" style={{ border: 'none', outline: 'none' }}>
-                      <Icon name="faDollarSign" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
-                      <span>${event.budget.toLocaleString()}</span>
-                    </div>
-                  )}
+      {upcomingEvents.length > 0 && (
+        <div className="mt-4 border-t pt-4">
+          <h4 className="text-base font-medium text-gray-900 mb-3">Upcoming Events</h4>
+          <div className="space-y-2">
+            {upcomingEvents.map(event => (
+              <motion.div
+                key={event.id}
+                whileHover={{ scale: 1.01 }}
+                className="p-3 border border-gray-200 rounded-lg hover:shadow-sm cursor-pointer"
+                onClick={() => onEventClick && onEventClick(event.id)}
+                style={{
+                  borderLeftColor: getCampaignColor(event.platform, event.status),
+                  borderLeftWidth: '3px'
+                }}
+              >
+                <div className="flex justify-between">
+                  <span className="font-medium">{event.title}</span>
                   {event.status && (
-                    <div className="mt-2 font-work-sans" style={{ border: 'none', outline: 'none' }}>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        event.status.toLowerCase() === 'draft' ? 'bg-gray-100 text-gray-800' :
-                        event.status.toLowerCase() === 'completed' ? 'bg-blue-100 text-blue-800' :
-                        event.status.toLowerCase() === 'active' || 
-                        event.status.toLowerCase() === 'approved' || 
-                        event.status.toLowerCase() === 'submitted' ? 'bg-green-100 text-green-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {event.statusText || event.status}
-                      </span>
-                    </div>
+                    <span 
+                      className="text-xs px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: `${getCampaignColor('other', event.status)}20`,
+                        color: getCampaignColor('other', event.status)
+                      }}
+                    >
+                      {event.status}
+                    </span>
                   )}
                 </div>
-              </div>
-            </div>
-          );
-        })()
+                <div className="text-sm text-gray-500 mt-1">
+                  {format(new Date(event.start), 'MMM d, yyyy')}
+                  {event.platform && ` • ${event.platform}`}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       )}
       
-      {/* Status legend */}
-      <div className="p-2 flex flex-wrap gap-2 border-t border-[var(--divider-color)]">
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-gray-100 border border-gray-400 rounded-sm"></span>
-          <span>Draft</span>
+      {hoveredEvent && (
+        <div className="fixed bg-white border border-gray-200 shadow-lg rounded-lg p-3 z-50">
+          {validEvents.find(e => e.id === hoveredEvent)?.title}
         </div>
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-yellow-100 border border-yellow-400 rounded-sm"></span>
-          <span>In Review</span>
-        </div>
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-green-100 border border-green-400 rounded-sm"></span>
-          <span>Active</span>
-        </div>
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-blue-100 border border-blue-400 rounded-sm"></span>
-          <span>Completed</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default CalendarDashboard; 
+export default CalendarDashboard;

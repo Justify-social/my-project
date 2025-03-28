@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
 import { DbOperation, dbLogger } from '@/lib/data-mapping/db-logger';
-import { Prisma, PrismaClient } from '@prisma/client';
 
 // Interface for query performance metrics
 export interface QueryMetrics {
@@ -9,6 +8,17 @@ export interface QueryMetrics {
   duration: number;
   timestamp: Date;
   query?: string;
+}
+
+// Interface for query statistics
+interface QueryStats {
+  model: string;
+  operation: string;
+  count: number;
+  totalDuration: number;
+  avgDuration: number;
+  maxDuration: number;
+  minDuration: number;
 }
 
 // Keep track of the last N slow queries
@@ -131,7 +141,7 @@ export function getDbPerformanceStats() {
     acc[key].minDuration = Math.min(acc[key].minDuration, query.duration);
     
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, QueryStats>);
   
   return {
     totalSlowQueries: slowQueries.length,

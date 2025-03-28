@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+// Remove problematic import and use a standard type
+// import HTMLDivElement from '../radio/types/index';
+import StatusBadge from '../feedback/Badge';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import Icon from '../icon';
+import { Icon } from '@/components/ui/icons';
 
 // Types
 export interface Campaign {
@@ -21,44 +24,44 @@ export interface Campaign {
 const kpiMapping = {
   adRecall: {
     title: "Ad Recall",
-    icon: "/KPIs/Ad_Recall.svg"
+    icon: "/icons/kpis/Ad_Recall.svg"
   },
   brandAwareness: {
     title: "Brand Awareness",
-    icon: "/KPIs/Brand_Awareness.svg"
+    icon: "/icons/kpis/Brand_Awareness.svg"
   },
   consideration: {
     title: "Consideration",
-    icon: "/KPIs/Consideration.svg"
+    icon: "/icons/kpis/Consideration.svg"
   },
   messageAssociation: {
     title: "Message Association",
-    icon: "/KPIs/Message_Association.svg"
+    icon: "/icons/kpis/Message_Association.svg"
   },
   brandPreference: {
     title: "Brand Preference",
-    icon: "/KPIs/Brand_Preference.svg"
+    icon: "/icons/kpis/Brand_Preference.svg"
   },
   purchaseIntent: {
     title: "Purchase Intent",
-    icon: "/KPIs/Purchase_Intent.svg"
+    icon: "/icons/kpis/Purchase_Intent.svg"
   },
   actionIntent: {
     title: "Action Intent",
-    icon: "/KPIs/Action_Intent.svg"
+    icon: "/icons/kpis/Action_Intent.svg"
   },
   recommendationIntent: {
     title: "Recommendation Intent",
-    icon: "/KPIs/Brand_Preference.svg"
+    icon: "/icons/kpis/Brand_Preference.svg"
   },
   advocacy: {
     title: "Advocacy",
-    icon: "/KPIs/Advocacy.svg"
+    icon: "/icons/kpis/Advocacy.svg"
   }
 };
 
 // Component to display a status badge
-const StatusBadge = ({ status, size = 'md' }: { status: string, size?: 'sm' | 'md' }) => {
+const CampaignStatusBadge = ({ status, size = 'md' }: { status: string, size?: 'sm' | 'md' }) => {
   const getStatusInfo = (status: string) => {
     const normalizedStatus = status.toLowerCase();
     
@@ -102,8 +105,8 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isMounted = useRef(true);
 
-  // Ensure the card is visible, even after hydration
-  useLayoutEffect(() => {
+  // Ensure the card is visible, even after hydration - use useEffect instead of useLayoutEffect
+  useEffect(() => {
     // Force the card to be visible immediately after mounting
     if (cardRef.current) {
       cardRef.current.style.display = 'block';
@@ -130,7 +133,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
   // Get the KPI display info or use fallback if not found
   const kpiInfo = kpiMapping[campaign.primaryKPI as keyof typeof kpiMapping] || {
     title: campaign.primaryKPI || 'Brand Awareness',
-    icon: "/KPIs/Brand_Awareness.svg"
+    icon: "/icons/kpis/Brand_Awareness.svg"
   };
 
   return (
@@ -154,7 +157,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onClick }) => {
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm sm:text-base font-medium text-[var(--primary-color)] font-sora" data-cy="campaign-name">{campaign.campaignName}</h3>
               <div data-cy="status-badge">
-                <StatusBadge status={campaign.submissionStatus || 'draft'} size="sm" />
+                <CampaignStatusBadge status={campaign.submissionStatus || 'draft'} size="sm" />
               </div>
             </div>
             <p className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
@@ -318,13 +321,13 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
   };
 
   // Add effect to ensure campaigns are visible after hydration
-  useLayoutEffect(() => {
+  useEffect(() => {
     // Force a redraw to ensure campaign tiles are visible
     const forceRedraw = () => {
       if (!containerRef.current || !isMounted.current) return;
       
       const campaignElements = containerRef.current.querySelectorAll('.campaign-card-container');
-      campaignElements.forEach(element => {
+      campaignElements.forEach((element: Element) => {
         if (element instanceof HTMLElement) {
           element.style.display = 'block';
           element.style.visibility = 'visible';

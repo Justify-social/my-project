@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import CampaignDetails from '../../src/hooks/use-campaign-details';
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Define interfaces for better type safety

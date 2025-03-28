@@ -1,0 +1,38 @@
+[1;33mRunning: standardize-test-files.js[0m
+[0;34m------------------------------------------[0m
+[32m[Success][0m Created backup branch: test-standardization-backup
+[36m[Test Standardization][0m Found 13 test files to standardize
+[32m[Success][0m Standardized: src/utils/enum-transformers.test.ts -> src/utils/__tests__/enum-transformers.test.ts
+[32m[Success][0m Centralized: src/utils/__tests__/enum-transformers.test.ts -> tests/unit/utils/enum-transformers.test.ts
+[32m[Success][0m Standardized: src/components/ui/icons/__tests__/icon-test.tsx -> src/components/ui/icons/__tests__/icon.test.tsx
+[32m[Success][0m Centralized: src/components/ui/icons/__tests__/icon.test.tsx -> tests/unit/components/ui/icons/icon.test.tsx
+[32m[Success][0m Standardized: src/components/features/users/profile/profile-settings-skeleton-test.tsx -> src/components/features/users/profile/__tests__/profile-settings-skeleton.test.tsx
+[32m[Success][0m Centralized: src/components/features/users/profile/__tests__/profile-settings-skeleton.test.tsx -> tests/unit/components/features/users/profile/profile-settings-skeleton.test.tsx
+[32m[Success][0m Standardized: src/components/features/users/profile/profile-settings-page-test.tsx -> src/components/features/users/profile/__tests__/profile-settings-page.test.tsx
+[32m[Success][0m Centralized: src/components/features/users/profile/__tests__/profile-settings-page.test.tsx -> tests/unit/components/features/users/profile/profile-settings-page.test.tsx
+[32m[Success][0m Standardized: src/components/features/users/profile/profile-picture-section-test.tsx -> src/components/features/users/profile/__tests__/profile-picture-section.test.tsx
+[32m[Success][0m Centralized: src/components/features/users/profile/__tests__/profile-picture-section.test.tsx -> tests/unit/components/features/users/profile/profile-picture-section.test.tsx
+[32m[Success][0m Standardized: src/components/features/users/profile/personal-info-section-test.tsx -> src/components/features/users/profile/__tests__/personal-info-section.test.tsx
+[32m[Success][0m Centralized: src/components/features/users/profile/__tests__/personal-info-section.test.tsx -> tests/unit/components/features/users/profile/personal-info-section.test.tsx
+[32m[Success][0m Standardized: src/components/features/users/authentication/password-management-section-test.tsx -> src/components/features/users/authentication/__tests__/password-management-section.test.tsx
+[32m[Success][0m Centralized: src/components/features/users/authentication/__tests__/password-management-section.test.tsx -> tests/unit/components/features/users/authentication/password-management-section.test.tsx
+[32m[Success][0m Standardized: src/components/features/settings/team/team-management-skeleton-test.tsx -> src/components/features/settings/team/__tests__/team-management-skeleton.test.tsx
+[32m[Success][0m Centralized: src/components/features/settings/team/__tests__/team-management-skeleton.test.tsx -> tests/unit/components/features/settings/team/team-management-skeleton.test.tsx
+[32m[Success][0m Standardized: src/components/features/settings/team/team-management-page-test.tsx -> src/components/features/settings/team/__tests__/team-management-page.test.tsx
+[32m[Success][0m Centralized: src/components/features/settings/team/__tests__/team-management-page.test.tsx -> tests/unit/components/features/settings/team/team-management-page.test.tsx
+[32m[Success][0m Standardized: src/components/features/settings/branding/branding-skeleton-test.tsx -> src/components/features/settings/branding/__tests__/branding-skeleton.test.tsx
+[32m[Success][0m Centralized: src/components/features/settings/branding/__tests__/branding-skeleton.test.tsx -> tests/unit/components/features/settings/branding/branding-skeleton.test.tsx
+[32m[Success][0m Standardized: src/components/features/settings/branding/branding-page-test.tsx -> src/components/features/settings/branding/__tests__/branding-page.test.tsx
+[32m[Success][0m Centralized: src/components/features/settings/branding/__tests__/branding-page.test.tsx -> tests/unit/components/features/settings/branding/branding-page.test.tsx
+[32m[Success][0m Standardized: src/components/features/dashboard/notifications/notification-preferences-section-test.tsx -> src/components/features/dashboard/notifications/__tests__/notification-preferences-section.test.tsx
+[32m[Success][0m Centralized: src/components/features/dashboard/notifications/__tests__/notification-preferences-section.test.tsx -> tests/unit/components/features/dashboard/notifications/notification-preferences-section.test.tsx
+[32m[Success][0m Standardized: src/__tests__/settings/shared/settings-page-skeleton-test.tsx -> src/__tests__/settings/shared/settings-page-skeleton.test.tsx
+[32m[Success][0m Centralized: src/__tests__/settings/shared/settings-page-skeleton.test.tsx -> tests/unit/settings/shared/settings-page-skeleton.test.tsx
+[32m[Success][0m Report written to docs/project-history/test-standardization-report.md
+[32m[Success][0m Updated Jest configuration
+[32m[Success][0m Updated test scripts in package.json
+[32m[Success][0m Updated .gitignore to exclude local test duplicates
+[36m[Test Standardization][0m Test standardization completed.
+[32m[Success][0m Successfully processed 13 test files.
+[0;32m✓ Successfully completed: standardize-test-files.js[0m
+

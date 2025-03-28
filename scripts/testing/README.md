@@ -1,33 +1,53 @@
 # Testing Scripts
 
-This directory contains scripts for testing various aspects of the application.
+Testing, validation, and verification scripts.
 
-## Scripts Overview
+## Available Scripts
 
-- **test-algolia-search.js**: Tests Algolia search integration
-- **measure-bundle-size.js**: Measures and reports JavaScript bundle sizes
-- **test-api-endpoints.js**: Tests API endpoints for functionality and performance
-- **test-transaction-manager.js**: Tests database transaction management
-- **test-auth.ts**: TypeScript utility for testing authentication
-- **test-discovery.ts**: TypeScript utility for testing discovery services
+- `app-directory-migration.js`: App Directory Migration Script
+- `centralize-config.js`: Configuration Centralization Script
+- `consolidate-test-scripts.js`: Test Scripts Consolidation
+- `create-campaign.js`: No description available
+- `create-test-data.js`: No description available
+- `feature-component-identification.js`: Feature Component Identification Script
+- `final-unification.js`: Final Unification Script
+- `final-verification.js`: Final Verification Script
+- `find-any-types.js`: Find 'any' Type Usage
+- `find-hook-issues.js`: Find React Hook Dependency Issues
+- `find-img-tags.js`: Find <img> Tag Usage
+- `find-missing-readmes.js`: Script to identify UI component directories that are missing README.md files
+- `fix-any-types.js`: Fix 'any' Type Usage Script
+- `fix-img-tags.js`: Fix <img> Tags Script
+- `fix-linter-issues.js`: Fix Linter Issues Script
+- `implement-dev-experience.js`: Developer Experience Enhancement Script
+- `measure-bundle-size.js`: Bundle Size Measurement Script for Font Awesome Migration
+- `migrate-datepicker.js`: DatePicker Component Migration Script
+- `migrate-pagination.js`: Pagination Component Migration Script
+- `migrate-tests.js`: Test Migration Script
+- `rename-files.js`: File Renaming Script for Naming Consistency
+- `test-algolia-search.js`: No description available
+- `test-api-endpoints.js`: API Endpoint Test Script
+- `test-campaign-creation.js`: Test script for campaign creation API
+- `test-campaign-submission.js`: No description available
+- `test-campaign.js`: No description available
+- `test-database-operations.js`: Database Operations Test Script
+- `test-transaction-manager.js`: Test script for the transaction manager
+- `update-imports-dashboard.js`: Import Path Updater for dashboard components
+- `update-imports-users.js`: Import Path Updater for users components
+- `update-references.js`: Deprecated Component Reference Updater
+- `validate-build.js`: Build & Validate Font Awesome Fixes
+- `verify-imports.js`: Import Verification Script
 
 ## Usage
 
-JavaScript scripts can be run directly with Node.js:
+You can import individual scripts directly:
 
-```bash
-node scripts/testing/[script-name].js
+```js
+const scriptName = require('./scripts/consolidated/testing/script-name');
 ```
 
-For TypeScript scripts, use ts-node:
+Or import all scripts in this category using the index:
 
-```bash
-npx ts-node scripts/testing/test-auth.ts
+```js
+const { scriptName } = require('./scripts/consolidated/testing');
 ```
-
-Or import through the main scripts index:
-
-```javascript
-const { testing } = require('../index');
-testing.testApiEndpoints();
-``` 

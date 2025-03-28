@@ -42,14 +42,20 @@ export class DateService {
   /**
    * Attempts to extract an ISO date string from an object
    */
-  private static extractDateString(obj: any): string | null {
+  private static extractDateString(obj: object): string | null {
+    // Use type assertion for accessing properties safely
+    const dateObj = obj as Record<string, unknown>;
+    
     // Common patterns in serialized dates
-    if (obj.value && typeof obj.value === 'string') return obj.value;
-    if (obj.date && typeof obj.date === 'string') return obj.date;
-    if (obj.toISOString && typeof obj.toISOString === 'function') {
+    if (dateObj.value && typeof dateObj.value === 'string') return dateObj.value;
+    if (dateObj.date && typeof dateObj.date === 'string') return dateObj.date;
+    
+    // Handle Date-like objects with toISOString
+    const objWithMethods = obj as unknown as { toISOString?: () => string };
+    if (typeof objWithMethods.toISOString === 'function') {
       try {
-        return obj.toISOString();
-      } catch (e) {
+        return objWithMethods.toISOString();
+      } catch {
         return null;
       }
     }

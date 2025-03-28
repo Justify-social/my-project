@@ -1,5 +1,7 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import HTMLDivElement from '../radio/types/index';
+import SVGSVGElement from '../icons/variants/IconVariants';
+import { cn } from '@/utils/string/utils';
 
 export interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   /**

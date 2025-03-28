@@ -181,9 +181,9 @@ export const EnumTransformers = {
     
     if (typeof obj !== 'object') return obj;
     
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     
-    for (const [key, value] of Object.entries(obj as Record<string, any>)) {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (value === null || value === undefined) {
         result[key] = value;
         continue;
@@ -226,9 +226,9 @@ export const EnumTransformers = {
     
     if (typeof obj !== 'object') return obj;
     
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     
-    for (const [key, value] of Object.entries(obj as Record<string, any>)) {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (value === null || value === undefined) {
         result[key] = value;
         continue;

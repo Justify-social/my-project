@@ -31,10 +31,10 @@ export function sanitizeApiPayload<T>(
     preserveFields = []
   } = options;
   
-  if (payload === null || payload === undefined) return {};
-  if (typeof payload !== 'object' || Array.isArray(payload)) return payload as any;
+  if (payload === null || payload === undefined) return {} as Partial<T>;
+  if (typeof payload !== 'object' || Array.isArray(payload)) return payload as unknown as Partial<T>;
   
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   
   for (const [key, value] of Object.entries(payload)) {
     // Never remove fields that should be preserved (even if empty)
@@ -90,7 +90,7 @@ export function sanitizeApiPayload<T>(
  * This matches the API validation expectations where contacts need
  * complete information if present.
  */
-export function sanitizeContactFields<T extends Record<string, any>>(
+export function sanitizeContactFields<T extends Record<string, unknown>>(
   payload: T,
   contactFields: string[] = ['primaryContact', 'secondaryContact']
 ): T {
@@ -104,9 +104,10 @@ export function sanitizeContactFields<T extends Record<string, any>>(
     if (!contact) continue;
     
     // Check if contact has all required fields properly filled
-    const hasCompleteData = contact.firstName && 
-                           contact.surname && 
-                           contact.email;
+    const contactObj = contact as Record<string, unknown>;
+    const hasCompleteData = contactObj.firstName && 
+                           contactObj.surname && 
+                           contactObj.email;
     
     // Remove contact field entirely if incomplete
     if (!hasCompleteData) {
@@ -122,41 +123,42 @@ export function sanitizeContactFields<T extends Record<string, any>>(
  * Draft-specific sanitizer that applies rules appropriate for draft saves
  * with a more lenient approach than final submissions
  */
-export function sanitizeDraftPayload<T extends Record<string, any>>(payload: T): Partial<T> {
+export function sanitizeDraftPayload<T extends Record<string, unknown>>(payload: T): Partial<T> {
   // First apply general sanitization
   const sanitized = sanitizeApiPayload(payload, {
     removeEmptyStrings: false,
     removeEmptyArrays: false,
     // Always include required fields for drafts, even if empty
     preserveFields: ['name', 'status', 'step']
-  }) as Record<string, any>; // Cast to allow property access
+  }) as Record<string, unknown>; // Cast to allow property access
   
   // Sanitize influencers to ensure they have the minimal required fields
   if (sanitized.influencers && Array.isArray(sanitized.influencers)) {
     // Remove any influencers with empty/undefined platform or handle
-    sanitized.influencers = sanitized.influencers.filter((influencer: any) => {
+    sanitized.influencers = sanitized.influencers.filter((influencer: unknown) => {
       // For completely empty influencer entries, keep one for the UI
-      if (sanitized.influencers && sanitized.influencers.length === 1) {
+      if (sanitized.influencers && Array.isArray(sanitized.influencers) && sanitized.influencers.length === 1) {
         return true;
       }
       
       // Otherwise, only keep entries that have both platform and handle
+      const inf = influencer as Record<string, unknown>;
       return influencer && 
         typeof influencer === 'object' && 
-        influencer.platform && 
-        influencer.handle;
+        inf.platform && 
+        inf.handle;
     });
   }
   
   // Then apply contact-specific sanitization
   // Cast the result to ensure TypeScript is happy with the return type
-  return sanitizeContactFields(sanitized as any) as Partial<T>;
+  return sanitizeContactFields(sanitized as unknown as Record<string, unknown>) as Partial<T>;
 }
 
 /**
  * Sanitize a campaign payload for a specific wizard step
  */
-export function sanitizeStepPayload<T extends Record<string, any>>(payload: T, step: number): Partial<T> {
+export function sanitizeStepPayload<T extends Record<string, unknown>>(payload: T, step: number): Partial<T> {
   // Apply base sanitization
   const sanitized = sanitizeApiPayload(payload);
   
@@ -180,7 +182,7 @@ export function sanitizeStepPayload<T extends Record<string, any>>(payload: T, s
 /**
  * Step 1 specific sanitization (campaign basics)
  */
-function sanitizeStep1Payload<T extends Record<string, any>>(payload: T): Partial<T> {
+function sanitizeStep1Payload<T extends Record<string, unknown>>(payload: T): Partial<T> {
   // Handle contacts appropriately
   return sanitizeContactFields(payload);
 }
@@ -188,7 +190,7 @@ function sanitizeStep1Payload<T extends Record<string, any>>(payload: T): Partia
 /**
  * Step 2 specific sanitization (KPIs and features)
  */
-function sanitizeStep2Payload<T extends Record<string, any>>(payload: T): Partial<T> {
+function sanitizeStep2Payload<T extends Record<string, unknown>>(payload: T): Partial<T> {
   const result = { ...payload };
   
   // Handle arrays of values
@@ -206,7 +208,7 @@ function sanitizeStep2Payload<T extends Record<string, any>>(payload: T): Partia
 /**
  * Step 3 specific sanitization (audience targeting)
  */
-function sanitizeStep3Payload<T extends Record<string, any>>(payload: T): Partial<T> {
+function sanitizeStep3Payload<T extends Record<string, unknown>>(payload: T): Partial<T> {
   const result = { ...payload };
   
   // Handle audience data
@@ -220,7 +222,7 @@ function sanitizeStep3Payload<T extends Record<string, any>>(payload: T): Partia
 /**
  * Step 4 specific sanitization (creative assets)
  */
-function sanitizeStep4Payload<T extends Record<string, any>>(payload: T): Partial<T> {
+function sanitizeStep4Payload<T extends Record<string, unknown>>(payload: T): Partial<T> {
   const result = { ...payload };
   
   // Handle creative assets
@@ -234,7 +236,7 @@ function sanitizeStep4Payload<T extends Record<string, any>>(payload: T): Partia
 /**
  * Step 5 specific sanitization (review and submit)
  */
-function sanitizeStep5Payload<T extends Record<string, any>>(payload: T): Partial<T> {
+function sanitizeStep5Payload<T extends Record<string, unknown>>(payload: T): Partial<T> {
   // For step 5, we want to keep most fields as they are for review
   return payload;
 } 

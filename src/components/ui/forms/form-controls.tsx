@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { Input } from '../input';
+import { cn } from '@/utils/string/utils';
+import { Input } from './Input';
 import { Icon } from '../icons';
 
 /**

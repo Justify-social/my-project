@@ -7,9 +7,9 @@
  * Usage: node src/scripts/test-api-endpoints.js
  */
 
-const fetch = require('node-fetch');
-const { v4: uuidv4 } = require('uuid');
-const chalk = require('chalk');
+import fetch from 'node-fetch';
+import v4: uuidv4 from 'uuid';
+import chalk from 'chalk';
 
 // Configuration
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000/api';
@@ -225,8 +225,7 @@ async function testGetCampaign(campaignId) {
   });
 
   const campaignExists = listResponse.ok && 
-    listResponse.data.success && 
-    Array.isArray(listResponse.data.data.campaigns) &&
+    if (listResponse.data.success) Array.isArray(listResponse.data.data.campaigns) &&
     listResponse.data.data.campaigns.some(campaign => campaign.id === campaignId);
 
   logResult(

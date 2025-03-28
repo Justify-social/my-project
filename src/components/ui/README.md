@@ -1,6 +1,117 @@
-# UI Component System
+# UI Component Library
 
-This directory contains all centralized UI components for the Justify.social application.
+This directory contains all the shared UI components for the application, designed to be reusable, robust, and scalable.
+
+## Directory Structure
+
+Our UI component library follows a clean, modular structure:
+
+- `/button` - Button components including variations and states
+- `/calendar` - Calendar and date-related components
+- `/icons` - Icon system with variants and utilities
+- `/spinner` - Loading spinners and indicators
+- `/loading-skeleton` - Skeleton loading patterns for content
+
+## Recent Optimizations
+
+### Icon System Unification (2025-03-27)
+
+We've completed a major optimization of the icon system:
+
+1. **Consolidated Directory Structure**
+   - Moved all icons to `/components/ui/icons`
+   - Updated paths from `/public/ui-icons/` to `/public/icons/`
+
+2. **Improved Component Architecture**
+   - Organized components into logical directories (`core`, `variants`, `utils`)
+   - Created single entry point for consistent imports
+   - Added proper type definitions for better IDE support
+
+3. **Simplified Developer Experience**
+   - Standardized icon import patterns
+   - Improved documentation and examples
+   - Added deprecation notices to legacy files
+
+### Loading Component Consolidation
+
+We've also optimized our loading/spinner components:
+
+1. **Consolidated Implementation**
+   - Primary implementation now in `/spinner` directory
+   - Created backward compatibility layers for existing imports
+   - Standardized API across all spinner variants
+
+2. **Improved Customization Options**
+   - Consistent sizing system
+   - Unified color variants
+   - Better accessibility features
+
+## Usage Guidelines
+
+### Icons
+
+```tsx
+// Preferred import pattern
+import { Icon, ButtonIcon, StaticIcon } from '@/components/ui/icons';
+
+// Basic usage
+<Icon name="star" />
+
+// With hover effect
+<ButtonIcon name="star" />
+
+// Without hover effect
+<StaticIcon name="star" />
+```
+
+### Spinners
+
+```tsx
+// Preferred import pattern
+import { Spinner, ButtonSpinner } from '@/components/ui/spinner';
+
+// Basic usage
+<Spinner />
+
+// Inside a button
+<ButtonSpinner />
+
+// With customizations
+<Spinner size="lg" variant="primary" label="Loading..." />
+```
+
+## Deprecated Components
+
+The following components are deprecated and will be removed in a future update:
+
+- `/icon.tsx` - Use `/icons/index.ts` instead
+- `/icon-wrapper.tsx` - Use `/icons/index.ts` instead  
+- `/safe-icon.tsx` - Use `/icons/core/safe-icon.tsx` instead
+- `/custom-icon-display.tsx` - Use `/icons/examples/index.ts` instead
+- `/loading-spinner` - Use `/spinner` instead
+- `/loading-skeleton/spinners` - Use `/spinner` instead
+
+## Next Steps
+
+Our optimization efforts are ongoing:
+
+1. **Tree-Shaking Support**
+   - Implement proper tree-shaking for icon components
+   - Ensure unused components don't add to bundle size
+
+2. **Component Consolidation**
+   - Complete removal of deprecated components
+   - Ensure consistent API across component families
+
+## Contributing
+
+When adding new UI components, please follow these guidelines:
+
+1. Create a dedicated directory for your component
+2. Include both the component and an index.ts file
+3. Add proper TypeScript typings
+4. Document usage examples
+5. Add appropriate tests
 
 ## Component Inventory
 
@@ -1213,3 +1324,94 @@ import Head from 'next/head';
   <link rel="icon" href="/favicon.ico" />
 </Head>
 ```
+
+## Component Organization
+
+### Directory Structure
+
+Each UI component follows this consistent structure:
+
+```
+src/components/ui/
+├── {component}/               # Main component directory
+│   ├── index.ts               # Exports all from this component
+│   ├── {Component}.tsx        # Main component implementation
+│   ├── README.md              # Component documentation
+│   ├── styles/                # Component styles 
+│   │   └── {component}.styles.ts
+│   ├── types/                 # Component type definitions
+│   │   └── index.ts
+│   ├── utils/                 # Component utility functions (if needed)
+│   └── examples/              # Example implementations (if needed)
+```
+
+### Component Categories
+
+Our UI components are organized into these categories:
+
+1. **Core Components**
+   - Alert, Avatar, Badge, Button, Calendar, Card, Checkbox
+   - Container, Grid, Icons, Input, List, Progress
+   - Radio, Select, Skeleton, Spinner, Table, Tabs, Toast, Typography
+
+2. **Layout and Navigation**
+   - Navigation components (ComponentNav)
+
+3. **Feedback and Notifications**
+   - Notification components (NotificationBell)
+
+4. **Theming**
+   - Color palettes and themes
+
+5. **Utils**
+   - Error handling components
+
+6. **Debug Tools**
+   - Development and debugging utilities
+
+### Import Patterns
+
+```tsx
+// Import specific components
+import { Button, Card, Input } from '@/components/ui';
+
+// Or import directly from a component category
+import { Spinner } from '@/components/ui/spinner';
+```
+
+### Component Implementation Guidelines
+
+1. **Component Files**:
+   - Use PascalCase for component files: `Button.tsx`, not `button.tsx`
+   - Place in the root of the component directory
+
+2. **Style Files**:
+   - Place in `styles/` subdirectory
+   - Use kebab-case: `button.styles.ts`
+
+3. **Type Definitions**:
+   - Place in `types/` subdirectory
+   - Export all types from `types/index.ts`
+
+4. **Documentation**:
+   - Include a README.md with usage examples
+   - Document props and variants
+
+5. **Examples**:
+   - Place in `examples/` subdirectory
+   - Create demonstrations of various use cases
+
+### Component Creation
+
+Use the `create-ui-component.sh` script to generate new components with the correct structure:
+
+```bash
+./create-ui-component.sh ComponentName
+```
+
+This will:
+- Create the directory structure
+- Generate type definitions
+- Create style files
+- Set up example files
+- Add exports to index.ts

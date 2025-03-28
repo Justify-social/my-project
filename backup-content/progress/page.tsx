@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import ProgressBar from '../../src/components/features/settings/branding/SurveyProgressBar';
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 

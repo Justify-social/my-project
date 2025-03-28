@@ -1,118 +1,85 @@
-# Contributing to Documentation
+# Contributing Guide
 
-**Last Updated:** 2025-03-05  
-**Status:** Active  
-**Owner:** Documentation Team
+Thank you for your interest in contributing to our project. This guide explains our development process and how you can contribute effectively.
 
-## Overview
+## Getting Started
 
-This document outlines the guidelines for contributing to the Campaign Wizard documentation. Following these guidelines ensures consistency and quality across all documentation.
+1. **Set up your environment**
+   - Follow our [Development Setup Guide](guides/developer/setup.md)
+   - Ensure all dependencies are installed correctly
+   - Verify that you can run the application locally
 
-## Documentation Structure
+2. **Understand the codebase**
+   - Review the [Project Overview](guides/project-overview.md)
+   - Study the [Directory Structure](architecture/directory-structure.md)
+   - Familiarise yourself with our [Naming Conventions](guides/naming-conventions.md)
 
-Our documentation follows a specific structure:
+## Development Workflow
 
-```
-/docs
-├── README.md                                # Main documentation hub with navigation guide
-├── CONTRIBUTING.md                          # Documentation guidelines (this file)
-│
-├── features-frontend/                       # User-facing features
-│   ├── README.md                            # Overview of frontend features
-│   │
-│   ├── [feature-name]/                      # Feature-specific folder
-│       ├── overview.md                      # Feature description and purpose
-│       ├── usage.md                         # How to use this feature
-│       └── [other relevant files]           # Additional documentation as needed
-│
-├── features-backend/                        # Technical backend features
-│   ├── README.md                            # Overview of backend features
-│   │
-│   ├── [component-name]/                    # Component-specific folder
-│       ├── overview.md                      # Component description and purpose
-│       └── [other relevant files]           # Additional documentation as needed
-│
-├── guides/                                  # User & developer guides
-│   ├── README.md                            # Guide overview
-│   │
-│   ├── user/                                # End-user guides
-│   └── developer/                           # Developer guides
-│
-└── templates/                               # Document templates
-    ├── feature.md                           # Template for feature docs
-    └── guide.md                             # Template for guides
-```
+1. **Create a branch**
+   - Branch from `main` for most changes
+   - Use the naming format: `<type>/<description>`
+   - Types: `feature`, `bugfix`, `refactor`, `docs`, `test`, `chore`
+   - Example: `feature/campaign-filter-improvements`
 
-## Document Templates
+2. **Make your changes**
+   - Follow our [Coding Standards](guides/developer/coding-standards.md)
+   - Ensure proper testing of your changes
+   - Keep commits small and focused
+   - Write meaningful commit messages
 
-When creating new documentation, please use the appropriate template:
+3. **Submit a pull request**
+   - Fill in the pull request template
+   - Link any related issues
+   - Request review from appropriate team members
+   - Respond to feedback promptly
 
-- [Feature Documentation Template](./templates/feature.md) - For documenting application features
-- [Guide Template](./templates/guide.md) - For creating how-to guides
+## Code Quality
 
-## Documentation Standards
+We maintain high standards for code quality:
 
-### File Naming
+- **Linting**: Run `npm run lint` before committing
+- **Testing**: Include tests for new features and fixes
+- **Documentation**: Update relevant documentation for your changes
+- **Accessibility**: Ensure UI changes meet WCAG 2.1 AA standards
+- **Performance**: Consider the performance impact of your changes
 
-- Use lowercase letters
-- Use hyphens instead of spaces
-- Be descriptive but concise
-- Examples: `overview.md`, `api-authentication.md`, `database-schema.md`
+## Commit Guidelines
 
-### Document Headers
-
-All documents should include a header with metadata:
+Write clear, concise commit messages:
 
 ```
-# Document Title
+<type>: <summary>
 
-**Last Updated:** YYYY-MM-DD  
-**Status:** Active/Draft/Deprecated  
-**Owner:** Team or Individual
+<optional body>
+
+<optional footer>
 ```
 
-### Writing Style
+Types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Formatting changes
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
 
-- Use clear, concise language
-- Write in second person (you/your) for guides
-- Use present tense
-- Break up text with headings, lists, and code blocks
-- Include examples and screenshots where helpful
+## Pull Request Process
 
-### Markdown Guidelines
-
-- Use ATX-style headers (`#` for main heading, `##` for subheadings)
-- Use code blocks with language specification for code samples
-- Use relative links for internal documentation references
-- Use tables for structured data
-- Use blockquotes for notes and warnings
-
-## Adding New Documentation
-
-1. Identify where the document belongs in the structure
-2. Use the appropriate template
-3. Follow the documentation standards
-4. Update any relevant index files
-5. Update the last updated date in the document header
-
-## Updating Existing Documentation
-
-1. Always update the "Last Updated" date when making substantive changes
-2. Maintain the existing structure and style of the document
-3. If making major changes, consider whether the document's status should change
-4. If you're not the owner, consider consulting with the owner before making major changes
-
-## Review Process
-
-1. Self-review your documentation using the standards in this guide
-2. Request review from relevant stakeholders
-3. Update based on feedback
-4. Finalize and publish
+1. Ensure all tests pass
+2. Update documentation as needed
+3. Get approval from at least one reviewer
+4. Rebase and squash commits if needed
+5. Merge using the squash and merge option
 
 ## Getting Help
 
-If you have questions about these guidelines or need help with documentation, please contact the Documentation Team.
+If you need assistance:
 
----
+- Check our [Development Setup Guide](guides/developer/setup.md)
+- Review our [Troubleshooting Guide](guides/developer/troubleshooting.md)
+- Ask questions in the development channel on Slack
+- Contact the core development team
 
-Thank you for contributing to the Campaign Wizard documentation! 
+Thank you for helping improve our project! 

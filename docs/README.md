@@ -1,33 +1,38 @@
-# Justify.social Documentation
+# Developer Documentation
 
-Welcome to the official documentation for Justify.social, a platform that captures authentic audience opinions to measure social campaign impact and identify standout influencers for brands.
+Welcome to our documentation portal. This resource is designed to help you understand our marketing intelligence platform quickly and thoroughly.
 
-## About This Documentation
+## Quick Links
 
-This documentation serves as a comprehensive guide for both users and developers. It covers all aspects of the platform, from basic usage to advanced technical details.
+- [Project Overview](guides/project-overview.md) - Essential understanding of the application purpose, features, and user types
+- [Development Setup](guides/developer/setup.md) - Get your local environment running
+- [Architecture](architecture/directory-structure.md) - Understand how the application is structured
+- [Contributing](CONTRIBUTING.md) - Learn how to contribute to the project
 
-## How to Use This Documentation
+## Documentation Structure
 
-- **Users**: Start with the [Getting Started](guides/user/getting-started.md) guide
-- **Developers**: Begin with the [Setup Guide](guides/developer/setup.md) and [Architecture Overview](features-backend/architecture/overview.md)
+Our documentation is organised into these key sections:
 
-## Documentation Sections
+- **Guides** - Step-by-step instructions for specific tasks
+- **Architecture** - System design and technical decisions
+- **Features** - Detailed documentation of application features
+- **Reference** - Technical specifications and API documentation
+- **Processes** - Development workflows and procedures
+- **Routes** - Navigation structure and page information
+- **Project History** - Historical context and project evolution
 
-- **[Frontend Features](features-frontend/README.md)**: User interface components and interactions
-- **[Backend Features](features-backend/README.md)**: Server-side implementation and APIs
-- **[Guides](guides/README.md)**: Step-by-step instructions for common tasks
-- **[Templates](templates/README.md)**: Reference templates for documentation
+## For New Developers
 
-## Key Features
+If you're new to the project, we recommend this learning path:
 
-- Campaign Creation and Management
-- Brand Lift Measurement
-- Influencer Discovery and Analysis
-- Creative Asset Testing
-- Brand Health Monitoring
-- Mixed Media Modeling
-- Comprehensive Reporting
+1. Read the [Project Overview](guides/project-overview.md) to understand the application's purpose
+2. Set up your development environment using the [Setup Guide](guides/developer/setup.md)
+3. Review the [Directory Structure](architecture/directory-structure.md) to understand the codebase
+4. Learn our [Naming Conventions](guides/naming-conventions.md) and [Coding Standards](guides/developer/coding-standards.md)
+5. Understand our [Available Scripts](reference/scripts/index.md) for development tasks
 
-## Contributing to Documentation
+## GitBook Navigation
 
-Please follow our [Contributing Guidelines](CONTRIBUTING.md) if you wish to improve or add to this documentation.
+This documentation is organised for optimal navigation in GitBook. Use the sidebar to browse through sections, or search for specific topics using the search bar.
+
+For a complete table of contents, see the [SUMMARY](SUMMARY.md) file.

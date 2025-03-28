@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
+import SurveyQuestion from '../../src/types/brand-lift';
+import HTMLInputElement from '../../src/components/ui/radio/types/index';
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { FaMagic } from "react-icons/fa";

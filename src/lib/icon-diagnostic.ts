@@ -1,24 +1,31 @@
 /**
- * FontAwesome Icons Diagnostic Script
+ * Icon System Diagnostic Utility
  * 
- * This script identifies and resolves issues with FontAwesome icons in the application.
- * Common issues include:
- * 1. Icons not being imported and registered properly
- * 2. Timing issues with library registration
+ * This script identifies and resolves issues with icons in the application.
+ * It helps debug common issues such as:
+ * 1. Missing icon SVG files
+ * 2. Timing issues with icon loading
  * 3. Memory leaks or cache problems
- * 4. Race conditions in icon loading
+ * 4. Race conditions in icon rendering
+ * 
+ * UPDATED: This version uses the unified icon system rather than direct FontAwesome imports.
  */
 
-import { IconDefinition, IconName, IconPrefix, findIconDefinition, library } from '@fortawesome/fontawesome-svg-core';
-import * as SolidIcons from '@fortawesome/pro-solid-svg-icons';
-import * as LightIcons from '@fortawesome/pro-light-svg-icons';
-import * as RegularIcons from '@fortawesome/pro-regular-svg-icons';
-import * as DuotoneIcons from '@fortawesome/pro-duotone-svg-icons';
-import * as BrandIcons from '@fortawesome/free-brands-svg-icons';
+// Remove direct FontAwesome imports
+// import { IconDefinition, IconName, IconPrefix, findIconDefinition, library } from '@fortawesome/fontawesome-svg-core';
+// import * as SolidIcons from '@fortawesome/pro-solid-svg-icons';
+// import * as LightIcons from '@fortawesome/pro-light-svg-icons';
+// import * as RegularIcons from '@fortawesome/pro-regular-svg-icons';
+// import * as DuotoneIcons from '@fortawesome/pro-duotone-svg-icons';
+// import * as BrandIcons from '@fortawesome/free-brands-svg-icons';
 
-// Map of icon names (kebab-case) by their prefix
+// Import from our unified icon system
+import { IconName } from '@/components/ui/icons';
+import { iconNameToFilePath } from '@/lib/icon-loader';
+
+// Define our icon map type
 interface IconMap {
-  [prefix: string]: { [name: string]: IconDefinition };
+  [prefix: string]: { [name: string]: boolean };
 }
 
 // Event logger - creates timestamped logs for debugging
@@ -50,67 +57,44 @@ class EventLogger {
 // Global event logger instance
 export const iconLogger = new EventLogger();
 
-// Create a map of all available icons
-function buildIconMap(): IconMap {
+// Create a map of available icons based on public SVG files
+async function buildIconMap(): Promise<IconMap> {
   iconLogger.log('Building icon map');
   
-  const iconMap: IconMap = { fas: {}, fal: {}, far: {}, fad: {}, fab: {} };
+  const iconMap: IconMap = { fas: {}, fal: {}, far: {}, fab: {} };
   
-  // Add all solid icons
-  Object.keys(SolidIcons).forEach(key => {
-    if (key.startsWith('fa') && key !== 'faForward') {
-      const icon = (SolidIcons as any)[key] as IconDefinition;
-      if (icon && icon.iconName) {
-        iconMap.fas[icon.iconName] = icon;
-      }
+  try {
+    // In a browser environment, we can fetch the icon index or check specific icons
+    if (typeof window !== 'undefined' && typeof fetch !== 'undefined') {
+      // We could fetch an index of available icons if available
+      // For now, we'll mark some common icons as available
+      
+      // Mark common solid icons as available
+      const commonSolidIcons = ['user', 'search', 'check', 'xmark', 'gear', 'circle-info'];
+      commonSolidIcons.forEach(name => {
+        iconMap.fas[name] = true;
+      });
+      
+      // Mark common light icons as available
+      const commonLightIcons = ['user', 'search', 'check', 'xmark', 'gear', 'circle-info'];
+      commonLightIcons.forEach(name => {
+        iconMap.fal[name] = true;
+      });
+      
+      // Mark common brand icons as available
+      const commonBrandIcons = ['twitter', 'facebook', 'github', 'instagram'];
+      commonBrandIcons.forEach(name => {
+        iconMap.fab[name] = true;
+      });
     }
-  });
-  
-  // Add all light icons
-  Object.keys(LightIcons).forEach(key => {
-    if (key.startsWith('fa') && key !== 'faForward') {
-      const icon = (LightIcons as any)[key] as IconDefinition;
-      if (icon && icon.iconName) {
-        iconMap.fal[icon.iconName] = icon;
-      }
-    }
-  });
-  
-  // Add all regular icons
-  Object.keys(RegularIcons).forEach(key => {
-    if (key.startsWith('fa') && key !== 'faForward') {
-      const icon = (RegularIcons as any)[key] as IconDefinition;
-      if (icon && icon.iconName) {
-        iconMap.far[icon.iconName] = icon;
-      }
-    }
-  });
-  
-  // Add all duotone icons
-  Object.keys(DuotoneIcons).forEach(key => {
-    if (key.startsWith('fa') && key !== 'faForward') {
-      const icon = (DuotoneIcons as any)[key] as IconDefinition;
-      if (icon && icon.iconName) {
-        iconMap.fad[icon.iconName] = icon;
-      }
-    }
-  });
-  
-  // Add all brand icons
-  Object.keys(BrandIcons).forEach(key => {
-    if (key.startsWith('fa') && key !== 'faForward') {
-      const icon = (BrandIcons as any)[key] as IconDefinition;
-      if (icon && icon.iconName) {
-        iconMap.fab[icon.iconName] = icon;
-      }
-    }
-  });
+  } catch (error) {
+    iconLogger.log('Error building icon map', error);
+  }
   
   iconLogger.log('Icon map built', { 
     solid: Object.keys(iconMap.fas).length, 
     light: Object.keys(iconMap.fal).length,
     regular: Object.keys(iconMap.far).length,
-    duotone: Object.keys(iconMap.fad).length,
     brand: Object.keys(iconMap.fab).length 
   });
   
@@ -121,69 +105,111 @@ function buildIconMap(): IconMap {
 let iconMapCache: IconMap | null = null;
 
 // Get the icon map, building it if needed
-export function getIconMap(): IconMap {
+export async function getIconMap(): Promise<IconMap> {
   if (!iconMapCache) {
-    iconMapCache = buildIconMap();
+    iconMapCache = await buildIconMap();
   }
   return iconMapCache;
 }
 
+// Convert camelCase icon name to kebab-case for lookup
+function camelToKebabCase(str: string): string {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 // Check if an icon exists by name and prefix
-export function iconExists(prefix: IconPrefix, name: IconName): boolean {
+export async function iconExists(prefix: string, name: string): Promise<boolean> {
   try {
-    // Try the direct lookup first (faster)
-    const iconMap = getIconMap();
-    if (iconMap[prefix] && iconMap[prefix][name]) {
+    // Get the icon map
+    const iconMap = await getIconMap();
+    
+    // Convert camelCase to kebab-case if needed
+    const kebabName = iconName.replace(/^fa/, '').replace(/([A-Z])/g, '-$1').toLowerCase();
+    
+    // Try direct lookup
+    if (iconMap[prefix] && iconMap[prefix][kebabName]) {
       return true;
     }
     
-    // Fall back to findIconDefinition
-    return !!findIconDefinition({ prefix, iconName: name });
+    // If not found in our cache, check if the SVG file exists
+    if (typeof window !== 'undefined' && typeof fetch !== 'undefined') {
+      // Map prefix to variant
+      const variantMap: Record<string, string> = {
+        'fas': 'solid',
+        'fal': 'light',
+        'far': 'regular',
+        'fab': 'brands'
+      };
+      
+      const variant = variantMap[prefix] || 'solid';
+      
+      // Try to fetch the SVG file
+      try {
+        const filePath = `/icons/${variant}/${kebabName}.svg`;
+        const response = await fetch(filePath, { method: 'HEAD' });
+        
+        // If the SVG exists, add it to our cache
+        if (response.ok) {
+          if (!iconMap[prefix]) {
+            iconMap[prefix] = {};
+          }
+          iconMap[prefix][kebabName] = true;
+          return true;
+        }
+      } catch (e) {
+        iconLogger.log(`Error checking if SVG exists: ${prefix} ${name}`, e);
+      }
+    }
+    
+    return false;
   } catch (e) {
     iconLogger.log(`Error checking if icon exists: ${prefix} ${name}`, e);
     return false;
   }
 }
 
-// Register any missing icons in the FontAwesome library
-export function ensureIconsRegistered() {
-  iconLogger.log('Ensuring icons are registered');
-  
-  // Get the icon map
-  const iconMap = getIconMap();
-  
-  // Count icons to be registered
-  const solidIcons = Object.values(iconMap.fas);
-  const lightIcons = Object.values(iconMap.fal);
-  const regularIcons = Object.values(iconMap.far);
-  const duotoneIcons = Object.values(iconMap.fad);
-  const brandIcons = Object.values(iconMap.fab);
+// This function replaced ensureIconsRegistered
+// Instead of registering with FontAwesome library, it preloads SVG files
+export async function preloadCommonIcons(): Promise<boolean> {
+  iconLogger.log('Preloading common icons');
   
   try {
-    // Register all icons with the library
-    library.add(...solidIcons, ...lightIcons, ...regularIcons, ...duotoneIcons, ...brandIcons);
+    // List of common icons to preload
+    const commonIcons = [
+      ['fas', 'user'],
+      ['fas', 'search'],
+      ['fas', 'check'],
+      ['fas', 'xmark'],
+      ['fal', 'user'],
+      ['fal', 'search'],
+      ['fab', 'twitter'],
+      ['fab', 'facebook']
+    ];
     
-    iconLogger.log('Registered all icons with library', {
-      solid: solidIcons.length,
-      light: lightIcons.length,
-      regular: regularIcons.length,
-      duotone: duotoneIcons.length,
-      brand: brandIcons.length
-    });
+    // Preload icons
+    await Promise.all(
+      commonIcons.map(async ([prefix, name]) => {
+        await iconExists(prefix, name);
+      })
+    );
     
+    iconLogger.log('Preloaded common icons');
     return true;
   } catch (e) {
-    iconLogger.log('Error registering icons with library', e);
+    iconLogger.log('Error preloading icons', e);
     return false;
   }
 }
 
-// Check if the FontAwesome library has been initialized
-export function checkLibraryInitialized(): boolean {
+// This function replaces checkLibraryInitialized
+// It checks if the icon system is ready by verifying a basic icon
+export async function checkIconSystemReady(): Promise<boolean> {
   try {
-    return !!findIconDefinition({ prefix: 'fas' as IconPrefix, iconName: 'question' as IconName });
+    // Check if a basic icon exists
+    const result = await iconExists('fas', 'question');
+    return result;
   } catch (e) {
-    iconLogger.log('Error checking if library is initialized', e);
+    iconLogger.log('Error checking if icon system is ready', e);
     return false;
   }
 }
@@ -196,18 +222,19 @@ export function monitorIconFailures() {
   
   iconLogger.log('Setting up icon failure monitor');
   
-  // Create a monitor for question mark icons
+  // Create a monitor for question mark icons (fallback icons)
   const observer = new MutationObserver((mutations) => {
-    let questionMarkIconsFound = false;
+    let fallbackIconsFound = false;
     
     mutations.forEach(mutation => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
           if (node instanceof HTMLElement) {
-            const questionIcons = node.querySelectorAll('.question-mark-icon-fallback');
-            if (questionIcons.length > 0) {
-              questionMarkIconsFound = true;
-              iconLogger.log(`Found ${questionIcons.length} question mark icons`, {
+            // Check for fallback icons - these would have a specific class or data attribute
+            const fallbackIcons = node.querySelectorAll('.icon-fallback, [data-icon-fallback="true"]');
+            if (fallbackIcons.length > 0) {
+              fallbackIconsFound = true;
+              iconLogger.log(`Found ${fallbackIcons.length} fallback icons`, {
                 path: node.closest('[data-path]')?.getAttribute('data-path') || 'unknown'
               });
             }
@@ -216,9 +243,9 @@ export function monitorIconFailures() {
       }
     });
     
-    if (questionMarkIconsFound) {
-      iconLogger.log('Attempting to re-register icons');
-      ensureIconsRegistered();
+    if (fallbackIconsFound) {
+      iconLogger.log('Attempting to preload icons');
+      preloadCommonIcons();
     }
   });
   
@@ -236,70 +263,78 @@ export function monitorIconFailures() {
 }
 
 // Generate a report of all icon statuses
-export function generateIconReport(): string {
+export async function generateIconReport(): Promise<string> {
   iconLogger.log('Generating icon report');
   
-  const iconMap = getIconMap();
+  const iconMap = await getIconMap();
   
   const report = [
-    '=== FontAwesome Icon Status Report ===',
+    '=== Icon System Status Report ===',
     `Generated at: ${new Date().toISOString()}`,
     '',
     `Solid Icons: ${Object.keys(iconMap.fas).length}`,
     `Light Icons: ${Object.keys(iconMap.fal).length}`,
     `Regular Icons: ${Object.keys(iconMap.far).length}`,
-    `Duotone Icons: ${Object.keys(iconMap.fad).length}`,
     `Brand Icons: ${Object.keys(iconMap.fab).length}`,
     '',
-    'Library Initialized: ' + (checkLibraryInitialized() ? 'Yes' : 'No'),
+    'System Status:',
+    `Icon system ready: ${await checkIconSystemReady() ? 'Yes' : 'No'}`,
     '',
-    '=== Event Log ===',
+    'Event Log:',
     iconLogger.getFormattedLogs()
-  ].join('\n');
+  ];
   
-  return report;
+  return report.join('\n');
 }
 
-// Export a diagnostic function that can be called to fix icon issues
-export function fixIconIssues(): void {
-  iconLogger.log('Running icon fix');
+// Test specific icons to check if they're available
+export async function testSpecificIcons(icons: { prefix: string; name: string }[]): Promise<{ [key: string]: boolean }> {
+  const results: { [key: string]: boolean } = {};
   
-  // Step 1: Check if the library is initialized
-  const initialized = checkLibraryInitialized();
-  iconLogger.log(`Library initialized: ${initialized}`);
-  
-  // Step 2: Register all icons
-  const registered = ensureIconsRegistered();
-  iconLogger.log(`Icons registered: ${registered}`);
-  
-  // Step 3: Set up monitoring for future failures
-  const cleanup = monitorIconFailures();
-  
-  // Log a success message
-  iconLogger.log('Icon fix complete');
-  
-  // Store the cleanup function in window for later use
-  if (typeof window !== 'undefined') {
-    (window as any).__iconMonitorCleanup = cleanup;
+  for (const { prefix, name } of icons) {
+    const key = `${prefix}:${name}`;
+    results[key] = await iconExists(prefix, name);
   }
+  
+  return results;
+}
+
+// Check for missing icons in a component or page
+export async function checkComponentIcons(iconUsage: { prefix: string; name: string }[]): Promise<{
+  missing: { prefix: string; name: string }[];
+  available: { prefix: string; name: string }[];
+}> {
+  const missing: { prefix: string; name: string }[] = [];
+  const available: { prefix: string; name: string }[] = [];
+  
+  for (const icon of iconUsage) {
+    const exists = await iconExists(icon.prefix, icon.name);
+    if (exists) {
+      available.push(icon);
+    } else {
+      missing.push(icon);
+    }
+  }
+  
+  return { missing, available };
 }
 
 // Auto-run the fix if in browser environment
 if (typeof window !== 'undefined') {
   // Wait for the document to be fully loaded
   if (document.readyState === 'complete') {
-    fixIconIssues();
+    monitorIconFailures();
   } else {
-    window.addEventListener('load', fixIconIssues);
+    window.addEventListener('load', monitorIconFailures);
   }
   
   // Also expose the diagnostic functions on window for debug use
   (window as any).__iconDiagnostics = {
     logger: iconLogger,
     getIconMap,
-    ensureIconsRegistered,
-    checkLibraryInitialized,
-    fixIconIssues,
+    preloadCommonIcons,
+    checkIconSystemReady,
+    monitorIconFailures,
     generateIconReport
   };
 } 
