@@ -1,3 +1,4 @@
+'use client';
 
 // Static content - long-term cache
 export const revalidate = 86400; // Revalidate once per day
@@ -5,7 +6,6 @@ export const fetchCache = 'force-cache'; // Use cache but revalidate according t
 
 // Data fetching optimization
 export const dynamic = 'force-dynamic'; // Force dynamic rendering
-"use client";
 
 import React, { useState, useEffect } from 'react';
 import { redirect } from 'next/navigation';
