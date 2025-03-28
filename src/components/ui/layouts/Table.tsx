@@ -209,7 +209,7 @@ export interface TableProps<T> {
 }
 
 // Internal components
-const TableHeader = <T extends {}>() => {
+const TableHeader = <T extends Record<string, unknown>>() => {
   const {
     columns,
     sortState,
@@ -263,7 +263,7 @@ const TableHeader = <T extends {}>() => {
       </tr>
     </thead>;
 };
-const TableBody = <T extends {}>() => {
+const TableBody = <T extends Record<string, unknown>>() => {
   const {
     data,
     columns,
@@ -319,7 +319,7 @@ const TableBody = <T extends {}>() => {
     })}
     </tbody>;
 };
-const TablePagination = <T extends {}>() => {
+const TablePagination = <T extends Record<string, unknown>>() => {
   const {
     data,
     pagination,
@@ -392,7 +392,7 @@ const TablePagination = <T extends {}>() => {
 };
 
 // Main Table component
-export const Table = <T extends {}>({
+export const Table = <T extends Record<string, unknown>>({
   data,
   columns,
   sortable = true,

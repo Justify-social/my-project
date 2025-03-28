@@ -124,7 +124,7 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
       </div>
       
       <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-        {/* @ts-ignore - Plotly typedefs are not perfect */}
+        {/* @ts-expect-error - Plotly typedefs are not perfect */}
         <Plot
           data={[
           {

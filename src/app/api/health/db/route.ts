@@ -230,7 +230,7 @@ async function checkDatabaseConnectivity() {
 async function checkTableAccess(modelName: string) {
   try {
     // Try to count records for this model
-    // @ts-ignore - Dynamic access to model
+    // @ts-expect-error - Dynamic access to model
     const count = await prisma[modelName].count();
     return { 
       model: modelName, 

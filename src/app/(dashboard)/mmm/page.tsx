@@ -1,13 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Bar from '../../../components/ui/icons/core/icon-data';
-import Line from '../../../components/ui/icons/core/icon-data';
-import SankeyDiagram from '../../../components/mmm/customer-journey/SankeyDiagram';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area } from
-'recharts';
+  LineChart, Line, AreaChart, Area } from 'recharts';
 import dynamic from 'next/dynamic';
 
 // Import our Sankey diagram component (with dynamic import to avoid SSR issues)
@@ -24,7 +20,7 @@ const SankeyDiagram = dynamic(() => import('@/components/mmm/customer-journey/Sa
 });
 
 // Import sample data for Sankey diagram
-import { sampleSankeyData } from '@/components/features/analytics/mmm/CustomerJourney/SankeyDiagram';
+import { sampleSankeyData } from '@/components/mmm/customer-journey/SankeyDiagram';
 
 // Mock data - would come from API in production
 const channelData = [

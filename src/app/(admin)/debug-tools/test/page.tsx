@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/hooks/use-permissions';
 import { PERMISSIONS } from '@/utils/roles';
 
 export default function TestPage() {

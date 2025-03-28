@@ -5,8 +5,7 @@
  */
 
 // Route parameters for dynamic routes
-export type RouteParams = {
-};
+export type RouteParams = Record<string, string>;
 
 // Route paths organized by feature domain
 export type RoutePaths = {

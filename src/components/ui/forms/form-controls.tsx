@@ -346,7 +346,9 @@ function FormFieldHelperText({
 
 }
 
-interface FormFieldErrorMessageProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+interface FormFieldErrorMessageProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  _dummy?: never;
+}
 
 function FormFieldErrorMessage({
   className,

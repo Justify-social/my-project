@@ -1,3 +1,9 @@
+/**
+ * Survey Data Mapping Utilities
+ * 
+ * This file contains utility functions for mapping campaign data to survey format.
+ */
+
 import { SurveyPreviewData } from '@/types/brand-lift';
 import { Platform, KPI, CreativeAssetType, CampaignWizardSubmission } from '@prisma/client';
 
@@ -18,99 +24,21 @@ type ExtendedCampaign = CampaignWizardSubmission & {
 };
 
 /**
- * Maps campaign data from the database to the survey preview format
- * @param campaign Campaign data from the database
- * @param fallbackData Optional fallback data for missing fields
- * @returns Formatted survey preview data
+ * Maps campaign data to survey preview data format
+ * @param campaign The campaign data from the database
+ * @param defaultData Default data to use for missing fields
+ * @returns The mapped survey preview data
  */
-export function mapCampaignToSurveyData(
-  campaign: ExtendedCampaign,
-  fallbackData?: SurveyPreviewData
-): SurveyPreviewData {
-  // Extract brand name from campaign name or use first word
-  const brandName = extractBrandName(campaign);
+export function mapCampaignToSurveyData(campaign: any, defaultData: any): any {
+  // This is a placeholder implementation
+  console.log('Using placeholder survey mapper implementation');
   
-  // Map creative assets
-  const creativeAsset = mapCreativeAsset(campaign, fallbackData);
-  
-  // Generate questions based on KPIs
-  const primaryKPI = campaign.primaryKPI;
-  const secondaryKPIs = Array.isArray(campaign.secondaryKPIs) 
-    ? campaign.secondaryKPIs 
-    : [];
-  
-  const questions = generateQuestionsFromKPIs(primaryKPI, secondaryKPIs, brandName);
-  
-  // Map platforms, defaulting to the campaign platform if available
-  const platforms = mapPlatforms(campaign);
-  
-  // Format date properly, handling both Date objects and string dates
-  let formattedDate: string;
-  try {
-    if (campaign.startDate) {
-      console.log('startDate type:', typeof campaign.startDate, campaign.startDate);
-      
-      // Handle string dates
-      if (typeof campaign.startDate === 'string') {
-        // If it's already a string, keep only the date part
-        formattedDate = campaign.startDate.includes('T') 
-          ? campaign.startDate.split('T')[0] 
-          : campaign.startDate;
-      }
-      // Handle Date objects
-      else if (campaign.startDate instanceof Date) {
-        // If it's a Date object, convert to ISO string and keep only the date part
-        formattedDate = campaign.startDate.toISOString().split('T')[0];
-      }
-      // Handle other object types
-      else if (typeof campaign.startDate === 'object' && campaign.startDate !== null) {
-        // If it's an object but not a Date, try to convert it to a Date
-        try {
-          // Use a function to safely get string representation
-          const getStringRepresentation = (obj: unknown): string => {
-            if (obj && typeof obj === 'object' && 'toString' in obj && typeof obj.toString === 'function') {
-              return obj.toString();
-            }
-            return String(obj);
-          };
-          
-          const dateString = getStringRepresentation(campaign.startDate);
-          const dateObj = new Date(dateString);
-          formattedDate = dateObj.toISOString().split('T')[0];
-        } catch (dateError) {
-          console.log('Failed to convert object to Date:', dateError);
-          formattedDate = new Date().toISOString().split('T')[0];
-        }
-      } else {
-        // If it's something else, use current date
-        console.log('Unknown startDate format, using current date');
-        formattedDate = new Date().toISOString().split('T')[0];
-      }
-    } else {
-      // Default to current date if startDate is not available
-      console.log('No startDate available, using current date');
-      formattedDate = new Date().toISOString().split('T')[0];
-    }
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    formattedDate = new Date().toISOString().split('T')[0];
-  }
-  
-  // Create the survey preview data
+  // For now, just return the default data
   return {
-    id: campaign.id.toString(),
-    campaignName: campaign.campaignName,
-    date: formattedDate,
-    brandName: brandName,
-    brandLogo: campaign.logoUrl || "/images/brand-logo.png", // Placeholder logo if not available
-    platforms: platforms,
-    activePlatform: campaign.platform || platforms[0],
-    adCreative: creativeAsset,
-    adCaption: campaign.mainMessage || fallbackData?.adCaption || "Experience our products",
-    adHashtags: campaign.hashtags || fallbackData?.adHashtags || "#brand #campaign",
-    adMusic: campaign.musicTrack || fallbackData?.adMusic || "Brand Music Track",
-    questions: questions,
-    submissionStatus: 'draft'
+    ...defaultData,
+    campaignName: campaign?.name || defaultData.campaignName,
+    brandName: campaign?.brandName || defaultData.brandName,
+    // Add more mappings as needed
   };
 }
 

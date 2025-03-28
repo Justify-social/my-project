@@ -1,9 +1,10 @@
+'use client';
 
-// Static content - long-term cache
+// Page configuration
+export const dynamic = 'force-static'; // Force static rendering
 export const revalidate = 86400; // Revalidate once per day
 export const fetchCache = 'force-cache'; // Use cache but revalidate according to the revalidate option
 // src/app/subscribe/page.tsx
-"use client";
 
 import React from "react";
 

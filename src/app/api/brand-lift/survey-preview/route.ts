@@ -3,7 +3,7 @@ import { SurveyPreviewData } from '@/types/brandLift';
 import { Platform, KPI, CreativeAssetType } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { connectToDatabase } from '@/lib/db';
-import { mapCampaignToSurveyData } from '@/utils/surveyMappers';
+import { mapCampaignToSurveyData } from '@/utils/survey-mappers';
 
 // Mock data for development - will be replaced with actual database queries
 const getMockSurveyData = (campaignId: string): SurveyPreviewData => {

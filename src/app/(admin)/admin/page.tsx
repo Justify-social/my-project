@@ -1,13 +1,13 @@
+'use client';
 
 // Data fetching optimization
 export const dynamic = 'force-dynamic'; // Force dynamic rendering
 export const revalidate = 60; // Revalidate every 60 seconds
-'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { toast } from 'react-hot-toast';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icons';

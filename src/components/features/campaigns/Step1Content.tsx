@@ -564,9 +564,9 @@ async function validateInfluencerHandle(platform: string, handle: string): Promi
 }
 
 // Add a debounce utility function
-const debounce = (func: Function, wait: number) => {
+const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
   let timeout: NodeJS.Timeout;
-  return function executedFunction(...args: any[]) {
+  return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);

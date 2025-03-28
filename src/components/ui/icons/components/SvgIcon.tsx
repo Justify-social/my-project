@@ -6,6 +6,7 @@ import cn from 'classnames';
 import { validateDynamicName } from '../utils';
 import { SEMANTIC_TO_FA_MAP, getIconBaseName, getIconPath, getIconPrefix, shouldUseHoverEffect, getActionColor, iconConfig } from '../utils';
 import { SafeIcon } from './SafeIcon';
+import { iconData } from '../data'; // Import from the index file
 
 // Map of icon prefixes to style folders
 const ICON_STYLE_FOLDERS = {
@@ -14,38 +15,6 @@ const ICON_STYLE_FOLDERS = {
   'fab': 'brands',
   'far': 'regular'
 };
-
-// Import the generated icon data directly
-let iconData: Record<string, {
-  width: number;
-  height: number;
-  path: string;
-  url: string;
-  prefix?: string; // Add prefix as it might come from the registry
-  name?: string;
-}> = {};
-
-// Attempt to import the icon data from various possible locations
-try {
-  // Try the component-local data file first
-  iconData = require('../data/icon-data').iconData;
-  console.log('Successfully loaded icon data from component-local file');
-} catch (e) {
-  try {
-    // Then try the icons/data path 
-    iconData = require('../data/icon-data').iconData;
-    console.log('Successfully loaded icon data from icons data file');
-  } catch (e) {
-    try {
-      // Then try the root icon-data.ts file
-      iconData = require('../icon-data').iconData;
-      console.log('Successfully loaded icon data from root file');
-    } catch (e) {
-      // If none of them work, show the warning
-      console.warn('Icon data not found. Run the icon generation scripts or icons will be loaded from files.');
-    }
-  }
-}
 
 /**
  * A modern SVG icon component that supports:
@@ -297,7 +266,7 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     });
   }
 
-  // For debugging icons that fail to load
+  // For debugging icons that fail to load - always declare hooks at the top level
   const [svgContent, setSvgContent] = useState<string | null>(null);
   
   useEffect(() => {

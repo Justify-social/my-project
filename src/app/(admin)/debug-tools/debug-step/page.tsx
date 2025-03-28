@@ -181,10 +181,10 @@ export default function DebugStep() {
       
       {results &&
       <div className="space-y-6 font-work-sans">
-          {step === if (1) renderStepDetail(results.step1, 1)}
-          {step === if (2) renderStepDetail(results.step2, 2)}
-          {step === if (3) renderStepDetail(results.step3, 3)}
-          {step === if (4) renderStepDetail(results.step4, 4)}
+          {step === 1 && renderStepDetail(results.step1, 1)}
+          {step === 2 && renderStepDetail(results.step2, 2)}
+          {step === 3 && renderStepDetail(results.step3, 3)}
+          {step === 4 && renderStepDetail(results.step4, 4)}
         </div>
       }
     </div>);
