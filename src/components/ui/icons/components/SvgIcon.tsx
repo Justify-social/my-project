@@ -1,16 +1,11 @@
 'use client';
 
-import React, { forwardRef, useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
+import { SvgIconProps, PlatformIconProps, IconSize, IconName, PlatformName, SIZE_CLASSES, PLATFORM_ICON_MAP } from '../types';
 import cn from 'classnames';
-import Image from 'next/image';
-import { useIconValidation, useButtonIconValidation, validateDynamicName } from './validation';
-import { SEMANTIC_TO_FA_MAP, getIconBaseName, getIconPath } from './icon-mappings';
-import SafeIcon from './safe-icon';
-
-// Type definitions
-type IconName = string;
-type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
-type PlatformName = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'x';
+import { validateDynamicName } from '../utils';
+import { SEMANTIC_TO_FA_MAP, getIconBaseName, getIconPath, getIconPrefix, shouldUseHoverEffect, getActionColor, iconConfig } from '../utils';
+import { SafeIcon } from './SafeIcon';
 
 // Map of icon prefixes to style folders
 const ICON_STYLE_FOLDERS = {
@@ -20,134 +15,7 @@ const ICON_STYLE_FOLDERS = {
   'far': 'regular'
 };
 
-export interface SvgIconProps {
-  /**
-   * Name of the icon to display
-   */
-  name: IconName;
-
-  /**
-   * CSS class names to apply to the icon
-   */
-  className?: string;
-
-  /**
-   * Size variant of the icon
-   */
-  size?: IconSize;
-
-  /**
-   * Optional title for accessibility
-   */
-  title?: string;
-
-  /**
-   * Click handler for the icon
-   */
-  onClick?: (e: React.MouseEvent<SVGElement>) => void;
-
-  /**
-   * Whether to apply a spin animation to the icon
-   */
-  spin?: boolean;
-
-  /**
-   * Whether to apply a pulse animation to the icon
-   */
-  pulse?: boolean;
-
-  /**
-   * Whether the icon should be flipped horizontally
-   */
-  flipHorizontal?: boolean;
-
-  /**
-   * Whether the icon should be flipped vertically
-   */
-  flipVertical?: boolean;
-
-  /**
-   * Degree rotation for the icon (0-360)
-   */
-  rotation?: 0 | 90 | 180 | 270;
-
-  /**
-   * Icon style (solid, light, etc) - by default uses the style from the icon prefix
-   */
-  style?: 'solid' | 'light' | 'brands' | 'regular';
-
-  /**
-   * Whether to use solid variant of the icon (alternative to style='solid')
-   */
-  solid?: boolean;
-
-  /**
-   * Whether the icon is in active state
-   */
-  active?: boolean;
-
-  /**
-   * Type of icon (button or static) - affects hover behavior
-   */
-  iconType?: 'button' | 'static';
-
-  /**
-   * Action type of the icon - affects hover color
-   */
-  action?: 'default' | 'delete' | 'warning' | 'success';
-
-  // Allow any other props to be passed through to the SVG element
-  [key: string]: any;
-}
-export interface PlatformIconProps {
-  /**
-   * Name of the platform
-   */
-  platformName: PlatformName;
-
-  /**
-   * CSS class names to apply to the icon
-   */
-  className?: string;
-
-  /**
-   * Size variant of the icon
-   */
-  size?: IconSize;
-
-  /**
-   * Click handler for the icon
-   */
-  onClick?: (e: React.MouseEvent<SVGElement>) => void;
-}
-
-/**
- * Map of icon sizes to Tailwind CSS classes
- */
-const SIZE_CLASSES: Record<IconSize, string> = {
-  'xs': 'w-3 h-3',
-  'sm': 'w-4 h-4',
-  'md': 'w-5 h-5',
-  'lg': 'w-6 h-6',
-  'xl': 'w-8 h-8',
-  '2xl': 'w-10 h-10',
-  '3xl': 'w-12 h-12',
-  '4xl': 'w-16 h-16'
-};
-
-/**
- * Map of platform names to their corresponding icon names
- */
-const PLATFORM_ICON_MAP: Record<PlatformName, IconName> = {
-  'facebook': 'faFacebook',
-  'instagram': 'faInstagram',
-  'linkedin': 'faLinkedin',
-  'tiktok': 'faTiktok',
-  'youtube': 'faYoutube',
-  'x': 'faXTwitter'
-} as const;
-
-// We'll try to dynamically import the icon data when the script generates it
+// Import the generated icon data directly
 let iconData: Record<string, {
   width: number;
   height: number;
@@ -157,45 +25,26 @@ let iconData: Record<string, {
   name?: string;
 }> = {};
 
-// This will be filled after running the icon scripts
+// Attempt to import the icon data from various possible locations
 try {
-  // When icon-data.ts exists, this will work
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const importedData = require('./icon-data');
-  iconData = importedData.iconData || {};
-} catch (_error) {
-  // If the import fails, we'll use direct file access instead
-  console.warn('Icon data not found. Run the icon generation scripts or icons will be loaded from files.');
-}
-
-/**
- * Extracts the prefix/style of an icon
- */
-function getIconPrefix(fullName: string): string {
-  // If name is undefined or empty, return default prefix
-  if (!fullName) {
-    return 'fas'; // Default to solid as a fallback
+  // Try the component-local data file first
+  iconData = require('../data/icon-data').iconData;
+  console.log('Successfully loaded icon data from component-local file');
+} catch (e) {
+  try {
+    // Then try the icons/data path 
+    iconData = require('../data/icon-data').iconData;
+    console.log('Successfully loaded icon data from icons data file');
+  } catch (e) {
+    try {
+      // Then try the root icon-data.ts file
+      iconData = require('../icon-data').iconData;
+      console.log('Successfully loaded icon data from root file');
+    } catch (e) {
+      // If none of them work, show the warning
+      console.warn('Icon data not found. Run the icon generation scripts or icons will be loaded from files.');
+    }
   }
-
-  // Special case for Light icons
-  if (fullName.endsWith('Light')) {
-    return 'fal';
-  }
-
-  // Check if there's a predefined prefix in the icon data
-  const iconInfo = iconData[fullName];
-  if (iconInfo && iconInfo.prefix) {
-    return iconInfo.prefix;
-  }
-
-  // Default prefix based on first two letters (e.g., fa[b] for brands)
-  const prefix = fullName.slice(0, 3).toLowerCase();
-  if (Object.keys(ICON_STYLE_FOLDERS).includes(prefix)) {
-    return prefix;
-  }
-
-  // Default to solid if no other prefixes match
-  return 'fas';
 }
 
 /**
@@ -240,8 +89,17 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   const isValidIcon = hasName || hasPlatformName || hasKpiName || hasAppName;
 
   // For platform specific icons, look up the name
-  const iconName = hasPlatformName ? PLATFORM_ICON_MAP[platformName as PlatformName] :
-  name || '';
+  // For KPI and App icons, use those directly
+  let iconName = '';
+  if (hasPlatformName) {
+    iconName = PLATFORM_ICON_MAP[platformName as PlatformName];
+  } else if (hasKpiName) {
+    iconName = `fa${kpiName}`;
+  } else if (hasAppName) {
+    iconName = `fa${appName}`;
+  } else {
+    iconName = name || '';
+  }
 
   // Normalize icon name (handle special cases like icons from UI_ICON_MAP)
   const normalizedIconName = SEMANTIC_TO_FA_MAP[iconName] || iconName;
@@ -250,38 +108,12 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   const criticalIcons = ['faPenToSquare', 'faEdit', 'faEye', 'faCopy', 'faTrashCan'];
   const isCriticalIcon = criticalIcons.includes(normalizedIconName);
   
-  // If this is a critical icon and it's a button type, use SafeIcon for robust rendering
-  if (isCriticalIcon && iconType === 'button') {
-    return (
-      <SafeIcon 
-        icon={normalizedIconName}
-        className={className}
-        solid={solid}
-        iconType={iconType}
-        size={size}
-        action={action}
-        title={title}
-      />
-    );
-  }
-
-  // Only use validation in development to avoid unnecessary overhead in production
-  if (process.env.NODE_ENV === 'development') {
-    // Validate icon name and properties, suppressing console warnings
-    useIconValidation({
-      name: normalizedIconName,
-      solid,
-      iconType,
-      className
-    });
-
-    // Check if button icons have proper parent elements with group class
-    useButtonIconValidation(resolvedRef as unknown as React.RefObject<HTMLElement>, iconType);
-  }
-
-  // Extract prefix (fa, fas, far, fal, fab) and base name
-  const baseName = getIconBaseName(normalizedIconName);
-  const defaultPrefix = getIconPrefix(normalizedIconName);
+  // Check if this is a critical icon and it's a button type
+  const isCriticalButtonIcon = isCriticalIcon && iconType === 'button';
+  
+  // Extract prefix (fa, fas, far, fal, fab) and base name, only if not using SafeIcon
+  const baseName = !isCriticalButtonIcon ? getIconBaseName(normalizedIconName) : '';
+  const defaultPrefix = !isCriticalButtonIcon ? getIconPrefix(normalizedIconName) : '';
 
   // Determine which prefix to use based on props and defaults
   const useExplicitStyle = style ? `fa${style.charAt(0).toUpperCase()}${style.slice(1)}` : '';
@@ -385,9 +217,6 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     );
   }, [size, spin, pulse, flipHorizontal, flipVertical, rotation, iconType, action, className]);
 
-  // Determine if we need to use SVG or Next.js Image component
-  const useNextImage = false; // Currently not using Next.js Image for icons
-
   // Check if icon exists in our icon-data.ts file
   // For button icons, we need to handle both the default (light) and hover (solid) states
   const isButtonIcon = iconType === 'button';
@@ -397,14 +226,14 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   // If icon data is not found, use a fallback question mark icon
   const finalIconName = iconExists ? normalizedIconName : 'faQuestion';
 
-  // Add detection for missing 'group' class on parent elements
+  // Add detection for missing 'group' class on parent elements - moved outside of conditional blocks
   const hasGroupClassParent = useMemo(() => {
     // Only check in browser environment
     if (typeof window === 'undefined') return true;
     if (!resolvedRef.current) return true;
     
     const parentElement = resolvedRef.current.parentElement;
-    return parentElement && parentElement.classList.contains('group');
+    return parentElement ? parentElement.classList.contains('group') : false;
   }, [resolvedRef]);
 
   // Check if this is an edit icon (faEdit or faPenToSquare)
@@ -412,6 +241,21 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
   
   // Use alternate behavior if it's a button icon without a 'group' parent or if it's an edit icon
   const useAlternateBehavior = isButtonIcon && (!hasGroupClassParent || isEditIcon);
+
+  // Early return for critical button icons
+  if (isCriticalButtonIcon) {
+    return (
+      <SafeIcon 
+        icon={normalizedIconName}
+        className={className}
+        solid={solid}
+        iconType={iconType}
+        size={size as IconSize}
+        action={action}
+        title={title}
+      />
+    );
+  }
 
   // For button icons, we need a different approach to handle hover
   let finalIconKey;
@@ -426,11 +270,15 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     finalIconKey = `${finalIconName}${solid ? '' : 'Light'}`;
   }
 
+  // Get the correct icon URL based on the style
+  const iconStyle = solid ? 'solid' : 'light';
+  const iconUrl = getIconPath(finalIconName, iconStyle);
+
   const finalIconData = iconData[finalIconKey] || {
     width: 512,
     height: 512,
     path: '', // Will use file path instead
-    url: getIconPath(finalIconName, solid ? 'solid' : 'light')
+    url: iconUrl
   };
 
   // For button icons, also get the hover (solid) icon data
@@ -441,10 +289,6 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
     url: getIconPath(finalIconName, 'solid')
   } : null;
 
-  // Get the correct icon URL based on the style
-  const iconStyle = solid ? 'solid' : 'light';
-  const iconUrl = getIconPath(normalizedIconName, iconStyle);
-
   // If DEV mode, log debug info when parent group class is missing
   if (process.env.NODE_ENV === 'development' && isButtonIcon && !hasGroupClassParent) {
     console.debug(`[Icon System] Button icon "${normalizedIconName}" missing parent 'group' class. Using fallback rendering.`, {
@@ -452,6 +296,49 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       element: resolvedRef.current?.parentElement?.tagName || 'unknown'
     });
   }
+
+  // For debugging icons that fail to load
+  const [svgContent, setSvgContent] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Only fetch SVG if we don't have path data and we're in the browser
+    if (!finalIconData.path && typeof window !== 'undefined' && iconUrl) {
+      // Check if we already have this SVG in cache
+      const cacheKey = `svg-cache-${iconUrl}`;
+      const cached = (window as any)[cacheKey];
+      
+      if (cached) {
+        setSvgContent(cached);
+      } else {
+        fetch(iconUrl)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load SVG from ${iconUrl}`);
+            }
+            return response.text();
+          })
+          .then(text => {
+            // Extract the SVG content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'image/svg+xml');
+            const svgElement = doc.querySelector('svg');
+            
+            if (svgElement) {
+              // Get the inner content (paths, etc.)
+              const content = svgElement.innerHTML;
+              // Cache the content
+              (window as any)[cacheKey] = content;
+              setSvgContent(content);
+            } else {
+              console.warn(`[Icon System] SVG file at ${iconUrl} does not contain an SVG element.`);
+            }
+          })
+          .catch(error => {
+            console.error(`[Icon System] Error loading SVG from ${iconUrl}:`, error);
+          });
+      }
+    }
+  }, [finalIconData.path, iconUrl]);
 
   // Pass the appropriate CSS classes and SVG path to svg element
   return (
@@ -467,23 +354,32 @@ export const SvgIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(({
       {...rest}>
 
       {title && <title className="font-sora">{title}</title>}
+      
       {/* For button icons with proper group class, use two paths - otherwise use simpler approach */}
-      {isButtonIcon && !useAlternateBehavior ?
-      <>
+      {isButtonIcon && !useAlternateBehavior ? (
+        <>
           <path
-          d={finalIconData.path || ''}
-          className="group-hover:opacity-0 transition-opacity duration-200" />
+            d={finalIconData.path || ''}
+            className="group-hover:opacity-0 transition-opacity duration-200" />
 
           <path
-          d={hoverIconData?.path || ''}
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-
-        </> :
-
-      <path d={finalIconData.path || ''} />
-      }
-    </svg>);
-
+            d={hoverIconData?.path || ''}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+        </>
+      ) : (
+        finalIconData.path ? (
+          <path d={finalIconData.path} />
+        ) : (
+          svgContent ? (
+            <g dangerouslySetInnerHTML={{ __html: svgContent }} />
+          ) : (
+            // Fallback to question mark path if we couldn't load the SVG
+            <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z" />
+          )
+        )
+      )}
+    </svg>
+  );
 });
 SvgIcon.displayName = 'SvgIcon';
 
@@ -511,4 +407,4 @@ export function PlatformIcon({
  * This is a drop-in replacement for the FontAwesome-based Icon component.
  * Uses local SVG files for maximum reliability.
  */
-export const Icon = SvgIcon;
+export const Icon = SvgIcon; 
