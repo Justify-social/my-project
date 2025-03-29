@@ -44,6 +44,10 @@
 - [Linting Guide](reference/configs/linting-guide.md)
 - [Build Configuration](reference/configs/build-configuration.md)
 
+### UI
+
+- [Atomic Design Structure](reference/ui/atomic-design-structure.md)
+
 ### Scripts
 
 - [Available Scripts](reference/scripts/index.md)

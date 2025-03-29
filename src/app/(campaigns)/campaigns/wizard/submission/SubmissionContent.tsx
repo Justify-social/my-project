@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import ErrorBoundary from '@/components/ui/error/ErrorBoundary';
 import ErrorFallback from '@/components/error-fallback';

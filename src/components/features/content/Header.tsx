@@ -1,12 +1,11 @@
 import Link from "next/link";
-import HeaderProps from '../../ui/card/types/index';
 import Image from "next/image";
 import React, { useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useSidebar } from "@/providers/SidebarProvider";
-import MobileMenu from "../navigation/MobileMenu";
-import { navItems, settingsNavItem } from "@/configs/navigation";
-import SearchBar from "@/components/features/core/search/SearchBar";
+import { MobileMenu } from "@/components/ui/organisms/navigation/mobile-menu";
+import { navItems, settingsNavItem } from "@/components/ui/organisms/navigation/config";
+import { SearchBar } from "@/components/ui/molecules/search-bar";
 
 interface HeaderProps {
   companyName: string;

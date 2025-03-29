@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { useWizard } from "@/components/features/campaigns/WizardContext";
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";

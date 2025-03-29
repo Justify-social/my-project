@@ -7,6 +7,7 @@ Welcome to our documentation portal. This resource is designed to help you under
 - [Project Overview](guides/project-overview.md) - Essential understanding of the application purpose, features, and user types
 - [Development Setup](guides/developer/setup.md) - Get your local environment running
 - [Architecture](architecture/directory-structure.md) - Understand how the application is structured
+- [UI Components](reference/ui/atomic-design-structure.md) - Our atomic design component system
 - [Contributing](CONTRIBUTING.md) - Learn how to contribute to the project
 
 ## Documentation Structure

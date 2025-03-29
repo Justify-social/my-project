@@ -6,13 +6,15 @@ alwaysApply: true
 Using Graphitis MCP Tools
 
 Before Starting Any Task
-Use searchnodes to find existing preferences procedures or facts before starting
-Use searchfacts to uncover relationships or relevant factual data
-Filter by type when searching for example Preference or Procedure
-Always review all matches before acting
+REQUIRED: Always check Graphiti before starting ANY task
+Use mcp_Graphiti_search_nodes to find existing preferences procedures or facts relevant to the task
+Use mcp_Graphiti_search_facts to uncover relationships or relevant factual data
+Filter by entity type when searching (e.g., "Preference" or "Procedure")
+Always review all matches before taking any action
+Follow existing procedures and preferences exactly
 
 Capture Work Immediately
-Use addepisode to capture preferences procedures and facts as soon as they come up
+Use mcp_Graphiti_add_episode (keep to less than 10 words where you can) to capture preferences procedures and facts as soon as they come up
 Break long preferences into clear logical chunks
 Be explicit when something updates existing knowledge
 Label all entries with specific categories for better recall
@@ -28,4 +30,4 @@ Keep memory updated - remove outdated preferences or procedures
 Make sure every preference or procedure mentioned is in memory
 Show users what is in memory when helpful
 
-[cursor-ai-graphiti-procedure.md](mdc:docs/cursor-ai-graphiti-procedure.md)
+VERIFICATION: After every task, confirm knowledge has been properly stored

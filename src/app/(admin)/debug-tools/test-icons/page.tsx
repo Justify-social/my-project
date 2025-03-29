@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 
 export default function IconTestPage() {
   // List of common icons to test

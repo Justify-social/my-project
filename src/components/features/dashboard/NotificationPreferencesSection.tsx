@@ -7,7 +7,7 @@ import Card from '@/components/settings/shared/Card';
 import SectionHeader from '@/components/settings/shared/SectionHeader';
 import ToggleSwitch from '@/components/settings/shared/ToggleSwitch';
 import ActionButtons from '@/components/settings/shared/ActionButtons';
-import { Icon, SuccessIcon, WarningIcon, StaticIcon } from '@/components/ui/icons';
+import { Icon, SuccessIcon, WarningIcon, StaticIcon } from '@/components/ui/atoms/icons';
 
 interface NotificationPreferences {
   campaignUpdates: boolean;

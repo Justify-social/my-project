@@ -2,7 +2,7 @@
 
 import React from 'react';
 import JustifyScoreDisplayProps from './influencers/JustifyScoreDisplay';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import { cn } from '@/utils/string/utils';
 
 export interface JustifyScoreDisplayProps {

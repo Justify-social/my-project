@@ -23,16 +23,11 @@ src/
 │   │   │   └── user/          # User-related components
 │   │   └── dashboard/         # Dashboard components
 │   ├── ui/                    # UI components
-│   │   ├── button/            # Button components
-│   │   ├── card/              # Card components
-│   │   ├── form/              # Form components
-│   │   ├── icons/             # Icon components
-│   │   │   ├── core/          # Core icon system components
-│   │   │   ├── brand/         # Brand-specific icons
-│   │   │   ├── examples/      # Icon examples
-│   │   │   └── test/          # Icon test utilities
-│   │   ├── layout/            # Layout components
-│   │   ├── typography/        # Typography components
+│   │   ├── atoms/            # Atomic design: basic building blocks
+│   │   ├── molecules/        # Atomic design: combinations of atoms
+│   │   ├── organisms/        # Atomic design: complex components
+│   │   ├── utils/            # UI utility functions
+│   │   ├── deprecated/       # Legacy components (backward compatibility)
 │   │   └── index.ts           # UI components barrel export
 │   └── providers/             # Context providers
 ├── hooks/                     # Custom React hooks
@@ -107,6 +102,7 @@ To maintain consistency in imports, follow these conventions:
 ### UI Components
 
 UI components should be:
+- Organized following atomic design principles (see detailed documentation in [docs/reference/ui/atomic-design-structure.md](/docs/reference/ui/atomic-design-structure.md))
 - Reusable across the application
 - Stateless or with minimal internal state
 - Focused on presentation rather than business logic

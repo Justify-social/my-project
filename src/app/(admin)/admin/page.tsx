@@ -10,7 +10,7 @@ import { toast } from 'react-hot-toast';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@auth0/nextjs-auth0';
 import type { UserProfile } from '@auth0/nextjs-auth0/client';

@@ -8,7 +8,7 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import { Spinner } from "@/components/ui/spinner";
 import { generateCorrelationId, sanitizeFileName, logAndShowError, enhancedFileTypeDetection, extractAssetUrl } from "@/utils/file-utils";
 export interface UploadedAsset {

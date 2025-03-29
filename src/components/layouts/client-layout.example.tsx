@@ -2,7 +2,7 @@ import React from 'react';
 import { Header } from '@/components/layouts/Header';
 import { Sidebar } from '@/components/layouts/Sidebar';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { AuthSpinner } from '@/components/ui/spinner';
+import { Icon } from '@/components/ui/atoms/icons';
 import Link from 'next/link';
 
 interface ClientLayoutProps {
@@ -14,7 +14,12 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // Show the auth spinner while checking authentication
   if (isLoading) {
-    return <AuthSpinner label="Loading Justify..." />;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Icon name="spinner" className="animate-spin text-blue-500" size="xl" />
+        <span className="ml-2">Loading Justify...</span>
+      </div>
+    );
   }
 
   // Show error with login button if authentication fails

@@ -9,9 +9,8 @@ import ErrorBoundary from '@/components/ui/utilities/error-boundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/error-fallback';
 import { SkeletonSection } from '@/components/ui/skeleton';
-import { useSidebar } from '@/providers/SidebarProvider';
 import Image from 'next/image';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Define types locally instead of importing
@@ -1252,9 +1251,6 @@ const ErrorStatusBadge = ({ message }: {message: string;}) => {
 export default function CampaignDetail() {
   const params = useParams();
   const router = useRouter();
-  const {
-    isOpen
-  } = useSidebar(); // Access sidebar state
   const [data, setData] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

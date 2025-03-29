@@ -14,8 +14,8 @@ import ErrorFallback from '@/components/ui/error-fallback';
 import { CampaignDetailSkeleton } from '@/components/ui/loading-skeleton';
 import { useSidebar } from '@/providers/SidebarProvider';
 import Image from 'next/image';
-import { Icon } from "@/components/ui/icons";
-import { iconComponentFactory } from '@/components/ui/icons';
+import { Icon } from "@/components/ui/atoms/icons";
+import { iconComponentFactory } from '@/components/ui/atoms/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Import Currency from shared types

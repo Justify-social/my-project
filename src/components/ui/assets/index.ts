@@ -1,7 +1,7 @@
-import AssetPreview from '../asset-card/asset-preview';
-import AssetCard from '../asset-card/asset-card';
+/**
+ * @deprecated This component has been moved to follow atomic design principles.
+ * Please import from '@/components/ui/organisms/AssetCard' instead.
+ * This redirect will be removed in a future version.
+ */
 
-export {
-  AssetPreview,
-  AssetCard
-}; 
+export * from '@/components/ui/organisms/AssetCard'; 

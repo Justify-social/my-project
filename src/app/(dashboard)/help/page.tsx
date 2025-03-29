@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import HTMLInputElement from '../../../components/ui/radio/types/index';
 import Badge from '../../../components/ui/Badge';
 import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@/components/ui/icons";
+import { Icon } from "@/components/ui/atoms/icons";
 import Link from 'next/link';
 
 // Types

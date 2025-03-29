@@ -1,29 +1,10 @@
-import Image from 'next/image';
-import OptimizedImageProps from './OptimizedImage';
-import React from 'react';
+/**
+ * @deprecated This component has been moved to src/components/ui/atoms/image/OptimizedImage.tsx
+ * Please import from '@/components/ui/atoms/image' instead.
+ */
 
-interface OptimizedImageProps {
-  src: string;
-  alt: string;
-  width?: number;
-  height?: number;
-  className?: string;
-}
+import { OptimizedImage as UIOptimizedImage, OptimizedImageProps } from '@/components/ui/atoms/image';
 
-export const OptimizedImage: React.FC<OptimizedImageProps> = ({
-  src,
-  alt,
-  width = 500,
-  height = 300,
-  className = ''
-}) => {
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-    />
-  );
-}; 
+export type { OptimizedImageProps };
+export const OptimizedImage = UIOptimizedImage;
+export default OptimizedImage; 

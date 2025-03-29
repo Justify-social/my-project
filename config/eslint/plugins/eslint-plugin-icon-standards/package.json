@@ -1,0 +1,21 @@
+{
+  "name": "eslint-plugin-icon-standards",
+  "version": "1.0.0",
+  "description": "ESLint plugin to enforce icon usage standards",
+  "main": "index.js",
+  "author": "Justify",
+  "license": "UNLICENSED",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "fontawesome",
+    "icons"
+  ],
+  "peerDependencies": {
+    "eslint": ">=6.0.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+} 

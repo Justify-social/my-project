@@ -1,18 +1,12 @@
-'use client';
+/**
+ * @deprecated This component has been moved to src/components/ui/molecules/search/search-params-wrapper
+ * Please import from '@/components/ui/molecules/search/search-params-wrapper' instead.
+ */
 
-import { useSearchParams } from 'next/navigation';
+import { 
+  SearchParamsWrapper as UISearchParamsWrapper, 
+  useSearchParamsHook 
+} from '@/components/ui/molecules/search/search-params-wrapper';
 
-export function useSearchParamsHook() {
-  const searchParams = useSearchParams();
-  return searchParams.get('id');
-}
-
-export default function SearchParamsWrapper({ children }: {children: React.ReactNode;}) {
-  const campaignId = useSearchParamsHook();
-
-  return (
-    <div data-campaign-id={campaignId} className="font-work-sans">
-      {children}
-    </div>);
-
-}
+export { useSearchParamsHook };
+export default UISearchParamsWrapper;

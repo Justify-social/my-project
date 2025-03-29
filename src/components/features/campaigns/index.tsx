@@ -4,7 +4,7 @@ import LoadingSpinner from '../../ui/spinner-examples';
 import { Influencer } from '@/types/influencer';
 import InfluencerCard from '@/src/components/features/campaigns/influencers/InfluencerCard';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icons';
+import { Icon } from '@/components/ui/atoms/icons';
 import { Spinner } from '@/components/ui/spinner';
 
 export interface MarketplaceListProps {

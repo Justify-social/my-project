@@ -5,7 +5,7 @@ import Card from './shared/Card';
 import SectionHeader from './shared/SectionHeader';
 import InputField from './shared/InputField';
 import ActionButtons from './shared/ActionButtons';
-import { Icon, ButtonIcon } from '@/components/ui/icons';
+import { Icon, ButtonIcon } from '@/components/ui/atoms/icons';
 
 interface PasswordChangeData {
   currentPassword: string;

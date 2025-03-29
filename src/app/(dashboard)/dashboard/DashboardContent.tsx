@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
-import { Icon } from "@/components/ui/icons";
+import { Icon } from "@/components/ui/atoms/icons";
 import { TableSkeleton } from '@/components/ui/skeleton';
 import CalendarDashboard from "@/components/ui/calendar/calendar-dashboard";
 import UpcomingCampaignsCard from "@/components/ui/cards/upcoming-campaigns-card";

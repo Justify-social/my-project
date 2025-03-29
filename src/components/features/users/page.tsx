@@ -7,8 +7,8 @@ import Modal from '../../ui/Modal/index';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Icon } from "@/components/ui/icons";
-import { iconComponentFactory } from '@/components/ui/icons';
+import { Icon } from "@/components/ui/atoms/icons";
+import { iconComponentFactory } from '@/components/ui/atoms/icons';
 interface PaymentMethod {
   id: number;
   cardType: string;
