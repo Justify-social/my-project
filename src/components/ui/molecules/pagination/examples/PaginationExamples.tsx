@@ -87,8 +87,8 @@ export default function PaginationExamples() {
             currentPage={minimalPage}
             onPageChange={setMinimalPage}
             showFirstLast={false}
-            previousLabel={<Icon name="fa-angle-left" size="sm" />}
-            nextLabel={<Icon name="fa-angle-right" size="sm" />}
+            previousLabel={<Icon name="faAngleLeft" size="sm" />}
+            nextLabel={<Icon name="faAngleRight" size="sm" />}
           />
         </div>
       </section>

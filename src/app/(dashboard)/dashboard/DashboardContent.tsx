@@ -761,10 +761,10 @@ const mockMetrics = {
         channel: "TikTok",
         value: 6.3
       }, {
-        channel: "Facebook",
+        channel: "X",
         value: 3.7
       }, {
-        channel: "Twitter",
+        channel: "linkedin",
         value: 2.9
       }]
     },
@@ -1090,7 +1090,8 @@ const CalendarMonthView: React.FC<{
       'tiktok': '#000000',
       'youtube': '#FF0000',
       'linkedin': '#0077B5',
-      'other': '#00BFFF'
+      'other': '#00BFFF',
+      'x-twitter': '#000000' // X (formerly Twitter) color
     };
     
     return colors[platform.toLowerCase()] || colors.other;
@@ -1380,7 +1381,8 @@ const getCampaignColor = (platform: string) => {
     'tiktok': '#000000',
     'linkedin': '#0A66C2',
     'youtube': '#FF0000',
-    'other': '#00BFFF'
+    'other': '#00BFFF',
+    'x-twitter': '#000000' // X (formerly Twitter) color
   };
   return colorMap[platform.toLowerCase()] || colorMap.other;
 };

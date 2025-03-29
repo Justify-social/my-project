@@ -53,7 +53,7 @@ const SectionHeader: React.FC<{
   description
 }) => <div className="flex items-center mb-6 font-work-sans">
     <div className="bg-[var(--background-color)] p-3 rounded-lg font-work-sans">
-      <Icon className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
+      <Icon className="w-6 h-6 text-[var(--accent-color)] font-work-sans" />
     </div>
     <div className="ml-4 font-work-sans">
       <h2 className="text-xl font-semibold text-[var(--primary-color)] font-sora">{title}</h2>

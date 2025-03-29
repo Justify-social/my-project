@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { cn } from '@/utils/string/utils';
 import { useSearch } from '@/contexts/SearchContext';
 import { CommandMenu } from '../../molecules/command-menu';
+import { Icon } from '@/components/ui/atoms/icons';
 
 export interface SearchBarProps {
   /**
@@ -124,7 +125,7 @@ export function SearchBar({
           )}
           onClick={openSearch}>
 
-          <Image src="/icons/app/magnifying-glass.svg" alt="Search" width={20} height={20} />
+          <Icon name="search" size="sm" />
           <input
             ref={inputRef}
             type="text"

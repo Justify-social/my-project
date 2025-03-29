@@ -20,8 +20,8 @@ export function Pagination({
   maxVisiblePages = 5,
   showFirstLast = true,
   showNextPrevious = true,
-  previousLabel = <><Icon name="fa-chevron-left" className="mr-1" size="sm" /> Previous</>,
-  nextLabel = <>Next <Icon name="fa-chevron-right" className="ml-1" size="sm" /></>,
+  previousLabel = <><Icon name="faChevronLeft" className="mr-1" size="sm" /> Previous</>,
+  nextLabel = <>Next <Icon name="faChevronRight" className="ml-1" size="sm" /></>,
   renderPageButton,
   className,
   activeClassName,
@@ -43,7 +43,7 @@ export function Pagination({
       // Calculate the range of pages to show
       const halfVisible = Math.floor(maxVisiblePages / 2);
       let startPage = Math.max(currentPage - halfVisible, 1);
-      let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+      const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
       
       // Adjust if we're near the end
       if (endPage === totalPages) {
@@ -156,7 +156,7 @@ export function Pagination({
               )}
               aria-label="Go to first page"
             >
-              <Icon name="fa-angles-left" size={size === 'sm' ? 'xs' : 'sm'} />
+              <Icon name="faAnglesLeft" size={size === 'sm' ? 'xs' : 'sm'} />
             </button>
           </li>
         )}
@@ -217,7 +217,7 @@ export function Pagination({
               )}
               aria-label="Go to last page"
             >
-              <Icon name="fa-angles-right" size={size === 'sm' ? 'xs' : 'sm'} />
+              <Icon name="faAnglesRight" size={size === 'sm' ? 'xs' : 'sm'} />
             </button>
           </li>
         )}

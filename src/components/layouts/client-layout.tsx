@@ -10,6 +10,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { LoadingSpinner as AuthSpinner } from '@/components/ui';
 import { Icon } from "@/components/ui/atoms/icons";
 import Link from "next/link";
+import Image from "next/image";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -22,6 +23,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const { user, error, isLoading } = useUser();
   const { isOpen, toggle } = useSidebar();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSettingsHovered, setIsSettingsHovered] = useState(false);
 
   useEffect(() => {
     // If there's no user and we're not loading, redirect to login
@@ -190,26 +192,29 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const sidebarFooter = (
     <Link
       href="/settings"
-      className={`flex items-center py-2 pl-4 pr-2 rounded-md no-underline ${
-        pathname.startsWith('/settings') ? 'text-[#00BFFF] font-medium' : 'text-[#333333] hover:bg-gray-100'
+      className={`flex items-center py-2 pl-4 pr-2 rounded-md no-underline transition-all duration-150 ${
+        pathname.startsWith('/settings') ? 'text-[#00BFFF] font-medium' : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]'
       }`}
+      onMouseEnter={() => setIsSettingsHovered(true)}
+      onMouseLeave={() => setIsSettingsHovered(false)}
     >
       <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0 relative">
-        <div className="w-5 h-5">
-          <img 
-            src="/icons/app/settings.svg" 
-            alt="Settings" 
-            width={18}
-            height={18}
-            style={{ 
-              filter: pathname.startsWith('/settings') ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
-              maxWidth: '18px',
-              maxHeight: '18px'
-            }}
-          />
-        </div>
+        <Image 
+          src="/icons/app/settings.svg" 
+          alt="Settings" 
+          width={20}
+          height={20}
+          className="w-5 h-5"
+          style={{ 
+            filter: (pathname.startsWith('/settings') || isSettingsHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
+            transition: 'filter 0.15s ease-in-out'
+          }}
+          unoptimized
+        />
       </div>
-      <span className="flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis">
+      <span className={`flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis ${
+        (pathname.startsWith('/settings') || isSettingsHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'
+      }`}>
         Settings
       </span>
     </Link>

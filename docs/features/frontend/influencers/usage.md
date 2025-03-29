@@ -35,7 +35,7 @@ To find the perfect match for your campaign:
 
 1. Use the filter panel on the left side of the marketplace
 2. Apply filters by:
-   - Platform (Instagram, TikTok, YouTube, Twitter)
+   - Platform (Instagram, TikTok, YouTube, X)
    - Audience size (Micro, Mid-tier, Macro, Celebrity)
    - Engagement rate (Low, Medium, High, Very High)
    - Content categories (Fashion, Beauty, Tech, Fitness, etc.)

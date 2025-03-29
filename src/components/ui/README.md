@@ -313,7 +313,7 @@ Available sizes: `xs`, `sm`, `md` (default), `lg`, `xl`
 - Navigation: home, campaigns, influencers, brandLift, brandHealth, creativeAssetTesting, mmm, reports, billing, settings, help
 
 **Available Platform Icons:**
-- instagram, youtube, tiktok, facebook, twitter, linkedin
+- instagram, youtube, tiktok, facebook, x-twitter, linkedin
 
 **Common Heroicons:**
 - Solid: DocumentIcon, PlayIcon, PauseIcon, CheckIcon, SparklesIcon, UserIcon, XMarkIcon, ExclamationTriangleIcon

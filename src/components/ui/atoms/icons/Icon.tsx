@@ -19,13 +19,17 @@ export const Icon = forwardRef<HTMLImageElement, IconProps>((props, ref) => {
     active = false,
     title,
     onClick,
+    // Extract props that shouldn't be passed to the DOM element
+    iconType,
+    solid,
+    action,
     ...rest
   } = props;
   
   // Early validation - catch errors before they propagate
   if (!name) {
     console.warn('Icon: No name provided, using fallback');
-    return <FallbackIcon size={size} className={className} {...rest} ref={ref} />;
+    return <FallbackIcon size={size} className={className} ref={ref} />;
   }
 
   // Normalize the icon name
@@ -77,12 +81,15 @@ LightIcon.displayName = 'LightIcon';
 
 // Fallback icon for error cases
 function FallbackIcon({ size = 'md', className, ...rest }: Omit<IconProps, 'name'>) {
+  // Extract props that shouldn't be passed to the DOM
+  const { iconType, solid, action, variant, active, ...domProps } = rest as any;
+  
   const sizeClass = SIZE_CLASSES[size as IconSize] || SIZE_CLASSES.md;
   
   return (
     <div 
       className={cn('inline-flex items-center justify-center bg-gray-200 text-gray-500 rounded', sizeClass, className)}
-      {...rest}
+      {...domProps}
     >
       ?
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon, type SvgIconProps } from '@/components/ui/atoms/icons';
+import { Icon, type IconProps } from '@/components/ui/atoms/icons';
 
 /**
  * Props for the ButtonWithIcon component
@@ -8,7 +8,7 @@ export interface ButtonWithIconProps extends React.ButtonHTMLAttributes<HTMLButt
   /**
    * The name of the icon to display
    */
-  iconName: string;
+  iconName?: string;
   
   /**
    * Content to display next to the icon
@@ -33,7 +33,7 @@ export interface ButtonWithIconProps extends React.ButtonHTMLAttributes<HTMLButt
   /**
    * Additional props to pass to the Icon component
    */
-  iconProps?: Partial<SvgIconProps>;
+  iconProps?: Partial<IconProps>;
 
   /**
    * The type of action this button performs (affects hover color)
@@ -82,12 +82,10 @@ export const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
       className={`group ${className}`}
       {...rest}
     >
-      {iconPosition === 'left' && (
+      {iconPosition === 'left' && iconName && (
         <Icon 
           name={iconName} 
           className={iconClasses} 
-          iconType="button" 
-          solid={false}
           action={iconAction}
           {...iconProps} 
         />
@@ -95,12 +93,10 @@ export const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
       
       {children}
       
-      {iconPosition === 'right' && (
+      {iconPosition === 'right' && iconName && (
         <Icon 
           name={iconName} 
           className={iconClasses} 
-          iconType="button" 
-          solid={false}
           action={iconAction}
           {...iconProps} 
         />
@@ -113,11 +109,11 @@ export const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
  * LinkWithIcon component - similar to ButtonWithIcon but for anchor tags
  */
 export interface LinkWithIconProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  iconName: string;
+  iconName?: string;
   children: React.ReactNode;
   className?: string;
   iconClassName?: string;
-  iconProps?: Partial<SvgIconProps>;
+  iconProps?: Partial<IconProps>;
   actionType?: 'default' | 'delete' | 'warning' | 'success';
   iconPosition?: 'left' | 'right';
 }
@@ -145,12 +141,10 @@ export const LinkWithIcon: React.FC<LinkWithIconProps> = ({
       className={`group ${className}`}
       {...rest}
     >
-      {iconPosition === 'left' && (
+      {iconPosition === 'left' && iconName && (
         <Icon 
           name={iconName} 
           className={iconClasses} 
-          iconType="button" 
-          solid={false}
           action={iconAction}
           {...iconProps} 
         />
@@ -158,12 +152,10 @@ export const LinkWithIcon: React.FC<LinkWithIconProps> = ({
       
       {children}
       
-      {iconPosition === 'right' && (
+      {iconPosition === 'right' && iconName && (
         <Icon 
           name={iconName} 
           className={iconClasses}
-          iconType="button" 
-          solid={false}
           action={iconAction}
           {...iconProps} 
         />

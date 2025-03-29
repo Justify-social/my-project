@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits,
   notificationsCount,
-  profileImageUrl = "/icons/app/profile-image.svg",
+  profileImageUrl = "/icons/solid/user-circle.svg",
   onMenuClick
 }) => {
   const { user } = useUser();
@@ -40,31 +40,34 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right: Icon Group */}
-          <div className="flex items-center space-x-4 font-work-sans">
+          <div className="flex items-center space-x-1 font-work-sans">
             {/* Desktop Icons */}
-            <div className="hidden md:flex items-center space-x-4 font-work-sans">
-              {/* Credits */}
-              <Link href="/billing">
-                <div className="flex items-center space-x-1 cursor-pointer font-work-sans">
-                  <Image src="/coins.svg" alt="Credits" width={24} height={24} data-testid="coins-icon" />
-                  <span className="text-[#333333] font-medium text-sm font-work-sans">{remainingCredits}</span>
+            <div className="hidden md:flex items-center font-work-sans ml-auto mr-3">
+              {/* Combined Credits and Notifications container */}
+              <div className="relative flex items-center">
+                {/* Credits */}
+                <Link href="/billing">
+                  <div className="flex items-center space-x-1 cursor-pointer font-work-sans">
+                    <Image src="/coins.svg" alt="Credits" width={24} height={24} data-testid="coins-icon" />
+                    <span className="text-[#333333] font-medium text-sm font-work-sans">{remainingCredits}</span>
+                  </div>
+                </Link>
+
+                {/* Notifications - positioned directly adjacent to coins */}
+                <div className="relative font-work-sans ml-1">
+                  <Image
+                    src="/bell.svg"
+                    alt="Notifications"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6" />
+
+                  {notificationsCount > 0 &&
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center font-work-sans">
+                      {notificationsCount}
+                    </span>
+                  }
                 </div>
-              </Link>
-
-              {/* Notifications */}
-              <div className="relative font-work-sans">
-                <Image
-                  src="/bell.svg"
-                  alt="Notifications"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6" />
-
-                {notificationsCount > 0 &&
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center font-work-sans">
-                    {notificationsCount}
-                  </span>
-                }
               </div>
             </div>
             
@@ -99,11 +102,12 @@ const Header: React.FC<HeaderProps> = ({
               {user &&
               <Link href="/settings">
                   <Image
-                  src="/icons/app/profile-image.svg"
+                  src={profileImageUrl}
                   alt="Profile"
                   width={32}
                   height={32}
-                  className="rounded-full" />
+                  className="rounded-full"
+                  unoptimized />
 
                 </Link>
               }

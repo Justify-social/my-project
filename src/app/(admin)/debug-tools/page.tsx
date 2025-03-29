@@ -205,6 +205,21 @@ export default function DebugTools() {
           </div>
         </div>
         
+        {/* Graphiti Monitoring */}
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
+          <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">Graphiti Monitoring</h2>
+          <p className="text-[var(--secondary-color)] mb-4 font-work-sans">
+            Monitor Graphiti knowledge graph usage, integration health, and telemetry data.
+          </p>
+          <div className="mt-4 font-work-sans">
+            <Link
+              href="/debug-tools/graphiti-monitoring"
+              className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md inline-block hover:bg-white hover:text-[var(--accent-color)] hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 font-work-sans">
+              View Graphiti Dashboard
+            </Link>
+          </div>
+        </div>
+        
         {/* Uploadthing Test Tool */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">Uploadthing Test</h2>

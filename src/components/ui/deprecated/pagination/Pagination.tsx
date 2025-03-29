@@ -119,7 +119,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage <= 1}
           aria-label="First page"
         >
-          <Icon name="angles-left" className="w-4 h-4" />
+          <Icon name="faAnglesLeft" className="w-4 h-4" />
         </button>
         
         {/* Previous page button */}
@@ -131,7 +131,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage <= 1}
           aria-label="Previous page"
         >
-          <Icon name="angle-left" className="w-4 h-4" />
+          <Icon name="faAngleLeft" className="w-4 h-4" />
         </button>
 
         {/* Page number buttons */}
@@ -158,7 +158,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage >= totalPages}
           aria-label="Next page"
         >
-          <Icon name="angle-right" className="w-4 h-4" />
+          <Icon name="faAngleRight" className="w-4 h-4" />
         </button>
         
         {/* Last page button */}
@@ -170,7 +170,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage >= totalPages}
           aria-label="Last page"
         >
-          <Icon name="angles-right" className="w-4 h-4" />
+          <Icon name="faAnglesRight" className="w-4 h-4" />
         </button>
       </div>
     </div>

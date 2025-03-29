@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { cn } from '@/utils/string/utils';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getIconPath } from '@/components/ui/atoms/icons';
 
 // Define sidebar item types
 export interface SidebarItem {
@@ -46,6 +47,10 @@ export function Sidebar({
   // Track which sections are expanded in the sidebar
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
+  // For tracking hovered items
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [hoveredChild, setHoveredChild] = useState<string | null>(null);
+
   // Toggle a section's expanded state
   const toggleSection = (id: string) => {
     setExpandedSections(prev => ({
@@ -59,6 +64,11 @@ export function Sidebar({
     // If the item has its own isActive property, use that
     if (typeof item.isActive === 'boolean') {
       return item.isActive;
+    }
+    
+    // If section is expanded, consider it active
+    if (expandedSections[item.id]) {
+      return true;
     }
     
     // If any children are active, the parent should be considered active
@@ -78,41 +88,13 @@ export function Sidebar({
     return (isExpanded || active) && item.children && item.children.length > 0;
   };
 
-  // Get the correct SVG path for an icon
-  const getIconPath = (iconName: string) => {
-    // Remove any prefix like "app" from the icon name
-    let fileName = '';
-    
-    if (iconName.startsWith('app')) {
-      // Remove the 'app' prefix
-      fileName = iconName.slice(3);
-      
-      // If the filename already contains dashes, use it directly
-      if (fileName.includes('-')) {
-        return `/icons/app/${fileName}.svg`;
-      }
-      
-      // Handle underscores by keeping them (for brand_health, brand_lift)
-      if (fileName.includes('_')) {
-        fileName = fileName.toLowerCase();
-        return `/icons/app/${fileName}.svg`;
-      }
-      
-      // For other cases, just lowercase the first character
-      fileName = fileName.charAt(0).toLowerCase() + fileName.slice(1);
-    } else {
-      fileName = iconName.toLowerCase();
-    }
-    
-    return `/icons/app/${fileName}.svg`;
-  };
-
   // Render a single navigation item
   const renderItem = (item: SidebarItem, depth = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedSections[item.id];
     const active = isItemActive(item);
     const showChildren = shouldShowChildren(item);
+    const isHovered = hoveredItem === item.id;
     
     return (
       <li key={item.id} className="w-full">
@@ -128,31 +110,31 @@ export function Sidebar({
               onItemClick(item);
             }
           }}
+          onMouseEnter={() => setHoveredItem(item.id)}
+          onMouseLeave={() => setHoveredItem(null)}
           className={cn(
-            'flex items-center py-2 pl-4 pr-2 rounded-md transition-colors w-full',
-            active ? 'text-[#00BFFF]' : 'text-[#333333] hover:bg-gray-100',
+            'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
+            active ? 'text-[#00BFFF] font-medium' : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]',
             item.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'
           )}
         >
           {item.icon && (
             <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0 relative">
-              <div className="w-5 h-5">
-                <Image 
-                  src={getIconPath(item.icon)}
-                  alt={`${item.label} icon`}
-                  width={18}
-                  height={18}
-                  className="object-contain"
-                  style={{ 
-                    filter: active ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
-                    maxWidth: '18px',
-                    maxHeight: '18px'
-                  }}
-                />
-              </div>
+              <Image 
+                src={getIconPath(item.icon, (active || isHovered) ? 'solid' : 'light')}
+                alt={`${item.label} icon`}
+                width={20}
+                height={20}
+                className="w-5 h-5"
+                style={{ 
+                  filter: (active || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
+                  transition: 'filter 0.15s ease-in-out'
+                }}
+                unoptimized
+              />
             </div>
           )}
-          <span className="flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis">
+          <span className={`flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis ${(active || isHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
             {item.label}
           </span>
           {item.badge && (
@@ -165,34 +147,57 @@ export function Sidebar({
         {hasChildren && (
           <div className={`overflow-hidden transition-all duration-200 ${showChildren ? 'max-h-96' : 'max-h-0'}`}>
             <ul className="pl-10 mt-0.5 space-y-0">
-              {item.children?.map(child => (
-                <li key={child.id} className="w-full">
-                  <Link
-                    href={child.href}
-                    onClick={() => {
-                      if (onItemClick) {
-                        onItemClick(child);
-                      }
-                    }}
-                    className={cn(
-                      'flex items-center py-1.5 pl-4 pr-2 rounded-md transition-colors w-full',
-                      child.isActive 
-                        ? 'text-[#00BFFF] bg-[#fafafa]' 
-                        : 'text-[#333333] hover:bg-gray-100',
-                      child.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'
-                    )}
-                  >
-                    <span className="flex-grow text-xs font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {child.label}
-                    </span>
-                    {child.badge && (
-                      <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 ml-2 text-xs font-medium rounded-full bg-[#00BFFF]/20 text-[#00BFFF]">
-                        {child.badge}
+              {item.children?.map(child => {
+                const childActive = child.isActive;
+                const childHovered = hoveredChild === child.id;
+                
+                return (
+                  <li key={child.id} className="w-full">
+                    <Link
+                      href={child.href}
+                      onClick={() => {
+                        if (onItemClick) {
+                          onItemClick(child);
+                        }
+                      }}
+                      onMouseEnter={() => setHoveredChild(child.id)}
+                      onMouseLeave={() => setHoveredChild(null)}
+                      className={cn(
+                        'flex items-center py-1.5 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
+                        childActive 
+                          ? 'text-[#00BFFF] bg-[#fafafa] font-medium' 
+                          : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]',
+                        child.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'
+                      )}
+                    >
+                      {child.icon && (
+                        <div className="w-5 h-5 mr-2 flex items-center justify-center flex-shrink-0">
+                          <Image 
+                            src={getIconPath(child.icon, (childActive || childHovered) ? 'solid' : 'light')}
+                            alt={`${child.label} icon`}
+                            width={16}
+                            height={16}
+                            className="w-4 h-4"
+                            style={{ 
+                              filter: (childActive || childHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
+                              transition: 'filter 0.15s ease-in-out'
+                            }}
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      <span className={`flex-grow text-xs font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis ${(childActive || childHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
+                        {child.label}
                       </span>
-                    )}
-                  </Link>
-                </li>
-              ))}
+                      {child.badge && (
+                        <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 ml-2 text-xs font-medium rounded-full bg-[#00BFFF]/20 text-[#00BFFF]">
+                          {child.badge}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UiComponentsSidebar } from '@/components/ui/organisms/navigation/sidebar/Sidebar-ui-components';
 import { Heading } from '@/components/ui/atoms/typography';
 import { Icon } from '@/components/ui/atoms/icons';
+import Image from 'next/image';
+import { getIconPath } from '@/components/ui/atoms/icons';
 import Link from 'next/link';
+import clsx from 'clsx';
 
 // Component categories with their subcategories
 interface Category {
@@ -24,6 +27,20 @@ export default function UIComponentsLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Create refs for icons
+  const headerGithubIconRef = useRef<HTMLImageElement>(null);
+  const footerGithubIconRef = useRef<HTMLImageElement>(null);
+  const backArrowIconRef = useRef<HTMLImageElement>(null);
+
+  // Helper function for icon filter
+  const applyIconFilter = (ref: React.RefObject<HTMLImageElement>, apply: boolean) => {
+    if (ref.current) {
+      ref.current.style.filter = apply ? 
+        'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 
+        'none';
+    }
+  };
+
   // Create sidebar items from component categories
   const sidebarItems = [
     {
@@ -86,12 +103,32 @@ export default function UIComponentsLayout({
         <Heading level={4} className="text-gray-800">UI Component Library</Heading>
         <div className="ml-auto flex items-center space-x-4">
           <a 
-            href="https://github.com/your-org/your-repo/tree/main/src/components/ui" 
+            href="https://github.com/Justify-social/my-project" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+            className="flex items-center py-2 pl-4 pr-2 text-base font-sora font-medium hover:text-[#00BFFF] space-x-1 group transition-all duration-150"
+            onMouseEnter={() => {
+              applyIconFilter(headerGithubIconRef, true);
+            }}
+            onMouseLeave={() => {
+              applyIconFilter(headerGithubIconRef, false);
+            }}
           >
-            <Icon name="faGithub" />
+            <div className="h-6 w-6 flex items-center justify-center">
+              <Image 
+                src="/icons/brands/github.svg"
+                alt="GitHub icon"
+                width={20}
+                height={20}
+                className="w-5 h-5 header-github-icon"
+                ref={headerGithubIconRef}
+                style={{ 
+                  filter: 'none',
+                  transition: 'filter 0.15s ease-in-out'
+                }}
+                unoptimized
+              />
+            </div>
             <span>View Source</span>
           </a>
         </div>
@@ -103,20 +140,70 @@ export default function UIComponentsLayout({
         isMobileOpen={false}
         width="240px"
         footer={
-          <Link
-            href="/debug-tools"
-            className="flex items-center py-2 pl-4 pr-2 rounded-md no-underline text-[#333333] hover:bg-gray-100"
-          >
-            <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0 relative">
-              <Icon 
-                name="faArrowLeft" 
-                className="text-[#333333]"
-              />
+          <>
+            {/* Footer items */}
+            <div className="mt-auto">
+              <div className="py-2">
+                <a
+                  href="https://github.com/Justify-social/my-project"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 text-base font-sora font-medium text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]"
+                  onMouseEnter={() => {
+                    applyIconFilter(footerGithubIconRef, true);
+                  }}
+                  onMouseLeave={() => {
+                    applyIconFilter(footerGithubIconRef, false);
+                  }}
+                >
+                  <div className="mr-3 h-6 w-6 flex items-center justify-center">
+                    <Image 
+                      src="/icons/brands/github.svg"
+                      alt="GitHub icon"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5 footer-github-icon"
+                      ref={footerGithubIconRef}
+                      style={{ 
+                        filter: 'none',
+                        transition: 'filter 0.15s ease-in-out'
+                      }}
+                      unoptimized
+                    />
+                  </div>
+                  <span className="flex-grow truncate whitespace-nowrap overflow-hidden text-ellipsis">View Source</span>
+                </a>
+
+                <a
+                  href="/admin/debug-tools"
+                  className="flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 text-base font-sora font-medium text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]"
+                  onMouseEnter={() => {
+                    applyIconFilter(backArrowIconRef, true);
+                  }}
+                  onMouseLeave={() => {
+                    applyIconFilter(backArrowIconRef, false);
+                  }}
+                >
+                  <div className="mr-3 h-6 w-6 flex items-center justify-center relative">
+                    <Image 
+                      src="/icons/light/arrow-left.svg"
+                      alt="Back arrow icon"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5 back-arrow-icon"
+                      ref={backArrowIconRef}
+                      style={{ 
+                        filter: 'none',
+                        transition: 'filter 0.15s ease-in-out'
+                      }}
+                      unoptimized
+                    />
+                  </div>
+                  <span className="flex-grow truncate whitespace-nowrap overflow-hidden text-ellipsis">Back to Debug Tools</span>
+                </a>
+              </div>
             </div>
-            <span className="flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis">
-              Back to Debug Tools
-            </span>
-          </Link>
+          </>
         }
       />
 

@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 import { connection } from 'next/server';
 
 // Import diagnostic script for legacy compatibility
-import '@/lib/icon-diagnostic';
+// Removed as part of icon system simplification - functionality now built into Icon component
 
 const inter = Inter({ subsets: ['latin'] })
 

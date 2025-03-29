@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/utils/string/utils';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/atoms/icons';
@@ -43,8 +43,38 @@ export function UiComponentsSidebar({
   width = '240px',
   onItemClick
 }: SidebarProps) {
-  // Track which sections are expanded in the sidebar
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  // Function to get initially expanded sections based on URL
+  const getInitialExpandedSections = () => {
+    if (typeof window === 'undefined') return {};
+
+    // Get hash from URL (e.g., #atoms)
+    const hash = window.location.hash;
+    if (!hash) return {};
+
+    // Initialize with the section from hash expanded
+    const initialExpanded: Record<string, boolean> = {};
+    
+    // Remove # from hash to get section id
+    const sectionId = hash.substring(1).split('-')[0]; // Handle both #atoms and #atoms-button
+    if (sectionId) {
+      initialExpanded[sectionId] = true;
+    }
+    
+    return initialExpanded;
+  };
+
+  // Track which sections are expanded in the sidebar with initial value
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(
+    getInitialExpandedSections()
+  );
+  
+  // Track which item is currently selected
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(
+    typeof window !== 'undefined' && window.location.hash ? 
+      window.location.hash.substring(1).split('-')[0] : 
+      null
+  );
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
   // Toggle a section's expanded state
   const toggleSection = (id: string) => {
@@ -56,13 +86,23 @@ export function UiComponentsSidebar({
 
   // Helper to check if an item is active based on various conditions
   const isItemActive = (item: SidebarItem) => {
+    // Selected by user click
+    if (item.id === selectedItemId) {
+      return true;
+    }
+    
+    // If section is expanded, consider it active
+    if (expandedSections[item.id]) {
+      return true;
+    }
+    
     // If the item has its own isActive property, use that
     if (typeof item.isActive === 'boolean') {
       return item.isActive;
     }
     
     // If any children are active, the parent should be considered active
-    if (item.children?.some(child => isItemActive(child))) {
+    if (item.children?.some(child => isItemActive(child) || child.id === selectedChildId)) {
       return true;
     }
     
@@ -78,12 +118,101 @@ export function UiComponentsSidebar({
     return (isExpanded || active) && item.children && item.children.length > 0;
   };
 
+  // Child item component to manage its own hover state
+  const ChildItem = ({ child, onItemClick }: { child: SidebarItem, onItemClick?: (item: SidebarItem) => void }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const isActive = child.isActive || child.id === selectedChildId;
+    
+    return (
+      <li className="w-full">
+        <Link
+          href={child.href}
+          onClick={() => {
+            // Set this as the selected child item
+            setSelectedChildId(child.id);
+            setSelectedItemId(null);
+            
+            if (onItemClick) {
+              onItemClick(child);
+            }
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className={cn(
+            'flex items-center py-1.5 pl-4 pr-2 rounded-md transition-colors w-full group',
+            isActive
+              ? 'text-[#00BFFF] bg-[#fafafa] font-medium' 
+              : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]',
+            child.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'
+          )}
+        >
+          {child.icon && (
+            <div className="w-5 h-5 mr-2 flex items-center justify-center flex-shrink-0">
+              {renderIcon(child.icon, isActive, isHovered)}
+            </div>
+          )}
+          <span className={`flex-grow text-xs font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis ${(isActive || isHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
+            {child.label}
+          </span>
+          {child.badge && (
+            <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 ml-2 text-xs font-medium rounded-full bg-[#00BFFF]/20 text-[#00BFFF]">
+              {child.badge}
+            </span>
+          )}
+        </Link>
+      </li>
+    );
+  };
+
+  // Function to determine the correct variant based on icon name and state
+  const getIconVariant = (iconName: string | undefined, isActive: boolean, isHovered: boolean): 'solid' | 'light' | 'brand' => {
+    if (!iconName) return 'light';
+    if (iconName === 'faGithub') {
+      return 'brand';
+    }
+    return (isActive || isHovered) ? 'solid' : 'light';
+  };
+
+  const renderIcon = (name: string | undefined, isActive: boolean, isHovered: boolean) => {
+    if (!name) return null;
+    
+    // Special handling for brand icons
+    if (name === 'faGithub') {
+      return (
+        <Icon 
+          name={name}
+          className={(isActive || isHovered) ? "text-[#00BFFF]" : "text-[#333333]"}
+          variant="brand"
+          style={{ transition: 'color 0.15s ease-in-out' }}
+        />
+      );
+    }
+    
+    // For regular icons, use CSS filter approach matching Sidebar.tsx
+    return (
+      <Icon 
+        name={name}
+        variant={(isActive || isHovered) ? "solid" : "light"}
+        className="w-5 h-5"
+        style={{ 
+          filter: (isActive || isHovered) ? 
+            'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 
+            'none',
+          transition: 'filter 0.15s ease-in-out'
+        }}
+      />
+    );
+  };
+
   // Render a single navigation item
   const renderItem = (item: SidebarItem, depth = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedSections[item.id];
     const active = isItemActive(item);
     const showChildren = shouldShowChildren(item);
+    
+    // Handle hover state for icons
+    const [isHovered, setIsHovered] = useState(false);
     
     return (
       <li key={item.id} className="w-full">
@@ -93,27 +222,39 @@ export function UiComponentsSidebar({
             if (hasChildren) {
               e.preventDefault();
               toggleSection(item.id);
+              // Also set this as selected when toggling
+              setSelectedItemId(item.id);
+              
+              // Update URL hash without scroll
+              if (window && window.history) {
+                window.history.replaceState(null, '', `#${item.id}`);
+              }
+            } else {
+              // Set this as the selected item
+              setSelectedItemId(item.id);
+              setSelectedChildId(null);
+              
+              // Let the link handle the hash update
             }
             
             if (onItemClick) {
               onItemClick(item);
             }
           }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           className={cn(
-            'flex items-center py-2 pl-4 pr-2 rounded-md transition-colors w-full',
-            active ? 'text-[#00BFFF]' : 'text-[#333333] hover:bg-gray-100',
+            'flex items-center py-2 pl-4 pr-2 rounded-md transition-colors w-full group',
+            active ? 'text-[#00BFFF] font-medium' : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]',
             item.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'
           )}
         >
           {item.icon && (
             <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0 relative">
-              <Icon 
-                name={item.icon} 
-                className={active ? "text-[#00BFFF]" : "text-[#333333]"}
-              />
+              {renderIcon(item.icon, active, isHovered)}
             </div>
           )}
-          <span className="flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis">
+          <span className={`flex-grow text-base font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis ${(active || isHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
             {item.label}
           </span>
           {item.badge && (
@@ -121,45 +262,13 @@ export function UiComponentsSidebar({
               {item.badge}
             </span>
           )}
-          {hasChildren && (
-            <Icon 
-              name={showChildren ? "faChevronDown" : "faChevronRight"} 
-              className="text-gray-400 ml-1"
-              size="sm"
-            />
-          )}
         </Link>
         
         {hasChildren && (
           <div className={`overflow-hidden transition-all duration-200 ${showChildren ? 'max-h-96' : 'max-h-0'}`}>
             <ul className="pl-10 mt-0.5 space-y-0">
               {item.children?.map(child => (
-                <li key={child.id} className="w-full">
-                  <Link
-                    href={child.href}
-                    onClick={() => {
-                      if (onItemClick) {
-                        onItemClick(child);
-                      }
-                    }}
-                    className={cn(
-                      'flex items-center py-1.5 pl-4 pr-2 rounded-md transition-colors w-full',
-                      child.isActive 
-                        ? 'text-[#00BFFF] bg-[#fafafa]' 
-                        : 'text-[#333333] hover:bg-gray-100',
-                      child.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none'
-                    )}
-                  >
-                    <span className="flex-grow text-xs font-sora font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {child.label}
-                    </span>
-                    {child.badge && (
-                      <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 ml-2 text-xs font-medium rounded-full bg-[#00BFFF]/20 text-[#00BFFF]">
-                        {child.badge}
-                      </span>
-                    )}
-                  </Link>
-                </li>
+                <ChildItem key={child.id} child={child} onItemClick={onItemClick} />
               ))}
             </ul>
           </div>
@@ -167,6 +276,35 @@ export function UiComponentsSidebar({
       </li>
     );
   };
+
+  // Effect to handle URL hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (!hash) return;
+      
+      const sectionId = hash.substring(1).split('-')[0];
+      if (sectionId) {
+        // Expand the section
+        setExpandedSections(prev => ({
+          ...prev,
+          [sectionId]: true
+        }));
+        
+        // Set the section as selected
+        setSelectedItemId(sectionId);
+      }
+    };
+    
+    // Set initial state on mount
+    handleHashChange();
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   return (
     <>

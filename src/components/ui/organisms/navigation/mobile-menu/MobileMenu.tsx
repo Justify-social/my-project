@@ -237,13 +237,13 @@ export function MobileMenu({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Icon name="appCoins" size="md" />
+          <Icon name="coins" size="md" />
           <span className="text-sm font-medium">{remainingCredits} credits</span>
         </div>
         
         <div className="flex items-center space-x-2">
           <div className="relative">
-            <Icon name="appBell" size="md" />
+            <Icon name="bell" size="md" />
             {notificationsCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
                 {notificationsCount}
@@ -257,7 +257,7 @@ export function MobileMenu({
       {user && (
         <div className="flex items-center space-x-3 pt-2 border-t border-gray-200">
           <Image 
-            src={user.picture || "/icons/app/profile-image.svg"} 
+            src={user.picture || "/icons/light/user.svg"} 
             alt="Profile" 
             width={32} 
             height={32}
