@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { IconButtonProps } from './types';
 import { getButtonClasses } from './styles/button.styles';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 /**
  * IconButton component for icon-only buttons with proper accessibility.

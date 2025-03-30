@@ -1,0 +1,1530 @@
+{
+  "timestamp": "2025-03-30T15:23:54.650Z",
+  "summary": {
+    "namingIssues": 19,
+    "structureIssues": 52,
+    "importIssues": 193,
+    "total": 264
+  },
+  "details": {
+    "namingIssues": [
+      {
+        "file": "atoms/badge/badge.tsx",
+        "issue": "Component file should be PascalCase: badge.tsx",
+        "suggestion": "Badge.tsx"
+      },
+      {
+        "file": "atoms/badge/badge.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Badge.tsx"
+      },
+      {
+        "file": "atoms/slider/slider.tsx",
+        "issue": "Component file should be PascalCase: slider.tsx",
+        "suggestion": "Slider.tsx"
+      },
+      {
+        "file": "atoms/slider/slider.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Slider.tsx"
+      },
+      {
+        "file": "atoms/toggle/switch.tsx",
+        "issue": "Component file should be PascalCase: switch.tsx",
+        "suggestion": "Switch.tsx"
+      },
+      {
+        "file": "molecules/accordion/accordion.tsx",
+        "issue": "Component file should be PascalCase: accordion.tsx",
+        "suggestion": "Accordion.tsx"
+      },
+      {
+        "file": "molecules/accordion/accordion.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Accordion.tsx"
+      },
+      {
+        "file": "molecules/data-display/table/table.tsx",
+        "issue": "Component file should be PascalCase: table.tsx",
+        "suggestion": "Table.tsx"
+      },
+      {
+        "file": "molecules/data-display/table/table.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Table.tsx"
+      },
+      {
+        "file": "molecules/feedback/alert/alert.tsx",
+        "issue": "Component file should be PascalCase: alert.tsx",
+        "suggestion": "Alert.tsx"
+      },
+      {
+        "file": "molecules/feedback/alert/alert.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Alert.tsx"
+      },
+      {
+        "file": "molecules/forms/form-controls.tsx",
+        "issue": "Component file should be PascalCase: form-controls.tsx",
+        "suggestion": "Form-controls.tsx"
+      },
+      {
+        "file": "molecules/scroll-area/scroll-area.tsx",
+        "issue": "Component file should be PascalCase: scroll-area.tsx",
+        "suggestion": "Scroll-area.tsx"
+      },
+      {
+        "file": "molecules/scroll-area/scroll-area.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Scroll-area.tsx"
+      },
+      {
+        "file": "molecules/select/select.tsx",
+        "issue": "Component file should be PascalCase: select.tsx",
+        "suggestion": "Select.tsx"
+      },
+      {
+        "file": "molecules/select/select.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Select.tsx"
+      },
+      {
+        "file": "molecules/tabs/tabs.tsx",
+        "issue": "Component file should be PascalCase: tabs.tsx",
+        "suggestion": "Tabs.tsx"
+      },
+      {
+        "file": "molecules/tabs/tabs.tsx",
+        "issue": "Main component file should match directory name in PascalCase",
+        "suggestion": "Tabs.tsx"
+      },
+      {
+        "file": "organisms/Calendar/calendar-dashboard.tsx",
+        "issue": "Component file should be PascalCase: calendar-dashboard.tsx",
+        "suggestion": "Calendar-dashboard.tsx"
+      }
+    ],
+    "structureIssues": [
+      {
+        "directory": "atoms/assets",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Assets.tsx"
+      },
+      {
+        "directory": "atoms/assets",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "atoms/data-display",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Data-display.tsx"
+      },
+      {
+        "directory": "atoms/data-display",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "atoms/data-display/skeleton",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Skeleton.tsx"
+      },
+      {
+        "directory": "atoms/icons",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Icons.tsx"
+      },
+      {
+        "directory": "atoms/image",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Image.tsx"
+      },
+      {
+        "directory": "atoms/layout",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Layout.tsx"
+      },
+      {
+        "directory": "atoms/multi-select",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Multi-select.tsx"
+      },
+      {
+        "directory": "atoms/skeleton",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Skeleton.tsx"
+      },
+      {
+        "directory": "atoms/skeleton",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "molecules/command-menu",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Command-menu.tsx"
+      },
+      {
+        "directory": "molecules/command-menu",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "molecules/data-display",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Data-display.tsx"
+      },
+      {
+        "directory": "molecules/data-display",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "molecules/feedback",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Feedback.tsx"
+      },
+      {
+        "directory": "molecules/form-field",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Form-field.tsx"
+      },
+      {
+        "directory": "molecules/forms",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Forms.tsx"
+      },
+      {
+        "directory": "molecules/forms/date-picker",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Date-picker.tsx"
+      },
+      {
+        "directory": "molecules/search",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Search.tsx"
+      },
+      {
+        "directory": "molecules/search/search-params-wrapper",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Search-params-wrapper.tsx"
+      },
+      {
+        "directory": "molecules/search/search-results",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Search-results.tsx"
+      },
+      {
+        "directory": "molecules/search-bar",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Search-bar.tsx"
+      },
+      {
+        "directory": "molecules/search-bar",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "molecules/skeleton/compositions",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Compositions.tsx"
+      },
+      {
+        "directory": "molecules/skeleton/compositions",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "molecules/skeleton/variants",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Variants.tsx"
+      },
+      {
+        "directory": "molecules/skeleton/variants",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "molecules/tabs/basic-tabs",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Basic-tabs.tsx"
+      },
+      {
+        "directory": "molecules/tabs/custom-tabs",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Custom-tabs.tsx"
+      },
+      {
+        "directory": "organisms/AssetCard",
+        "issue": "Component directory should be kebab-case: AssetCard",
+        "suggestion": "asset-card"
+      },
+      {
+        "directory": "organisms/AssetCard/components",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Components.tsx"
+      },
+      {
+        "directory": "organisms/AssetCard/components",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "organisms/Calendar",
+        "issue": "Component directory should be kebab-case: Calendar",
+        "suggestion": "calendar"
+      },
+      {
+        "directory": "organisms/Card",
+        "issue": "Component directory should be kebab-case: Card",
+        "suggestion": "card"
+      },
+      {
+        "directory": "organisms/Modal",
+        "issue": "Component directory should be kebab-case: Modal",
+        "suggestion": "modal"
+      },
+      {
+        "directory": "organisms/command-menu",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Command-menu.tsx"
+      },
+      {
+        "directory": "organisms/command-menu",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "organisms/data-display",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Data-display.tsx"
+      },
+      {
+        "directory": "organisms/data-display",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "organisms/data-display/data-grid",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Data-grid.tsx"
+      },
+      {
+        "directory": "organisms/data-display/data-grid",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "organisms/error-fallback",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Error-fallback.tsx"
+      },
+      {
+        "directory": "organisms/feedback",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Feedback.tsx"
+      },
+      {
+        "directory": "organisms/navigation",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Navigation.tsx"
+      },
+      {
+        "directory": "organisms/navigation/component-nav",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Component-nav.tsx"
+      },
+      {
+        "directory": "organisms/navigation/mobile-menu",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Mobile-menu.tsx"
+      },
+      {
+        "directory": "organisms/navigation/nav-bar",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Nav-bar.tsx"
+      },
+      {
+        "directory": "organisms/stepper",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Stepper.tsx"
+      },
+      {
+        "directory": "organisms/stepper",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      },
+      {
+        "directory": "organisms/templates",
+        "issue": "Missing main component file that matches directory name",
+        "suggestion": "Create Templates.tsx"
+      },
+      {
+        "directory": "organisms/templates",
+        "issue": "Missing index.ts barrel file",
+        "suggestion": "Create index.ts to export all components from this directory"
+      }
+    ],
+    "importIssues": [
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-1/ClientPage.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-1/page.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-5/ClientPage.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-5/page.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-2/ClientPage.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-2/page.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-3/ClientPage.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-3/page.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-4/ClientPage.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/step-4/page.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx",
+        "importStatement": "import ErrorBoundary from '@/components/ui/error/ErrorBoundary';",
+        "importPath": "@/components/ui/error/ErrorBoundary",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/error/ErrorBoundary/ErrorBoundary.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/wizard/submission/page.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/loading.tsx",
+        "importStatement": "import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'",
+        "importPath": "@/components/ui/molecules/skeleton/SkeletonSection",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/SkeletonSection/SkeletonSection.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/components/ActionPanel.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons/Icon'",
+        "importPath": "@/components/ui/atoms/icons/Icon",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/Icon/Icon.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/loading.tsx",
+        "importStatement": "import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'",
+        "importPath": "@/components/ui/molecules/skeleton/SkeletonSection",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/SkeletonSection/SkeletonSection.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/backup/page.original.tsx",
+        "importStatement": "import { ErrorFallback } from '@/components/ui/organisms/error-fallback/ErrorFallback'",
+        "importPath": "@/components/ui/organisms/error-fallback/ErrorFallback",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/error-fallback/ErrorFallback/ErrorFallback.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/backup/page.original.tsx",
+        "importStatement": "import { CampaignDetailSkeleton } from '@/components/ui/loading-skeleton';",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/backup/page.original.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/backup/page.original.tsx",
+        "importStatement": "import { iconComponentFactory } from '@/components/ui/atoms/icons';",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/page.tsx",
+        "importStatement": "import BadgeComponent from '@/components/ui/feedback/Badge';",
+        "importPath": "@/components/ui/feedback/Badge",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/feedback/Badge/Badge.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/page.tsx",
+        "importStatement": "import ErrorBoundary from '@/components/ui/utilities/error-boundary';",
+        "importPath": "@/components/ui/utilities/error-boundary",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/utilities/error-boundary/error-boundary.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/page.tsx",
+        "importStatement": "import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'",
+        "importPath": "@/components/ui/molecules/skeleton/SkeletonSection",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/SkeletonSection/SkeletonSection.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/page.tsx",
+        "importStatement": "import { AssetPreview } from '@/components/ui/organisms/AssetCard/components/AssetPreview'",
+        "importPath": "@/components/ui/organisms/AssetCard/components/AssetPreview",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/AssetCard/components/AssetPreview/AssetPreview.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/[id]/page.tsx",
+        "importStatement": "import { AssetCard } from '@/components/ui/organisms/AssetCard/AssetCard'",
+        "importPath": "@/components/ui/organisms/AssetCard/AssetCard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/AssetCard/AssetCard/AssetCard.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/page.tsx",
+        "importStatement": "import { TableSkeleton } from '@/components/ui/skeleton';",
+        "importPath": "@/components/ui/skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/skeleton/skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(campaigns)/campaigns/ServerCampaigns.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//app/layout.tsx",
+        "importStatement": "import { ToastProvider } from '@/components/ui/molecules/feedback/Toast';",
+        "importPath": "@/components/ui/molecules/feedback/Toast",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/feedback/Toast/Toast.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'",
+        "importPath": "@/components/ui/molecules/tabs/basic-tabs/Tabs",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/tabs/basic-tabs/Tabs/Tabs.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Input } from '@/components/ui/atoms/input/Input'",
+        "importPath": "@/components/ui/atoms/input/Input",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/input/Input/Input.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Label } from '@/components/ui/atoms/label/Label'",
+        "importPath": "@/components/ui/atoms/label/Label",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/label/Label/Label.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Switch } from '@/components/ui/atoms/switch/Switch'",
+        "importPath": "@/components/ui/atoms/switch/Switch",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/switch/Switch/Switch.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Badge } from '@/components/ui/molecules/feedback/Badge'",
+        "importPath": "@/components/ui/molecules/feedback/Badge",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/feedback/Badge/Badge.tsx)"
+      },
+      {
+        "file": "src//app/api/webhooks/github/webhook-receiver.tsx",
+        "importStatement": "import { Alert } from '@/components/ui/atoms/alert/Alert'",
+        "importPath": "@/components/ui/atoms/alert/Alert",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/alert/Alert/Alert.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/DashboardContent.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/DashboardContent.tsx",
+        "importStatement": "import { TableSkeleton } from '@/components/ui/skeleton';",
+        "importPath": "@/components/ui/skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/skeleton/skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/DashboardContent.tsx",
+        "importStatement": "import CalendarDashboard from \"@/components/ui/organisms/Calendar/calendar-dashboard\";",
+        "importPath": "@/components/ui/organisms/Calendar/calendar-dashboard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Calendar/calendar-dashboard/calendar-dashboard.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/DashboardContent.tsx",
+        "importStatement": "import UpcomingCampaignsCard from \"@/components/ui/deprecated/cards/upcoming-campaigns-card\";",
+        "importPath": "@/components/ui/deprecated/cards/upcoming-campaigns-card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/cards/upcoming-campaigns-card/upcoming-campaigns-card.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/DashboardContent.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/loading.tsx",
+        "importStatement": "import { UIDashboardSkeleton as DashboardSkeleton } from '@/components/ui/skeleton';",
+        "importPath": "@/components/ui/skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/skeleton/skeleton.tsx)"
+      },
+      {
+        "file": "src//app/(dashboard)/dashboard/page.tsx",
+        "importStatement": "import { TableSkeleton, UIDashboardSkeleton } from '@/components/ui/skeleton';",
+        "importPath": "@/components/ui/skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/skeleton/skeleton.tsx)"
+      },
+      {
+        "file": "src//app/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/admin/page.tsx",
+        "importStatement": "import Card, { CardHeader, CardContent } from '@/components/ui/Card';",
+        "importPath": "@/components/ui/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/admin/page.tsx",
+        "importStatement": "import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'",
+        "importPath": "@/components/ui/molecules/tabs/basic-tabs/Tabs",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/tabs/basic-tabs/Tabs/Tabs.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/admin/page.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/admin/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/database/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'",
+        "importPath": "@/components/ui/molecules/tabs/basic-tabs/Tabs",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/tabs/basic-tabs/Tabs/Tabs.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Input } from '@/components/ui/atoms/input/Input'",
+        "importPath": "@/components/ui/atoms/input/Input",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/input/Input/Input.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Label } from '@/components/ui/atoms/label/Label'",
+        "importPath": "@/components/ui/atoms/label/Label",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/label/Label/Label.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Switch } from '@/components/ui/atoms/switch/Switch'",
+        "importPath": "@/components/ui/atoms/switch/Switch",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/switch/Switch/Switch.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Select } from '@/components/ui/atoms/select/Select'",
+        "importPath": "@/components/ui/atoms/select/Select",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/select/Select/Select.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Badge } from '@/components/ui/molecules/feedback/Badge'",
+        "importPath": "@/components/ui/molecules/feedback/Badge",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/feedback/Badge/Badge.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Alert } from '@/components/ui/atoms/alert/Alert'",
+        "importPath": "@/components/ui/atoms/alert/Alert",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/alert/Alert/Alert.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/automated-docs/AutomatedDocs.tsx",
+        "importStatement": "<code>{`import { ${selectedComponent.name} } from \"@/components/ui/${selectedComponent.id}\";`}</code>",
+        "importPath": "@/components/ui/${selectedComponent.id}",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/${selectedComponent.id}/${selectedComponent.id}.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconErrorBoundary.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconErrorBoundary.tsx",
+        "importStatement": "import { Alert } from '@/components/ui/atoms/alert/Alert'",
+        "importPath": "@/components/ui/atoms/alert/Alert",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/alert/Alert/Alert.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconErrorBoundary.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'",
+        "importPath": "@/components/ui/molecules/tabs/basic-tabs/Tabs",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/tabs/basic-tabs/Tabs/Tabs.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Badge } from '@/components/ui/molecules/feedback/Badge'",
+        "importPath": "@/components/ui/molecules/feedback/Badge",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/feedback/Badge/Badge.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Input } from '@/components/ui/atoms/input/Input'",
+        "importPath": "@/components/ui/atoms/input/Input",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/input/Input/Input.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Slider } from '@/components/ui/atoms/slider/slider';",
+        "importPath": "@/components/ui/atoms/slider/slider",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/slider/slider/slider.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Switch } from '@/components/ui/atoms/switch/Switch'",
+        "importPath": "@/components/ui/atoms/switch/Switch",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/switch/Switch/Switch.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Select } from '@/components/ui/atoms/select/Select'",
+        "importPath": "@/components/ui/atoms/select/Select",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/select/Select/Select.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+        "importStatement": "import { Alert } from '@/components/ui/atoms/alert/Alert'",
+        "importPath": "@/components/ui/atoms/alert/Alert",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/alert/Alert/Alert.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/discovery/browser-watcher.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/discovery/browser-watcher.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentSection.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentSection.tsx",
+        "importStatement": "import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'",
+        "importPath": "@/components/ui/molecules/tabs/basic-tabs/Tabs",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/tabs/basic-tabs/Tabs/Tabs.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentSection.tsx",
+        "importStatement": "import { Badge } from '@/components/ui/molecules/feedback/Badge'",
+        "importPath": "@/components/ui/molecules/feedback/Badge",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/feedback/Badge/Badge.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentSection.tsx",
+        "importStatement": "import { Table } from '@/components/ui/organisms/data-display/table/Table'",
+        "importPath": "@/components/ui/organisms/data-display/table/Table",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/data-display/table/Table/Table.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentResolver.tsx",
+        "importStatement": "import { Card } from '@/components/ui/organisms/Card/Card'",
+        "importPath": "@/components/ui/organisms/Card/Card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Card/Card/Card.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentResolver.tsx",
+        "importStatement": "import { Alert } from '@/components/ui/atoms/alert/Alert'",
+        "importPath": "@/components/ui/atoms/alert/Alert",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/alert/Alert/Alert.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ComponentResolver.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/ClientOnlyComponentsList.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/components/DynamicStyledSidebar.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons/Icon'",
+        "importPath": "@/components/ui/atoms/icons/Icon",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/Icon/Icon.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/ui-components/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//app/(admin)/debug-tools/test-icons/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/pagination/Pagination.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/pagination/examples/PaginationExamples.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/forms/form-controls.tsx",
+        "importStatement": "import { Input } from '@/components/ui/atoms/input/Input'",
+        "importPath": "@/components/ui/atoms/input/Input",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/input/Input/Input.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/forms/form-controls.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/forms/form-controls.tsx",
+        "importStatement": "import { FormField } from '@/components/ui/molecules/form-field'",
+        "importPath": "@/components/ui/molecules/form-field",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/form-field/form-field.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/forms/form-controls.tsx",
+        "importStatement": "* Please import from '@/components/ui/molecules/form-field' instead.",
+        "importPath": "@/components/ui/molecules/form-field",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/form-field/form-field.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/forms/date-picker/DatePicker.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/forms/date-picker/DatePicker.tsx",
+        "importStatement": "import { Calendar } from '@/components/ui/organisms/Calendar/Calendar'",
+        "importPath": "@/components/ui/organisms/Calendar/Calendar",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/Calendar/Calendar/Calendar.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/search-bar/index.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/skeleton/examples/SkeletonExamples.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/skeleton/examples/SkeletonExamples.tsx",
+        "importStatement": "{`import { WizardSkeleton } from '@/components/ui/loading-skeleton';",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/skeleton/examples/SkeletonExamples.tsx",
+        "importStatement": "{`import { TableSkeleton } from '@/components/ui/loading-skeleton';",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/skeleton/examples/SkeletonExamples.tsx",
+        "importStatement": "import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'",
+        "importPath": "@/components/ui/molecules/skeleton/SkeletonSection",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/SkeletonSection/SkeletonSection.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/skeleton/examples/SkeletonExamples.tsx",
+        "importStatement": "import { FormFieldSkeleton } from '@/components/ui/molecules/skeleton/FormFieldSkeleton'",
+        "importPath": "@/components/ui/molecules/skeleton/FormFieldSkeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/FormFieldSkeleton/FormFieldSkeleton.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/feedback/Toast.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/command-menu/examples/CommandMenuExamples.tsx",
+        "importStatement": "import { CommandMenu } from '@/components/ui/molecules/command-menu';",
+        "importPath": "@/components/ui/molecules/command-menu",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/command-menu/command-menu.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/breadcrumbs/Breadcrumbs.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/molecules/breadcrumbs/examples/BreadcrumbsExamples.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/atoms/spinner/examples/SpinnerExamples.tsx",
+        "importStatement": "{`import { AuthSpinner } from '@/components/ui/spinner';",
+        "importPath": "@/components/ui/spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/spinner/spinner.tsx)"
+      },
+      {
+        "file": "src//components/ui/atoms/spinner/examples/SpinnerExamples.tsx",
+        "importStatement": "{`import { FullscreenSpinner } from '@/components/ui/spinner';",
+        "importPath": "@/components/ui/spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/spinner/spinner.tsx)"
+      },
+      {
+        "file": "src//components/ui/atoms/button/ButtonWithIcon.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/atoms/button/IconButton.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/atoms/select/Select.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Calendar/calendar-dashboard.tsx",
+        "importStatement": "* Please import from '@/components/ui/deprecated/calendar/calendar-dashboard' instead.",
+        "importPath": "@/components/ui/deprecated/calendar/calendar-dashboard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/calendar-dashboard/calendar-dashboard.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Calendar/calendar-dashboard.tsx",
+        "importStatement": "import { default as OriginalCalendarDashboard } from '@/components/ui/deprecated/calendar/calendar-dashboard';",
+        "importPath": "@/components/ui/deprecated/calendar/calendar-dashboard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/calendar-dashboard/calendar-dashboard.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Calendar/Calendar.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Calendar/CalendarUpcoming.tsx",
+        "importStatement": "* Please import from '@/components/ui/deprecated/calendar/CalendarUpcoming' instead.",
+        "importPath": "@/components/ui/deprecated/calendar/CalendarUpcoming",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/CalendarUpcoming/CalendarUpcoming.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Calendar/CalendarUpcoming.tsx",
+        "importStatement": "import { default as OriginalCalendarUpcoming } from '@/components/ui/deprecated/calendar/CalendarUpcoming';",
+        "importPath": "@/components/ui/deprecated/calendar/CalendarUpcoming",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/CalendarUpcoming/CalendarUpcoming.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Card/Card.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/navigation/sidebar/Sidebar.tsx",
+        "importStatement": "import { getIconPath } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/navigation/mobile-menu/MobileMenu.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/navigation/nav-bar/NavigationBar.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/navigation/header/Header.tsx",
+        "importStatement": "import { MobileMenu } from '@/components/ui/organisms/navigation/mobile-menu/MobileMenu'",
+        "importPath": "@/components/ui/organisms/navigation/mobile-menu/MobileMenu",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/mobile-menu/MobileMenu/MobileMenu.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/navigation/header/Header.tsx",
+        "importStatement": "import { SearchBar } from \"@/components/ui/molecules/search-bar\";",
+        "importPath": "@/components/ui/molecules/search-bar",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/search-bar/search-bar.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/feedback/Alert.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/AssetCard/components/AssetPreview.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/AssetCard/AssetCard.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/AssetCard/AssetCard.tsx",
+        "importStatement": "import { Text } from '@/components/ui/atoms/typography'",
+        "importPath": "@/components/ui/atoms/typography",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/typography/typography.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/data-display/table/Table.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/data-display/data-grid/DataGrid.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/organisms/Modal/Modal.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/calendar/DatePicker.tsx",
+        "importStatement": "* Please import from '@/components/ui/molecules/forms/date-picker' instead.",
+        "importPath": "@/components/ui/molecules/forms/date-picker",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/forms/date-picker/date-picker.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/calendar/Calendar.tsx",
+        "importStatement": "* Please import from '@/components/ui/atoms/data-display/calendar' instead.",
+        "importPath": "@/components/ui/atoms/data-display/calendar",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/data-display/calendar/calendar.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/asset-card/asset-preview.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/asset-card/asset-card.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/cards/upcoming-campaigns-card.tsx",
+        "importStatement": "* Please import from '@/components/ui/deprecated/cards/upcoming-campaigns-card' instead.",
+        "importPath": "@/components/ui/deprecated/cards/upcoming-campaigns-card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/cards/upcoming-campaigns-card/upcoming-campaigns-card.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/cards/upcoming-campaigns-card.tsx",
+        "importStatement": "import { default as OriginalUpcomingCampaignsCard } from '@/components/ui/deprecated/cards/upcoming-campaigns-card';",
+        "importPath": "@/components/ui/deprecated/cards/upcoming-campaigns-card",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/cards/upcoming-campaigns-card/upcoming-campaigns-card.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/calendar-old/calendar-dashboard.tsx",
+        "importStatement": "* Please import from '@/components/ui/deprecated/calendar/calendar-dashboard' instead.",
+        "importPath": "@/components/ui/deprecated/calendar/calendar-dashboard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/calendar-dashboard/calendar-dashboard.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/calendar-old/calendar-dashboard.tsx",
+        "importStatement": "import { default as OriginalCalendarDashboard } from '@/components/ui/deprecated/calendar/calendar-dashboard';",
+        "importPath": "@/components/ui/deprecated/calendar/calendar-dashboard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/calendar-dashboard/calendar-dashboard.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/calendar-old/CalendarUpcoming.tsx",
+        "importStatement": "* Please import from '@/components/ui/deprecated/calendar/CalendarUpcoming' instead.",
+        "importPath": "@/components/ui/deprecated/calendar/CalendarUpcoming",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/CalendarUpcoming/CalendarUpcoming.tsx)"
+      },
+      {
+        "file": "src//components/ui/deprecated/calendar-old/CalendarUpcoming.tsx",
+        "importStatement": "import { default as OriginalCalendarUpcoming } from '@/components/ui/deprecated/calendar/CalendarUpcoming';",
+        "importPath": "@/components/ui/deprecated/calendar/CalendarUpcoming",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/deprecated/calendar/CalendarUpcoming/CalendarUpcoming.tsx)"
+      },
+      {
+        "file": "src//components/features/core/loading/index.tsx",
+        "importStatement": "* Please import from '@/components/ui/molecules/skeleton' instead.",
+        "importPath": "@/components/ui/molecules/skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/core/search/SearchParamsWrapper.tsx",
+        "importStatement": "* Please import from '@/components/ui/molecules/search/search-params-wrapper' instead.",
+        "importPath": "@/components/ui/molecules/search/search-params-wrapper",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/search/search-params-wrapper/search-params-wrapper.tsx)"
+      },
+      {
+        "file": "src//components/features/core/search/SearchResults.tsx",
+        "importStatement": "* Please import from '@/components/ui/molecules/search/search-results' instead.",
+        "importPath": "@/components/ui/molecules/search/search-results",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/search/search-results/search-results.tsx)"
+      },
+      {
+        "file": "src//components/features/navigation/MobileMenu.tsx",
+        "importStatement": "import { MobileMenu } from '@/components/ui/organisms/navigation/mobile-menu/MobileMenu'",
+        "importPath": "@/components/ui/organisms/navigation/mobile-menu/MobileMenu",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/mobile-menu/MobileMenu/MobileMenu.tsx)"
+      },
+      {
+        "file": "src//components/features/content/EnhancedAssetPreview.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/content/Header.tsx",
+        "importStatement": "import { MobileMenu } from '@/components/ui/organisms/navigation/mobile-menu/MobileMenu'",
+        "importPath": "@/components/ui/organisms/navigation/mobile-menu/MobileMenu",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/mobile-menu/MobileMenu/MobileMenu.tsx)"
+      },
+      {
+        "file": "src//components/features/content/Header.tsx",
+        "importStatement": "import { navItems, settingsNavItem } from \"@/components/ui/organisms/navigation/config\";",
+        "importPath": "@/components/ui/organisms/navigation/config",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/config/config.tsx)"
+      },
+      {
+        "file": "src//components/features/content/Header.tsx",
+        "importStatement": "import { SearchBar } from \"@/components/ui/molecules/search-bar\";",
+        "importPath": "@/components/ui/molecules/search-bar",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/search-bar/search-bar.tsx)"
+      },
+      {
+        "file": "src//components/features/content/AssetPreview.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/dashboard/NotificationPreferencesSection.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/dashboard/CalendarUpcoming.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/users/PasswordManagementSection.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/users/PersonalInfoSection.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/users/ProfileSettingsSkeleton.tsx",
+        "importStatement": "import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'",
+        "importPath": "@/components/ui/molecules/skeleton/SkeletonSection",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/skeleton/SkeletonSection/SkeletonSection.tsx)"
+      },
+      {
+        "file": "src//components/features/users/page.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/users/page.tsx",
+        "importStatement": "import { iconComponentFactory } from '@/components/ui/atoms/icons';",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/users/ProfilePictureSection.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/index.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/index.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/index.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step5Content.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step5Content.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step5Content.tsx",
+        "importStatement": "import { AssetCard } from '@/components/ui/organisms/AssetCard/AssetCard'",
+        "importPath": "@/components/ui/organisms/AssetCard/AssetCard",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/AssetCard/AssetCard/AssetCard.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/BasicInfo.tsx",
+        "importStatement": "import { DatePicker } from '@/components/ui/molecules/forms/date-picker/DatePicker'",
+        "importPath": "@/components/ui/molecules/forms/date-picker/DatePicker",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/molecules/forms/date-picker/DatePicker/DatePicker.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/BasicInfo.tsx",
+        "importStatement": "import { Button } from '@/components/ui/atoms/button/Button'",
+        "importPath": "@/components/ui/atoms/button/Button",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/button/Button/Button.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/BasicInfo.tsx",
+        "importStatement": "import { Input } from '@/components/ui/atoms/input/Input'",
+        "importPath": "@/components/ui/atoms/input/Input",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/input/Input/Input.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step2Content.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step2Content.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/ProgressBar.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/CampaignAssetUploader.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/CampaignAssetUploader.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step1Content.tsx",
+        "importStatement": "import { WizardSkeleton, FormSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step1Content.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/StepContentLoader.tsx",
+        "importStatement": "import { WizardSkeleton } from '@/components/ui/skeleton';",
+        "importPath": "@/components/ui/skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/skeleton/skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step4Content.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step3Content.tsx",
+        "importStatement": "import { _LoadingSpinner } from '@/components/ui/loading-spinner';",
+        "importPath": "@/components/ui/loading-spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-spinner/loading-spinner.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step3Content.tsx",
+        "importStatement": "import { WizardSkeleton } from \"@/components/ui/loading-skeleton\";",
+        "importPath": "@/components/ui/loading-skeleton",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/loading-skeleton/loading-skeleton.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step3Content.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step3Content.tsx",
+        "importStatement": "import { Tooltip } from '@/components/ui/tooltip';",
+        "importPath": "@/components/ui/tooltip",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/tooltip/tooltip.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/Step3Content.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/JustifyScoreDisplay.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/AutosaveIndicator.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//components/features/campaigns/WizardNavigation.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/common/OptimizedImage.tsx",
+        "importStatement": "* Please import from '@/components/ui/atoms/image' instead.",
+        "importPath": "@/components/ui/atoms/image",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/image/image.tsx)"
+      },
+      {
+        "file": "src//components/common/OptimizedImage.tsx",
+        "importStatement": "import { OptimizedImage } from '@/components/ui/atoms/image'",
+        "importPath": "@/components/ui/atoms/image",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/image/image.tsx)"
+      },
+      {
+        "file": "src//components/layouts/client-layout.tsx",
+        "importStatement": "import { Sidebar } from '@/components/ui/organisms/navigation/sidebar/Sidebar'",
+        "importPath": "@/components/ui/organisms/navigation/sidebar/Sidebar",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/sidebar/Sidebar/Sidebar.tsx)"
+      },
+      {
+        "file": "src//components/layouts/client-layout.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/layouts/Header.tsx",
+        "importStatement": "* Please import from '@/components/ui/organisms/navigation/header' instead.",
+        "importPath": "@/components/ui/organisms/navigation/header",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/header/header.tsx)"
+      },
+      {
+        "file": "src//components/layouts/Header.tsx",
+        "importStatement": "import { Header } from '@/components/ui/organisms/navigation/header/Header'",
+        "importPath": "@/components/ui/organisms/navigation/header/Header",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/organisms/navigation/header/Header/Header.tsx)"
+      },
+      {
+        "file": "src//components/upload/EnhancedAssetPreview.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/upload/CampaignAssetUploader.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//components/upload/CampaignAssetUploader.tsx",
+        "importStatement": "import { Spinner } from '@/components/ui/atoms/spinner/Spinner'",
+        "importPath": "@/components/ui/atoms/spinner/Spinner",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/spinner/Spinner/Spinner.tsx)"
+      },
+      {
+        "file": "src//components/upload/AssetPreview.tsx",
+        "importStatement": "import { Icon } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      },
+      {
+        "file": "src//lib/icon-utils.ts",
+        "importStatement": "import { normalizeIconName } from '@/components/ui/atoms/icons'",
+        "importPath": "@/components/ui/atoms/icons",
+        "suggestion": "Update to include specific file (e.g., @/components/ui/atoms/icons/icons.tsx)"
+      }
+    ]
+  }
+}

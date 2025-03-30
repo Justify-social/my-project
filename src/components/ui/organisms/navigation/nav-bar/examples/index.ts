@@ -5,3 +5,6 @@
  */
 
 export { default as NavigationBarExamples } from './NavigationBarExamples'; 
+import NavigationBarExamples from './NavigationBarExamples';
+
+export default NavigationBarExamples;

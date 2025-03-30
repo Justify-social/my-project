@@ -32,3 +32,7 @@ export interface SpacerProps extends HTMLAttributes<HTMLDivElement> {
    */
   inline?: boolean;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

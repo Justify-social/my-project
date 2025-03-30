@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Date from '../../../utils/date-service';
 import { useWizard } from '@/src/components/features/campaigns/wizard/WizardContext';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/molecules/forms/date-picker/DatePicker'
+import { Button } from '@/components/ui/atoms/button/Button'
+import { Input } from '@/components/ui/atoms/input/Input'
 
 /**
  * BasicInfo props interface

@@ -199,3 +199,7 @@ export function TabPanel({ children, id, className }: TabPanelProps) {
     </div>
   );
 } 
+/**
+ * Default export for Tabs
+ */
+export default Tabs;

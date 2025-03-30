@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/utils/string/utils';
 import { PaginationProps } from './types';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 /**
  * Pagination component for navigating through multiple pages of content

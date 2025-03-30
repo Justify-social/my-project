@@ -9,3 +9,6 @@ export {
   type CalendarProps,
   type CalendarDayEvent 
 } from './Calendar'; 
+import Calendar from './Calendar';
+
+export default Calendar;

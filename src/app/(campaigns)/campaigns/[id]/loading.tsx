@@ -1,5 +1,5 @@
 import React from 'react';
-import { SkeletonSection } from '@/components/ui/skeleton';
+import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'
 
 export default function Loading() {
   return (

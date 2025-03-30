@@ -27,3 +27,7 @@ export * from './multi-select';
 
 // Export Spinner components
 export * from './spinner'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/utils/string/utils';
 import { BreadcrumbsProps, BreadcrumbItem } from './types';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 /**
  * Breadcrumbs component for navigation hierarchy

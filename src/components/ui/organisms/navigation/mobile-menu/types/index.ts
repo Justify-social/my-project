@@ -87,3 +87,7 @@ export interface MobileMenuProps {
    */
   user?: UserProfile;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

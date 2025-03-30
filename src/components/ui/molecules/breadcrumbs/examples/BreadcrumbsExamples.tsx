@@ -1,6 +1,6 @@
 import React from 'react';
 import { Breadcrumbs, BreadcrumbItem } from '../';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 /**
  * Examples of the Breadcrumbs component

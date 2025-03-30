@@ -13,3 +13,4 @@ export * from './Sidebar';
 
 // Export types
 export * from './types'; 
+export default Sidebar;

@@ -78,4 +78,9 @@ export const settingsNavItem: NavItem = {
   label: "Settings",
   href: "/settings",
   icon: "appSettings",
+};
+
+// Default export added by auto-fix script
+export default {
+  // All configuration from this file
 }; 

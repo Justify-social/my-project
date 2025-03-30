@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { cn } from '@/utils/string/utils';
 import { useSearch } from '@/contexts/SearchContext';
 import { CommandMenu } from '../../molecules/command-menu';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 export interface SearchBarProps {
   /**

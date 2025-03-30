@@ -12,3 +12,4 @@ export * from './types';
 
 // Export main component
 export { default as Spacer } from './Spacer'; 
+export default Spacer;

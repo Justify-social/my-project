@@ -108,3 +108,7 @@ export interface SidebarProps {
    */
   onItemClick?: (item: SidebarItem) => void;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

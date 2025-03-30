@@ -3,7 +3,7 @@
  * Please import from '@/components/ui/atoms/image' instead.
  */
 
-import { OptimizedImage as UIOptimizedImage, OptimizedImageProps } from '@/components/ui/atoms/image';
+import { OptimizedImage } from '@/components/ui/atoms/image'
 
 export type { OptimizedImageProps };
 export const OptimizedImage = UIOptimizedImage;

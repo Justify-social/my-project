@@ -10,11 +10,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { ErrorBoundary } from '@/src/components/features/core/error-handling/ErrorBoundary';
 import { Analytics } from '@/lib/analytics/analytics';
-import ErrorFallback from '@/components/ui/error-fallback';
+import { ErrorFallback } from '@/components/ui/organisms/error-fallback/ErrorFallback'
 import { CampaignDetailSkeleton } from '@/components/ui/loading-skeleton';
 import { useSidebar } from '@/providers/SidebarProvider';
 import Image from 'next/image';
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 import { iconComponentFactory } from '@/components/ui/atoms/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';

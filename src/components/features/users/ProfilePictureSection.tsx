@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import Card from '@/components/settings/shared/Card';
 import SectionHeader from '@/components/settings/shared/SectionHeader';
 import ActionButtons from '@/components/settings/shared/ActionButtons';
-import { Icon, ButtonIcon, DeleteIcon, SuccessIcon, WarningIcon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 interface ProfilePictureSectionProps {
   currentImageUrl: string | null;

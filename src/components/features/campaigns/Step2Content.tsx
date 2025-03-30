@@ -10,7 +10,7 @@ import Header from "@/components/features/campaigns/Header";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { toast } from "react-hot-toast";
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { sanitizeStepPayload } from '@/utils/payload-sanitizer';
 

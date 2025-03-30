@@ -13,3 +13,4 @@ export * from './Pagination';
 
 // Export types
 export * from './types'; 
+export default Pagination;

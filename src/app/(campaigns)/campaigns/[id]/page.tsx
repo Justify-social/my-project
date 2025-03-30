@@ -8,9 +8,9 @@ import { toast } from 'react-hot-toast';
 import ErrorBoundary from '@/components/ui/utilities/error-boundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/error-fallback';
-import { SkeletonSection } from '@/components/ui/skeleton';
+import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'
 import Image from 'next/image';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Define types locally instead of importing
@@ -58,7 +58,8 @@ const UI_ICON_MAP: Record<string, string> = {
 };
 
 // Import the asset components
-import { AssetPreview, AssetCard } from '@/components/ui/assets';
+import { AssetPreview } from '@/components/ui/organisms/AssetCard/components/AssetPreview'
+import { AssetCard } from '@/components/ui/organisms/AssetCard/AssetCard'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums

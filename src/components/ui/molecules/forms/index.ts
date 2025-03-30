@@ -12,3 +12,8 @@ export * from './Checkbox';
 export * from './Input';
 export * from './Radio';
 export * from './Select';
+
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

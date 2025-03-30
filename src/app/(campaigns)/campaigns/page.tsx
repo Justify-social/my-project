@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Icon, ButtonIcon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { TableSkeleton } from '@/components/ui/skeleton';
 

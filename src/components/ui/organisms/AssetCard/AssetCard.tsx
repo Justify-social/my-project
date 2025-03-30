@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons';
-import { Text } from '@/components/ui/atoms/typography';
+import { Icon } from '@/components/ui/atoms/icons'
+import { Text } from '@/components/ui/atoms/typography'
 import { AssetCardProps } from './types';
 import AssetPreview from './components/AssetPreview';
 

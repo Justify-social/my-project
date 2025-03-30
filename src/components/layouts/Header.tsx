@@ -3,7 +3,7 @@
  * Please import from '@/components/ui/organisms/navigation/header' instead.
  */
 
-import { Header as UIHeader } from '@/components/ui/organisms/navigation/header';
+import { Header } from '@/components/ui/organisms/navigation/header/Header'
 
-export { UIHeader as Header };
-export default UIHeader;
+export { Header };
+export default Header;

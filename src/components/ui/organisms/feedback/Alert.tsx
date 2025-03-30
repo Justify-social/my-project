@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 type AlertProps = {
   status?: 'success' | 'info' | 'warning' | 'error';

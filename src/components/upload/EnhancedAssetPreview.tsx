@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Error from '../../middlewares/handle-db-errors';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import { cn } from '@/utils/string/utils';
 import { getSafeAssetUrl } from '@/utils/fileUtils';
 import { toast } from 'sonner';

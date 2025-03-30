@@ -10,3 +10,7 @@ export type {
   DatePickerEvent,
   DateFormat 
 } from './types'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

@@ -1866,11 +1866,6 @@
     "fileName": "github.svg",
     "path": "/icons/brands/github.svg"
   },
-  "faGithubLight": {
-    "prefix": "fab",
-    "iconName": "github",
-    "icon": []
-  },
   "faCodeLight": {
     "prefix": "fal",
     "name": "code",
@@ -1916,17 +1911,6 @@
     "fileName": "angles-left.svg",
     "path": "/icons/light/angles-left.svg"
   },
-  "faProfileImage": {
-    "name": "profile-image",
-    "fileName": "profile-image.svg",
-    "path": "/icons/solid/profile-image.svg"
-  },
-  "faProfileImageLight": {
-    "prefix": "fal",
-    "name": "profile-image",
-    "fileName": "profile-image.svg",
-    "path": "/icons/light/profile-image.svg"
-  },
   "faTimes": {
     "name": "times",
     "fileName": "times.svg",
@@ -1938,65 +1922,20 @@
     "fileName": "times.svg",
     "path": "/icons/light/times.svg"
   },
-  "appTest": {
-    "name": "test",
-    "fileName": "test.svg",
-    "path": "/icons/app/test.svg"
-  },
-  "appMMM": {
-    "name": "mmm",
-    "fileName": "mmm.svg",
-    "path": "/icons/app/mmm.svg"
-  },
-  "appLogo": {
-    "name": "app-logo",
-    "fileName": "app-logo.svg",
-    "path": "/icons/app/app-logo.svg"
-  },
-  "kpiAlarmClock": {
-    "name": "alarm-clock",
-    "fileName": "alarm-clock.svg",
-    "path": "/icons/kpis/alarm-clock.svg"
-  },
-  "kpiArrowTrendDown": {
-    "name": "arrow-trend-down",
-    "fileName": "arrow-trend-down.svg",
-    "path": "/icons/kpis/arrow-trend-down.svg"
-  },
-  "kpiArrowTrendUp": {
-    "name": "arrow-trend-up",
-    "fileName": "arrow-trend-up.svg",
-    "path": "/icons/kpis/arrow-trend-up.svg"
-  },
-  "kpiCalendar": {
-    "name": "calendar",
-    "fileName": "calendar.svg",
-    "path": "/icons/kpis/calendar.svg"
-  },
-  "kpiClock": {
-    "name": "clock",
-    "fileName": "clock.svg",
-    "path": "/icons/kpis/clock.svg"
-  },
-  "kpiCoins": {
-    "name": "coins",
-    "fileName": "coins.svg",
-    "path": "/icons/kpis/coins.svg"
-  },
-  "kpiDollarSign": {
-    "name": "dollar-sign",
-    "fileName": "dollar-sign.svg",
-    "path": "/icons/kpis/dollar-sign.svg"
-  },
-  "kpiInvestment": {
-    "name": "investment",
-    "fileName": "investment.svg",
-    "path": "/icons/kpis/investment.svg"
-  },
   "faDraftingCompassLight": {
     "prefix": "fal",
     "name": "drafting-compass",
     "fileName": "drafting-compass.svg",
     "path": "/icons/light/drafting-compass.svg"
+  },
+  "faDiamonds-4": {
+    "name": "diamonds-4",
+    "fileName": "diamonds-4.svg",
+    "path": "/icons/solid/diamonds-4.svg"
+  },
+  "faPaintbrush": {
+    "name": "paintbrush",
+    "fileName": "paintbrush.svg",
+    "path": "/icons/solid/paintbrush.svg"
   }
 }

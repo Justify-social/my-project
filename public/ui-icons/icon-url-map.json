@@ -338,5 +338,11 @@
   "faClockRotateLeftLight": "/icons/light/clock-rotate-left.svg",
   "faDollarLight": "/icons/light/dollar.svg",
   "faCheckCircleLight": "/icons/light/check-circle.svg",
-  "faCog": "/icons/solid/cog.svg"
+  "faCog": "/icons/solid/cog.svg",
+  "faDiamonds-4": "/icons/solid/diamonds-4.svg",
+  "faPaintbrush": "/icons/solid/paintbrush.svg",
+  "faDiamond": "/icons/solid/diamond.svg",
+  "faDiamonds": "/icons/solid/diamonds.svg",
+  "faDiamondExclamation": "/icons/solid/diamond-exclamation.svg",
+  "faGem": "/icons/solid/gem.svg"
 }

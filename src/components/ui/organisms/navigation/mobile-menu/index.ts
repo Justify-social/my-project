@@ -27,3 +27,7 @@
 export { BaseMobileMenu, MobileMenu } from './MobileMenu';
 export { default } from './MobileMenu';
 export type { BaseMobileMenuProps, MobileMenuProps } from './types'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

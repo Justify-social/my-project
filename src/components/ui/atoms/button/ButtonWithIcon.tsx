@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon, type IconProps } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 /**
  * Props for the ButtonWithIcon component
@@ -163,3 +163,7 @@ export const LinkWithIcon: React.FC<LinkWithIconProps> = ({
     </a>
   );
 }; 
+/**
+ * Default export for ButtonWithIcon
+ */
+export default ButtonWithIcon;

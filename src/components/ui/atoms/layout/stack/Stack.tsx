@@ -142,3 +142,7 @@ export function Stack({
     </div>
   );
 } 
+/**
+ * Default export for Stack
+ */
+export default Stack;

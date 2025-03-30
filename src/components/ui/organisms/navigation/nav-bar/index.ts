@@ -13,3 +13,7 @@ export * from './types';
 
 // Export examples
 export * from './examples'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

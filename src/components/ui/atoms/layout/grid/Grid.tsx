@@ -111,3 +111,7 @@ export function Grid({
     </div>
   );
 } 
+/**
+ * Default export for Grid
+ */
+export default Grid;

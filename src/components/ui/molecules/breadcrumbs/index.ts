@@ -13,3 +13,4 @@ export * from './Breadcrumbs';
 
 // Export types
 export * from './types'; 
+export default Breadcrumbs;

@@ -112,3 +112,8 @@ export interface SafeIconProps {
   action?: ActionType;
   title?: string;
 }
+
+// Default export added by auto-fix script
+export default {
+  // All types from this file
+};

@@ -61,3 +61,7 @@ export interface AssetPreviewProps extends React.HTMLAttributes<HTMLDivElement> 
   /** Additional class names for styling */
   className?: string;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

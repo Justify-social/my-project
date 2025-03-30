@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Spinner } from '@/components/ui/spinner';
+import { Card } from '@/components/ui/organisms/Card/Card'
+import { Alert } from '@/components/ui/atoms/alert/Alert'
+import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 import { AlertCircle } from 'lucide-react';
+import { ComponentMetadata } from '../types';
 
 /**
  * Props for the ComponentResolver
@@ -189,7 +190,7 @@ class ErrorBoundary extends React.Component<
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Render Error</AlertTitle>
           <AlertDescription>
-            {this.state.error?.message || 'An error occurred while rendering the component'}
+            {this.state.error?.message || 'An error occurred while rendering this component'}
           </AlertDescription>
         </Alert>
       );

@@ -46,3 +46,8 @@ export const IconProvider: React.FC<IconProviderProps> = ({
     </IconContext.Provider>
   );
 };
+
+/**
+ * Default export for IconContext
+ */
+export default IconContext;

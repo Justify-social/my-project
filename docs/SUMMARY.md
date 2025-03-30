@@ -4,13 +4,13 @@
 
 - [Project Overview](guides/project-overview.md)
 - [Contributing Guide](CONTRIBUTING.md)
-- [Graphiti](graphiti.md)
-- [CursorAI Graphiti Procedure](cursor-ai-graphiti-procedure.md)
+- [Graphiti](graphiti/README.md)
+- [CursorAI Graphiti Procedure](graphiti/guides/cursor-ai-procedure.md)
 
 ## Getting Started
 
 - [Development Setup](guides/developer/setup.md)
-- [Coding Standards](guides/developer/coding-standards.md)
+- [Coding Standards](standards/code-standards.md)
 - [Naming Conventions](guides/naming-conventions.md)
 
 ## Architecture
@@ -47,6 +47,12 @@
 ### UI
 
 - [Atomic Design Structure](reference/ui/atomic-design-structure.md)
+- [UI Components Plan](components/ui/guide/components-plan.md)
+- [UI Components Implementation](components/ui/implementation/components-implementation.md)
+- [UI Components Error Resolution](components/ui/implementation/error-resolution.md)
+- [UI Component Autoloading](components/ui/autoloading-implementation.md)
+- [UI Component Autoloading Phase 2 Plan](components/ui/phase2-build-time-registry.md)
+- [UI Component Autoloading README](components/ui/autoloading-README.md)
 
 ### Scripts
 
@@ -63,10 +69,14 @@
 - [Error Codes](reference/api/error-codes.md)
 - [Rate Limiting](reference/api/rate-limiting.md)
 
+### Graphiti
+
+- [Integration Guide](graphiti/guides/integration-guide.md)
+
 ## Processes
 
 - [Release Process](processes/release-process.md)
-- [Testing Strategy](processes/testing-strategy.md)
+- [Testing Strategy](testing/README.md)
 - [Bug Reporting](processes/bug-reporting.md)
 - [Feature Requests](processes/feature-requests.md)
 

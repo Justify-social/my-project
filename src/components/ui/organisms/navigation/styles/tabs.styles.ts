@@ -109,3 +109,6 @@ export function getTabPanelClasses(className?: string): string {
     className
   );
 } 
+
+// Default export added by auto-fix script
+export default {};

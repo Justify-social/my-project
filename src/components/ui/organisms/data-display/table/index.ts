@@ -18,3 +18,6 @@ export {
   type SortDirection,
   type SortState
 } from './Table'; 
+import Table from './Table';
+
+export default Table;

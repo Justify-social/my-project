@@ -1,6 +1,11 @@
 import React from 'react';
 
 /**
+ * Color variants for the checkbox
+ */
+export type CheckboxColor = 'interactive' | 'primary' | 'accent' | 'secondary' | 'success' | 'warning' | 'destructive';
+
+/**
  * Checkbox component props
  */
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
@@ -20,6 +25,12 @@ export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputE
    * @default 'md'
    */
   size?: 'sm' | 'md' | 'lg';
+  
+  /**
+   * Color theme for the checkbox
+   * @default 'interactive'
+   */
+  color?: CheckboxColor;
 
   /**
    * Whether the checkbox is in an indeterminate state

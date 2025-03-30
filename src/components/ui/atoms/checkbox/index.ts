@@ -6,3 +6,6 @@
 
 export { default as Checkbox } from './Checkbox';
 export * from './types'; 
+import Checkbox from './Checkbox';
+
+export default Checkbox;

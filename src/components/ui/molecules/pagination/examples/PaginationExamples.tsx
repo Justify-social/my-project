@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pagination } from '../';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 /**
  * Examples of the Pagination component

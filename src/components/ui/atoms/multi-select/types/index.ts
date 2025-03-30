@@ -178,3 +178,7 @@ export interface MultiSelectProps extends Omit<HTMLAttributes<HTMLDivElement>, '
    */
   closeMenuOnSelect?: boolean;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

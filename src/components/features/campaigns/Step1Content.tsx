@@ -13,7 +13,7 @@ import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { toast } from "react-hot-toast";
 import { WizardSkeleton, FormSkeleton } from "@/components/ui/loading-skeleton";
 import Image from "next/image";
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 import { EnumTransformers } from '@/utils/enum-transformers';
 // Import the payload sanitizer utilities
 import { sanitizeDraftPayload } from '@/utils/payload-sanitizer';

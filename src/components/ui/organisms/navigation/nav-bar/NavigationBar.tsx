@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import { NavigationBarProps, NavItem } from './types';
 import { 
   navBarStyles, 

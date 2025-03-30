@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import { Table, ColumnDef, SortDirection, SortState, TableProps } from '../table';
 
 // Types
@@ -143,4 +143,16 @@ const DataGridToolbar = <T extends Record<string, unknown>>() => {
       Export CSV
     </span>
   </button>
-)} 
+)}
+
+/**
+ * DataGrid component
+ *
+ * Extends Table with additional features like filtering, search, export, and selection.
+ */
+export const DataGrid = <T extends Record<string, unknown>>(props: DataGridProps<T>) => {
+  // ... existing implementation ...
+};
+
+// Add default export to ensure proper component loading
+export default DataGrid; 

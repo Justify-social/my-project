@@ -7,3 +7,7 @@
 
 export { default as FormField } from './FormField';
 export type { FormFieldProps } from './FormField'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

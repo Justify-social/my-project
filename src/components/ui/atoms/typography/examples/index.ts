@@ -5,3 +5,6 @@
  */
 
 export { default as TypographyExamples } from './TypographyExamples'; 
+import TypographyExamples from './TypographyExamples';
+
+export default TypographyExamples;

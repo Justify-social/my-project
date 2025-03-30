@@ -7,3 +7,7 @@
 // Export Alert component
 export * from './Alert';
 export { default as Alert } from './Alert'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

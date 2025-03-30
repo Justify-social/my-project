@@ -22,3 +22,6 @@ export type {
   MetricCardProps,
   CardVariant
 } from './Card'; 
+import Card from './Card';
+
+export default Card;

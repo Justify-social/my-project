@@ -19,18 +19,26 @@ import { ComponentMetadata, PropDefinition } from '../db/registry';
 // Check if we're in a browser or server environment
 const isServer = typeof window === 'undefined';
 
-// Dynamically import modules based on environment
+// Import modules based on environment
 let fs: any;
 let path: any;
 
-if (isServer) {
+if (typeof window === 'undefined') {
   // Server-side imports
-  import('fs').then((module) => { fs = module.default || module; });
-  import('path').then((module) => { path = module.default || module; });
+  try {
+    fs = require('fs');
+    path = require('path');
+  } catch (error) {
+    console.error('Error importing Node.js modules:', error);
+  }
 } else {
-  // Browser-side imports with mocks
-  fs = require('../utils/fs-browser').default;
-  path = require('../utils/path-browser-mock').default;
+  // Browser-side imports
+  try {
+    fs = require('../utils/fs-browser-compatibility').default;
+    path = require('../utils/path-browser-compatibility').default;
+  } catch (error) {
+    console.error('Error importing browser compatibility modules:', error);
+  }
 }
 
 /**

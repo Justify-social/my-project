@@ -23,8 +23,11 @@ import {
   TextSkeleton, 
   AvatarSkeleton, 
   CardSkeleton,
-  TableRowSkeleton 
-} from '@/components/ui/molecules/skeleton';
+  TableSkeleton 
+} from '@/components/ui/skeleton';
+
+// This alias will work because it's properly configured in next.config.js
+// to point to src/components/ui/molecules/skeleton
 
 function SkeletonExample() {
   return (
@@ -65,6 +68,23 @@ function SkeletonExample() {
   );
 }
 ```
+
+## Path Aliasing
+
+The skeleton components can be imported through a centralized alias:
+
+```tsx
+// ✅ Recommended way - Using the path alias
+import { TableSkeleton } from '@/components/ui/skeleton';
+
+// ❌ Avoid direct imports - These are prone to breaking if internal structure changes
+// import { TableSkeleton } from '@/components/ui/molecules/skeleton';
+// import { TableSkeleton } from '@/components/ui/atoms/skeleton'; 
+```
+
+This is achieved through path aliases configured in:
+- `next.config.js` - For webpack and server-side imports
+- `tsconfig.json` - For TypeScript resolution
 
 ## Base Skeleton Props
 

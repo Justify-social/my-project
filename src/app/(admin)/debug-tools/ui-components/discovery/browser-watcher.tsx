@@ -9,44 +9,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/atoms/button/Button';
-import { Card } from '@/components/ui/atoms/card/Card';
-import path from '../utils/path-browser-mock';
+import { Button } from '@/components/ui/atoms/button/Button'
+import { Card } from '@/components/ui/organisms/Card/Card'
+import { browserComponentApi } from '../api/component-api-browser';
+import type { ComponentMetadata } from '../db/registry';
 
 interface BrowserWatcherProps {
   onComponentFound?: (componentPath: string) => void;
 }
-
-/**
- * Mock component database for browser simulation
- */
-const MOCK_COMPONENTS = [
-  {
-    path: '/src/components/ui/atoms/button/Button.tsx',
-    name: 'Button',
-    category: 'atom'
-  },
-  {
-    path: '/src/components/ui/atoms/input/Input.tsx',
-    name: 'Input',
-    category: 'atom'
-  },
-  {
-    path: '/src/components/ui/molecules/card/Card.tsx',
-    name: 'Card',
-    category: 'molecule'
-  },
-  {
-    path: '/src/components/ui/molecules/select/Select.tsx',
-    name: 'Select',
-    category: 'molecule'
-  },
-  {
-    path: '/src/components/ui/organisms/calendar/Calendar.tsx',
-    name: 'Calendar',
-    category: 'organism'
-  }
-];
 
 /**
  * BrowserFileWatcher provides a UI for simulating file watching in browser environments
@@ -54,7 +24,7 @@ const MOCK_COMPONENTS = [
 export function BrowserFileWatcher({ onComponentFound }: BrowserWatcherProps) {
   const [mockActivityLog, setMockActivityLog] = useState<string[]>([]);
   const [isWatching, setIsWatching] = useState(false);
-  const [discoveredComponents, setDiscoveredComponents] = useState<typeof MOCK_COMPONENTS>([]);
+  const [discoveredComponents, setDiscoveredComponents] = useState<ComponentMetadata[]>([]);
   
   // Simulate initial file discovery
   useEffect(() => {
@@ -62,31 +32,42 @@ export function BrowserFileWatcher({ onComponentFound }: BrowserWatcherProps) {
       const startTime = Date.now();
       setMockActivityLog(prev => [...prev, 'Starting component discovery...']);
       
-      // Simulate async discovery of components with delays
+      // Fetch components from the registry API
       const discoverComponents = async () => {
-        for (let i = 0; i < MOCK_COMPONENTS.length; i++) {
-          // Simulate varying processing times
-          const delay = 200 + Math.random() * 500;
-          await new Promise(resolve => setTimeout(resolve, delay));
+        try {
+          const components = await browserComponentApi.getComponents();
           
-          const component = MOCK_COMPONENTS[i];
+          // Process components with simulated delays for UI feedback
+          for (let i = 0; i < components.length; i++) {
+            // Simulate varying processing times
+            const delay = 200 + Math.random() * 500;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            
+            const component = components[i];
+            setMockActivityLog(prev => [
+              ...prev, 
+              `Discovered component: ${component.name} (${component.category}) at ${component.path}`
+            ]);
+            
+            setDiscoveredComponents(prev => [...prev, component]);
+            
+            if (onComponentFound) {
+              onComponentFound(component.path);
+            }
+          }
+          
+          const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
           setMockActivityLog(prev => [
             ...prev, 
-            `Discovered component: ${component.name} (${component.category}) at ${component.path}`
+            `Component discovery completed in ${totalTime}s. Found ${components.length} components.`
           ]);
-          
-          setDiscoveredComponents(prev => [...prev, component]);
-          
-          if (onComponentFound) {
-            onComponentFound(component.path);
-          }
+        } catch (error) {
+          console.error('Error fetching components:', error);
+          setMockActivityLog(prev => [
+            ...prev,
+            `Error discovering components: ${error instanceof Error ? error.message : String(error)}`
+          ]);
         }
-        
-        const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-        setMockActivityLog(prev => [
-          ...prev, 
-          `Component discovery completed in ${totalTime}s. Found ${MOCK_COMPONENTS.length} components.`
-        ]);
       };
       
       discoverComponents();
@@ -131,10 +112,27 @@ export function BrowserFileWatcher({ onComponentFound }: BrowserWatcherProps) {
   const addMockComponent = () => {
     const timestamp = Date.now();
     const mockPath = `/src/components/ui/atoms/mock/MockComponent${timestamp}.tsx`;
-    const mockComponent = {
+    const currentDate = new Date();
+    const mockComponent: ComponentMetadata = {
       path: mockPath,
       name: `MockComponent${timestamp}`,
-      category: 'atom'
+      category: 'atom',
+      description: 'Auto-generated component for testing',
+      examples: [],
+      props: [],
+      dependencies: [],
+      lastUpdated: currentDate,
+      exports: ['default'],
+      version: '1.0.0',
+      changeHistory: [
+        {
+          version: '1.0.0',
+          date: currentDate,
+          author: 'System',
+          description: 'Component created through UI',
+          isBreaking: false
+        }
+      ]
     };
     
     setMockActivityLog(prev => [
@@ -151,19 +149,32 @@ export function BrowserFileWatcher({ onComponentFound }: BrowserWatcherProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-4">
-        <Button 
-          onClick={toggleWatching}
-          variant={isWatching ? "destructive" : "default"}
-        >
-          {isWatching ? 'Stop Watching' : 'Start Watching'}
-        </Button>
-        
-        {isWatching && (
-          <Button onClick={addMockComponent}>
-            Simulate New Component
+      <div className="flex flex-col space-y-2">
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
+          <p className="text-blue-700 text-sm flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <span>
+              <strong>Autoloading Enabled:</strong> Components are now automatically loaded on page initialization. 
+              The manual discovery below is still available for testing.
+            </span>
+          </p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Button 
+            onClick={toggleWatching}
+            variant={isWatching ? "destructive" : "default"}
+          >
+            {isWatching ? 'Stop Watching' : 'Start Watching'}
           </Button>
-        )}
+          
+          {isWatching && (
+            <Button onClick={addMockComponent}>
+              Simulate New Component
+            </Button>
+          )}
+        </div>
       </div>
       
       <Card className="p-4">

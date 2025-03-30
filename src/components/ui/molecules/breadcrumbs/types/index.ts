@@ -92,3 +92,7 @@ export interface BreadcrumbsProps {
    */
   separatorClassName?: string;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

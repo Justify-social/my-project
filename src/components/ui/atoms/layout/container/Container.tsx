@@ -76,3 +76,7 @@ export function Container({
     </div>
   );
 } 
+/**
+ * Default export for Container
+ */
+export default Container;

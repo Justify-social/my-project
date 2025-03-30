@@ -3,7 +3,7 @@
 import { createContext, useState, useContext, useCallback, ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 // Types for Toast functionality
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -401,3 +401,14 @@ export function useToast() {
 
   return context;
 }
+/**
+ * Toast - Combined component exporting all subcomponents
+ * 
+ * This component is the default export to ensure compatibility with dynamic imports.
+ */
+const Toast = {
+  ToastProvider,
+  useToast
+};
+
+export default Toast;

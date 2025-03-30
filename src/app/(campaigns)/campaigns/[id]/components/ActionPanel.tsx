@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import Icon from '@/components/ui/atoms/icons/Icon';
+import { Icon } from '@/components/ui/atoms/icons/Icon'
 
 const ActionPanel = ({ campaignId }) => {
   const router = useRouter();

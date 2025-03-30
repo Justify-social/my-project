@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useSidebar } from "@/providers/SidebarProvider";
-import { MobileMenu } from "@/components/ui/organisms/navigation/mobile-menu";
+import { MobileMenu } from '@/components/ui/organisms/navigation/mobile-menu/MobileMenu'
 import { navItems, settingsNavItem } from "@/components/ui/organisms/navigation/config";
 import { SearchBar } from "@/components/ui/molecules/search-bar";
 

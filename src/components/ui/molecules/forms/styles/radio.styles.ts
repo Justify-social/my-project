@@ -77,3 +77,6 @@ export function getRadioGroupClasses({
     className
   );
 } 
+
+// Default export added by auto-fix script
+export default {};

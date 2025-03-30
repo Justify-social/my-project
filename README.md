@@ -88,4 +88,69 @@ npm run format
 npm run test
 ```
 
-For more specific commands, see the scripts section in `package.json`. 
+For more specific commands, see the scripts section in `package.json`.
+
+# UI Component Library
+
+This is a comprehensive UI component library designed for building modern, accessible, and consistent web applications.
+
+## Available Components
+
+The library includes the following components:
+
+- **Accordion**: Expandable content sections
+- **Alert**: Contextual feedback messages
+- **Badge**: Small count and labeling component
+- **Button**: Interactive button with various styles
+- **Card**: Container for content and actions
+- **Input**: Text input fields
+- **Label**: Form labels with consistent styling
+- **Scroll Area**: Custom scrollable area
+- **Select**: Dropdown selection menu
+- **Slider**: Range slider control
+- **Spinner**: Loading indicator
+- **Switch**: Toggle control
+- **Table**: Data table with various features
+- **Tabs**: Tabbed interface for content organization
+
+## Getting Started
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
+
+```bash
+npm run dev
+```
+
+Visit `http://localhost:3000` to see the component library in action.
+
+## Key Features
+
+- **Accessibility**: All components follow WAI-ARIA standards
+- **Customization**: Extensive theming support
+- **Responsive**: Mobile-friendly components
+- **Typescript**: Full type definitions included
+- **Server Components**: Compatible with Next.js app router
+- **Documentation**: Comprehensive usage examples
+
+## Browser Compatibility
+
+This library is compatible with all modern browsers:
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## Implementation Notes
+
+See the [Implementation Notes](./docs/implementation-notes.md) for details on the technical implementation and browser compatibility solutions.
+
+## License
+
+MIT 

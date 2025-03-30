@@ -15,3 +15,4 @@ export * from './styles/modal.styles';
 // Export the main component
 export { ModalDialog } from './Modal';
 export { default } from './Modal'; 
+export default Modal;

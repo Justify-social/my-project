@@ -16,3 +16,7 @@ export {
   type ToastPosition,
   type ToastOptions 
 } from './Toast'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

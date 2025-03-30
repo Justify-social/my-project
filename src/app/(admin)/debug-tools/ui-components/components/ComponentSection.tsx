@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card } from '@/components/ui/organisms/Card/Card'
+import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
+import { Badge } from '@/components/ui/molecules/feedback/Badge'
+import { Table } from '@/components/ui/organisms/data-display/table/Table'
 import { Code, Info, Play, Code2 } from 'lucide-react';
-import { ComponentMetadata } from '../db/registry';
+import { ComponentMetadata } from '../types';
 import ComponentResolver from './ComponentResolver';
 
 /**

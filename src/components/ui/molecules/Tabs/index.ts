@@ -1,7 +1,15 @@
-/**
- * @deprecated This file is deprecated. Import from '@/components/ui/atoms/navigation/tabs' instead.
- * Tabs Component for organizing content into selectable sections.
- */
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent
+} from './tabs';
 
-// Export from the new location
-export * from '../../atoms/tabs'; 
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent
+};
+
+export default Tabs;

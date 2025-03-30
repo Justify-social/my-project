@@ -3,7 +3,7 @@
 import React from "react";
 import { useSidebar } from "@/providers/SidebarProvider";
 import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 
 export interface ProgressBarProps {
   currentStep: number;

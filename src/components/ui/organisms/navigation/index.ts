@@ -24,3 +24,7 @@ export * from '../stepper/types';
 export * from '../../molecules/breadcrumbs/types';
 export * from '../../molecules/pagination/types';
 export * from '../../molecules/command-menu/types'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

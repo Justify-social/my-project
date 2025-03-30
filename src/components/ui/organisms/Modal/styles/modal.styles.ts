@@ -109,3 +109,6 @@ export function getModalAnimationProps() {
     }
   };
 } 
+
+// Default export added by auto-fix script
+export default {};

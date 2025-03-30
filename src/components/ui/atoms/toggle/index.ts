@@ -1,14 +1,5 @@
-/**
- * Toggle Component Library
- * 
- * This file exports all Toggle-related components and types.
- * 
- * Usage:
- * import { Toggle, ToggleProps } from '@/components/ui/atoms/toggle';
- */
+export * from './switch';
 
-// Export type definitions
-export * from './types';
+import Toggle from './Toggle';
 
-// Export main component
-export { default as Toggle } from './Toggle'; 
+export default Toggle;

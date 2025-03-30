@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { cn } from '@/utils/string/utils';
 import { BaseMobileMenuProps, MobileMenuProps } from './types';
 import { SidebarItem } from '../sidebar/types';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import Image from 'next/image';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import { NavItem } from '../config';

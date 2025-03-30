@@ -55,3 +55,7 @@ export interface ToggleProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
    */
   id: string;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

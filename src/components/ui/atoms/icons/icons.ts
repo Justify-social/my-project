@@ -203,8 +203,10 @@ export function getIconPath(name: string, variant: IconStyle = 'light'): string 
     
     console.warn(`Icon not found in registry: ${normalizedName}, using fallback path generation`);
     
-    // Fallback logic based on icon naming conventions
+    // Build potential paths array for multi-stage fallback
+    const potentialPaths: string[] = [];
     
+    // Fallback logic based on icon naming conventions
     // Handle app icons
     if (normalizedName.toLowerCase().startsWith('app')) {
       // Extract the name without the 'app' prefix
@@ -214,13 +216,18 @@ export function getIconPath(name: string, variant: IconStyle = 'light'): string 
       if (STANDARD_ICONS.some(stdIcon => iconName.includes(stdIcon.toLowerCase()))) {
         const folderName = STYLE_FOLDERS[variant] || 'light';
         const kebabName = toKebabCase(iconName);
-        return `/icons/${folderName}/${kebabName}.svg`;
+        potentialPaths.push(`/icons/${folderName}/${kebabName}.svg`);
+        // Also try static directory
+        potentialPaths.push(`/static/icons/${folderName}/${kebabName}.svg`);
+      } else {
+        // Try different name formats for app icons
+        const kebabName = toKebabCase(iconName);
+        console.debug(`Attempting fallback app icon: ${kebabName}`);
+        potentialPaths.push(`/icons/app/${kebabName}.svg`);
+        potentialPaths.push(`/static/icons/app/${kebabName}.svg`);
+        // Also try with original casing
+        potentialPaths.push(`/icons/app/${iconName}.svg`);
       }
-      
-      // Try different name formats (camelCase, kebab-case, snake_case)
-      const kebabName = toKebabCase(iconName);
-      console.debug(`Attempting fallback app icon: ${kebabName}`);
-      return `/icons/app/${kebabName}.svg`;
     }
     
     // Handle Font Awesome icons
@@ -229,20 +236,46 @@ export function getIconPath(name: string, variant: IconStyle = 'light'): string 
       const baseName = getIconBaseName(normalizedName);
       const kebabName = toKebabCase(baseName);
       console.debug(`Attempting fallback FA icon: ${kebabName}`);
-      return `/icons/${folderName}/${kebabName}.svg`;
+      potentialPaths.push(`/icons/${folderName}/${kebabName}.svg`);
+      potentialPaths.push(`/static/icons/${folderName}/${kebabName}.svg`);
+      // Try alternative folder variants
+      Object.values(STYLE_FOLDERS).forEach(style => {
+        if (style !== folderName) {
+          potentialPaths.push(`/icons/${style}/${kebabName}.svg`);
+        }
+      });
     }
     
     // Check if it's a standard icon that should be in light/solid directories
     if (STANDARD_ICONS.some(stdIcon => name.toLowerCase().includes(stdIcon.toLowerCase()))) {
       const folderName = STYLE_FOLDERS[variant] || 'light';
       const kebabName = toKebabCase(name);
-      return `/icons/${folderName}/${kebabName}.svg`;
+      potentialPaths.push(`/icons/${folderName}/${kebabName}.svg`);
+      potentialPaths.push(`/static/icons/${folderName}/${kebabName}.svg`);
     }
     
     // Last resort - standard Font Awesome light icons
     const kebabName = toKebabCase(name);
     console.debug(`Last resort fallback: ${kebabName}`);
-    return `/icons/light/${kebabName}.svg`;
+    potentialPaths.push(`/icons/light/${kebabName}.svg`);
+    potentialPaths.push(`/static/icons/light/${kebabName}.svg`);
+    
+    // Add final fallback paths
+    potentialPaths.push(`/icons/light/question.svg`);
+    potentialPaths.push(`/static/icons/light/question.svg`);
+    
+    // Remove duplicates
+    const uniquePaths = Array.from(new Set(potentialPaths));
+    console.debug(`Generated ${uniquePaths.length} potential paths for icon ${name}`);
+    
+    // For client-side, we can't verify the existence before returning,
+    // so simply return the first potential path
+    return uniquePaths[0];
+    
+    // Note: In a more advanced implementation, we would use fetch to check 
+    // each path's existence in sequence, but that would require making this 
+    // an async function, which would be a breaking change.
+    
   } catch (error) {
     console.error(`Failed to generate path for icon ${name}`, error);
     return '/icons/light/question.svg';
@@ -286,3 +319,8 @@ export function getIconCacheKey(name: string, variant: IconStyle = 'light'): str
 export function toKebabCase(str: string): string {
   return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
+
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

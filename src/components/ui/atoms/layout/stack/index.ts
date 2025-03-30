@@ -12,3 +12,6 @@ export {
   type StackAlignment,
   type StackDistribution
 } from './Stack'; 
+import Stack from './Stack';
+
+export default Stack;

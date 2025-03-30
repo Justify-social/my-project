@@ -1,8 +1,8 @@
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 export interface SelectOption {
   /**
@@ -139,5 +139,165 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
 });
 
 Select.displayName = 'Select';
+
+// Enhanced contextual select components
+// These components provide a more customizable select experience
+
+/**
+ * ComposableSelect component - Container for custom select UI
+ * To be used with SelectTrigger, SelectValue, SelectContent, and SelectItem
+ */
+export interface ComposableSelectProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * The current value of the select
+   */
+  value?: string;
+  
+  /**
+   * Default value if no value is provided
+   */
+  defaultValue?: string;
+  
+  /**
+   * Callback when value changes
+   */
+  onValueChange?: (value: string) => void;
+}
+
+export const ComposableSelect = forwardRef<HTMLDivElement, ComposableSelectProps>(
+  ({ children, className, defaultValue, value, onValueChange, ...props }, ref) => {
+    const [selectedValue, setSelectedValue] = useState(value || defaultValue || '');
+
+    const handleValueChange = (newValue: string) => {
+      setSelectedValue(newValue);
+      onValueChange?.(newValue);
+    };
+
+    return (
+      <div ref={ref} className={cn('relative', className)} {...props}>
+        {React.Children.map(children, (child) => {
+          if (!React.isValidElement(child)) return child;
+          
+          return React.cloneElement(child, {
+            value: selectedValue,
+            onValueChange: handleValueChange,
+          } as React.HTMLAttributes<HTMLElement>);
+        })}
+      </div>
+    );
+  }
+);
+
+ComposableSelect.displayName = 'ComposableSelect';
+
+/**
+ * SelectTrigger component - Button that opens the select dropdown
+ */
+export interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  value?: string;
+}
+
+export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <button 
+        ref={ref} 
+        className={cn(
+          'flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
+          'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50',
+          className
+        )} 
+        type="button"
+        {...props}
+      >
+        {children}
+        <Icon 
+          name="faChevronDown" 
+          className="ml-2 h-4 w-4 opacity-70" 
+          aria-hidden="true" 
+          solid={false} 
+        />
+      </button>
+    );
+  }
+);
+
+SelectTrigger.displayName = 'SelectTrigger';
+
+/**
+ * SelectValue component - Displays the selected value
+ */
+export interface SelectValueProps extends React.HTMLAttributes<HTMLSpanElement> {
+  placeholder?: string;
+}
+
+export const SelectValue = forwardRef<HTMLSpanElement, SelectValueProps>(
+  ({ children, placeholder, className, ...props }, ref) => {
+    return (
+      <span ref={ref} className={cn('block truncate', className)} {...props}>
+        {children || placeholder || 'Select an option'}
+      </span>
+    );
+  }
+);
+
+SelectValue.displayName = 'SelectValue';
+
+/**
+ * SelectContent component - Container for select options
+ */
+export interface SelectContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <div 
+        ref={ref} 
+        className={cn(
+          'absolute z-50 mt-1 max-h-60 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 shadow-md',
+          className
+        )} 
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+SelectContent.displayName = 'SelectContent';
+
+/**
+ * SelectItem component - Individual select option
+ */
+export interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string;
+  onSelect?: (value: string) => void;
+}
+
+export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
+  ({ children, className, value, onSelect, onValueChange, ...props }, ref) => {
+    const handleClick = () => {
+      if (onSelect) onSelect(value);
+      if (onValueChange) (onValueChange as any)(value);
+    };
+
+    return (
+      <div 
+        ref={ref} 
+        className={cn(
+          'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-gray-100',
+          className
+        )} 
+        onClick={handleClick}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+SelectItem.displayName = 'SelectItem';
 
 export default Select; 

@@ -12,3 +12,4 @@ export * from './types';
 
 // Export main component
 export { default as Divider } from './Divider'; 
+export default Divider;

@@ -21,18 +21,25 @@ let componentMetadataExtractor: any;
 // Check if we're in a browser or server environment
 const isServer = typeof window === 'undefined';
 
+// Use Node.js modules if in Node environment, otherwise use browser-compatible versions
+if (typeof window === 'undefined') {
+  // Node.js environment
+  fs = require('fs');
+  path = require('path');
+} else {
+  // Browser environment
+  path = require('../utils/path-browser-compatibility').default;
+  fs = require('../utils/fs-browser-compatibility').default;
+}
+
 // Dynamically import modules based on environment
 if (isServer) {
   // Server-side imports
   import('chokidar').then((module) => { chokidar = module.default || module; });
-  import('path').then((module) => { path = module.default || module; });
-  import('fs').then((module) => { fs = module.default || module; });
   import('../db/registry-db').then((module) => { componentRegistryDB = module.componentRegistryDB; });
   import('./metadata-extractor').then((module) => { componentMetadataExtractor = module.componentMetadataExtractor; });
 } else {
   // Browser-side imports with mocks
-  path = require('../utils/path-browser-mock').default;
-  fs = require('../utils/fs-browser').default;
   componentRegistryDB = { upsertComponent: () => console.warn('componentRegistryDB mock called') };
   componentMetadataExtractor = { extractFromFile: () => Promise.resolve(null) };
   // Note: chokidar is not imported in browser - will be null

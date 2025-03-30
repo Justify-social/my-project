@@ -19,3 +19,7 @@ export type {
   CustomTabPanelsProps,
   CustomTabPanelProps
 } from './CustomTabs'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

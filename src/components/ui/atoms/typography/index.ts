@@ -19,3 +19,7 @@ export { default as Code } from './Code';
 
 // Export for backwards compatibility
 export * from './Typography';
+
+import Typography from './Typography';
+
+export default Typography;

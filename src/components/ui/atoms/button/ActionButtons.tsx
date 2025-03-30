@@ -98,4 +98,90 @@ export const DeleteButton = forwardRef<HTMLButtonElement, ActionButtonProps>(
   }
 );
 
-DeleteButton.displayName = 'DeleteButton'; 
+DeleteButton.displayName = 'DeleteButton';
+
+/**
+ * ActionButtons - Combined component providing all action buttons
+ * 
+ * This component is the default export to resolve import issues with dynamic component loading.
+ */
+export interface ActionButtonsProps {
+  /**
+   * Show edit button
+   */
+  showEdit?: boolean;
+  
+  /**
+   * Show view button
+   */
+  showView?: boolean;
+  
+  /**
+   * Show copy button
+   */
+  showCopy?: boolean;
+  
+  /**
+   * Show delete button
+   */
+  showDelete?: boolean;
+  
+  /**
+   * Callback when edit button is clicked
+   */
+  onEdit?: () => void;
+  
+  /**
+   * Callback when view button is clicked
+   */
+  onView?: () => void;
+  
+  /**
+   * Callback when copy button is clicked
+   */
+  onCopy?: () => void;
+  
+  /**
+   * Callback when delete button is clicked
+   */
+  onDelete?: () => void;
+  
+  /**
+   * Additional class name for the container
+   */
+  className?: string;
+}
+
+/**
+ * ActionButtons component that combines all action buttons into a single component
+ */
+const ActionButtons: React.FC<ActionButtonsProps> = ({
+  showEdit = true,
+  showView = true,
+  showCopy = false,
+  showDelete = true,
+  onEdit,
+  onView,
+  onCopy,
+  onDelete,
+  className
+}) => {
+  return (
+    <div className={cn('flex items-center gap-1', className)}>
+      {showView && (
+        <ViewButton onClick={onView} />
+      )}
+      {showEdit && (
+        <EditButton onClick={onEdit} />
+      )}
+      {showCopy && (
+        <CopyButton onClick={onCopy} />
+      )}
+      {showDelete && (
+        <DeleteButton onClick={onDelete} />
+      )}
+    </div>
+  );
+};
+
+export default ActionButtons; 

@@ -306,3 +306,15 @@ export const Paragraph = ({
     </p>);
 
 };
+/**
+ * Typography - Combined component exporting all subcomponents
+ * 
+ * This component is the default export to ensure compatibility with dynamic imports.
+ */
+const Typography = {
+  Heading,
+  Text,
+  Paragraph
+};
+
+export default Typography;

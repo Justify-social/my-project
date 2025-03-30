@@ -57,3 +57,9 @@ export const getButtonClasses = ({
     className
   );
 };
+
+
+// Default export added by auto-fix script
+export default {
+  getButtonClasses,
+};

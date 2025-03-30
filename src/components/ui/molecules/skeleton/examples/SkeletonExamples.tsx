@@ -1,10 +1,4 @@
 import React from 'react';
-import FormSkeleton from './loading-skeleton/index';
-import CampaignDetailSkeleton from './loading-skeleton/index';
-import DashboardSkeleton from './loading-skeleton/index';
-import AuthSkeleton from './loading-skeleton/index';
-import LoadingSpinner from './spinner-examples';
-import Component from '../../app/(admin)/debug-tools/ui-components/layout';
 import {
   WizardSkeleton,
   FormFieldSkeleton,
@@ -13,8 +7,9 @@ import {
   AuthSkeleton,
   SkeletonSection,
   DashboardSkeleton,
-  CampaignDetailSkeleton } from
-'@/components/ui/loading-skeleton';
+  CampaignDetailSkeleton 
+} from '@/components/ui/molecules/skeleton';
+import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 
 export function LoadingSkeletonExamples() {
   return (
@@ -163,7 +158,8 @@ if (loading) {
           <div className="pt-2 font-work-sans">
             <p className="text-sm font-medium font-work-sans">For complete customization:</p>
             <pre className="bg-gray-100 p-3 rounded text-xs overflow-x-auto font-work-sans">
-              {`import { WizardSkeleton, SkeletonSection, FormFieldSkeleton } from '@/components/ui/loading-skeleton';
+              import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'
+import { FormFieldSkeleton } from '@/components/ui/molecules/skeleton/FormFieldSkeleton'
 
 <WizardSkeleton
   step={3}
@@ -186,3 +182,13 @@ if (loading) {
     </div>);
 
 }
+/**
+ * SkeletonExamples - Combined component exporting all subcomponents
+ * 
+ * This component is the default export to ensure compatibility with dynamic imports.
+ */
+const SkeletonExamples = {
+  LoadingSkeletonExamples
+};
+
+export default SkeletonExamples;

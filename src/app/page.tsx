@@ -5,7 +5,7 @@ import SVGSVGElement from '../components/ui/icons/variants/IconVariants';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 export default function Home() {
   const router = useRouter();
   const {

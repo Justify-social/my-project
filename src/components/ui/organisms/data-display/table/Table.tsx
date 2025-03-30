@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 
 // Types
 export type SortDirection = 'asc' | 'desc' | undefined;
@@ -647,6 +647,9 @@ export const Table = <T extends Record<string, unknown>>({
     </div>
   );
 };
+
+// Add default export to ensure proper component loading
+export default Table;
 
 export interface TableCellProps {
   children: React.ReactNode;

@@ -18,3 +18,7 @@ export * from './divider';
 
 // Export Spacer components
 export * from './spacer'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

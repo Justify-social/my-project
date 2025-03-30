@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import Header from "./Header";
-import { Sidebar } from "@/components/ui/organisms/navigation/sidebar";
+import { Header } from '@/components/ui/organisms/navigation/header/Header';
+import { Sidebar } from '@/components/ui/organisms/navigation/sidebar/Sidebar'
 import { SidebarProvider, useSidebar } from "@/providers/SidebarProvider";
 import { SearchProvider } from '@/contexts/SearchContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { LoadingSpinner as AuthSpinner } from '@/components/ui';
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 import Link from "next/link";
 import Image from "next/image";
 
@@ -110,81 +110,11 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       ]
     },
     { 
-      id: 'brand-lift', 
-      label: 'Brand Lift', 
-      href: '/brand-lift', 
-      icon: 'appBrand_Lift',
-      isActive: pathname.startsWith('/brand-lift'),
-      children: [
-        {
-          id: 'brand-lift-list',
-          label: 'List',
-          href: '/brand-lift/list',
-          isActive: pathname === '/brand-lift/list' || pathname === '/brand-lift'
-        },
-        {
-          id: 'brand-lift-reports',
-          label: 'Reports',
-          href: '/brand-lift/reports',
-          isActive: pathname.startsWith('/brand-lift/reports')
-        }
-      ]
-    },
-    { 
       id: 'brand-health', 
       label: 'Brand Health', 
       href: '/brand-health', 
       icon: 'appBrand_Health',
       isActive: pathname.startsWith('/brand-health')
-    },
-    { 
-      id: 'influencers', 
-      label: 'Influencers', 
-      href: '/influencers', 
-      icon: 'appInfluencers',
-      isActive: pathname.startsWith('/influencers'),
-      children: [
-        {
-          id: 'influencers-marketplace',
-          label: 'Marketplace',
-          href: '/influencers/marketplace',
-          isActive: pathname.startsWith('/influencers/marketplace')
-        },
-        {
-          id: 'influencers-list',
-          label: 'List',
-          href: '/influencers',
-          isActive: pathname === '/influencers'
-        }
-      ]
-    },
-    { 
-      id: 'mmm', 
-      label: 'MMM', 
-      href: '/mmm', 
-      icon: 'appMMM',
-      isActive: pathname.startsWith('/mmm')
-    },
-    { 
-      id: 'reports', 
-      label: 'Reports', 
-      href: '/reports', 
-      icon: 'appReports',
-      isActive: pathname.startsWith('/reports')
-    },
-    { 
-      id: 'billing', 
-      label: 'Billing', 
-      href: '/billing', 
-      icon: 'appBilling',
-      isActive: pathname.startsWith('/billing')
-    },
-    { 
-      id: 'help', 
-      label: 'Help', 
-      href: '/help', 
-      icon: 'appHelp',
-      isActive: pathname.startsWith('/help')
     }
   ];
 

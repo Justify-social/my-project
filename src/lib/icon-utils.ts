@@ -9,7 +9,7 @@
  */
 
 import { IconStyle } from '@/components/ui/atoms/icons/types';
-import { normalizeIconName } from '@/components/ui/atoms/icons';
+import { normalizeIconName } from '@/components/ui/atoms/icons'
 
 // Cache for loaded SVG content
 const svgCache: Record<string, string> = {};
@@ -47,11 +47,8 @@ export const APP_ICONS = {
   navigation: {
     home: 'appHome',
     dashboard: 'appDashboard',
-    reports: 'appReports',
     settings: 'appSettings',
-    campaigns: 'appCampaigns',
-    help: 'appHelp',
-    billing: 'appBilling'
+    campaigns: 'appCampaigns'
   },
   // Action icons
   actions: {

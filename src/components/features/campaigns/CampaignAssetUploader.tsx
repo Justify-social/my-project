@@ -8,8 +8,8 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
-import { Icon } from '@/components/ui/atoms/icons';
-import { Spinner } from "@/components/ui/spinner";
+import { Icon } from '@/components/ui/atoms/icons'
+import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 import { generateCorrelationId, sanitizeFileName, logAndShowError, enhancedFileTypeDetection, extractAssetUrl } from "@/utils/file-utils";
 export interface UploadedAsset {
   id: string;

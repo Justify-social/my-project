@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { cn } from '@/utils/string/utils';
-import { Input } from '@/components/ui/atoms/input';
-import { Icon } from '@/components/ui/atoms/icons';
-import { FormField, FormFieldProps } from '@/components/ui/molecules/form-field';
+import { Input } from '@/components/ui/atoms/input/Input'
+import { Icon } from '@/components/ui/atoms/icons'
+import { FormField } from '@/components/ui/molecules/form-field/FormField'
 
 /**
  * FormStyleReset Component
@@ -84,7 +84,7 @@ export const FormStyleReset: React.FC = () => {
  * @deprecated This component has been moved to src/components/ui/molecules/form-field/FormField.tsx
  * Please import from '@/components/ui/molecules/form-field' instead.
  */
-export { FormField, type FormFieldProps };
+export { FormField };
 
 /**
  * Form Field Subcomponents
@@ -206,10 +206,12 @@ const FormFieldCompound = {
   ErrorMessage: FormFieldErrorMessage
 };
 
-// Export both the single component and compound components
-FormField.Root = FormFieldCompound.Root;
-FormField.Label = FormFieldCompound.Label;
-FormField.HelperText = FormFieldCompound.HelperText;
-FormField.ErrorMessage = FormFieldCompound.ErrorMessage;
+// Export the compound components separately to avoid the error
+export const UIFormField = {
+  Root: FormFieldCompound.Root,
+  Label: FormFieldCompound.Label,
+  HelperText: FormFieldCompound.HelperText,
+  ErrorMessage: FormFieldCompound.ErrorMessage
+};
 
 export default FormStyleReset;

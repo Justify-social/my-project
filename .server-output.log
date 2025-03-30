@@ -1,0 +1,82 @@
+
+> my-project@0.1.0 predev
+> npm run generate-ui-registry
+
+
+> my-project@0.1.0 generate-ui-registry
+> node src/app/\(admin\)/debug-tools/ui-components/registry/generate-registry.js && npm run validate:registry
+
+Generating static component registry...
+Found 33 components in src/components/ui/atoms
+Found 22 components in src/components/ui/molecules
+Found 18 components in src/components/ui/organisms
+Scanning for icons...
+Using icon-url-map.json as single source of truth for icon locations
+Successfully loaded 306 icons from icon-url-map.json
+Found 306 icons
+Static component registry generated at /Users/edadams/my-project/public/static/component-registry.json with 73 components
+Validating 306 icons before saving...
+Validation complete:
+- Valid SVG content: 306
+- Fixed SVG content: 0
+- Invalid SVG content: 0
+- Missing SVG content: 0
+- Total icons: 306
+Static icon registry generated at /Users/edadams/my-project/public/static/icon-registry.json with 306 icons
+Generating static component registry...
+Found 33 components in src/components/ui/atoms
+Found 22 components in src/components/ui/molecules
+Found 18 components in src/components/ui/organisms
+Scanning for icons...
+Using icon-url-map.json as single source of truth for icon locations
+Successfully loaded 306 icons from icon-url-map.json
+Found 306 icons
+Static component registry generated at /Users/edadams/my-project/public/static/component-registry.json with 73 components
+Validating 306 icons before saving...
+Validation complete:
+- Valid SVG content: 306
+- Fixed SVG content: 0
+- Invalid SVG content: 0
+- Missing SVG content: 0
+- Total icons: 306
+Static icon registry generated at /Users/edadams/my-project/public/static/icon-registry.json with 306 icons
+
+> my-project@0.1.0 validate:registry
+> node scripts/validate-component-registry.js
+
+Validating component registry against filesystem...
+Loaded registry with 73 components
+Loaded icon-url-map.json with 306 icon mappings
+Found 73 components in filesystem
+✅ Registry validation passed!
+
+> my-project@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+   ▲ Next.js 15.2.3
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.1.151:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+Added ComponentRegistryPlugin to webpack development build with incremental updates
+[ComponentRegistry] Starting component scan...
+[ComponentRegistry] Found 99 potential component files to analyze
+[ComponentRegistry] Error processing file /Users/edadams/my-project/src/components/ui/molecules/skeleton/examples/SkeletonExamples.tsx: Cannot read properties of undefined (reading 'buildError')
+[ComponentRegistry] Error processing file /Users/edadams/my-project/src/components/ui/atoms/spinner/examples/SpinnerExamples.tsx: Cannot read properties of undefined (reading 'buildError')
+[ComponentRegistry] Extracted metadata for 168 components
+[ComponentRegistry] Watching for component changes in: /Users/edadams/my-project/src/components/ui
+(node:73445) [DEP_WEBPACK_COMPILATION_ASSETS] DeprecationWarning: Compilation.assets will be frozen in future, all modifications are deprecated.
+BREAKING CHANGE: No more changes should happen to Compilation.assets after sealing the Compilation.
+	Do changes to assets earlier, e. g. in Compilation.hooks.processAssets.
+	Make sure to select an appropriate stage from Compilation.PROCESS_ASSETS_STAGE_*.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[ComponentRegistry] Registry complete: 168 components
+[ComponentRegistry] Starting component scan...
+[ComponentRegistry] Found 99 potential component files to analyze
+[ComponentRegistry] Error processing file /Users/edadams/my-project/src/components/ui/molecules/skeleton/examples/SkeletonExamples.tsx: Cannot read properties of undefined (reading 'buildError')
+[ComponentRegistry] Error processing file /Users/edadams/my-project/src/components/ui/atoms/spinner/examples/SpinnerExamples.tsx: Cannot read properties of undefined (reading 'buildError')
+[ComponentRegistry] Extracted metadata for 0 components
+[ComponentRegistry] Registry complete: 0 components
+ ✓ Ready in 2.6s

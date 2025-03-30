@@ -1,16 +1,12 @@
 import React from 'react';
-import Spinner from './Spinner/index';
-import ButtonSpinner from './spinner/index';
-import InlineSpinner from './spinner/index';
-import DotsSpinner from './spinner/index';
 import {
   Spinner,
   AuthSpinner,
   ButtonSpinner,
   InlineSpinner,
   DotsSpinner,
-  FullscreenSpinner } from
-'@/components/ui/spinner';
+  FullscreenSpinner 
+} from '@/components/ui/atoms/spinner';
 
 export function LoadingSpinnerExamples() {
   return (
@@ -148,3 +144,13 @@ return <FullscreenSpinner label="Processing..." />;`}
     </div>);
 
 }
+/**
+ * SpinnerExamples - Combined component exporting all subcomponents
+ * 
+ * This component is the default export to ensure compatibility with dynamic imports.
+ */
+const SpinnerExamples = {
+  LoadingSpinnerExamples
+};
+
+export default SpinnerExamples;

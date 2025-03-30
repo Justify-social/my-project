@@ -75,3 +75,6 @@ export function getChevronClasses(error: boolean): string {
     error ? 'text-red-500' : 'text-gray-500'
   );
 } 
+
+// Default export added by auto-fix script
+export default {};

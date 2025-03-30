@@ -6,11 +6,11 @@ import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { useWizard } from "@/components/features/campaigns/WizardContext";
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
-import { AssetCard } from '@/components/ui/assets';
+import { AssetCard } from '@/components/ui/organisms/AssetCard/AssetCard'
 
 // Create simple error boundary component if not available
 class ErrorBoundary extends React.Component<{children: React.ReactNode; FallbackComponent: React.ComponentType<{error: Error}>}, {hasError: boolean; error: Error | null}> {

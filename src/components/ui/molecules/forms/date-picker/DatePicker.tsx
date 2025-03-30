@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useEffect, forwardRef, useCallback } from 'react';
 import { format, isValid, parse, isDate, isAfter, isBefore, isSameDay } from 'date-fns';
-import { Icon } from '@/components/ui/atoms/icons';
-import { Calendar } from '@/components/ui/atoms/data-display/calendar';
+import { Icon } from '@/components/ui/atoms/icons'
+import { Calendar } from '@/components/ui/organisms/Calendar/Calendar'
 import { DatePickerProps, DatePickerCalendarProps, DatePickerEvent, DateFormat } from './types';
 import {
   getDatePickerContainerClasses,

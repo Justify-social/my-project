@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Spinner } from '@/components/ui/spinner';
+import { Card } from '@/components/ui/organisms/Card/Card'
+import { Button } from '@/components/ui/atoms/button/Button'
+import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
+import { Input } from '@/components/ui/atoms/input/Input'
+import { Label } from '@/components/ui/atoms/label/Label'
+import { Switch } from '@/components/ui/atoms/switch/Switch'
+import { Select } from '@/components/ui/atoms/select/Select'
+import { Badge } from '@/components/ui/molecules/feedback/Badge'
+import { Alert } from '@/components/ui/atoms/alert/Alert'
+import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 import { browserComponentApi } from '../../api/component-api-browser';
 import { cn } from '@/lib/utils';
 

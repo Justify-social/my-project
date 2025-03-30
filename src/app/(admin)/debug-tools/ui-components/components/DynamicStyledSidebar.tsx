@@ -7,7 +7,7 @@ import {
   componentApi,
   type ComponentChangeEvent
 } from './ui-components-bridge';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons/Icon'
 import { ComponentMetadata } from '../db/registry';
 
 /**

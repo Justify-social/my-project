@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { cn } from '@/utils/string/utils';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getIconPath } from '@/components/ui/atoms/icons';
+import { getIconPath } from '@/components/ui/atoms/icons'
 
 // Define sidebar item types
 export interface SidebarItem {

@@ -2,11 +2,12 @@
 // This is a redirect file for backward compatibility
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -21,7 +22,20 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/components/ui/accordion": ["./src/components/ui/molecules/accordion"],
+      "@/components/ui/alert": ["./src/components/ui/molecules/feedback/alert"],
+      "@/components/ui/badge": ["./src/components/ui/atoms/badge"],
+      "@/components/ui/button": ["./src/components/ui/atoms/button"],
+      "@/components/ui/card": ["./src/components/ui/atoms/card"],
+      "@/components/ui/input": ["./src/components/ui/atoms/input"],
+      "@/components/ui/label": ["./src/components/ui/atoms/label"],
+      "@/components/ui/scroll-area": ["./src/components/ui/molecules/scroll-area"],
+      "@/components/ui/select": ["./src/components/ui/molecules/select"],
+      "@/components/ui/slider": ["./src/components/ui/atoms/slider"],
+      "@/components/ui/spinner": ["./src/components/ui/atoms/spinner"],
+      "@/components/ui/switch": ["./src/components/ui/atoms/switch"],
+      "@/components/ui/tabs": ["./src/components/ui/molecules/tabs"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.d.ts"],

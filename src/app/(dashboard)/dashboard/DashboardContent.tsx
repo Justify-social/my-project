@@ -6,22 +6,21 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 import { TableSkeleton } from '@/components/ui/skeleton';
-import CalendarDashboard from "@/components/ui/calendar/calendar-dashboard";
-import UpcomingCampaignsCard from "@/components/ui/cards/upcoming-campaigns-card";
-import ErrorBoundary from '@/components/ui/utilities/error-boundary';
+import CalendarDashboard from "@/components/ui/organisms/Calendar/calendar-dashboard";
+import UpcomingCampaignsCard from "@/components/ui/deprecated/cards/upcoming-campaigns-card";
+import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import useSWR from 'swr';
 import Image from 'next/image';
-import { Tabs, TabList, TabPanel, TabPanels } from '@/components/ui/navigation/Tabs';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/atoms/button/Button'
 import { format } from 'date-fns';
 
 // Define IconName type locally if it's not available
 type IconName = string;
 
 // Import dynamically loaded components and ensure they are exported correctly.
-const CalendarUpcoming = dynamic(() => import("@/components/ui/calendar/CalendarUpcoming"), {
+const CalendarUpcoming = dynamic(() => import("@/components/ui/organisms/Calendar/CalendarUpcoming"), {
   ssr: false
 });
 
@@ -2221,4 +2220,8 @@ export default function DashboardContent({
 const handleEventClick = (event: any) => {
   console.log('Event clicked:', event);
   // Add your event handling logic here
+};
+
+const handleVoteChange = (id: string, value: number) => {
+  // Function implementation
 };

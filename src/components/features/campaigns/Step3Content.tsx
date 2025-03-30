@@ -12,9 +12,9 @@ import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { _LoadingSpinner } from '@/components/ui/loading-spinner';
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { toast } from "react-hot-toast";
-import { Icon } from "@/components/ui/atoms/icons";
+import { Icon } from '@/components/ui/atoms/icons'
 import { Tooltip } from '@/components/ui/tooltip';
-import Spinner from '@/components/ui/spinner';
+import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 
 // =============================================================================
 // TYPES & INTERFACES

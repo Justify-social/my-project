@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icons'
 import { cn } from '@/utils/string/utils';
 
 // Types for Card variants

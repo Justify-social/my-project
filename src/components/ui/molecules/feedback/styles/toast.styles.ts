@@ -126,3 +126,6 @@ export function getToastAnimationProps(position: ToastPosition): {
     }
   };
 } 
+
+// Default export added by auto-fix script
+export default {};

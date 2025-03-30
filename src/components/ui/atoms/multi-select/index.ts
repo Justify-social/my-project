@@ -13,3 +13,7 @@ export * from './types';
 // Export main component
 export { default as MultiSelect } from './MultiSelect';
 export * from './MultiSelect'; 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

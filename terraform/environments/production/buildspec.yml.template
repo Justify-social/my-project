@@ -1,0 +1,140 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Installing dependencies...
+      - npm install
+      
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - echo Running tests...
+      - npm test
+      - echo Setting build version...
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - BUILD_ID=$(echo $CODEBUILD_BUILD_ID | cut -d':' -f2)
+      - IMAGE_TAG=${COMMIT_HASH}_${BUILD_ID}
+      - echo Building image $REPOSITORY_URI:$IMAGE_TAG
+      
+  build:
+    commands:
+      - echo Building the application...
+      - npm run build
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest .
+      - echo Pushing the Docker image...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo Writing image definitions file...
+      
+  post_build:
+    commands:
+      - echo Creating task definition...
+      - |
+        cat > taskdef.json << EOF
+        {
+          "family": "component-registry-${ENVIRONMENT}",
+          "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/component-registry-ecs-execution-${ENVIRONMENT}",
+          "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/component-registry-ecs-task-${ENVIRONMENT}",
+          "networkMode": "awsvpc",
+          "containerDefinitions": [
+            {
+              "name": "component-registry",
+              "image": "${REPOSITORY_URI}:${IMAGE_TAG}",
+              "essential": true,
+              "environment": [
+                { "name": "NODE_ENV", "value": "production" },
+                { "name": "DB_SHARD_COUNT", "value": "8" },
+                { "name": "CACHE_ENABLED", "value": "true" },
+                { "name": "HASH_ALGORITHM", "value": "murmur3" },
+                { "name": "LOG_LEVEL", "value": "info" }
+              ],
+              "secrets": [
+                { "name": "DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:secret:component-registry/db-password-${ENVIRONMENT}" }
+              ],
+              "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                  "awslogs-region": "${AWS_DEFAULT_REGION}",
+                  "awslogs-group": "/ecs/component-registry-${ENVIRONMENT}",
+                  "awslogs-stream-prefix": "component-registry"
+                }
+              },
+              "portMappings": [
+                {
+                  "containerPort": 8080,
+                  "hostPort": 8080,
+                  "protocol": "tcp"
+                }
+              ],
+              "healthCheck": {
+                "command": ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 60
+              },
+              "cpu": 1024,
+              "memory": 2048
+            }
+          ],
+          "requiresCompatibilities": ["FARGATE"],
+          "cpu": "2048",
+          "memory": "4096"
+        }
+        EOF
+      
+      - echo Creating appspec...
+      - |
+        cat > appspec.yml << EOF
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: <TASK_DEFINITION>
+                LoadBalancerInfo:
+                  ContainerName: "component-registry"
+                  ContainerPort: 8080
+                PlatformVersion: "LATEST"
+        EOF
+      
+      - echo Writing image definitions file...
+      - |
+        cat > imagedefinitions.json << EOF
+        [
+          {
+            "name": "component-registry",
+            "imageUri": "${REPOSITORY_URI}:${IMAGE_TAG}"
+          }
+        ]
+        EOF
+      
+      - echo Build completed on `date`
+
+env:
+  variables:
+    AWS_ACCOUNT_ID: "{{aws_account_id}}"
+  
+  # Secrets should be defined in the CodeBuild project environment variables
+  # for security reasons instead of here
+      
+artifacts:
+  files:
+    - appspec.yml
+    - taskdef.json
+    - imagedefinitions.json
+    
+reports:
+  test-reports:
+    files:
+      - 'test-reports/**/*'
+    file-format: 'JUNITXML'
+    
+cache:
+  paths:
+    - 'node_modules/**/*' 

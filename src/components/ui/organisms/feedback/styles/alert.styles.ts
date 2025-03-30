@@ -73,3 +73,11 @@ export function getAlertClasses({
 export function getIconClasses(status: AlertStatus): string {
   return cn('h-5 w-5', colorMap[status]);
 } 
+
+// Default export added by auto-fix script
+export default {
+  iconMap,
+  colorMap,
+  bgColorMap,
+  borderColorMap,
+};

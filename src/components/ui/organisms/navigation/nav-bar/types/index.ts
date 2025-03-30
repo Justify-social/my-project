@@ -98,3 +98,7 @@ export interface NavigationBarProps {
    */
   onItemClick?: (item: NavItem) => void;
 } 
+// Default export added by auto-fix script
+export default {
+  // All exports from this file
+};

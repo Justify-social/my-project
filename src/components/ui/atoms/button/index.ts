@@ -10,8 +10,9 @@
 export * from './types';
 
 // Main Button Components
-export * from './Button';
-export { default as Button } from './Button';
+import { Button, buttonVariants } from './Button';
+export { Button, buttonVariants };
+export default Button;
 
 // Icon Button Component
 // export * from './IconButton'; // Removing this line to prevent duplicate exports

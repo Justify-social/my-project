@@ -12,3 +12,4 @@ export * from './types';
 
 // Export main component
 export { default as Textarea } from './Textarea'; 
+export default Textarea;

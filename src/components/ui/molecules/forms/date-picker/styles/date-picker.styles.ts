@@ -137,3 +137,6 @@ export function getEventIndicatorClasses(color?: string) {
     color || 'bg-blue-500'
   );
 } 
+
+// Default export added by auto-fix script
+export default {};
