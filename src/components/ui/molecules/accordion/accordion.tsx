@@ -2,12 +2,27 @@
 
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDown } from "lucide-react";
+import { Icon } from '@/components/ui/atoms/icon';
 import { cn } from "@/lib/utils";
 
-const Accordion = AccordionPrimitive.Root;
+/**
+ * Root Accordion component
+ * 
+ * @example
+ * ```tsx
+ * <Accordion type="single" collapsible>
+ *   <AccordionItem value="item-1">
+ *     <AccordionTrigger>Item 1</AccordionTrigger>
+ *     <AccordionContent>Content for item 1</AccordionContent>
+ *   </AccordionItem>
+ * </Accordion>
+ */
+export const Accordion = AccordionPrimitive.Root;
 
-const AccordionItem = React.forwardRef<
+/**
+ * AccordionItem component for individual collapsible sections
+ */
+export const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(({ className, ...props }, ref) => (
@@ -19,7 +34,10 @@ const AccordionItem = React.forwardRef<
 ));
 AccordionItem.displayName = "AccordionItem";
 
-const AccordionTrigger = React.forwardRef<
+/**
+ * AccordionTrigger component for the clickable header
+ */
+export const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
@@ -33,13 +51,16 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      <Icon iconId="faChevronDownLight"  className="h-4 w-4 shrink-0 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));
 AccordionTrigger.displayName = "AccordionTrigger";
 
-const AccordionContent = React.forwardRef<
+/**
+ * AccordionContent component for the expandable content
+ */
+export const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
@@ -56,13 +77,7 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = "AccordionContent";
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
-
-/**
- * accordion - Combined component exporting all subcomponents
- * 
- * This component is the default export to ensure compatibility with dynamic imports.
- */
+// Create a default export with all accordion components
 const accordion = {
   Accordion,
   AccordionItem,

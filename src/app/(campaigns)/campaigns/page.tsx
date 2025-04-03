@@ -1,12 +1,13 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.198Z
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { TableSkeleton } from '@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/atoms/skeleton";
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
@@ -712,7 +713,7 @@ const ClientCampaignList: React.FC = () => {
           setCurrentPage(1);
         }} aria-label="Search campaigns by name" className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans" />
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none font-work-sans">
-            <Icon name="faSearch" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+            <Icon iconId="faMagnifyingGlassLight" size="sm"  className="text-[var(--secondary-color)] font-work-sans" />
           </div>
         </div>
 
@@ -727,7 +728,7 @@ const ClientCampaignList: React.FC = () => {
               {KPI_OPTIONS.map((kpi) => <option key={kpi.key} value={kpi.key}>{kpi.title}</option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+              <Icon iconId="faChevronDownLight" size="sm"  className="text-[var(--secondary-color)] font-work-sans" />
             </div>
           </div>
 
@@ -746,7 +747,7 @@ const ClientCampaignList: React.FC = () => {
               <option value="completed">Completed</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+              <Icon iconId="faChevronDownLight" size="sm"  className="text-[var(--secondary-color)] font-work-sans" />
             </div>
           </div>
 
@@ -761,7 +762,7 @@ const ClientCampaignList: React.FC = () => {
                 </option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+              <Icon iconId="faChevronDownLight" size="sm"  className="text-[var(--secondary-color)] font-work-sans" />
             </div>
           </div>
 
@@ -776,7 +777,7 @@ const ClientCampaignList: React.FC = () => {
                 </option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-              <Icon name="faChevronDown" size="sm" iconType="static" solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+              <Icon iconId="faChevronDownLight" size="sm"  className="text-[var(--secondary-color)] font-work-sans" />
             </div>
           </div>
 
@@ -869,16 +870,16 @@ const ClientCampaignList: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-3 justify-center font-work-sans">
                             <button onClick={() => handleViewCampaign(campaign.id.toString())} className="group text-gray-500 transition-colors font-work-sans" title="View campaign">
-                              <Icon name="faEye" size="md" iconType="button" />
+                              <Icon iconId="faEyeLight" size="md" />
                             </button>
                             <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group text-gray-500 transition-colors font-work-sans" title="Edit campaign">
-                              <Icon name="faPenToSquare" size="md" iconType="button" />
+                              <Icon iconId="faPenToSquareLight" size="md" />
                             </Link>
                             <button onClick={() => handleDuplicateClick(campaign)} className="group text-gray-500 transition-colors cursor-pointer font-work-sans" title="Duplicate campaign">
-                              <Icon name="faCopy" size="md" iconType="button" />
+                              <Icon iconId="faCopyLight" size="md" />
                             </button>
                             <button onClick={() => handleDeleteClick(campaign)} className="group text-gray-500 transition-colors cursor-pointer font-work-sans" title="Delete campaign">
-                              <Icon name="faTrashCan" size="md" iconType="button" action="delete" />
+                              <Icon iconId="faTrashCanLight" size="md" action="delete" />
                             </button>
                           </div>
                         </td>
@@ -944,16 +945,16 @@ const ClientCampaignList: React.FC = () => {
                   
                   <div className="flex justify-end space-x-3 border-t border-[var(--divider-color)] pt-4 font-work-sans">
                     <button onClick={() => handleViewCampaign(campaign.id.toString())} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="View campaign">
-                      <Icon name="faEye" size="md" iconType="button" />
+                      <Icon iconId="faEyeLight" size="md" />
                     </button>
                     <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group p-1.5 text-gray-500 transition-colors font-work-sans" title="Edit campaign">
-                      <Icon name="faPenToSquare" size="md" iconType="button" />
+                      <Icon iconId="faPenToSquareLight" size="md" />
                     </Link>
                     <button onClick={() => handleDuplicateClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="Duplicate campaign">
-                      <Icon name="faCopy" size="md" iconType="button" />
+                      <Icon iconId="faCopyLight" size="md" />
                     </button>
                     <button onClick={() => handleDeleteClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="Delete campaign">
-                      <Icon name="faTrashCan" size="md" iconType="button" action="delete" />
+                      <Icon iconId="faTrashCanLight" size="md" action="delete" />
                     </button>
                   </div>
                 </div>;
@@ -983,7 +984,7 @@ const ClientCampaignList: React.FC = () => {
             <div className="flex justify-between items-center mb-4 font-work-sans">
               <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">Confirm Deletion</h3>
               <button onClick={() => setShowDeleteModal(false)} className="group text-gray-500 hover:text-gray-700 font-work-sans">
-                <Icon name="faXmark" size="sm" iconType="button" />
+                <Icon iconId="faXmarkLight" size="sm" />
               </button>
             </div>
             
@@ -1015,7 +1016,7 @@ const ClientCampaignList: React.FC = () => {
             <div className="flex justify-between items-center mb-4 font-work-sans">
               <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">Duplicate Campaign</h3>
               <button onClick={() => setShowDuplicateModal(false)} className="group text-gray-500 hover:text-gray-700 font-work-sans">
-                <Icon name="faXmark" size="sm" iconType="button" />
+                <Icon iconId="faXmarkLight" size="sm" />
               </button>
             </div>
             

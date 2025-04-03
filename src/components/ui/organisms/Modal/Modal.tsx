@@ -1,199 +1,98 @@
-'use client';
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { cva, VariantProps } from 'class-variance-authority';
+import { Icon } from '@/components/ui/atoms/icon/Icon';
 
-import React, { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Icon } from '@/components/ui/atoms/icons'
-import { ModalProps } from './types';
-import {
-  getOverlayClasses,
-  getModalContentClasses,
-  getModalHeaderClasses,
-  getModalBodyClasses,
-  getModalFooterClasses,
-  getCloseButtonClasses,
-  getModalAnimationProps
-} from './styles/modal.styles';
-
-/**
- * Modal component with smooth transitions and accessibility support
- * 
- * @example
- * ```tsx
- * // Basic usage
- * const [isOpen, setIsOpen] = useState(false);
- * 
- * <ModalDialog
- *   isOpen={isOpen}
- *   onClose={() => setIsOpen(false)}
- *   title="Example Modal"
- * >
- *   <p>Modal content goes here</p>
- * </ModalDialog>
- * 
- * // Different sizes
- * <ModalDialog size="lg" isOpen={isOpen} onClose={onClose}>
- *   <p>Large modal content</p>
- * </ModalDialog>
- * 
- * // Custom footer
- * <ModalDialog
- *   isOpen={isOpen}
- *   onClose={onClose}
- *   footer={
- *     <div>
- *       <button onClick={onClose}>Cancel</button>
- *       <button onClick={handleSave}>Save</button>
- *     </div>
- *   }
- * >
- *   <p>Modal with custom footer</p>
- * </ModalDialog>
- * ```
- */
-export const ModalDialog: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  children,
-  title,
-  size = 'md',
-  closeOnOverlayClick = true,
-  closeOnEsc = true,
-  className = '',
-  overlayClassName = '',
-  showCloseButton = true,
-  footer,
-  isCentered = true,
-  blockScroll = true,
-  id,
-}) => {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const animations = getModalAnimationProps();
-
-  // Handle escape key press
-  useEffect(() => {
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (isOpen && closeOnEsc && event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscKey);
+const modalVariants = cva("fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4", {
+  variants: {
+    position: {
+      center: "items-center justify-center",
+      top: "items-start justify-center pt-16",
+      bottom: "items-end justify-center pb-16",
     }
+  },
+  defaultVariants: {
+    position: "center"
+  }
+});
 
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-    };
-  }, [isOpen, onClose, closeOnEsc]);
+const modalContentVariants = cva("bg-white rounded-lg shadow-lg w-full overflow-hidden", {
+  variants: {
+    size: {
+      sm: "max-w-sm",
+      md: "max-w-md",
+      lg: "max-w-lg",
+      xl: "max-w-xl",
+      full: "max-w-full",
+    }
+  },
+  defaultVariants: {
+    size: "md"
+  }
+});
 
-  // Handle body scroll lock
-  useEffect(() => {
-    if (blockScroll) {
+export interface ModalProps extends 
+  React.HTMLAttributes<HTMLDivElement>,
+  VariantProps<typeof modalVariants>,
+  VariantProps<typeof modalContentVariants> {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
+  ({ className, isOpen, onClose, title, children, position, size, ...props }, ref) => {
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+      setMounted(true);
+      
       if (isOpen) {
         document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
       }
-    }
+      
+      return () => {
+        document.body.style.overflow = 'auto';
+      };
+    }, [isOpen]);
 
-    return () => {
-      if (blockScroll) {
-        document.body.style.overflow = '';
-      }
-    };
-  }, [isOpen, blockScroll]);
+    if (!mounted || !isOpen) return null;
 
-  // Handle click outside modal content
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (closeOnOverlayClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // Get CSS classes for each part of the modal
-  const overlayClasses = getOverlayClasses(overlayClassName);
-  const contentClasses = getModalContentClasses({
-    size,
-    isCentered,
-    className,
-  });
-  const headerClasses = getModalHeaderClasses(!!title);
-  const bodyClasses = getModalBodyClasses();
-  const footerClasses = getModalFooterClasses();
-  const closeButtonClasses = getCloseButtonClasses();
-
-  // Modal dialog element
-  const modalContent = (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className={`${overlayClasses} font-work-sans`}
-          onClick={handleOverlayClick}
-          initial={animations.overlay.initial}
-          animate={animations.overlay.animate}
-          exit={animations.overlay.exit}
-          transition={animations.overlay.transition}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={title ? `modal-title-${id}` : undefined}
-          aria-describedby={`modal-content-${id}`}
+    return (
+      <div
+        className={cn(modalVariants({ position }))}
+        onClick={onClose}
+        ref={ref}
+        {...props}
+      >
+        <div
+          className={cn(
+            modalContentVariants({ size }),
+            className
+          )}
+          onClick={(e) => e.stopPropagation()}
         >
-          <motion.div
-            className={`${contentClasses} font-work-sans`}
-            ref={contentRef}
-            initial={animations.content.initial}
-            animate={animations.content.animate}
-            exit={animations.content.exit}
-            transition={animations.content.transition}
-          >
-            {/* Header */}
-            <div className={`${headerClasses} font-work-sans`}>
-              {title && (
-                <h2
-                  id={`modal-title-${id}`}
-                  className="text-lg font-semibold text-gray-800 font-work-sans"
-                >
-                  {title}
-                </h2>
-              )}
-              {showCloseButton && (
-                <button
-                  type="button"
-                  aria-label="Close"
-                  onClick={onClose}
-                  className={`${closeButtonClasses} font-work-sans`}
-                >
-                  <Icon name="xmark" className="w-5 h-5" />
-                </button>
-              )}
+          {title && (
+            <div className="px-6 py-4 border-b flex items-center justify-between">
+              <h3 className="font-semibold text-lg">{title}</h3>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-muted-foreground hover:text-foreground focus:outline-none"
+                aria-label="Close dialog"
+              >
+                <Icon iconId="faXmarkLight" size="lg" />
+              </button>
             </div>
-
-            {/* Body */}
-            <div id={`modal-content-${id}`} className={`${bodyClasses} font-work-sans`}>
-              {children}
-            </div>
-
-            {/* Footer (optional) */}
-            {footer && (
-              <div className={`${footerClasses} font-work-sans`}>
-                {footer}
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
-  // Use portal to render modal at the end of the document body
-  if (typeof window !== 'undefined') {
-    return createPortal(modalContent, document.body);
+          )}
+          <div className="p-6">{children}</div>
+        </div>
+      </div>
+    );
   }
+);
 
-  return null;
-};
+Modal.displayName = "Modal";
 
-ModalDialog.displayName = 'ModalDialog';
-
-export default ModalDialog; 
+export default Modal; 

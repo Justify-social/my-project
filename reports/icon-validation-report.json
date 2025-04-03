@@ -1,0 +1,74 @@
+{
+  "validationDate": "2025-04-03T14:19:59.883Z",
+  "success": false,
+  "remainingFiles": 21,
+  "fileDetails": {
+    "src//app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx": {
+      "solid={": 8
+    },
+    "src//app/(campaigns)/campaigns/[id]/page.tsx": {
+      "solid={": 16,
+      "iconType=\"": 4
+    },
+    "src//app/(campaigns)/campaigns/page.tsx": {
+      "solid={": 5
+    },
+    "src//app/(dashboard)/dashboard/DashboardContent.tsx": {
+      "solid={": 15
+    },
+    "src//app/page.tsx": {
+      "solid={": 3
+    },
+    "src//app/(admin)/admin/page.tsx": {
+      "solid={": 4
+    },
+    "src//app/(admin)/debug-tools/database/page.tsx": {
+      "solid={": 12
+    },
+    "src//components/ui/atoms/icon/adapters/shadcn-adapter.tsx": {
+      "name=\"fa[A-Z]": 3
+    },
+    "src//components/ui/organisms/card/asset-card/AssetCard.tsx": {
+      "solid={": 3,
+      "iconType=\"": 1
+    },
+    "src//components/ui/organisms/card/asset-card/AssetPreview.tsx": {
+      "solid={": 4,
+      "iconType=\"": 1
+    },
+    "src//components/features/content/AssetPreview.tsx": {
+      "solid={": 4
+    },
+    "src//components/features/dashboard/CalendarUpcoming.tsx": {
+      "solid={": 5
+    },
+    "src//components/features/users/page.tsx": {
+      "solid={": 26
+    },
+    "src//components/features/campaigns/Step5Content.tsx": {
+      "solid={": 40,
+      "iconType=\"": 1
+    },
+    "src//components/features/campaigns/Step2Content.tsx": {
+      "solid={": 15
+    },
+    "src//components/features/campaigns/ProgressBar.tsx": {
+      "solid={": 6
+    },
+    "src//components/features/campaigns/CampaignAssetUploader.tsx": {
+      "solid={": 2
+    },
+    "src//components/features/campaigns/Step1Content.tsx": {
+      "solid={": 31
+    },
+    "src//components/features/campaigns/Step3Content.tsx": {
+      "solid={": 25
+    },
+    "src//components/features/campaigns/WizardNavigation.tsx": {
+      "solid={": 6
+    },
+    "src//__tests__/components/ui/icons/icon.test.tsx": {
+      "name=\"fa[A-Z]": 2
+    }
+  }
+}

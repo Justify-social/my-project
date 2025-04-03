@@ -1,315 +1,142 @@
-import React from 'react';
-import { Icon } from '@/components/ui/atoms/icons'
-import { cn } from '@/utils/string/utils';
+"use client";
 
-// Types for Card variants
-export type CardVariant = 'default' | 'interactive' | 'outline' | 'raised';
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
+/**
+ * Card Component System
+ * 
+ * A comprehensive set of card components following SSOT principles.
+ * This is the canonical source for all base card components.
+ */
+
+// Card component props
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Variant style for the card
-   * @default "default"
-   */
-  variant?: CardVariant;
-
-  /**
-   * Whether the card should have hover effects
-   * @default false
-   */
+  variant?: 'default' | 'outline' | 'raised' | 'interactive';
   hoverable?: boolean;
-
-  /**
-   * Content to render inside the card
-   */
-  children: React.ReactNode;
 }
 
-/**
- * Card component for grouping related content
- * 
- * @example
- * ```tsx
- * // Basic card
- * <Card>Content</Card>
- * 
- * // Interactive card with hover effects
- * <Card variant="interactive" hoverable>
- *   <CardHeader>
- *     <h3 className="text-lg font-medium">Card Title</h3>
- *   </CardHeader>
- *   <CardContent>
- *     <p>This is the main content of the card.</p>
- *   </CardContent>
- * </Card>
- * ```
- */
-export function Card({
-  variant = 'default',
-  hoverable = false,
-  className,
-  children,
-  ...props
-}: CardProps) {
-  // Prepare class based on variant
-  let cardClasses = '';
-
-  // Base styling for all cards
-  cardClasses = 'bg-white rounded-lg';
-
-  // Variant-specific styling
-  if (variant === 'default') {
-    cardClasses += ' border border-gray-200 shadow-sm';
-  } else if (variant === 'interactive') {
-    cardClasses += ' border border-[var(--divider-color)] shadow-sm transition-all duration-300';
-  } else if (variant === 'outline') {
-    cardClasses += ' border border-gray-200';
-  } else if (variant === 'raised') {
-    cardClasses += ' border border-gray-200 shadow-md';
-  }
-
-  // Add hover effects if enabled
-  if (hoverable) {
-    if (variant === 'default') {
-      cardClasses += ' hover:shadow-md hover:border-gray-300';
-    } else if (variant === 'interactive') {
-      cardClasses += ' hover:shadow-md hover:border-[var(--accent-color)] hover:border-opacity-50';
-    } else if (variant === 'outline') {
-      cardClasses += ' hover:border-gray-300';
-    } else if (variant === 'raised') {
-      cardClasses += ' hover:shadow-lg';
-    }
-  }
-
-  return (
-    <div className={cn(cardClasses, className)} {...props}>
-      {children}
-    </div>
-  );
-}
-
-export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Icon to display in the header (component or ReactNode)
-   */
-  icon?: React.ReactNode;
-
-  /**
-   * Actions to display in the header (typically buttons)
-   */
-  actions?: React.ReactNode;
-
-  /**
-   * Content of the header
-   */
-  children: React.ReactNode;
-}
-
-/**
- * Header section for Card
- */
-export function CardHeader({
-  icon,
-  actions,
-  className,
-  children,
-  ...props
-}: CardHeaderProps) {
-  return (
-    <div 
-      className={cn(
-        'px-6 py-4 border-b border-gray-200 flex items-center justify-between font-sora',
-        className
-      )} 
-      {...props}
-    >
-      <div className="flex items-center font-work-sans">
-        {icon && (
-          <div className="mr-3 flex-shrink-0 font-work-sans">
-            {icon}
-          </div>
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = 'default', hoverable, ...props }, ref) => {
+    const variantClasses = {
+      default: "border bg-card text-card-foreground shadow",
+      outline: "border bg-card text-card-foreground",
+      raised: "border bg-card text-card-foreground shadow-lg",
+      interactive: "border bg-card text-card-foreground shadow transition-all duration-200"
+    };
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "rounded-xl",
+          variantClasses[variant],
+          hoverable && "hover:shadow-md hover:scale-[1.01] cursor-pointer",
+          className
         )}
-        <div className="font-work-sans">{children}</div>
-      </div>
-      
-      {actions && (
-        <div className="flex items-center space-x-2 ml-4 font-work-sans">
-          {actions}
-        </div>
-      )}
-    </div>
-  );
-}
-
-export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Whether to add padding to the content
-   * @default true
-   */
-  withPadding?: boolean;
-
-  /**
-   * Content of the card body
-   */
-  children: React.ReactNode;
-}
-
-/**
- * Content section for Card
- */
-export function CardContent({
-  withPadding = true,
-  className,
-  children,
-  ...props
-}: CardContentProps) {
-  return (
-    <div 
-      className={cn(
-        withPadding ? 'px-6 py-4' : '',
-        'font-work-sans',
-        className
-      )} 
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Controls the alignment of items in the footer
-   * @default "right"
-   */
-  align?: 'left' | 'center' | 'right' | 'between';
-
-  /**
-   * Whether to show a border at the top of the footer
-   * @default true
-   */
-  withBorder?: boolean;
-
-  /**
-   * Content of the footer
-   */
-  children: React.ReactNode;
-}
-
-/**
- * Footer section for Card
- */
-export function CardFooter({
-  align = 'right',
-  withBorder = true,
-  className,
-  children,
-  ...props
-}: CardFooterProps) {
-  let alignClass = '';
-
-  if (align === 'left') {
-    alignClass = 'justify-start';
-  } else if (align === 'center') {
-    alignClass = 'justify-center';
-  } else if (align === 'right') {
-    alignClass = 'justify-end';
-  } else if (align === 'between') {
-    alignClass = 'justify-between';
+        {...props}
+      />
+    )
   }
+)
+Card.displayName = "Card"
 
-  return (
-    <div 
-      className={cn(
-        'px-6 py-4 flex items-center font-work-sans',
-        withBorder && 'border-t border-gray-200',
-        alignClass,
-        className
-      )} 
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-export interface MetricCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
-  /**
-   * Title of the metric
-   */
-  title: React.ReactNode;
-
-  /**
-   * Primary value to display
-   */
-  value: React.ReactNode;
-
-  /**
-   * Optional secondary/description text
-   */
-  description?: React.ReactNode;
-
-  /**
-   * Optional icon for the card
-   */
+// CardHeader props
+export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: React.ReactNode;
-
-  /**
-   * Optional trend indicator (positive or negative)
-   */
-  trend?: number;
+  actions?: React.ReactNode;
 }
 
-/**
- * Specialized card for displaying metrics/KPIs
- */
-export function MetricCard({
-  title,
-  value,
-  description,
-  icon,
-  trend,
-  className,
-  ...props
-}: MetricCardProps) {
-  return (
-    <Card 
-      className={cn('h-full', className)} 
+const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ className, icon, actions, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex flex-col space-y-1.5 p-6", className)}
       {...props}
     >
-      <CardContent>
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
-            <div className="text-2xl font-semibold">{value}</div>
-            
-            {description && (
-              <div className="mt-1 text-sm text-gray-500">{description}</div>
-            )}
-            
-            {typeof trend === 'number' && (
-              <div className={cn(
-                "mt-1 text-sm font-medium flex items-center",
-                trend > 0 ? 'text-green-600' : 'text-red-600'
-              )}>
-                <Icon 
-                  name={trend > 0 ? 'faArrowUp' : 'faArrowDown'} 
-                  className="h-3 w-3 mr-1" 
-                  type="static" 
-                />
-                {Math.abs(trend)}%
-              </div>
-            )}
-          </div>
-          
-          {icon && (
-            <div className="p-2 bg-gray-100 rounded-full">
-              {icon}
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+      {icon && <div className="mb-2">{icon}</div>}
+      <div className="flex justify-between items-center">
+        <div className="flex-1">{props.children}</div>
+        {actions && <div className="ml-4">{actions}</div>}
+      </div>
+    </div>
+  )
+)
+CardHeader.displayName = "CardHeader"
+
+// CardTitle props
+export interface CardTitleProps extends React.HTMLAttributes<HTMLDivElement> {
+  size?: 'small' | 'default' | 'large';
 }
 
-export default Card; 
+const CardTitle = React.forwardRef<HTMLDivElement, CardTitleProps>(
+  ({ className, size = 'default', ...props }, ref) => {
+    const sizeClasses = {
+      small: "text-sm font-medium",
+      default: "text-lg font-semibold",
+      large: "text-xl font-bold"
+    };
+    
+    return (
+      <div
+        ref={ref}
+        className={cn("leading-none tracking-tight", sizeClasses[size], className)}
+        {...props}
+      />
+    )
+  }
+)
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+// CardFooter props
+export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  align?: 'start' | 'center' | 'end' | 'between';
+}
+
+const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ className, align = 'start', ...props }, ref) => {
+    const alignClasses = {
+      start: "justify-start",
+      center: "justify-center",
+      end: "justify-end",
+      between: "justify-between"
+    };
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "flex items-center p-6 pt-0", 
+          alignClasses[align],
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
+
+// No default export - follow SSOT principles 

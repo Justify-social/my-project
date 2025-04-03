@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.213Z
 "use client";
 
 import React, { useState, memo } from 'react';
@@ -7,8 +8,8 @@ import Modal from '../../ui/Modal/index';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/atoms/icons'
-import { iconComponentFactory } from '@/components/ui/atoms/icons';
+import { Icon } from '@/components/ui/atoms/icon'
+import { iconComponentFactory } from '@/components/ui/atoms/icon';
 interface PaymentMethod {
   id: number;
   cardType: string;
@@ -84,7 +85,7 @@ const PlanCard: React.FC<{
     <p className="mt-1 text-sm text-[var(--secondary-color)] font-work-sans">per month</p>
     <ul className="mt-6 space-y-4 font-work-sans">
       {features.map((feature, idx) => <li key={idx} className="flex items-start font-work-sans">
-          <Icon name="faCheckCircle" className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 font-work-sans" solid={false} />
+          <Icon iconId="faCheckCircleLight" className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 font-work-sans"  />
           <span className="text-[var(--secondary-color)] font-work-sans">{feature}</span>
         </li>)}
     </ul>
@@ -94,7 +95,7 @@ const PlanCard: React.FC<{
     scale: 0.95
   }} onClick={onUpgrade} className={`mt-8 w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center ${isRecommended ? 'bg-[var(--accent-color)] text-white hover:opacity-90' : 'bg-white text-[var(--accent-color)] border-2 border-[var(--accent-color)] hover:bg-[var(--background-color)]'}`}>
 
-      <Icon name="faLightning" solid className="w-5 h-5 mr-2" />
+      <Icon iconId="faLightningLight" solid className="w-5 h-5 mr-2" />
       Upgrade Plan
     </motion.button>
   </motion.div>);
@@ -144,7 +145,7 @@ const Modal: React.FC<{
 
         <button onClick={onClose} className="absolute top-4 right-4 text-[var(--secondary-color)] hover:text-[var(--primary-color)] font-work-sans">
 
-          <Icon name="faXCircle" className="w-5 h-5" solid={false} />
+          <Icon iconId="faXCircleLight" className="w-5 h-5"  />
         </button>
         {children}
       </motion.div>
@@ -339,7 +340,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-                <Icon name="faArrowRight" className="w-5 h-5 mr-2" solid={false} />
+                <Icon iconId="faArrowRightLight" className="w-5 h-5 mr-2"  />
                 View Pricing
               </motion.button>
             </Link>
@@ -352,7 +353,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-              <Icon name="faCreditCard" className="w-5 h-5 mr-2" solid={false} />
+              <Icon iconId="faCreditCardLight" className="w-5 h-5 mr-2"  />
               Update Payment
             </motion.button>
           </div>
@@ -363,7 +364,7 @@ const SubscriptionBillingPage: React.FC = () => {
           <nav className="flex space-x-1 font-work-sans" aria-label="Billing navigation">
             {['overview', 'credits'].map((tab) => {
             const isActive = activeTab === tab;
-            const IconComponent = tab === 'overview' ? (props: any) => <Icon name="faCreditCard" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" /> : (props: any) => <Icon name="faMoney" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />;
+            const IconComponent = tab === 'overview' ? (props: any) => <Icon iconId="faCreditCardLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" /> : (props: any) => <Icon iconId="faMoneyLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />;
             return <button key={tab} onClick={() => setActiveTab(tab as "overview" | "credits")} className={`
                     relative flex-1 min-w-0 py-3 px-4 text-sm font-medium
                     ${isActive ? 'bg-white text-[var(--accent-color)] shadow-sm z-10' : 'text-[var(--secondary-color)] hover:text-[var(--primary-color)] bg-[var(--background-color)]'}
@@ -385,7 +386,7 @@ const SubscriptionBillingPage: React.FC = () => {
           {activeTab === "overview" ? <>
               {/* Current Plan Card */}
               <Card>
-                <SectionHeader icon={(props) => <Icon name="faLightning" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Current Plan" description="Your current subscription plan and features" />
+                <SectionHeader icon={(props) => <Icon iconId="faLightningLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Current Plan" description="Your current subscription plan and features" />
 
                 <div className="bg-[var(--background-color)] rounded-lg p-6 font-work-sans">
                   <div className="flex items-center justify-between font-work-sans">
@@ -404,13 +405,13 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-                      <Icon name="faArrowRight" className="w-5 h-5 mr-2" solid={false} />
+                      <Icon iconId="faArrowRightLight" className="w-5 h-5 mr-2"  />
                       Change Plan
                     </motion.button>
                   </div>
                   <div className="mt-6 grid grid-cols-2 gap-4 font-work-sans">
                     {subscriptionFeatures.map((feature, idx) => <div key={idx} className="flex items-center font-work-sans">
-                        <Icon name="faCheckCircle" className="w-5 h-5 text-green-500 mr-2 font-work-sans" solid={false} />
+                        <Icon iconId="faCheckCircleLight" className="w-5 h-5 text-green-500 mr-2 font-work-sans"  />
                         <span className="text-[var(--secondary-color)] font-work-sans">{feature}</span>
                       </div>)}
                   </div>
@@ -419,14 +420,14 @@ const SubscriptionBillingPage: React.FC = () => {
 
               {/* Payment Methods Card */}
               <Card>
-                <SectionHeader icon={(props) => <Icon name="faCreditCard" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Payment Methods" description="Manage your payment methods and billing information" />
+                <SectionHeader icon={(props) => <Icon iconId="faCreditCardLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Payment Methods" description="Manage your payment methods and billing information" />
 
                 <div className="space-y-4 font-work-sans">
                   {paymentMethods.map((method) => <div key={method.id} className="flex items-center justify-between p-4 rounded-lg border border-[var(--divider-color)] font-work-sans">
 
                       <div className="flex items-center font-work-sans">
                         <div className="bg-[var(--background-color)] p-2 rounded-lg font-work-sans">
-                          <Icon name="faCreditCard" className="w-6 h-6 text-[var(--accent-color)] font-work-sans" solid={false} />
+                          <Icon iconId="faCreditCardLight" className="w-6 h-6 text-[var(--accent-color)] font-work-sans"  />
                         </div>
                         <div className="ml-4 font-work-sans">
                           <p className="font-medium text-[var(--primary-color)] font-work-sans">
@@ -444,7 +445,7 @@ const SubscriptionBillingPage: React.FC = () => {
                     scale: 0.95
                   }} onClick={() => setUpdatePaymentModalOpen(true)} className="p-2 text-[var(--accent-color)] hover:bg-[var(--background-color)] rounded-lg font-work-sans">
 
-                          <Icon name="faArrowRight" className="w-5 h-5" solid={false} />
+                          <Icon iconId="faArrowRightLight" className="w-5 h-5"  />
                         </motion.button>
                         <motion.button whileHover={{
                     scale: 1.05
@@ -460,7 +461,7 @@ const SubscriptionBillingPage: React.FC = () => {
                     setTimeout(() => setToastMessage(""), 3000);
                   }} className="p-2 text-red-600 hover:bg-red-50 rounded-lg font-work-sans">
 
-                          <Icon name="faXCircle" className="w-5 h-5" solid={false} />
+                          <Icon iconId="faXCircleLight" className="w-5 h-5"  />
                         </motion.button>
                       </div>
                     </div>)}
@@ -476,7 +477,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-                    <Icon name="faPlus" className="w-5 h-5 mr-2" solid={false} />
+                    <Icon iconId="faPlusLight" className="w-5 h-5 mr-2"  />
                     Add Payment Method
                   </motion.button>
                 </div>
@@ -484,7 +485,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
               {/* Billing History Card */}
               <Card>
-                <SectionHeader icon={(props) => <Icon name="faDocumentText" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Billing History" description="View and download your past invoices" />
+                <SectionHeader icon={(props) => <Icon iconId="faFileLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Billing History" description="View and download your past invoices" />
 
                 <div className="overflow-hidden rounded-lg border border-[var(--divider-color)] font-work-sans">
                   <table className="min-w-full divide-y divide-[var(--divider-color)]">
@@ -534,7 +535,7 @@ const SubscriptionBillingPage: React.FC = () => {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                               ${tx.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} font-work-sans`}>
 
-                              {tx.status === 'Completed' ? <Icon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} /> : <Icon name="faClock" className="w-5 h-5 mr-2" solid={false} />}
+                              {tx.status === 'Completed' ? <Icon iconId="faCheckCircleLight" className="w-5 h-5 mr-2"  /> : <Icon iconId="faClockLight" className="w-5 h-5 mr-2"  />}
                               {tx.status}
                             </span>
                           </td>
@@ -546,7 +547,7 @@ const SubscriptionBillingPage: React.FC = () => {
                           scale: 0.95
                         }} onClick={() => alert("Downloading invoice...")} className="p-2 text-[var(--accent-color)] hover:bg-[var(--background-color)] rounded-lg font-work-sans" title="Download Invoice">
 
-                                <Icon name="faDownload" className="w-5 h-5" solid={false} />
+                                <Icon iconId="faDownloadLight" className="w-5 h-5"  />
                               </motion.button>
                               {tx.status === 'Pending' && <motion.button whileHover={{
                           scale: 1.05
@@ -554,7 +555,7 @@ const SubscriptionBillingPage: React.FC = () => {
                           scale: 0.95
                         }} onClick={() => alert("Retrying payment...")} className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg font-work-sans" title="Retry Payment">
 
-                                  <Icon name="faArrowRight" className="w-5 h-5" solid={false} />
+                                  <Icon iconId="faArrowRightLight" className="w-5 h-5"  />
                                 </motion.button>}
                             </div>
                           </td>
@@ -566,7 +567,7 @@ const SubscriptionBillingPage: React.FC = () => {
             </> : <>
               {/* Credits Balance Card */}
               <Card>
-                <SectionHeader icon={(props) => <Icon name="faMoney" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Credits Balance" description="View and manage your credits" />
+                <SectionHeader icon={(props) => <Icon iconId="faMoneyLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Credits Balance" description="View and manage your credits" />
 
                 <div className="bg-gradient-to-r from-[var(--accent-color)] to-[#0099cc] rounded-lg p-6 text-white font-work-sans">
                   <div className="flex items-center justify-between font-work-sans">
@@ -586,12 +587,12 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-                      <Icon name="faPlus" className="w-5 h-5 mr-2" solid={false} />
+                      <Icon iconId="faPlusLight" className="w-5 h-5 mr-2"  />
                       Buy Credits
                     </motion.button>
                   </div>
                   {creditsBalance < 10 && <div className="mt-4 bg-white bg-opacity-10 rounded-lg p-3 flex items-center font-work-sans">
-                      <Icon name="faXCircle" className="w-5 h-5 mr-2" solid={false} />
+                      <Icon iconId="faXCircleLight" className="w-5 h-5 mr-2"  />
                       <p className="text-sm font-work-sans">
                         Low balance warning! Purchase more credits to avoid service interruption.
                       </p>
@@ -601,7 +602,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
               {/* Credit Packages Card */}
               <Card>
-                <SectionHeader icon={(props) => <Icon name="faLightning" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />} title="Credit Packages" description="Choose a credit package that suits your needs" />
+                <SectionHeader icon={(props) => <Icon iconId="faLightningLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Credit Packages" description="Choose a credit package that suits your needs" />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
                   {creditPackages.map((pkg) => <CreditPackageCard key={pkg.credits} credits={pkg.credits} price={pkg.price} isSelected={selectedCreditPackage === pkg.credits} onSelect={() => setSelectedCreditPackage(pkg.credits)} />)}
@@ -618,7 +619,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-                  <Icon name="faMoney" className="w-5 h-5 mr-2" solid={false} />
+                  <Icon iconId="faMoneyLight" className="w-5 h-5 mr-2"  />
                   Purchase Credits
                 </motion.button>
               </Card>
@@ -660,7 +661,7 @@ const SubscriptionBillingPage: React.FC = () => {
               </div>
             </div>
             {paymentMethodError && <p className="text-sm text-red-600 flex items-center font-work-sans">
-                <Icon name="faXCircle" className="w-5 h-5 mr-1" solid={false} />
+                <Icon iconId="faXCircleLight" className="w-5 h-5 mr-1"  />
                 {paymentMethodError}
               </p>}
           </div>
@@ -750,7 +751,7 @@ const SubscriptionBillingPage: React.FC = () => {
 
 
 
-              <Icon name="faCheckCircle" className="w-5 h-5 mr-2" solid={false} />
+              <Icon iconId="faCheckCircleLight" className="w-5 h-5 mr-2"  />
               {toastMessage}
             </motion.div>}
         </AnimatePresence>

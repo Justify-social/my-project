@@ -1,9 +1,10 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.195Z
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import ErrorBoundary from '@/components/ui/error/ErrorBoundary';
 import ErrorFallback from '@/components/error-fallback';
@@ -100,7 +101,7 @@ function SubmissionContent() {
           <p className="text-red-600 mt-2 font-work-sans">{error}</p>
           <button onClick={() => router.push('/campaigns')} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center font-work-sans">
 
-            <Icon name="faChevronLeft" className="w-4 h-4 mr-2" solid={false} />
+            <Icon iconId="faChevronLeftLight" className="w-4 h-4 mr-2"  />
             Return to Campaigns
           </button>
         </div>
@@ -116,7 +117,7 @@ function SubmissionContent() {
           </p>
           <button onClick={() => router.push('/campaigns')} className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 flex items-center font-work-sans">
 
-            <Icon name="faChevronLeft" className="w-4 h-4 mr-2" solid={false} />
+            <Icon iconId="faChevronLeftLight" className="w-4 h-4 mr-2"  />
             Return to Campaigns
           </button>
         </div>
@@ -127,7 +128,7 @@ function SubmissionContent() {
       {/* Success Message - Simplified */}
       <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm mb-12 text-center font-work-sans">
         <div className="mx-auto w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6 font-work-sans">
-          <Icon name="faCheck" className="h-12 w-12 text-[#00BFFF] font-work-sans" solid={false} />
+          <Icon iconId="faCheckLight" className="h-12 w-12 text-[#00BFFF] font-work-sans"  />
         </div>
         
         <h2 className="text-2xl font-bold text-[#333333] mb-3 font-['Sora'] font-sora">
@@ -166,7 +167,7 @@ function SubmissionContent() {
             <Link href="/brand-lift" className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium font-work-sans">
 
               <span className="font-work-sans">Set Up</span>
-              <Icon name="faChevronRight" className="h-4 w-4 ml-1" solid={false} />
+              <Icon iconId="faChevronRightLight" className="h-4 w-4 ml-1"  />
             </Link>
           </div>
           
@@ -181,7 +182,7 @@ function SubmissionContent() {
             <Link href="/creative-testing" className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium font-work-sans">
 
               <span className="font-work-sans">Start Testing</span>
-              <Icon name="faChevronRight" className="h-4 w-4 ml-1" solid={false} />
+              <Icon iconId="faChevronRightLight" className="h-4 w-4 ml-1"  />
             </Link>
           </div>
           
@@ -196,7 +197,7 @@ function SubmissionContent() {
             <Link href={`/campaigns/${campaignId}`} className="flex items-center justify-end text-[#00BFFF] hover:text-blue-800 mt-2 text-sm font-medium font-work-sans">
 
               <span className="font-work-sans">View Campaign</span>
-              <Icon name="faChevronRight" className="h-4 w-4 ml-1" solid={false} />
+              <Icon iconId="faChevronRightLight" className="h-4 w-4 ml-1"  />
             </Link>
           </div>
         </div>
@@ -206,13 +207,13 @@ function SubmissionContent() {
       <div className="flex justify-between items-center font-work-sans">
         <button onClick={() => router.push('/campaigns')} className="flex items-center text-[#4A5568] hover:text-[#333333] font-medium font-['Work Sans'] font-work-sans">
 
-          <Icon name="faChevronLeft" className="w-4 h-4 mr-2" solid={false} />
+          <Icon iconId="faChevronLeftLight" className="w-4 h-4 mr-2"  />
           Back to Campaigns
         </button>
 
         <button onClick={() => router.push(`/campaigns/${campaignId}`)} className="flex items-center bg-[#00BFFF] text-white px-5 py-2 rounded-md hover:bg-blue-600 font-['Work Sans'] font-work-sans">
 
-          <Icon name="faInfo" className="w-5 h-5 mr-2" solid={false} />
+          <Icon iconId="faInfoLight" className="w-5 h-5 mr-2"  />
           View Full Details
         </button>
       </div>

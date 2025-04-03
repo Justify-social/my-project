@@ -2,7 +2,7 @@
 
 import { Calendar, DatePickerCalendar } from './Calendar';
 import CalendarUpcoming from './CalendarUpcoming';
-import CalendarDashboard from './calendar-dashboard';
+import CalendarDashboard from './CalendarDashboard';
 
 export {
   Calendar,

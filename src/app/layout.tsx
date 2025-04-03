@@ -6,7 +6,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Toaster } from 'react-hot-toast';
-import { ToastProvider } from '@/components/ui/molecules/feedback/Toast';
+import { Toaster as ShadcnToaster } from '@/components/ui/molecules/sonner/Sonner';
 import { Suspense } from 'react';
 import { connection } from 'next/server';
 
@@ -44,17 +44,16 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
-          <ToastProvider>
-            <Suspense>
-              <UTSSR />
-            </Suspense>
-            <ClientLayout>
-              <main className="min-h-screen bg-gray-100">
-                {children}
-              </main>
-            </ClientLayout>
-            <Toaster />
-          </ToastProvider>
+          <ShadcnToaster />
+          <Suspense>
+            <UTSSR />
+          </Suspense>
+          <ClientLayout>
+            <main className="min-h-screen bg-gray-100">
+              {children}
+            </main>
+          </ClientLayout>
+          <Toaster />
         </UserProvider>
       </body>
     </html>

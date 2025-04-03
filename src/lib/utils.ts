@@ -1,8 +1,6 @@
-/**
- * This file is maintained for backward compatibility.
- * Please import from 'utils/string/utils.ts' instead.
- * 
- * @deprecated
- */
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
-export * from '../utils/string/utils.ts';
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}

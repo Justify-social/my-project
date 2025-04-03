@@ -1,7 +1,8 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.210Z
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 interface AssetPreviewProps {
   url: string;
   fileName: string;
@@ -75,7 +76,7 @@ export function AssetPreview({
       {/* Loading state */}
       {!hasLoaded && <div className="absolute inset-0 flex items-center justify-center bg-gray-100 font-work-sans">
           <div className="animate-pulse flex flex-col items-center font-work-sans">
-            <Icon name="faInfo" className="h-8 w-8 text-gray-400 font-work-sans" solid={false} />
+            <Icon iconId="faInfoLight" className="h-8 w-8 text-gray-400 font-work-sans"  />
             <span className="mt-2 text-xs text-gray-500 font-work-sans">Loading...</span>
           </div>
         </div>}
@@ -96,14 +97,14 @@ export function AssetPreview({
           <div className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-0 hover:bg-opacity-20 transition-all font-work-sans" onClick={togglePlay}>
 
             {hasLoaded && <div className="p-2 rounded-full bg-white bg-opacity-70 font-work-sans">
-                {isPlaying ? <Icon name="faMinus" className="h-6 w-6 text-gray-800 font-work-sans" solid={false} /> : <Icon name="faPlus" className="h-6 w-6 text-gray-800 font-work-sans" solid={false} />}
+                {isPlaying ? <Icon iconId="faMinusLight" className="h-6 w-6 text-gray-800 font-work-sans"  /> : <Icon iconId="faPlusLight" className="h-6 w-6 text-gray-800 font-work-sans"  />}
               </div>}
           </div>
         </div>}
       
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && <div className="flex items-center justify-center p-8 font-work-sans">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400 font-work-sans" solid={false} />
+          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400 font-work-sans"  />
           <span className="ml-2 text-gray-700 font-work-sans">{fileName}</span>
         </div>}
     </div>;

@@ -1,7 +1,8 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.206Z
 import React, { forwardRef } from 'react';
 import { IconButtonProps } from './types';
 import { getButtonClasses } from './styles/button.styles';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 /**
  * IconButton component for icon-only buttons with proper accessibility.

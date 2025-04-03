@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { cn } from '@/utils/string/utils';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getIconPath } from '@/components/ui/atoms/icons'
+import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+
+// Helper function to get icon path
+const getIconPath = (icon: string, style: 'light' | 'solid' = 'light') => {
+  return `/icons/${style}/${icon}.svg`;
+};
 
 // Define sidebar item types
 export interface SidebarItem {

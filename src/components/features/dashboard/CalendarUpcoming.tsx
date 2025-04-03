@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon';
 
 interface CalendarEvent {
   id: number | string;
@@ -104,7 +104,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
               onClick={prevMonth} 
               className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors font-work-sans"
             >
-              <Icon name="faChevronLeft" className="w-5 h-5" solid={false} />
+              <Icon iconId="faChevronLeftLight" className="w-5 h-5"  />
             </button>
             <div className="text-xl font-semibold font-work-sans">
               {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
@@ -113,7 +113,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
               onClick={nextMonth} 
               className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 focus:outline-none transition-colors font-work-sans"
             >
-              <Icon name="faChevronRight" className="w-5 h-5" solid={false} />
+              <Icon iconId="faChevronRightLight" className="w-5 h-5"  />
             </button>
           </div>
           <button 
@@ -168,7 +168,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
             className="bg-white rounded-lg p-4"
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center font-sora">
-              <Icon name="faCalendar" className="w-5 h-5 mr-2 text-blue-600 font-work-sans" solid={false} />
+              <Icon iconId="faCalendarLight" className="w-5 h-5 mr-2 text-blue-600 font-work-sans"  />
               {monthYear}
             </h3>
             <div className="space-y-3 font-work-sans">
@@ -193,7 +193,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
                         )}
                         {event.kpi && (
                           <span className="flex items-center font-work-sans">
-                            <Icon name="faChatBubble" className="w-4 h-4 mr-1" solid={false} />
+                            <Icon iconId="faChatBubbleLight" className="w-4 h-4 mr-1"  />
                             {event.kpi}
                           </span>
                         )}
@@ -203,7 +203,7 @@ const CalendarUpcoming: React.FC<CalendarUpcomingProps> = ({
                       {event.budget !== undefined && (
                         <div className="flex flex-col space-y-1 font-work-sans">
                           <span className="flex items-center justify-end text-sm text-gray-600 font-work-sans">
-                            <Icon name="faMoney" className="w-4 h-4 mr-1" solid={false} />
+                            <Icon iconId="faMoneyLight" className="w-4 h-4 mr-1"  />
                             ${event.budget.toLocaleString()}
                           </span>
                         </div>

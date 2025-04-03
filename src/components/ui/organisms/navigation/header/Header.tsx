@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { MobileMenu } from '@/components/ui/organisms/navigation/mobile-menu/MobileMenu'
 import { navItems, settingsNavItem } from "../config";
-import { SearchBar } from "@/components/ui/molecules/search-bar";
+import { SearchBar } from '@/components/ui/molecules/search-bar';
 
 interface HeaderProps {
   companyName: string;

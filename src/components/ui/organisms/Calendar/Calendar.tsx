@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Icon } from '@/components/ui/atoms/icon';
 import dynamic from 'next/dynamic';
 import { format } from "date-fns";
 
@@ -82,8 +82,8 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        IconLeft: ({ ...props }) => <Icon iconId="faChevronLeftLight"  className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <Icon iconId="faChevronRightLight"  className="h-4 w-4" />,
       }}
       {...props}
     />

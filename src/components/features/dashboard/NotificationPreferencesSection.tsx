@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.211Z
 'use client';
 
 import React, { useState } from 'react';
@@ -7,7 +8,7 @@ import Card from '@/components/settings/shared/Card';
 import SectionHeader from '@/components/settings/shared/SectionHeader';
 import ToggleSwitch from '@/components/settings/shared/ToggleSwitch';
 import ActionButtons from '@/components/settings/shared/ActionButtons';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 interface NotificationPreferences {
   campaignUpdates: boolean;

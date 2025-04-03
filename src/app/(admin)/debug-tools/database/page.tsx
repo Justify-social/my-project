@@ -1,10 +1,11 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.200Z
 "use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 interface DocFile {
   name: string;
   path: string;
@@ -85,67 +86,67 @@ export default function DatabasePage() {
     path: '/docs/DATABASE_SCHEMA.md',
     description: 'Comprehensive documentation of the database schema and entity relationships',
     category: 'database',
-    icon: <Icon name="faServer" className="h-5 w-5 text-blue-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faServerLight" className="h-5 w-5 text-blue-600 font-work-sans"  />
   }, {
     name: 'Database Schema Audit',
     path: '/docs/schema-audit-summary.md',
     description: 'Database schema validation and audit results',
     category: 'database',
-    icon: <Icon name="faChartBar" className="h-5 w-5 text-blue-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faChartBarLight" className="h-5 w-5 text-blue-600 font-work-sans"  />
   }, {
     name: 'Project Progress',
     path: '/docs/PROGRESS.md',
     description: 'Development progress and roadmap for the application',
     category: 'general',
-    icon: <Icon name="faDocumentText" className="h-5 w-5 text-green-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-work-sans"  />
   }, {
     name: 'User Flow',
     path: '/docs/User-Flow.md',
     description: 'User journey and application flow documentation',
     category: 'general',
-    icon: <Icon name="faDocumentText" className="h-5 w-5 text-green-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-work-sans"  />
   }, {
     name: 'Campaign Wizard Validation',
     path: '/docs/campaign-wizard-validation.md',
     description: 'Validation rules and requirements for the campaign wizard',
     category: 'general',
-    icon: <Icon name="faDocumentText" className="h-5 w-5 text-green-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-work-sans"  />
   }, {
     name: 'Cint API Documentation',
     path: '/docs/Cint_API_info.md',
     description: 'Integration documentation for the Cint API',
     category: 'api',
-    icon: <Icon name="faDocumentText" className="h-5 w-5 text-purple-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faFileLight" className="h-5 w-5 text-purple-600 font-work-sans"  />
   }, {
     name: 'Any Type Usage Report',
     path: '/docs/any-type-usage-report.md',
     description: 'ESLint report on any type usage in the codebase',
     category: 'linter',
-    icon: <Icon name="faWarning" className="h-5 w-5 text-yellow-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-work-sans"  />
   }, {
     name: 'Image Tag Usage Report',
     path: '/docs/img-tag-usage-report.md',
     description: 'Report on <img> tag usage instead of Next.js Image component',
     category: 'linter',
-    icon: <Icon name="faWarning" className="h-5 w-5 text-yellow-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-work-sans"  />
   }, {
     name: 'Hook Dependency Issues Report',
     path: '/docs/hook-dependency-issues-report.md',
     description: 'Report on React Hook dependency issues in the codebase',
     category: 'linter',
-    icon: <Icon name="faWarning" className="h-5 w-5 text-yellow-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-work-sans"  />
   }, {
     name: 'API Documentation',
     path: '/docs/API.md',
     description: 'API endpoints, parameters, and example responses',
     category: 'api',
-    icon: <Icon name="faDocumentText" className="h-5 w-5 text-green-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-work-sans"  />
   }, {
     name: 'Data Models',
     path: '/docs/MODELS.md',
     description: 'Database models and their relationships',
     category: 'database',
-    icon: <Icon name="faWarning" className="h-5 w-5 text-yellow-600 font-work-sans" solid={false} />
+    icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-work-sans"  />
   }];
 
   // Check if user is admin
@@ -273,7 +274,7 @@ export default function DatabasePage() {
         </div>
         <Link href="/debug-tools" className="mt-4 md:mt-0 flex items-center text-[var(--accent-color)] hover:underline font-work-sans">
 
-          {<Icon name="faChevronRight" className="h-4 w-4 mr-1 rotate-180" solid={false} />}
+          {<Icon iconId="faChevronRightLight" className="h-4 w-4 mr-1 rotate-180"  />}
           Back to Debug Tools
         </Link>
       </div>

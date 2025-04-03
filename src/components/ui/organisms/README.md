@@ -1,15 +1,36 @@
-# Organisms
+# UI Organisms
 
-Organisms are complex UI components composed of groups of molecules and/or atoms and/or other organisms. These organisms form distinct sections of an interface.
+Organisms are complex UI components composed of molecules and/or atoms. They represent distinct sections of the interface with specific functionality.
 
-While molecules are relatively simple combinations of atoms, organisms are more complex and can represent entire interface sections like headers, footers, or complex cards.
+## Definition
 
-## Guidelines
+Organisms in atomic design are complex components that represent a distinct section of the interface. They're composed of multiple molecules and/or atoms working together to provide specific functionality.
 
-- Organisms should be focused on a specific interface section
-- They can contain multiple interacting elements
-- They represent a standalone, reusable component
-- Document the different states and variations 
+## Examples of Organisms
+
+- **Navigation Systems**: Main menus, navigation bars
+- **Card Systems**: Complex card layouts with headers, content areas, and footers
+- **Forms**: Complete forms with multiple input fields, validation, and submission controls
+- **Tables**: Data tables with sorting, filtering, and pagination
+- **Dashboards**: Widget collections and metric displays
+
+## Our Organisms
+
+The organisms in this directory include:
+
+- `card`: Card components with headers, content areas, and footers (moved from atoms)
+- `navigation`: Navigation components like headers and sidebars
+- `table`: Complex table implementations with advanced features
+- `form`: Form components with validation and submission handling
+- `calendar`: Calendar and date picker components
+
+## Usage Guidelines
+
+- Prefer composition over inheritance
+- Organisms should be context-agnostic where possible
+- Organisms can sometimes be app-specific but should aim for reusability
+- Document complex props and interactions thoroughly
+- Include usage examples for complex organisms
 
 ## Components in this Directory
 

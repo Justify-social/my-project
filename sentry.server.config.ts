@@ -1,9 +1,3 @@
-import * as Sentry from "@sentry/nextjs"
-
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 1.0,
-  debug: false,
-  autoInstrumentServerFunctions: false,
-  instrumenter: "otel"
-}) 
+// This file is now located at config/sentry/sentry.server.config.ts
+// This is a redirect file for backward compatibility
+export * from './config/sentry/sentry.server.config';

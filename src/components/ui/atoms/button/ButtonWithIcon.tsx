@@ -1,5 +1,6 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.206Z
 import React from 'react';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 /**
  * Props for the ButtonWithIcon component

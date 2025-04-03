@@ -1,6 +1,7 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.204Z
 import React, { useState } from 'react';
 import { Pagination } from '../';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 /**
  * Examples of the Pagination component
@@ -87,8 +88,8 @@ export default function PaginationExamples() {
             currentPage={minimalPage}
             onPageChange={setMinimalPage}
             showFirstLast={false}
-            previousLabel={<Icon name="faAngleLeft" size="sm" />}
-            nextLabel={<Icon name="faAngleRight" size="sm" />}
+            previousLabel={<Icon iconId="faAngleLeftLight" size="sm" />}
+            nextLabel={<Icon iconId="faAngleRightLight" size="sm" />}
           />
         </div>
       </section>

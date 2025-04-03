@@ -1,3 +1,6 @@
+// This file is now located at config/prisma/schema.prisma
+// This is a redirect file for backward compatibility
+
 generator client {
   provider = "prisma-client-js"
 }

@@ -6,21 +6,22 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
-import { Icon } from '@/components/ui/atoms/icons'
-import { TableSkeleton } from '@/components/ui/skeleton';
-import CalendarDashboard from "@/components/ui/organisms/Calendar/calendar-dashboard";
-import UpcomingCampaignsCard from "@/components/ui/deprecated/cards/upcoming-campaigns-card";
+import { Skeleton } from "@/components/ui/atoms/skeleton";
+import CalendarDashboard from "@/components/ui/organisms/calendar/CalendarDashboard";
+import UpcomingCampaignsCard from "@/components/ui/organisms/card/UpcomingCampaignsCard";
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import useSWR from 'swr';
 import Image from 'next/image';
 import { Button } from '@/components/ui/atoms/button/Button'
 import { format } from 'date-fns';
+import { IconAdapter as Icon  } from "@/components/ui/utils/font-awesome-adapter";
+import { TableSkeleton } from '@/components/ui/molecules/skeleton';
 
 // Define IconName type locally if it's not available
 type IconName = string;
 
 // Import dynamically loaded components and ensure they are exported correctly.
-const CalendarUpcoming = dynamic(() => import("@/components/ui/organisms/Calendar/CalendarUpcoming"), {
+const CalendarUpcoming = dynamic(() => import("@/components/ui/organisms/calendar/CalendarUpcoming"), {
   ssr: false
 });
 
@@ -58,15 +59,15 @@ const Toast: React.FC<ToastProps> = ({
   const config = {
     error: {
       bg: "bg-red-600",
-      icon: (props: IconProps) => <Icon name="faXCircle" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+      icon: (props: IconProps) => <Icon iconId="faXCircleLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />
     },
     success: {
       bg: "bg-green-600",
-      icon: (props: IconProps) => <Icon name="faCheckCircle" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+      icon: (props: IconProps) => <Icon iconId="faCheckCircleLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />
     },
     info: {
       bg: "bg-[var(--accent-color)]",
-      icon: (props: IconProps) => <Icon name="faBellAlert" {...props} solid={false} className="text-[var(--secondary-color)] font-work-sans" />
+      icon: (props: IconProps) => <Icon iconId="faBellAlertLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />
     }
   }[type];
   const Icon = config.icon;
@@ -95,7 +96,7 @@ const ErrorDisplay: React.FC<{
   onRetry
 }) => <div className="bg-white rounded-lg border border-red-200 p-6 text-center font-work-sans">
     <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4 font-work-sans">
-      <Icon name="faXCircle" className="w-8 h-8 text-red-500 font-work-sans" solid={false} />
+      <Icon iconId="faXCircleLight" className="w-8 h-8 text-red-500 font-work-sans"  />
     </div>
     <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2 font-sora">Something went wrong!</h3>
     <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">
@@ -103,7 +104,7 @@ const ErrorDisplay: React.FC<{
     </p>
     {onRetry && <button onClick={onRetry} className="group inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors font-work-sans">
 
-        <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
+        <Icon iconId="faArrowRightLight" className="w-4 h-4 mr-2" />
         <span className="font-work-sans">Try again</span>
       </button>}
     </div>;
@@ -240,7 +241,7 @@ const DashboardMetricCard: React.FC<MetricCardProps> = ({
       </div>
       
       {trend !== undefined && <span className={`inline-flex items-center mr-2 ${trend >= 0 ? 'text-green-600' : 'text-red-600'} font-work-sans`}>
-          {trend >= 0 ? <Icon name="faChevronUp" className="w-3 h-3 mr-1" solid={false} /> : <Icon name="faChevronDown" className="w-3 h-3 mr-1" solid={false} />}
+          {trend >= 0 ? <Icon iconId="faChevronUpLight" className="w-3 h-3 mr-1"  /> : <Icon iconId="faChevronDownLight" className="w-3 h-3 mr-1"  />}
           {Math.abs(trend)}%
         </span>}
     </div>
@@ -1139,10 +1140,10 @@ const CalendarMonthView: React.FC<{
         <h3 className="text-base font-semibold text-center font-sora">{format(currentMonth, 'MMMM yyyy')}</h3>
         <div className="flex space-x-2 font-work-sans">
           <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
-            <Icon name="faChevronLeft" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
+            <Icon iconId="faChevronLeftLight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" />
           </button>
           <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
-            <Icon name="faChevronRight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" iconType="button" />
+            <Icon iconId="faChevronRightLight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" />
           </button>
         </div>
       </div>
@@ -1237,7 +1238,7 @@ const CalendarMonthView: React.FC<{
                 <h4 className="font-semibold text-sm font-sora">{event.title}</h4>
                 <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
                   <div className="flex items-center font-work-sans">
-                    <Icon name="faCalendar" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
+                    <Icon iconId="faCalendarLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
                     <span>
                       {format(new Date(event.start), 'MMM d, yyyy')} 
                       {event.end && ` - ${format(new Date(event.end), 'MMM d, yyyy')}`}
@@ -1245,13 +1246,13 @@ const CalendarMonthView: React.FC<{
                   </div>
                   {event.platform && (
                     <div className="flex items-center mt-1 font-work-sans">
-                      <Icon name="faHashtag" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
+                      <Icon iconId="faHashtagLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
                       <span>{event.platform}</span>
                     </div>
                   )}
                   {event.budget && (
                     <div className="flex items-center mt-1 font-work-sans">
-                      <Icon name="faDollarSign" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" iconType="button" />
+                      <Icon iconId="faDollarSignLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
                       <span>${event.budget.toLocaleString()}</span>
                     </div>
                   )}
@@ -1669,7 +1670,7 @@ export default function DashboardContent({
       <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">{insight.description}</p>
       <button onClick={() => onAction(insight.action)} className="group w-full px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center font-work-sans">
         <span className="font-work-sans">Take Action</span>
-        <Icon name="faArrowRight" className="w-4 h-4 ml-2" iconType="button" />
+        <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-2" />
       </button>
     </div>
   </motion.div>;
@@ -1700,7 +1701,7 @@ export default function DashboardContent({
               className="inline-flex items-center rounded-lg border border-[var(--divider-color)] px-4 py-2 text-sm text-[var(--primary-color)] hover:bg-gray-50 transition-colors font-work-sans"
               data-cy="export-button"
             >
-              <Icon name="faDownload" className="w-4 h-4 mr-2 text-[var(--secondary-color)]" solid={false} />
+              <Icon iconId="faDownloadLight" className="w-4 h-4 mr-2 text-[var(--secondary-color)]"  />
               Export
             </button>
             
@@ -1709,7 +1710,7 @@ export default function DashboardContent({
               className="bg-[var(--accent-color)] hover:bg-[#0096cc] text-white px-4 py-2 rounded-lg flex items-center transition-colors duration-200 font-work-sans"
               data-cy="new-campaign-button"
             >
-              <Icon name="faPlus" className="w-4 h-4 mr-2" solid={false} />
+              <Icon iconId="faPlusLight" className="w-4 h-4 mr-2"  />
               <span className="font-work-sans">New Campaign</span>
             </button>
           </div>
@@ -1783,7 +1784,7 @@ export default function DashboardContent({
             title="Survey Responses"
             value={metrics.stats.surveyResponses}
             trend={metrics.stats.surveyChange}
-            iconName="faCommentDots"
+            iconName="faCommentDotsLight"
             description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
 
           
@@ -1811,7 +1812,7 @@ export default function DashboardContent({
           <h2 className="text-xl font-semibold text-gray-900 font-sora">Influencers Overview</h2>
           <div className="flex space-x-3 font-work-sans">
             <button onClick={() => router.push('/influencers/reports')} className="group px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors font-work-sans">
-              <Icon name="faArrowRight" className="w-4 h-4 mr-2" iconType="button" />
+              <Icon iconId="faArrowRightLight" className="w-4 h-4 mr-2" />
               <span className="font-work-sans">View Detailed Report</span>
             </button>
           </div>
@@ -1924,7 +1925,7 @@ export default function DashboardContent({
           <h2 className="text-xl font-semibold text-gray-900 font-sora">Insights Summary</h2>
           <a href="#" className="group text-[var(--accent-color)] text-sm font-medium flex items-center hover:underline font-work-sans">
             <span className="font-work-sans">View All Insights</span>
-            <Icon name="faArrowRight" className="w-4 h-4 ml-1" iconType="button" />
+            <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-1" />
           </a>
         </div>
         
@@ -1933,7 +1934,7 @@ export default function DashboardContent({
           <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden font-work-sans">
             <div className="flex items-start mb-3 font-work-sans">
               <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3 font-work-sans">
-                <Icon name="faChartLine" className="w-5 h-5 text-white font-work-sans" solid={false} />
+                <Icon iconId="faChartLineLight" className="w-5 h-5 text-white font-work-sans"  />
               </div>
               <div className="flex-1 font-work-sans">
                 <h3 className="text-base font-semibold text-[#0c4a6e] font-sora">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
@@ -1953,12 +1954,12 @@ export default function DashboardContent({
           <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden font-work-sans">
             <div className="absolute top-0 right-0 p-1 font-work-sans">
               <button className="group text-gray-400 hover:text-gray-600 font-work-sans">
-                <Icon name="faXmark" className="w-4 h-4" iconType="button" />
+                <Icon iconId="faXmarkLight" className="w-4 h-4" />
               </button>
             </div>
             <div className="flex items-start mb-3 font-work-sans">
               <div className="bg-gray-300 p-2 rounded-md mr-3 font-work-sans">
-                <Icon name="faTriangleExclamation" className="w-5 h-5 text-gray-600 font-work-sans" solid={false} />
+                <Icon iconId="faTriangleExclamationLight" className="w-5 h-5 text-gray-600 font-work-sans"  />
               </div>
               <div className="flex-1 font-work-sans">
                 <h3 className="text-base font-semibold text-gray-700 font-sora">Low Engagement on "NextGen Focus: Amplify Impact"</h3>

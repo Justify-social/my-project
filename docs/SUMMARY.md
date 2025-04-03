@@ -19,6 +19,8 @@
 - [Data Flow](architecture/data-flow.md)
 - [Authentication](architecture/authentication.md)
 - [State Management](architecture/state-management.md)
+- [Tree-Shake Optimisation](architecture/tree-shake-optimization.md)
+- [Icon Registry Consolidation](architecture/icon-registry-consolidation.md)
 
 ## Features
 
@@ -43,16 +45,22 @@
 - [Environment Variables](reference/configs/environment-variables.md)
 - [Linting Guide](reference/configs/linting-guide.md)
 - [Build Configuration](reference/configs/build-configuration.md)
+- [Configuration System](configuration/README.md)
+- [Migration Guide](configuration/migration-guide.md)
+- [Implementation Status](configuration/implementation-status.md)
 
 ### UI
 
 - [Atomic Design Structure](reference/ui/atomic-design-structure.md)
+- [Shadcn UI Complete Guide](components/ui/shadcn-complete-guide.md)
 - [UI Components Plan](components/ui/guide/components-plan.md)
 - [UI Components Implementation](components/ui/implementation/components-implementation.md)
 - [UI Components Error Resolution](components/ui/implementation/error-resolution.md)
 - [UI Component Autoloading](components/ui/autoloading-implementation.md)
 - [UI Component Autoloading Phase 2 Plan](components/ui/phase2-build-time-registry.md)
 - [UI Component Autoloading README](components/ui/autoloading-README.md)
+- [UI Component Browser](components/ui/browser/README.md)
+- [UI Component Browser Implementation Roadmap](components/ui/browser/implementation-roadmap.md)
 
 ### Scripts
 

@@ -1,7 +1,3 @@
-import * as Sentry from "@sentry/nextjs"
-
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 1.0,
-  debug: false,
-}) 
+// This file is now located at config/sentry/sentry.edge.config.ts
+// This is a redirect file for backward compatibility
+export * from './config/sentry/sentry.edge.config';

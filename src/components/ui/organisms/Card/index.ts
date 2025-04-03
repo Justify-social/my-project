@@ -1,27 +1,31 @@
 /**
- * Card Component Library
+ * Card Module - Single Source of Truth for Card Components
  * 
- * This file exports all Card-related components, types, and utilities.
+ * This file consolidates all card-related exports into a single entry point,
+ * making it easier to import and use cards throughout the application.
+ * 
+ * The entire card system follows the Single Source of Truth principle:
+ * - Card.tsx is the canonical source for base card components
+ * - MetricCard.tsx is the canonical source for the metric card component
+ * - All card variants are consolidated and exported from this single file
  */
 
-// Export the main Card component and related components
-export { 
-  default as Card,
+// Re-export the main Card components
+export {
+  Card,
   CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
-  CardFooter,
-  MetricCard
+  CardFooter
 } from './Card';
 
-// Export type definitions
-export type { 
-  CardProps,
-  CardHeaderProps,
-  CardContentProps,
-  CardFooterProps,
-  MetricCardProps,
-  CardVariant
-} from './Card'; 
-import Card from './Card';
+// Re-export specialized card components
+export { MetricCard } from './MetricCard';
+export { default as UpcomingCampaignsCard } from './UpcomingCampaignsCard';
 
-export default Card;
+// Re-export example for the component library
+export { CardExamples } from './examples/CardExamples';
+
+// Export types
+export type { MetricCardProps } from './MetricCard';

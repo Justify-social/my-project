@@ -1,8 +1,9 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.210Z
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Error from '../../../middlewares/handle-db-errors';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { cn } from '@/utils/string/utils';
 import { getSafeAssetUrl } from '@/utils/fileUtils';
 import { toast } from 'sonner';
@@ -358,21 +359,21 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
   // Function to render the appropriate icon based on file type and status
   const renderFileIcon = () => {
     if (status === 'loading') {
-      return <Icon name="faSpinner" className="w-6 h-6 animate-spin" />;
+      return <Icon iconId="faSpinnerLight" className="w-6 h-6 animate-spin" />;
     }
     
     if (status === 'error' || status === 'deleted') {
-      return <Icon name="faTriangleExclamation" className="w-6 h-6 text-red-500" />;
+      return <Icon iconId="faTriangleExclamationLight" className="w-6 h-6 text-red-500" />;
     }
     
     if (isVideo) {
-      return <Icon name="faFileVideo" className="w-6 h-6" />;
+      return <Icon iconId="faFileVideoLight" className="w-6 h-6" />;
     } else if (isImage) {
-      return <Icon name="faFileImage" className="w-6 h-6" />;
+      return <Icon iconId="faFileImageLight" className="w-6 h-6" />;
     } else if (type?.includes('audio')) {
-      return <Icon name="faFileAudio" className="w-6 h-6" />;
+      return <Icon iconId="faFileAudioLight" className="w-6 h-6" />;
     } else {
-      return <Icon name="faFile" className="w-6 h-6" />;
+      return <Icon iconId="faFileLight" className="w-6 h-6" />;
     }
   };
 
@@ -426,7 +427,7 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
             onClick={handleRetry}
             className="px-3 py-1 bg-blue-500 text-white text-sm rounded flex items-center font-work-sans">
 
-              <Icon name="faRotateRight" className="mr-1" />
+              <Icon iconId="faRotateRightLight" className="mr-1" />
               Retry
             </button>
             <button
@@ -470,9 +471,9 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
             className="bg-white bg-opacity-70 rounded-full p-2 text-[var(--primary-color)] hover:text-[var(--accent-color)] transition-colors font-work-sans">
 
               {isPlaying ? (
-                <Icon name="faPause" className="w-5 h-5 text-current" />
+                <Icon iconId="faPauseLight" className="w-5 h-5 text-current" />
               ) : (
-                <Icon name="faPlay" className="w-5 h-5 text-current" />
+                <Icon iconId="faPlayLight" className="w-5 h-5 text-current" />
               )}
 
             </button>

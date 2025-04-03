@@ -7,10 +7,10 @@ export const revalidate = 60; // Revalidate every 60 seconds
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { toast } from 'react-hot-toast';
-import Card, { CardHeader, CardContent } from '@/components/ui/Card';
+import { Card, CardHeader, CardContent } from '@/components/ui/organisms/card';
 import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
 import { Button } from '@/components/ui/atoms/button/Button'
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@auth0/nextjs-auth0';
 import type { UserProfile } from '@auth0/nextjs-auth0/client';
@@ -244,7 +244,7 @@ export default function AdminDashboard() {
           <strong className="font-bold">Error! </strong>
           <span className="block sm:inline font-work-sans">{alertMessage}</span>
           <span className="absolute top-0 bottom-0 right-0 px-4 py-3 font-work-sans" onClick={() => setShowAlertError(false)}>
-            {<Icon name="faXCircle" className="h-6 w-6 text-red-500 font-work-sans" solid={false} />}
+            {<Icon iconId="faXCircleLight" className="h-6 w-6 text-red-500 font-work-sans"  />}
           </span>
         </div>}
 
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
           <strong className="font-bold">Success! </strong>
           <span className="block sm:inline font-work-sans">{alertMessage}</span>
           <span className="absolute top-0 bottom-0 right-0 px-4 py-3 font-work-sans" onClick={() => setShowAlertSuccess(false)}>
-            {<Icon name="faXCircle" className="h-6 w-6 text-green-500 font-work-sans" solid={false} />}
+            {<Icon iconId="faXCircleLight" className="h-6 w-6 text-green-500 font-work-sans"  />}
           </span>
         </div>}
 
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
             <div className="flex gap-3 font-work-sans">
               <button onClick={() => router.push('/debug-tools')} className="px-4 py-2 flex items-center gap-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors font-work-sans">
 
-                {<Icon name="faBug" className="h-5 w-5" solid={false} />}
+                {<Icon iconId="faBugLight" className="h-5 w-5"  />}
                 Debug Tools
               </button>
             </div>
@@ -376,7 +376,7 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-medium font-sora">User Details</h3>
                   <button className="text-[var(--secondary-color)] hover:text-[var(--primary-color)] font-work-sans" onClick={() => setUserModalOpen(false)}>
 
-                    {<Icon name="faXCircle" className="h-6 w-6" solid={false} />}
+                    {<Icon iconId="faXCircleLight" className="h-6 w-6"  />}
                   </button>
                 </div>
                 

@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.198Z
 'use client';
 
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from 'react';
@@ -10,7 +11,7 @@ import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/error-fallback';
 import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'
 import Image from 'next/image';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 // Define types locally instead of importing
@@ -38,28 +39,28 @@ enum Position {
 
 // Define UI_ICON_MAP for use in the component
 const UI_ICON_MAP: Record<string, string> = {
-  "lightBulb": "faLightbulb",
-  "chart": "faChartLine",
-  "tag": "faTag",
-  "circleCheck": "faCircleCheck",
+  "lightBulb": "faLightbulbLight",
+  "chart": "faChartLineLight",
+  "tag": "faTagLight",
+  "circleCheck": "faCircleCheckLight",
   "bookmark": "faBookmark",
   "trendUp": "faTrendUp",
-  "dollarSign": "faDollarSign",
-  "calendar": "faCalendar",
+  "dollarSign": "faDollarSignLight",
+  "calendar": "faCalendarLight",
   "documentText": "faFileLines",
-  "userCircle": "faUserCircle",
-  "mail": "faEnvelope",
-  "building": "faBuilding",
+  "userCircle": "faUserCircleLight",
+  "mail": "faEnvelopeLight",
+  "building": "faBuildingLight",
   "lightning": "faBolt",
-  "userGroup": "faUserGroup",
+  "userGroup": "faUserGroupLight",
   "photo": "faImage",
-  "globe": "faGlobe",
+  "globe": "faGlobeLight",
   "bolt": "faBolt"
 };
 
 // Import the asset components
-import { AssetPreview } from '@/components/ui/organisms/AssetCard/components/AssetPreview'
-import { AssetCard } from '@/components/ui/organisms/AssetCard/AssetCard'
+import { AssetPreview } from '@/components/ui/organisms/card/asset-card/components/AssetPreview'
+import { AssetCard } from '@/components/ui/organisms/card/asset-card/AssetCard'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -355,10 +356,10 @@ const CampaignMetricCard = ({
   let trendIcon = null;
   let trendColor = "text-gray-500";
   if (trend === "up") {
-    trendIcon = <Icon name="faArrowUp" className="inline-block h-4 w-4 ml-1" solid={false} />;
+    trendIcon = <Icon iconId="faArrowUpLight" className="inline-block h-4 w-4 ml-1" />;
     trendColor = "text-green-600";
   } else if (trend === "down") {
-    trendIcon = <Icon name="faArrowDown" className="inline-block h-4 w-4 ml-1" solid={false} />;
+    trendIcon = <Icon iconId="faArrowDownLight" className="inline-block h-4 w-4 ml-1" />;
     trendColor = "text-red-600";
   }
   
@@ -493,7 +494,7 @@ const DataRow = ({
           </span>}
         <span className={`${featured ? 'font-medium' : ''} font-work-sans`}>{label}</span>
         {tooltip && <span className="ml-1 cursor-help font-work-sans" title={tooltip}>
-            {<Icon name="faCircleInfo" className="h-4 w-4 text-gray-400 font-work-sans" solid={false} />}
+            {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-work-sans"  />}
           </span>}
       </div>
     </div>
@@ -529,12 +530,12 @@ const AudienceSection: React.FC<{
     return aValue - bValue;
   });
 
-  return <DataCard title="Audience Demographics" iconName="faUserGroup" description="Target audience information for this campaign">
+  return <DataCard title="Audience Demographics" iconName="faUserGroupLight" description="Target audience information for this campaign">
       <div className="space-y-6 font-work-sans">
         {/* Demographics Section */}
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-start mb-4">
-            <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+            <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
             <h3 className="font-medium text-gray-800 font-sora">Demographics</h3>
         </div>
 
@@ -596,7 +597,7 @@ const AudienceSection: React.FC<{
         {/* Location Section */}
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-start mb-4">
-            <Icon name="faMap" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+            <Icon iconId="faMapLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
             <h3 className="font-medium text-gray-800 font-sora">Location</h3>
           </div>
 
@@ -637,7 +638,7 @@ const AudienceSection: React.FC<{
         {audience.demographics.interests && audience.demographics.interests.length > 0 && (
           <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
             <div className="flex items-start mb-4">
-              <Icon name="faChartPie" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+              <Icon iconId="faChartPieLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
               <h3 className="font-medium text-gray-800 font-sora">Interests & Job Titles</h3>
             </div>
 
@@ -797,7 +798,7 @@ const CampaignDetailAssetPreview = ({
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400" iconType="static" solid={false} />
+          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400"  />
         </div>
       )}
     </div>
@@ -861,7 +862,7 @@ const ObjectivesSection: React.FC<{
         {/* Main Message */}
         <div className="space-y-6">
           <div className="flex items-start">
-            <Icon name="faCommentDots" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
               <span className="text-base text-gray-800 block">{campaign.mainMessage || 'Not specified'}</span>
@@ -870,7 +871,7 @@ const ObjectivesSection: React.FC<{
           
           {/* Hashtags */}
           <div className="flex items-start">
-            <Icon name="faTag" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
               <span className="text-base text-gray-800 block">{campaign.hashtags || 'Not specified'}</span>
@@ -879,7 +880,7 @@ const ObjectivesSection: React.FC<{
           
           {/* Memorability Score */}
           <div className="flex items-start">
-            <Icon name="faStar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
               <span className="text-base text-gray-800 block">{campaign.memorability || 'Not specified'}</span>
@@ -888,7 +889,7 @@ const ObjectivesSection: React.FC<{
           
           {/* Key Benefits */}
           <div className="flex items-start">
-            <Icon name="faCircleCheck" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
               <span className="text-base text-gray-800 block">{campaign.keyBenefits || 'Not specified'}</span>
@@ -901,7 +902,7 @@ const ObjectivesSection: React.FC<{
         {/* Expected Achievements */}
         <div className="space-y-6">
           <div className="flex items-start">
-            <Icon name="faArrowTrendUp" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
               <span className="text-base text-gray-800 block">{campaign.expectedAchievements || 'Not specified'}</span>
@@ -910,7 +911,7 @@ const ObjectivesSection: React.FC<{
           
           {/* Impact on Purchase Intent */}
           <div className="flex items-start">
-            <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
               <span className="text-base text-gray-800 block">{campaign.purchaseIntent || 'Not specified'}</span>
@@ -919,7 +920,7 @@ const ObjectivesSection: React.FC<{
           
           {/* Brand Perception Change */}
           <div className="flex items-start">
-            <Icon name="faChartBar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+            <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
             <div className="flex-1">
               <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
               <span className="text-base text-gray-800 block">{campaign.brandPerception || 'Not specified'}</span>
@@ -970,7 +971,7 @@ const CreativeRequirementsSection: React.FC<{
 
     <div className="space-y-2 font-work-sans">
       {requirements && requirements.length > 0 ? requirements.map((req) => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start font-work-sans">
-            {<Icon name="faDocumentText" className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-work-sans" solid={false} />}
+            {<Icon iconId="faFileLight" className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-work-sans" />}
             <span className="text-gray-700 font-work-sans">{req.requirement}</span>
           </div>) : <div className="p-3 bg-gray-50 rounded-lg font-work-sans">
           <p className="text-gray-500 italic font-work-sans">No requirements specified</p>
@@ -1152,44 +1153,44 @@ const capitalize = (str: string): string => {
 // StatusBadge component with semantic icons
 const CampaignStatusBadge = ({ status }: {status?: string;}) => {
   let statusColor = "bg-gray-100 text-gray-700";
-  let statusIcon = <Icon name="faCircleQuestion" className="h-4 w-4 mr-1" solid={false} />;
+  let statusIcon = <Icon iconId="faCircleQuestionLight" className="h-4 w-4 mr-1" />;
   
   switch (status?.toLowerCase()) {
     case 'draft':
       statusColor = "bg-yellow-50 text-yellow-700";
-      statusIcon = <Icon name="faPencil" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faPencilLight" className="h-4 w-4 mr-1" />;
       break;
     case 'submitted':
       statusColor = "bg-blue-50 text-blue-700";
-      statusIcon = <Icon name="faPaperPlane" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1" />;
       break;
     case 'pending':
       statusColor = "bg-orange-50 text-orange-700";
-      statusIcon = <Icon name="faClock" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faClockLight" className="h-4 w-4 mr-1" />;
       break;
     case 'approved':
       statusColor = "bg-green-50 text-green-700";
-      statusIcon = <Icon name="faCircleCheck" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faCircleCheckLight" className="h-4 w-4 mr-1" />;
       break;
     case 'rejected':
       statusColor = "bg-red-50 text-red-700";
-      statusIcon = <Icon name="faCircleXmark" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faCircleXmarkLight" className="h-4 w-4 mr-1" />;
       break;
     case 'error':
       statusColor = "bg-red-50 text-red-700";
-      statusIcon = <Icon name="faTriangleExclamation" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-1" />;
       break;
     case 'active':
       statusColor = "bg-green-50 text-green-700";
-      statusIcon = <Icon name="faPlay" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faPlayLight" className="h-4 w-4 mr-1" />;
       break;
     case 'completed':
       statusColor = "bg-purple-50 text-purple-700";
-      statusIcon = <Icon name="faFlag" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faFlagLight" className="h-4 w-4 mr-1" />;
       break;
     default:
       statusColor = "bg-gray-100 text-gray-700";
-      statusIcon = <Icon name="faCircleQuestion" className="h-4 w-4 mr-1" solid={false} />;
+      statusIcon = <Icon iconId="faCircleQuestionLight" className="h-4 w-4 mr-1" />;
   }
   
   return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor} font-work-sans`}>
@@ -1244,7 +1245,7 @@ const safeCurrency = (value: Currency | string | undefined | null): string => {
 // Error status badge for displaying API errors
 const ErrorStatusBadge = ({ message }: {message: string;}) => {
   return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm font-work-sans">
-      <Icon name="faTriangleExclamation" className="h-4 w-4 mr-2" solid={false} />
+      <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-2" />
       <span className="font-work-sans">{message}</span>
     </div>;
 };
@@ -1640,12 +1641,10 @@ export default function CampaignDetail() {
                 className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-work-sans"
                 aria-label="Go back"
               >
-                <Icon 
-                  name="faChevronLeft" 
+                <Icon iconId="faChevronLeftLight" 
                   className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans" 
-                  solid={false} 
-                  iconType="button"
-                />
+                   
+                  />
               </button>
               <div className="font-work-sans">
                 <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
@@ -1659,11 +1658,11 @@ export default function CampaignDetail() {
             
             <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-                <Icon name="faPrint" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" solid={false} iconType="button" />
+                <Icon iconId="faPrintLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
                 <span className="font-work-sans">Print</span>
               </button>
               <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-                <Icon name="faShare" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" solid={false} iconType="button" />
+                <Icon iconId="faShareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
                 <span className="font-work-sans">Share</span>
               </button>
               <button 
@@ -1671,7 +1670,7 @@ export default function CampaignDetail() {
                 className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans" 
                 disabled={!!error}
               >
-                <Icon name="faPenToSquare" className="h-4 w-4 mr-2 text-white !text-white" solid={true} iconType="static" />
+                <Icon iconId="faPenToSquareSolid" className="h-4 w-4 mr-2 text-white !text-white" />
                 <span className="font-work-sans">Edit Campaign</span>
               </button>
             </div>
@@ -1782,7 +1781,7 @@ export default function CampaignDetail() {
         <div className="mb-6 font-work-sans">
           <DataCard title="Creative Assets" iconName="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
             {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-                {<Icon name="faImage" className="h-10 w-10 mx-auto mb-2 opacity-50" solid={false} />}
+                {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
                 <p className="font-work-sans">No creative assets available</p>
               </div> : 
               <div>
@@ -1811,7 +1810,7 @@ export default function CampaignDetail() {
                   </div> 
                   : 
                   <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                      <Icon name="faImage" className="h-8 w-8 mx-auto mb-2 opacity-50" solid={false} />
+                      <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p className="font-work-sans">No creative assets uploaded yet</p>
                   </div>
                 }
@@ -1842,11 +1841,9 @@ export default function CampaignDetail() {
                                 alt={featureIconsMap[featureKey].title} 
                                 className="w-7 h-7" 
                               /> : 
-                              <Icon 
-                                name="faBolt" 
+                              <Icon iconId="faBoltLight" 
                                 className="h-7 w-7 text-[var(--accent-color)]" 
-                                iconType="static" 
-                                solid={false} 
+                                 
                               />
                             }
                           </div>
@@ -1863,7 +1860,7 @@ export default function CampaignDetail() {
                     );
                   }) : 
                   <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                      <Icon name="faBolt" className="h-8 w-8 mx-auto mb-2 opacity-50" solid={false} />
+                      <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p className="font-work-sans">No features enabled for this campaign</p>
                   </div>
                 }

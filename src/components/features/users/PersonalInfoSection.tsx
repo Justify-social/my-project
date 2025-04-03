@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.213Z
 import React, { useState } from 'react';
 import HTMLInputElement from '../../ui/radio/types/index';
 import { motion } from 'framer-motion';
@@ -5,7 +6,7 @@ import Card from './shared/Card';
 import SectionHeader from './shared/SectionHeader';
 import InputField from './shared/InputField';
 import ActionButtons from './shared/ActionButtons';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 interface UserProfile {
   firstName: string;

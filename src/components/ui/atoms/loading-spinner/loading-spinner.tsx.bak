@@ -1,0 +1,63 @@
+'use client';
+
+import { Icon } from '@/components/ui/atoms/icon';
+import React from 'react';
+import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+import { cn } from '@/lib/utils';
+
+export interface LoadingSpinnerProps {
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  label?: string;
+  className?: string;
+  labelClassName?: string;
+  center?: boolean;
+}
+
+const sizeClasses = {
+  xs: 'w-3 h-3',
+  sm: 'w-4 h-4',
+  md: 'w-5 h-5',
+  lg: 'w-6 h-6',
+  xl: 'w-8 h-8',
+};
+
+/**
+ * LoadingSpinner Component
+ * 
+ * A versatile spinner component for loading states
+ */
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 'md',
+  label,
+  className,
+  labelClassName,
+  center = false,
+}) => {
+  const containerClasses = cn(
+    'flex items-center',
+    center && 'justify-center',
+    className
+  );
+
+  const spinnerClasses = cn(
+    'animate-spin text-primary',
+    sizeClasses[size]
+  );
+
+  const labelClasses = cn(
+    'ml-2 text-gray-700',
+    size === 'xs' && 'text-xs',
+    size === 'sm' && 'text-sm',
+    size === 'md' && 'text-base',
+    size === 'lg' && 'text-lg',
+    size === 'xl' && 'text-xl',
+    labelClassName
+  );
+
+  return (
+    <div className={containerClasses}>
+      <Icon name="faCircleNotch" className={spinnerClasses} variant="solid"/>
+      {label && <span className={labelClasses}>{label}</span>}
+    </div>
+  );
+}; 

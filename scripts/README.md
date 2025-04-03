@@ -1,150 +1,143 @@
-# Project Scripts - Comprehensive Toolkit
+# Project Scripts Architecture
 
-This directory contains a consolidated set of utilities and scripts for managing various aspects of the project. The scripts have been intentionally organized into a streamlined, logical structure to minimize duplication and maximize power and flexibility.
+This directory contains a holistic, well-organized collection of utilities and scripts for managing various aspects of the project. The scripts are structured following solid software engineering principles to ensure maintainability, clarity, and efficiency.
 
-## Master Toolkit
+> **New Master Toolkit Available!** 
+> 
+> Try our new unified script interface that provides centralized access to all scripts:
+> ```bash
+> node scripts/master/master-toolkit.mjs help
+> ```
+> See [Master Script Architecture](./master/README.md) for details.
 
-The centerpiece of our script organization is the `master-toolkit.js` script, which provides a unified interface to all script functionality across categories. This master script coordinates the execution of specialized scripts in each category, presenting a coherent and consistent user experience.
+## Directory Structure
 
-### Usage
+```
+scripts/
+├── master/                # Master toolkit and script architecture
+│   ├── master-toolkit.mjs # Unified entry point for all scripts
+│   └── README.md          # Master architecture documentation
+├── consolidated/           # Single source of truth for consolidated scripts
+├── icons/                  # Icon management scripts
+│   └── README.md           # Documentation for icon scripts
+├── ui/                     # UI component management scripts
+│   └── README.md           # Documentation for UI scripts
+├── config/                 # Configuration management scripts
+│   ├── config-organizer.mjs    # Organizes configuration files
+│   └── migrate-config.mjs      # Updates configuration references
+├── build/                  # Build process scripts
+├── utils/                  # Utility scripts
+├── cleanup/                # Cleanup and maintenance scripts
+├── linting/                # Code quality scripts
+├── docs/                   # Documentation scripts
+└── db/                     # Database scripts
+```
+
+## Architecture Principles
+
+Our script architecture follows these key principles:
+
+1. **Single Source of Truth**: Each functionality has one definitive implementation
+2. **Logical Organization**: Scripts are grouped by domain and purpose
+3. **Unified Interface**: Common entry points for related functionality
+4. **Progressive Complexity**: Simple operations are easy, complex operations are possible
+5. **Documentation First**: Every script directory includes comprehensive documentation
+6. **ESM Preference**: Modern ES modules (.mjs) are preferred for new scripts
+7. **Backward Compatibility**: Support for existing workflows while moving forward
+
+## Script Categories
+
+### Core Scripts
+
+- **master-toolkit.js**: Unified command-line interface for all script functionality
+- **config-organizer.mjs**: Manages configuration file organization
+- **migrate-config.mjs**: Updates references to configuration files
+
+### Icon Management
+
+The `icons/` directory contains scripts for managing UI icons:
+
+- **download-icons.mjs**: Downloads and processes icon files
+- **audit-icons.mjs**: Analyzes icon usage and validates integrity
+
+### UI Component Management
+
+The `ui/` directory contains scripts for UI component management:
+
+- **validate-component-paths.mjs**: Validates component paths
+- **analyze-component-usage.cjs**: Analyzes component usage
+- **backup-ui-components.js**: Creates component backups
+
+### File Organization
+
+Several scripts maintain the project's clean directory structure:
+
+- **config/scripts/config-organizer.mjs**: Organizes configuration files
+- **tree-shake/tree-shake.mjs**: Identifies and removes deprecated files
+
+## Usage Guidelines
+
+### General Pattern
+
+Most scripts follow this usage pattern:
+
+```bash
+node scripts/<category>/<script-name>.mjs [options]
+```
+
+### Master Toolkit
+
+The master toolkit provides a unified interface:
 
 ```bash
 node scripts/master-toolkit.js <category> <command> [options]
 ```
 
-### Available Categories
-
-- **components** - UI component management tools
-- **linting** - Code quality and linting tools
-- **icons** - Icon management tools
-- **docs** - Documentation tools
-- **cleanup** - Cleanup utilities
-- **utils** - Utility tools
-
-For detailed help on each category:
-
+Example:
 ```bash
-node scripts/master-toolkit.js <category> help
-```
-
-## Component Management
-
-The component management tools are now consolidated into a single powerful script (`master-component-manager.sh`) that can:
-
-- Find duplicate components
-- Consolidate components into their canonical directories
-- Remove duplicate component directories
-- Clean up component structure and fix imports
-- Run a full component management cycle
-
-```bash
-# Example: Find duplicate components
-node scripts/master-toolkit.js components find
-
-# Example: Consolidate components 
-node scripts/master-toolkit.js components consolidate
-
-# Example: Run full cycle
-node scripts/master-toolkit.js components full-cycle
-```
-
-## Linting and Code Quality
-
-The linting tools provide comprehensive code quality management:
-
-- Fix linting issues automatically
-- Fix explicit 'any' types
-- Find common linting issues
-- Generate lint fix execution plans
-- Execute bulk lint fixes
-
-```bash
-# Example: Fix linting issues in a specific file
-node scripts/master-toolkit.js linting fix --file src/components/SomeComponent.tsx
-
-# Example: Generate a lint fix plan
-node scripts/master-toolkit.js linting plan
-```
-
-## Icon Management
-
-Icon management tools provide a complete workflow for managing icons:
-
-- Audit icons for issues
-- Download and update icons
-- Verify icon structure
-- Update icon imports
-- Fix common icon issues
-- Generate icon data
-
-```bash
-# Example: Audit icons
+# Run icon audit
 node scripts/master-toolkit.js icons audit
 
-# Example: Update icon imports
-node scripts/master-toolkit.js icons update-imports
+# Organize configuration files
+node scripts/master-toolkit.js config organize
 ```
 
-## Documentation
+### NPM Scripts
 
-Documentation tools help maintain project documentation:
-
-- Update documentation
-- Generate script documentation
-- Clean up documentation files
+Common operations are available through npm scripts:
 
 ```bash
-# Example: Generate script documentation
-node scripts/master-toolkit.js docs generate-scripts
+# Icon management
+npm run icons:download
+npm run icons:validate
+
+# UI component management
+npm run ui:validate-paths
+npm run ui:analyze-usage
 ```
 
-## Cleanup Utilities
+## Development Guidelines
 
-Cleanup tools help maintain a clean codebase:
+When creating new scripts:
 
-- Update import paths
-- Find and remove backup files
-- Clean up deprecated files
+1. **Location**: Place scripts in the appropriate category directory
+2. **Format**: Use `.mjs` for ES modules, `.cjs` for CommonJS modules
+3. **Documentation**: Update the relevant README.md with usage instructions
+4. **Interfaces**: Maintain consistent CLI interfaces across scripts
+5. **Error Handling**: Include robust error handling and user feedback
+6. **Testing**: Include testing mechanisms for script functionality
+7. **Single Responsibility**: Each script should have a clear, focused purpose
 
-```bash
-# Example: Update import paths
-node scripts/master-toolkit.js cleanup import-paths
+## Implementation Notes
 
-# Example: Find backup files
-node scripts/master-toolkit.js cleanup find-backups
-```
+- Scripts are interconnected through a cohesive architecture while maintaining isolation
+- Shared utilities are available in the `utils/` directory
+- Configuration can be environment-specific using the `NODE_ENV` variable
+- All scripts include detailed help output with the `--help` flag
 
-## Utility Tools
+## Future Improvements
 
-General utility functions:
-
-- Verify no backup files exist
-- Generate final verification reports
-
-```bash
-# Example: Generate verification report
-node scripts/master-toolkit.js utils final-report
-```
-
-## Directory Structure
-
-The script directory is organized by function:
-
-- `/scripts/components/` - UI component management
-- `/scripts/linting/` - Linting and code quality
-- `/scripts/icons/` - Icon management
-- `/scripts/docs/` - Documentation
-- `/scripts/cleanup/` - Cleanup utilities
-- `/scripts/utils/` - General utilities
-
-Each specialized subdirectory contains scripts focused on a specific domain of functionality, while the master toolkit provides a unified interface to all functionality.
-
-## Design Philosophy
-
-This script architecture follows several key principles:
-
-1. **Centralized Control**: The master toolkit provides a single entry point
-2. **Specialized Execution**: Domain-specific scripts handle specialized logic
-3. **Minimal Duplication**: Common functionality is consolidated
-4. **Progressive Enhancement**: Simple operations are easy, complex operations are possible
-5. **Consistent Interface**: Command structure and options follow consistent patterns
+- Complete migration to ES modules (.mjs) format
+- Enhanced type checking with TypeScript or JSDoc
+- Further consolidation of duplicate functionality
+- Expanded test coverage for script functionality

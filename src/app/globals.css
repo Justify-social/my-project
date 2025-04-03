@@ -54,13 +54,80 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary-color: #333333;      /* Jet */
-  --secondary-color: #4A5568;    /* Payne's Grey */
-  --accent-color: #00BFFF;       /* Deep Sky Blue */
-  --background-color: #FFFFFF;   /* White */
-  --divider-color: #D1D5DB;      /* French Grey */
-  --interactive-color: #3182CE;  /* Medium Blue */
+@layer base {
+  :root {
+    /* Original brand variables */
+    --primary-color: #333333;      /* Jet */
+    --secondary-color: #4A5568;    /* Payne's Grey */
+    --accent-color: #00BFFF;       /* Deep Sky Blue */
+    --background-color: #FFFFFF;   /* White */
+    --divider-color: #D1D5DB;      /* French Grey */
+    --interactive-color: #3182CE;  /* Medium Blue */
+    
+    /* Shadcn variables mapped to our brand colors */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 222.2 47.4% 11.2%; /* Using Jet #333333 */
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 215 19% 35%; /* Using Payne's Grey #4A5568 */
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 195.1 100% 50%; /* Using Deep Sky Blue #00BFFF */
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --interactive: 209 70% 50%; /* Using Medium Blue #3182CE */
+    --interactive-foreground: 210 40% 98%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
 }
 
 /* Global form input styling for consistent branding */
@@ -683,5 +750,27 @@ div[class*='bg-white'] {
 @media (max-width: 768px) {
   .calendar-cell {
     min-height: 60px;
+  }
+}
+/*
+---break---
+
+*/
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add shadcn animation styles at the end of the file */
+@layer utilities {
+  .animate-accordion-down {
+    animation: accordion-down 0.2s ease-out;
+  }
+  .animate-accordion-up {
+    animation: accordion-up 0.2s ease-out;
   }
 }

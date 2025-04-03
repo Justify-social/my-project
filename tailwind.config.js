@@ -1,5 +1,5 @@
 // This file is a redirect to the configuration in config/tailwind/
 // For backward compatibility
-import tailwindConfig from './config/tailwind/tailwind.config.js';
+const tailwindConfig = require('./config/tailwind/tailwind.config.js');
 
-export default tailwindConfig;
+module.exports = tailwindConfig;

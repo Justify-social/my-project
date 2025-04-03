@@ -1,25 +1,9 @@
-/**
- * Typography Component Library
- * 
- * This file exports all typography-related components, types, and utilities.
- * 
- * Usage:
- * import { Heading, Text, Paragraph, Blockquote, Code } from '@/components/ui/atoms/typography';
- */
+export { Typography } from './Typography';
+export { Heading } from './Heading';
+export { Paragraph } from './Paragraph';
+export { Text } from './Text';
 
-// Export type definitions
-export * from './types';
-
-// Export main components
-export { default as Heading } from './Heading';
-export { default as Text } from './Text';
-export { default as Paragraph } from './Paragraph';
-export { default as Blockquote } from './Blockquote';
-export { default as Code } from './Code';
-
-// Export for backwards compatibility
-export * from './Typography';
-
-import Typography from './Typography';
-
-export default Typography;
+export type { TypographyProps } from './Typography';
+export type { HeadingProps } from './Heading';
+export type { ParagraphProps } from './Paragraph';
+export type { TextProps } from './Text'; 

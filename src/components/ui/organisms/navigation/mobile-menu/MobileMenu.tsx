@@ -1,11 +1,48 @@
+import { Icon } from '@/components/ui/atoms/icon';
 import React, { useState, useEffect } from 'react';
-import { cn } from '@/utils/string/utils';
-import { BaseMobileMenuProps, MobileMenuProps } from './types';
-import { SidebarItem } from '../sidebar/types';
-import { Icon } from '@/components/ui/atoms/icons'
-import Image from 'next/image';
+import { cn } from '@/lib/utils';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
-import { NavItem } from '../config';
+import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+import Image from 'next/image';
+
+// Define sidebar item types
+interface SidebarItem {
+  id: string;
+  label: string;
+  href: string;
+  icon?: string;
+  isActive?: boolean;
+  isDisabled?: boolean;
+  badge?: string | number;
+  children?: SidebarItem[];
+}
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: string;
+}
+
+interface BaseMobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  items: SidebarItem[];
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
+  className?: string;
+  onItemClick?: (item: SidebarItem) => void;
+}
+
+interface MobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  navItems: NavItem[];
+  settingsNavItem: NavItem;
+  remainingCredits: number;
+  notificationsCount: number;
+  companyName: string;
+  user?: UserProfile;
+}
 
 /**
  * BaseMobileMenu component for responsive navigation on mobile devices.
@@ -96,7 +133,7 @@ export function BaseMobileMenu({
         >
           {item.icon && (
             <span className="flex-shrink-0 mr-3">
-              <Icon name={item.icon} size="md" />
+              <Icon iconId="faQuestionLight" name={item.icon} className="w-5 h-5"/>
             </span>
           )}
           <span className="flex-grow">{item.label}</span>
@@ -106,17 +143,13 @@ export function BaseMobileMenu({
             </span>
           )}
           {hasChildren && (
-            <Icon
-              name={isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'}
-              size="sm"
-              className="ml-2"
-            />
+            <Icon iconId="faQuestionLight" name={isExpanded ? "faChevronDown" : "faChevronRight"} className="ml-2 w-4 h-4"/>
           )}
         </a>
         
         {hasChildren && isExpanded && (
           <ul className="bg-gray-50">
-            {item.children?.map(child => renderItem(child, depth + 1))}
+            {item.children?.map((child: SidebarItem) => renderItem(child, depth + 1))}
           </ul>
         )}
       </li>
@@ -156,7 +189,7 @@ export function BaseMobileMenu({
               onClick={onClose}
               aria-label="Close menu"
             >
-              <Icon name="fa-xmark" size="md" />
+              <Icon iconId="faXmarkLight" className="w-5 h-5"/>
             </button>
           </div>
         )}
@@ -170,7 +203,7 @@ export function BaseMobileMenu({
               onClick={onClose}
               aria-label="Close menu"
             >
-              <Icon name="fa-xmark" size="md" />
+              <Icon iconId="faXmarkLight" className="w-5 h-5"/>
             </button>
           </div>
         )}
@@ -237,13 +270,13 @@ export function MobileMenu({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Icon name="coins" size="md" />
+          <Icon iconId="faCoinsLight" className="w-5 h-5"/>
           <span className="text-sm font-medium">{remainingCredits} credits</span>
         </div>
         
         <div className="flex items-center space-x-2">
           <div className="relative">
-            <Icon name="bell" size="md" />
+            <Icon iconId="faBellLight" className="w-5 h-5"/>
             {notificationsCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
                 {notificationsCount}

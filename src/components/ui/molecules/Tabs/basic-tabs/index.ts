@@ -3,21 +3,21 @@
  * Provides a compound component pattern for creating tabbed interfaces
  */
 
-export { 
-  Tabs, 
-  TabList, 
-  Tab, 
-  TabPanels, 
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from './Tabs';
+import { TabsList, TabsTrigger, TabsContent } from './TabsSubcomponents';
+
+export {
+  // Original components
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
   TabPanel,
-  type TabsProps,
-  type TabListProps,
-  type TabProps,
-  type TabPanelsProps,
-  type TabPanelProps,
-  type TabsVariant,
-  type TabsAlign
-} from './Tabs'; 
-// Default export added by auto-fix script
-export default {
-  // All exports from this file
+  
+  // Compatibility components
+  TabsList,
+  TabsTrigger,
+  TabsContent
 };
+
+export default Tabs;

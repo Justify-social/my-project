@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { Header } from '@/components/ui/organisms/navigation/header/Header';
-import { Sidebar } from '@/components/ui/organisms/navigation/sidebar/Sidebar'
+import Header from '@/components/ui/organisms/navigation/header';
+import Sidebar from '@/components/ui/organisms/navigation/sidebar';
 import { SidebarProvider, useSidebar } from "@/providers/SidebarProvider";
 import { SearchProvider } from '@/contexts/SearchContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { LoadingSpinner as AuthSpinner } from '@/components/ui';
-import { Icon } from '@/components/ui/atoms/icons'
+import { LoadingSpinner } from '@/components/ui/atoms/loading-spinner';
+import { Icon } from '@/components/ui/atoms/icon';
 import Link from "next/link";
 import Image from "next/image";
 
@@ -35,7 +35,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // Show the auth spinner while checking authentication
   if (isLoading) {
-    return <AuthSpinner label="Loading Justify..." />;
+    return <LoadingSpinner label="Loading Justify..." />;
   }
 
   // Show error with login button if authentication fails
