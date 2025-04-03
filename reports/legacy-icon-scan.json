@@ -1,0 +1,852 @@
+{
+  "summary": {
+    "totalFiles": 262,
+    "filesWithIcons": 47,
+    "filesToMigrate": 0,
+    "filesPartiallyMigrated": 0,
+    "filesFullyMigrated": 47,
+    "totalLegacyReferences": 0,
+    "totalModernReferences": 302,
+    "overallMigrationPercent": 100
+  },
+  "files": [
+    {
+      "file": "src/app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 8,
+        "totalCount": 8,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronLeftLight\"",
+          "iconId=\"faCheckLight\"",
+          "iconId=\"faChevronRightLight\"",
+          "iconId=\"faInfoLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(campaigns)/campaigns/[id]/components/ActionPanel.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCopyLight\"",
+          "iconId=\"faTrashCanLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(campaigns)/campaigns/[id]/page.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 35,
+        "totalCount": 35,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [
+          "solid={false}",
+          "solid={true}"
+        ],
+        "modernIds": [
+          "iconId=\"faArrowUpLight\"",
+          "iconId=\"faArrowDownLight\"",
+          "iconId=\"faCircleInfoLight\"",
+          "iconId=\"faUserGroupLight\"",
+          "iconId=\"faUserLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/page.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 3,
+        "totalCount": 3,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronRightLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/admin/page.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 4,
+        "totalCount": 4,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faXCircleLight\"",
+          "iconId=\"faBugLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/features/icon-demo/IconDemo.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 3,
+        "totalCount": 3,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faHeartLight\"",
+          "iconId=\"faHeartSolid\"",
+          "iconId=\"faCheckSolid\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/features/icon-library/IconErrorBoundary.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faRotateLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/features/icon-library/IconLibrary.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 21,
+        "totalCount": 21,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faSpinnerLight\"",
+          "iconId=\"faTriangleExclamationLight\"",
+          "iconId=\"faRotateLight\"",
+          "iconId=\"faQuestionLight\"",
+          "iconId=\"faCheckLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/components/SelectedComponentView.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCubesLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/components/ComponentPreview.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 5,
+        "totalCount": 5,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faSpinnerLight\"",
+          "iconId=\"faEyeLight\"",
+          "iconId=\"faCodeLight\"",
+          "iconId=\"faGearLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/components/ComponentResolver.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 4,
+        "totalCount": 4,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCircleExclamationLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/components/DynamicStyledSidebar.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 5,
+        "totalCount": 5,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faPaletteLight\"",
+          "iconId=\"faMagnifyingGlassLight\"",
+          "iconId=\"faMagnifyingGlassPlusLight\"",
+          "iconId=\"faGearLight\"",
+          "iconId=\"faArrowLeftLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/app/(admin)/debug-tools/ui-components/page.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 5,
+        "totalCount": 5,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faPaletteLight\"",
+          "iconId=\"faIconsLight\"",
+          "iconId=\"faWandMagicLight\"",
+          "iconId=\"faQuestionLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/molecules/pagination/examples/PaginationExamples.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faAngleLeftLight\"",
+          "iconId=\"faAngleRightLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/molecules/search-bar/SearchBar.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faMagnifyingGlassLight\"",
+          "iconId=\"faTimesLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/molecules/accordion/accordion.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/molecules/carousel/Carousel.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faArrowLeftLight\"",
+          "iconId=\"faArrowRightLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/molecules/resizable/Resizable.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faGripVerticalLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/molecules/select/select.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 4,
+        "totalCount": 4,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\"",
+          "iconId=\"faChevronUpLight\"",
+          "iconId=\"faCheckLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/calendar/Calendar.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronLeftLight\"",
+          "iconId=\"faChevronRightLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/navigation-menu/Navigation-menu.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/accordion/Accordion.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/checkbox/Checkbox.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCheckLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/dropdown-menu/Dropdown-menu.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 3,
+        "totalCount": 3,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronRightLight\"",
+          "iconId=\"faCheckLight\"",
+          "iconId=\"faCircleLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/context-menu/Context-menu.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 3,
+        "totalCount": 3,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronRightLight\"",
+          "iconId=\"faCheckLight\"",
+          "iconId=\"faCircleLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/dialog/Dialog.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCloseLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/loading-spinner/loading-spinner.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCircleNotchLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/command/Command.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faMagnifyingGlassLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/select/Select.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 4,
+        "totalCount": 4,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\"",
+          "iconId=\"faChevronUpLight\"",
+          "iconId=\"faCheckLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/icon/adapters/shadcn-adapter.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 3,
+        "totalCount": 3,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/atoms/sheet/Sheet.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faXLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/organisms/calendar/Calendar.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronLeftLight\"",
+          "iconId=\"faChevronRightLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/organisms/card/UpcomingCampaignsCard.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 9,
+        "totalCount": 9,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faQuestionLight\"",
+          "iconId=\"faXmarkCircleLight\"",
+          "iconId=\"faRefreshLight\"",
+          "iconId=\"faCalendarPlusLight\"",
+          "iconId=\"faPlusLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/organisms/card/asset-card/AssetCard.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [
+          "solid={false}"
+        ],
+        "modernIds": [
+          "iconId=\"faUserLight\"",
+          "iconId=\"faWalletLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/organisms/card/asset-card/AssetPreview.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 3,
+        "totalCount": 3,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [
+          "solid={true}"
+        ],
+        "modernIds": [
+          "iconId=\"faVideoLight\"",
+          "iconId=\"faImageLight\"",
+          "iconId=\"faInfoLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/organisms/navigation/navigation-menu/NavigationMenu.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronDownLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/ui/organisms/modal/Modal.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 1,
+        "totalCount": 1,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faXmarkLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/content/EnhancedAssetPreview.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 9,
+        "totalCount": 9,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faSpinnerLight\"",
+          "iconId=\"faTriangleExclamationLight\"",
+          "iconId=\"faFileVideoLight\"",
+          "iconId=\"faFileImageLight\"",
+          "iconId=\"faFileAudioLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/content/AssetPreview.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 4,
+        "totalCount": 4,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faInfoLight\"",
+          "iconId=\"faMinusLight\"",
+          "iconId=\"faPlusLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/dashboard/CalendarUpcoming.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 5,
+        "totalCount": 5,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChevronLeftLight\"",
+          "iconId=\"faChevronRightLight\"",
+          "iconId=\"faCalendarLight\"",
+          "iconId=\"faChatBubbleLight\"",
+          "iconId=\"faMoneyLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/users/page.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 27,
+        "totalCount": 27,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCheckCircleLight\"",
+          "iconId=\"faLightningLight\"",
+          "iconId=\"faXCircleLight\"",
+          "iconId=\"faArrowRightLight\"",
+          "iconId=\"faCreditCardLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/campaigns/Step5Content.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 39,
+        "totalCount": 39,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [
+          "solid={true}"
+        ],
+        "modernIds": [
+          "iconId=\"faPenToSquareLight\"",
+          "iconId=\"faVideoLight\"",
+          "iconId=\"faInfoLight\"",
+          "iconId=\"faCalendarLight\"",
+          "iconId=\"faCircleInfoLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/campaigns/Step2Content.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 15,
+        "totalCount": 15,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faChartBarLight\"",
+          "iconId=\"faChartLineLight\"",
+          "iconId=\"faTrashCanLight\"",
+          "iconId=\"faTrashCanSolid\"",
+          "iconId=\"faCommentsLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/campaigns/CampaignAssetUploader.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 2,
+        "totalCount": 2,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faUploadLight\"",
+          "iconId=\"faInfoLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/campaigns/Step1Content.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 31,
+        "totalCount": 31,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCalendarLight\"",
+          "iconId=\"faChevronDownLight\"",
+          "iconId=\"faCircleInfoLight\"",
+          "iconId=\"faCloseLight\"",
+          "iconId=\"faUserLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/components/features/campaigns/WizardNavigation.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 6,
+        "totalCount": 6,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faCheckCircleSolid\"",
+          "iconId=\"faArrowLeftLight\"",
+          "iconId=\"faFloppyDiskLight\"",
+          "iconId=\"faCircleNotchLight\"",
+          "iconId=\"faCheckLight\""
+        ]
+      }
+    },
+    {
+      "file": "src/__tests__/components/ui/icons/icon.test.tsx",
+      "stats": {
+        "legacyCount": 0,
+        "modernCount": 15,
+        "totalCount": 15,
+        "migrationPercent": 100
+      },
+      "examples": {
+        "legacyNames": [],
+        "legacySolid": [],
+        "modernIds": [
+          "iconId=\"faUserLight\"",
+          "iconId=\"faUserSolid\""
+        ]
+      }
+    }
+  ]
+}

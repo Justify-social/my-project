@@ -10,6 +10,7 @@ module.exports = {
   ],
   
   rules: {
-    'icon-standards/no-fontawesome-direct-import': 'error'
+    'icon-standards/no-fontawesome-direct-import': 'error',
+    'icon-standards/prefer-icon-id-prop': 'error'
   }
 };

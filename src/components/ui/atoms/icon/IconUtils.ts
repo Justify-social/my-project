@@ -56,10 +56,27 @@ export function ensureIconVariant(iconName: string, variant: 'light' | 'solid'):
  * const CheckIcon = createIcon('faCheck');
  * // Later in a component:
  * <CheckIcon size="lg" />
+ * 
+ * @deprecated Use createIconWithId instead for better type safety
  */
 export function createIcon(iconName: string) {
   return (props: Omit<IconProps, 'name'>) => ({
     name: iconName,
+    ...props
+  });
+}
+
+/**
+ * Create a type-safe icon factory using the new iconId approach
+ * 
+ * @example
+ * const CheckIcon = createIconWithId('faCheckLight');
+ * // Later in a component:
+ * <CheckIcon size="lg" />
+ */
+export function createIconWithId(iconId: string) {
+  return (props: Omit<IconProps, 'iconId'>) => ({
+    iconId: iconId,
     ...props
   });
 }

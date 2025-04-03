@@ -38,8 +38,15 @@ export const PLATFORM_ICON_TYPE_MAP: Record<PlatformName, IconName> = {
 export interface IconProps {
   /**
    * Name of the icon to display (can be a semantic name like 'add', a FontAwesome name like 'faUser', or a platform name like 'facebook')
+   * @deprecated Use iconId instead for explicit variant control
    */
-  name: IconName;
+  name?: IconName;
+
+  /**
+   * Icon ID with explicit variant suffix (e.g., 'faUserLight', 'faUserSolid')
+   * This is the preferred way to reference icons for better type safety
+   */
+  iconId?: string;
 
   /**
    * CSS class names to apply to the icon

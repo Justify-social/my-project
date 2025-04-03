@@ -46,13 +46,13 @@ export interface ShadcnIconProps extends
  * @example
  * ```tsx
  * // Basic usage
- * <ShadcnIcon name="faChevronDown" />
+ * <ShadcnIcon iconId="faChevronDownLight" />
  * 
  * // With size variant
- * <ShadcnIcon name="faChevronDown" size="sm" />
+ * <ShadcnIcon iconId="faChevronDownLight" size="sm" />
  * 
  * // With solid variant (for hover states)
- * <ShadcnIcon name="faChevronDown" variant="solid" />
+ * <ShadcnIcon iconId="faChevronDownLight" variant="solid" />
  * ```
  */
 export const ShadcnIcon = forwardRef<HTMLSpanElement, ShadcnIconProps>(

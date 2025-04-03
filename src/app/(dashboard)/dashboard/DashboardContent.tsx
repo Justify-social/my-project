@@ -113,7 +113,8 @@ const ErrorDisplay: React.FC<{
 interface CardProps {
   title: string;
   description?: string;
-  iconName?: IconName; // Changed from icon component to iconName string
+  iconName?: IconName; // @deprecated - use iconId instead
+  iconId?: string; // New property for explicit icon ID with variant suffix
   children: React.ReactNode;
   actions?: React.ReactNode;
 }
@@ -121,6 +122,7 @@ const Card: React.FC<CardProps> = ({
   title,
   description,
   iconName,
+  iconId,
   children,
   actions
 }) => <motion.div initial={{
@@ -133,8 +135,12 @@ const Card: React.FC<CardProps> = ({
 
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3 font-work-sans">
       <div className="flex items-center font-work-sans">
-        {iconName && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3 font-work-sans">
-            <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />
+        {(iconName || iconId) && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3 font-work-sans">
+            <Icon 
+              {... (iconId ? { iconId } : { name: iconName })} 
+              className="w-5 h-5 text-[var(--accent-color)] font-work-sans" 
+              solid={false} 
+            />
           </div>}
         <div className="font-work-sans">
           <h2 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h2>
@@ -166,37 +172,47 @@ const DashboardStatusBadge: React.FC<StatusBadgeProps> = ({
   const config = {
     draft: {
       iconName: "edit" as IconName,
+      iconId: "faEditLight",
       color: "bg-gray-100 text-gray-800",
       label: "Draft"
     },
     active: {
       iconName: "check" as IconName,
+      iconId: "faCheckLight",
       color: "bg-green-100 text-green-800",
       label: "Active"
     },
     paused: {
       iconName: "info" as IconName,
+      iconId: "faInfoLight",
       color: "bg-yellow-100 text-yellow-800",
       label: "Paused"
     },
     completed: {
       iconName: "check" as IconName,
+      iconId: "faCheckLight",
       color: "bg-blue-100 text-blue-800",
       label: "Completed"
     },
     error: {
       iconName: "close" as IconName,
+      iconId: "faXmarkLight",
       color: "bg-red-100 text-red-800",
       label: "Error"
     }
   }[status.toLowerCase()] || {
     iconName: "info" as IconName,
+    iconId: "faInfoLight",
     color: "bg-gray-100 text-gray-800",
     label: status
   };
   return <span className={`inline-flex items-center ${sizeClasses} rounded-full font-medium 
       ${config.color} border shadow-sm font-work-sans`}>
-      <Icon name={config.iconName} className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} solid={false} />
+      <Icon 
+        iconId={config.iconId} 
+        className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} 
+        solid={false} 
+      />
       {config.label}
     </span>;
 };
@@ -206,7 +222,8 @@ interface MetricCardProps {
   title: string;
   value: number | string;
   trend?: number;
-  iconName?: IconName; // Changed from icon component to iconName string
+  iconName?: IconName; // @deprecated - use iconId instead
+  iconId?: string; // New property for explicit icon ID with variant suffix
   imageSrc?: string; // Add support for direct SVG images
   description?: string;
   format?: "number" | "currency" | "percent";
@@ -218,6 +235,7 @@ const DashboardMetricCard: React.FC<MetricCardProps> = ({
   value,
   trend,
   iconName,
+  iconId,
   imageSrc,
   description,
   format = "number"
@@ -233,8 +251,12 @@ const DashboardMetricCard: React.FC<MetricCardProps> = ({
           className="w-5 h-5"
           style={{ filter: 'brightness(0) invert(1)' }} /> :
 
-
-        <Icon name={iconName!} className="w-5 h-5 text-white font-work-sans" solid={true} />
+        /* Use iconId if provided, fall back to legacy iconName if not */
+        <Icon 
+          {... (iconId ? { iconId } : { name: iconName })}
+          className="w-5 h-5 text-white font-work-sans" 
+          solid={true} 
+        />
         }
         </div>
         <h3 className="text-sm font-medium text-[var(--secondary-color)] font-sora">{title}</h3>
@@ -414,7 +436,8 @@ interface ChartCardProps {
   title: string;
   description?: string;
   children: React.ReactNode;
-  iconName: IconName; // Changed from icon component to iconName string
+  iconName?: IconName; // @deprecated - use iconId instead
+  iconId?: string; // New property for explicit icon ID with variant suffix
   actions?: React.ReactNode;
 }
 const ChartCard: React.FC<ChartCardProps> = ({
@@ -422,13 +445,18 @@ const ChartCard: React.FC<ChartCardProps> = ({
   description,
   children,
   iconName,
+  iconId,
   actions
 }) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6 font-work-sans" data-cy="chart-card">
-    <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-3 font-work-sans">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 font-work-sans">
       <div className="flex items-center font-work-sans">
-        <div className="p-2 bg-[var(--light-background)] rounded-lg mr-3 font-work-sans">
-          <Icon name={iconName} className="w-5 h-5 text-[var(--accent-color)] font-work-sans" solid={false} />
-        </div>
+        {(iconName || iconId) && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2 rounded-lg mr-3 font-work-sans">
+            <Icon 
+              {... (iconId ? { iconId } : { name: iconName })}
+              className="w-5 h-5 text-[var(--accent-color)] font-work-sans" 
+              solid={false} 
+            />
+          </div>}
         <div className="font-work-sans">
           <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h3>
           {description && <p className="text-sm text-[var(--secondary-color)] font-work-sans">{description}</p>}
@@ -1776,7 +1804,7 @@ export default function DashboardContent({
             title="Total Campaigns"
             value={metrics.stats.totalCampaigns}
             trend={metrics.stats.campaignChange}
-            iconName="faMegaphone"
+            iconId="faMegaphoneLight"
             description={`+${metrics.stats.campaignChange} campaigns`} />
 
           
@@ -1784,7 +1812,7 @@ export default function DashboardContent({
             title="Survey Responses"
             value={metrics.stats.surveyResponses}
             trend={metrics.stats.surveyChange}
-            iconName="faCommentDotsLight"
+            iconId="faCommentDotsLight"
             description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
 
           
@@ -1792,7 +1820,7 @@ export default function DashboardContent({
             title="Live Campaigns"
             value={metrics.stats.liveCampaigns}
             trend={metrics.stats.liveChange}
-            iconName="faPlay"
+            iconId="faPlayLight"
             description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} />
 
           

@@ -323,7 +323,8 @@ const formatKpiName = (kpi: string): string => {
 interface MetricCardProps {
   title: string;
   value: string | number;
-  iconName: string;
+  iconName?: string; // @deprecated - use iconId instead
+  iconId?: string;
   trend?: "up" | "down" | "none";
   subtext?: string;
   format?: "number" | "currency" | "percent" | "text";
@@ -334,6 +335,7 @@ const CampaignMetricCard = ({
   title,
   value,
   iconName,
+  iconId,
   trend = "none",
   subtext,
   format = "text",
@@ -389,7 +391,7 @@ const CampaignMetricCard = ({
     }
     return (
           <Icon 
-            name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
+            name={UI_ICON_MAP[iconId] || `fa${iconId.charAt(0).toUpperCase() + iconId.slice(1)}`} 
             className="h-5 w-5 text-[var(--accent-color)]" 
             iconType="static" 
             solid={false} 
@@ -429,15 +431,18 @@ const CampaignMetricCard = ({
 interface DataCardProps {
   title: string;
   description?: string;
-  iconName: string;
+  iconName?: string; // @deprecated - use iconId instead
+  iconId?: string;
   children: React.ReactNode;
   className?: string;
   actions?: React.ReactNode;
 }
+
 const DataCard: React.FC<DataCardProps> = ({
   title,
   description,
   iconName,
+  iconId,
   children,
   className = '',
   actions
@@ -446,12 +451,13 @@ const DataCard: React.FC<DataCardProps> = ({
       <div className="flex items-center font-work-sans">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3 font-work-sans">
           <Icon 
-            name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
-          className="h-5 w-5 text-[var(--accent-color)] font-work-sans"
+            {... (iconId 
+              ? { iconId } 
+              : { name: UI_ICON_MAP[iconName || ''] || `fa${(iconName || '').charAt(0).toUpperCase() + (iconName || '').slice(1)}` }
+            )}
+            className="h-5 w-5 text-[var(--accent-color)] font-work-sans"
             aria-hidden="true" 
-            iconType="static" 
-          solid={false} />
-
+          />
         </div>
         <div className="font-work-sans">
           <h3 className="text-[var(--primary-color)] font-semibold font-sora">{title}</h3>
@@ -471,30 +477,34 @@ const DataCard: React.FC<DataCardProps> = ({
 interface DataRowProps {
   label: string;
   value: React.ReactNode;
-  iconName?: string;
+  iconName?: string; // @deprecated - use iconId instead
+  iconId?: string;
   tooltip?: string;
   featured?: boolean;
 }
+
 const DataRow = ({
   label,
   value,
   iconName,
+  iconId,
   tooltip,
   featured = false
 }: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'} font-work-sans`}>
     <div className="w-1/3 flex-shrink-0 font-work-sans">
       <div className="flex items-center text-[var(--secondary-color)] font-work-sans">
-        {iconName && <span className="mr-2 flex-shrink-0 font-work-sans">
+        {(iconName || iconId) && <span className="mr-2 flex-shrink-0 font-work-sans">
             <Icon 
-              name={UI_ICON_MAP[iconName] || `fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`} 
+              {... (iconId 
+                ? { iconId } 
+                : { name: UI_ICON_MAP[iconName || ''] || `fa${(iconName || '').charAt(0).toUpperCase() + (iconName || '').slice(1)}` }
+              )}
               className="h-4 w-4" 
-              iconType="static" 
-          solid={false} />
-
+            />
           </span>}
         <span className={`${featured ? 'font-medium' : ''} font-work-sans`}>{label}</span>
         {tooltip && <span className="ml-1 cursor-help font-work-sans" title={tooltip}>
-            {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-work-sans"  />}
+            {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-work-sans" />}
           </span>}
       </div>
     </div>
@@ -530,7 +540,7 @@ const AudienceSection: React.FC<{
     return aValue - bValue;
   });
 
-  return <DataCard title="Audience Demographics" iconName="faUserGroupLight" description="Target audience information for this campaign">
+  return <DataCard title="Audience Demographics" iconId="faUserGroupLight" description="Target audience information for this campaign">
       <div className="space-y-6 font-work-sans">
         {/* Demographics Section */}
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
@@ -810,7 +820,7 @@ const ObjectivesSection: React.FC<{
   campaign: CampaignDetail;
 }> = ({
   campaign
-}) => <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
+}) => <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
 
     <div className="space-y-6 font-work-sans">
       {/* Primary KPI with enhanced styling */}
@@ -937,7 +947,7 @@ const AudienceInsightsSection: React.FC<{
 }) => {
   if (!audience) return null; // Early return if no audience data
 
-  return <DataCard title="Audience Insights" iconName="userCircle" className="col-span-2">
+  return <DataCard title="Audience Insights" iconId="userCircle" className="col-span-2">
       <div className="grid grid-cols-2 gap-8 font-work-sans">
         {/* Screening Questions */}
         <div className="font-work-sans">
@@ -967,7 +977,7 @@ const CreativeRequirementsSection: React.FC<{
   requirements: CampaignDetail['creativeRequirements'];
 }> = ({
   requirements
-}) => <DataCard title="Creative Requirements" iconName="documentText" description="Campaign creative specifications">
+}) => <DataCard title="Creative Requirements" iconId="documentText" description="Campaign creative specifications">
 
     <div className="space-y-2 font-work-sans">
       {requirements && requirements.length > 0 ? requirements.map((req) => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start font-work-sans">
@@ -1697,7 +1707,7 @@ export default function CampaignDetail() {
 
         {/* Campaign Details & Primary Contact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          <DataCard title="Campaign Details" iconName="documentText" description="Basic campaign information">
+          <DataCard title="Campaign Details" iconId="documentText" description="Basic campaign information">
             <div className="space-y-3 font-work-sans">
               <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
               <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
@@ -1712,7 +1722,7 @@ export default function CampaignDetail() {
             </div>
           </DataCard>
 
-          <DataCard title="Primary Contact" iconName="userCircle" description="Primary point of contact for this campaign">
+          <DataCard title="Primary Contact" iconId="userCircle" description="Primary point of contact for this campaign">
             <div className="space-y-3 font-work-sans">
               <div className="flex items-center mb-4 font-work-sans">
                 <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
@@ -1748,7 +1758,7 @@ export default function CampaignDetail() {
 
         {/* Objectives & Audience */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          {error ? <DataCard title="Campaign Objectives" iconName="lightning" description="Key objectives and performance indicators">
+          {error ? <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
               <div className="space-y-5 font-work-sans">
                 <div className="font-work-sans">
                   <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
@@ -1770,7 +1780,7 @@ export default function CampaignDetail() {
               </div>
             </DataCard> : data && <ObjectivesSection campaign={data} />}
           
-          {error ? <DataCard title="Target Audience" iconName="userGroup" description="Detailed audience targeting information">
+          {error ? <DataCard title="Target Audience" iconId="userGroup" description="Detailed audience targeting information">
               <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
                 <p className="font-work-sans">N/A</p>
               </div>
@@ -1779,7 +1789,7 @@ export default function CampaignDetail() {
 
         {/* Creative Assets */}
         <div className="mb-6 font-work-sans">
-          <DataCard title="Creative Assets" iconName="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
+          <DataCard title="Creative Assets" iconId="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
             {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
                 {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
                 <p className="font-work-sans">No creative assets available</p>
@@ -1821,7 +1831,7 @@ export default function CampaignDetail() {
 
         {/* Campaign Features */}
         <div className="mb-6 font-work-sans">
-          <DataCard title="Campaign Features" iconName="bolt" description="Additional features enabled for this campaign">
+          <DataCard title="Campaign Features" iconId="bolt" description="Additional features enabled for this campaign">
             {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
                 <p className="font-work-sans">N/A</p>
               </div> : 
