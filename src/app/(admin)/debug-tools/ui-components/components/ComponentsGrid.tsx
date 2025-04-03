@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/components/ui/atoms/card';
 import { ComponentMetadata } from '../db/registry';
 
 interface ComponentsGridProps {
@@ -18,6 +18,21 @@ export const ComponentsGrid: React.FC<ComponentsGridProps> = ({
   filter = '',
   category = ''
 }) => {
+  // Get the appropriate icon for a category
+  const getCategoryIcon = (category: string) => {
+    const normalized = category?.toLowerCase() || '';
+    
+    switch(normalized) {
+      case 'atom':
+      case 'atoms': return '/icons/light/faAtomLight.svg';
+      case 'molecule':
+      case 'molecules': return '/icons/light/faDnaLight.svg';
+      case 'organism':
+      case 'organisms': return '/icons/light/faBacteriumLight.svg';
+      default: return '/icons/light/faTableCellsLight.svg';
+    }
+  };
+
   const filteredComponents = useMemo(() => {
     return components.filter((component) => {
       const matchesFilter = filter
@@ -41,7 +56,7 @@ export const ComponentsGrid: React.FC<ComponentsGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
       {filteredComponents.map((component) => (
         <Card
           key={component.id}
@@ -54,9 +69,16 @@ export const ComponentsGrid: React.FC<ComponentsGridProps> = ({
               {component.description}
             </p>
           )}
-          <div className="mt-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              {component.category}
+          <div className="mt-2 flex items-center">
+            <span 
+              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+              title={component.category}
+            >
+              <img 
+                src={getCategoryIcon(component.category)}
+                alt={component.category}
+                className="w-4 h-4 mr-1"
+              />
             </span>
             {component.tags?.slice(0, 2).map((tag) => (
               <span

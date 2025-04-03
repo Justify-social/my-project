@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ComponentMetadata } from '../db/registry';
+import { Tabs, TabsList, TabsTrigger } from '../components/ui-components-bridge';
 
 interface CategoryFilterProps {
   components: ComponentMetadata[];
@@ -29,30 +30,86 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
     return Array.from(uniqueCategories);
   }, [components]);
 
+  // Get the appropriate light icon for each category
+  const getLightIcon = (category: string) => {
+    switch(category.toLowerCase()) {
+      case 'atom':
+      case 'atoms': return 'faAtomLight';
+      case 'molecule':
+      case 'molecules': return 'faDnaLight';
+      case 'organism':
+      case 'organisms': return 'faBacteriumLight';
+      default: return 'faTableCellsLight'; // "All" category
+    }
+  };
+
+  // Get the appropriate solid icon for each category
+  const getSolidIcon = (category: string) => {
+    switch(category.toLowerCase()) {
+      case 'atom':
+      case 'atoms': return 'faAtomSolid';
+      case 'molecule':
+      case 'molecules': return 'faDnaSolid';
+      case 'organism':
+      case 'organisms': return 'faBacteriumSolid';
+      default: return 'faTableCellsSolid'; // "All" category
+    }
+  };
+
+  // Function to get direct path to the icon SVG
+  const getIconPath = (iconId: string) => {
+    const variant = iconId.endsWith('Solid') ? 'solid' : 'light';
+    return `/icons/${variant}/${iconId}.svg`;
+  };
+
+  // Get a friendly name for each category tab
+  const getCategoryLabel = (category: string) => {
+    if (!category) return 'All';
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  // Track hover state for each tab
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+
   return (
-    <div className="mb-6">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Categories</h3>
-      <div className="flex flex-wrap gap-2">
+    <Tabs defaultValue={selectedCategory} onValueChange={onSelectCategory} className="w-full flex justify-end">
+      <TabsList className="bg-white border border-gray-100 p-2 rounded-lg shadow-sm">
         {categories.map((category) => {
-          const isSelected = category === selectedCategory;
-          const displayName = category || 'All';
+          const isActive = category === selectedCategory;
+          const isHovered = category === hoveredCategory;
+          
+          // Use the appropriate icon based on state
+          const iconId = (isActive || isHovered) ? getSolidIcon(category) : getLightIcon(category);
+          const iconPath = getIconPath(iconId);
+          const label = getCategoryLabel(category);
           
           return (
-            <button
+            <TabsTrigger
               key={category}
-              onClick={() => onSelectCategory(category)}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                isSelected
-                  ? 'bg-blue-100 text-blue-800 font-medium'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              value={category}
+              onMouseEnter={() => setHoveredCategory(category)}
+              onMouseLeave={() => setHoveredCategory(null)}
+              className={`px-4 py-2 rounded-md transition-all ${
+                isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
               }`}
+              title={label}
             >
-              {displayName}
-            </button>
+              <span className="flex items-center justify-center">
+                <img 
+                  src={iconPath}
+                  alt={`${label} category`}
+                  className="w-8 h-8"
+                  style={{ 
+                    filter: (isActive || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
+                    transition: 'filter 0.15s ease-in-out'
+                  }}
+                />
+              </span>
+            </TabsTrigger>
           );
         })}
-      </div>
-    </div>
+      </TabsList>
+    </Tabs>
   );
 };
 
