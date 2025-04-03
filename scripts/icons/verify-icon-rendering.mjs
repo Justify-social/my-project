@@ -43,9 +43,7 @@ const REGISTRY_FILES = [
   'brands-icon-registry.json',
   'kpis-icon-registry.json',
   'light-icon-registry.json',
-  'solid-icon-registry.json',
-  'new-light-icon-registry.json',
-  'new-solid-icon-registry.json',
+  'solid-icon-registry.json'
 ];
 
 // FontAwesome patterns to detect

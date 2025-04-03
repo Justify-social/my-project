@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Use the specific registry file
-const ICON_REGISTRY_PATH = path.resolve(process.cwd(), 'public/static/categories/brands-icon-registry.json');
+const ICON_REGISTRY_PATH = path.resolve(process.cwd(), 'public/static/brands-icon-registry.json');
 // Custom output directory
 const OUTPUT_BASE_DIR = path.resolve(process.cwd(), 'public');
 

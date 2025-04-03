@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Path to the solid icon registry JSON file
-const ICON_REGISTRY_PATH = path.resolve(process.cwd(), 'public/static/categories/solid-icon-registry.json');
+const ICON_REGISTRY_PATH = path.resolve(process.cwd(), 'public/static/solid-icon-registry.json');
 
 // Main validation function
 async function validateSolidIconRegistry() {

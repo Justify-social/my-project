@@ -1,110 +1,144 @@
-#!/usr/bin/env node
-
 /**
- * Icon Reference Scanner
+ * Scan Icon References - Updated for New Icon System
  * 
- * This script scans the codebase for legacy icon references that need to be updated
- * to standardized icons from the icon registry. It generates a detailed report of
- * all references found.
+ * This script no longer depends on the deprecated icon-name-mapping.json file.
+ * It directly checks all icon references against the consolidated icon registry.
  */
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const glob = require('glob');
 const chalk = require('chalk');
 
-// Load the icon mapping file
-const iconMappingPath = path.join(process.cwd(), 'public', 'static', 'icon-name-mapping.json');
-const iconMapping = JSON.parse(fs.readFileSync(iconMappingPath, 'utf8')).mappings;
-const iconKeys = Object.keys(iconMapping);
+// Paths
+const srcDir = path.join(process.cwd(), 'src');
+const registryFiles = {
+  app: path.join(process.cwd(), 'public', 'static', 'app-icon-registry.json'),
+  brands: path.join(process.cwd(), 'public', 'static', 'brands-icon-registry.json'),
+  light: path.join(process.cwd(), 'public', 'static', 'light-icon-registry.json'),
+  solid: path.join(process.cwd(), 'public', 'static', 'solid-icon-registry.json'),
+  kpis: path.join(process.cwd(), 'public', 'static', 'kpis-icon-registry.json')
+};
 
-// Build regex pattern for all legacy icon names
-const iconPattern = iconKeys.map(key => `\\b${key}\\b`).join('|');
+// Initialize the consolidated registry
+const registry = { icons: [] };
 
-// Execute grep search across the codebase
-console.log(chalk.blue('Scanning for legacy icon references...'));
-console.log(chalk.gray('This may take a few minutes depending on the size of the codebase.'));
-
-try {
-  // Use ripgrep for faster searching if available
-  const grepCommand = `rg -l "${iconPattern}" --type=ts --type=tsx --type=js --type=jsx src/`;
-  const files = execSync(grepCommand, { encoding: 'utf8' }).trim().split('\n');
-
-  if (!files || files.length === 0 || (files.length === 1 && !files[0])) {
-    console.log(chalk.green('No legacy icon references found!'));
-    process.exit(0);
-  }
-
-  // Count references in each file
-  const fileReferences = {};
-  const totalStats = {
-    totalFiles: 0,
-    totalReferences: 0,
-    iconsByFrequency: {}
-  };
-
-  files.forEach(file => {
-    if (!file) return;
-    
-    totalStats.totalFiles++;
-    const content = fs.readFileSync(file, 'utf8');
-    
-    const fileStats = {
-      references: 0,
-      icons: {}
-    };
-
-    iconKeys.forEach(iconName => {
-      // Use regex to find all instances of this icon name
-      const regex = new RegExp(`\\b${iconName}\\b`, 'g');
-      const matches = content.match(regex);
-      
-      if (matches && matches.length > 0) {
-        fileStats.references += matches.length;
-        fileStats.icons[iconName] = matches.length;
-        
-        // Update global stats
-        totalStats.totalReferences += matches.length;
-        totalStats.iconsByFrequency[iconName] = (totalStats.iconsByFrequency[iconName] || 0) + matches.length;
+// Load all registry files
+Object.keys(registryFiles).forEach(key => {
+  if (fs.existsSync(registryFiles[key])) {
+    try {
+      const data = JSON.parse(fs.readFileSync(registryFiles[key], 'utf8'));
+      if (data && Array.isArray(data.icons)) {
+        registry.icons.push(...data.icons);
       }
-    });
+    } catch (e) {
+      console.error(chalk.red(`Error loading ${key} registry:`, e.message));
+    }
+  }
+});
 
-    if (fileStats.references > 0) {
-      fileReferences[file] = fileStats;
+// Find all JSX/TSX files
+console.log(chalk.blue('Scanning for icon references...'));
+const files = glob.sync('**/*.{jsx,tsx}', { cwd: srcDir, ignore: 'node_modules/**' });
+console.log(chalk.gray(`Found ${files.length} JSX/TSX files to scan`));
+
+// Regular expressions for icon references
+const iconRegexes = [
+  /<Icon\s+([^>]*)name=["']([^"']+)["']([^>]*)>/g,
+  /<Icon\s+([^>]*)iconId=["']([^"']+)["']([^>]*)>/g,
+  /<FontAwesomeIcon\s+([^>]*)icon=["']([^"']+)["']([^>]*)>/g,
+  /<IconAdapter\s+([^>]*)icon=["']([^"']+)["']([^>]*)>/g,
+  /<ShadcnIcon\s+([^>]*)iconId=["']([^"']+)["']([^>]*)>/g
+];
+
+// Results
+const results = {
+  total: 0,
+  modern: 0,
+  legacy: 0,
+  byFile: {}
+};
+
+// Analyze each file
+files.forEach(file => {
+  const filePath = path.join(srcDir, file);
+  const content = fs.readFileSync(filePath, 'utf8');
+  let fileResults = { modern: 0, legacy: 0, references: [] };
+  
+  // Check for icon references
+  iconRegexes.forEach(regex => {
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const iconIdentifier = match[2];
+      
+      // Check if this is a modern or legacy reference
+      let isModern = false;
+      
+      // Modern references use iconId that matches registry id
+      if (match[0].includes('iconId=')) {
+        isModern = true;
+      } else {
+        // Check if this is an id in the registry
+        isModern = registry.icons.some(icon => 
+          icon.id === iconIdentifier || 
+          (icon.alternatives && icon.alternatives.includes(iconIdentifier))
+        );
+      }
+      
+      fileResults.references.push({
+        identifier: iconIdentifier,
+        isModern,
+        context: match[0].trim()
+      });
+      
+      if (isModern) {
+        fileResults.modern++;
+        results.modern++;
+      } else {
+        fileResults.legacy++;
+        results.legacy++;
+      }
+      
+      results.total++;
     }
   });
-
-  // Sort icons by frequency
-  const sortedIcons = Object.entries(totalStats.iconsByFrequency)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, count]) => ({ name, mappedTo: iconMapping[name], count }));
-
-  // Generate report
-  const report = {
-    summary: {
-      totalFiles: totalStats.totalFiles,
-      totalReferences: totalStats.totalReferences,
-      uniqueIcons: Object.keys(totalStats.iconsByFrequency).length
-    },
-    fileReferences: fileReferences,
-    iconsByFrequency: sortedIcons
-  };
-
-  // Save report to disk
-  const reportPath = path.join(process.cwd(), 'reports', 'icon-references-report.json');
-  fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-
-  // Print summary to console
-  console.log(chalk.green(`✓ Found ${totalStats.totalReferences} legacy icon references across ${totalStats.totalFiles} files`));
-  console.log(chalk.green(`✓ Full report saved to: ${reportPath}`));
-  console.log(chalk.yellow('\nTop 10 most used legacy icons:'));
   
-  sortedIcons.slice(0, 10).forEach((icon, index) => {
-    console.log(`${index + 1}. ${chalk.cyan(icon.name)} → ${chalk.green(icon.mappedTo)} (${icon.count} references)`);
+  // Save results if file has icon references
+  if (fileResults.references.length > 0) {
+    results.byFile[file] = fileResults;
+  }
+});
+
+// Display results
+console.log(chalk.green(`\n📊 Icon Reference Analysis`));
+console.log(chalk.green(`======================`));
+console.log(`Total icon references found: ${results.total}`);
+console.log(`- Modern references: ${results.modern} (${Math.round(results.modern / results.total * 100)}%)`);
+console.log(`- Legacy references: ${results.legacy} (${Math.round(results.legacy / results.total * 100)}%)`);
+
+// Show files with legacy references
+if (results.legacy > 0) {
+  console.log(chalk.yellow(`\n⚠️ Files with legacy icon references:`));
+  Object.keys(results.byFile).filter(file => results.byFile[file].legacy > 0).forEach(file => {
+    const fileData = results.byFile[file];
+    console.log(chalk.yellow(`  ${file}: ${fileData.legacy} legacy references`));
+    
+    // Show the first few legacy references as examples
+    fileData.references.filter(ref => !ref.isModern).slice(0, 3).forEach(ref => {
+      console.log(chalk.gray(`    - ${ref.identifier}: ${ref.context}`));
+    });
   });
-  
-} catch (error) {
-  console.error(chalk.red('Error scanning for icon references:'), error);
-  process.exit(1);
+} else {
+  console.log(chalk.green(`\n✅ No legacy icon references found - all icons use the modern approach!`));
+}
+
+console.log(chalk.blue(`\nRun the migration tool to update any remaining legacy references:`));
+console.log(chalk.gray(`  node scripts/icons/migrate-icons.mjs [file-path]`));
+
+// Export results as JSON if requested
+if (process.argv.includes('--json')) {
+  const outputPath = path.join(process.cwd(), 'reports', 'icon-references.json');
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
+  console.log(chalk.blue(`\n📄 Detailed report saved to ${outputPath}`));
 } 
