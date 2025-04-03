@@ -1,151 +1,130 @@
-# Linting Guide
+# Linting Configuration Guide
 
-## Overview
+This document provides a comprehensive guide to the linting configuration used in the project.
 
-This guide documents our linting setup, rules, and processes for maintaining code quality across the project.
+## Configuration Location
 
-## Linting Setup
+Linting configuration is centralized in the `/config` directory:
 
-### ESLint Configuration
+- `/config/eslint/` - ESLint configuration
+- `/config/prettier/` - Prettier configuration
 
-We use ESLint with the following configuration:
+## ESLint Configuration
+
+The project uses ESLint for JavaScript and TypeScript linting with a hierarchical configuration:
+
+### Base Configuration
+
+The base configuration in `/config/eslint/base.js` includes:
+
+- ECMAScript 2021 support
+- React plugin integration
+- TypeScript support
+- Import sorting rules
+- Error prevention rules
+
+### Extended Configurations
+
+Several specialized configurations extend the base:
+
+- `/config/eslint/next.js` - Next.js specific rules
+- `/config/eslint/react.js` - React specific rules
+- `/config/eslint/typescript.js` - TypeScript specific rules
+
+## Prettier Configuration
+
+Prettier is used for code formatting with configuration in `/config/prettier/index.js`:
+
+```javascript
+module.exports = {
+  semi: true,
+  singleQuote: true,
+  tabWidth: 2,
+  trailingComma: 'es5',
+  printWidth: 100,
+  bracketSpacing: true,
+  arrowParens: 'avoid',
+};
+```
+
+## Integration with IDE
+
+### VS Code
+
+The project includes VS Code settings for optimal linting integration:
 
 ```json
-// .eslintrc.json
 {
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended",
-    "prettier"
-  ],
-  "plugins": ["react", "@typescript-eslint", "import", "jsx-a11y"],
-  "rules": {
-    "react/prop-types": "off",
-    "react/react-in-jsx-scope": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "import/order": ["error", {
-      "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
-      "newlines-between": "always",
-      "alphabetize": { "order": "asc", "caseInsensitive": true }
-    }]
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
+}
+```
+
+### Other IDEs
+
+Configuration for other popular IDEs is available in `/docs/guides/editor-setup.md`.
+
+## Pre-commit Hooks
+
+Husky is configured to run linting checks before commits:
+
+```json
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
 ```
 
-### Prettier Configuration
+## Custom Rules
 
-We use Prettier for consistent code formatting:
+The project includes custom linting rules for project-specific standards:
 
-```json
-// .prettierrc.json
-{
-  "semi": true,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "printWidth": 100,
-  "bracketSpacing": true
-}
+- Import organization
+- Component naming conventions
+- Type definition requirements
+- Component structure consistency
+
+## Troubleshooting
+
+### Common Issues
+
+1. **ESLint and Prettier conflicts**: Resolved with `eslint-config-prettier`
+2. **Import sorting issues**: Check `.eslintrc.js` import/order rules
+3. **Next.js specific rules**: Ensure using `/config/eslint/next.js`
+
+### Disabling Rules
+
+Rules can be disabled in specific cases with proper documentation:
+
+```javascript
+// eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(() => {
+  // Complex effect with known dependency exclusions
+}, [dependencies]);
 ```
 
-## Scripts
+## Adding Custom Rules
 
-The following scripts are available for linting and formatting:
+To add new custom rules:
 
-- `npm run lint`: Run ESLint on the codebase
-- `npm run lint:fix`: Run ESLint with automatic fixes
-- `npm run format`: Run Prettier to format all files
-
-## Common Issues and Solutions
-
-### Unused Variables
-
-**Issue:**
-```tsx
-const [value, setValue] = useState(''); // 'value' is defined but never used
-```
-
-**Solution:**
-```tsx
-const [, setValue] = useState(''); // Use empty destructuring for unused variables
-```
-
-### Missing Dependencies in useEffect
-
-**Issue:**
-```tsx
-function Component({ id }) {
-  const [data, setData] = useState(null);
-  
-  useEffect(() => {
-    fetchData(id).then(setData);
-  }, []); // Missing dependency: 'id'
-}
-```
-
-**Solution:**
-```tsx
-function Component({ id }) {
-  const [data, setData] = useState(null);
-  
-  useEffect(() => {
-    fetchData(id).then(setData);
-  }, [id]); // Added 'id' to the dependency array
-}
-```
-
-### Import Ordering
-
-**Issue:**
-```tsx
-import { useState } from 'react';
-import styles from './styles.module.css';
-import axios from 'axios';
-import { MyComponent } from '../components';
-```
-
-**Solution:**
-```tsx
-// External dependencies first
-import axios from 'axios';
-import { useState } from 'react';
-
-// Internal dependencies next
-import { MyComponent } from '../components';
-
-// Local imports last
-import styles from './styles.module.css';
-```
-
-### Accessibility Issues
-
-**Issue:**
-```tsx
-<div onClick={handleClick}>Click me</div>
-```
-
-**Solution:**
-```tsx
-<button type="button" onClick={handleClick}>Click me</button>
-```
-
-## CI/CD Integration
-
-Our CI pipeline includes linting checks that run on every pull request. Pull requests with linting errors will be blocked from merging until the issues are resolved.
-
-## Pre-commit Hooks
-
-We use Husky and lint-staged to run linting and formatting checks before each commit. This ensures that code quality is maintained throughout the development process.
-
-## Best Practices
-
-1. **Fix issues as you go**: Don't accumulate linting errors
-2. **Use IDE integrations**: Configure your editor to show linting errors in real-time
-3. **Run `npm run lint:fix`** before submitting a PR
-4. **Understand the rules**: Don't just fix errors blindly, understand why they exist
-
-## Contact
-
-If you have questions about our linting setup or need help resolving issues, contact the DevOps team.
+1. Update the appropriate config file in `/config/eslint/`
+2. Document the rule in this guide
+3. Add examples of correct/incorrect usage
+4. Run linting on the entire codebase to check impact 

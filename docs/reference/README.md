@@ -1,31 +1,32 @@
-# Reference
+# Reference Documentation
 
-This section contains technical reference material for the project. These documents provide detailed specifications and usage information rather than step-by-step guides.
+This directory contains technical reference documentation for the project. Unlike guides that provide step-by-step instructions, reference documentation provides comprehensive technical details.
 
-## Available References
+## Organization
 
-- **[Scripts](./scripts/index.md)**: Detailed documentation of available scripts in the project
-- **[Linting](./configs/linting-guide.md)**: Linting rules and configuration guidance
-- **[Icon System](./icons/icon-system.md)**: Icon system specification and usage
-- **[API](./api/)**: API endpoints and specifications
-- **[Routes](../routes/)**: Application routes and navigation structure
+The reference documentation is organized into several key areas:
 
-## How to Use References
+- [Architecture](./architecture/) - System architecture and implementation details
+- [API](./api/) - API endpoints, parameters, and response formats
+- [UI](./ui/) - User interface components and design system
+- [Icons](./icons/) - Icon system documentation
+- [Scripts](./scripts/) - Documentation for development and maintenance scripts
+- [Configuration](./config/) - Configuration parameters and options
 
-Reference documents are designed for lookup rather than reading from start to finish. Use them when you need:
+## Purpose
 
-1. Specific technical details 
-2. Configuration options
-3. Available parameters
-4. Expected behaviours or responses
+Reference documentation serves as the authoritative source of detailed technical information. It is typically consulted when:
 
-## Keeping References Updated
+- You need specific technical details about a system component
+- You're looking for complete information about available options and parameters
+- You need to understand the technical architecture or design of a component
 
-Reference documentation should be updated whenever related code changes. When updating reference material:
+## Using This Documentation
 
-1. Be precise and concise
-2. Include examples where helpful
-3. Document edge cases and limitations
-4. Cross-link to related documentation
+Each subdirectory contains documentation focused on a specific technical area. Start with the README in each directory for an overview of available documentation.
 
-For more comprehensive guides and tutorials, see the [Guides](../guides/) section. 
+## Related Documentation
+
+- [Guides](../guides/) - Step-by-step instructions for common tasks
+- [Architecture](../architecture/) - High-level architecture documentation
+- [Standards](../standards/) - Coding standards and conventions 

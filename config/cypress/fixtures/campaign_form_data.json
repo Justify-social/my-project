@@ -1,0 +1,59 @@
+{
+  "step1": {
+    "campaignName": "Test Wizard Campaign",
+    "description": "This is a test campaign created via automated tests",
+    "startDate": "2024-06-01",
+    "endDate": "2024-09-01",
+    "budget": 45000,
+    "brandId": 1
+  },
+  "step2": {
+    "primaryKPI": "brand_awareness",
+    "secondaryKPIs": ["consideration", "conversion_rate"],
+    "objectives": ["Increase brand awareness", "Drive website traffic"],
+    "targetCPA": 25,
+    "targetCPM": 10,
+    "roi": 150
+  },
+  "step3": {
+    "audience": {
+      "locations": [
+        { "country": "United States", "region": "California", "city": "San Francisco" }
+      ],
+      "ageRanges": [
+        { "minAge": 25, "maxAge": 45 }
+      ],
+      "genders": ["male", "female"],
+      "languages": ["English"],
+      "interests": ["Technology", "Digital Marketing"],
+      "screeningQuestions": [
+        {
+          "question": "Have you heard of our brand before?",
+          "required": true,
+          "options": ["Yes", "No", "Not sure"]
+        }
+      ]
+    }
+  },
+  "step4": {
+    "assets": [
+      {
+        "name": "Test Banner",
+        "type": "image",
+        "description": "Main banner for test campaign",
+        "url": "https://example.com/assets/test_banner.jpg"
+      },
+      {
+        "name": "Test Video",
+        "type": "video",
+        "description": "15-second promotional video",
+        "url": "https://example.com/assets/test_video.mp4"
+      }
+    ]
+  },
+  "step5": {
+    "notes": "Ready for review and launch",
+    "confirmation": true,
+    "notifications": ["email", "in_app"]
+  }
+} 
