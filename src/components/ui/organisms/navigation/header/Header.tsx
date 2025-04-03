@@ -5,6 +5,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { MobileMenu } from '@/components/ui/organisms/navigation/mobile-menu/MobileMenu'
 import { navItems, settingsNavItem } from "../config";
 import { SearchBar } from '@/components/ui/molecules/search-bar';
+import { Icon } from '@/components/ui/atoms/icon';
 
 interface HeaderProps {
   companyName: string;
@@ -48,19 +49,18 @@ const Header: React.FC<HeaderProps> = ({
                 {/* Credits */}
                 <Link href="/billing">
                   <div className="flex items-center space-x-1 cursor-pointer font-work-sans">
-                    <Image src="/coins.svg" alt="Credits" width={24} height={24} data-testid="coins-icon" />
+                    <Icon iconId="faCoinsSolid" className="w-6 h-6" data-testid="coins-icon" />
                     <span className="text-[#333333] font-medium text-sm font-work-sans">{remainingCredits}</span>
                   </div>
                 </Link>
 
                 {/* Notifications - positioned directly adjacent to coins */}
                 <div className="relative font-work-sans ml-1">
-                  <Image
-                    src="/bell.svg"
-                    alt="Notifications"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6" />
+                  <Icon 
+                    iconId="faBellSolid" 
+                    className="w-6 h-6" 
+                    alt="Notifications" 
+                  />
 
                   {notificationsCount > 0 &&
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center font-work-sans">
@@ -101,14 +101,11 @@ const Header: React.FC<HeaderProps> = ({
             <div className="hidden md:block font-work-sans">
               {user &&
               <Link href="/settings">
-                  <Image
-                  src={profileImageUrl}
-                  alt="Profile"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                  unoptimized />
-
+                  <Icon 
+                    iconId="faCircleUserSolid" 
+                    className="w-8 h-8" 
+                    alt="Profile"
+                  />
                 </Link>
               }
             </div>

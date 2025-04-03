@@ -34,56 +34,40 @@ export const PLATFORM_ICON_TYPE_MAP: Record<PlatformName, IconName> = {
   'x': 'faXTwitter'
 } as const;
 
-// Main Icon component props interface
+/**
+ * Icon component props
+ */
 export interface IconProps {
   /**
-   * Name of the icon to display (can be a semantic name like 'add', a FontAwesome name like 'faUser', or a platform name like 'facebook')
-   * @deprecated Use iconId instead for explicit variant control
+   * The icon ID with explicit variant suffix (e.g. 'faUserLight', 'faUserSolid')
+   * This is the preferred and most direct way to specify an icon
    */
-  name?: IconName;
-
+  iconId: string;
+  
   /**
-   * Icon ID with explicit variant suffix (e.g., 'faUserLight', 'faUserSolid')
-   * This is the preferred way to reference icons for better type safety
-   */
-  iconId?: string;
-
-  /**
-   * CSS class names to apply to the icon
+   * Optional CSS class to apply to the icon
    */
   className?: string;
-
+  
   /**
-   * Size variant of the icon
+   * Size of the icon (mapped to Tailwind classes)
+   * @default 'md'
    */
   size?: IconSize;
-
+  
   /**
-   * Style variant of the icon (light, solid, etc.)
-   */
-  variant?: IconVariant;
-
-  /**
-   * Optional title for accessibility
+   * Optional accessibility title for the icon
    */
   title?: string;
-
+  
   /**
-   * Whether the icon is in active state (will use solid variant when true)
+   * Optional click handler for the icon
    */
-  active?: boolean;
-
+  onClick?: (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void;
+  
   /**
-   * Optional text color override
+   * Any additional props to pass to the icon container
    */
-  color?: string;
-
-  /**
-   * Click handler for the icon
-   */
-  onClick?: () => void;
-
-  // Allow any other props to be passed through to the element
   [key: string]: any;
 }
 
@@ -130,15 +114,15 @@ export interface IconMetadata {
   id: string;
   
   /** Display name for the icon */
-  name: string;
+  name?: string;
   
-  /** Category the icon belongs to (e.g., 'solid', 'light', 'app') */
-  category: string;
+  /** Category the icon belongs to (e.g., 'solid', 'light') */
+  category?: string;
   
   /** Path to the icon file */
-  path: string;
+  path?: string;
   
-  /** SVG viewBox attribute */
+  /** ViewBox dimensions for SVG */
   viewBox?: string;
   
   /** Width of the icon */
@@ -147,34 +131,34 @@ export interface IconMetadata {
   /** Height of the icon */
   height?: number;
   
-  /** Reference to FontAwesome or other mapping ID */
-  map?: string | null;
+  /** Icon mapping data */
+  map?: string;
   
-  /** Optional usage count tracking */
+  /** Counter for icon usage in the app */
   usageCount?: number;
   
-  /** Optional tags for searchability */
+  /** Tags for searchability */
   tags?: string[];
   
-  /** Kebab-case version of the ID for path generation */
+  /** Kebab-case ID for the icon */
   kebabId?: string;
   
-  /** SVG content for direct rendering - used in icon library but not registry */
+  /** SVG content of the icon */
   svgContent?: string;
   
-  /** Weight/style of the icon */
+  /** Weight of the icon (e.g., 'regular', 'light', 'solid') */
   weight?: string;
   
-  /** Version of the icon */
+  /** Version number of the icon */
   version?: string;
 
-  /** Added: For semantic icon mapping */
+  /** Semantic name/purpose of the icon */
   semantic?: string;
 
-  /** Added: For platform icons like 'facebook' */
+  /** Platform the icon represents (e.g., 'twitter', 'facebook') */
   platform?: string;
 
-  /** Added: For alternative icon names */
+  /** Alternative icons that can be used */
   alternatives?: string[];
 }
 

@@ -16,7 +16,7 @@ import { glob } from 'glob';
 // Configuration
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, '..');
+const ROOT_DIR = path.resolve(__dirname, '../..');
 const UI_DIR = path.join(ROOT_DIR, 'src', 'components', 'ui');
 const COMPONENT_TYPES = ['atoms', 'molecules', 'organisms'];
 

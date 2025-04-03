@@ -2,10 +2,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/organisms/card/Card'
-import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
-import { Badge } from '@/components/ui/molecules/feedback/Badge'
-import { Table } from '@/components/ui/organisms/data-display/table/Table'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/atoms/table';
 import { Icon } from '@/components/ui/atoms/icon';
 import { ComponentMetadata } from '../types';
 import ComponentResolver from './ComponentResolver';
@@ -59,7 +59,7 @@ export default function ComponentSection({ component }: ComponentSectionProps) {
             Props
           </TabsTrigger>
           <TabsTrigger value="code" className="flex items-center">
-            <Icon iconId="faCodeLight" 2 className="h-4 w-4 mr-2" />
+            <Icon iconId="faCodeLight" className="h-4 w-4 mr-2" />
             Code
           </TabsTrigger>
         </TabsList>

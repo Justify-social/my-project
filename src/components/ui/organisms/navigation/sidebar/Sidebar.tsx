@@ -3,8 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import Image from 'next/image';
-import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+import { Icon } from '@/components/ui/atoms/icon';
 
 // Helper function to get icon path
 const getIconPath = (icon: string, style: 'light' | 'solid' = 'light') => {
@@ -36,8 +35,8 @@ export interface SidebarProps {
 }
 
 /**
- * Sidebar component that uses direct SVG imports
- * Instead of using the Icon component, it loads SVGs directly from the public directory
+ * Sidebar component that uses the Icon component
+ * Uses the Single Source of Truth pattern via the Icon component
  */
 export function Sidebar({
   items,
@@ -125,17 +124,13 @@ export function Sidebar({
         >
           {item.icon && (
             <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0 relative">
-              <Image 
-                src={getIconPath(item.icon, (active || isHovered) ? 'solid' : 'light')}
-                alt={`${item.label} icon`}
-                width={20}
-                height={20}
+              <Icon 
+                iconId={item.icon}
                 className="w-5 h-5"
                 style={{ 
                   filter: (active || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
                   transition: 'filter 0.15s ease-in-out'
                 }}
-                unoptimized
               />
             </div>
           )}
@@ -177,17 +172,13 @@ export function Sidebar({
                     >
                       {child.icon && (
                         <div className="w-5 h-5 mr-2 flex items-center justify-center flex-shrink-0">
-                          <Image 
-                            src={getIconPath(child.icon, (childActive || childHovered) ? 'solid' : 'light')}
-                            alt={`${child.label} icon`}
-                            width={16}
-                            height={16}
+                          <Icon 
+                            iconId={child.icon}
                             className="w-4 h-4"
                             style={{ 
                               filter: (childActive || childHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
                               transition: 'filter 0.15s ease-in-out'
                             }}
-                            unoptimized
                           />
                         </div>
                       )}

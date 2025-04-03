@@ -16,7 +16,6 @@ const { mergeConfigurations } = require('../../utils.js');
 const baseNextConfig = {
   // Next.js production optimizations
   reactStrictMode: true,
-  swcMinify: true,
   poweredByHeader: false,
   
   // Error handling

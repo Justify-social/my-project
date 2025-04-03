@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './index';
 import { Button } from '@/components/ui/atoms/button/Button';
 import { Badge } from '@/components/ui/atoms/badge/badge';
-import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
 
 interface Campaign {
   id: number;
@@ -48,19 +47,19 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
   // Get appropriate badge style based on status
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { color: string, icon: string }> = {
-      'draft': { color: 'bg-gray-100 text-gray-800', icon: 'faPencil' },
-      'active': { color: 'bg-green-100 text-green-800', icon: 'faCheckCircle' },
-      'paused': { color: 'bg-yellow-100 text-yellow-800', icon: 'faPause' },
+      'draft': { color: 'bg-gray-100 text-gray-800', icon: 'faPencilLight' },
+      'active': { color: 'bg-green-100 text-green-800', icon: 'faCircleCheckLight' },
+      'paused': { color: 'bg-yellow-100 text-yellow-800', icon: 'faPauseLight' },
       'completed': { color: 'bg-blue-100 text-blue-800', icon: 'faCheckLight' },
       'error': { color: 'bg-red-100 text-red-800', icon: 'faXmarkLight' }
     };
 
     const lowercaseStatus = status.toLowerCase();
-    const config = statusMap[lowercaseStatus] || { color: 'bg-gray-100 text-gray-800', icon: 'faInfoCircle' };
+    const config = statusMap[lowercaseStatus] || { color: 'bg-gray-100 text-gray-800', icon: 'faInfoLight' };
     
     return (
       <Badge variant="outline" className={`${config.color} inline-flex items-center px-2 py-1 rounded-full text-xs font-medium`}>
-        <Icon iconId="faQuestionLight" name={config.icon} size="xs" className="mr-1"/>
+        <Icon iconId={config.icon} size="xs" className="mr-1"/>
         {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
       </Badge>
     );
@@ -128,7 +127,7 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
         </CardHeader>
         <CardContent>
           <div className="p-6 text-center bg-gray-50 rounded-lg border border-gray-100">
-            <Icon iconId="faCalendarPlusLight" className="text-gray-400 mb-2 h-10 w-10"/>
+            <Icon iconId="faCalendarLight" className="text-gray-400 mb-2 h-10 w-10"/>
             <p className="text-gray-600">No upcoming campaigns</p>
             <Button variant="outline" size="sm" className="mt-3">
               <Icon iconId="faPlusLight" size="xs" className="mr-1"/>
@@ -159,12 +158,24 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
               <div>
                 <h4 className="font-medium text-gray-900 mb-1">{campaign.campaignName}</h4>
                 <div className="flex items-center text-sm text-gray-500">
-                  <Icon iconId="faCalendarDayLight" size="xs" className="mr-1"/>
+                  <Icon iconId="faCalendarLight" size="xs" className="mr-1"/>
                   <span>{formatDate(campaign.startDate)}</span>
                   {campaign.platform && (
                     <>
                       <span className="mx-2">•</span>
-                      <Icon iconId="faQuestionLight" name={ campaign.platform.toLowerCase() === 'instagram' ? 'faInstagram' : campaign.platform.toLowerCase() === 'tiktok' ? 'faTiktok' : campaign.platform.toLowerCase() === 'youtube' ? 'faYoutube' : 'faGlobeLight' } size="xs" className="mr-1"/>
+                      <Icon 
+                        iconId={
+                          campaign.platform.toLowerCase() === 'instagram' ? 'brandsInstagram' : 
+                          campaign.platform.toLowerCase() === 'tiktok' ? 'brandsTiktok' : 
+                          campaign.platform.toLowerCase() === 'youtube' ? 'brandsYoutube' :
+                          campaign.platform.toLowerCase() === 'twitter' ? 'brandsXTwitter' :
+                          campaign.platform.toLowerCase() === 'linkedin' ? 'brandsLinkedin' :
+                          campaign.platform.toLowerCase() === 'facebook' ? 'brandsFacebook' : 
+                          'faGlobeLight'
+                        } 
+                        size="xs" 
+                        className="mr-1"
+                      />
                       <span>{campaign.platform}</span>
                     </>
                   )}
@@ -184,7 +195,7 @@ const UpcomingCampaignsCard: React.FC<UpcomingCampaignsCardProps> = ({
       </CardContent>
       <CardFooter>
         <Button onClick={onViewAll} variant="outline">
-          <Icon iconId="faListCheckLight" size="sm" className="mr-2"/>
+          <Icon iconId="faListLight" size="sm" className="mr-2"/>
           View All Campaigns
         </Button>
       </CardFooter>

@@ -158,13 +158,26 @@ export default function DynamicStyledSidebar() {
     return (isActive || isHovered) ? 'solid' : 'light';
   };
 
-  const renderIcon = (name: string, isActive: boolean, isHovered: boolean) => {
+  const renderIcon = (iconId: string, isActive: boolean, isHovered: boolean) => {
+    // Extract base icon name and apply correct variant suffix
+    let finalIconId = iconId;
+    
+    // If the icon already has a variant suffix, replace it with the correct one
+    if (iconId.endsWith('Light') || iconId.endsWith('Solid')) {
+      finalIconId = iconId.slice(0, -5) + ((isActive || isHovered) ? 'Solid' : 'Light');
+    } else {
+      // Otherwise, append the correct variant suffix
+      finalIconId = iconId + ((isActive || isHovered) ? 'Solid' : 'Light');
+    }
+    
     return (
       <Icon 
-        name={name} 
-        variant={(isActive || isHovered) ? "solid" : "light"} 
+        iconId={finalIconId}
         className="w-5 h-5" 
-        style={{ filter: (isActive || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}
+        style={{ 
+          filter: (isActive || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', 
+          transition: 'filter 0.15s ease-in-out' 
+        }}
       />
     );
   };
@@ -172,9 +185,9 @@ export default function DynamicStyledSidebar() {
   // Get appropriate icon for category
   const getCategoryIcon = (category: string) => {
     switch(category) {
-      case 'atom': return 'faAtomLight';
-      case 'molecule': return 'faDnaLight';
-      case 'organism': return 'faBacteriumLight';
+      case 'atom': return 'faAtom';
+      case 'molecule': return 'faDna';
+      case 'organism': return 'faBacterium';
       default: return 'faCode';
     }
   };
@@ -324,7 +337,7 @@ export default function DynamicStyledSidebar() {
             >
               <div className="flex items-center">
                 <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-                  <Icon iconId="faMagnifyingGlassPlusLight" variant={hoverStates['scan'] ? "solid" : "light"} className="w-5 h-5" style={{ filter: hoverStates['scan'] ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}/>
+                  <Icon iconId={hoverStates['scan'] ? "faMagnifyingGlassPlusSolid" : "faMagnifyingGlassPlusLight"} className="w-5 h-5" style={{ filter: hoverStates['scan'] ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}/>
                 </div>
                 <span className={`text-base font-sora font-medium ${hoverStates['scan'] ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
                   Scan for Components
@@ -351,11 +364,13 @@ export default function DynamicStyledSidebar() {
               <div className="flex items-center">
                 <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
                   <Icon 
-                    name="brandsGithub"
-                    variant="brand"
-                    className={(hoverStates['github'] || selectedItemId === 'github') ? "text-[#00BFFF]" : "text-[#333333]"}
+                    iconId="brandsGithub"
+                    className="w-5 h-5"
                     style={{ 
-                      transition: 'color 0.15s ease-in-out'
+                      filter: (hoverStates['github'] || selectedItemId === 'github') 
+                        ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' 
+                        : 'none',
+                      transition: 'filter 0.15s ease-in-out'
                     }}
                   />
                 </div>
@@ -366,6 +381,7 @@ export default function DynamicStyledSidebar() {
             </a>
           </li>
           
+          {/* Settings Button */}
           <li className="w-full">
             <Link
               href="/debug-tools/ui-components/settings"
@@ -380,7 +396,7 @@ export default function DynamicStyledSidebar() {
             >
               <div className="flex items-center">
                 <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-                  <Icon iconId="faGearLight" variant={hoverStates['settings'] ? "solid" : "light"} className="w-5 h-5" style={{ filter: hoverStates['settings'] ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}/>
+                  <Icon iconId={hoverStates['settings'] ? "faGearSolid" : "faGearLight"} className="w-5 h-5" style={{ filter: hoverStates['settings'] ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}/>
                 </div>
                 <span className={`text-base font-sora font-medium ${hoverStates['settings'] ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
                   Settings
@@ -406,7 +422,7 @@ export default function DynamicStyledSidebar() {
         >
           <div className="flex items-center">
             <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-              <Icon iconId="faArrowLeftLight" variant={hoverStates['back'] ? "solid" : "light"} className="w-5 h-5" style={{ filter: hoverStates['back'] ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}/>
+              <Icon iconId={hoverStates['back'] ? "faArrowLeftSolid" : "faArrowLeftLight"} className="w-5 h-5" style={{ filter: hoverStates['back'] ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', transition: 'filter 0.15s ease-in-out' }}/>
             </div>
             <span className={`text-base font-sora font-medium ${hoverStates['back'] ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
               Back to Debug Tools
@@ -421,4 +437,4 @@ export default function DynamicStyledSidebar() {
       </div>
     </aside>
   );
-} 
+}

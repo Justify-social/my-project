@@ -1,60 +1,63 @@
-import React from 'react';
-import { getIconPath, normalizeIconName } from '../icons';
-import { Icon } from '../Icon';
-import { IconStyle } from '../types';
+'use client';
 
+import React from 'react';
+import { Icon } from '../Icon';
+import { IconProps, IconStyle } from '../types';
+
+/**
+ * Adapter props for legacy components
+ */
 interface IconAdapterProps {
-  name?: string;
+  /**
+   * The iconId to render with explicit variant suffix (required)
+   */
+  iconId: string;
+  
+  /**
+   * CSS classes to apply to the icon
+   */
   className?: string;
+  
+  /**
+   * @deprecated - Legacy prop, use iconId with Solid suffix instead
+   */
   solid?: boolean;
+  
+  /**
+   * Optional inline style
+   */
   style?: React.CSSProperties;
+  
+  /**
+   * Optional click handler
+   */
   onClick?: () => void;
+  
+  /**
+   * Optional title for the icon
+   */
   title?: string;
+  
+  /**
+   * @deprecated - Legacy prop, no longer used
+   */
   iconType?: string;
+  
+  /**
+   * Any additional props
+   */
   [key: string]: any;
 }
 
 /**
- * Properly formats FontAwesome icon names with special handling for hyphenated formats
+ * Formats an icon name to ensure it has the correct prefix and casing
  */
-function formatIconName(name: string): string {
-  if (!name) return '';
-  
-  // If it's already in the fa* format, just return it
-  if (name.startsWith('fa') && name.length > 2 && name[2].toUpperCase() === name[2]) {
-    return name;
+function formatIconId(id: string, solid: boolean = false): string {
+  // Ensure id has a variant suffix
+  if (!id.endsWith('Light') && !id.endsWith('Solid')) {
+    return solid ? `${id}Solid` : `${id}Light`;
   }
-  
-  // Special case for 'circle-notch' and similar hyphenated names
-  if (name.includes('-')) {
-    // Create parts: ['fa', 'circle', 'notch'] or ['circle', 'notch']
-    const parts = name.split('-');
-    // Start with 'fa' prefix
-    const prefix = 'fa';
-    
-    // Convert remaining parts to capitalize each word: CircleNotch
-    let iconName;
-    if (parts[0] === 'fa') {
-      // If first part is 'fa', skip it
-      iconName = parts.slice(1).map(part => 
-        part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-      ).join('');
-    } else {
-      // Otherwise use all parts
-      iconName = parts.map(part => 
-        part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-      ).join('');
-    }
-    
-    return prefix + iconName;
-  }
-  
-  // Handle single word icon without fa prefix
-  if (!name.startsWith('fa')) {
-    return `fa${name.charAt(0).toUpperCase()}${name.slice(1)}`;
-  }
-  
-  return name;
+  return id;
 }
 
 /**
@@ -62,7 +65,7 @@ function formatIconName(name: string): string {
  * This provides backward compatibility for components using the old icon pattern
  */
 export const IconAdapter: React.FC<IconAdapterProps> = ({
-  name,
+  iconId,
   className,
   solid = false,
   style,
@@ -72,22 +75,18 @@ export const IconAdapter: React.FC<IconAdapterProps> = ({
   ...rest
 }) => {
   // Skip rendering if no name provided
-  if (!name) {
-    console.warn('IconAdapter: No icon name provided');
+  if (!iconId) {
+    console.warn('IconAdapter: No icon ID provided');
     return null;
   }
 
-  // Format the icon name properly before passing to Icon component
-  const formattedName = formatIconName(name);
-  
-  // Convert deprecated solid prop to variant
-  const variant: IconStyle = solid ? 'solid' : 'light';
+  // Format the icon ID properly to include variant suffix
+  const formattedIconId = formatIconId(iconId, solid);
 
   return (
     <Icon
-      name={formattedName}
+      iconId={formattedIconId}
       className={className}
-      variant={variant}
       style={style}
       onClick={onClick}
       title={title}

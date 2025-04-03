@@ -2,18 +2,38 @@
 'use client';
 
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from 'react';
-import BadgeComponent from '@/components/ui/feedback/Badge';
+import { Badge } from '@/components/ui/atoms/badge';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import ErrorBoundary from '@/components/ui/utilities/error-boundary';
+import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/error-fallback';
-import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'
+import { Skeleton } from '@/components/ui/atoms/skeleton';
 import Image from 'next/image';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/atoms/icon/Icon';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/atoms/card";
+import { Button } from "@/components/ui/atoms/button/Button";
+
+// Define a simple UI icon mapping for now until we can properly import UI_ICON_MAP
+const UI_ICON_MAP: Record<string, string> = {
+  'info': 'faInfoCircle',
+  'warning': 'faExclamationTriangle',
+  'success': 'faCheckCircle',
+  'error': 'faTimesCircle',
+  'lightning': 'faLightningBolt',
+  'documentText': 'faFileText',
+  'users': 'faUsers',
+  'calendar': 'faCalendar',
+  'chart': 'faChartBar',
+  'target': 'faTarget',
+  'trophy': 'faTrophy',
+  'check': 'faCheck',
+  'globe': 'faGlobe'
+};
+
 // Define types locally instead of importing
 // These will be used to define our component props and state
 enum Currency {
@@ -446,32 +466,34 @@ const DataCard: React.FC<DataCardProps> = ({
   children,
   className = '',
   actions
-}) => <div className={`bg-white rounded-lg border border-[var(--divider-color)] shadow-sm overflow-hidden ${className} font-work-sans`}>
-    <div className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between font-work-sans">
-      <div className="flex items-center font-work-sans">
-        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3 font-work-sans">
+}) => (
+  <Card className={`overflow-hidden ${className}`}>
+    <CardHeader className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
+      <div className="flex items-center">
+        <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
           <Icon 
             {... (iconId 
               ? { iconId } 
               : { name: UI_ICON_MAP[iconName || ''] || `fa${(iconName || '').charAt(0).toUpperCase() + (iconName || '').slice(1)}` }
             )}
-            className="h-5 w-5 text-[var(--accent-color)] font-work-sans"
+            className="h-5 w-5 text-[var(--accent-color)]"
             aria-hidden="true" 
           />
         </div>
-        <div className="font-work-sans">
-          <h3 className="text-[var(--primary-color)] font-semibold font-sora">{title}</h3>
-          {description && <p className="text-[var(--secondary-color)] text-sm mt-1 font-work-sans">{description}</p>}
+        <div>
+          <CardTitle className="text-[var(--primary-color)] font-semibold font-sora">{title}</CardTitle>
+          {description && <CardDescription className="text-[var(--secondary-color)] text-sm mt-1">{description}</CardDescription>}
         </div>
       </div>
-      {actions && <div className="flex space-x-2 font-work-sans">
+      {actions && <div className="flex space-x-2">
           {actions}
         </div>}
-    </div>
-    <div className="px-4 py-5 sm:p-6 bg-white font-work-sans">
+    </CardHeader>
+    <CardContent className="px-4 py-5 sm:p-6 bg-white">
       {children}
-    </div>
-  </div>;
+    </CardContent>
+  </Card>
+);
 
 // Add DataRow component before the main CampaignDetail component
 interface DataRowProps {
@@ -1341,14 +1363,13 @@ export default function CampaignDetail() {
   }, []);
   useEffect(() => {
     const fetchData = async () => {
-      // If mock data is explicitly requested, use it
-      if (useFallbackData) {
-        console.log('Using mock data instead of fetching from API');
-        setData(emptyData); // Use empty data instead of fallbackData
-        setError("DEMO MODE: Using placeholder data.");
+      debugLog({ type: 'LIFECYCLE', message: 'fetchData called', data: { id: params?.id } });
+      if (!params?.id) {
+        setError(new Error('Campaign ID is missing'));
         setLoading(false);
         return;
       }
+      
       try {
         setLoading(true);
         console.log(`Fetching campaign data for ID: ${params.id}`);
@@ -1482,10 +1503,10 @@ export default function CampaignDetail() {
         setLoading(false);
       }
     };
-    if (params.id) {
+    if (params?.id) {
       fetchData();
     }
-  }, [params.id, useFallbackData]); // Remove testMode and fallbackData to prevent extra rerenders
+  }, [params?.id, useFallbackData]); // Remove testMode and fallbackData to prevent extra rerenders
 
   // Move the format functions here, before they're used in stress testing
   // Format currency with better type handling
@@ -1595,7 +1616,7 @@ export default function CampaignDetail() {
         <div className="h-8 bg-gray-200 rounded w-1/3 mb-8 font-work-sans" />
         
         {/* Campaign Details Section */}
-        <SkeletonSection 
+        <Skeleton 
           title={true} 
           titleWidth="w-1/4" 
           actionButton={true}
@@ -1604,7 +1625,7 @@ export default function CampaignDetail() {
 
 
         {/* Objectives Section */}
-        <SkeletonSection 
+        <Skeleton 
           title={true} 
           titleWidth="w-1/3" 
           actionButton={true}
@@ -1613,7 +1634,7 @@ export default function CampaignDetail() {
 
 
         {/* Audience Section */}
-        <SkeletonSection 
+        <Skeleton 
           title={true} 
           titleWidth="w-1/4" 
           actionButton={true}
@@ -1622,7 +1643,7 @@ export default function CampaignDetail() {
 
 
         {/* Creative Assets Section */}
-        <SkeletonSection 
+        <Skeleton 
           title={true} 
           titleWidth="w-1/4" 
           actionButton={true}

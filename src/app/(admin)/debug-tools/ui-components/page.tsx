@@ -208,8 +208,19 @@ export default function UIComponentsPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">UI Components</h1>
+    <div className="p-6 w-full">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">UI Components</h1>
+        {!selectedComponent && (
+          <div className="w-1/3 flex justify-end">
+            <CategoryFilter
+              components={components}
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleCategorySelect}
+            />
+          </div>
+        )}
+      </div>
 
       {selectedComponent ? (
         <div>
@@ -223,22 +234,6 @@ export default function UIComponentsPage() {
         </div>
       ) : (
         <>
-          <div className="mb-6">
-            <Input
-              type="search"
-              placeholder="Search components..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="max-w-md"
-            />
-          </div>
-
-          <CategoryFilter
-            components={components}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleCategorySelect}
-          />
-
           <ComponentsGrid
             components={components}
             filter={searchTerm}

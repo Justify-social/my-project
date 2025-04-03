@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card } from '@/components/ui/organisms/card/Card'
-import { Button } from '@/components/ui/atoms/button/Button'
-import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
-import { Input } from '@/components/ui/atoms/input/Input'
-import { Label } from '@/components/ui/atoms/label/Label'
-import { Switch } from '@/components/ui/atoms/switch/Switch'
-import { Select } from '@/components/ui/atoms/select/Select'
-import { Badge } from '@/components/ui/molecules/feedback/Badge'
-import { Alert } from '@/components/ui/atoms/alert/Alert'
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs';
+import { Input } from '@/components/ui/atoms/input';
+import { Label } from '@/components/ui/atoms/label';
+import { Switch } from '@/components/ui/atoms/switch';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/atoms/alert';
+import { LoadingSpinner as Spinner } from '@/components/ui/atoms/loading-spinner';
 import { browserComponentApi } from '../../api/component-api-browser';
 import { cn } from '@/lib/utils';
 

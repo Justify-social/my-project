@@ -2,15 +2,17 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import OurFileRouter from '../../../app/api/uploadthing/core';
 import { UploadDropzone } from "@uploadthing/react";
 import { generateReactHelpers } from "@uploadthing/react";
+// Import OurFileRouter as a type only to avoid duplicate declarations
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
 import { Icon } from '@/components/ui/atoms/icon'
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+// Fix Spinner import - use the correct component from loading-spinner
+import { LoadingSpinner as Spinner } from '@/components/ui/atoms/loading-spinner'
 import { generateCorrelationId, sanitizeFileName, logAndShowError, enhancedFileTypeDetection, extractAssetUrl } from "@/utils/file-utils";
+
 export interface UploadedAsset {
   id: string;
   url: string;
@@ -26,6 +28,7 @@ export interface UploadedAsset {
     platform: string;
   };
 }
+
 interface CampaignAssetUploaderProps {
   campaignId: string;
   onUploadComplete: (assets: UploadedAsset[]) => void;
@@ -40,6 +43,7 @@ const {
 // Type for the UploadDropzone component
 type FileRouter = OurFileRouter;
 type FileRouteEndpoint = keyof FileRouter;
+
 export function CampaignAssetUploader({
   campaignId,
   onUploadComplete,
@@ -47,6 +51,7 @@ export function CampaignAssetUploader({
 }: CampaignAssetUploaderProps) {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  // Use correct type for the ref - standard DOM HTMLInputElement
   const dropzoneRef = useRef<HTMLInputElement | null>(null);
 
   // Manually track file input changes since uploadthing no longer exposes onFileSelect
@@ -290,7 +295,7 @@ export function CampaignAssetUploader({
       {/* Loading indicator */}
       {isUploading &&
     <div className="mt-4 flex items-center justify-center font-work-sans">
-          <Spinner size="md" className="mr-3" variant="primary" />
+          <Spinner size="md" className="mr-3" center />
           <span className="text-sm font-medium text-gray-600 font-work-sans">Uploading files...</span>
         </div>
     }

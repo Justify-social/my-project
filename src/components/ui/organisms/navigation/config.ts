@@ -7,24 +7,24 @@ export interface NavItem {
 // Default navigation items
 export const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    label: 'Home',
     href: '/dashboard',
-    icon: 'faHome'
+    icon: 'appHome'
   },
   {
-    label: 'Projects',
-    href: '/projects',
-    icon: 'faFolder'
+    label: 'Campaigns',
+    href: '/campaigns',
+    icon: 'appCampaigns'
   },
   {
-    label: 'Analytics',
-    href: '/analytics',
-    icon: 'faChartLine'
+    label: 'Creative Testing',
+    href: '/creative-testing',
+    icon: 'appCreativeAssetTesting'
   },
   {
-    label: 'Messages',
-    href: '/messages',
-    icon: 'faComment'
+    label: 'Brand Health',
+    href: '/brand-health',
+    icon: 'appBrandHealth'
   },
 ];
 
@@ -32,5 +32,5 @@ export const navItems: NavItem[] = [
 export const settingsNavItem: NavItem = {
   label: 'Settings',
   href: '/settings',
-  icon: 'faCog'
+  icon: 'appSettings'
 }; 

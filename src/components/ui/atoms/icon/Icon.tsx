@@ -1,68 +1,49 @@
 'use client';
 
-import React, { memo, useContext } from 'react';
+import React, { memo, useEffect } from 'react';
 import { getIconPath } from './icons';
 import { IconProps, IconSize, IconVariant, SIZE_CLASSES } from './types';
 import { useIconContext } from './IconContext';
+
+// Debug flag for development
+const DEBUG = process.env.NODE_ENV === 'development';
 
 /**
  * Main Icon component that renders Font Awesome icons as SVGs
  * Uses the consolidated registry via getIconPath as Single Source of Truth
  */
 export const Icon: React.FC<IconProps> = memo(({
-  name,
-  iconId,
+  iconId = 'faQuestionLight',
   className = '',
   size = 'md',
-  variant = 'light',
   title,
-  active = false,
-  color,
   onClick,
   ...rest
 }) => {
   // Get context values
   const context = useIconContext();
   
-  let iconName = name;
-  let actualVariant: IconVariant = variant;
+  // Determine if icon ID explicitly contains variant
+  const hasSolidSuffix = iconId.endsWith('Solid');
+  const hasLightSuffix = iconId.endsWith('Light');
+  const variant: IconVariant = hasSolidSuffix ? 'solid' : hasLightSuffix ? 'light' : 'light';
   
-  // Handle iconId if provided (preferred approach)
-  if (iconId) {
-    // Check if the icon name explicitly ends with "Solid" or "Light"
-    const hasSolidSuffix = iconId.endsWith('Solid');
-    const hasLightSuffix = iconId.endsWith('Light');
-    
-    // Extract the base name without suffix for icon lookup
-    iconName = hasSolidSuffix ? iconId.replace(/Solid$/, '') : 
-              hasLightSuffix ? iconId.replace(/Light$/, '') : 
-              iconId;
-              
-    // Set variant based on suffix
-    actualVariant = hasSolidSuffix ? 'solid' : 
-                   hasLightSuffix ? 'light' : 
-                   variant;
-  } else if (name) {
-    // Legacy approach - check if the icon name explicitly ends with "Solid"
-    const hasSolidSuffix = name.endsWith('Solid');
-    
-    // Determine variant - prioritize explicit name suffix over props
-    actualVariant = hasSolidSuffix ? 'solid' : 
-                   active ? 'solid' : 
-                   variant;
-  } else {
-    // Neither name nor iconId provided
-    console.warn('Icon component used without name or iconId prop');
-    iconName = 'faQuestion'; // Default fallback icon
-  }
+  // Special handling for app icons (they don't have variants)
+  const isAppIcon = iconId.startsWith('app');
   
   // Determine the path using the single source of truth
-  const iconPath = getIconPath(iconName as string, actualVariant as any);
+  const iconPath = getIconPath(iconId, variant);
+  
+  // Debug logging for development
+  useEffect(() => {
+    if (DEBUG) {
+      console.log(`[Icon] Rendering icon: ${iconId}, path: ${iconPath}, isAppIcon: ${isAppIcon}`);
+    }
+  }, [iconId, iconPath, isAppIcon]);
   
   // Handle dynamic classes
   const sizeClass = SIZE_CLASSES[size] || 'w-5 h-5';
-  const colorClass = color || '';
-  const combinedClasses = `inline-block ${sizeClass} ${colorClass} ${className || ''}`.trim();
+  const combinedClasses = `inline-block ${sizeClass} ${className || ''}`.trim();
   
   return (
     <span 
@@ -73,9 +54,17 @@ export const Icon: React.FC<IconProps> = memo(({
     >
       <img 
         src={iconPath}
-        alt={title || `${iconName || iconId} icon`}
+        alt={title || `${iconId} icon`}
         className="w-full h-full"
         loading="lazy"
+        onError={(e) => {
+          if (DEBUG) {
+            console.error(`[Icon] Failed to load icon: ${iconId}, path: ${iconPath}`);
+            // Show broken image visually in dev mode
+            (e.target as HTMLImageElement).style.border = '1px dashed red';
+            (e.target as HTMLImageElement).style.padding = '2px';
+          }
+        }}
       />
     </span>
   );
@@ -87,28 +76,42 @@ Icon.displayName = 'Icon';
  * Solid variant of the Icon component
  */
 export const SolidIcon: React.FC<Omit<IconProps, 'variant'>> = ({
-  // Destructure props
-  name,
   iconId,
   ...otherProps
 }) => {
-  // Support both iconId and name
-  return iconId 
-    ? <Icon iconId={iconId} {...otherProps} variant="solid" />
-    : <Icon name={name} {...otherProps} variant="solid" />;
+  // Don't modify app icons since they don't have variants
+  if (iconId?.startsWith('app')) {
+    return <Icon iconId={iconId} {...otherProps} />;
+  }
+  
+  // Convert to solid variant if needed
+  const solidIconId = iconId?.endsWith('Solid') 
+    ? iconId 
+    : iconId?.endsWith('Light')
+      ? iconId.replace(/Light$/, 'Solid')
+      : `${iconId}Solid`;
+      
+  return <Icon iconId={solidIconId} {...otherProps} />;
 };
 
 /**
  * Light variant of the Icon component
  */
 export const LightIcon: React.FC<Omit<IconProps, 'variant'>> = ({
-  // Destructure props
-  name,
   iconId,
   ...otherProps
 }) => {
-  // Support both iconId and name
-  return iconId 
-    ? <Icon iconId={iconId} {...otherProps} variant="light" />
-    : <Icon name={name} {...otherProps} variant="light" />;
+  // Don't modify app icons since they don't have variants
+  if (iconId?.startsWith('app')) {
+    return <Icon iconId={iconId} {...otherProps} />;
+  }
+  
+  // Convert to light variant if needed
+  const lightIconId = iconId?.endsWith('Light') 
+    ? iconId 
+    : iconId?.endsWith('Solid')
+      ? iconId.replace(/Solid$/, 'Light')
+      : `${iconId}Light`;
+      
+  return <Icon iconId={lightIconId} {...otherProps} />;
 }; 

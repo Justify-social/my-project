@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/organisms/card/Card'
-import { Alert } from '@/components/ui/atoms/alert/Alert'
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+import { Card, CardContent } from '@/components/ui/atoms/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/atoms/alert';
+import { LoadingSpinner as Spinner } from '@/components/ui/atoms/loading-spinner';
 import { Icon } from '@/components/ui/atoms/icon';
 import { ComponentMetadata } from '../types';
 
@@ -119,7 +119,7 @@ export default function ComponentResolver({
 
     if (!Component) {
       return (
-        <Alert variant="warning">
+        <Alert variant="default">
           <Icon iconId="faCircleExclamationLight"  className="h-4 w-4" />
           <AlertTitle>Component Not Found</AlertTitle>
           <AlertDescription>

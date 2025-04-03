@@ -255,48 +255,58 @@ function generateFontAwesomeIconPath(name: string, variant: IconStyle = 'light')
  * Get the path to an icon image file
  * First looks for the icon in the registry, then falls back to a generative approach
  * 
- * @param name - Icon name or ID
- * @param variant - Icon variant (light or solid)
+ * @param iconId - Icon ID with explicit variant suffix (e.g., faUserLight, faUserSolid)
+ * @param variant - Legacy parameter, only used as fallback if iconId doesn't have suffix
  * @returns URL to the icon image file
  */
-export function getIconPath(name: string, variant: IconStyle = 'light'): string {
-  if (!name) {
-    return '/icons/solid/question.svg'; // Default fallback
+export function getIconPath(iconId: string, variant: IconStyle = 'light'): string {
+  if (!iconId) {
+    return '/icons/solid/faQuestionLight.svg'; // Default fallback
   }
 
-  // Handle explicit suffixes in the name that should override the variant
-  const hasSolidSuffix = name.endsWith('Solid');
-  const hasLightSuffix = name.endsWith('Light');
-  
-  // Determine the effective variant based on name suffix
+  // Normalize app icons with dashes or underscores to the correct format
+  if (
+    iconId.startsWith('app') && 
+    (iconId.includes('-') || iconId.includes('_'))
+  ) {
+    // Remove dashes and underscores and convert to proper camelCase
+    const parts = iconId.replace(/[-_]/g, ' ').split(' ');
+    const firstPart = parts[0]; // 'app'
+    const restParts = parts.slice(1).map(part => 
+      part.charAt(0).toUpperCase() + part.slice(1)
+    ).join('');
+    iconId = firstPart + restParts;
+    debug(`Normalized icon ID from format with dashes/underscores to: ${iconId}`);
+  }
+
+  // Determine variant from the iconId suffix
+  const hasSolidSuffix = iconId.endsWith('Solid');
+  const hasLightSuffix = iconId.endsWith('Light');
   const effectiveVariant = hasSolidSuffix ? 'solid' : hasLightSuffix ? 'light' : variant;
-
-  // Normalize the icon name
-  const normalizedName = normalizeIconName(name);
   
-  // Try to find the icon in the registry first - most efficient
-  // This handles both direct icon IDs and mapped names
-  
-  // 1. First try with the exact name
-  let iconMetadata = findIconById(normalizedName);
-  
-  // 2. If not found, try finding by map name
-  if (!iconMetadata) {
-    iconMetadata = findIconByMapName(normalizedName);
-  }
-  
-  // 3. If still not found, try finding by alternatives
-  if (!iconMetadata) {
-    iconMetadata = findIconByAlternatives(normalizedName);
-  }
+  // Find directly by iconId in registry
+  const iconMetadata = findIconById(iconId);
   
   // If icon found in registry, use its path
   if (iconMetadata && iconMetadata.path) {
+    debug(`Using registry path for ${iconId}: ${iconMetadata.path}`);
     return iconMetadata.path;
   }
   
-  // Fallback to generating a path based on conventions
-  return generateFontAwesomeIconPath(normalizedName, effectiveVariant);
+  // Determine folder based on variant
+  const folder = STYLE_FOLDERS[effectiveVariant] || 'light';
+  
+  // Special case for app icons - needs to be exactly matched
+  if (iconId.startsWith('app')) {
+    // Don't strip the 'app' prefix - use the full icon ID for the filename
+    // regardless of format (with dashes, underscores, etc.)
+    debug(`Using app icon path for ${iconId}: /icons/app/${iconId}.svg`);
+    return `/icons/app/${iconId}.svg`;
+  }
+  
+  // Standard path format for FontAwesome icons
+  debug(`Using standard path for ${iconId}: /icons/${folder}/${iconId}.svg`);
+  return `/icons/${folder}/${iconId}.svg`;
 }
 
 /**

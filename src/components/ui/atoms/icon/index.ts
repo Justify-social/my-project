@@ -15,8 +15,17 @@
  * Provides a centralized export point for the Icon component
  */
 
-// Export the main Icon component
-export { Icon } from './Icon';
+// Export the main Icon components
+export { Icon, SolidIcon, LightIcon } from './Icon';
+
+// Export the necessary types
+export type { IconProps, IconSize } from './types';
+
+// Export the path utility function (needed for custom implementations)
+export { getIconPath } from './icons';
+
+// Export the adapter for backwards compatibility
+export { IconAdapter } from './adapters/font-awesome-adapter';
 
 // Export icon utility functions
 export * from './icons';
@@ -31,13 +40,11 @@ export * from './adapters';
 // Export component interfaces and types directly - more reliable than re-exports
 export type {
   IconName,
-  IconSize,
   IconStyle,
   PlatformName,
   ActionType,
   IconType,
   IconVariant,
-  IconProps,
   PlatformIconProps,
   SafeIconProps,
   IconMetadata,
@@ -51,14 +58,15 @@ export {
   PLATFORM_ICON_TYPE_MAP
 } from './types';
 
-// Re-export the main Icon component and its variants
-export { SolidIcon, LightIcon } from './Icon';
-
 // Re-export the IconContext provider and hook
 export { 
   default as IconContext,
   IconContextProvider, 
   useIconContext 
 } from './IconContext';
+
+// Semantic mapping - Single Source of Truth
+export { UI_ICON_MAP, getSolidUIIcon } from './semantic-map';
+export { default as UI_ICON_MAP_DEFAULT } from './semantic-map';
 
 // No default export - use named exports exclusively

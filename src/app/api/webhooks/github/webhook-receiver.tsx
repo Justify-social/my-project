@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/organisms/card/Card'
-import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
-import { Button } from '@/components/ui/atoms/button/Button'
-import { Input } from '@/components/ui/atoms/input/Input'
-import { Label } from '@/components/ui/atoms/label/Label'
-import { Switch } from '@/components/ui/atoms/switch/Switch'
-import { Badge } from '@/components/ui/molecules/feedback/Badge'
-import { Alert } from '@/components/ui/atoms/alert/Alert'
-import { CopyIcon, ReloadIcon, CheckCircleIcon } from '@/components/icons';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/atoms/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs';
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+import { Label } from '@/components/ui/atoms/label';
+import { Switch } from '@/components/ui/atoms/switch';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/atoms/alert';
+import { Icon } from '@/components/ui/atoms/icon';
 
 interface WebhookEvent {
   id: string;
@@ -187,9 +187,9 @@ export default function WebhookReceiver() {
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <Icon iconId="faArrowRotateRightLight" className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <ReloadIcon className="mr-2 h-4 w-4" />
+                    <Icon iconId="faArrowRotateRightLight" className="mr-2 h-4 w-4" />
                   )}
                   Refresh
                 </Button>
@@ -289,12 +289,12 @@ export default function WebhookReceiver() {
                   >
                     {showCopied ? (
                       <>
-                        <CheckCircleIcon className="mr-2 h-4 w-4" />
+                        <Icon iconId="faCircleCheckLight" className="mr-2 h-4 w-4" />
                         Copied
                       </>
                     ) : (
                       <>
-                        <CopyIcon className="mr-2 h-4 w-4" />
+                        <Icon iconId="faCopyLight" className="mr-2 h-4 w-4" />
                         Copy
                       </>
                     )}
@@ -362,7 +362,7 @@ export default function WebhookReceiver() {
               
               {configSaved && (
                 <Alert className="bg-green-50 border-green-200">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                  <Icon iconId="faCircleCheckLight" className="h-4 w-4 text-green-600" />
                   <AlertTitle>Success</AlertTitle>
                   <AlertDescription>
                     Configuration saved successfully
@@ -377,7 +377,7 @@ export default function WebhookReceiver() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  <Icon iconId="faArrowRotateRightLight" className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   'Save Configuration'
                 )}

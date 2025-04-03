@@ -66,7 +66,7 @@
     "lint-staged": "lint-staged",
     "test:local": "jest --testPathPattern=src",
     "generate-ui-registry": "node src/app/\\(admin\\)/debug-tools/ui-components/registry/generate-registry.js && npm run validate:registry && npm run validate:component-paths",
-    "predev": "npm run generate-ui-registry && npm run update:shadcn-index",
+    "predev": "npm run generate-ui-registry",
     "validate:components": "node scripts/validate-components.js",
     "update:shadcn-index": "node config/start-up/update-shadcn-index.mjs",
     "prebuild": "npm run generate:component-registry && npm run update:shadcn-index",

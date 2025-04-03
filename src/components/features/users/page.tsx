@@ -2,9 +2,10 @@
 "use client";
 
 import React, { useState, memo } from 'react';
-import Card from '../../ui/Card';
-import SectionHeader from '../../settings/shared/SectionHeader';
-import Modal from '../../ui/Modal/index';
+// Import UI components from atomic design structure
+import { Card } from '@/components/ui/atoms/card';
+import { SectionHeader } from '@/components/ui/molecules/section-header';
+import { Modal } from '@/components/ui/organisms/modal';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -25,6 +26,23 @@ interface Transaction {
   status: "Pending" | "Completed";
 }
 
+// Create specialized animated variants of base components
+const AnimatedCard = memo(({
+  children,
+  ...props
+
+
+}: {children: React.ReactNode;} & React.ComponentProps<typeof Card>) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }} 
+    animate={{ opacity: 1, y: 0 }} 
+    transition={{ duration: 0.3 }}
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-[var(--divider-color)]"
+  >
+    <Card {...props}>{children}</Card>
+  </motion.div>
+));
+
 // Enhanced UI Components
 const ProfileCard = memo(({
   children
@@ -42,25 +60,6 @@ const ProfileCard = memo(({
 
     {children}
   </motion.div>);
-const SectionHeader: React.FC<{
-  icon: React.ComponentType<{
-    className?: string;
-  }>;
-  title: string;
-  description?: string;
-}> = memo(({
-  icon: Icon,
-  title,
-  description
-}) => <div className="flex items-center mb-6 font-work-sans">
-    <div className="bg-[var(--background-color)] p-3 rounded-lg font-work-sans">
-      <Icon className="w-6 h-6 text-[var(--accent-color)] font-work-sans" />
-    </div>
-    <div className="ml-4 font-work-sans">
-      <h2 className="text-xl font-semibold text-[var(--primary-color)] font-sora">{title}</h2>
-      {description && <p className="mt-1 text-sm text-[var(--secondary-color)] font-work-sans">{description}</p>}
-    </div>
-  </div>);
 const PlanCard: React.FC<{
   title: string;
   price: string;
@@ -121,36 +120,6 @@ const CreditPackageCard: React.FC<{
       <p className="text-xl font-bold text-[var(--primary-color)] font-work-sans">{price}</p>
     </div>
   </motion.div>);
-const Modal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}> = ({
-  isOpen,
-  onClose,
-  children
-}) => {
-  if (!isOpen) return null;
-  return <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 font-work-sans">
-      <motion.div initial={{
-      opacity: 0,
-      scale: 0.95
-    }} animate={{
-      opacity: 1,
-      scale: 1
-    }} exit={{
-      opacity: 0,
-      scale: 0.95
-    }} className="bg-white rounded-xl p-6 max-w-md w-full mx-4 relative">
-
-        <button onClick={onClose} className="absolute top-4 right-4 text-[var(--secondary-color)] hover:text-[var(--primary-color)] font-work-sans">
-
-          <Icon iconId="faXCircleLight" className="w-5 h-5"  />
-        </button>
-        {children}
-      </motion.div>
-    </div>;
-};
 const SubscriptionBillingPage: React.FC = () => {
   const router = useRouter();
 

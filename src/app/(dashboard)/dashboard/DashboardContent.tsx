@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { Skeleton } from "@/components/ui/atoms/skeleton";
+import { Card } from "@/components/ui/atoms/card";
 import CalendarDashboard from "@/components/ui/organisms/calendar/CalendarDashboard";
 import UpcomingCampaignsCard from "@/components/ui/organisms/card/UpcomingCampaignsCard";
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
@@ -14,7 +15,7 @@ import useSWR from 'swr';
 import Image from 'next/image';
 import { Button } from '@/components/ui/atoms/button/Button'
 import { format } from 'date-fns';
-import { IconAdapter as Icon  } from "@/components/ui/utils/font-awesome-adapter";
+import { Icon } from "@/components/ui/atoms/icon/Icon";
 import { TableSkeleton } from '@/components/ui/molecules/skeleton';
 
 // Define IconName type locally if it's not available
@@ -118,7 +119,7 @@ interface CardProps {
   children: React.ReactNode;
   actions?: React.ReactNode;
 }
-const Card: React.FC<CardProps> = ({
+const DashboardCard: React.FC<CardProps> = ({
   title,
   description,
   iconName,
@@ -1785,7 +1786,7 @@ export default function DashboardContent({
                 }
                 isLoading={isLoadingCampaigns}
                 onNewCampaign={handleNewCampaign}
-                onSelectCampaign={(id) => router.push(`/campaigns/${id}`)}
+                onSelectCampaign={(id: number | string) => router.push(`/campaigns/${id}`)}
               />
             </ErrorBoundary>
           </div>
@@ -1828,7 +1829,7 @@ export default function DashboardContent({
             title="Credits Available"
             value={metrics.stats.creditsAvailable}
             trend={metrics.stats.creditsChange}
-            imageSrc="/coins.svg"
+            iconId="faCoinsLight"
             description={`${metrics.stats.creditsChange > 0 ? '+' : ''}${metrics.stats.creditsChange} credits`} />
 
         </div>

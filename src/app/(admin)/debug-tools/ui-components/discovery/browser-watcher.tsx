@@ -9,8 +9,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/atoms/button/Button'
-import { Card } from '@/components/ui/organisms/card/Card'
+import { Button } from '@/components/ui/atoms/button';
+import { Card } from '@/components/ui/atoms/card';
 import { browserComponentApi } from '../api/component-api-browser';
 import type { ComponentMetadata } from '../db/registry';
 
@@ -112,8 +112,8 @@ export function BrowserFileWatcher({ onComponentFound }: BrowserWatcherProps) {
   const addMockComponent = () => {
     const timestamp = Date.now();
     const mockPath = `/src/components/ui/atoms/mock/MockComponent${timestamp}.tsx`;
-    const currentDate = new Date();
     const mockComponent: ComponentMetadata = {
+      id: `mock-${timestamp}`,
       path: mockPath,
       name: `MockComponent${timestamp}`,
       category: 'atom',
@@ -121,18 +121,7 @@ export function BrowserFileWatcher({ onComponentFound }: BrowserWatcherProps) {
       examples: [],
       props: [],
       dependencies: [],
-      lastUpdated: currentDate,
-      exports: ['default'],
-      version: '1.0.0',
-      changeHistory: [
-        {
-          version: '1.0.0',
-          date: currentDate,
-          author: 'System',
-          description: 'Component created through UI',
-          isBreaking: false
-        }
-      ]
+      tags: ['mock', 'auto-generated']
     };
     
     setMockActivityLog(prev => [

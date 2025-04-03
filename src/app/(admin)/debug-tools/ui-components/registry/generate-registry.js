@@ -145,15 +145,31 @@ function scanDirectory(dirPath, category) {
       
       // Create component metadata with kebab-case name
       const relativePath = path.relative(process.cwd(), fullPath).replace(/\\/g, '/');
+      
+      // Extract the path relative to the UI components directory for correct registry key
+      const uiRelativePath = path.relative(
+        path.join(process.cwd(), 'src/components/ui'),
+        fullPath
+      ).replace(/\\/g, '/');
+      
+      // Use the directory structure in the component name for better organization
+      // This fixes the issue with nested components like organisms/card/MetricCard
+      const registryPath = uiRelativePath.replace(/\.tsx$|\.jsx$/, '');
+      
       const kebabName = pascalToKebab(baseName);
+      
+      // Extract component exports from file content
+      const exports = extractComponentExports(fileContent, baseName);
+      console.log(`Found ${exports.length} exports in ${baseName} (${registryPath})`);
       
       const component = {
         path: relativePath,
+        registryPath: registryPath, // Add the registry path for location lookup
         name: kebabName,
         originalName: baseName, // Store original name for reference
         category,
         lastUpdated: new Date().toISOString(),
-        exports: [baseName],
+        exports: exports.length > 0 ? exports : [baseName], // Use found exports or fallback to baseName
         props: [],
         description: `${baseName} ${category} component`,
         examples: [],
@@ -170,62 +186,106 @@ function scanDirectory(dirPath, category) {
 }
 
 /**
+ * Extract component exports (named and default) from file content
+ */
+function extractComponentExports(fileContent, baseName) {
+  const exports = [];
+  
+  // Match named exports like "export const ComponentName"
+  const namedExportsRegex = /export\s+(?:const|function|class|let|var)\s+([A-Za-z0-9_]+)/g;
+  let match;
+  while ((match = namedExportsRegex.exec(fileContent)) !== null) {
+    exports.push(match[1]);
+  }
+  
+  // Match default exports like "export default ComponentName"
+  const defaultExportRegex = /export\s+default\s+(?:const|function|class|let|var)?\s*([A-Za-z0-9_]+)?/;
+  const defaultMatch = fileContent.match(defaultExportRegex);
+  if (defaultMatch && defaultMatch[1]) {
+    exports.push(defaultMatch[1]);
+    // Mark as default export
+    exports.push(`default:${defaultMatch[1]}`);
+  } else if (fileContent.includes('export default')) {
+    // If export default exists but doesn't have a name, use the baseName
+    exports.push(`default:${baseName}`);
+  }
+  
+  // Match types exports
+  const typeExportsRegex = /export\s+(?:type|interface)\s+([A-Za-z0-9_]+)/g;
+  while ((match = typeExportsRegex.exec(fileContent)) !== null) {
+    exports.push(`type:${match[1]}`);
+  }
+  
+  return exports;
+}
+
+/**
  * Scan icons directory and generate icon metadata
  */
 function scanIcons() {
   console.log('Scanning for icons...');
   let icons = [];
   
-  // First, use icon-registry.json as our single source of truth
-  const iconRegistryPath = join(process.cwd(), 'public', 'static', 'icon-registry.json');
+  // We'll now use the same approach as registry-loader.ts that loads category-specific registries
+  const registryFiles = [
+    'app-icon-registry.json',
+    'brands-icon-registry.json',
+    'kpis-icon-registry.json',
+    'light-icon-registry.json',
+    'solid-icon-registry.json'
+  ];
   
-  try {
-    if (existsSync(iconRegistryPath)) {
-      console.log('Using icon-registry.json as single source of truth');
-      const iconRegistry = JSON.parse(readFileSync(iconRegistryPath, 'utf8'));
-      
-      if (iconRegistry.icons && Array.isArray(iconRegistry.icons)) {
-        // Modern registry format with icons array
-        icons = iconRegistry.icons.map(icon => ({
-          id: icon.id,
-          name: icon.name || icon.id,
-          category: icon.category || 'unknown',
-          path: icon.path,
-          viewBox: icon.viewBox || '0 0 512 512',
-          width: icon.width || 24,
-          height: icon.height || 24,
-          map: icon.map || null,
-          usageCount: icon.usageCount || 0,
-        }));
+  // Function to safely add icons from a registry file, matching the pattern in registry-loader.ts
+  const addIconsFromRegistry = (registryPath, fileName) => {
+    try {
+      if (existsSync(registryPath)) {
+        const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+        
+        if (registry && Array.isArray(registry.icons)) {
+          console.log(`Found ${registry.icons.length} icons in ${fileName}`);
+          
+          // Add icons to the consolidated collection, ensuring each has required fields
+          registry.icons.forEach(icon => {
+            if (!icon.id) {
+              console.warn(`Skipping icon without ID in ${fileName}`);
+              return;
+            }
+            
+            // Add with default values for missing fields to ensure consistent structure
+            icons.push({
+              id: icon.id,
+              name: icon.name || icon.id,
+              category: icon.category || fileName.replace('-icon-registry.json', ''),
+              path: icon.path,
+              viewBox: icon.viewBox || '0 0 512 512',
+              width: icon.width || 24,
+              height: icon.height || 24,
+              map: icon.map || null,
+              usageCount: icon.usageCount || 0,
+            });
+          });
+        } else {
+          console.warn(`Invalid registry format in ${fileName}`);
+        }
       } else {
-        // Legacy registry format (object with keys)
-        icons = Object.entries(iconRegistry).map(([id, data]) => {
-          return {
-            id,
-            name: data.name || id,
-            category: data.prefix || 'unknown',
-            path: data.path,
-            viewBox: data.viewBox || '0 0 512 512',
-            width: data.width || 24,
-            height: data.height || 24,
-            map: null, // Legacy format doesn't have map property
-            usageCount: data.usageCount || 0,
-          };
-        });
+        console.warn(`Registry file not found: ${fileName}`);
       }
-      
-      console.log(`Successfully loaded ${icons.length} icons from icon-registry.json`);
-      return icons;
-    } else {
-      console.error('icon-registry.json not found');
+    } catch (error) {
+      console.error(`Error loading ${fileName}:`, error);
     }
-  } catch (error) {
-    console.error('Error parsing icon-registry.json:', error);
+  };
+  
+  // Process each registry file
+  for (const fileName of registryFiles) {
+    const registryPath = join(process.cwd(), 'public', 'static', fileName);
+    addIconsFromRegistry(registryPath, fileName);
   }
   
-  // If we couldn't load any icons, log an error
-  if (icons.length === 0) {
-    console.warn('No icons found in registry. Debug tools will have limited functionality.');
+  const iconCount = icons.length;
+  if (iconCount === 0) {
+    console.warn('No icons found in registry files. Debug tools will have limited functionality.');
+  } else {
+    console.log(`Successfully loaded ${iconCount} total icons from category registries`);
   }
   
   return icons;
@@ -339,6 +399,33 @@ function validateIconRegistry(icons) {
 }
 
 /**
+ * Load SVG content for an icon from its path
+ */
+function loadSvgContent(iconPath) {
+  if (!iconPath) {
+    return null;
+  }
+  
+  // Convert from path used in browser to filesystem path
+  // Icons are typically referenced as /icons/category/filename.svg
+  // But stored in public/icons/category/filename.svg
+  const fsPath = join(process.cwd(), 'public', iconPath);
+  
+  try {
+    if (existsSync(fsPath)) {
+      const svgContent = readFileSync(fsPath, 'utf8');
+      return svgContent.trim();
+    } else {
+      console.warn(`SVG file not found: ${fsPath}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error loading SVG content from ${fsPath}:`, error);
+    return null;
+  }
+}
+
+/**
  * Main function to generate the component registry
  */
 function generateComponentRegistry() {
@@ -358,6 +445,28 @@ function generateComponentRegistry() {
     // Scan for icons using the single source of truth
     const icons = scanIcons();
     console.log(`Found ${icons.length} icons`);
+    
+    // Load SVG content for each icon
+    console.log('Loading SVG content for icons...');
+    let loadedCount = 0;
+    let missingCount = 0;
+    
+    icons.forEach(icon => {
+      const svgContent = loadSvgContent(icon.path);
+      if (svgContent) {
+        icon.svgContent = svgContent;
+        loadedCount++;
+      } else {
+        missingCount++;
+        console.warn(`Could not load SVG content for icon: ${icon.id} (path: ${icon.path})`);
+      }
+    });
+    
+    console.log(`SVG content loading complete:
+- Successfully loaded: ${loadedCount}
+- Failed to load: ${missingCount}
+- Total icons: ${icons.length}
+`);
     
     // Ensure output directory exists
     if (!existsSync(OUTPUT_PATH)) {

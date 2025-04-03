@@ -56,7 +56,7 @@ const SidebarWithDefaultProps = (props: any) => {
 const CalendarWithDefaultProps = (props: any) => {
   // Import the actual Calendar component with client-side only rendering
   const CalendarComponent = dynamic(() => 
-    safeDynamicImportPath(
+    safeDynamicImport(
       import('@/components/ui/organisms/calendar/Calendar'),
       'Calendar',
       createErrorComponent('Calendar')
@@ -76,7 +76,7 @@ const CalendarWithDefaultProps = (props: any) => {
 const CalendarUpcomingWithDefaultProps = (props: any) => {
   // Import the actual CalendarUpcoming component with client-side only rendering
   const CalendarUpcomingComponent = dynamic(() => 
-    safeDynamicImportPath(
+    safeDynamicImport(
       import('@/components/ui/organisms/calendar/CalendarUpcoming'),
       'CalendarUpcoming',
       createErrorComponent('CalendarUpcoming')
@@ -116,7 +116,7 @@ const DataGridWithDefaultProps = (props: any) => {
   
   // Import the actual DataGrid component
   const DataGridComponent = dynamic(() => 
-    safeDynamicImportPath(
+    safeDynamicImport(
       import('@/components/ui/organisms/data-display/data-grid/DataGrid'),
       'DataGrid',
       createErrorComponent('DataGrid')
@@ -142,7 +142,7 @@ const TableWithDefaultProps = (props: any) => {
   
   // Import the actual Table component
   const TableComponent = dynamic(() => 
-    safeDynamicImportPath(
+    safeDynamicImport(
       import('@/components/ui/organisms/data-display/table/Table'),
       'Table',
       createErrorComponent('Table')
@@ -255,7 +255,7 @@ const componentMap: Record<string, any> = (() => {
   const guaranteedComponents: Record<string, any> = {
     // Core atomic components
     Button: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/atoms/button/Button'),
         'Button',
         createErrorComponent('Button')
@@ -263,7 +263,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Button...</div> }
     ),
     Alert: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/atoms/alert/Alert'),
         'Alert',
         createErrorComponent('Alert')
@@ -271,7 +271,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Alert...</div> }
     ),
     Skeleton: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/molecules/skeleton/Skeleton'),
         'Skeleton',
         createErrorComponent('Skeleton')
@@ -279,7 +279,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Skeleton...</div> }
     ),
     Modal: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/organisms/modal/Modal'),
         'Modal',
         createErrorComponent('Modal')
@@ -287,7 +287,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Modal...</div> }
     ),
     Typography: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/atoms/typography/Typography'),
         'Typography',
         createErrorComponent('Typography')
@@ -295,7 +295,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Typography...</div> }
     ),
     Paragraph: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/atoms/typography/Paragraph'),
         'Paragraph',
         createErrorComponent('Paragraph')
@@ -303,7 +303,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Paragraph...</div> }
     ),
     Text: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/atoms/typography/Text'),
         'Text',
         createErrorComponent('Text')
@@ -311,7 +311,7 @@ const componentMap: Record<string, any> = (() => {
       { ssr: false, loading: () => <div>Loading Text...</div> }
     ),
     Heading: dynamic(() => 
-      safeDynamicImportPath(
+      safeDynamicImport(
         import('@/components/ui/atoms/typography/Heading'),
         'Heading',
         createErrorComponent('Heading')
@@ -449,7 +449,7 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
           
           // Create a dynamic component
           const DynamicComponent = dynamic(
-            () => safeDynamicImportPath(
+            () => safeDynamicImport(
               import(/* @vite-ignore */ importPath),
               exportName,
               createErrorComponent(component.name)

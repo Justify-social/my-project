@@ -95,15 +95,17 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
               title={label}
             >
               <span className="flex items-center justify-center">
-                <img 
-                  src={iconPath}
-                  alt={`${label} category`}
-                  className="w-8 h-8"
-                  style={{ 
-                    filter: (isActive || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
-                    transition: 'filter 0.15s ease-in-out'
-                  }}
-                />
+                <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 relative">
+                  <img 
+                    src={iconPath}
+                    alt={`${label} category`}
+                    className="w-5 h-5"
+                    style={{ 
+                      filter: (isActive || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
+                      transition: 'filter 0.15s ease-in-out'
+                    }}
+                  />
+                </div>
               </span>
             </TabsTrigger>
           );
