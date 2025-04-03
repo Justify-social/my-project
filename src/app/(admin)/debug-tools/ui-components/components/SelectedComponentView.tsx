@@ -6,7 +6,7 @@ import { ComponentMetadata } from '../db/registry';
 import { browserComponentApi } from '../api/component-api-browser';
 import ComponentPreview from './ComponentPreview';
 import { Card, CardContent } from './ui-components-bridge';
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/atoms/icon';
 
 /**
  * SelectedComponentView

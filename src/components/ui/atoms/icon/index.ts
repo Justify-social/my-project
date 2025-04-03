@@ -20,6 +20,7 @@ export { Icon } from './Icon';
 
 // Export icon utility functions
 export * from './icons';
+export * from './IconUtils';
 
 // Export icon types
 export * from './types';

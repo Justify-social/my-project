@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/organisms/card/Card'
 import { Alert } from '@/components/ui/atoms/alert/Alert'
 import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/atoms/icon';
 import { ComponentMetadata } from '../types';
 
 /**

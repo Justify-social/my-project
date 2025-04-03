@@ -4,7 +4,7 @@
 import React, { Component, ReactNode, ErrorInfo } from 'react';
 import { Card, CardContent } from '@/components/ui/organisms/card/Card'
 import { Alert } from '@/components/ui/atoms/alert/Alert'
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/atoms/icon';
 import { Button } from '@/components/ui/atoms/button/Button'
 
 interface ErrorBoundaryProps {

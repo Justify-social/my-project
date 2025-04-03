@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/organisms/card/Card'
 import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
 import { Badge } from '@/components/ui/molecules/feedback/Badge'
 import { Table } from '@/components/ui/organisms/data-display/table/Table'
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/atoms/icon';
 import { ComponentMetadata } from '../types';
 import ComponentResolver from './ComponentResolver';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/atoms/icon';
 
 const modalVariants = cva("fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4", {
   variants: {

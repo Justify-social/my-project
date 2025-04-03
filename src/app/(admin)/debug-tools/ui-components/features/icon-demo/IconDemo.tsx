@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Icon } from '../../../../../../components/ui/atoms/icon/Icon';
-import { 
-  getLightVariant, 
-  getSolidVariant, 
-  ensureIconVariant 
-} from '../../../../../../components/ui/atoms/icon/IconUtils';
+import { Icon, getLightVariant, getSolidVariant, ensureIconVariant } from '../../../../../../components/ui/atoms/icon';
 
 /**
  * Demonstrates the new icon system with explicit variants

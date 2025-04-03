@@ -1,10 +1,14 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { Icon } from '@/components/ui/atoms/icon';
-import { IconSize, IconVariant } from '@/components/ui/atoms/icon/types';
-import { cn } from '@/lib/utils';
-import { VariantProps, cva } from 'class-variance-authority';
+import { Icon } from '../../icon';
+import { IconSize, IconVariant } from '../types';
+import { cva, type VariantProps } from 'class-variance-authority';
+
+// Simple utility to combine class names when cn isn't available
+const combinedClassNames = (...classes: (string | undefined)[]) => {
+  return classes.filter(Boolean).join(' ');
+};
 
 // Create icon variants to match shadcn/ui expectations
 const iconVariants = cva('inline-flex items-center justify-center', {
@@ -56,18 +60,17 @@ export interface ShadcnIconProps extends
  * ```
  */
 export const ShadcnIcon = forwardRef<HTMLSpanElement, ShadcnIconProps>(
-  ({ iconId, className, size, variant, ...props }, ref) => {
-    // Simple utility function if cn is missing
-    const combineClasses = cn || function(...classes: any[]) {
-      return classes.filter(Boolean).join(' ');
-    };
+  ({ iconId, className, size, variant, onClick, ...props }, ref) => {
+    // Convert the onClick handler to the format expected by Icon
+    const handleClick = onClick ? () => onClick({} as React.MouseEvent<HTMLElement>) : undefined;
     
     return (
       <Icon
         iconId={iconId}
         size={size as IconSize}
         variant={variant as IconVariant}
-        className={combineClasses(iconVariants({ size, variant }), className)}
+        className={combinedClassNames(iconVariants({ size, variant }), className)}
+        onClick={handleClick}
         {...props}
       />
     );

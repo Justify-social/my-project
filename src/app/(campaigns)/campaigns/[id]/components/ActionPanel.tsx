@@ -1,7 +1,7 @@
 // Updated import paths via tree-shake script - 2025-04-01T17:13:32.196Z
 import React from 'react';
 import { useRouter } from 'next/router';
-import { Icon } from '@/components/ui/atoms/icon/index'
+import { Icon } from '../../../../../components/ui/atoms/icon';
 
 const ActionPanel = ({ campaignId }) => {
   const router = useRouter();

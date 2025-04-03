@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { Card, CardHeader, CardTitle, CardContent } from './ui-components-bridge';
 import { ComponentMetadata, PropDefinition } from '../types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui-components-bridge';
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/atoms/icon';
 import { Modal } from '@/components/ui/organisms/modal/Modal';
 import { OrgAlert } from '@/components/ui/organisms/feedback/Alert/Alert';
 import { discoverComponents, createComponentMapFromDiscovery } from '../utils/component-discovery';

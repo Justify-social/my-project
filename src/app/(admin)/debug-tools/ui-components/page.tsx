@@ -16,8 +16,8 @@ import {
   Badge,
   Button
 } from './components/ui-components-bridge';
-import { Icon } from '@/components/ui/atoms/icon/Icon';
-import { ComponentMetadata } from './db/registry';
+import { Icon } from '@/components/ui/atoms/icon';
+import { ComponentMetadata, ComponentRegistryData, STATIC_REGISTRY_PATH } from './db/registry';
 import { ComponentRegistryManager } from './registry/ComponentRegistryManager';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -25,9 +25,11 @@ import { ErrorBoundary } from 'react-error-boundary';
 import ComponentsLoadingSkeleton from './components/ComponentsLoadingSkeleton';
 import SelectedComponentView from './components/SelectedComponentView';
 import { ComponentsGrid } from './components/ComponentsGrid';
-import { Palette } from './features/design-system/Palette';
+import { Palette } from './features/design-system';
 import { IconLibrary } from './features/icon-library/IconLibrary';
 import IconDemo from './features/icon-demo/IconDemo';
+import { CategoryFilter } from './components/CategoryFilter';
+import { ComponentDetail } from './components/ComponentDetail';
 
 // Error fallback component
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -126,208 +128,125 @@ const isBrowser = !isServer;
  * It allows filtering, searching, and exploring component details.
  */
 export default function UIComponentsPage() {
-  const searchParams = useSearchParams();
-  const defaultTab = searchParams?.get('tab') ?? 'components';
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [components, setComponents] = useState<ComponentMetadata[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedComponent, setSelectedComponent] = useState<ComponentMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set loading to false after component mounts
-    setIsLoading(false);
+    async function loadComponents() {
+      try {
+        const response = await fetch(STATIC_REGISTRY_PATH);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch component registry: ${response.status}`);
+        }
+        const data: ComponentRegistryData = await response.json();
+        setComponents(data.components);
+      } catch (error) {
+        console.error('Error loading component registry:', error);
+        // Set mock data for development
+        setComponents([
+          {
+            id: 'button',
+            name: 'Button',
+            path: '@/components/ui/atoms/button',
+            category: 'Atoms',
+            description: 'A versatile button component with multiple variants and sizes',
+            type: 'Component',
+            tags: ['interaction', 'form', 'ui']
+          },
+          {
+            id: 'card',
+            name: 'Card',
+            path: '@/components/ui/atoms/card',
+            category: 'Atoms',
+            description: 'Container component for grouping related content',
+            type: 'Component',
+            tags: ['layout', 'container', 'ui']
+          },
+          {
+            id: 'icon',
+            name: 'Icon',
+            path: '@/components/ui/atoms/icon',
+            category: 'Atoms',
+            description: 'SVG icon component with different variants',
+            type: 'Component',
+            tags: ['visual', 'ui']
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadComponents();
   }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const handleComponentSelect = (component: ComponentMetadata) => {
+    setSelectedComponent(component);
+  };
+
+  const handleBackToList = () => {
+    setSelectedComponent(null);
+  };
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-6 w-full">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-12 bg-gray-200 rounded w-full mt-6"></div>
-          <div className="h-64 bg-gray-200 rounded w-full"></div>
-        </div>
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-gray-500">Loading components...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-6 w-full">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold mb-1">UI Component Debug Tools</h1>
-        <p className="text-gray-500">
-          Discover, document, and visualize UI components in the codebase
-          {isBrowser && ' (Browser Mode)'}
-        </p>
-      </header>
+    <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8">UI Components</h1>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-6 bg-gray-100 p-1 rounded-lg">
-          <TabsTrigger 
-            value="components" 
-            className="px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#00BFFF] data-[state=active]:shadow-sm transition-all duration-200"
+      {selectedComponent ? (
+        <div>
+          <button
+            onClick={handleBackToList}
+            className="mb-6 text-blue-600 hover:text-blue-800 flex items-center"
           >
-            Components
-          </TabsTrigger>
-          <TabsTrigger 
-            value="icons" 
-            className="px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#00BFFF] data-[state=active]:shadow-sm transition-all duration-200"
-          >
-            Icons
-          </TabsTrigger>
-          <TabsTrigger 
-            value="discovery" 
-            className="px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#00BFFF] data-[state=active]:shadow-sm transition-all duration-200"
-          >
-            Discovery
-          </TabsTrigger>
-          <TabsTrigger 
-            value="settings" 
-            className="px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#00BFFF] data-[state=active]:shadow-sm transition-all duration-200"
-          >
-            Settings
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="components" className="space-y-4">
-          <Card className="w-full p-4">
-            <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
-              <span className="w-6 h-6 mr-2 text-[#00BFFF] flex items-center justify-center">
-                <Icon iconId="faPaletteLight"
-                  variant="light"
-                  className="w-5 h-5"
-                />
-              </span>
-              Component Library
-            </h2>
-
-            {/* Use client-only component list to avoid server-side Node.js imports */}
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <ClientOnlyComponentsList />
-            </ErrorBoundary>
-            
-            {/* Display selected component */}
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <SelectedComponentView />
-            </ErrorBoundary>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="icons" className="space-y-4">
-          <Card className="w-full p-4">
-            <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
-              <span className="w-6 h-6 mr-2 text-[#00BFFF] flex items-center justify-center">
-                <Icon iconId="faIconsLight"
-                  variant="light"
-                  className="w-5 h-5"
-                />
-              </span>
-              Icon Library
-            </h2>
-            
-            {/* Icon Library Component */}
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <IconLibraryComponent />
-            </ErrorBoundary>
-            
-            {/* New Icon System Demo */}
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
-                <span className="w-6 h-6 mr-2 text-[#00BFFF] flex items-center justify-center">
-                  <Icon iconId="faWandMagicLight"
-                    variant="light"
-                    className="w-5 h-5"
-                  />
-                </span>
-                New Icon System
-              </h3>
-              
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <IconDemo />
-              </ErrorBoundary>
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="discovery" className="space-y-4">
-          <Card className="w-full p-4">
-            <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
-              <span className="w-6 h-6 mr-2 text-[#00BFFF]">
-                <Icon iconId="faQuestionLight"  size={24} />
-              </span>
-              Component Discovery
-            </h2>
-            <p className="mb-4 text-sm text-gray-500">
-              {isBrowser 
-                ? 'Browser environment detected. Using simulated component discovery.' 
-                : 'Server environment detected. Using filesystem component discovery.'}
-            </p>
-            
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              {isBrowser ? (
-                // Browser-only UI for simulating file watching
-                <BrowserFileWatcher onComponentFound={(path: string) => console.log(`Component found: ${path}`)} />
-              ) : (
-                // Server-side functionality would be rendered here
-                <div className="py-4 text-gray-400 text-center">
-                  Server-side file watching UI would be shown here
-                </div>
-              )}
-            </ErrorBoundary>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-4">
-          <Card className="w-full p-4">
-            <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
-              <span className="w-6 h-6 mr-2 text-[#00BFFF]">
-                <Icon iconId="faQuestionLight"  size={24} />
-              </span>
-              Settings
-            </h2>
-            <div className="grid gap-4">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">Component Paths</label>
-                <input 
-                  type="text" 
-                  placeholder="/src/components/ui"
-                  className="border rounded p-2 text-sm"
-                  disabled={isBrowser}
-                />
-                {isBrowser && (
-                  <p className="text-xs text-amber-500">
-                    Path configuration is only available in server environments
-                  </p>
-                )}
-              </div>
-              
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">Auto-Discovery</label>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="auto-discovery"
-                    disabled={isBrowser}
-                  />
-                  <label htmlFor="auto-discovery" className="text-sm">
-                    Enable automatic component discovery
-                  </label>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      <div className="flex flex-col gap-6">
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-4">Icon Library</h2>
-          <IconLibrary />
+            ← Back to all components
+          </button>
+          <ComponentDetail component={selectedComponent} />
         </div>
-        
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-4">Color Palette</h2>
-          <Palette />
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="mb-6">
+            <Input
+              type="search"
+              placeholder="Search components..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="max-w-md"
+            />
+          </div>
+
+          <CategoryFilter
+            components={components}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleCategorySelect}
+          />
+
+          <ComponentsGrid
+            components={components}
+            filter={searchTerm}
+            category={selectedCategory}
+            onSelectComponent={handleComponentSelect}
+          />
+        </>
+      )}
     </div>
   );
 } 

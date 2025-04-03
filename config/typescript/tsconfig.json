@@ -34,6 +34,7 @@
       "@/components/ui/scroll-area": ["./src/components/ui/molecules/scroll-area"],
       "@/components/ui/select": ["./src/components/ui/molecules/select"],
       "@/components/ui/skeleton": ["./src/components/ui/molecules/skeleton"],
+      "@/components/ui/loading-skeleton": ["./src/components/ui/molecules/skeleton"],
       "@/components/ui/slider": ["./src/components/ui/atoms/slider"],
       "@/components/ui/spinner": ["./src/components/ui/atoms/spinner"],
       "@/components/ui/switch": ["./src/components/ui/atoms/switch"],
