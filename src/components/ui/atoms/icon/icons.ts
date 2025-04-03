@@ -1,20 +1,16 @@
 /**
  * Consolidated Icon Utilities
- * Updated to use consolidated registry loader - last updated: 2023-04-03
- * Replaces multiple overlapping files with a single source of truth
+ * Updated to use consolidated registry loader - last updated: 2024-04-03
+ * Provides standardized icon path resolution and utility functions
  */
 
 import { IconStyle, IconMetadata, IconRegistryData } from './types';
 
 // IMPORTANT: The icon registry is the single source of truth for icons
-// Updated to use the consolidated registry loader
 import { iconRegistry } from './registry-loader';
 
 // Use registry directly with type safety
 const registry = iconRegistry;
-
-// Legacy icon name mappings have been removed
-// All components now use direct references to standard icon IDs
 
 // Debug flag
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -61,9 +57,6 @@ const STANDARD_ICONS = [
  */
 export function normalizeIconName(name: string): string {
   if (!name) return 'faQuestion';
-  
-  // Legacy icon mapping has been removed
-  // All components now use standardized icon IDs directly
   
   // Handle semantic names by looking up in registry
   const semanticMatch = registry.icons.find(icon => icon.semantic === name);
@@ -152,9 +145,6 @@ export function findIconById(id: string): IconMetadata | null {
     debug('Icon registry is not properly loaded or not an array');
     return null;
   }
-  
-  // Legacy icon mapping has been removed
-  // All components now use standardized icon IDs directly
   
   // Direct lookup
   let icon = registry.icons.find((item: IconMetadata) => 

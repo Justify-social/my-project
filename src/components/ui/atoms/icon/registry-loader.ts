@@ -17,8 +17,6 @@ import brandsIcons from '../../../../../public/static/brands-icon-registry.json'
 import kpisIcons from '../../../../../public/static/kpis-icon-registry.json';
 import lightIcons from '../../../../../public/static/light-icon-registry.json';
 import solidIcons from '../../../../../public/static/solid-icon-registry.json';
-import newLightIcons from '../../../../../public/static/new-light-icon-registry.json';
-import newSolidIcons from '../../../../../public/static/new-solid-icon-registry.json';
 import { IconMetadata, IconRegistryData } from './types';
 
 // Debug flag for development mode
@@ -71,8 +69,6 @@ export function consolidateRegistries(): IconRegistryData {
     addIconsFromRegistry(kpisIcons, 'kpis-icon-registry.json');
     addIconsFromRegistry(lightIcons, 'light-icon-registry.json');
     addIconsFromRegistry(solidIcons, 'solid-icon-registry.json');
-    addIconsFromRegistry(newLightIcons, 'new-light-icon-registry.json');
-    addIconsFromRegistry(newSolidIcons, 'new-solid-icon-registry.json');
     
     // Create the consolidated registry with metadata
     const consolidatedRegistry: IconRegistryData = {

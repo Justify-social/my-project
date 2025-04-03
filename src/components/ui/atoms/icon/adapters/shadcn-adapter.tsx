@@ -33,7 +33,7 @@ const iconVariants = cva('inline-flex items-center justify-center', {
 export interface ShadcnIconProps extends
   React.HTMLAttributes<HTMLElement>,
   VariantProps<typeof iconVariants> {
-  name: string;
+  iconId: string;
 }
 
 /**
@@ -56,7 +56,7 @@ export interface ShadcnIconProps extends
  * ```
  */
 export const ShadcnIcon = forwardRef<HTMLSpanElement, ShadcnIconProps>(
-  ({ name, className, size, variant, ...props }, ref) => {
+  ({ iconId, className, size, variant, ...props }, ref) => {
     // Simple utility function if cn is missing
     const combineClasses = cn || function(...classes: any[]) {
       return classes.filter(Boolean).join(' ');
@@ -64,7 +64,7 @@ export const ShadcnIcon = forwardRef<HTMLSpanElement, ShadcnIconProps>(
     
     return (
       <Icon
-        name={name}
+        iconId={iconId}
         size={size as IconSize}
         variant={variant as IconVariant}
         className={combineClasses(iconVariants({ size, variant }), className)}
