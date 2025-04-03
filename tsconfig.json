@@ -1,13 +1,1 @@
-// This file is now located at config/typescript/tsconfig.json
-// This is a redirect file for backward compatibility
-{
-  "extends": "./config/typescript/tsconfig.json",
-  "include": [
-    "config/typescript/next-env.d.ts",
-    "config/typescript/**/*.ts",
-    "config/typescript/**/*.tsx",
-    "config/typescript/.next/types/**/*.ts",
-    "config/typescript/src/types/**/*.d.ts",
-    ".next/types/**/*.ts"
-  ]
-}
+config/typescript/tsconfig.json

@@ -1,7 +1,1 @@
-node_modules/
-.next/
-build/
-dist/
-out/
-coverage/
-next.config.js 
+config/eslint/.eslintignore

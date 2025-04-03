@@ -37,8 +37,11 @@
       "@/components/ui/slider": ["./src/components/ui/atoms/slider"],
       "@/components/ui/spinner": ["./src/components/ui/atoms/spinner"],
       "@/components/ui/switch": ["./src/components/ui/atoms/switch"],
-      "@/components/ui/tabs": ["./src/components/ui/molecules/tabs"]
-    }
+      "@/components/ui/tabs": ["./src/components/ui/molecules/tabs"],
+      "@/components/ui/atoms/icon": ["./src/components/ui/atoms/icon"],
+      "@/components/ui/atoms/icon/*": ["./src/components/ui/atoms/icon/*"]
+    },
+    "baseUrl": "./"
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.d.ts"],
   "exclude": ["node_modules"]

@@ -1,3 +1,1 @@
-{
-  "extends": "./config/vercel/vercel.json"
-}
+config/vercel/vercel.json

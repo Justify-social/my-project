@@ -69,7 +69,7 @@
     "predev": "npm run generate-ui-registry && npm run update:shadcn-index",
     "validate:components": "node scripts/validate-components.js",
     "update:shadcn-index": "node config/start-up/update-shadcn-index.mjs",
-    "prebuild": "npm run generate:component-manifest && npm run update:shadcn-index",
+    "prebuild": "npm run generate:component-registry && npm run update:shadcn-index",
     "toolkit": "node scripts/master/master-toolkit.mjs",
     "icons": "node scripts/master/master-toolkit.mjs icons",
     "ui": "node scripts/master/master-toolkit.mjs ui",
@@ -92,7 +92,8 @@
     "icons:merge": "node scripts/icons/merge-icon-registries.mjs",
     "codebase:find-redundant": "node scripts/codebase-structure/cleanup-redundant-files.js",
     "codebase:clean-redundant": "node scripts/codebase-structure/cleanup-redundant-files.js --clean",
-    "codebase:health": "npm run lint && npm run check-format && npm run codebase:check-naming && npm run codebase:find-redundant"
+    "codebase:health": "npm run lint && npm run check-format && npm run codebase:check-naming && npm run codebase:find-redundant",
+    "config:symlinks": "./scripts/migration/create-config-symlinks.sh"
   },
   "dependencies": {
     "@algolia/client-search": "5.21.0",
