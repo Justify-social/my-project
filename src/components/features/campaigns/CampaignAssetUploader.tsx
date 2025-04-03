@@ -3,7 +3,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import OurFileRouter from '../../../app/api/uploadthing/core';
-import HTMLInputElement from '../../ui/radio/types/index';
 import { UploadDropzone } from "@uploadthing/react";
 import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";

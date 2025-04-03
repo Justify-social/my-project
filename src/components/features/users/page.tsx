@@ -26,7 +26,7 @@ interface Transaction {
 }
 
 // Enhanced UI Components
-const Card = memo(({
+const ProfileCard = memo(({
   children
 
 
@@ -385,7 +385,7 @@ const SubscriptionBillingPage: React.FC = () => {
         <div className="space-y-8 font-work-sans">
           {activeTab === "overview" ? <>
               {/* Current Plan Card */}
-              <Card>
+              <ProfileCard>
                 <SectionHeader icon={(props) => <Icon iconId="faLightningLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Current Plan" description="Your current subscription plan and features" />
 
                 <div className="bg-[var(--background-color)] rounded-lg p-6 font-work-sans">
@@ -416,10 +416,10 @@ const SubscriptionBillingPage: React.FC = () => {
                       </div>)}
                   </div>
                 </div>
-              </Card>
+              </ProfileCard>
 
               {/* Payment Methods Card */}
-              <Card>
+              <ProfileCard>
                 <SectionHeader icon={(props) => <Icon iconId="faCreditCardLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Payment Methods" description="Manage your payment methods and billing information" />
 
                 <div className="space-y-4 font-work-sans">
@@ -481,10 +481,10 @@ const SubscriptionBillingPage: React.FC = () => {
                     Add Payment Method
                   </motion.button>
                 </div>
-              </Card>
+              </ProfileCard>
 
               {/* Billing History Card */}
-              <Card>
+              <ProfileCard>
                 <SectionHeader icon={(props) => <Icon iconId="faFileLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Billing History" description="View and download your past invoices" />
 
                 <div className="overflow-hidden rounded-lg border border-[var(--divider-color)] font-work-sans">
@@ -563,10 +563,10 @@ const SubscriptionBillingPage: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
-              </Card>
+              </ProfileCard>
             </> : <>
               {/* Credits Balance Card */}
-              <Card>
+              <ProfileCard>
                 <SectionHeader icon={(props) => <Icon iconId="faMoneyLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Credits Balance" description="View and manage your credits" />
 
                 <div className="bg-gradient-to-r from-[var(--accent-color)] to-[#0099cc] rounded-lg p-6 text-white font-work-sans">
@@ -598,10 +598,10 @@ const SubscriptionBillingPage: React.FC = () => {
                       </p>
                     </div>}
                 </div>
-              </Card>
+              </ProfileCard>
 
               {/* Credit Packages Card */}
-              <Card>
+              <ProfileCard>
                 <SectionHeader icon={(props) => <Icon iconId="faLightningLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />} title="Credit Packages" description="Choose a credit package that suits your needs" />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
@@ -622,7 +622,7 @@ const SubscriptionBillingPage: React.FC = () => {
                   <Icon iconId="faMoneyLight" className="w-5 h-5 mr-2"  />
                   Purchase Credits
                 </motion.button>
-              </Card>
+              </ProfileCard>
             </>}
         </div>
 
