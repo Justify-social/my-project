@@ -1,0 +1,62 @@
+{
+  "icons": [
+    {
+      "category": "kpis",
+      "id": "kpisActionIntent",
+      "name": "Action intent",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisActionIntent.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisAdRecall",
+      "name": "Ad recall",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisAdRecall.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisAdvocacy",
+      "name": "Advocacy",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisAdvocacy.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisBrandAwareness",
+      "name": "Brand awareness",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisBrandAwareness.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisBrandPreference",
+      "name": "Brand preference",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisBrandPreference.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisConsideration",
+      "name": "Consideration",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisConsideration.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisMessageAssociation",
+      "name": "Message association",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisMessageAssociation.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisPurchaseIntent",
+      "name": "Purchase intent",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisPurchaseIntent.svg"
+    }
+  ],
+  "category": "kpis",
+  "iconCount": 8
+}

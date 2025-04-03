@@ -1,0 +1,55 @@
+{
+  "icons": [
+    {
+      "category": "brands",
+      "id": "brandsFacebook",
+      "name": "Facebook",
+      "faVersion": "fab fa-facebook",
+      "path": "/icons/brands/brandsFacebook.svg"
+    },
+    {
+      "category": "brands",
+      "id": "brandsGithub",
+      "name": "Github",
+      "faVersion": "fab fa-github",
+      "path": "/icons/brands/brandsGithub.svg"
+    },
+    {
+      "category": "brands",
+      "id": "brandsInstagram",
+      "name": "Instagram",
+      "faVersion": "fab fa-instagram",
+      "path": "/icons/brands/brandsInstagram.svg"
+    },
+    {
+      "category": "brands",
+      "id": "brandsLinkedin",
+      "name": "Linkedin",
+      "faVersion": "fab fa-linkedin",
+      "path": "/icons/brands/brandsLinkedin.svg"
+    },
+    {
+      "category": "brands",
+      "id": "brandsTiktok",
+      "name": "Tiktok",
+      "faVersion": "fab fa-tiktok",
+      "path": "/icons/brands/brandsTiktok.svg"
+    },
+    {
+      "category": "brands",
+      "id": "brandsXTwitter",
+      "name": "X Twitter",
+      "faVersion": "fab fa-x-twitter",
+      "path": "/icons/brands/brandsXTwitter.svg"
+    },
+    {
+      "category": "brands",
+      "id": "brandsYoutube",
+      "name": "Youtube",
+      "faVersion": "fab fa-youtube",
+      "path": "/icons/brands/brandsYoutube.svg"
+    }
+  ],
+  "category": "brands",
+  "iconCount": 7
+}

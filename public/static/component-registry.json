@@ -1,15 +1,64 @@
 {
   "components": [
     {
+      "path": "src/components/ui/atoms/accordion/Accordion.tsx",
+      "name": "accordion",
+      "originalName": "Accordion",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.043Z",
+      "exports": [
+        "Accordion"
+      ],
+      "props": [],
+      "description": "Accordion atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
       "path": "src/components/ui/atoms/alert/Alert.tsx",
-      "name": "Alert",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "alert",
+      "originalName": "Alert",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.044Z",
       "exports": [
         "Alert"
       ],
       "props": [],
-      "description": "Alert atom component",
+      "description": "Alert atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/alert/examples/AlertExamples.tsx",
+      "name": "alert-examples",
+      "originalName": "AlertExamples",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.044Z",
+      "exports": [
+        "AlertExamples"
+      ],
+      "props": [],
+      "description": "AlertExamples atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/avatar/Avatar.tsx",
+      "name": "avatar",
+      "originalName": "Avatar",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.045Z",
+      "exports": [
+        "Avatar"
+      ],
+      "props": [],
+      "description": "Avatar atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -17,14 +66,15 @@
     },
     {
       "path": "src/components/ui/atoms/button/ActionButtons.tsx",
-      "name": "ActionButtons",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "action-buttons",
+      "originalName": "ActionButtons",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.046Z",
       "exports": [
         "ActionButtons"
       ],
       "props": [],
-      "description": "ActionButtons atom component",
+      "description": "ActionButtons atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -32,14 +82,15 @@
     },
     {
       "path": "src/components/ui/atoms/button/Button.tsx",
-      "name": "Button",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "button",
+      "originalName": "Button",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.046Z",
       "exports": [
         "Button"
       ],
       "props": [],
-      "description": "Button atom component",
+      "description": "Button atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -47,14 +98,15 @@
     },
     {
       "path": "src/components/ui/atoms/button/ButtonWithIcon.tsx",
-      "name": "ButtonWithIcon",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "button-with-icon",
+      "originalName": "ButtonWithIcon",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.046Z",
       "exports": [
         "ButtonWithIcon"
       ],
       "props": [],
-      "description": "ButtonWithIcon atom component",
+      "description": "ButtonWithIcon atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -62,14 +114,31 @@
     },
     {
       "path": "src/components/ui/atoms/button/IconButton.tsx",
-      "name": "IconButton",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "icon-button",
+      "originalName": "IconButton",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.047Z",
       "exports": [
         "IconButton"
       ],
       "props": [],
-      "description": "IconButton atom component",
+      "description": "IconButton atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/calendar/Calendar.tsx",
+      "name": "calendar",
+      "originalName": "Calendar",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.048Z",
+      "exports": [
+        "Calendar"
+      ],
+      "props": [],
+      "description": "Calendar atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -77,14 +146,15 @@
     },
     {
       "path": "src/components/ui/atoms/card/Card.tsx",
-      "name": "Card",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "card",
+      "originalName": "Card",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.048Z",
       "exports": [
         "Card"
       ],
       "props": [],
-      "description": "Card atom component",
+      "description": "Card atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -92,74 +162,143 @@
     },
     {
       "path": "src/components/ui/atoms/checkbox/Checkbox.tsx",
-      "name": "Checkbox",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "name": "checkbox",
+      "originalName": "Checkbox",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.049Z",
       "exports": [
         "Checkbox"
       ],
       "props": [],
-      "description": "Checkbox atom component",
+      "description": "Checkbox atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/data-display/calendar/Calendar.tsx",
-      "name": "Calendar",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "path": "src/components/ui/atoms/collapsible/Collapsible.tsx",
+      "name": "collapsible",
+      "originalName": "Collapsible",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.049Z",
       "exports": [
-        "Calendar"
+        "Collapsible"
       ],
       "props": [],
-      "description": "Calendar atom component",
+      "description": "Collapsible atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/icons/Icon.tsx",
-      "name": "Icon",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "path": "src/components/ui/atoms/command/Command.tsx",
+      "name": "command",
+      "originalName": "Command",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.049Z",
+      "exports": [
+        "Command"
+      ],
+      "props": [],
+      "description": "Command atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/context-menu/Context-menu.tsx",
+      "name": "context-menu",
+      "originalName": "Context-menu",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.050Z",
+      "exports": [
+        "Context-menu"
+      ],
+      "props": [],
+      "description": "Context-menu atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/dialog/Dialog.tsx",
+      "name": "dialog",
+      "originalName": "Dialog",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.050Z",
+      "exports": [
+        "Dialog"
+      ],
+      "props": [],
+      "description": "Dialog atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/dropdown-menu/Dropdown-menu.tsx",
+      "name": "dropdown-menu",
+      "originalName": "Dropdown-menu",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.050Z",
+      "exports": [
+        "Dropdown-menu"
+      ],
+      "props": [],
+      "description": "Dropdown-menu atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/hover-card/Hover-card.tsx",
+      "name": "hover-card",
+      "originalName": "Hover-card",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.050Z",
+      "exports": [
+        "Hover-card"
+      ],
+      "props": [],
+      "description": "Hover-card atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/icon/Icon.tsx",
+      "name": "icon",
+      "originalName": "Icon",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.051Z",
       "exports": [
         "Icon"
       ],
       "props": [],
-      "description": "Icon atom component",
+      "description": "Icon atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/icons/IconContext.tsx",
-      "name": "IconContext",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.443Z",
+      "path": "src/components/ui/atoms/icon/IconContext.tsx",
+      "name": "icon-context",
+      "originalName": "IconContext",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.051Z",
       "exports": [
         "IconContext"
       ],
       "props": [],
-      "description": "IconContext atom component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/atoms/image/OptimizedImage.tsx",
-      "name": "OptimizedImage",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
-      "exports": [
-        "OptimizedImage"
-      ],
-      "props": [],
-      "description": "OptimizedImage atom component",
+      "description": "IconContext atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -167,14 +306,15 @@
     },
     {
       "path": "src/components/ui/atoms/input/Input.tsx",
-      "name": "Input",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
+      "name": "input",
+      "originalName": "Input",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.053Z",
       "exports": [
         "Input"
       ],
       "props": [],
-      "description": "Input atom component",
+      "description": "Input atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -182,89 +322,31 @@
     },
     {
       "path": "src/components/ui/atoms/label/Label.tsx",
-      "name": "Label",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
+      "name": "label",
+      "originalName": "Label",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.054Z",
       "exports": [
         "Label"
       ],
       "props": [],
-      "description": "Label atom component",
+      "description": "Label atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/layout/container/Container.tsx",
-      "name": "Container",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
+      "path": "src/components/ui/atoms/menubar/Menubar.tsx",
+      "name": "menubar",
+      "originalName": "Menubar",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.054Z",
       "exports": [
-        "Container"
+        "Menubar"
       ],
       "props": [],
-      "description": "Container atom component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/atoms/layout/divider/Divider.tsx",
-      "name": "Divider",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
-      "exports": [
-        "Divider"
-      ],
-      "props": [],
-      "description": "Divider atom component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/atoms/layout/grid/Grid.tsx",
-      "name": "Grid",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
-      "exports": [
-        "Grid"
-      ],
-      "props": [],
-      "description": "Grid atom component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/atoms/layout/spacer/Spacer.tsx",
-      "name": "Spacer",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
-      "exports": [
-        "Spacer"
-      ],
-      "props": [],
-      "description": "Spacer atom component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/atoms/layout/stack/Stack.tsx",
-      "name": "Stack",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
-      "exports": [
-        "Stack"
-      ],
-      "props": [],
-      "description": "Stack atom component",
+      "description": "Menubar atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -272,29 +354,95 @@
     },
     {
       "path": "src/components/ui/atoms/multi-select/MultiSelect.tsx",
-      "name": "MultiSelect",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.444Z",
+      "name": "multi-select",
+      "originalName": "MultiSelect",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.055Z",
       "exports": [
         "MultiSelect"
       ],
       "props": [],
-      "description": "MultiSelect atom component",
+      "description": "MultiSelect atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/radio/Radio.tsx",
-      "name": "Radio",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "path": "src/components/ui/atoms/navigation-menu/Navigation-menu.tsx",
+      "name": "navigation-menu",
+      "originalName": "Navigation-menu",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.055Z",
       "exports": [
-        "Radio"
+        "Navigation-menu"
       ],
       "props": [],
-      "description": "Radio atom component",
+      "description": "Navigation-menu atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/popover/Popover.tsx",
+      "name": "popover",
+      "originalName": "Popover",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.055Z",
+      "exports": [
+        "Popover"
+      ],
+      "props": [],
+      "description": "Popover atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/progress/Progress.tsx",
+      "name": "progress",
+      "originalName": "Progress",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.055Z",
+      "exports": [
+        "Progress"
+      ],
+      "props": [],
+      "description": "Progress atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/radio-group/Radio-group.tsx",
+      "name": "radio-group",
+      "originalName": "Radio-group",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.055Z",
+      "exports": [
+        "Radio-group"
+      ],
+      "props": [],
+      "description": "Radio-group atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/scroll-area/Scroll-area.tsx",
+      "name": "scroll-area",
+      "originalName": "Scroll-area",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.056Z",
+      "exports": [
+        "Scroll-area"
+      ],
+      "props": [],
+      "description": "Scroll-area atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -302,44 +450,63 @@
     },
     {
       "path": "src/components/ui/atoms/select/Select.tsx",
-      "name": "Select",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "select",
+      "originalName": "Select",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.056Z",
       "exports": [
         "Select"
       ],
       "props": [],
-      "description": "Select atom component",
+      "description": "Select atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/spinner/Spinner.tsx",
-      "name": "Spinner",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "path": "src/components/ui/atoms/separator/Separator.tsx",
+      "name": "separator",
+      "originalName": "Separator",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.056Z",
       "exports": [
-        "Spinner"
+        "Separator"
       ],
       "props": [],
-      "description": "Spinner atom component",
+      "description": "Separator atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/spinner/examples/SpinnerExamples.tsx",
-      "name": "SpinnerExamples",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "path": "src/components/ui/atoms/sheet/Sheet.tsx",
+      "name": "sheet",
+      "originalName": "Sheet",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.056Z",
       "exports": [
-        "SpinnerExamples"
+        "Sheet"
       ],
       "props": [],
-      "description": "SpinnerExamples atom component",
+      "description": "Sheet atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/skeleton/Skeleton.tsx",
+      "name": "skeleton",
+      "originalName": "Skeleton",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.056Z",
+      "exports": [
+        "Skeleton"
+      ],
+      "props": [],
+      "description": "Skeleton atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -347,14 +514,47 @@
     },
     {
       "path": "src/components/ui/atoms/switch/Switch.tsx",
-      "name": "Switch",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "switch",
+      "originalName": "Switch",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.057Z",
       "exports": [
         "Switch"
       ],
       "props": [],
-      "description": "Switch atom component",
+      "description": "Switch atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/table/Table.tsx",
+      "name": "table",
+      "originalName": "Table",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.057Z",
+      "exports": [
+        "Table"
+      ],
+      "props": [],
+      "description": "Table atoms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/atoms/tabs/Tabs.tsx",
+      "name": "tabs",
+      "originalName": "Tabs",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.057Z",
+      "exports": [
+        "Tabs"
+      ],
+      "props": [],
+      "description": "Tabs atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -362,14 +562,15 @@
     },
     {
       "path": "src/components/ui/atoms/textarea/Textarea.tsx",
-      "name": "Textarea",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "textarea",
+      "originalName": "Textarea",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.057Z",
       "exports": [
         "Textarea"
       ],
       "props": [],
-      "description": "Textarea atom component",
+      "description": "Textarea atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -377,44 +578,31 @@
     },
     {
       "path": "src/components/ui/atoms/toggle/Toggle.tsx",
-      "name": "Toggle",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "toggle",
+      "originalName": "Toggle",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.057Z",
       "exports": [
         "Toggle"
       ],
       "props": [],
-      "description": "Toggle atom component",
+      "description": "Toggle atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/typography/Blockquote.tsx",
-      "name": "Blockquote",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "path": "src/components/ui/atoms/tooltip/Tooltip.tsx",
+      "name": "tooltip",
+      "originalName": "Tooltip",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.057Z",
       "exports": [
-        "Blockquote"
+        "Tooltip"
       ],
       "props": [],
-      "description": "Blockquote atom component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/atoms/typography/Code.tsx",
-      "name": "Code",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
-      "exports": [
-        "Code"
-      ],
-      "props": [],
-      "description": "Code atom component",
+      "description": "Tooltip atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -422,14 +610,15 @@
     },
     {
       "path": "src/components/ui/atoms/typography/Heading.tsx",
-      "name": "Heading",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "heading",
+      "originalName": "Heading",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.059Z",
       "exports": [
         "Heading"
       ],
       "props": [],
-      "description": "Heading atom component",
+      "description": "Heading atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -437,14 +626,15 @@
     },
     {
       "path": "src/components/ui/atoms/typography/Paragraph.tsx",
-      "name": "Paragraph",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "paragraph",
+      "originalName": "Paragraph",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.059Z",
       "exports": [
         "Paragraph"
       ],
       "props": [],
-      "description": "Paragraph atom component",
+      "description": "Paragraph atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -452,14 +642,15 @@
     },
     {
       "path": "src/components/ui/atoms/typography/Text.tsx",
-      "name": "Text",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "text",
+      "originalName": "Text",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.060Z",
       "exports": [
         "Text"
       ],
       "props": [],
-      "description": "Text atom component",
+      "description": "Text atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -467,179 +658,111 @@
     },
     {
       "path": "src/components/ui/atoms/typography/Typography.tsx",
-      "name": "Typography",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.445Z",
+      "name": "typography",
+      "originalName": "Typography",
+      "category": "atoms",
+      "lastUpdated": "2025-04-03T14:19:36.060Z",
       "exports": [
         "Typography"
       ],
       "props": [],
-      "description": "Typography atom component",
+      "description": "Typography atoms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/atoms/typography/examples/TypographyExamples.tsx",
-      "name": "TypographyExamples",
-      "category": "atom",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
+      "path": "src/components/ui/molecules/accordion/examples/AccordionExamples.tsx",
+      "name": "accordion-examples",
+      "originalName": "AccordionExamples",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.061Z",
       "exports": [
-        "TypographyExamples"
+        "AccordionExamples"
       ],
       "props": [],
-      "description": "TypographyExamples atom component",
+      "description": "AccordionExamples molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/breadcrumbs/Breadcrumbs.tsx",
-      "name": "Breadcrumbs",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
+      "path": "src/components/ui/molecules/aspect-ratio/Aspect-ratio.tsx",
+      "name": "aspect-ratio",
+      "originalName": "Aspect-ratio",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.061Z",
       "exports": [
-        "Breadcrumbs"
+        "Aspect-ratio"
       ],
       "props": [],
-      "description": "Breadcrumbs molecule component",
+      "description": "Aspect-ratio molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/breadcrumbs/examples/BreadcrumbsExamples.tsx",
-      "name": "BreadcrumbsExamples",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
+      "path": "src/components/ui/molecules/breadcrumb/Breadcrumb.tsx",
+      "name": "breadcrumb",
+      "originalName": "Breadcrumb",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.061Z",
       "exports": [
-        "BreadcrumbsExamples"
+        "Breadcrumb"
       ],
       "props": [],
-      "description": "BreadcrumbsExamples molecule component",
+      "description": "Breadcrumb molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/command-menu/CommandMenuList.tsx",
-      "name": "CommandMenuList",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
+      "path": "src/components/ui/molecules/carousel/Carousel.tsx",
+      "name": "carousel",
+      "originalName": "Carousel",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.061Z",
       "exports": [
-        "CommandMenuList"
+        "Carousel"
       ],
       "props": [],
-      "description": "CommandMenuList molecule component",
+      "description": "Carousel molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/command-menu/CommandMenuSearch.tsx",
-      "name": "CommandMenuSearch",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
+      "path": "src/components/ui/molecules/combobox/Combobox.tsx",
+      "name": "combobox",
+      "originalName": "Combobox",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.062Z",
       "exports": [
-        "CommandMenuSearch"
+        "Combobox"
       ],
       "props": [],
-      "description": "CommandMenuSearch molecule component",
+      "description": "Combobox molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/command-menu/examples/CommandMenuExamples.tsx",
-      "name": "CommandMenuExamples",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
+      "path": "src/components/ui/molecules/data-table/DataTable.tsx",
+      "name": "data-table",
+      "originalName": "DataTable",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.062Z",
       "exports": [
-        "CommandMenuExamples"
+        "DataTable"
       ],
       "props": [],
-      "description": "CommandMenuExamples molecule component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/molecules/feedback/Badge.tsx",
-      "name": "Badge",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
-      "exports": [
-        "Badge"
-      ],
-      "props": [],
-      "description": "Badge molecule component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/molecules/feedback/NotificationBell.tsx",
-      "name": "NotificationBell",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
-      "exports": [
-        "NotificationBell"
-      ],
-      "props": [],
-      "description": "NotificationBell molecule component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/molecules/feedback/Toast.tsx",
-      "name": "Toast",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
-      "exports": [
-        "Toast"
-      ],
-      "props": [],
-      "description": "Toast molecule component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/molecules/form-field/FormField.tsx",
-      "name": "FormField",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.446Z",
-      "exports": [
-        "FormField"
-      ],
-      "props": [],
-      "description": "FormField molecule component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/molecules/forms/date-picker/DatePicker.tsx",
-      "name": "DatePicker",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
-      "exports": [
-        "DatePicker"
-      ],
-      "props": [],
-      "description": "DatePicker molecule component",
+      "description": "DataTable molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -647,14 +770,15 @@
     },
     {
       "path": "src/components/ui/molecules/pagination/Pagination.tsx",
-      "name": "Pagination",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "pagination",
+      "originalName": "Pagination",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.062Z",
       "exports": [
         "Pagination"
       ],
       "props": [],
-      "description": "Pagination molecule component",
+      "description": "Pagination molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -662,14 +786,31 @@
     },
     {
       "path": "src/components/ui/molecules/pagination/examples/PaginationExamples.tsx",
-      "name": "PaginationExamples",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "pagination-examples",
+      "originalName": "PaginationExamples",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.062Z",
       "exports": [
         "PaginationExamples"
       ],
       "props": [],
-      "description": "PaginationExamples molecule component",
+      "description": "PaginationExamples molecules component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/molecules/resizable/Resizable.tsx",
+      "name": "resizable",
+      "originalName": "Resizable",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.062Z",
+      "exports": [
+        "Resizable"
+      ],
+      "props": [],
+      "description": "Resizable molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -677,44 +818,63 @@
     },
     {
       "path": "src/components/ui/molecules/scroll-area/ScrollArea.tsx",
-      "name": "ScrollArea",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "scroll-area",
+      "originalName": "ScrollArea",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.063Z",
       "exports": [
         "ScrollArea"
       ],
       "props": [],
-      "description": "ScrollArea molecule component",
+      "description": "ScrollArea molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/search/search-params-wrapper/SearchParamsWrapper.tsx",
-      "name": "SearchParamsWrapper",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "path": "src/components/ui/molecules/search-bar/SearchBar.tsx",
+      "name": "search-bar",
+      "originalName": "SearchBar",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.064Z",
+      "exports": [
+        "SearchBar"
+      ],
+      "props": [],
+      "description": "SearchBar molecules component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/molecules/search-bar/search-params-wrapper/SearchParamsWrapper.tsx",
+      "name": "search-params-wrapper",
+      "originalName": "SearchParamsWrapper",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.065Z",
       "exports": [
         "SearchParamsWrapper"
       ],
       "props": [],
-      "description": "SearchParamsWrapper molecule component",
+      "description": "SearchParamsWrapper molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/molecules/search/search-results/SearchResults.tsx",
-      "name": "SearchResults",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "path": "src/components/ui/molecules/search-bar/search-results/SearchResults.tsx",
+      "name": "search-results",
+      "originalName": "SearchResults",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.065Z",
       "exports": [
         "SearchResults"
       ],
       "props": [],
-      "description": "SearchResults molecule component",
+      "description": "SearchResults molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -722,14 +882,15 @@
     },
     {
       "path": "src/components/ui/molecules/skeleton/FormFieldSkeleton.tsx",
-      "name": "FormFieldSkeleton",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "form-field-skeleton",
+      "originalName": "FormFieldSkeleton",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.065Z",
       "exports": [
         "FormFieldSkeleton"
       ],
       "props": [],
-      "description": "FormFieldSkeleton molecule component",
+      "description": "FormFieldSkeleton molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -737,14 +898,15 @@
     },
     {
       "path": "src/components/ui/molecules/skeleton/LoadingSkeleton.tsx",
-      "name": "LoadingSkeleton",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "loading-skeleton",
+      "originalName": "LoadingSkeleton",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.065Z",
       "exports": [
         "LoadingSkeleton"
       ],
       "props": [],
-      "description": "LoadingSkeleton molecule component",
+      "description": "LoadingSkeleton molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -752,14 +914,15 @@
     },
     {
       "path": "src/components/ui/molecules/skeleton/Skeleton.tsx",
-      "name": "Skeleton",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "skeleton",
+      "originalName": "Skeleton",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.066Z",
       "exports": [
         "Skeleton"
       ],
       "props": [],
-      "description": "Skeleton molecule component",
+      "description": "Skeleton molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -767,14 +930,15 @@
     },
     {
       "path": "src/components/ui/molecules/skeleton/SkeletonSection.tsx",
-      "name": "SkeletonSection",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "skeleton-section",
+      "originalName": "SkeletonSection",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.066Z",
       "exports": [
         "SkeletonSection"
       ],
       "props": [],
-      "description": "SkeletonSection molecule component",
+      "description": "SkeletonSection molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -782,14 +946,31 @@
     },
     {
       "path": "src/components/ui/molecules/skeleton/examples/SkeletonExamples.tsx",
-      "name": "SkeletonExamples",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.447Z",
+      "name": "skeleton-examples",
+      "originalName": "SkeletonExamples",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.066Z",
       "exports": [
         "SkeletonExamples"
       ],
       "props": [],
-      "description": "SkeletonExamples molecule component",
+      "description": "SkeletonExamples molecules component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/molecules/sonner/Sonner.tsx",
+      "name": "sonner",
+      "originalName": "Sonner",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.066Z",
+      "exports": [
+        "Sonner"
+      ],
+      "props": [],
+      "description": "Sonner molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -797,14 +978,47 @@
     },
     {
       "path": "src/components/ui/molecules/tabs/basic-tabs/Tabs.tsx",
-      "name": "Tabs",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
+      "name": "tabs",
+      "originalName": "Tabs",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.067Z",
       "exports": [
         "Tabs"
       ],
       "props": [],
-      "description": "Tabs molecule component",
+      "description": "Tabs molecules component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/molecules/tabs/basic-tabs/TabsSubcomponents.tsx",
+      "name": "tabs-subcomponents",
+      "originalName": "TabsSubcomponents",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.067Z",
+      "exports": [
+        "TabsSubcomponents"
+      ],
+      "props": [],
+      "description": "TabsSubcomponents molecules component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/molecules/tabs/basic-tabs/examples/TabsExamples.tsx",
+      "name": "tabs-examples",
+      "originalName": "TabsExamples",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.067Z",
+      "exports": [
+        "TabsExamples"
+      ],
+      "props": [],
+      "description": "TabsExamples molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -812,119 +1026,175 @@
     },
     {
       "path": "src/components/ui/molecules/tabs/custom-tabs/CustomTabs.tsx",
-      "name": "CustomTabs",
-      "category": "molecule",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
+      "name": "custom-tabs",
+      "originalName": "CustomTabs",
+      "category": "molecules",
+      "lastUpdated": "2025-04-03T14:19:36.067Z",
       "exports": [
         "CustomTabs"
       ],
       "props": [],
-      "description": "CustomTabs molecule component",
+      "description": "CustomTabs molecules component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/AssetCard/AssetCard.tsx",
-      "name": "AssetCard",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
-      "exports": [
-        "AssetCard"
-      ],
-      "props": [],
-      "description": "AssetCard organism component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/organisms/AssetCard/components/AssetPreview.tsx",
-      "name": "AssetPreview",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
-      "exports": [
-        "AssetPreview"
-      ],
-      "props": [],
-      "description": "AssetPreview organism component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/organisms/Calendar/Calendar.tsx",
-      "name": "Calendar",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
+      "path": "src/components/ui/organisms/calendar/Calendar.tsx",
+      "name": "calendar",
+      "originalName": "Calendar",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.068Z",
       "exports": [
         "Calendar"
       ],
       "props": [],
-      "description": "Calendar organism component",
+      "description": "Calendar organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/Calendar/CalendarUpcoming.tsx",
-      "name": "CalendarUpcoming",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
+      "path": "src/components/ui/organisms/calendar/CalendarDashboard.tsx",
+      "name": "calendar-dashboard",
+      "originalName": "CalendarDashboard",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.068Z",
+      "exports": [
+        "CalendarDashboard"
+      ],
+      "props": [],
+      "description": "CalendarDashboard organisms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/organisms/calendar/CalendarUpcoming.tsx",
+      "name": "calendar-upcoming",
+      "originalName": "CalendarUpcoming",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.068Z",
       "exports": [
         "CalendarUpcoming"
       ],
       "props": [],
-      "description": "CalendarUpcoming organism component",
+      "description": "CalendarUpcoming organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/Card/Card.tsx",
-      "name": "Card",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
+      "path": "src/components/ui/organisms/calendar-date-range-picker/CalendarDateRangePicker.tsx",
+      "name": "calendar-date-range-picker",
+      "originalName": "CalendarDateRangePicker",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.068Z",
+      "exports": [
+        "CalendarDateRangePicker"
+      ],
+      "props": [],
+      "description": "CalendarDateRangePicker organisms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/organisms/card/Card.tsx",
+      "name": "card",
+      "originalName": "Card",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.068Z",
       "exports": [
         "Card"
       ],
       "props": [],
-      "description": "Card organism component",
+      "description": "Card organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/Modal/Modal.tsx",
-      "name": "Modal",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.448Z",
+      "path": "src/components/ui/organisms/card/MetricCard.tsx",
+      "name": "metric-card",
+      "originalName": "MetricCard",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.069Z",
       "exports": [
-        "Modal"
+        "MetricCard"
       ],
       "props": [],
-      "description": "Modal organism component",
+      "description": "MetricCard organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/command-menu/examples/CommandMenuExamples.tsx",
-      "name": "CommandMenuExamples",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "path": "src/components/ui/organisms/card/UpcomingCampaignsCard.tsx",
+      "name": "upcoming-campaigns-card",
+      "originalName": "UpcomingCampaignsCard",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.069Z",
       "exports": [
-        "CommandMenuExamples"
+        "UpcomingCampaignsCard"
       ],
       "props": [],
-      "description": "CommandMenuExamples organism component",
+      "description": "UpcomingCampaignsCard organisms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/organisms/card/asset-card/AssetCard.tsx",
+      "name": "asset-card",
+      "originalName": "AssetCard",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.069Z",
+      "exports": [
+        "AssetCard"
+      ],
+      "props": [],
+      "description": "AssetCard organisms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/organisms/card/asset-card/AssetPreview.tsx",
+      "name": "asset-preview",
+      "originalName": "AssetPreview",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.069Z",
+      "exports": [
+        "AssetPreview"
+      ],
+      "props": [],
+      "description": "AssetPreview organisms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/organisms/card/examples/CardExamples.tsx",
+      "name": "card-examples",
+      "originalName": "CardExamples",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.070Z",
+      "exports": [
+        "CardExamples"
+      ],
+      "props": [],
+      "description": "CardExamples organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -932,14 +1202,15 @@
     },
     {
       "path": "src/components/ui/organisms/data-display/data-grid/DataGrid.tsx",
-      "name": "DataGrid",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "name": "data-grid",
+      "originalName": "DataGrid",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.070Z",
       "exports": [
         "DataGrid"
       ],
       "props": [],
-      "description": "DataGrid organism component",
+      "description": "DataGrid organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -947,59 +1218,79 @@
     },
     {
       "path": "src/components/ui/organisms/data-display/table/Table.tsx",
-      "name": "Table",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "name": "table",
+      "originalName": "Table",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.070Z",
       "exports": [
         "Table"
       ],
       "props": [],
-      "description": "Table organism component",
+      "description": "Table organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/error-fallback/ErrorFallback.tsx",
-      "name": "ErrorFallback",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "path": "src/components/ui/organisms/date-picker/DatePicker.tsx",
+      "name": "date-picker",
+      "originalName": "DatePicker",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.070Z",
       "exports": [
-        "ErrorFallback"
+        "DatePicker"
       ],
       "props": [],
-      "description": "ErrorFallback organism component",
+      "description": "DatePicker organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/feedback/Alert.tsx",
-      "name": "Alert",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "path": "src/components/ui/organisms/form/Form.tsx",
+      "name": "form",
+      "originalName": "Form",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.071Z",
       "exports": [
-        "Alert"
+        "Form"
       ],
       "props": [],
-      "description": "Alert organism component",
+      "description": "Form organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/navigation/component-nav/ComponentNav.tsx",
-      "name": "ComponentNav",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "path": "src/components/ui/organisms/modal/Modal.tsx",
+      "name": "modal",
+      "originalName": "Modal",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.071Z",
       "exports": [
-        "ComponentNav"
+        "Modal"
       ],
       "props": [],
-      "description": "ComponentNav organism component",
+      "description": "Modal organisms component",
+      "examples": [],
+      "dependencies": [],
+      "version": "1.0.0",
+      "changeHistory": []
+    },
+    {
+      "path": "src/components/ui/organisms/multi-select/MultiSelect.tsx",
+      "name": "multi-select",
+      "originalName": "MultiSelect",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.071Z",
+      "exports": [
+        "MultiSelect"
+      ],
+      "props": [],
+      "description": "MultiSelect organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -1007,14 +1298,15 @@
     },
     {
       "path": "src/components/ui/organisms/navigation/header/Header.tsx",
-      "name": "Header",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.449Z",
+      "name": "header",
+      "originalName": "Header",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.071Z",
       "exports": [
         "Header"
       ],
       "props": [],
-      "description": "Header organism component",
+      "description": "Header organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -1022,44 +1314,31 @@
     },
     {
       "path": "src/components/ui/organisms/navigation/mobile-menu/MobileMenu.tsx",
-      "name": "MobileMenu",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.450Z",
+      "name": "mobile-menu",
+      "originalName": "MobileMenu",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.071Z",
       "exports": [
         "MobileMenu"
       ],
       "props": [],
-      "description": "MobileMenu organism component",
+      "description": "MobileMenu organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     },
     {
-      "path": "src/components/ui/organisms/navigation/nav-bar/NavigationBar.tsx",
-      "name": "NavigationBar",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.450Z",
+      "path": "src/components/ui/organisms/navigation/navigation-menu/NavigationMenu.tsx",
+      "name": "navigation-menu",
+      "originalName": "NavigationMenu",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.071Z",
       "exports": [
-        "NavigationBar"
+        "NavigationMenu"
       ],
       "props": [],
-      "description": "NavigationBar organism component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/organisms/navigation/nav-bar/examples/NavigationBarExamples.tsx",
-      "name": "NavigationBarExamples",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.450Z",
-      "exports": [
-        "NavigationBarExamples"
-      ],
-      "props": [],
-      "description": "NavigationBarExamples organism component",
+      "description": "NavigationMenu organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
@@ -1067,49 +1346,22 @@
     },
     {
       "path": "src/components/ui/organisms/navigation/sidebar/Sidebar.tsx",
-      "name": "Sidebar",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.450Z",
+      "name": "sidebar",
+      "originalName": "Sidebar",
+      "category": "organisms",
+      "lastUpdated": "2025-04-03T14:19:36.072Z",
       "exports": [
         "Sidebar"
       ],
       "props": [],
-      "description": "Sidebar organism component",
-      "examples": [],
-      "dependencies": [],
-      "version": "1.0.0",
-      "changeHistory": []
-    },
-    {
-      "path": "src/components/ui/organisms/stepper/examples/StepperExamples.tsx",
-      "name": "StepperExamples",
-      "category": "organism",
-      "lastUpdated": "2025-03-30T18:12:30.450Z",
-      "exports": [
-        "StepperExamples"
-      ],
-      "props": [],
-      "description": "StepperExamples organism component",
+      "description": "Sidebar organisms component",
       "examples": [],
       "dependencies": [],
       "version": "1.0.0",
       "changeHistory": []
     }
   ],
-  "generatedAt": "2025-03-30T18:13:26.514Z",
-  "updatedAt": "2025-03-30T18:13:26.514Z",
-  "version": "1.0.0",
-  "scanDuration": 193,
-  "cacheHits": 90,
-  "successfulFiles": 0,
-  "failedFiles": 0,
-  "warnings": [],
-  "metadata": {
-    "totalFiles": 90,
-    "extractedComponents": 0,
-    "uniqueComponents": 1,
-    "environment": "development"
-  },
-  "_preservedFromNewer": true,
-  "_originalComponentCount": 1
+  "generatedAt": "2025-04-03T14:19:36.072Z",
+  "updatedAt": "2025-04-03T14:19:36.072Z",
+  "version": "1.0.0"
 }

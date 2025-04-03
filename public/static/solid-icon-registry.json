@@ -1,0 +1,959 @@
+{
+  "icons": [
+    {
+      "category": "solid",
+      "id": "faAnglesLeftSolid",
+      "name": "Angles Left",
+      "faVersion": "fas fa-angles-left",
+      "path": "/icons/solid/faAnglesLeftSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faAnglesRightSolid",
+      "name": "Angles Right",
+      "faVersion": "fas fa-angles-right",
+      "path": "/icons/solid/faAnglesRightSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faArrowDownSolid",
+      "name": "Arrow Down",
+      "faVersion": "fas fa-arrow-down",
+      "path": "/icons/solid/faArrowDownSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faArrowLeftSolid",
+      "name": "Arrow Left",
+      "faVersion": "fas fa-arrow-left",
+      "path": "/icons/solid/faArrowLeftSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faArrowRightSolid",
+      "name": "Arrow Right",
+      "faVersion": "fas fa-arrow-right",
+      "path": "/icons/solid/faArrowRightSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faArrowTrendDownSolid",
+      "name": "Arrow Trend Down",
+      "faVersion": "fas fa-arrow-trend-down",
+      "path": "/icons/solid/faArrowTrendDownSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faArrowTrendUpSolid",
+      "name": "Arrow Trend Up",
+      "faVersion": "fas fa-arrow-trend-up",
+      "path": "/icons/solid/faArrowTrendUpSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faArrowUpSolid",
+      "name": "Arrow Up",
+      "faVersion": "fas fa-arrow-up",
+      "path": "/icons/solid/faArrowUpSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faAtomSolid",
+      "name": "Atom",
+      "faVersion": "fas fa-atom",
+      "path": "/icons/solid/faAtomSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBacteriaSolid",
+      "name": "Bacteria",
+      "faVersion": "fas fa-bacteria",
+      "path": "/icons/solid/faBacteriaSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBacteriumSolid",
+      "name": "Bacterium",
+      "faVersion": "fas fa-bacterium",
+      "path": "/icons/solid/faBacteriumSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBarsSolid",
+      "name": "Bars",
+      "faVersion": "fas fa-bars",
+      "path": "/icons/solid/faBarsSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBellSlashSolid",
+      "name": "Bell Slash",
+      "faVersion": "fas fa-bell-slash",
+      "path": "/icons/solid/faBellSlashSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBellSolid",
+      "name": "Bell",
+      "faVersion": "fas fa-bell",
+      "path": "/icons/solid/faBellSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBoltSolid",
+      "name": "Bolt",
+      "faVersion": "fas fa-bolt",
+      "path": "/icons/solid/faBoltSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBookmarkSolid",
+      "name": "Bookmark",
+      "faVersion": "fas fa-bookmark",
+      "path": "/icons/solid/faBookmarkSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBugSolid",
+      "name": "Bug",
+      "faVersion": "fas fa-bug",
+      "path": "/icons/solid/faBugSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBuildingSolid",
+      "name": "Building",
+      "faVersion": "fas fa-building",
+      "path": "/icons/solid/faBuildingSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBullseyeSolid",
+      "name": "Bullseye",
+      "faVersion": "fas fa-bullseye",
+      "path": "/icons/solid/faBullseyeSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBurgerSolid",
+      "name": "Burger",
+      "faVersion": "fas fa-burger",
+      "path": "/icons/solid/faBurgerSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCalendarDaysSolid",
+      "name": "Calendar Days",
+      "faVersion": "fas fa-calendar-days",
+      "path": "/icons/solid/faCalendarDaysSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCalendarSolid",
+      "name": "Calendar",
+      "faVersion": "fas fa-calendar",
+      "path": "/icons/solid/faCalendarSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCameraSolid",
+      "name": "Camera",
+      "faVersion": "fas fa-camera",
+      "path": "/icons/solid/faCameraSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChartBarSolid",
+      "name": "Chart Bar",
+      "faVersion": "fas fa-chart-bar",
+      "path": "/icons/solid/faChartBarSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChartColumnSolid",
+      "name": "Chart Column",
+      "faVersion": "fas fa-chart-column",
+      "path": "/icons/solid/faChartColumnSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChartLineSolid",
+      "name": "Chart Line",
+      "faVersion": "fas fa-chart-line",
+      "path": "/icons/solid/faChartLineSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChartPieSolid",
+      "name": "Chart Pie",
+      "faVersion": "fas fa-chart-pie",
+      "path": "/icons/solid/faChartPieSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCheckSolid",
+      "name": "Check",
+      "faVersion": "fas fa-check",
+      "path": "/icons/solid/faCheckSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChevronDownSolid",
+      "name": "Chevron Down",
+      "faVersion": "fas fa-chevron-down",
+      "path": "/icons/solid/faChevronDownSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChevronLeftSolid",
+      "name": "Chevron Left",
+      "faVersion": "fas fa-chevron-left",
+      "path": "/icons/solid/faChevronLeftSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChevronRightSolid",
+      "name": "Chevron Right",
+      "faVersion": "fas fa-chevron-right",
+      "path": "/icons/solid/faChevronRightSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faChevronUpSolid",
+      "name": "Chevron Up",
+      "faVersion": "fas fa-chevron-up",
+      "path": "/icons/solid/faChevronUpSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleCheckSolid",
+      "name": "Circle Check",
+      "path": "/icons/solid/faCircleCheckSolid.svg",
+      "faVersion": "fas fa-circle-check"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleInfoSolid",
+      "name": "Circle Info",
+      "path": "/icons/solid/faCircleInfoSolid.svg",
+      "faVersion": "fas fa-circle-info"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleNotchSolid",
+      "name": "Circle Notch",
+      "faVersion": "fas fa-circle-notch",
+      "path": "/icons/solid/faCircleNotchSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleQuestionSolid",
+      "name": "Circle Question",
+      "path": "/icons/solid/faCircleQuestionSolid.svg",
+      "faVersion": "fas fa-circle-question"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleSolid",
+      "name": "Circle",
+      "faVersion": "fas fa-circle",
+      "path": "/icons/solid/faCircleSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleUserSolid",
+      "name": "Circle User",
+      "faVersion": "fas fa-circle-user",
+      "path": "/icons/solid/faCircleUserSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCircleXmarkSolid",
+      "name": "Circle Xmark",
+      "faVersion": "fas fa-circle-xmark",
+      "path": "/icons/solid/faCircleXmarkSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faClockRotateLeftSolid",
+      "name": "Clock Rotate Left",
+      "path": "/icons/solid/faClockRotateLeftSolid.svg",
+      "faVersion": "fas fa-clock-rotate-left"
+    },
+    {
+      "category": "solid",
+      "id": "faClockSolid",
+      "name": "Clock",
+      "faVersion": "fas fa-clock",
+      "path": "/icons/solid/faClockSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCodeSolid",
+      "name": "Code",
+      "faVersion": "fas fa-code",
+      "path": "/icons/solid/faCodeSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCogSolid",
+      "name": "Cog",
+      "faVersion": "fas fa-cog",
+      "path": "/icons/solid/faCogSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCoinsSolid",
+      "name": "Coins",
+      "faVersion": "fas fa-coins",
+      "path": "/icons/solid/faCoinsSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCommentDotsSolid",
+      "name": "Comment Dots",
+      "faVersion": "fas fa-comment-dots",
+      "path": "/icons/solid/faCommentDotsSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCommentSolid",
+      "name": "Comment",
+      "faVersion": "fas fa-comment",
+      "path": "/icons/solid/faCommentSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCommentsSolid",
+      "name": "Comments",
+      "faVersion": "fas fa-comments",
+      "path": "/icons/solid/faCommentsSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCopySolid",
+      "name": "Copy",
+      "faVersion": "fas fa-copy",
+      "path": "/icons/solid/faCopySolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCreditCardSolid",
+      "name": "Credit Card",
+      "faVersion": "fas fa-credit-card",
+      "path": "/icons/solid/faCreditCardSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDiamondExclamationSolid",
+      "name": "Diamond Exclamation",
+      "faVersion": "fas fa-diamond-exclamation",
+      "path": "/icons/solid/faDiamondExclamationSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDiamonds4Solid",
+      "name": "Diamonds 4",
+      "faVersion": "fas fa-diamonds-4",
+      "path": "/icons/solid/faDiamonds4Solid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDiamondSolid",
+      "name": "Diamond",
+      "faVersion": "fas fa-diamond",
+      "path": "/icons/solid/faDiamondSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDnaSolid",
+      "name": "Dna",
+      "faVersion": "fas fa-dna",
+      "path": "/icons/solid/faDnaSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDollarSignSolid",
+      "name": "Dollar Sign",
+      "faVersion": "fas fa-dollar-sign",
+      "path": "/icons/solid/faDollarSignSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDollarSolid",
+      "name": "Dollar",
+      "faVersion": "fas fa-dollar",
+      "path": "/icons/solid/faDollarSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDownloadSolid",
+      "name": "Download",
+      "faVersion": "fas fa-download",
+      "path": "/icons/solid/faDownloadSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faDraftingCompassSolid",
+      "name": "Drafting Compass",
+      "faVersion": "fas fa-drafting-compass",
+      "path": "/icons/solid/faDraftingCompassSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faEnvelopeSolid",
+      "name": "Envelope",
+      "faVersion": "fas fa-envelope",
+      "path": "/icons/solid/faEnvelopeSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faExclamationSolid",
+      "name": "Exclamation",
+      "faVersion": "fas fa-exclamation",
+      "path": "/icons/solid/faExclamationSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faEyeSlashSolid",
+      "name": "Eye Slash",
+      "faVersion": "fas fa-eye-slash",
+      "path": "/icons/solid/faEyeSlashSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faEyeSolid",
+      "name": "Eye",
+      "faVersion": "fas fa-eye",
+      "path": "/icons/solid/faEyeSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFileAudioSolid",
+      "name": "File Audio",
+      "faVersion": "fas fa-file-audio",
+      "path": "/icons/solid/faFileAudioSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFileImageSolid",
+      "name": "File Image",
+      "faVersion": "fas fa-file-image",
+      "path": "/icons/solid/faFileImageSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFileLinesSolid",
+      "name": "File Lines",
+      "faVersion": "fas fa-file-lines",
+      "path": "/icons/solid/faFileLinesSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFileSolid",
+      "name": "File",
+      "faVersion": "fas fa-file",
+      "path": "/icons/solid/faFileSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFileVideoSolid",
+      "name": "File Video",
+      "faVersion": "fas fa-file-video",
+      "path": "/icons/solid/faFileVideoSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFilterSolid",
+      "name": "Filter",
+      "faVersion": "fas fa-filter",
+      "path": "/icons/solid/faFilterSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFlagCheckeredSolid",
+      "name": "Flag Checkered",
+      "faVersion": "fas fa-flag-checkered",
+      "path": "/icons/solid/faFlagCheckeredSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFlagSolid",
+      "name": "Flag",
+      "faVersion": "fas fa-flag",
+      "path": "/icons/solid/faFlagSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFloppyDiskSolid",
+      "name": "Floppy Disk",
+      "faVersion": "fas fa-floppy-disk",
+      "path": "/icons/solid/faFloppyDiskSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faFolderSolid",
+      "name": "Folder",
+      "faVersion": "fas fa-folder",
+      "path": "/icons/solid/faFolderSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faForwardSolid",
+      "name": "Forward",
+      "faVersion": "fas fa-forward",
+      "path": "/icons/solid/faForwardSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faGearSolid",
+      "name": "Gear",
+      "faVersion": "fas fa-gear",
+      "path": "/icons/solid/faGearSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faGemSolid",
+      "name": "Gem",
+      "faVersion": "fas fa-gem",
+      "path": "/icons/solid/faGemSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faGlobeSolid",
+      "name": "Globe",
+      "faVersion": "fas fa-globe",
+      "path": "/icons/solid/faGlobeSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faHamburgerSolid",
+      "name": "Hamburger",
+      "faVersion": "fas fa-hamburger",
+      "path": "/icons/solid/faHamburgerSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faHandPointerSolid",
+      "name": "Hand Pointer",
+      "faVersion": "fas fa-hand-pointer",
+      "path": "/icons/solid/faHandPointerSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faHeartSolid",
+      "name": "Heart",
+      "faVersion": "fas fa-heart",
+      "path": "/icons/solid/faHeartSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faHouseSolid",
+      "name": "House",
+      "path": "/icons/solid/faHouseSolid.svg",
+      "faVersion": "fas fa-house"
+    },
+    {
+      "category": "solid",
+      "id": "faImageSolid",
+      "name": "Image",
+      "faVersion": "fas fa-image",
+      "path": "/icons/solid/faImageSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faInfoSolid",
+      "name": "Info",
+      "faVersion": "fas fa-info",
+      "path": "/icons/solid/faInfoSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faKeySolid",
+      "name": "Key",
+      "faVersion": "fas fa-key",
+      "path": "/icons/solid/faKeySolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faLightbulbSolid",
+      "name": "Lightbulb",
+      "faVersion": "fas fa-lightbulb",
+      "path": "/icons/solid/faLightbulbSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faListSolid",
+      "name": "List",
+      "faVersion": "fas fa-list",
+      "path": "/icons/solid/faListSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faLockSolid",
+      "name": "Lock",
+      "faVersion": "fas fa-lock",
+      "path": "/icons/solid/faLockSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMagnifyingGlassPlusSolid",
+      "name": "Magnifying Glass Plus",
+      "faVersion": "fas fa-magnifying-glass-plus",
+      "path": "/icons/solid/faMagnifyingGlassPlusSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMagnifyingGlassSolid",
+      "name": "Magnifying Glass",
+      "faVersion": "fas fa-magnifying-glass",
+      "path": "/icons/solid/faMagnifyingGlassSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMapSolid",
+      "name": "Map",
+      "faVersion": "fas fa-map",
+      "path": "/icons/solid/faMapSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMegaphoneSolid",
+      "name": "Megaphone",
+      "faVersion": "fas fa-megaphone",
+      "path": "/icons/solid/faMegaphoneSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMinusSolid",
+      "name": "Minus",
+      "faVersion": "fas fa-minus",
+      "path": "/icons/solid/faMinusSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMoneyBillSolid",
+      "name": "Money Bill",
+      "faVersion": "fas fa-money-bill",
+      "path": "/icons/solid/faMoneyBillSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPaintbrushSolid",
+      "name": "Paintbrush",
+      "faVersion": "fas fa-paintbrush",
+      "path": "/icons/solid/faPaintbrushSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPaletteSolid",
+      "name": "Palette",
+      "faVersion": "fas fa-palette",
+      "path": "/icons/solid/faPaletteSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPaperclipSolid",
+      "name": "Paperclip",
+      "faVersion": "fas fa-paperclip",
+      "path": "/icons/solid/faPaperclipSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPaperPlaneSolid",
+      "name": "Paper Plane",
+      "faVersion": "fas fa-paper-plane",
+      "path": "/icons/solid/faPaperPlaneSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPauseSolid",
+      "name": "Pause",
+      "faVersion": "fas fa-pause",
+      "path": "/icons/solid/faPauseSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPencilSolid",
+      "name": "Pencil",
+      "faVersion": "fas fa-pencil",
+      "path": "/icons/solid/faPencilSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPenSolid",
+      "name": "Pen",
+      "faVersion": "fas fa-pen",
+      "path": "/icons/solid/faPenSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPenToSquareSolid",
+      "name": "Pen To Square",
+      "path": "/icons/solid/faPenToSquareSolid.svg",
+      "faVersion": "fas fa-pen-to-square"
+    },
+    {
+      "category": "solid",
+      "id": "faPhoneSolid",
+      "name": "Phone",
+      "faVersion": "fas fa-phone",
+      "path": "/icons/solid/faPhoneSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPlaySolid",
+      "name": "Play",
+      "faVersion": "fas fa-play",
+      "path": "/icons/solid/faPlaySolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPlusSolid",
+      "name": "Plus",
+      "faVersion": "fas fa-plus",
+      "path": "/icons/solid/faPlusSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPresentationScreenSolid",
+      "name": "Presentation Screen",
+      "faVersion": "fas fa-presentation-screen",
+      "path": "/icons/solid/faPresentationScreenSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faPrintSolid",
+      "name": "Print",
+      "faVersion": "fas fa-print",
+      "path": "/icons/solid/faPrintSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faQuestionSolid",
+      "name": "Question",
+      "faVersion": "fas fa-question",
+      "path": "/icons/solid/faQuestionSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faRightFromBracketSolid",
+      "name": "Right From Bracket",
+      "faVersion": "fas fa-right-from-bracket",
+      "path": "/icons/solid/faRightFromBracketSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faRightToBracketSolid",
+      "name": "Right To Bracket",
+      "faVersion": "fas fa-right-to-bracket",
+      "path": "/icons/solid/faRightToBracketSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faRocketSolid",
+      "name": "Rocket",
+      "faVersion": "fas fa-rocket",
+      "path": "/icons/solid/faRocketSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faRotateRightSolid",
+      "name": "Rotate Right",
+      "faVersion": "fas fa-rotate-right",
+      "path": "/icons/solid/faRotateRightSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faRotateSolid",
+      "name": "Rotate",
+      "faVersion": "fas fa-rotate",
+      "path": "/icons/solid/faRotateSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSaveSolid",
+      "name": "Save",
+      "faVersion": "fas fa-save",
+      "path": "/icons/solid/faSaveSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSearchSolid",
+      "name": "Search",
+      "faVersion": "fas fa-search",
+      "path": "/icons/solid/faSearchSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faServerSolid",
+      "name": "Server",
+      "faVersion": "fas fa-server",
+      "path": "/icons/solid/faServerSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faShareSolid",
+      "name": "Share",
+      "faVersion": "fas fa-share",
+      "path": "/icons/solid/faShareSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faShieldSolid",
+      "name": "Shield",
+      "faVersion": "fas fa-shield",
+      "path": "/icons/solid/faShieldSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSignalSolid",
+      "name": "Signal",
+      "faVersion": "fas fa-signal",
+      "path": "/icons/solid/faSignalSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSpinnerSolid",
+      "name": "Spinner",
+      "faVersion": "fas fa-spinner",
+      "path": "/icons/solid/faSpinnerSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSquareSolid",
+      "name": "Square",
+      "faVersion": "fas fa-square",
+      "path": "/icons/solid/faSquareSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faStarSolid",
+      "name": "Star",
+      "faVersion": "fas fa-star",
+      "path": "/icons/solid/faStarSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faTableCellsSolid",
+      "name": "Table Cells",
+      "faVersion": "fas fa-table-cells",
+      "path": "/icons/solid/faTableCellsSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faTableSolid",
+      "name": "Table",
+      "faVersion": "fas fa-table",
+      "path": "/icons/solid/faTableSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faTagSolid",
+      "name": "Tag",
+      "faVersion": "fas fa-tag",
+      "path": "/icons/solid/faTagSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faThumbsUpSolid",
+      "name": "Thumbs Up",
+      "faVersion": "fas fa-thumbs-up",
+      "path": "/icons/solid/faThumbsUpSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faTimesSolid",
+      "name": "Times",
+      "faVersion": "fas fa-times",
+      "path": "/icons/solid/faTimesSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faTrashCanSolid",
+      "name": "Trash Can",
+      "path": "/icons/solid/faTrashCanSolid.svg",
+      "faVersion": "fas fa-trash-can"
+    },
+    {
+      "category": "solid",
+      "id": "faTriangleExclamationSolid",
+      "name": "Triangle Exclamation",
+      "path": "/icons/solid/faTriangleExclamationSolid.svg",
+      "faVersion": "fas fa-triangle-exclamation"
+    },
+    {
+      "category": "solid",
+      "id": "faTrophySolid",
+      "name": "Trophy",
+      "faVersion": "fas fa-trophy",
+      "path": "/icons/solid/faTrophySolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faUnlockSolid",
+      "name": "Unlock",
+      "faVersion": "fas fa-unlock",
+      "path": "/icons/solid/faUnlockSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faUploadSolid",
+      "name": "Upload",
+      "faVersion": "fas fa-upload",
+      "path": "/icons/solid/faUploadSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faUserCircleSolid",
+      "name": "User Circle",
+      "faVersion": "fas fa-user-circle",
+      "path": "/icons/solid/faUserCircleSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faUserGroupSolid",
+      "name": "User Group",
+      "faVersion": "fas fa-user-group",
+      "path": "/icons/solid/faUserGroupSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faUserSolid",
+      "name": "User",
+      "faVersion": "fas fa-user",
+      "path": "/icons/solid/faUserSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faUsersSolid",
+      "name": "Users",
+      "faVersion": "fas fa-users",
+      "path": "/icons/solid/faUsersSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faVideoSolid",
+      "name": "Video",
+      "faVersion": "fas fa-video",
+      "path": "/icons/solid/faVideoSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faWarningSolid",
+      "name": "Warning",
+      "faVersion": "fas fa-warning",
+      "path": "/icons/solid/faWarningSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faXmarkSolid",
+      "name": "Xmark",
+      "path": "/icons/solid/faXmarkSolid.svg",
+      "faVersion": "fas fa-xmark"
+    }
+  ],
+  "category": "solid",
+  "iconCount": 136,
+  "updatedAt": "2025-04-03T11:59:21.689Z"
+}

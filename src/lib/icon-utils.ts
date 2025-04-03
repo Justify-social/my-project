@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.223Z
 /**
  * Consolidated Icon Utilities
  * 
@@ -8,8 +9,8 @@
  * - app-icon-mappings.ts
  */
 
-import { IconStyle } from '@/components/ui/atoms/icons/types';
-import { normalizeIconName } from '@/components/ui/atoms/icons'
+import { IconStyle } from '@/components/ui/atoms/icon/types';
+import { normalizeIconName } from '@/components/ui/atoms/icon'
 
 // Cache for loaded SVG content
 const svgCache: Record<string, string> = {};
@@ -52,24 +53,24 @@ export const APP_ICONS = {
   },
   // Action icons
   actions: {
-    add: 'faPlus',
+    add: 'faPlusLight',
     edit: 'faPen',
     delete: 'faTrash',
-    save: 'faSave',
-    cancel: 'faXmark',
+    save: 'faFloppyDiskLight',
+    cancel: 'faXmarkLight',
     search: 'faMagnifyingGlass',
-    filter: 'faFilter',
-    upload: 'faUpload',
+    filter: 'faFilterLight',
+    upload: 'faUploadLight',
     download: 'faDownload',
     refresh: 'faArrowsRotate'
   },
   // Status icons
   status: {
-    success: 'faCircleCheck',
+    success: 'faCircleCheckLight',
     error: 'faCircleXmark',
-    warning: 'faTriangleExclamation',
-    info: 'faCircleInfo',
-    pending: 'faSpinner',
+    warning: 'faTriangleExclamationLight',
+    info: 'faCircleInfoLight',
+    pending: 'faSpinnerLight',
     locked: 'faLock',
     unlocked: 'faLockOpen'
   }

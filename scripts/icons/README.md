@@ -1,107 +1,51 @@
-# Icon Management System
+# Icon Management Scripts
 
-This directory contains tools for managing, downloading, and auditing icons in the application.
+This directory contains scripts related to icon management, validation, and processing.
 
-## Overview
+## Available Scripts
 
-The icon system has been consolidated into a clean, organized structure with minimal scripts. The system only requires two main scripts:
+| Script | Description |
+|--------|-------------|
+| `download-light-icons.mjs` | Downloads light icons from FontAwesome based on registry |
+| `download-solid-icons.mjs` | Downloads solid icons from FontAwesome based on registry |
+| `download-brands-icons.mjs` | Downloads brand icons from FontAwesome based on registry |
+| `check-light-icons.mjs` | Validates light icon registry integrity |
+| `check-solid-icons.mjs` | Validates solid icon registry integrity |
+| `fix-light-registry.mjs` | Fixes issues in the light icon registry |
+| `fix-solid-registry.mjs` | Fixes issues in the solid icon registry |
+| `validate-solid-registry.mjs` | Validates the solid icon registry |
+| `lock-registry-files.sh` | Secures registry files as read-only |
+| `audit-icons.mjs` | Audits the codebase for icon usage |
 
-1. **download-icons.js** - Downloads and processes all icons
-2. **audit-icons.js** - Audits the codebase for icon usage and validates icon integrity
+## Icon Registry
 
-The scripts are designed to be comprehensive and handle all aspects of icon management in a consistent way.
+The icon registry files are stored in:
+- `public/static/*-icon-registry.json` - Primary icon registries with all metadata
+- `public/static/new-light-icon-registry.json` - New light icons registry
+- `public/static/new-solid-icon-registry.json` - New solid icons registry
 
-## Scripts
+## Usage
 
-### Download Icons
+Scripts should be run from the project root using npm.
 
-```bash
-# Download all icons used in the application
-node scripts/icons/download-icons.js
-
-# Options:
-#   --verbose       Show detailed logging information
-#   --force         Force download even if icons exist
-#   --no-generate   Skip icon data generation
-#   --no-verify     Skip verification of downloaded icons
-```
-
-This script:
-- Scans the codebase for icon usage
-- Downloads all required SVG icons
-- Ensures proper icon structure in public directory
-- Generates optimized icon data
-- Verifies icon integrity
-
-### Audit Icons
+You can also run the scripts directly:
 
 ```bash
-# Audit the application's icon usage
-node scripts/icons/audit-icons.js
-
-# Options:
-#   --verbose    Show detailed information about findings
-#   --json       Output results in JSON format
-#   --fix        Attempt to automatically fix simple issues
-#   --verify     Include verification of icon SVG files
-#   --paths      Check icon import paths
-#   --all        Run all checks (equivalent to --verify --paths)
+node scripts/icons/download-light-icons.mjs
+node scripts/icons/download-solid-icons.mjs
+node scripts/icons/check-light-icons.mjs
 ```
 
-This script:
-- Analyzes the codebase for icon usage patterns
-- Identifies problematic FontAwesome imports or patterns
-- Validates icon files for consistency
-- Verifies icon data matches physical SVG files
-- Checks for missing or broken icon references
-- Provides comprehensive reporting
+## Adding New Icons
 
-### Icon Data Generation
+To add new icons to the system:
 
-```bash
-# Generate icon data (automatically called by download-icons.js)
-node scripts/icons/generate-icon-data.js
+1. Add the icon definition to the appropriate registry file
+2. Run the download script to download and process the icons
+3. Verify the icons are correctly added with the validation script
 
-# Options:
-#   --verbose    Show detailed information
-```
+## Guidelines
 
-This script generates the icon data files needed by the application based on the downloaded SVG files.
-
-## Icon Directory Structure
-
-```
-public/icons/                # Public SVG files
-├── solid/                   # Solid style icons
-├── light/                   # Light style icons
-├── brands/                  # Brand icons
-└── regular/                 # Regular style icons
-
-src/components/ui/icons/     # Icon components
-├── components/              # Icon React components
-├── data/                    # Icon data files
-└── utils/                   # Icon utility functions
-```
-
-## Usage in Application
-
-Import icons in your components:
-
-```jsx
-import { Icon, StaticIcon, ButtonIcon } from '@/components/ui/icons';
-
-// Basic usage
-<Icon name="faUser" />
-
-// With styling
-<Icon name="faCheck" className="text-green-500" />
-
-// Light variant
-<Icon name="faUserLight" />
-
-// Static icon (pre-rendered)
-<StaticIcon name="faUser" />
-
-// Button icon (with button styling)
-<ButtonIcon name="faEdit" onClick={handleEdit} />
-```
+- All icon-related scripts should be placed in this directory
+- Registry files are secured with read-only permissions
+- Always maintain backward compatibility with existing icon usage

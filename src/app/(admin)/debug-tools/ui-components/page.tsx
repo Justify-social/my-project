@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.203Z
 'use client';
 
 import React, { useEffect, useState, Suspense } from 'react';
@@ -15,27 +16,18 @@ import {
   Badge,
   Button
 } from './components/ui-components-bridge';
-import { 
-  Search, 
-  Filter, 
-  LayoutGrid, 
-  ListFilter, 
-  RefreshCw,
-  Component as ComponentIcon,
-  Clock,
-  Layers,
-  History,
-  ActivitySquare,
-  BarChart3,
-  Loader2
-} from 'lucide-react';
+import { Icon } from '@/components/ui/atoms/icon/Icon';
 import { ComponentMetadata } from './db/registry';
 import { ComponentRegistryManager } from './registry/ComponentRegistryManager';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Icon } from '@/components/ui/atoms/icons';
 import { ErrorBoundary } from 'react-error-boundary';
 import ComponentsLoadingSkeleton from './components/ComponentsLoadingSkeleton';
+import SelectedComponentView from './components/SelectedComponentView';
+import { ComponentsGrid } from './components/ComponentsGrid';
+import { Palette } from './features/design-system/Palette';
+import { IconLibrary } from './features/icon-library/IconLibrary';
+import IconDemo from './features/icon-demo/IconDemo';
 
 // Error fallback component
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -199,8 +191,7 @@ export default function UIComponentsPage() {
           <Card className="w-full p-4">
             <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
               <span className="w-6 h-6 mr-2 text-[#00BFFF] flex items-center justify-center">
-                <Icon 
-                  name="faPalette"
+                <Icon iconId="faPaletteLight"
                   variant="light"
                   className="w-5 h-5"
                 />
@@ -212,6 +203,11 @@ export default function UIComponentsPage() {
             <ErrorBoundary FallbackComponent={ErrorFallback}>
               <ClientOnlyComponentsList />
             </ErrorBoundary>
+            
+            {/* Display selected component */}
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <SelectedComponentView />
+            </ErrorBoundary>
           </Card>
         </TabsContent>
 
@@ -219,8 +215,7 @@ export default function UIComponentsPage() {
           <Card className="w-full p-4">
             <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
               <span className="w-6 h-6 mr-2 text-[#00BFFF] flex items-center justify-center">
-                <Icon 
-                  name="faIcons"
+                <Icon iconId="faIconsLight"
                   variant="light"
                   className="w-5 h-5"
                 />
@@ -232,6 +227,23 @@ export default function UIComponentsPage() {
             <ErrorBoundary FallbackComponent={ErrorFallback}>
               <IconLibraryComponent />
             </ErrorBoundary>
+            
+            {/* New Icon System Demo */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
+                <span className="w-6 h-6 mr-2 text-[#00BFFF] flex items-center justify-center">
+                  <Icon iconId="faWandMagicLight"
+                    variant="light"
+                    className="w-5 h-5"
+                  />
+                </span>
+                New Icon System
+              </h3>
+              
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <IconDemo />
+              </ErrorBoundary>
+            </div>
           </Card>
         </TabsContent>
 
@@ -239,7 +251,7 @@ export default function UIComponentsPage() {
           <Card className="w-full p-4">
             <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
               <span className="w-6 h-6 mr-2 text-[#00BFFF]">
-                <Search size={24} />
+                <Icon iconId="faQuestionLight"  size={24} />
               </span>
               Component Discovery
             </h2>
@@ -267,7 +279,7 @@ export default function UIComponentsPage() {
           <Card className="w-full p-4">
             <h2 className="text-xl font-semibold mb-4 text-[#333333] flex items-center">
               <span className="w-6 h-6 mr-2 text-[#00BFFF]">
-                <Filter size={24} />
+                <Icon iconId="faQuestionLight"  size={24} />
               </span>
               Settings
             </h2>
@@ -304,6 +316,18 @@ export default function UIComponentsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="flex flex-col gap-6">
+        <div className="p-6 bg-white rounded-lg shadow">
+          <h2 className="text-2xl font-bold mb-4">Icon Library</h2>
+          <IconLibrary />
+        </div>
+        
+        <div className="p-6 bg-white rounded-lg shadow">
+          <h2 className="text-2xl font-bold mb-4">Color Palette</h2>
+          <Palette />
+        </div>
+      </div>
     </div>
   );
 } 

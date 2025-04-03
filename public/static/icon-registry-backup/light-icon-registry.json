@@ -1,0 +1,959 @@
+{
+  "icons": [
+    {
+      "category": "light",
+      "id": "faAnglesLeftLight",
+      "name": "Angles Left",
+      "faVersion": "fal fa-angles-left",
+      "path": "/icons/light/faAnglesLeftLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faAnglesRightLight",
+      "name": "Angles Right",
+      "faVersion": "fal fa-angles-right",
+      "path": "/icons/light/faAnglesRightLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faArrowDownLight",
+      "name": "Arrow Down",
+      "faVersion": "fal fa-arrow-down",
+      "path": "/icons/light/faArrowDownLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faArrowLeftLight",
+      "name": "Arrow Left",
+      "faVersion": "fal fa-arrow-left",
+      "path": "/icons/light/faArrowLeftLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faArrowRightLight",
+      "name": "Arrow Right",
+      "faVersion": "fal fa-arrow-right",
+      "path": "/icons/light/faArrowRightLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faArrowTrendDownLight",
+      "name": "Arrow Trend Down",
+      "faVersion": "fal fa-arrow-trend-down",
+      "path": "/icons/light/faArrowTrendDownLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faArrowTrendUpLight",
+      "name": "Arrow Trend Up",
+      "faVersion": "fal fa-arrow-trend-up",
+      "path": "/icons/light/faArrowTrendUpLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faArrowUpLight",
+      "name": "Arrow Up",
+      "faVersion": "fal fa-arrow-up",
+      "path": "/icons/light/faArrowUpLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faAtomLight",
+      "name": "Atom",
+      "faVersion": "fal fa-atom",
+      "path": "/icons/light/faAtomLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBacteriaLight",
+      "name": "Bacteria",
+      "faVersion": "fal fa-bacteria",
+      "path": "/icons/light/faBacteriaLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBacteriumLight",
+      "name": "Bacterium",
+      "faVersion": "fal fa-bacterium",
+      "path": "/icons/light/faBacteriumLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBarsLight",
+      "name": "Bars",
+      "faVersion": "fal fa-bars",
+      "path": "/icons/light/faBarsLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBellLight",
+      "name": "Bell",
+      "faVersion": "fal fa-bell",
+      "path": "/icons/light/faBellLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBellSlashLight",
+      "name": "Bell Slash",
+      "faVersion": "fal fa-bell-slash",
+      "path": "/icons/light/faBellSlashLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBoltLight",
+      "name": "Bolt",
+      "faVersion": "fal fa-bolt",
+      "path": "/icons/light/faBoltLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBookmarkLight",
+      "name": "Bookmark",
+      "faVersion": "fal fa-bookmark",
+      "path": "/icons/light/faBookmarkLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBugLight",
+      "name": "Bug",
+      "faVersion": "fal fa-bug",
+      "path": "/icons/light/faBugLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBuildingLight",
+      "name": "Building",
+      "faVersion": "fal fa-building",
+      "path": "/icons/light/faBuildingLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBullseyeLight",
+      "name": "Bullseye",
+      "faVersion": "fal fa-bullseye",
+      "path": "/icons/light/faBullseyeLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBurgerLight",
+      "name": "Burger",
+      "faVersion": "fal fa-burger",
+      "path": "/icons/light/faBurgerLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCalendarDaysLight",
+      "name": "Calendar Days",
+      "faVersion": "fal fa-calendar-days",
+      "path": "/icons/light/faCalendarDaysLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCalendarLight",
+      "name": "Calendar",
+      "faVersion": "fal fa-calendar",
+      "path": "/icons/light/faCalendarLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCameraLight",
+      "name": "Camera",
+      "faVersion": "fal fa-camera",
+      "path": "/icons/light/faCameraLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChartBarLight",
+      "name": "Chart Bar",
+      "faVersion": "fal fa-chart-bar",
+      "path": "/icons/light/faChartBarLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChartColumnLight",
+      "name": "Chart Column",
+      "faVersion": "fal fa-chart-column",
+      "path": "/icons/light/faChartColumnLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChartLineLight",
+      "name": "Chart Line",
+      "faVersion": "fal fa-chart-line",
+      "path": "/icons/light/faChartLineLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChartPieLight",
+      "name": "Chart Pie",
+      "faVersion": "fal fa-chart-pie",
+      "path": "/icons/light/faChartPieLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCheckLight",
+      "name": "Check",
+      "faVersion": "fal fa-check",
+      "path": "/icons/light/faCheckLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChevronDownLight",
+      "name": "Chevron Down",
+      "faVersion": "fal fa-chevron-down",
+      "path": "/icons/light/faChevronDownLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChevronLeftLight",
+      "name": "Chevron Left",
+      "faVersion": "fal fa-chevron-left",
+      "path": "/icons/light/faChevronLeftLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChevronRightLight",
+      "name": "Chevron Right",
+      "faVersion": "fal fa-chevron-right",
+      "path": "/icons/light/faChevronRightLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faChevronUpLight",
+      "name": "Chevron Up",
+      "faVersion": "fal fa-chevron-up",
+      "path": "/icons/light/faChevronUpLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCircleCheckLight",
+      "name": "Circle Check",
+      "path": "/icons/light/faCircleCheckLight.svg",
+      "faVersion": "fal fa-circle-check"
+    },
+    {
+      "category": "light",
+      "id": "faCircleInfoLight",
+      "name": "Circle Info",
+      "path": "/icons/light/faCircleInfoLight.svg",
+      "faVersion": "fal fa-circle-info"
+    },
+    {
+      "category": "light",
+      "id": "faCircleLight",
+      "name": "Circle",
+      "faVersion": "fal fa-circle",
+      "path": "/icons/light/faCircleLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCircleNotchLight",
+      "name": "Circle Notch",
+      "faVersion": "fal fa-circle-notch",
+      "path": "/icons/light/faCircleNotchLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCircleQuestionLight",
+      "name": "Circle Question",
+      "path": "/icons/light/faCircleQuestionLight.svg",
+      "faVersion": "fal fa-circle-question"
+    },
+    {
+      "category": "light",
+      "id": "faCircleUserLight",
+      "name": "Circle User",
+      "faVersion": "fal fa-circle-user",
+      "path": "/icons/light/faCircleUserLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCircleXmarkLight",
+      "name": "Circle Xmark",
+      "faVersion": "fal fa-circle-xmark",
+      "path": "/icons/light/faCircleXmarkLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faClockLight",
+      "name": "Clock",
+      "faVersion": "fal fa-clock",
+      "path": "/icons/light/faClockLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faClockRotateLeftLight",
+      "name": "Clock Rotate Left",
+      "path": "/icons/light/faClockRotateLeftLight.svg",
+      "faVersion": "fal fa-clock-rotate-left"
+    },
+    {
+      "category": "light",
+      "id": "faCodeLight",
+      "name": "Code",
+      "faVersion": "fal fa-code",
+      "path": "/icons/light/faCodeLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCogLight",
+      "name": "Cog",
+      "faVersion": "fal fa-cog",
+      "path": "/icons/light/faCogLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCoinsLight",
+      "name": "Coins",
+      "faVersion": "fal fa-coins",
+      "path": "/icons/light/faCoinsLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCommentDotsLight",
+      "name": "Comment Dots",
+      "faVersion": "fal fa-comment-dots",
+      "path": "/icons/light/faCommentDotsLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCommentLight",
+      "name": "Comment",
+      "faVersion": "fal fa-comment",
+      "path": "/icons/light/faCommentLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCommentsLight",
+      "name": "Comments",
+      "faVersion": "fal fa-comments",
+      "path": "/icons/light/faCommentsLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCopyLight",
+      "name": "Copy",
+      "faVersion": "fal fa-copy",
+      "path": "/icons/light/faCopyLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCreditCardLight",
+      "name": "Credit Card",
+      "faVersion": "fal fa-credit-card",
+      "path": "/icons/light/faCreditCardLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDiamondExclamationLight",
+      "name": "Diamond Exclamation",
+      "faVersion": "fal fa-diamond-exclamation",
+      "path": "/icons/light/faDiamondExclamationLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDiamondLight",
+      "name": "Diamond",
+      "faVersion": "fal fa-diamond",
+      "path": "/icons/light/faDiamondLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDiamonds4Light",
+      "name": "Diamonds 4",
+      "faVersion": "fal fa-diamonds-4",
+      "path": "/icons/light/faDiamonds4Light.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDnaLight",
+      "name": "Dna",
+      "faVersion": "fal fa-dna",
+      "path": "/icons/light/faDnaLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDollarLight",
+      "name": "Dollar",
+      "faVersion": "fal fa-dollar",
+      "path": "/icons/light/faDollarLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDollarSignLight",
+      "name": "Dollar Sign",
+      "faVersion": "fal fa-dollar-sign",
+      "path": "/icons/light/faDollarSignLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDownloadLight",
+      "name": "Download",
+      "faVersion": "fal fa-download",
+      "path": "/icons/light/faDownloadLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faDraftingCompassLight",
+      "name": "Drafting Compass",
+      "faVersion": "fal fa-drafting-compass",
+      "path": "/icons/light/faDraftingCompassLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faEnvelopeLight",
+      "name": "Envelope",
+      "faVersion": "fal fa-envelope",
+      "path": "/icons/light/faEnvelopeLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faExclamationLight",
+      "name": "Exclamation",
+      "faVersion": "fal fa-exclamation",
+      "path": "/icons/light/faExclamationLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faEyeLight",
+      "name": "Eye",
+      "faVersion": "fal fa-eye",
+      "path": "/icons/light/faEyeLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faEyeSlashLight",
+      "name": "Eye Slash",
+      "faVersion": "fal fa-eye-slash",
+      "path": "/icons/light/faEyeSlashLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFileAudioLight",
+      "name": "File Audio",
+      "faVersion": "fal fa-file-audio",
+      "path": "/icons/light/faFileAudioLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFileImageLight",
+      "name": "File Image",
+      "faVersion": "fal fa-file-image",
+      "path": "/icons/light/faFileImageLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFileLight",
+      "name": "File",
+      "faVersion": "fal fa-file",
+      "path": "/icons/light/faFileLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFileLinesLight",
+      "name": "File Lines",
+      "faVersion": "fal fa-file-lines",
+      "path": "/icons/light/faFileLinesLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFileVideoLight",
+      "name": "File Video",
+      "faVersion": "fal fa-file-video",
+      "path": "/icons/light/faFileVideoLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFilterLight",
+      "name": "Filter",
+      "faVersion": "fal fa-filter",
+      "path": "/icons/light/faFilterLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFlagCheckeredLight",
+      "name": "Flag Checkered",
+      "faVersion": "fal fa-flag-checkered",
+      "path": "/icons/light/faFlagCheckeredLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFlagLight",
+      "name": "Flag",
+      "faVersion": "fal fa-flag",
+      "path": "/icons/light/faFlagLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFloppyDiskLight",
+      "name": "Floppy Disk",
+      "faVersion": "fal fa-floppy-disk",
+      "path": "/icons/light/faFloppyDiskLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faFolderLight",
+      "name": "Folder",
+      "faVersion": "fal fa-folder",
+      "path": "/icons/light/faFolderLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faForwardLight",
+      "name": "Forward",
+      "faVersion": "fal fa-forward",
+      "path": "/icons/light/faForwardLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faGearLight",
+      "name": "Gear",
+      "faVersion": "fal fa-gear",
+      "path": "/icons/light/faGearLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faGemLight",
+      "name": "Gem",
+      "faVersion": "fal fa-gem",
+      "path": "/icons/light/faGemLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faGlobeLight",
+      "name": "Globe",
+      "faVersion": "fal fa-globe",
+      "path": "/icons/light/faGlobeLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faHamburgerLight",
+      "name": "Hamburger",
+      "faVersion": "fal fa-hamburger",
+      "path": "/icons/light/faHamburgerLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faHandPointerLight",
+      "name": "Hand Pointer",
+      "faVersion": "fal fa-hand-pointer",
+      "path": "/icons/light/faHandPointerLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faHeartLight",
+      "name": "Heart",
+      "faVersion": "fal fa-heart",
+      "path": "/icons/light/faHeartLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faHouseLight",
+      "name": "House",
+      "path": "/icons/light/faHouseLight.svg",
+      "faVersion": "fal fa-house"
+    },
+    {
+      "category": "light",
+      "id": "faImageLight",
+      "name": "Image",
+      "faVersion": "fal fa-image",
+      "path": "/icons/light/faImageLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faInfoLight",
+      "name": "Info",
+      "faVersion": "fal fa-info",
+      "path": "/icons/light/faInfoLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faKeyLight",
+      "name": "Key",
+      "faVersion": "fal fa-key",
+      "path": "/icons/light/faKeyLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faLightbulbLight",
+      "name": "Lightbulb",
+      "faVersion": "fal fa-lightbulb",
+      "path": "/icons/light/faLightbulbLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faListLight",
+      "name": "List",
+      "faVersion": "fal fa-list",
+      "path": "/icons/light/faListLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faLockLight",
+      "name": "Lock",
+      "faVersion": "fal fa-lock",
+      "path": "/icons/light/faLockLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faMagnifyingGlassLight",
+      "name": "Magnifying Glass",
+      "faVersion": "fal fa-magnifying-glass",
+      "path": "/icons/light/faMagnifyingGlassLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faMagnifyingGlassPlusLight",
+      "name": "Magnifying Glass Plus",
+      "faVersion": "fal fa-magnifying-glass-plus",
+      "path": "/icons/light/faMagnifyingGlassPlusLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faMapLight",
+      "name": "Map",
+      "faVersion": "fal fa-map",
+      "path": "/icons/light/faMapLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faMegaphoneLight",
+      "name": "Megaphone",
+      "faVersion": "fal fa-megaphone",
+      "path": "/icons/light/faMegaphoneLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faMinusLight",
+      "name": "Minus",
+      "faVersion": "fal fa-minus",
+      "path": "/icons/light/faMinusLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faMoneyBillLight",
+      "name": "Money Bill",
+      "faVersion": "fal fa-money-bill",
+      "path": "/icons/light/faMoneyBillLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPaintbrushLight",
+      "name": "Paintbrush",
+      "faVersion": "fal fa-paintbrush",
+      "path": "/icons/light/faPaintbrushLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPaletteLight",
+      "name": "Palette",
+      "faVersion": "fal fa-palette",
+      "path": "/icons/light/faPaletteLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPaperclipLight",
+      "name": "Paperclip",
+      "faVersion": "fal fa-paperclip",
+      "path": "/icons/light/faPaperclipLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPaperPlaneLight",
+      "name": "Paper Plane",
+      "faVersion": "fal fa-paper-plane",
+      "path": "/icons/light/faPaperPlaneLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPauseLight",
+      "name": "Pause",
+      "faVersion": "fal fa-pause",
+      "path": "/icons/light/faPauseLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPencilLight",
+      "name": "Pencil",
+      "faVersion": "fal fa-pencil",
+      "path": "/icons/light/faPencilLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPenLight",
+      "name": "Pen",
+      "faVersion": "fal fa-pen",
+      "path": "/icons/light/faPenLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPenToSquareLight",
+      "name": "Pen To Square",
+      "path": "/icons/light/faPenToSquareLight.svg",
+      "faVersion": "fal fa-pen-to-square"
+    },
+    {
+      "category": "light",
+      "id": "faPhoneLight",
+      "name": "Phone",
+      "faVersion": "fal fa-phone",
+      "path": "/icons/light/faPhoneLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPlayLight",
+      "name": "Play",
+      "faVersion": "fal fa-play",
+      "path": "/icons/light/faPlayLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPlusLight",
+      "name": "Plus",
+      "faVersion": "fal fa-plus",
+      "path": "/icons/light/faPlusLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPresentationScreenLight",
+      "name": "Presentation Screen",
+      "faVersion": "fal fa-presentation-screen",
+      "path": "/icons/light/faPresentationScreenLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faPrintLight",
+      "name": "Print",
+      "faVersion": "fal fa-print",
+      "path": "/icons/light/faPrintLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faQuestionLight",
+      "name": "Question",
+      "faVersion": "fal fa-question",
+      "path": "/icons/light/faQuestionLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faRightFromBracketLight",
+      "name": "Right From Bracket",
+      "faVersion": "fal fa-right-from-bracket",
+      "path": "/icons/light/faRightFromBracketLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faRightToBracketLight",
+      "name": "Right To Bracket",
+      "faVersion": "fal fa-right-to-bracket",
+      "path": "/icons/light/faRightToBracketLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faRocketLight",
+      "name": "Rocket",
+      "faVersion": "fal fa-rocket",
+      "path": "/icons/light/faRocketLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faRotateLight",
+      "name": "Rotate",
+      "faVersion": "fal fa-rotate",
+      "path": "/icons/light/faRotateLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faRotateRightLight",
+      "name": "Rotate Right",
+      "faVersion": "fal fa-rotate-right",
+      "path": "/icons/light/faRotateRightLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faSaveLight",
+      "name": "Save",
+      "faVersion": "fal fa-save",
+      "path": "/icons/light/faSaveLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faSearchLight",
+      "name": "Search",
+      "faVersion": "fal fa-search",
+      "path": "/icons/light/faSearchLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faServerLight",
+      "name": "Server",
+      "faVersion": "fal fa-server",
+      "path": "/icons/light/faServerLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faShareLight",
+      "name": "Share",
+      "faVersion": "fal fa-share",
+      "path": "/icons/light/faShareLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faShieldLight",
+      "name": "Shield",
+      "faVersion": "fal fa-shield",
+      "path": "/icons/light/faShieldLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faSignalLight",
+      "name": "Signal",
+      "faVersion": "fal fa-signal",
+      "path": "/icons/light/faSignalLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faSpinnerLight",
+      "name": "Spinner",
+      "faVersion": "fal fa-spinner",
+      "path": "/icons/light/faSpinnerLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faSquareLight",
+      "name": "Square",
+      "faVersion": "fal fa-square",
+      "path": "/icons/light/faSquareLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faStarLight",
+      "name": "Star",
+      "faVersion": "fal fa-star",
+      "path": "/icons/light/faStarLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faTableCellsLight",
+      "name": "Table Cells",
+      "faVersion": "fal fa-table-cells",
+      "path": "/icons/light/faTableCellsLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faTableLight",
+      "name": "Table",
+      "faVersion": "fal fa-table",
+      "path": "/icons/light/faTableLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faTagLight",
+      "name": "Tag",
+      "faVersion": "fal fa-tag",
+      "path": "/icons/light/faTagLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faThumbsUpLight",
+      "name": "Thumbs Up",
+      "faVersion": "fal fa-thumbs-up",
+      "path": "/icons/light/faThumbsUpLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faTimesLight",
+      "name": "Times",
+      "faVersion": "fal fa-times",
+      "path": "/icons/light/faTimesLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faTrashCanLight",
+      "name": "Trash Can",
+      "path": "/icons/light/faTrashCanLight.svg",
+      "faVersion": "fal fa-trash-can"
+    },
+    {
+      "category": "light",
+      "id": "faTriangleExclamationLight",
+      "name": "Triangle Exclamation",
+      "path": "/icons/light/faTriangleExclamationLight.svg",
+      "faVersion": "fal fa-triangle-exclamation"
+    },
+    {
+      "category": "light",
+      "id": "faTrophyLight",
+      "name": "Trophy",
+      "faVersion": "fal fa-trophy",
+      "path": "/icons/light/faTrophyLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faUnlockLight",
+      "name": "Unlock",
+      "faVersion": "fal fa-unlock",
+      "path": "/icons/light/faUnlockLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faUploadLight",
+      "name": "Upload",
+      "faVersion": "fal fa-upload",
+      "path": "/icons/light/faUploadLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faUserCircleLight",
+      "name": "User Circle",
+      "faVersion": "fal fa-user-circle",
+      "path": "/icons/light/faUserCircleLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faUserGroupLight",
+      "name": "User Group",
+      "faVersion": "fal fa-user-group",
+      "path": "/icons/light/faUserGroupLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faUserLight",
+      "name": "User",
+      "faVersion": "fal fa-user",
+      "path": "/icons/light/faUserLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faUsersLight",
+      "name": "Users",
+      "faVersion": "fal fa-users",
+      "path": "/icons/light/faUsersLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faVideoLight",
+      "name": "Video",
+      "faVersion": "fal fa-video",
+      "path": "/icons/light/faVideoLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faWarningLight",
+      "name": "Warning",
+      "faVersion": "fal fa-warning",
+      "path": "/icons/light/faWarningLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faXmarkLight",
+      "name": "Xmark",
+      "path": "/icons/light/faXmarkLight.svg",
+      "faVersion": "fal fa-xmark"
+    }
+  ],
+  "category": "light",
+  "iconCount": 136,
+  "updatedAt": "2025-04-03T11:56:57.509Z"
+}
