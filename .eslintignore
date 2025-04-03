@@ -1,5 +1,7 @@
-node_modules
-.next
-build
-dist
-public 
+node_modules/
+.next/
+build/
+dist/
+out/
+coverage/
+next.config.js 

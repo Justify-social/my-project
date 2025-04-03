@@ -1,5 +1,7 @@
-// Remove or replace this file if it contains Clerk middleware
-// If using Auth0, you might not need middleware at all
+// This file is now located at config/middleware/middleware.ts
+// This is a redirect file for backward compatibility
+// Auth0 middleware configuration
+
 import { withMiddlewareAuthRequired } from '@auth0/nextjs-auth0/edge';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';

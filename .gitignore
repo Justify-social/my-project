@@ -51,3 +51,6 @@ src/**/__tests__/**/*.test.ts
 src/**/__tests__/**/*.test.tsx
 src/**/__tests__/**/*.test.js
 src/**/__tests__/**/*.test.jsx
+
+# Cache files
+.cache/
