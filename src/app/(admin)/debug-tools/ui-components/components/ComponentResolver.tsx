@@ -1,10 +1,11 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.202Z
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/organisms/Card/Card'
+import { Card } from '@/components/ui/organisms/card/Card'
 import { Alert } from '@/components/ui/atoms/alert/Alert'
 import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
-import { AlertCircle } from 'lucide-react';
+import { Icon } from '@/components/ui/atoms/icon/Icon';
 import { ComponentMetadata } from '../types';
 
 /**
@@ -109,7 +110,7 @@ export default function ComponentResolver({
     if (error) {
       return (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+          <Icon iconId="faCircleExclamationLight"  className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -119,7 +120,7 @@ export default function ComponentResolver({
     if (!Component) {
       return (
         <Alert variant="warning">
-          <AlertCircle className="h-4 w-4" />
+          <Icon iconId="faCircleExclamationLight"  className="h-4 w-4" />
           <AlertTitle>Component Not Found</AlertTitle>
           <AlertDescription>
             No component found at path: {componentPath}
@@ -144,7 +145,7 @@ export default function ComponentResolver({
     } catch (renderError) {
       return (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+          <Icon iconId="faCircleExclamationLight"  className="h-4 w-4" />
           <AlertTitle>Render Error</AlertTitle>
           <AlertDescription>
             {renderError instanceof Error ? renderError.message : String(renderError)}
@@ -187,7 +188,7 @@ class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+          <Icon iconId="faCircleExclamationLight"  className="h-4 w-4" />
           <AlertTitle>Render Error</AlertTitle>
           <AlertDescription>
             {this.state.error?.message || 'An error occurred while rendering this component'}

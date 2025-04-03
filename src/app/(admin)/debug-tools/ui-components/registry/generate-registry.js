@@ -1,23 +1,25 @@
 /**
  * Static Registry Generator (JavaScript version)
  * 
- * Simple JavaScript version that can be required directly without TypeScript compilation.
+ * Simple JavaScript version that can be imported directly without TypeScript compilation.
  */
 
-const fs = require('fs');
-const path = require('path');
+import path from 'path';
+import fs from 'fs';
+const { join } = path;
+const { existsSync, readFileSync, readdirSync, writeFileSync } = fs;
 
 // Target directories to scan
 const COMPONENT_DIRS = [
-  { path: 'src/components/ui/atoms', category: 'atom' },
-  { path: 'src/components/ui/molecules', category: 'molecule' },
-  { path: 'src/components/ui/organisms', category: 'organism' }
+  { path: 'src/components/ui/atoms', category: 'atoms' },
+  { path: 'src/components/ui/molecules', category: 'molecules' },
+  { path: 'src/components/ui/organisms', category: 'organisms' }
 ];
 
 // Output file path
-const OUTPUT_PATH = path.join(process.cwd(), 'public', 'static');
-const COMPONENT_REGISTRY_FILE = path.join(OUTPUT_PATH, 'component-registry.json');
-const ICON_REGISTRY_FILE = path.join(OUTPUT_PATH, 'icon-registry.json');
+const OUTPUT_PATH = join(process.cwd(), 'public', 'static');
+const COMPONENT_REGISTRY_FILE = join(OUTPUT_PATH, 'component-registry.json');
+const ICON_REGISTRY_FILE = join(OUTPUT_PATH, 'icon-registry.json');
 
 // Keywords that might indicate mock data
 const MOCK_KEYWORDS = ['mock', 'fake', 'dummy', 'placeholder', 'sample'];
@@ -43,6 +45,14 @@ const LEGITIMATE_CONTEXTS = [
   'component-test'
 ];
 
+// Function to convert PascalCase to kebab-case
+function pascalToKebab(str) {
+  return str
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+    .toLowerCase();
+}
+
 /**
  * Scan directory recursively for React component files
  */
@@ -50,16 +60,16 @@ function scanDirectory(dirPath, category) {
   const components = [];
   
   // Check if directory exists
-  if (!fs.existsSync(dirPath)) {
+  if (!existsSync(dirPath)) {
     console.warn(`Directory not found: ${dirPath}`);
     return components;
   }
   
   // Read directory contents
-  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  const entries = readdirSync(dirPath, { withFileTypes: true });
   
   for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
+    const fullPath = join(dirPath, entry.name);
     
     if (entry.isDirectory()) {
       // Recursively scan subdirectories
@@ -80,7 +90,7 @@ function scanDirectory(dirPath, category) {
       }
       
       // Check for mock data indicators in file content
-      const fileContent = fs.readFileSync(fullPath, 'utf8');
+      const fileContent = readFileSync(fullPath, 'utf8');
       
       // Improved mock detection logic that's less aggressive
       const containsMockData = MOCK_KEYWORDS.some(keyword => {
@@ -133,11 +143,14 @@ function scanDirectory(dirPath, category) {
         continue;
       }
       
-      // Create component metadata
+      // Create component metadata with kebab-case name
       const relativePath = path.relative(process.cwd(), fullPath).replace(/\\/g, '/');
+      const kebabName = pascalToKebab(baseName);
+      
       const component = {
         path: relativePath,
-        name: baseName,
+        name: kebabName,
+        originalName: baseName, // Store original name for reference
         category,
         lastUpdated: new Date().toISOString(),
         exports: [baseName],
@@ -161,164 +174,60 @@ function scanDirectory(dirPath, category) {
  */
 function scanIcons() {
   console.log('Scanning for icons...');
-  const icons = [];
+  let icons = [];
   
-  // First, use icon-url-map.json as our single source of truth
-  const iconMapPath = path.join(process.cwd(), 'src', 'components', 'ui', 'atoms', 'icons', 'icon-url-map.json');
+  // First, use icon-registry.json as our single source of truth
+  const iconRegistryPath = join(process.cwd(), 'public', 'static', 'icon-registry.json');
   
-  if (fs.existsSync(iconMapPath)) {
-    console.log('Using icon-url-map.json as single source of truth for icon locations');
-    try {
-      const iconMap = JSON.parse(fs.readFileSync(iconMapPath, 'utf8'));
+  try {
+    if (existsSync(iconRegistryPath)) {
+      console.log('Using icon-registry.json as single source of truth');
+      const iconRegistry = JSON.parse(readFileSync(iconRegistryPath, 'utf8'));
       
-      // Process each entry in the icon map
-      Object.entries(iconMap).forEach(([iconName, iconPath]) => {
-        // The iconPath is like "/icons/light/check.svg" - we need to prepend "public"
-        const fullPath = path.join(process.cwd(), 'public', iconPath);
-        
-        // Check if the file actually exists
-        if (fs.existsSync(fullPath)) {
-          const svgContent = fs.readFileSync(fullPath, 'utf8');
-          
-          icons.push({
-            id: iconName,
-            name: iconName,
-            path: iconPath, // Store the original path as it appears in icon-url-map.json
-            category: iconPath.includes('/light/') ? 'light' : 
-                      iconPath.includes('/solid/') ? 'solid' : 
-                      iconPath.includes('/brands/') ? 'brands' : 'icon',
-            weight: iconPath.includes('/light/') ? 'light' : 
-                    iconPath.includes('/solid/') ? 'solid' : 
-                    iconPath.includes('/brands/') ? 'regular' : 'regular',
-            tags: [iconName.replace('fa', '').toLowerCase()],
-            viewBox: extractSvgAttribute(svgContent, 'viewBox') || '0 0 24 24',
-            width: parseInt(extractSvgAttribute(svgContent, 'width') || '24', 10),
-            height: parseInt(extractSvgAttribute(svgContent, 'height') || '24', 10),
-            svgContent: prepareSvgForReact(svgContent),
-            usageCount: 0
-          });
-        } else {
-          // Icon file not found, but don't spam logs
-          // This is more informational than an error
-          if (!iconPath.includes('fa-')) { // Reduce noise
-            console.log(`Icon file mapping exists but file not found at ${fullPath} (${iconPath})`);
-          }
-        }
-      });
-      
-      console.log(`Successfully loaded ${icons.length} icons from icon-url-map.json`);
-      return icons;
-    } catch (error) {
-      console.error('Error parsing icon-url-map.json:', error);
-      // Fall through to traditional scanning
-    }
-  }
-  
-  // If the icon map wasn't found or failed to load, fall back to directory scanning
-  console.warn('icon-url-map.json not found or invalid, falling back to directory scanning');
-  
-  // Check the public icons directory for SVG files
-  const publicIconsPath = path.join(process.cwd(), 'public', 'icons');
-  if (fs.existsSync(publicIconsPath)) {
-    const publicIcons = scanPublicIcons(publicIconsPath);
-    icons.push(...publicIcons);
-  }
-  
-  return icons;
-}
-
-/**
- * Scan public icons directory
- */
-function scanPublicIcons(directory) {
-  const icons = [];
-  
-  if (!fs.existsSync(directory)) {
-    console.warn(`Directory not found: ${directory}`);
-    return icons;
-  }
-  
-  // Process files recursively
-  function processDirectory(dir, pathPrefix = '') {
-    if (!fs.existsSync(dir)) return;
-    
-    const files = fs.readdirSync(dir, { withFileTypes: true });
-    
-    for (const file of files) {
-      const fullPath = path.join(dir, file.name);
-      const relativePath = path.join(pathPrefix, file.name);
-      
-      if (file.isDirectory()) {
-        processDirectory(fullPath, relativePath);
-        continue;
-      }
-      
-      // Only process SVG files
-      if (!file.name.endsWith('.svg')) continue;
-      
-      try {
-        // Read actual SVG content
-        const svgContent = fs.readFileSync(fullPath, 'utf8');
-        
-        // Validate it's proper SVG by checking for svg tag
-        if (!svgContent.includes('<svg')) {
-          console.warn(`Invalid SVG content in ${fullPath}`);
-          continue;
-        }
-        
-        // Clean and prepare SVG for React rendering
-        const cleanedSvg = prepareSvgForReact(svgContent);
-        
-        // Determine category from path or filename
-        const pathParts = relativePath.split(path.sep);
-        const category = pathParts.length > 1 ? pathParts[0] : 'UI';
-        
-        // Generate unique ID
-        const id = relativePath
-          .replace(/\.svg$/i, '')
-          .replace(/[\\/]/g, '-')
-          .replace(/\s+/g, '-')
-          .toLowerCase();
-          
-        // Determine if this is a solid icon based on path or filename
-        const isSolid = fullPath.includes('solid') || file.name.includes('solid');
-        
-        // Extract viewBox, width, and height from SVG
-        const viewBox = extractSvgAttribute(svgContent, 'viewBox') || '0 0 24 24';
-        const width = parseInt(extractSvgAttribute(svgContent, 'width') || '24', 10);
-        const height = parseInt(extractSvgAttribute(svgContent, 'height') || '24', 10);
-        
-        // Generate tags from filename and category
-        const fileName = path.basename(file.name, '.svg')
-          .replace(/[-_]/g, ' ')
-          .replace(/([a-z])([A-Z])/g, '$1 $2'); // Add spaces between camelCase
-          
-        const tags = [
-          fileName,
-          ...fileName.split(/\s+/),
-          category
-        ].filter(Boolean).map(tag => tag.toLowerCase());
-        
-        icons.push({
-          id,
-          name: fileName.charAt(0).toUpperCase() + fileName.slice(1),
-          path: '/' + relativePath.replace(/\\/g, '/'),
-          category,
-          weight: isSolid ? 'solid' : 'light',
-          tags: [...new Set(tags)], // Remove duplicates
-          viewBox,
-          width,
-          height,
-          svgContent: cleanedSvg,
-          usageCount: 1
+      if (iconRegistry.icons && Array.isArray(iconRegistry.icons)) {
+        // Modern registry format with icons array
+        icons = iconRegistry.icons.map(icon => ({
+          id: icon.id,
+          name: icon.name || icon.id,
+          category: icon.category || 'unknown',
+          path: icon.path,
+          viewBox: icon.viewBox || '0 0 512 512',
+          width: icon.width || 24,
+          height: icon.height || 24,
+          map: icon.map || null,
+          usageCount: icon.usageCount || 0,
+        }));
+      } else {
+        // Legacy registry format (object with keys)
+        icons = Object.entries(iconRegistry).map(([id, data]) => {
+          return {
+            id,
+            name: data.name || id,
+            category: data.prefix || 'unknown',
+            path: data.path,
+            viewBox: data.viewBox || '0 0 512 512',
+            width: data.width || 24,
+            height: data.height || 24,
+            map: null, // Legacy format doesn't have map property
+            usageCount: data.usageCount || 0,
+          };
         });
-      } catch (err) {
-        console.error(`Error processing icon ${fullPath}:`, err);
       }
+      
+      console.log(`Successfully loaded ${icons.length} icons from icon-registry.json`);
+      return icons;
+    } else {
+      console.error('icon-registry.json not found');
     }
+  } catch (error) {
+    console.error('Error parsing icon-registry.json:', error);
   }
   
-  processDirectory(directory);
+  // If we couldn't load any icons, log an error
+  if (icons.length === 0) {
+    console.warn('No icons found in registry. Debug tools will have limited functionality.');
+  }
+  
   return icons;
 }
 
@@ -440,7 +349,7 @@ function generateComponentRegistry() {
     let allComponents = [];
     
     for (const dir of COMPONENT_DIRS) {
-      const dirPath = path.join(process.cwd(), dir.path);
+      const dirPath = join(process.cwd(), dir.path);
       const components = scanDirectory(dirPath, dir.category);
       console.log(`Found ${components.length} components in ${dir.path}`);
       allComponents = [...allComponents, ...components];
@@ -451,7 +360,7 @@ function generateComponentRegistry() {
     console.log(`Found ${icons.length} icons`);
     
     // Ensure output directory exists
-    if (!fs.existsSync(OUTPUT_PATH)) {
+    if (!existsSync(OUTPUT_PATH)) {
       fs.mkdirSync(OUTPUT_PATH, { recursive: true });
     }
     
@@ -463,7 +372,7 @@ function generateComponentRegistry() {
       version: '1.0.0'
     };
     
-    fs.writeFileSync(
+    writeFileSync(
       COMPONENT_REGISTRY_FILE, 
       JSON.stringify(registry, null, 2)
     );
@@ -519,7 +428,7 @@ function generateComponentRegistry() {
         version: '1.0.0'
       };
       
-      fs.writeFileSync(
+      writeFileSync(
         ICON_REGISTRY_FILE, 
         JSON.stringify(iconRegistry, null, 2)
       );
@@ -538,14 +447,4 @@ function generateComponentRegistry() {
 generateComponentRegistry();
 
 // Export the function
-module.exports = {
-  generateComponentRegistry
-};
-
-// If script is run directly, generate the registry
-if (require.main === module) {
-  const result = generateComponentRegistry();
-  if (!result) {
-    process.exit(1);
-  }
-} 
+export { generateComponentRegistry }; 

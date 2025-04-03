@@ -1,8 +1,9 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.220Z
 'use client';
 
 import React from 'react';
 import JustifyScoreDisplayProps from './influencers/JustifyScoreDisplay';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { cn } from '@/utils/string/utils';
 
 export interface JustifyScoreDisplayProps {

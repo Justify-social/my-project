@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card } from '@/components/ui/organisms/Card/Card'
+import { Card } from '@/components/ui/organisms/card/Card'
 import { Button } from '@/components/ui/atoms/button/Button'
 import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
 import { Input } from '@/components/ui/atoms/input/Input'

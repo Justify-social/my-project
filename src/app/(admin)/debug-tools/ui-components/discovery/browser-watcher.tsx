@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/atoms/button/Button'
-import { Card } from '@/components/ui/organisms/Card/Card'
+import { Card } from '@/components/ui/organisms/card/Card'
 import { browserComponentApi } from '../api/component-api-browser';
 import type { ComponentMetadata } from '../db/registry';
 

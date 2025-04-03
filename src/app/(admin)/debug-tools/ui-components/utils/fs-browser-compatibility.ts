@@ -1,257 +1,213 @@
 /**
- * Browser-compatibility layer for Node.js 'fs' module
- * This provides browser-compatible implementations for filesystem operations
- * Follows the Single Source of Truth principle by using registry data when available
+ * Browser-compatible file system utilities
+ * 
+ * This module provides a filesystem-like API that works in the browser by proxying
+ * calls to server-side actions. This maintains the Single Source of Truth principle
+ * by ensuring all filesystem operations occur on the server while providing a compatible
+ * API for client components.
  */
 
-// Import registry data if needed in browser context
-let iconRegistry: any = null;
-let iconUrlMap: any = null;
+'use client';
 
-// Try to load the registry data if we're in a browser
-if (typeof window !== 'undefined') {
-  try {
-    // In production, these files should be available in the public directory
-    fetch('/static/icon-registry.json')
-      .then(response => response.json())
-      .then(data => {
-        iconRegistry = data;
-      })
-      .catch(err => {
-        console.warn('Unable to load icon registry:', err);
-      });
+import { 
+  serverReadFile, 
+  serverFileExists, 
+  serverStatFile, 
+  serverReadDir, 
+  serverWriteFile 
+} from './server-actions';
 
-    fetch('/static/component-registry.json')
-      .then(response => response.json())
-      .then(data => {
-        // Store component data for filesystem simulation
-      })
-      .catch(err => {
-        console.warn('Unable to load component registry:', err);
-      });
-  } catch (e) {
-    console.warn('Error initializing registry data in browser:', e);
-  }
+// Define encoding type to match Node.js without requiring imports
+type EncodingType = 'utf8' | 'utf-8' | 'ascii' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'base64url' | 'latin1' | 'binary' | 'hex';
+
+// Type definitions to match Node's fs module API
+export interface FSStats {
+  isFile: () => boolean;
+  isDirectory: () => boolean;
+  size: number;
+  mtime: Date;
 }
 
-// Synchronous file operations
-export const readFileSync = (path: string, options?: string | { encoding?: string; flag?: string }): string => {
-  console.warn(`Browser compatibility: readFileSync called for ${path}`);
-  
-  // If this is an icon path and we have registry data, try to return real data
-  if (path.includes('/icons/') && iconRegistry) {
-    // Extract icon name from path
-    const parts = path.split('/');
-    const iconName = parts[parts.length - 1].replace('.svg', '');
-    
-    // Find in registry
-    for (const key in iconRegistry) {
-      if (iconRegistry[key].fileName === `${iconName}.svg`) {
-        return JSON.stringify(iconRegistry[key]);
-      }
-    }
-  }
-  
-  return JSON.stringify({ data: 'Browser environment - filesystem access not available' });
-};
+export interface DirectoryEntry {
+  name: string;
+  isFile: () => boolean;
+  isDirectory: () => boolean;
+}
 
-export const writeFileSync = (path: string, data: string | Buffer, options?: string | { encoding?: string; mode?: number; flag?: string }): void => {
-  console.warn(`Browser compatibility: writeFileSync called for ${path} (not supported in browser)`);
-  return;
-};
-
-export const existsSync = (path: string): boolean => {
-  console.warn(`Browser compatibility: existsSync called for ${path}`);
+export interface FSInterface {
+  readFileSync: (path: string, options?: { encoding?: string }) => string | Buffer;
   
-  // If this is checking an icon and we have registry data, return real answer
-  if (path.includes('/icons/') && iconRegistry) {
-    // Extract icon name from path
-    const parts = path.split('/');
-    const iconName = parts[parts.length - 1].replace('.svg', '');
-    
-    // Check if exists in registry
-    for (const key in iconRegistry) {
-      if (iconRegistry[key].fileName === `${iconName}.svg`) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
-  return true; // Default assumption in browser environment
-};
-
-export const readdirSync = (path: string, options?: { encoding?: string; withFileTypes?: boolean }): string[] => {
-  console.warn(`Browser compatibility: readdirSync called for ${path}`);
-  
-  // If looking for icons and we have registry data, return real icon names
-  if (path.includes('/icons/') && iconRegistry) {
-    const iconType = path.includes('/light/') ? 'light' : 
-                    path.includes('/solid/') ? 'solid' : 
-                    path.includes('/brand/') ? 'brand' : 
-                    path.includes('/app/') ? 'app' : null;
-                    
-    if (iconType) {
-      const icons = [];
-      for (const key in iconRegistry) {
-        if (iconRegistry[key].path.includes(`/${iconType}/`)) {
-          icons.push(iconRegistry[key].fileName);
-        }
-      }
-      return icons;
-    }
-  }
-  
-  return ['example-file-1.ts', 'example-file-2.ts', 'example-directory'];
-};
-
-export const statSync = (path: string): { 
-  isDirectory: () => boolean,
-  isFile: () => boolean,
-  mtime: Date
-} => {
-  console.warn(`Browser compatibility: statSync called for ${path}`);
-  return {
-    isDirectory: () => path.includes('directory'),
-    isFile: () => !path.includes('directory'),
-    mtime: new Date()
+  // Properly define overloads for readFile
+  readFile: {
+    (path: string, options: { encoding: string }, callback: (err: Error | null, data: string) => void): void;
+    (path: string, callback: (err: Error | null, data: Buffer) => void): void;
   };
-};
+  
+  writeFileSync: (path: string, data: string | Buffer, options?: { encoding?: string }) => void;
+  
+  // Properly define overloads for writeFile
+  writeFile: {
+    (path: string, data: string | Buffer, options: { encoding?: string }, callback: (err: Error | null) => void): void;
+    (path: string, data: string | Buffer, callback: (err: Error | null) => void): void;
+  };
+  
+  existsSync: (path: string) => boolean;
+  exists: (path: string, callback: (exists: boolean) => void) => void;
+  
+  statSync: (path: string) => FSStats;
+  stat: (path: string, callback: (err: Error | null, stats: FSStats) => void) => void;
+  
+  readdirSync: (path: string, options?: { withFileTypes?: boolean }) => string[] | DirectoryEntry[];
+  
+  // Properly define overloads for readdir
+  readdir: {
+    (path: string, callback: (err: Error | null, files: string[]) => void): void;
+    (path: string, options: { withFileTypes: boolean }, callback: (err: Error | null, files: DirectoryEntry[]) => void): void;
+  };
+}
 
-export const mkdirSync = (path: string, options?: { recursive?: boolean; mode?: number }): string | undefined => {
-  console.warn(`Browser compatibility: mkdirSync called for ${path}`);
-  return path;
-};
-
-// Asynchronous file operations (callbacks)
-export const readFile = (path: string, options: any, callback?: (err: Error | null, data: string | Buffer) => void): void => {
-  if (typeof options === 'function') {
-    callback = options;
-    options = { encoding: 'utf8' };
+// Implementation of the readFile function with proper overload handling
+function fsReadFile(path: string, optionsOrCallback: any, callback?: any): void {
+  const isOptionsObject = typeof optionsOrCallback === 'object';
+  const encoding = isOptionsObject ? optionsOrCallback.encoding as EncodingType : undefined;
+  const actualCallback = callback || optionsOrCallback;
+  
+  if (typeof actualCallback !== 'function') {
+    throw new Error('Callback must be a function');
   }
   
-  console.warn(`Browser compatibility: readFile called for ${path}`);
-  
-  // If this is an icon path and we have registry data, try to return real data
-  if (path.includes('/icons/') && iconRegistry && callback) {
-    // Extract icon name from path
-    const parts = path.split('/');
-    const iconName = parts[parts.length - 1].replace('.svg', '');
-    
-    // Find in registry
-    for (const key in iconRegistry) {
-      if (iconRegistry[key].fileName === `${iconName}.svg`) {
-        callback(null, JSON.stringify(iconRegistry[key]));
-        return;
+  serverReadFile(path, encoding)
+    .then(result => {
+      if (result.success) {
+        actualCallback(null, result.data);
+      } else {
+        actualCallback(new Error(result.error), null);
       }
-    }
-  }
-  
-  if (callback) {
-    callback(null, JSON.stringify({ data: 'Browser environment - filesystem access not available' }));
-  }
-};
+    })
+    .catch(err => {
+      actualCallback(err, null);
+    });
+}
 
-export const writeFile = (path: string, data: string | Buffer, options: any, callback?: (err: Error | null) => void): void => {
-  if (typeof options === 'function') {
-    callback = options;
-    options = { encoding: 'utf8' };
+// Implementation of the writeFile function with proper overload handling
+function fsWriteFile(path: string, data: string | Buffer, optionsOrCallback: any, callback?: any): void {
+  const isOptionsObject = typeof optionsOrCallback === 'object';
+  const encoding = isOptionsObject ? optionsOrCallback.encoding as EncodingType : undefined;
+  const actualCallback = callback || optionsOrCallback;
+  
+  if (typeof actualCallback !== 'function') {
+    throw new Error('Callback must be a function');
   }
   
-  console.warn(`Browser compatibility: writeFile called for ${path} (not supported in browser)`);
-  if (callback) {
-    callback(null);
-  }
-};
-
-export const exists = (path: string, callback: (exists: boolean) => void): void => {
-  console.warn(`Browser compatibility: exists called for ${path}`);
+  const dataStr = typeof data === 'string' ? data : data.toString();
   
-  // If this is checking an icon and we have registry data, return real answer
-  if (path.includes('/icons/') && iconRegistry) {
-    // Extract icon name from path
-    const parts = path.split('/');
-    const iconName = parts[parts.length - 1].replace('.svg', '');
-    
-    // Check if exists in registry
-    for (const key in iconRegistry) {
-      if (iconRegistry[key].fileName === `${iconName}.svg`) {
-        callback(true);
-        return;
+  serverWriteFile(path, dataStr, encoding)
+    .then(result => {
+      if (result.success) {
+        actualCallback(null);
+      } else {
+        actualCallback(new Error(result.error));
       }
-    }
-    callback(false);
-    return;
-  }
-  
-  callback(true);
-};
+    })
+    .catch(err => {
+      actualCallback(err);
+    });
+}
 
-export const readdir = (path: string, options: any, callback?: (err: Error | null, files: string[]) => void): void => {
-  if (typeof options === 'function') {
-    callback = options;
-    options = { encoding: 'utf8' };
+// Implementation of the readdir function with proper overload handling
+function fsReaddir(path: string, optionsOrCallback: any, callback?: any): void {
+  const withFileTypes = typeof optionsOrCallback === 'object' ? optionsOrCallback.withFileTypes : false;
+  const actualCallback = callback || optionsOrCallback;
+  
+  if (typeof actualCallback !== 'function') {
+    throw new Error('Callback must be a function');
   }
   
-  console.warn(`Browser compatibility: readdir called for ${path}`);
-  
-  // If looking for icons and we have registry data, return real icon names
-  if (path.includes('/icons/') && iconRegistry && callback) {
-    const iconType = path.includes('/light/') ? 'light' : 
-                    path.includes('/solid/') ? 'solid' : 
-                    path.includes('/brand/') ? 'brand' : 
-                    path.includes('/app/') ? 'app' : null;
-                    
-    if (iconType) {
-      const icons = [];
-      for (const key in iconRegistry) {
-        if (iconRegistry[key].path.includes(`/${iconType}/`)) {
-          icons.push(iconRegistry[key].fileName);
-        }
+  serverReadDir(path, withFileTypes)
+    .then(result => {
+      if (result.success && result.files) {
+        actualCallback(null, result.files);
+      } else {
+        actualCallback(new Error(result.error || 'Failed to read directory'), null);
       }
-      callback(null, icons);
-      return;
-    }
-  }
+    })
+    .catch(err => {
+      actualCallback(err, null);
+    });
+}
+
+// Implementation of the stat function
+function fsStat(path: string, callback: (err: Error | null, stats: FSStats) => void): void {
+  serverStatFile(path)
+    .then(result => {
+      if (result.success && result.stats) {
+        const stats: FSStats = {
+          isFile: () => result.stats!.isFile,
+          isDirectory: () => result.stats!.isDirectory,
+          size: result.stats!.size,
+          mtime: new Date(result.stats!.mtime),
+        };
+        callback(null, stats);
+      } else {
+        callback(new Error(result.error || 'Failed to stat file'), null as any);
+      }
+    })
+    .catch(err => {
+      callback(err, null as any);
+    });
+}
+
+// Implementation of the exists function
+function fsExists(path: string, callback: (exists: boolean) => void): void {
+  serverFileExists(path)
+    .then(result => {
+      callback(result.exists);
+    })
+    .catch(() => {
+      callback(false);
+    });
+}
+
+/**
+ * Creates a browser-compatible fs interface that delegates to server actions
+ * when running on the server, and shows warnings in the browser.
+ */
+export function createFSInterface(): FSInterface {
+  // Create synchronous methods that throw errors in browser or delegate to server
+  const readFileSync = (path: string, options?: { encoding?: string }): string | Buffer => {
+    throw new Error('Synchronous file operations are not supported in the browser');
+  };
   
-  if (callback) {
-    callback(null, ['example-file-1.ts', 'example-file-2.ts', 'example-directory']);
-  }
-};
-
-export const stat = (path: string, callback: (err: Error | null, stats: any) => void): void => {
-  console.warn(`Browser compatibility: stat called for ${path}`);
-  callback(null, {
-    isDirectory: () => path.includes('directory'),
-    isFile: () => !path.includes('directory'),
-    mtime: new Date()
-  });
-};
-
-export const mkdir = (path: string, options: any, callback?: (err: Error | null, path?: string) => void): void => {
-  if (typeof options === 'function') {
-    callback = options;
-    options = { recursive: false };
-  }
+  const writeFileSync = (path: string, data: string | Buffer, options?: { encoding?: string }): void => {
+    throw new Error('Synchronous file operations are not supported in the browser');
+  };
   
-  console.warn(`Browser compatibility: mkdir called for ${path}`);
-  if (callback) {
-    callback(null, path);
-  }
-};
+  const existsSync = (path: string): boolean => {
+    throw new Error('Synchronous file operations are not supported in the browser');
+  };
+  
+  const statSync = (path: string): FSStats => {
+    throw new Error('Synchronous file operations are not supported in the browser');
+  };
+  
+  const readdirSync = (path: string, options?: { withFileTypes?: boolean }): string[] | DirectoryEntry[] => {
+    throw new Error('Synchronous file operations are not supported in the browser');
+  };
+  
+  // Return the fs interface
+  return {
+    readFileSync,
+    readFile: fsReadFile as any,
+    writeFileSync,
+    writeFile: fsWriteFile as any,
+    existsSync,
+    exists: fsExists,
+    statSync,
+    stat: fsStat,
+    readdirSync,
+    readdir: fsReaddir as any,
+  };
+}
 
-// Export default object
-export default {
-  readFileSync,
-  writeFileSync,
-  existsSync,
-  readdirSync,
-  statSync,
-  mkdirSync,
-  readFile,
-  writeFile,
-  exists,
-  readdir,
-  stat,
-  mkdir
-}; 
+// Create a "fake" fs object for universal use
+export const fs = createFSInterface(); 

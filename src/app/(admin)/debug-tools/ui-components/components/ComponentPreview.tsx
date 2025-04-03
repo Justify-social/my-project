@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.201Z
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -5,301 +6,341 @@ import dynamic from 'next/dynamic';
 import { Card, CardHeader, CardTitle, CardContent } from './ui-components-bridge';
 import { ComponentMetadata, PropDefinition } from '../types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui-components-bridge';
-import { Loader2, Code, Play, Settings, Eye } from 'lucide-react';
+import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Modal } from '@/components/ui/organisms/modal/Modal';
+import { OrgAlert } from '@/components/ui/organisms/feedback/Alert/Alert';
+import { discoverComponents, createComponentMapFromDiscovery } from '../utils/component-discovery';
+import { 
+  createComponentMapEntry, 
+  applyDefaultProps, 
+  safeDynamicImport, 
+  safeDynamicImportPath,
+  createErrorComponent, 
+  withDefaultProps 
+} from '../utils/component-registry-utils';
+import { ErrorBoundary } from 'react-error-boundary';
 
-/**
- * Helper to safely handle dynamic imports with fallback for both default and named exports
- * @param importPromise The dynamic import promise
- * @param componentName The name of the component to extract
- * @param fallback Fallback component to use if import fails
- */
-const safeDynamicImport = (importPromise: Promise<any>, componentName: string, fallback: React.ComponentType<any>) => {
-  return importPromise
-    .then(mod => {
-      // Handle different export patterns:
-      // 1. Named export matching component name: mod[componentName]
-      // 2. Default export: mod.default
-      // 3. Named export as 'default' property: mod.default[componentName]
-      if (mod[componentName]) {
-        return mod[componentName];
-      } else if (mod.default) {
-        // Could be either a direct default export or an object with the component
-        return typeof mod.default === 'object' && mod.default[componentName] 
-          ? mod.default[componentName] 
-          : mod.default;
-      } else {
-        console.warn(`Could not find component ${componentName} in module:`, mod);
-        return fallback;
-      }
-    })
-    .catch(err => {
-      console.error(`Failed to load ${componentName} component:`, err);
-      return fallback;
-    });
+// Default props for components that need it to render safely
+const SidebarWithDefaultProps = (props: any) => {
+  // Default items array to prevent undefined.map errors
+  const defaultItems = props.items || [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      href: '/dashboard',
+      icon: 'faHome'
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      href: '/settings',
+      icon: 'faCog'
+    }
+  ];
+  
+  // Import the actual Sidebar component with default props
+  const SidebarComponent = dynamic(() => 
+    import('@/components/ui/organisms/navigation/sidebar/Sidebar')
+      .then(mod => mod.default || mod)
+      .catch(err => {
+        console.error("Error loading Sidebar:", err);
+        return createErrorComponent('Sidebar');
+      }),
+    { ssr: false }
+  );
+  
+  return <SidebarComponent {...props} items={defaultItems} />;
 };
 
-/**
- * Creates a fallback error component
- */
-function createErrorComponent(name: string) {
-  return function ErrorComponent(props: any) {
-    return (
-      <div className="p-4 border border-red-200 bg-red-50 rounded-md text-sm text-red-500">
-        <p className="font-semibold">Error: Could not load {name} component</p>
-        <p className="text-xs mt-1">Check the console for more details.</p>
-      </div>
-    );
+// Default props wrapper for Calendar components
+const CalendarWithDefaultProps = (props: any) => {
+  // Import the actual Calendar component with client-side only rendering
+  const CalendarComponent = dynamic(() => 
+    safeDynamicImportPath(
+      import('@/components/ui/organisms/calendar/Calendar'),
+      'Calendar',
+      createErrorComponent('Calendar')
+    ),
+    { ssr: false } // Ensure client-side only to prevent ReactCurrentDispatcher errors
+  );
+  
+  // Add sensible defaults to prevent rendering errors
+  return (
+    <React.Suspense fallback={<div className="p-4 animate-pulse">Loading calendar...</div>}>
+      <CalendarComponent {...props} />
+    </React.Suspense>
+  );
+};
+
+// Default props wrapper for CalendarUpcoming component
+const CalendarUpcomingWithDefaultProps = (props: any) => {
+  // Import the actual CalendarUpcoming component with client-side only rendering
+  const CalendarUpcomingComponent = dynamic(() => 
+    safeDynamicImportPath(
+      import('@/components/ui/organisms/calendar/CalendarUpcoming'),
+      'CalendarUpcoming',
+      createErrorComponent('CalendarUpcoming')
+    ),
+    { ssr: false } // Ensure client-side only to prevent ReactCurrentDispatcher errors
+  );
+  
+  // Add sensible defaults to prevent rendering errors
+  const defaultProps = {
+    events: props.events || [
+      { id: 1, title: 'Team Meeting', date: new Date(Date.now() + 86400000), type: 'primary' },
+      { id: 2, title: 'Project Deadline', date: new Date(Date.now() + 172800000), type: 'accent' }
+    ],
+    limit: props.limit || 5
   };
-}
-
-// Component imports map - this is crucial for dynamic rendering
-const componentMap: Record<string, any> = {
-  // Atoms
-  Button: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/button/Button'), 
-    'Button', 
-    createErrorComponent('Button')
-  )),
-  ButtonWithIcon: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/button/ButtonWithIcon'), 
-    'ButtonWithIcon', 
-    createErrorComponent('ButtonWithIcon')
-  )),
-  IconButton: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/button/IconButton'), 
-    'IconButton', 
-    createErrorComponent('IconButton')
-  )),
-  ActionButtons: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/button/ActionButtons'), 
-    'ActionButtons', 
-    createErrorComponent('ActionButtons')
-  )),
-  Card: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/card/Card'), 
-    'Card', 
-    createErrorComponent('Card')
-  )),
-  CardContent: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/card/Card'), 
-    'CardContent', 
-    createErrorComponent('CardContent')
-  )),
-  CardHeader: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/card/Card'), 
-    'CardHeader', 
-    createErrorComponent('CardHeader')
-  )),
-  CardTitle: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/card/Card'), 
-    'CardTitle', 
-    createErrorComponent('CardTitle')
-  )),
-  CardDescription: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/card/Card'), 
-    'CardDescription', 
-    createErrorComponent('CardDescription')
-  )),
-  Badge: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/badge/badge'), 
-    'Badge', 
-    createErrorComponent('Badge')
-  )),
-  Input: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/input/Input'), 
-    'Input', 
-    createErrorComponent('Input')
-  )),
-  Toggle: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/toggle/Toggle'), 
-    'Toggle', 
-    createErrorComponent('Toggle')
-  )),
-  Switch: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/switch/Switch'), 
-    'Switch', 
-    createErrorComponent('Switch')
-  )),
-  Checkbox: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/checkbox/Checkbox'), 
-    'Checkbox', 
-    createErrorComponent('Checkbox')
-  )),
-  Radio: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/radio/Radio'), 
-    'Radio', 
-    createErrorComponent('Radio')
-  )),
-  Select: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/select/Select'), 
-    'Select', 
-    createErrorComponent('Select')
-  )),
-  Textarea: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/textarea/Textarea'), 
-    'Textarea', 
-    createErrorComponent('Textarea')
-  )),
-  Spinner: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/spinner/Spinner'), 
-    'Spinner', 
-    createErrorComponent('Spinner')
-  )),
-  Icon: dynamic(() => safeDynamicImport(
-    import('@/components/ui/atoms/icons/Icon'), 
-    'Icon', 
-    createErrorComponent('Icon')
-  )),
   
-  // Molecules
-  Accordion: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/accordion/accordion'), 
-    'Accordion', 
-    createErrorComponent('Accordion')
-  )),
-  AccordionItem: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/accordion/accordion'), 
-    'AccordionItem', 
-    createErrorComponent('AccordionItem')
-  )),
-  AccordionTrigger: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/accordion/accordion'), 
-    'AccordionTrigger', 
-    createErrorComponent('AccordionTrigger')
-  )),
-  AccordionContent: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/accordion/accordion'), 
-    'AccordionContent', 
-    createErrorComponent('AccordionContent')
-  )),
-  Tabs: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/tabs/tabs'), 
-    'Tabs', 
-    createErrorComponent('Tabs')
-  )),
-  TabsList: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/tabs/tabs'), 
-    'TabsList', 
-    createErrorComponent('TabsList')
-  )),
-  TabsTrigger: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/tabs/tabs'), 
-    'TabsTrigger', 
-    createErrorComponent('TabsTrigger')
-  )),
-  TabsContent: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/tabs/tabs'), 
-    'TabsContent', 
-    createErrorComponent('TabsContent')
-  )),
-  Breadcrumbs: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/breadcrumbs/Breadcrumbs'), 
-    'Breadcrumbs', 
-    createErrorComponent('Breadcrumbs')
-  )),
-  Pagination: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/pagination/Pagination'), 
-    'Pagination', 
-    createErrorComponent('Pagination')
-  )),
-  ScrollArea: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/scroll-area/scroll-area'), 
-    'ScrollArea', 
-    createErrorComponent('ScrollArea')
-  )),
-  Alert: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/feedback/alert/alert'), 
-    'Alert', 
-    createErrorComponent('Alert')
-  )),
-  FormField: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/form-field/FormField'), 
-    'FormField', 
-    createErrorComponent('FormField')
-  )),
-  DatePicker: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/forms/date-picker/DatePicker'), 
-    'DatePicker', 
-    createErrorComponent('DatePicker')
-  )),
-  SearchParamsWrapper: dynamic(() => safeDynamicImport(
-    import('@/components/ui/molecules/search/search-params-wrapper/SearchParamsWrapper'), 
-    'SearchParamsWrapper', 
-    createErrorComponent('SearchParamsWrapper')
-  )),
-  
-  // Organisms
-  MobileMenu: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/navigation/mobile-menu/MobileMenu'), 
-    'MobileMenu', 
-    createErrorComponent('MobileMenu')
-  )),
-  AssetCard: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/AssetCard/AssetCard'), 
-    'AssetCard', 
-    createErrorComponent('AssetCard')
-  )),
-  AssetPreview: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/AssetCard/components/AssetPreview'), 
-    'AssetPreview', 
-    createErrorComponent('AssetPreview')
-  )),
-  Calendar: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/Calendar/Calendar'), 
-    'Calendar', 
-    createErrorComponent('Calendar')
-  )),
-  CalendarUpcoming: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/Calendar/CalendarUpcoming'), 
-    'CalendarUpcoming', 
-    createErrorComponent('CalendarUpcoming')
-  )),
-  Modal: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/Modal/Modal'), 
-    'Modal', 
-    createErrorComponent('Modal')
-  )),
-  DataGrid: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/data-display/data-grid/DataGrid'), 
-    'DataGrid', 
-    createErrorComponent('DataGrid')
-  )),
-  Table: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/data-display/table/Table'), 
-    'Table', 
-    createErrorComponent('Table')
-  )),
-  ErrorFallback: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/error-fallback/ErrorFallback'), 
-    'ErrorFallback', 
-    createErrorComponent('ErrorFallback')
-  )),
-  OrgAlert: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/feedback/Alert'), 
-    'OrgAlert', 
-    createErrorComponent('OrgAlert')
-  )),
-  ComponentNav: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/navigation/component-nav/ComponentNav'), 
-    'ComponentNav', 
-    createErrorComponent('ComponentNav')
-  )),
-  Header: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/navigation/header/Header'), 
-    'Header', 
-    createErrorComponent('Header')
-  )),
-  NavigationBar: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/navigation/nav-bar/NavigationBar'), 
-    'NavigationBar', 
-    createErrorComponent('NavigationBar')
-  )),
-  Sidebar: dynamic(() => safeDynamicImport(
-    import('@/components/ui/organisms/navigation/sidebar/Sidebar'), 
-    'Sidebar', 
-    createErrorComponent('Sidebar')
-  )),
+  return (
+    <React.Suspense fallback={<div className="p-4 animate-pulse">Loading upcoming events...</div>}>
+      <CalendarUpcomingComponent {...props} {...defaultProps} />
+    </React.Suspense>
+  );
 };
+
+// Default props wrapper for DataGrid components
+const DataGridWithDefaultProps = (props: any) => {
+  // Provide default columns and data to prevent rendering errors
+  const defaultProps = {
+    columns: props.columns || [
+      { field: 'id', headerName: 'ID', width: 70 },
+      { field: 'name', headerName: 'Name', width: 150 }
+    ],
+    data: props.data || [
+      { id: 1, name: 'Sample Item 1' },
+      { id: 2, name: 'Sample Item 2' }
+    ]
+  };
+  
+  // Import the actual DataGrid component
+  const DataGridComponent = dynamic(() => 
+    safeDynamicImportPath(
+      import('@/components/ui/organisms/data-display/data-grid/DataGrid'),
+      'DataGrid',
+      createErrorComponent('DataGrid')
+    )
+  );
+  
+  return <DataGridComponent {...props} {...defaultProps} />;
+};
+
+// Default props wrapper for Table components
+const TableWithDefaultProps = (props: any) => {
+  // Provide default columns and data to prevent rendering errors
+  const defaultProps = {
+    columns: props.columns || [
+      { id: 'name', header: 'Name', cell: (row: any) => row.name },
+      { id: 'status', header: 'Status', cell: (row: any) => row.status }
+    ],
+    data: props.data || [
+      { id: 1, name: 'Sample Row 1', status: 'Active' },
+      { id: 2, name: 'Sample Row 2', status: 'Inactive' }
+    ]
+  };
+  
+  // Import the actual Table component
+  const TableComponent = dynamic(() => 
+    safeDynamicImportPath(
+      import('@/components/ui/organisms/data-display/table/Table'),
+      'Table',
+      createErrorComponent('Table')
+    )
+  );
+  
+  return <TableComponent {...props} {...defaultProps} />;
+};
+
+// Define default props for components that need them for proper preview rendering
+const componentDefaultProps: Record<string, any> = {
+  Alert: {
+    children: "This is an example alert message",
+    title: "Alert Title",
+    variant: "default",
+    showIcon: true
+  },
+  Button: {
+    children: "Button Text",
+    variant: "default"
+  },
+  Card: {
+    children: "Card Content"
+  },
+  Badge: {
+    children: "Badge"
+  },
+  Label: {
+    children: "Label"
+  },
+  Toggle: {
+    children: "Toggle"
+  },
+  Input: {
+    placeholder: "Input placeholder"
+  },
+  Checkbox: {
+    label: "Checkbox label"
+  },
+  IconButton: {
+    name: "check"
+  },
+  Icon: {
+    name: "check"
+  },
+  // Add more components as needed
+};
+
+// Replace the component map with our automated discovery
+const componentMap: Record<string, any> = (() => {
+  // Define default props for components that need them to render properly
+  const defaultProps = {
+    // Dialog components
+    Modal: {
+      isOpen: true,
+      onClose: () => {},
+      title: "Example Modal",
+      children: "Modal content goes here",
+      size: "md"
+    },
+    Dialog: {
+      open: true,
+      onOpenChange: () => {},
+      title: "Example Dialog",
+      children: "Dialog content"
+    },
+    // Data display components
+    Table: {
+      columns: [{ id: 'name', header: 'Name' }, { id: 'status', header: 'Status' }],
+      data: [{ id: 1, name: 'Example', status: 'Active' }]
+    },
+    DataGrid: {
+      columns: [{ field: 'id', headerName: 'ID' }, { field: 'name', headerName: 'Name' }],
+      data: [{ id: 1, name: 'Example Item' }]
+    },
+    // Content components
+    Skeleton: {
+      width: "100%",
+      height: "24px"
+    },
+    Calendar: {
+      initialDate: new Date(),
+    },
+    // Various skeleton components
+    SkeletonSection: {},
+    UICampaignDetailSkeleton: {},
+    WizardSkeleton: {},
+    TableSkeleton: {},
+    UIFormSkeleton: {},
+    AuthSkeleton: {},
+    UIDashboardSkeleton: {},
+    // Navigation components
+    CommandMenu: { open: true, onOpenChange: () => {} },
+    Sidebar: {},
+    BaseMobileMenu: {},
+    // Card variants
+    CardFooter: {},
+    MetricCard: { title: "Example Metric", value: "42", description: "Sample metric" },
+    // Calendar components
+    CalendarUpcoming: {},
+    CalendarDashboard: {},
+    DatePickerCalendar: {},
+    ModalDialog: { open: true, onOpenChange: () => {} },
+    // Form components
+    FormStyleReset: { children: "Form content" },
+    UIFormField: { label: "Example Field", name: "example" }
+  };
+
+  // Guaranteed components - these are directly registered regardless of discovery
+  const guaranteedComponents: Record<string, any> = {
+    // Core atomic components
+    Button: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/atoms/button/Button'),
+        'Button',
+        createErrorComponent('Button')
+      ),
+      { ssr: false, loading: () => <div>Loading Button...</div> }
+    ),
+    Alert: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/atoms/alert/Alert'),
+        'Alert',
+        createErrorComponent('Alert')
+      ),
+      { ssr: false, loading: () => <div>Loading Alert...</div> }
+    ),
+    Skeleton: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/molecules/skeleton/Skeleton'),
+        'Skeleton',
+        createErrorComponent('Skeleton')
+      ),
+      { ssr: false, loading: () => <div>Loading Skeleton...</div> }
+    ),
+    Modal: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/organisms/modal/Modal'),
+        'Modal',
+        createErrorComponent('Modal')
+      ),
+      { ssr: false, loading: () => <div>Loading Modal...</div> }
+    ),
+    Typography: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/atoms/typography/Typography'),
+        'Typography',
+        createErrorComponent('Typography')
+      ),
+      { ssr: false, loading: () => <div>Loading Typography...</div> }
+    ),
+    Paragraph: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/atoms/typography/Paragraph'),
+        'Paragraph',
+        createErrorComponent('Paragraph')
+      ),
+      { ssr: false, loading: () => <div>Loading Paragraph...</div> }
+    ),
+    Text: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/atoms/typography/Text'),
+        'Text',
+        createErrorComponent('Text')
+      ),
+      { ssr: false, loading: () => <div>Loading Text...</div> }
+    ),
+    Heading: dynamic(() => 
+      safeDynamicImportPath(
+        import('@/components/ui/atoms/typography/Heading'),
+        'Heading',
+        createErrorComponent('Heading')
+      ),
+      { ssr: false, loading: () => <div>Loading Heading...</div> }
+    ),
+    // Add more critical components as needed
+  };
+
+  // Special handlers for complex components that need default props
+  const specialComponentHandlers: Record<string, any> = {
+    Sidebar: SidebarWithDefaultProps,
+    Calendar: CalendarWithDefaultProps,
+    CalendarUpcoming: CalendarUpcomingWithDefaultProps,
+    DataGrid: DataGridWithDefaultProps,
+    Table: TableWithDefaultProps,
+  };
+  
+  // Combine the guaranteed components and special handlers
+  const baseComponentMap = {
+    ...guaranteedComponents,
+    ...specialComponentHandlers
+  };
+  
+  return baseComponentMap;
+})();
+
+// Create a registry to track loaded components
+const loadedComponentsRegistry = new Map<string, any>();
 
 interface ComponentPreviewProps {
   component: ComponentMetadata;
@@ -315,6 +356,8 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('preview');
+  const [renderError, setRenderError] = useState<Error | null>(null);
+  const [componentToRender, setComponentToRender] = useState<React.ComponentType<any> | null>(null);
   
   // Props state for the component
   const [propValues, setPropValues] = useState<Record<string, any>>({});
@@ -323,42 +366,152 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
   useEffect(() => {
     if (!component || !component.props) return;
     
-    const defaultProps: Record<string, any> = {};
-    component.props.forEach(prop => {
-      if (prop.defaultValue !== undefined) {
-        try {
-          // Convert string default values to actual values
-          if (prop.type === 'boolean') {
-            defaultProps[prop.name] = prop.defaultValue === 'true';
-          } else if (prop.type === 'number') {
-            defaultProps[prop.name] = Number(prop.defaultValue);
-          } else if (prop.defaultValue.startsWith("'") && prop.defaultValue.endsWith("'")) {
-            // Handle string literals in the format "'value'"
-            defaultProps[prop.name] = prop.defaultValue.slice(1, -1);
-          } else {
+    try {
+      const defaultProps: Record<string, any> = {};
+      component.props.forEach(prop => {
+        if (prop.defaultValue !== undefined) {
+          try {
+            // Convert string default values to actual values
+            if (prop.type === 'boolean') {
+              defaultProps[prop.name] = prop.defaultValue === 'true';
+            } else if (prop.type === 'number') {
+              defaultProps[prop.name] = Number(prop.defaultValue);
+            } else if (prop.defaultValue.startsWith("'") && prop.defaultValue.endsWith("'")) {
+              // Handle string literals in the format "'value'"
+              defaultProps[prop.name] = prop.defaultValue.slice(1, -1);
+            } else {
+              defaultProps[prop.name] = prop.defaultValue;
+            }
+          } catch (e) {
             defaultProps[prop.name] = prop.defaultValue;
           }
-        } catch (e) {
-          defaultProps[prop.name] = prop.defaultValue;
         }
-      }
-    });
-    
-    setPropValues(defaultProps);
-    setLoading(false);
+      });
+      
+      // Get any global default props for this component type
+      const globalComponentDefaults = componentDefaultProps[component.name] || {};
+      
+      // Merge global defaults with component-specific defaults
+      setPropValues({...globalComponentDefaults, ...defaultProps});
+    } catch (err) {
+      console.error("Error initializing props:", err);
+      setError(`Error setting up component props: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }, [component]);
   
-  // Get the component to render
-  const ComponentToRender = useMemo(() => {
-    if (!component || !component.name) return null;
+  // Load the component
+  useEffect(() => {
+    if (!component || !component.name) {
+      setLoading(false);
+      return;
+    }
     
-    // Find the component in our map
-    const exportName = component.exports && component.exports.length > 0 
-      ? component.exports[0] // Use the first export by default
-      : component.name;
+    const loadComponent = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Check if already in the registry
+        const registryKey = `${component.path}:${component.name}`;
+        if (loadedComponentsRegistry.has(registryKey)) {
+          setComponentToRender(loadedComponentsRegistry.get(registryKey));
+          setLoading(false);
+          return;
+        }
+        
+        // Check if the component is in our pre-defined map
+        const exportName = component.exports && component.exports.length > 0 
+          ? component.exports[0] 
+          : component.name;
+          
+        if (componentMap[exportName]) {
+          setComponentToRender(componentMap[exportName]);
+          loadedComponentsRegistry.set(registryKey, componentMap[exportName]);
+          setLoading(false);
+          return;
+        }
+        
+        if (componentMap[component.name]) {
+          setComponentToRender(componentMap[component.name]);
+          loadedComponentsRegistry.set(registryKey, componentMap[component.name]);
+          setLoading(false);
+          return;
+        }
+        
+        // If not found in pre-defined map, try to dynamically load it
+        if (component.path) {
+          console.log(`Dynamically loading ${component.name} from ${component.path}`);
+          
+          // Normalize the import path
+          const importPath = component.path
+            .replace(/\/$/, '') // Remove trailing slash if present
+            .replace(/\.tsx$|\.jsx$/, ''); // Remove file extension if present
+          
+          // Create a dynamic component
+          const DynamicComponent = dynamic(
+            () => safeDynamicImportPath(
+              import(/* @vite-ignore */ importPath),
+              exportName,
+              createErrorComponent(component.name)
+            ),
+            { 
+              loading: () => <div className="flex justify-center items-center p-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+                <span>Loading {component.name}...</span>
+              </div>,
+              ssr: false
+            }
+          );
+          
+          setComponentToRender(DynamicComponent);
+          loadedComponentsRegistry.set(registryKey, DynamicComponent);
+        } else {
+          throw new Error(`No path specified for component ${component.name}`);
+        }
+      } catch (err) {
+        console.error(`Error loading component ${component.name}:`, err);
+        setError(`Failed to load component: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    return componentMap[exportName] || null;
+    loadComponent();
   }, [component]);
+  
+  // Render component with error boundary
+  const renderComponent = () => {
+    if (!componentToRender) return null;
+    
+    try {
+      return (
+        <React.Suspense fallback={
+          <div className="flex items-center justify-center p-8">
+            <Icon iconId="faSpinnerLight"  className="h-8 w-8 animate-spin text-gray-400" />
+          </div>
+        }>
+          <ErrorBoundary
+            fallbackRender={({ error }) => (
+              <div className="p-4 border border-red-200 rounded bg-red-50 text-red-600">
+                <h3 className="font-medium mb-2">Error rendering component</h3>
+                <div className="text-sm">{error.message}</div>
+              </div>
+            )}
+            onError={(error: Error) => {
+              console.error('Error in component:', error);
+              setRenderError(error);
+            }}
+          >
+            {React.createElement(componentToRender, propValues)}
+          </ErrorBoundary>
+        </React.Suspense>
+      );
+    } catch (err) {
+      console.error('Error rendering component', err);
+      setRenderError(err instanceof Error ? err : new Error(String(err)));
+      return null;
+    }
+  };
   
   // Handle prop change
   const handlePropChange = (propName: string, value: any) => {
@@ -397,7 +550,7 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
     return (
       <Card className="w-full">
         <CardContent className="py-10 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Icon iconId="faSpinnerLight"  className="h-8 w-8 animate-spin text-gray-400" />
         </CardContent>
       </Card>
     );
@@ -415,7 +568,7 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
   }
   
   // If component not found
-  if (!ComponentToRender) {
+  if (!componentToRender) {
     return (
       <Card className="w-full">
         <CardHeader>
@@ -450,22 +603,40 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="px-4">
           <TabsTrigger value="preview" className="flex items-center">
-            <Eye className="w-4 h-4 mr-2" />
+            <Icon iconId="faEyeLight"  className="w-4 h-4 mr-2" />
             Preview
           </TabsTrigger>
           <TabsTrigger value="code" className="flex items-center">
-            <Code className="w-4 h-4 mr-2" />
+            <Icon iconId="faCodeLight"  className="w-4 h-4 mr-2" />
             Code
           </TabsTrigger>
           <TabsTrigger value="props" className="flex items-center">
-            <Settings className="w-4 h-4 mr-2" />
+            <Icon iconId="faGearLight"  className="w-4 h-4 mr-2" />
             Props
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="preview" className="p-6">
           <div className="flex items-center justify-center p-6 border rounded-md bg-gray-50 min-h-[200px]">
-            <ComponentToRender {...propValues} />
+            {renderError ? (
+              <div className="p-4 border border-red-200 rounded bg-red-50 text-red-600 max-w-md">
+                <h3 className="font-medium mb-2">Error rendering component</h3>
+                <div className="text-sm overflow-auto max-h-40">
+                  {renderError.message}
+                  {renderError.stack && (
+                    <pre className="mt-2 text-xs overflow-auto p-2 bg-red-100 rounded">
+                      {renderError.stack.split('\n').slice(0, 5).join('\n')}
+                    </pre>
+                  )}
+                </div>
+                <button 
+                  onClick={() => setRenderError(null)}
+                  className="mt-4 px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : renderComponent()}
           </div>
         </TabsContent>
         

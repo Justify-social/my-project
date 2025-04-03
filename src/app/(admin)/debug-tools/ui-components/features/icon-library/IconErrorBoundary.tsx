@@ -1,9 +1,10 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.201Z
 'use client';
 
 import React, { Component, ReactNode, ErrorInfo } from 'react';
-import { Card, CardContent } from '@/components/ui/organisms/Card/Card'
+import { Card, CardContent } from '@/components/ui/organisms/card/Card'
 import { Alert } from '@/components/ui/atoms/alert/Alert'
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Icon } from '@/components/ui/atoms/icon/Icon';
 import { Button } from '@/components/ui/atoms/button/Button'
 
 interface ErrorBoundaryProps {
@@ -78,7 +79,7 @@ export class IconErrorBoundary extends Component<ErrorBoundaryProps, ErrorBounda
                 onClick={this.resetError}
                 variant="outline"
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <Icon iconId="faRotateLight"  className="mr-2 h-4 w-4" />
                 Try again
               </Button>
             </Alert>

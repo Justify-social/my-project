@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.216Z
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
@@ -6,11 +7,11 @@ import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { useWizard } from "@/components/features/campaigns/WizardContext";
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
-import { AssetCard } from '@/components/ui/organisms/AssetCard/AssetCard'
+import { AssetCard } from '@/components/ui/organisms/card/asset-card/AssetCard'
 
 // Create simple error boundary component if not available
 class ErrorBoundary extends React.Component<{children: React.ReactNode; FallbackComponent: React.ComponentType<{error: Error}>}, {hasError: boolean; error: Error | null}> {
@@ -86,7 +87,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
           <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
         </div>
         <button onClick={onEdit} className="group text-[var(--primary-color)] text-sm flex items-center transition-colors duration-200" aria-label={`Edit ${title}`}>
-          <Icon name="faPenToSquare" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" iconType="button" solid={false} />
+          <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200"  />
           <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Edit</span>
         </button>
       </div>
@@ -1010,7 +1011,7 @@ const Step5AssetPreview = ({
           {/* Video label in the bottom corner */}
           <div className="absolute bottom-3 left-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs font-medium">
             <div className="flex items-center">
-              <Icon name="faVideo" className="h-3 w-3 mr-1" iconType="static" solid={false} /> 
+              <Icon iconId="faVideoLight" className="h-3 w-3 mr-1"  /> 
               Video
             </div>
           </div>
@@ -1020,7 +1021,7 @@ const Step5AssetPreview = ({
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <Icon name="faInfo" className="h-12 w-12 text-gray-400" iconType="static" solid={false} />
+          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400"  />
         </div>
       )}
     </div>
@@ -1618,15 +1619,15 @@ function Step5Content() {
                 />
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
+                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon iconId="faCalendarLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
                   
-                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon name="faCalendar" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
+                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon iconId="faCalendarLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
                 </div>
 
                 {displayData.startDate && displayData.endDate && (
                   <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
                     <div className="flex items-start">
-                      <Icon name="faCircleInfo" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]" iconType="static" solid={false} />
+                      <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]"  />
                       <span className="flex-1">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
                 </div>
                   </div>
@@ -1639,11 +1640,11 @@ function Step5Content() {
               <h3 className="font-medium text-gray-800 mb-4">Budget Information</h3>
               
               <div className="space-y-4">
-                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
+                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
                 
-                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} featured={true} />
+                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} featured={true} />
                 
-                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon name="faMoneyBill" className="h-4 w-4 text-[var(--secondary-color)] mr-2" iconType="static" solid={false} />} />
+                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
               </div>
             </div>
           </div>
@@ -1657,7 +1658,7 @@ function Step5Content() {
               
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Name</span>
                     <span className="text-base text-gray-800 block font-medium">
@@ -1667,7 +1668,7 @@ function Step5Content() {
                 </div>
                 
                 <div className="flex items-start">
-                  <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Email</span>
                     <span className="text-base text-gray-800 block font-medium">
@@ -1677,7 +1678,7 @@ function Step5Content() {
             </div>
                 
                 <div className="flex items-start">
-                  <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Position</span>
                     <span className="text-base text-gray-800 block font-medium">
@@ -1695,7 +1696,7 @@ function Step5Content() {
               {displayData.secondaryContact?.firstName || displayData.secondaryContact?.email ? (
               <div className="space-y-4">
                   <div className="flex items-start">
-                    <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                     <div className="flex-1">
                       <span className="text-sm text-gray-500 mb-1 block">Name</span>
                       <span className="text-base text-gray-800 block font-medium">
@@ -1705,7 +1706,7 @@ function Step5Content() {
                   </div>
                   
                   <div className="flex items-start">
-                    <Icon name="faEnvelope" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                     <div className="flex-1">
                       <span className="text-sm text-gray-500 mb-1 block">Email</span>
                       <span className="text-base text-gray-800 block font-medium">
@@ -1715,7 +1716,7 @@ function Step5Content() {
                   </div>
                   
                   <div className="flex items-start">
-                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                    <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                     <div className="flex-1">
                       <span className="text-sm text-gray-500 mb-1 block">Position</span>
                       <span className="text-base text-gray-800 block font-medium">
@@ -1747,7 +1748,7 @@ function Step5Content() {
                         </h4>
                         {influencer.verified && (
                           <span className="inline-flex items-center text-blue-500 bg-blue-50 px-2 py-1 rounded-full text-sm">
-                            <Icon name="faCheck" className="h-3 w-3 mr-1" iconType="static" solid={true} />
+                            <Icon iconId="faCheckSolid" className="h-3 w-3 mr-1"  />
                             Verified
                           </span>
                         )}
@@ -1761,7 +1762,7 @@ function Step5Content() {
                             <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)]">
-                              <Icon name="faUser" className="h-10 w-10" iconType="static" solid={false} />
+                              <Icon iconId="faUserLight" className="h-10 w-10"  />
                             </div>
                           )}
                         </div>
@@ -1772,7 +1773,7 @@ function Step5Content() {
                           <div className="flex flex-col space-y-1">
                             {influencer.followers && (
                               <p className="text-sm text-gray-600 flex items-center">
-                                <Icon name="faUsers" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" iconType="static" solid={false} />
+                                <Icon iconId="faUsersLight" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]"  />
                                 {typeof influencer.followers === 'number' 
                                   ? `${new Intl.NumberFormat().format(influencer.followers)} followers` 
                                   : influencer.followers}
@@ -1780,7 +1781,7 @@ function Step5Content() {
                             )}
                             {influencer.engagement && (
                               <p className="text-sm text-gray-600 flex items-center">
-                                <Icon name="faChartLine" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" iconType="static" solid={false} />
+                                <Icon iconId="faChartLineLight" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]"  />
                                 {influencer.engagement} engagement
                               </p>
                             )}
@@ -1821,7 +1822,7 @@ function Step5Content() {
                         {influencer.description && !influencer.description.includes('No description available') && (
                           <div className="flex items-start bg-gray-50 p-3 rounded-lg">
                             <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center mr-3 flex-shrink-0">
-                              <Icon name="faInfoCircle" className="h-5 w-5 text-[var(--accent-color)]" iconType="static" solid={false} />
+                              <Icon iconId="faInfoCircleLight" className="h-5 w-5 text-[var(--accent-color)]"  />
                             </div>
                             <div className="flex-1">
                               <span className="text-sm text-gray-500 block">Description</span>
@@ -1839,7 +1840,7 @@ function Step5Content() {
               isLoading ? (
                 <div className="bg-gray-50 p-6 rounded-md text-center">
                   <div className="mb-3 animate-spin">
-                    <Icon name="faCircleNotch" className="h-10 w-10 text-gray-400 mx-auto" iconType="static" solid={false} />
+                    <Icon iconId="faCircleNotchLight" className="h-10 w-10 text-gray-400 mx-auto"  />
                 </div>
                   <p className="text-gray-600 mb-2">Loading influencer data...</p>
                 </div>
@@ -1847,7 +1848,7 @@ function Step5Content() {
                 // Show message when no influencers found
                 <div className="bg-gray-50 p-8 rounded-md text-center">
                   <div className="mb-4 bg-gray-100 p-4 rounded-full inline-flex items-center justify-center">
-                    <Icon name="faUserGroup" className="h-12 w-12 text-[var(--accent-color)] opacity-70" iconType="static" solid={false} />
+                    <Icon iconId="faUserGroupLight" className="h-12 w-12 text-[var(--accent-color)] opacity-70"  />
                   </div>
                   <p className="text-gray-700 font-medium mb-3">No influencers added to this campaign yet.</p>
                   <p className="text-gray-500 mb-4">Add influencers to better track and manage your campaign's reach.</p>
@@ -1855,7 +1856,7 @@ function Step5Content() {
                     onClick={() => navigateToStep(1)} 
                     className="px-5 py-2.5 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors inline-flex items-center font-medium"
                   >
-                    <Icon name="faPlus" className="h-4 w-4 mr-2" iconType="static" solid={false} />
+                    <Icon iconId="faPlusLight" className="h-4 w-4 mr-2"  />
                     Add Influencers in Step 1
                   </button>
                 </div>
@@ -1975,7 +1976,7 @@ function Step5Content() {
                 
                 {/* Main Message */}
                 <div className="flex items-start">
-                  <Icon name="faCommentDots" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
                     <span className="text-base text-gray-800 block">
@@ -1986,7 +1987,7 @@ function Step5Content() {
                 
                 {/* Hashtags */}
                 <div className="flex items-start">
-                  <Icon name="faTag" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
                     <span className="text-base text-gray-800 block">
@@ -1997,7 +1998,7 @@ function Step5Content() {
                 
                 {/* Memorability Score */}
                 <div className="flex items-start">
-                  <Icon name="faStar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
                     <span className="text-base text-gray-800 block">
@@ -2008,7 +2009,7 @@ function Step5Content() {
                 
                 {/* Key Benefits */}
                 <div className="flex items-start">
-                  <Icon name="faCircleCheck" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
                     <span className="text-base text-gray-800 block">
@@ -2021,7 +2022,7 @@ function Step5Content() {
                 
                 {/* Expected Achievements */}
                 <div className="flex items-start">
-                  <Icon name="faArrowTrendUp" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
                     <span className="text-base text-gray-800 block">
@@ -2032,7 +2033,7 @@ function Step5Content() {
                 
                 {/* Impact on Purchase Intent */}
                 <div className="flex items-start">
-                  <Icon name="faDollarSign" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
                     <span className="text-base text-gray-800 block">
@@ -2043,7 +2044,7 @@ function Step5Content() {
                 
                 {/* Brand Perception Change */}
                 <div className="flex items-start">
-                  <Icon name="faChartBar" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" iconType="static" solid={false} />
+                  <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
                   <div className="flex-1">
                     <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
                     <span className="text-base text-gray-800 block">
@@ -2063,7 +2064,7 @@ function Step5Content() {
               {/* Demographics Section */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex items-start mb-4">
-                  <Icon name="faUser" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                  <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
                   <h3 className="font-medium text-gray-800">Demographics</h3>
                 </div>
 
@@ -2107,7 +2108,7 @@ function Step5Content() {
               {/* Location Section */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex items-start mb-4">
-                  <Icon name="faMap" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                  <Icon iconId="faMapLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
                   <h3 className="font-medium text-gray-800">Location</h3>
                 </div>
 
@@ -2151,7 +2152,7 @@ function Step5Content() {
                Array.isArray(displayData.audience.screeningQuestions) && displayData.audience.screeningQuestions.length > 0 && (
                 <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                   <div className="flex items-start mb-4">
-                    <Icon name="faQuestionCircle" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                    <Icon iconId="faQuestionCircleLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
                     <h3 className="font-medium text-gray-800">Screening Questions</h3>
                   </div>
                   <div className="space-y-2">
@@ -2169,7 +2170,7 @@ function Step5Content() {
               {/* Advanced Targeting */}
               <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex items-start mb-4">
-                  <Icon name="faFilter" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                  <Icon iconId="faFilterLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
                   <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
                 </div>
 
@@ -2227,7 +2228,7 @@ function Step5Content() {
                Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 && (
                 <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                   <div className="flex items-start mb-4">
-                    <Icon name="faBuilding" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" iconType="static" solid={false} />
+                    <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
                     <h3 className="font-medium text-gray-800">Competitors to Monitor</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -2243,10 +2244,10 @@ function Step5Content() {
             </div>
           ) : (
             <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <Icon name="faUser" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
+              <Icon iconId="faUserLight" className="h-10 w-10 text-gray-400 mx-auto mb-2"  />
               <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
               <button onClick={() => navigateToStep(3)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto">
-                <Icon name="faEdit" className="h-4 w-4 mr-1" iconType="button" solid={false} />
+                <Icon iconId="faEditLight" className="h-4 w-4 mr-1"  />
                 Edit audience targeting
               </button>
             </div>
@@ -2284,10 +2285,10 @@ function Step5Content() {
             </div>
           ) : (
             <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <Icon name="faImage" className="h-10 w-10 text-gray-400 mx-auto mb-2" iconType="static" solid={false} />
+              <Icon iconId="faImageLight" className="h-10 w-10 text-gray-400 mx-auto mb-2"  />
               <p className="text-gray-500">No creative assets have been added yet.</p>
               <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--primary-color)] flex items-center justify-center mx-auto group transition-colors duration-200">
-                <Icon name="faPenToSquare" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" iconType="button" solid={false} />
+                <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200"  />
                 <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Add creative assets</span>
               </button>
             </div>

@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { WizardSkeleton } from '@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/atoms/skeleton";
 import Step1Content from './Step1Content';
 import Step2Content from './Step2Content';
 import Step3Content from './Step3Content';

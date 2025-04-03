@@ -8,15 +8,10 @@
  * from the icon and component registries when possible.
  */
 
-import fs from '../fs-browser-compatibility';
+import { fs } from '../fs-browser-compatibility';
 import path from '../path-browser-compatibility';
 
 export {
-  fs,
-  path
-};
-
-export default {
   fs,
   path
 }; 

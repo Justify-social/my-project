@@ -3,6 +3,11 @@
  * 
  * This script generates a static registry of UI components during development.
  * It scans the component directories and creates a JSON file in the public directory.
+ * 
+ * IMPORTANT: This script follows the Single Source of Truth principle and only writes
+ * to canonical locations:
+ * - /public/static/component-registry.json
+ * - /public/static/icon-registry.json
  */
 
 import fs from 'fs';
@@ -17,7 +22,7 @@ const COMPONENT_DIRS = [
   { path: 'src/components/ui/organisms', category: 'organism' }
 ];
 
-// Output file path
+// Output file path - CANONICAL LOCATIONS ONLY
 const OUTPUT_PATH = path.join(process.cwd(), 'public', 'static');
 const COMPONENT_REGISTRY_FILE = path.join(OUTPUT_PATH, 'component-registry.json');
 const ICON_REGISTRY_FILE = path.join(OUTPUT_PATH, 'icon-registry.json');
@@ -28,18 +33,8 @@ interface SerializableComponentMetadata extends Omit<ComponentMetadata, 'lastUpd
 }
 
 // Extend IconMetadata for serializable version
-interface SerializableIconMetadata extends Omit<IconMetadata, 'id'> {
-  id: string;
-  name: string;
-  path: string;
-  category: string;
-  weight: string;
-  tags: string[];
-  viewBox: string;
-  width: number;
-  height: number;
-  svgContent: string;
-  usageCount?: number;
+interface SerializableIconMetadata extends IconMetadata {
+  lastUpdated: string;
 }
 
 /**
@@ -152,23 +147,18 @@ function scanComponentIcons(dirPath: string): SerializableIconMetadata[] {
           category = 'FontAwesome';
         }
         
-        // Create tags from name parts
-        const nameParts = iconName.split(/[-_]/);
-        const tags = Array.from(new Set([iconName, ...nameParts]));
-        
         // Create icon metadata
         const icon: SerializableIconMetadata = {
           id,
           name: `Icon${iconName.charAt(0).toUpperCase() + iconName.slice(1)}`,
           path: iconPath,
           category,
-          weight: id.includes('Solid') ? 'solid' : 'light',
-          tags,
           viewBox: '0 0 24 24',
           width: 24,
           height: 24,
           svgContent: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>',
-          usageCount: 1 // Real usage count would need to be determined by code analysis
+          usageCount: 1, // Real usage count would need to be determined by code analysis
+          lastUpdated: new Date().toISOString()
         };
         
         icons.push(icon);
@@ -198,23 +188,18 @@ function scanComponentIcons(dirPath: string): SerializableIconMetadata[] {
         const baseName = path.basename(entry.name, path.extname(entry.name));
         const relativePath = path.relative(process.cwd(), fullPath).replace(/\\/g, '/');
         
-        // Create tags
-        const nameParts = baseName.split(/[-_]/);
-        const tags = Array.from(new Set([baseName, ...nameParts]));
-        
         // Create icon metadata
         const icon: SerializableIconMetadata = {
           id: `icon-${baseName}`,
           name: `Icon${baseName.charAt(0).toUpperCase() + baseName.slice(1)}`,
           path: relativePath,
           category: 'UI',
-          weight: 'regular',
-          tags,
           viewBox: '0 0 24 24',
           width: 24,
           height: 24,
           svgContent: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>',
-          usageCount: 1
+          usageCount: 1,
+          lastUpdated: new Date().toISOString()
         };
         
         icons.push(icon);
@@ -277,23 +262,18 @@ function scanPublicIcons(dirPath: string): SerializableIconMetadata[] {
             }
           }
           
-          // Create tags
-          const nameParts = baseName.split(/[-_]/);
-          const tags = Array.from(new Set([baseName, ...nameParts]));
-          
           // Create icon metadata with a prefix to avoid collisions
           const icon: SerializableIconMetadata = {
             id: `file-icon-${parentDir}-${baseName}`,
             name: `Icon${baseName.charAt(0).toUpperCase() + baseName.slice(1)}`,
             path: `/icons/${prefix}${entry.name}`,
             category,
-            weight: parentDir,
-            tags,
             viewBox,
             width: 24,
             height: 24,
             svgContent,
-            usageCount: 1
+            usageCount: 1,
+            lastUpdated: new Date().toISOString()
           };
           
           icons.push(icon);
@@ -482,23 +462,19 @@ export async function generateStaticRegistry(): Promise<void> {
     iconMap.set(icon.id, icon);
   });
   
-  // Convert Map back to array
-  const allIcons = Array.from(iconMap.values());
+  // Convert Map to array for saving
+  const uniqueIcons = Array.from(iconMap.values());
   
-  // Validate icon registry
-  const validatedIcons = validateIconRegistry(allIcons);
-  
-  // Create icon registry data
-  const iconRegistryData = {
-    items: validatedIcons,
+  // Create the icon registry object
+  const iconRegistry = {
+    icons: uniqueIcons,
     generatedAt: new Date().toISOString(),
-    version: '1.0.0',
-    source: 'static-generator'
+    version: '1.0.0'
   };
   
-  // Write icon registry to file
-  fs.writeFileSync(ICON_REGISTRY_FILE, JSON.stringify(iconRegistryData, null, 2));
-  console.log(`Static icon registry generated at ${ICON_REGISTRY_FILE} with ${validatedIcons.length} icons`);
+  // Write icon registry to file (canonical location only)
+  fs.writeFileSync(ICON_REGISTRY_FILE, JSON.stringify(iconRegistry, null, 2));
+  console.log(`Icon registry generated at ${ICON_REGISTRY_FILE} with ${uniqueIcons.length} icons`);
 }
 
 // If script is run directly, generate the registry

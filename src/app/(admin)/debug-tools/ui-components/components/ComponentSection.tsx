@@ -1,11 +1,12 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.202Z
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/organisms/Card/Card'
+import { Card } from '@/components/ui/organisms/card/Card'
 import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
 import { Badge } from '@/components/ui/molecules/feedback/Badge'
 import { Table } from '@/components/ui/organisms/data-display/table/Table'
-import { Code, Info, Play, Code2 } from 'lucide-react';
+import { Icon } from '@/components/ui/atoms/icon/Icon';
 import { ComponentMetadata } from '../types';
 import ComponentResolver from './ComponentResolver';
 
@@ -50,15 +51,15 @@ export default function ComponentSection({ component }: ComponentSectionProps) {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
         <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="preview" className="flex items-center">
-            <Play className="h-4 w-4 mr-2" />
+            <Icon iconId="faPlayLight"  className="h-4 w-4 mr-2" />
             Preview
           </TabsTrigger>
           <TabsTrigger value="props" className="flex items-center">
-            <Info className="h-4 w-4 mr-2" />
+            <Icon iconId="faInfoLight"  className="h-4 w-4 mr-2" />
             Props
           </TabsTrigger>
           <TabsTrigger value="code" className="flex items-center">
-            <Code2 className="h-4 w-4 mr-2" />
+            <Icon iconId="faCodeLight" 2 className="h-4 w-4 mr-2" />
             Code
           </TabsTrigger>
         </TabsList>

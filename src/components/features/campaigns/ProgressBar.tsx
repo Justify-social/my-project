@@ -1,9 +1,10 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.218Z
 "use client";
 
 import React from "react";
 import { useSidebar } from "@/providers/SidebarProvider";
 import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 export interface ProgressBarProps {
   currentStep: number;
@@ -127,7 +128,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
                 {status === "completed" &&
                 <span className="mr-1 text-green-500 font-work-sans" aria-hidden="true">
-                    <Icon name="faCheckCircle" className="h-4 w-4" solid={true} />
+                    <Icon iconId="faCheckCircleSolid" className="h-4 w-4"  />
                   </span>
                 }
                 <span
@@ -143,7 +144,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 </span>
                 {index < STEPS.length - 1 &&
                 <span className="mx-1 text-[var(--secondary-color)] font-work-sans">
-                    <Icon name="faChevronRight" className="h-3 w-3" solid={false} />
+                    <Icon iconId="faChevronRightLight" className="h-3 w-3"  />
                   </span>
                 }
               </li>);
@@ -175,7 +176,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
             onClick={onBack}
             className="px-3 py-1.5 bg-white border border-[var(--secondary-color)] text-[var(--secondary-color)] rounded-md hover:bg-gray-50 transition duration-200 flex items-center font-work-sans">
 
-              <Icon name="faArrowLeft" className="h-3 w-3 mr-1" solid={false} />
+              <Icon iconId="faArrowLeftLight" className="h-3 w-3 mr-1"  />
               Back
             </button>
           }
@@ -186,7 +187,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
             disabled={isSaving}
             className="px-3 py-1.5 bg-white border border-[var(--primary-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-50 transition duration-200 flex items-center font-work-sans">
 
-              <Icon name="faSave" className="h-3 w-3 mr-1" solid={false} />
+              <Icon iconId="faFloppyDiskLight" className="h-3 w-3 mr-1"  />
               {isSaving ? "Saving..." : "Save Draft"}
             </button>
           }
@@ -209,12 +210,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
             {currentStep < STEPS.length ?
             <>
                 Next
-                <Icon name="faArrowRight" className="h-3 w-3 ml-1" solid={false} />
+                <Icon iconId="faArrowRightLight" className="h-3 w-3 ml-1"  />
               </> :
 
             <>
                 Submit Campaign
-                <Icon name="faCheck" className="h-3 w-3 ml-1" solid={false} />
+                <Icon iconId="faCheckLight" className="h-3 w-3 ml-1"  />
               </>
             }
           </button>

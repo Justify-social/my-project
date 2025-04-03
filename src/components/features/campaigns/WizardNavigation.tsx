@@ -1,10 +1,11 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.220Z
 'use client';
 
 import React from 'react';
 import { useCampaignWizardContext } from '@/src/components/features/campaigns/wizard/CampaignWizardContext';
 import { AutosaveIndicator } from './wizard/AutosaveIndicator';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 
 interface WizardNavigationProps {
   className?: string;
@@ -60,7 +61,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             )} font-work-sans`}>
 
               {step < currentStep ?
-            <Icon name="faCheckCircle" className="w-5 h-5 text-green-500 font-work-sans" solid={true} /> :
+            <Icon iconId="faCheckCircleSolid" className="w-5 h-5 text-green-500 font-work-sans"  /> :
 
             step
             }
@@ -96,7 +97,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
               'border-[var(--secondary-color)] bg-white text-[var(--secondary-color)] hover:bg-gray-50'
             )} font-work-sans`}>
 
-            <Icon name="faArrowLeft" className="w-4 h-4 mr-2" solid={false} />
+            <Icon iconId="faArrowLeftLight" className="w-4 h-4 mr-2"  />
             Previous
           </button>
 
@@ -107,7 +108,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             disabled={isLoading || isSaving}
             className="px-4 py-2 text-sm font-medium text-[var(--primary-color)] bg-white border border-[var(--primary-color)] rounded-md hover:bg-gray-50 flex items-center font-work-sans">
 
-            <Icon name="faSave" className="w-4 h-4 mr-2" solid={false} />
+            <Icon iconId="faFloppyDiskLight" className="w-4 h-4 mr-2"  />
             Save Draft
           </button>
         </div>
@@ -130,18 +131,18 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
 
             {isLoading || isSaving ?
             <span className="flex items-center font-work-sans">
-                <Icon name="faCircleNotch" className="w-4 h-4 mr-2 animate-spin" solid={false} />
+                <Icon iconId="faCircleNotchLight" className="w-4 h-4 mr-2 animate-spin"  />
                 {isLastStep ? 'Submitting...' : 'Saving...'}
               </span> :
             isLastStep ?
             <>
                 Submit Campaign
-                <Icon name="faCheck" className="w-4 h-4 ml-2" solid={false} />
+                <Icon iconId="faCheckLight" className="w-4 h-4 ml-2"  />
               </> :
 
             <>
                 Next Step
-                <Icon name="faArrowRight" className="w-4 h-4 ml-2" solid={false} />
+                <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-2"  />
               </>
             }
           </button>

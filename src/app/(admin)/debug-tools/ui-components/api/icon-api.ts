@@ -269,20 +269,91 @@ export const iconApi: IconApi = {
     const retryDelay = 500; // ms
     let retryCount = 0;
     
-    // Potential registry paths to try
-    const registryPaths = [
+    // All potential category-specific registries to try first
+    const categoryRegistries = [
+      '/static/app-icon-registry.json',
+      '/static/brands-icon-registry.json',
+      '/static/kpis-icon-registry.json',
+      '/static/light-icon-registry.json',
+      '/static/solid-icon-registry.json'
+    ];
+    
+    // Legacy registry paths as fallback
+    const legacyRegistryPaths = [
       '/static/icon-registry.json',
       '/api/icon-registry',
       '/static/icons/registry.json',
-      '/api/component-registry' // fallback to component registry which might contain icons
+      '/api/component-registry'
     ];
     
-    // Try each path until we get a valid response
-    for (const path of registryPaths) {
+    // Combine both arrays - try category files first, then legacy paths
+    const registryPaths = [...categoryRegistries, ...legacyRegistryPaths];
+    
+    // Collected icons from all category registries
+    const allIcons: IconMetadata[] = [];
+    const loadedPaths: string[] = [];
+    
+    // Try each registry path, accumulating all icons found
+    for (const path of categoryRegistries) {
       retryCount = 0;
       while (retryCount < maxRetries) {
         try {
           debug(`Fetching from ${path} (attempt ${retryCount + 1}/${maxRetries})`);
+          const response = await fetch(path, { 
+            cache: process.env.NODE_ENV === 'development' ? 'no-store' : 'force-cache',
+            next: { tags: ['icon-registry'] }
+          });
+          
+          if (!response.ok) {
+            debug(`Response not OK from ${path}: ${response.status}`);
+            throw new Error(`Failed to fetch icon registry from ${path}: ${response.status}`);
+          }
+          
+          const registry = await response.json();
+          
+          // Validate registry format
+          if (registry && Array.isArray(registry.icons) && registry.icons.length > 0) {
+            debug(`Successfully loaded ${registry.icons.length} icons from ${path}`);
+            allIcons.push(...registry.icons);
+            loadedPaths.push(path);
+            break; // Success, move to the next path
+          } else {
+            debug(`Registry at ${path} has invalid format or is empty`);
+            throw new Error(`Registry at ${path} has invalid format or is empty`);
+          }
+        } catch (err) {
+          debug(`Attempt ${retryCount + 1} failed for ${path}:`, err);
+          retryCount++;
+          
+          // Only wait if we're going to retry
+          if (retryCount < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+          }
+        }
+      }
+    }
+    
+    // If we found icons in category registries, return the consolidated collection
+    if (allIcons.length > 0) {
+      debug(`Successfully loaded ${allIcons.length} icons from ${loadedPaths.length} category registries`);
+      
+      // Update cache
+      iconCache.items = allIcons;
+      
+      return { 
+        items: allIcons 
+      };
+    }
+    
+    // If no icons found in category registries, try legacy paths
+    debug('No icons found in category registries, trying legacy paths');
+    
+    // Try each legacy path until we get a valid response
+    for (const path of legacyRegistryPaths) {
+      retryCount = 0;
+      while (retryCount < maxRetries) {
+        try {
+          debug(`Fetching from legacy path ${path} (attempt ${retryCount + 1}/${maxRetries})`);
           const response = await fetch(path, { 
             cache: process.env.NODE_ENV === 'development' ? 'no-store' : 'force-cache',
             next: { tags: ['icon-registry'] }

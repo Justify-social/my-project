@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.217Z
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
@@ -10,7 +11,7 @@ import Header from "@/components/features/campaigns/Header";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { toast } from "react-hot-toast";
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { sanitizeStepPayload } from '@/utils/payload-sanitizer';
 
@@ -457,7 +458,7 @@ function FormContent() {
               {/* KPIs Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                 <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center font-sora">
-                  <Icon name="faChartBar" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                  <Icon iconId="faChartBarLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                   Key Performance Indicators
                 </h2>
                 <p className="mb-4 text-sm text-[var(--secondary-color)] font-work-sans">
@@ -505,7 +506,7 @@ function FormContent() {
               {/* Primary and Secondary KPIs */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                 <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center font-sora">
-                  <Icon name="faChartLine" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                  <Icon iconId="faChartLineLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                   Primary and Secondary KPIs
                 </h2>
                 <p className="mb-4 text-sm text-[var(--secondary-color)] font-work-sans">
@@ -544,8 +545,8 @@ function FormContent() {
                         setFieldValue('secondaryKPIs', updatedKpis);
                       }}>
 
-                            <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
-                            <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
+                            <Icon iconId="faTrashCanLight" className="w-4 h-4 group-hover:hidden"  />
+                            <Icon iconId="faTrashCanSolid" className="w-4 h-4 hidden group-hover:block"  />
                           </button>
                         </div>)}
                     </div>
@@ -556,7 +557,7 @@ function FormContent() {
               {/* Messaging Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                 <h2 className="text-xl font-semibold mb-4 flex items-center font-sora">
-                  <Icon name="faComments" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                  <Icon iconId="faCommentsLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                   Messaging
                 </h2>
                 <p className="text-[var(--secondary-color)] mb-6 font-work-sans">
@@ -564,16 +565,16 @@ function FormContent() {
                 </p>
                 
                 <div className="space-y-4 font-work-sans">
-                  <StyledField label="What is the main message of your campaign?" name="mainMessage" as="textarea" rows={3} required icon={<Icon name="faCommentDots" className="h-5 w-5" solid={false} />} placeholder="Discover sustainable living with our eco-friendly products." />
+                  <StyledField label="What is the main message of your campaign?" name="mainMessage" as="textarea" rows={3} required icon={<Icon iconId="faCommentDotsLight" className="h-5 w-5"  />} placeholder="Discover sustainable living with our eco-friendly products." />
 
                   
-                  <StyledField label="Hashtags related to the campaign" name="hashtags" icon={<Icon name="faTag" className="h-5 w-5" solid={false} />} placeholder="#hashtag" />
+                  <StyledField label="Hashtags related to the campaign" name="hashtags" icon={<Icon iconId="faTagLight" className="h-5 w-5"  />} placeholder="#hashtag" />
 
                   
-                  <StyledField label="Memorability Score (1-10)" name="memorability" required icon={<Icon name="faStar" className="h-5 w-5" solid={false} />} placeholder="Type the value" />
+                  <StyledField label="Memorability Score (1-10)" name="memorability" required icon={<Icon iconId="faStarLight" className="h-5 w-5"  />} placeholder="Type the value" />
 
                   
-                  <StyledField label="What are the key benefits your brand offers?" name="keyBenefits" required icon={<Icon name="faCircleCheck" className="h-5 w-5" solid={false} />} placeholder="Innovative design, Exceptional quality, Outstanding customer service." />
+                  <StyledField label="What are the key benefits your brand offers?" name="keyBenefits" required icon={<Icon iconId="faCircleCheckLight" className="h-5 w-5"  />} placeholder="Innovative design, Exceptional quality, Outstanding customer service." />
 
                 </div>
               </div>
@@ -581,7 +582,7 @@ function FormContent() {
               {/* Hypotheses Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                 <h2 className="text-xl font-semibold mb-4 flex items-center font-sora">
-                  <Icon name="faLightbulb" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                  <Icon iconId="faLightbulbLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                   Hypotheses
                 </h2>
                 <p className="text-[var(--secondary-color)] mb-6 font-work-sans">
@@ -589,13 +590,13 @@ function FormContent() {
                 </p>
                 
                 <div className="space-y-4 font-work-sans">
-                  <StyledField label="What do you expect to achieve with this campaign?" name="expectedAchievements" as="textarea" rows={2} required icon={<Icon name="faArrowTrendUp" className="h-5 w-5" solid={false} />} placeholder="We expect a 20% increase in brand awareness within three months." />
+                  <StyledField label="What do you expect to achieve with this campaign?" name="expectedAchievements" as="textarea" rows={2} required icon={<Icon iconId="faArrowTrendUpLight" className="h-5 w-5"  />} placeholder="We expect a 20% increase in brand awareness within three months." />
 
                   
-                  <StyledField label="How do you think the campaign will impact Purchase Intent?" name="purchaseIntent" as="textarea" rows={2} required icon={<Icon name="faDollarSign" className="h-5 w-5" solid={false} />} placeholder="Purchase intent will rise by 15% due to targeted ads." />
+                  <StyledField label="How do you think the campaign will impact Purchase Intent?" name="purchaseIntent" as="textarea" rows={2} required icon={<Icon iconId="faDollarSignLight" className="h-5 w-5"  />} placeholder="Purchase intent will rise by 15% due to targeted ads." />
 
                   
-                  <StyledField label="How will it change people's perception of your brand?" name="brandPerception" as="textarea" rows={2} icon={<Icon name="faChartBar" className="h-5 w-5" solid={false} />} placeholder="Our brand will be seen as more innovative and customer-focused." />
+                  <StyledField label="How will it change people's perception of your brand?" name="brandPerception" as="textarea" rows={2} icon={<Icon iconId="faChartBarLight" className="h-5 w-5"  />} placeholder="Our brand will be seen as more innovative and customer-focused." />
 
                 </div>
               </div>
@@ -603,7 +604,7 @@ function FormContent() {
               {/* Features Section */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                 <h2 className="text-lg font-semibold text-[var(--primary-color)] mb-4 flex items-center font-sora">
-                  <Icon name="faList" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                  <Icon iconId="faListLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                   Features to Include
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-work-sans">
@@ -667,7 +668,7 @@ function FormContent() {
                       </div>
                       <div className="flex justify-end mt-3 font-work-sans">
                         {Array.isArray(values.features) && values.features.includes(feature.key) &&
-                  <Icon name="faCheckCircle" className="w-5 h-5" solid={true} />
+                  <Icon iconId="faCheckCircleSolid" className="w-5 h-5"  />
                   }
                         {!(Array.isArray(values.features) && values.features.includes(feature.key)) &&
                   <div className="text-[var(--secondary-color)] text-xs font-work-sans">Click to select</div>

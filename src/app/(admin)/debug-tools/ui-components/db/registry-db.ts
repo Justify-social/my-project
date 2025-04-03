@@ -1,292 +1,225 @@
 /**
- * Component Registry Database Service
+ * Component Registry Database Service (Client API)
  * 
- * Implements a repository pattern for component metadata storage with SQLite.
- * This service provides a clean abstraction layer that can be replaced with
- * PostgreSQL in production environments without changing the consuming code.
+ * Implements a client-side API layer for component registry operations.
+ * This file serves as the entry point for component registry operations in client code.
  */
 
 'use client';
 
-import { ComponentMetadata, PropDefinition, Change } from './registry';
-import { Database, Statement } from './database-types';
+import { ComponentMetadata, DBChange, ComponentRegistryInterface } from '@/lib/types/component-registry';
 
-// Server component marker for database operations
-let db: any = null;
-let isInitialized = false;
-
-// Initialize database on server side only
-async function initDatabaseIfServer() {
-  // Only run on server side and avoid duplicate initialization
-  if (typeof window !== 'undefined' || isInitialized) return;
-  
-  try {
-    // Dynamic imports to ensure these modules are only loaded on the server
-    const Database = (await import('better-sqlite3')).default;
-    const fs = await import('fs');
-    const path = await import('path');
-    
-    const dbDir = path.join(process.cwd(), '.db');
-    const dbPath = path.join(dbDir, 'component-registry.db');
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-    
-    // Initialize database
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL'); // Write-Ahead Logging for better concurrency
-    db.pragma('foreign_keys = ON');  // Enable foreign key constraints
-    
-    // Create tables
-    createTables();
-    isInitialized = true;
-  } catch (error) {
-    console.error('Error initializing database:', error);
-    // In browser, this will fail and we'll just continue without DB functionality
-  }
-}
-
-// Create necessary tables
-function createTables() {
-  if (!db) return;
-  
-  try {
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS components (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        category TEXT,
-        path TEXT NOT NULL,
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS props (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        component_id TEXT NOT NULL,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        description TEXT,
-        default_value TEXT,
-        required BOOLEAN DEFAULT FALSE,
-        FOREIGN KEY (component_id) REFERENCES components(id)
-      );
-
-      CREATE TABLE IF NOT EXISTS changes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        component_id TEXT NOT NULL,
-        change_type TEXT NOT NULL,
-        description TEXT NOT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (component_id) REFERENCES components(id)
-      );
-    `);
-  } catch (error) {
-    console.error('Error creating database tables:', error);
-  }
-}
+// In-memory storage for client-side fallback
+const inMemoryComponents: Record<string, ComponentMetadata> = {};
+const inMemoryChanges: DBChange[] = [];
+let useServerApi = true;
 
 /**
- * ComponentRegistryDB is responsible for persisting component metadata
- * in a SQLite database with proper schema management and migrations.
+ * Client implementation that delegates to server API endpoints
+ * Only references to this implementation are included in client bundles
  */
-export class ComponentRegistryDB {
+class ClientComponentRegistry implements ComponentRegistryInterface {
   constructor() {
-    // Initialize database if on server
-    if (typeof window === 'undefined') {
-      initDatabaseIfServer();
-    }
-  }
-
-  /**
-   * Get all components from the registry
-   */
-  getAllComponents(): ComponentMetadata[] {
-    if (!db) {
-      console.warn('Database operations are only available on the server side');
-      return [];
-    }
+    console.info('Using client component registry implementation');
     
-    try {
-      const components = db.prepare(`
-        SELECT * FROM components
-      `).all();
-
-      return components.map((row: any) => this.hydrateComponent(row));
-    } catch (error) {
-      console.error('Error getting components:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Get a component by ID
-   */
-  getComponent(id: string): ComponentMetadata | null {
-    if (!db) return null;
-    
-    try {
-      const component = db.prepare(`
-        SELECT * FROM components WHERE id = ?
-      `).get(id);
-
-      if (!component) return null;
-
-      return this.hydrateComponent(component);
-    } catch (error) {
-      console.error(`Error getting component with ID ${id}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Add or update a component in the registry
-   */
-  upsertComponent(component: ComponentMetadata & { id: string }): void {
-    if (!db) return;
-    
-    try {
-      const { id, name, description, category, path, props } = component;
-
-      // Begin transaction
-      db.transaction(() => {
-        // Insert or replace component
-        db.prepare(`
-          INSERT OR REPLACE INTO components (id, name, description, category, path, last_updated)
-          VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        `).run(id, name, description, category, path);
-  
-        // Delete existing props
-        db.prepare(`DELETE FROM props WHERE component_id = ?`).run(id);
-  
-        // Insert new props
-        if (props && props.length > 0) {
-          const insertProp = db.prepare(`
-            INSERT INTO props (component_id, name, type, description, default_value, required)
-            VALUES (?, ?, ?, ?, ?, ?)
-          `);
-  
-          for (const prop of props) {
-            insertProp.run(
-              id,
-              prop.name,
-              prop.type,
-              prop.description,
-              prop.defaultValue,
-              prop.required
-            );
-          }
-        }
-  
-        // Add change record
-        db.prepare(`
-          INSERT INTO changes (component_id, change_type, description)
-          VALUES (?, ?, ?)
-        `).run(id, 'UPDATE', `Component ${name} was updated`);
-      })();
-    } catch (error) {
-      console.error('Error upserting component:', error);
-    }
-  }
-
-  /**
-   * Delete a component from the registry
-   */
-  deleteComponent(id: string): void {
-    if (!db) return;
-    
-    try {
-      db.transaction(() => {
-        // Get component name before deletion
-        const component = db.prepare(`SELECT name FROM components WHERE id = ?`).get(id);
-        
-        if (!component) return;
-        
-        // Delete props first (foreign key constraint)
-        db.prepare(`DELETE FROM props WHERE component_id = ?`).run(id);
-        
-        // Delete changes
-        db.prepare(`DELETE FROM changes WHERE component_id = ?`).run(id);
-        
-        // Delete component
-        db.prepare(`DELETE FROM components WHERE id = ?`).run(id);
-        
-        // Add change record with special "orphaned" ID
-        db.prepare(`
-          INSERT INTO changes (component_id, change_type, description)
-          VALUES (?, ?, ?)
-        `).run('system', 'DELETE', `Component ${component.name} was deleted`);
-      })();
-    } catch (error) {
-      console.error(`Error deleting component with ID ${id}:`, error);
-    }
-  }
-
-  /**
-   * Get change history for all components or a specific component
-   */
-  getChangeHistory(componentId?: string): Change[] {
-    if (!db) return [];
-    
-    try {
-      let query = `
-        SELECT 
-          changes.id, 
-          changes.component_id, 
-          COALESCE(components.name, 'Deleted Component') as component_name,
-          changes.change_type, 
-          changes.description, 
-          changes.timestamp
-        FROM changes
-        LEFT JOIN components ON changes.component_id = components.id
-      `;
+    // Determine if we can use the server API or need to fall back to in-memory
+    if (typeof window !== 'undefined') {
+      // Client-side checks
+      useServerApi = true; // Assume we can use server API by default
       
-      if (componentId) {
-        query += ` WHERE changes.component_id = ?`;
-        return db.prepare(query).all(componentId);
-      } else {
-        query += ` ORDER BY changes.timestamp DESC LIMIT 100`;
-        return db.prepare(query).all();
+      // Could add more sophisticated detection here based on network or feature flags
+    }
+  }
+
+  async getAllComponents(): Promise<ComponentMetadata[]> {
+    if (!useServerApi) {
+      return Object.values(inMemoryComponents);
+    }
+    
+    try {
+      // Use Next.js API route to get components from server
+      const response = await fetch('/api/components');
+      if (!response.ok) {
+        throw new Error(`Server API error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching components from server:', error);
+      // Fall back to in-memory on error
+      useServerApi = false;
+      return Object.values(inMemoryComponents);
+    }
+  }
+
+  async getComponent(id: string): Promise<ComponentMetadata | null> {
+    if (!useServerApi) {
+      return inMemoryComponents[id] || null;
+    }
+    
+    try {
+      // Use Next.js API route to get component by ID
+      const response = await fetch(`/api/components/${id}`);
+      if (response.status === 404) {
+        return null;
+      }
+      if (!response.ok) {
+        throw new Error(`Server API error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching component ${id} from server:`, error);
+      // Fall back to in-memory on error
+      useServerApi = false;
+      return inMemoryComponents[id] || null;
+    }
+  }
+
+  async upsertComponent(component: ComponentMetadata & { id: string }): Promise<void> {
+    if (!useServerApi) {
+      // In-memory fallback
+      inMemoryComponents[component.id] = { ...component };
+      
+      // Add change record
+      inMemoryChanges.push({
+        id: Date.now(),
+        component_id: component.id,
+        component_name: component.name,
+        change_type: 'UPDATE',
+        description: `Component ${component.name} was updated`,
+        timestamp: new Date().toISOString()
+      });
+      
+      return;
+    }
+    
+    try {
+      // Use Next.js API route to create/update component
+      const response = await fetch('/api/components', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(component),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server API error: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error getting change history:', error);
-      return [];
+      console.error(`Error updating component ${component.id} on server:`, error);
+      // Fall back to in-memory on error
+      useServerApi = false;
+      
+      // Store in fallback memory
+      inMemoryComponents[component.id] = { ...component };
+      
+      // Add change record
+      inMemoryChanges.push({
+        id: Date.now(),
+        component_id: component.id,
+        component_name: component.name,
+        change_type: 'UPDATE',
+        description: `Component ${component.name} was updated`,
+        timestamp: new Date().toISOString()
+      });
     }
   }
 
-  /**
-   * Helper method to hydrate a component with its props
-   */
-  private hydrateComponent(component: any): ComponentMetadata {
-    if (!db) return component;
+  async deleteComponent(id: string): Promise<void> {
+    if (!useServerApi) {
+      // In-memory fallback
+      const component = inMemoryComponents[id];
+      if (component) {
+        const name = component.name;
+        delete inMemoryComponents[id];
+        
+        // Add change record
+        inMemoryChanges.push({
+          id: Date.now(),
+          component_id: 'system',
+          component_name: 'Deleted Component',
+          change_type: 'DELETE',
+          description: `Component ${name} was deleted`,
+          timestamp: new Date().toISOString()
+        });
+      }
+      return;
+    }
     
     try {
-      const props = db.prepare(`
-        SELECT * FROM props WHERE component_id = ?
-      `).all(component.id);
-  
-      return {
-        ...component,
-        props: props.map((prop: any) => ({
-          name: prop.name,
-          type: prop.type,
-          description: prop.description,
-          defaultValue: prop.default_value,
-          required: !!prop.required
-        }))
-      };
+      // Use Next.js API route to delete component
+      const response = await fetch(`/api/components/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server API error: ${response.status}`);
+      }
     } catch (error) {
-      console.error(`Error hydrating component with ID ${component.id}:`, error);
-      return {
-        ...component,
-        props: []
-      };
+      console.error(`Error deleting component ${id} on server:`, error);
+      // Fall back to in-memory on error
+      useServerApi = false;
+      
+      // Perform deletion in fallback memory
+      const component = inMemoryComponents[id];
+      if (component) {
+        const name = component.name;
+        delete inMemoryComponents[id];
+        
+        // Add change record
+        inMemoryChanges.push({
+          id: Date.now(),
+          component_id: 'system',
+          component_name: 'Deleted Component',
+          change_type: 'DELETE',
+          description: `Component ${name} was deleted`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+  }
+
+  async getChangeHistory(componentId?: string): Promise<DBChange[]> {
+    if (!useServerApi) {
+      // In-memory fallback
+      if (componentId) {
+        return inMemoryChanges.filter(change => change.component_id === componentId);
+      } else {
+        return [...inMemoryChanges].sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        ).slice(0, 100);
+      }
+    }
+    
+    try {
+      // Use Next.js API route to get change history
+      const url = componentId 
+        ? `/api/components/changes?componentId=${componentId}` 
+        : '/api/components/changes';
+        
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Server API error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching change history from server:', error);
+      // Fall back to in-memory on error
+      useServerApi = false;
+      
+      // Return from fallback memory
+      if (componentId) {
+        return inMemoryChanges.filter(change => change.component_id === componentId);
+      } else {
+        return [...inMemoryChanges].sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        ).slice(0, 100);
+      }
     }
   }
 }
 
 // Export a singleton instance
-export const componentRegistryDB = new ComponentRegistryDB(); 
+export const componentRegistryDB: ComponentRegistryInterface = new ClientComponentRegistry(); 

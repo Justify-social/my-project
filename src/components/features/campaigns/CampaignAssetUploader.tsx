@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.218Z
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -8,7 +9,7 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 import { generateCorrelationId, sanitizeFileName, logAndShowError, enhancedFileTypeDetection, extractAssetUrl } from "@/utils/file-utils";
 export interface UploadedAsset {
@@ -237,7 +238,7 @@ export function CampaignAssetUploader({
         label: "Choose a file or drag and drop",
         uploadIcon: () =>
         <div className="mb-8 p-6 rounded-full bg-blue-50 flex items-center justify-center mx-auto font-work-sans">
-              <Icon name="faUpload" className="h-16 w-16 text-blue-500 font-work-sans" solid={false} />
+              <Icon iconId="faUploadLight" className="h-16 w-16 text-blue-500 font-work-sans"  />
             </div>,
 
         button: ({ ready }: {ready: boolean;}) =>
@@ -276,7 +277,7 @@ export function CampaignAssetUploader({
           {selectedFiles.map((file, index) =>
       <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 font-work-sans">
               <div className="flex items-center font-work-sans">
-                <Icon name="faInfo" className="h-6 w-6 text-gray-400 mr-3 font-work-sans" solid={false} />
+                <Icon iconId="faInfoLight" className="h-6 w-6 text-gray-400 mr-3 font-work-sans"  />
                 <div className="font-work-sans">
                   <p className="text-sm font-medium font-work-sans">{file.name}</p>
                   <p className="text-xs text-gray-500 font-work-sans">{(file.size / 1024).toFixed(1)} KB</p>

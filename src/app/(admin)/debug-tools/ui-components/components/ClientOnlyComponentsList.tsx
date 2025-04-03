@@ -1,347 +1,239 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Card, Button, Input } from '../components/ui-components-bridge';
-import { Icon } from '@/components/ui/atoms/icons'
-import { ComponentMetadata, ComponentCategory, UIComponent } from '../types';
-import { ComponentRegistryManager } from '../registry/ComponentRegistryManager';
-import { RefreshCw, Search, Filter, ArrowRight, Eye, X } from 'lucide-react';
-import ComponentPreview from './ComponentPreview';
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { Skeleton } from '@/components/ui/molecules/skeleton/Skeleton';
 
 /**
- * Client-only component list
- * This component handles loading and displaying components using the registry manager
- * It's loaded dynamically to avoid server-side Node.js imports
+ * Component metadata interface
+ */
+interface ComponentMeta {
+  name: string;
+  path: string;
+  category: string;
+  exports: string[];
+}
+
+/**
+ * Client-only component list that fetches components from the API
+ * This solves the "glob is not defined" error by not using glob directly in client code
  */
 export default function ClientOnlyComponentsList() {
-  const [discoveredComponents, setDiscoveredComponents] = useState<ComponentMetadata[]>([]);
-  const [filteredComponents, setFilteredComponents] = useState<ComponentMetadata[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [components, setComponents] = useState<ComponentMeta[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState<ComponentMetadata | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'split'>('grid');
+  const [hasCache, setHasCache] = useState<boolean>(false);
 
-  // Handle search and filtering
-  useEffect(() => {
-    if (!discoveredComponents.length) {
-      setFilteredComponents([]);
-      return;
-    }
-
-    let results = [...discoveredComponents];
-
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      results = results.filter(component => 
-        component.name.toLowerCase().includes(term) || 
-        component.path.toLowerCase().includes(term) || 
-        (component.description?.toLowerCase() || '').includes(term)
-      );
-    }
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      results = results.filter(component => component.category === selectedCategory);
-    }
-
-    setFilteredComponents(results);
-  }, [searchTerm, selectedCategory, discoveredComponents]);
-
-  // Initial loading
-  useEffect(() => {
-    loadComponents();
-  }, []);
-
-  const loadComponents = async () => {
+  // Fetch components function - extracted for reusability
+  const fetchComponents = useCallback(async (force = false) => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setLoading(true);
       
-      // Get the registry manager singleton
-      const registryManager = ComponentRegistryManager.getInstance();
+      // Add a cache busting parameter if force refresh is requested
+      const url = force 
+        ? `/api/components/discover?force=true&t=${Date.now()}` 
+        : '/api/components/discover';
       
-      // Add a listener for registry changes
-      const handleRegistryUpdate = () => {
-        const components = registryManager.getAllComponents();
-        console.info(`Registry updated: ${components.length} components available`);
-        setDiscoveredComponents(components);
-      };
+      const response = await fetch(url);
       
-      registryManager.addListener(handleRegistryUpdate);
-      
-      // Initialize the registry (will load from appropriate sources)
-      await registryManager.initialize();
-      
-      // Initial fetch of components
-      handleRegistryUpdate();
-      
-      setIsLoading(false);
-      
-      // Cleanup listener on unmount
-      return () => registryManager.removeListener(handleRegistryUpdate);
-    } catch (error) {
-      console.error('Failed to initialize component registry:', error);
-      setError('Failed to load components. Please try again later.');
-      setIsLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    
-    try {
-      // Force refresh from API
-      const response = await fetch('/api/component-registry?refresh=true');
       if (!response.ok) {
-        throw new Error('Failed to refresh components');
+        throw new Error(`Failed to fetch components: ${response.status} ${response.statusText}`);
       }
       
-      // Wait for the response
       const data = await response.json();
-      console.log('Refreshed component data:', data);
       
-      // Re-initialize the registry
-      const registryManager = ComponentRegistryManager.getInstance();
+      if (data.status === 'success' && Array.isArray(data.components)) {
+        // Check if data came from cache
+        setHasCache(data.source === 'cache');
+        
+        // Filter out any invalid components
+        const validComponents = data.components.filter(
+          (c: any) => c && c.name && c.path
+        );
+        
+        if (validComponents.length > 0) {
+          setComponents(validComponents);
+          // Store components in sessionStorage as a backup
+          try {
+            sessionStorage.setItem('ui-components-cache', JSON.stringify(validComponents));
+          } catch (e) {
+            console.warn('Failed to cache components in sessionStorage:', e);
+          }
+        } else {
+          throw new Error('No valid components found in API response');
+        }
+      } else {
+        throw new Error('Invalid component data received from API');
+      }
+    } catch (err) {
+      console.error('Error fetching components:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
       
-      // Reset and re-initialize
-      registryManager.reset();
-      await registryManager.initialize();
+      // Try to load from sessionStorage cache as fallback
+      try {
+        const cachedData = sessionStorage.getItem('ui-components-cache');
+        if (cachedData) {
+          const cachedComponents = JSON.parse(cachedData);
+          if (Array.isArray(cachedComponents) && cachedComponents.length > 0) {
+            console.log('Using cached components from sessionStorage');
+            setComponents(cachedComponents);
+            setHasCache(true);
+            return; // Exit if we successfully used cache
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Failed to load cached components:', cacheErr);
+      }
       
-      // Components will update through the listener
-    } catch (error) {
-      console.error('Error refreshing components:', error);
-      setError('Failed to refresh components. Please try again.');
+      // Ultimate fallback: hardcoded essential components
+      setComponents([
+        {
+          name: 'Button',
+          path: '@/components/ui/atoms/button/Button',
+          category: 'atom',
+          exports: ['Button']
+        },
+        {
+          name: 'Alert',
+          path: '@/components/ui/atoms/alert/Alert',
+          category: 'atom',
+          exports: ['Alert']
+        },
+        {
+          name: 'Typography',
+          path: '@/components/ui/atoms/typography/Typography',
+          category: 'atom',
+          exports: ['Typography']
+        },
+        {
+          name: 'Paragraph',
+          path: '@/components/ui/atoms/typography/Paragraph',
+          category: 'atom', 
+          exports: ['Paragraph']
+        },
+        {
+          name: 'Text',
+          path: '@/components/ui/atoms/typography/Text',
+          category: 'atom',
+          exports: ['Text']
+        }
+      ]);
     } finally {
-      setIsRefreshing(false);
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const handleComponentSelect = (component: ComponentMetadata) => {
-    setSelectedComponent(component);
-    // Switch to split view when selecting a component
-    setViewMode('split');
-  };
+  useEffect(() => {
+    // Initial loading
+    fetchComponents()
+      .catch(error => {
+        console.error('Unhandled error in fetchComponents:', error);
+        setLoading(false);
+      });
+  }, [fetchComponents]);
 
-  const handleClosePreview = () => {
-    setSelectedComponent(null);
-    setViewMode('grid');
-  };
+  // Group components by category
+  const componentsByCategory = React.useMemo(() => {
+    return components.reduce((acc, component) => {
+      const category = component.category || 'unknown';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(component);
+      return acc;
+    }, {} as Record<string, ComponentMeta[]>);
+  }, [components]);
 
-  const handleRetry = () => {
-    window.location.reload();
-  };
+  // Get sorted categories
+  const categories = Object.keys(componentsByCategory).sort();
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="h-40 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00BFFF]"></div>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Loading Components...</h2>
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="space-y-2">
+            <Skeleton className="h-6 w-32" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 rounded-md" />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
-  if (error) {
+  if (error && components.length === 0) {
     return (
-      <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-md text-red-800">
-        <h3 className="font-semibold text-lg mb-2">Error loading components</h3>
-        <div className="flex flex-col gap-4">
-          <p>{error}</p>
-          <p className="text-sm">This may be due to a chunk loading error or a problem with the component registry.</p>
-          <button 
-            onClick={handleRetry}
-            className="self-start px-4 py-2 bg-white border border-red-300 rounded-md flex items-center hover:bg-red-50"
-          >
-            <RefreshCw className="mr-2 h-4 w-4" /> Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (discoveredComponents.length === 0) {
-    return (
-      <div className="col-span-3 flex flex-col items-center justify-center py-16 text-gray-400">
-        <div className="w-12 h-12 mb-3 text-[#00BFFF]">
-          <Icon 
-            name="faPaintbrush"
-            variant="solid"
-            className="w-full h-full"
-          />
-        </div>
-        <p className="text-lg mb-2">No components discovered yet</p>
-        <p className="mb-6">Components will appear here when discovered</p>
-        <Button 
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="bg-[#00BFFF] hover:bg-[#0077B6] text-white flex items-center justify-center"
+      <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-md">
+        <h2 className="text-lg font-semibold mb-2">Error Loading Components</h2>
+        <p className="mb-3">{error}</p>
+        <button 
+          onClick={() => fetchComponents(true)}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh Components'}
-        </Button>
+          Retry Component Loading
+        </button>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap gap-4 items-center">
-        {/* Search Field */}
-        <div className="relative flex-grow max-w-md">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Search components..."
-            className="pl-8 pr-4 py-2 bg-white rounded-md border shadow-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        {/* Category Filter */}
-        <div className="relative">
-          <select
-            className="bg-white rounded-md border shadow-sm px-4 py-2 appearance-none pr-8"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Components ({components.length})</h2>
+        {(error || hasCache) && (
+          <button 
+            onClick={() => fetchComponents(true)}
+            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors flex items-center"
           >
-            <option value="all">All Categories</option>
-            <option value="atom">Atoms</option>
-            <option value="molecule">Molecules</option>
-            <option value="organism">Organisms</option>
-          </select>
-          <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-        </div>
-        
-        {/* View Mode Toggle */}
-        <div className="flex items-center bg-white border rounded-md shadow-sm">
-          <button
-            className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-gray-100 text-gray-800' : 'text-gray-500'}`}
-            onClick={() => setViewMode('grid')}
-          >
-            Grid
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
           </button>
-          <button
-            className={`px-3 py-2 ${viewMode === 'split' ? 'bg-gray-100 text-gray-800' : 'text-gray-500'}`}
-            onClick={() => setViewMode('split')}
-          >
-            Split
-          </button>
-        </div>
-        
-        {/* Refresh Button */}
-        <Button 
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="ml-auto bg-white hover:bg-gray-50 border shadow-sm text-gray-700 flex items-center"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </Button>
+        )}
       </div>
       
-      {/* Statistics */}
-      <div className="mb-4 text-sm text-gray-500">
-        Showing {filteredComponents.length} of {discoveredComponents.length} components
-      </div>
-      
-      {filteredComponents.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <p>No components match your search criteria</p>
+      {error && (
+        <div className="p-3 border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800">
+          <p className="text-sm">
+            Warning: Using fallback or cached components due to an error. Some components may be missing.
+          </p>
         </div>
-      ) : viewMode === 'split' ? (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Components List */}
-          <div className="md:col-span-5 lg:col-span-4">
-            <div className="overflow-y-auto max-h-[70vh] pr-4">
-              {filteredComponents.map((component, index) => (
-                <div 
-                  key={index} 
-                  className={`mb-3 border rounded-md p-3 cursor-pointer transition-colors 
-                    ${selectedComponent?.name === component.name 
-                      ? 'border-[#00BFFF] bg-blue-50'
-                      : 'hover:border-gray-300'}`}
-                  onClick={() => handleComponentSelect(component)}
+      )}
+      
+      {categories.map(category => {
+        const categoryComponents = componentsByCategory[category];
+        const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1) + 's';
+        
+        return (
+          <div key={category} className="space-y-3">
+            <h3 className="text-lg font-medium">{capitalizedCategory} ({categoryComponents.length})</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {categoryComponents.map((component, index) => (
+                <Link
+                  key={`${category}-${component.name}-${index}`}
+                  href={`/debug-tools/ui-components?component=${encodeURIComponent(component.path)}`}
+                  className="px-4 py-3 border border-gray-200 rounded-md hover:border-blue-300 hover:bg-blue-50 transition-colors"
                 >
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">{component.name}</h3>
-                    <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded">
-                      {component.category}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 truncate" title={component.path}>{component.path}</p>
-                </div>
+                  <div className="font-medium">{component.name}</div>
+                  <div className="text-xs text-gray-500 truncate">{component.path}</div>
+                </Link>
               ))}
             </div>
           </div>
-          
-          {/* Component Preview */}
-          <div className="md:col-span-7 lg:col-span-8">
-            {selectedComponent ? (
-              <ComponentPreview 
-                component={selectedComponent} 
-                onClose={handleClosePreview}
-              />
-            ) : (
-              <div className="border rounded-md p-8 flex flex-col items-center justify-center h-64 bg-gray-50 text-gray-400">
-                <Eye className="w-8 h-8 mb-3" />
-                <p>Select a component to preview</p>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredComponents.map((component, index) => (
-            <Card key={index} className="p-4 hover:shadow-md transition-shadow duration-200">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">{component.name}</h3>
-                <Button
-                  onClick={() => handleComponentSelect(component)}
-                  className="text-xs bg-white border hover:bg-gray-50 text-gray-700 flex items-center py-1 px-2 h-auto"
-                >
-                  <Eye className="w-3 h-3 mr-1" />
-                  Preview
-                </Button>
-              </div>
-              <p className="text-sm text-gray-500 truncate" title={component.path}>{component.path}</p>
-              <div className="mt-2 flex gap-2">
-                <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded">
-                  {component.category}
-                </span>
-                {component.exports && component.exports.length > 0 && (
-                  <span className="inline-block bg-blue-50 text-xs px-2 py-1 rounded text-blue-700">
-                    {component.exports.length} exports
-                  </span>
-                )}
-              </div>
-              {component.description && (
-                <p className="mt-2 text-sm text-gray-600">{component.description}</p>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
+        );
+      })}
       
-      {/* Bottom Preview Panel for Selected Component */}
-      {selectedComponent && viewMode === 'grid' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-50">
-          <button 
-            onClick={handleClosePreview}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 z-10"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium">{selectedComponent.name}</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ComponentPreview component={selectedComponent} />
-          </div>
-        </div>
-      )}
+      <div className="p-4 bg-gray-50 border border-gray-200 rounded-md text-sm">
+        <p>
+          Click on any component tile to see its preview. All components follow the standardized UI component
+          architecture patterns and are automatically discovered from the codebase.
+        </p>
+      </div>
     </div>
   );
 } 

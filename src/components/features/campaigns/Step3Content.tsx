@@ -12,8 +12,7 @@ import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { _LoadingSpinner } from '@/components/ui/loading-spinner';
 import { WizardSkeleton } from "@/components/ui/loading-skeleton";
 import { toast } from "react-hot-toast";
-import { Icon } from '@/components/ui/atoms/icons'
-import { Tooltip } from '@/components/ui/tooltip';
+import { Tooltip } from "@/components/ui/atoms/tooltip";
 import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 
 // =============================================================================
@@ -261,7 +260,7 @@ function FormContent() {
                 {/* Demographics Section */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 font-work-sans">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center font-sora">
-                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faUserGroupLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Demographics
                   </h2>
                   
@@ -289,7 +288,7 @@ function FormContent() {
                       }} />
 
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none font-work-sans">
-                            <Icon name="faMap" className="h-5 w-5 text-[var(--secondary-color)] font-work-sans" solid={false} />
+                            <Icon iconId="faMapLight" className="h-5 w-5 text-[var(--secondary-color)] font-work-sans"  />
                           </div>
 
                           <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center font-work-sans" onClick={() => {
@@ -302,7 +301,7 @@ function FormContent() {
                       }}>
 
                             <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors font-work-sans">
-                              <Icon name="faPlus" className="h-3 w-3 text-white font-work-sans" solid={false} />
+                              <Icon iconId="faPlusLight" className="h-3 w-3 text-white font-work-sans"  />
                             </div>
                           </button>
                         </div>
@@ -320,8 +319,8 @@ function FormContent() {
                             setFieldValue('location', newLocations);
                           }}>
 
-                                  <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
-                                  <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
+                                  <Icon iconId="faTrashCanLight" className="w-4 h-4 group-hover:hidden"  />
+                                  <Icon iconId="faTrashCanSolid" className="w-4 h-4 hidden group-hover:block"  />
                                 </button>
                               </span>)}
                           </div>}
@@ -476,13 +475,13 @@ function FormContent() {
                 {/* Screening Questions */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 font-work-sans">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center font-sora">
-                    <Icon name="faCircleQuestion" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faCircleQuestionLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Screening Questions
                   </h2>
                   
                   <div className="relative mb-4 font-work-sans">
                     <div className="flex items-center font-work-sans">
-                      <Icon name="faSearch" className="h-5 w-5 text-[var(--secondary-color)] absolute left-3 font-work-sans" solid={false} />
+                      <Icon iconId="faMagnifyingGlassLight" className="h-5 w-5 text-[var(--secondary-color)] absolute left-3 font-work-sans"  />
                       <input type="text" id="screeningQueryInput" placeholder="Search Screening Questions" className="w-full p-2.5 pl-10 pr-10 border border-[var(--divider-color)] rounded-md font-work-sans" onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -505,7 +504,7 @@ function FormContent() {
                   }}>
 
                         <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors font-work-sans">
-                          <Icon name="faPlus" className="h-3 w-3 text-white font-work-sans" solid={true} />
+                          <Icon iconId="faPlusSolid" className="h-3 w-3 text-white font-work-sans"  />
                         </div>
                       </button>
                     </div>
@@ -543,8 +542,8 @@ function FormContent() {
                       setFieldValue('screeningQuestions', newQuestions);
                     }}>
 
-                            <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
-                            <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
+                            <Icon iconId="faTrashCanLight" className="w-4 h-4 group-hover:hidden"  />
+                            <Icon iconId="faTrashCanSolid" className="w-4 h-4 hidden group-hover:block"  />
                           </button>
                         </div>)}
                     </div>}
@@ -553,7 +552,7 @@ function FormContent() {
                 {/* Languages */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 font-work-sans">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center font-sora">
-                    <Icon name="faGlobe" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faGlobeLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Languages
                   </h2>
                   
@@ -588,8 +587,8 @@ function FormContent() {
                           setFieldValue('languages', newLanguages);
                         }}>
 
-                                <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
-                                <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
+                                <Icon iconId="faTrashCanLight" className="w-4 h-4 group-hover:hidden"  />
+                                <Icon iconId="faTrashCanSolid" className="w-4 h-4 hidden group-hover:block"  />
                               </button>
                             </span>)}
                         </div>
@@ -602,11 +601,11 @@ function FormContent() {
                   <div className="flex justify-between items-center cursor-pointer font-work-sans" onClick={() => setShowAdvanced(!showAdvanced)}>
 
                     <h2 className="text-lg font-semibold text-gray-900 flex items-center font-sora">
-                      <Icon name="faFilter" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                      <Icon iconId="faFilterLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                       Advanced Targeting
                     </h2>
                     <div className="text-[var(--accent-color)] hover:text-[var(--interactive-color)] font-work-sans">
-                      <Icon name="faChevronRight" className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`} solid={false} />
+                      <Icon iconId="faChevronRightLight" className={`h-5 w-5 transform ${showAdvanced ? 'rotate-90' : ''} transition-transform`}  />
                     </div>
                   </div>
                   
@@ -649,7 +648,7 @@ function FormContent() {
                         
                         <div className="relative mb-6 font-work-sans">
                           <div className="flex items-center font-work-sans">
-                            <Icon name="faSearch" className="h-5 w-5 text-[var(--secondary-color)] absolute left-3 font-work-sans" solid={false} />
+                            <Icon iconId="faMagnifyingGlassLight" className="h-5 w-5 text-[var(--secondary-color)] absolute left-3 font-work-sans"  />
                             <input type="text" id="jobTitleInput" placeholder="Enter job titles (press Enter to add)" className="w-full p-2.5 pl-10 pr-10 border border-[var(--divider-color)] rounded-md focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans" onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -672,7 +671,7 @@ function FormContent() {
                       }}>
 
                               <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors font-work-sans">
-                                <Icon name="faPlus" className="h-3 w-3 text-white font-work-sans" solid={false} />
+                                <Icon iconId="faPlusLight" className="h-3 w-3 text-white font-work-sans"  />
                               </div>
                             </button>
                           </div>
@@ -693,8 +692,8 @@ function FormContent() {
                             setFieldValue('jobTitles', newJobTitles);
                           }}>
 
-                  <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
-                  <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
+                  <Icon iconId="faTrashCanLight" className="w-4 h-4 group-hover:hidden"  />
+                  <Icon iconId="faTrashCanSolid" className="w-4 h-4 hidden group-hover:block"  />
                 </button>
                                 </span>)}
                             </div>}
@@ -708,7 +707,7 @@ function FormContent() {
                             Income Level
                           </label>
                           <div className="group relative font-work-sans">
-                            <Icon name="faCircleInfo" className="h-5 w-5 text-gray-400 cursor-help font-work-sans" solid={false} />
+                            <Icon iconId="faCircleInfoLight" className="h-5 w-5 text-gray-400 cursor-help font-work-sans"  />
                             <div className="absolute right-0 bottom-6 w-64 bg-white shadow-lg rounded-md p-2 text-xs text-gray-700 hidden group-hover:block border border-gray-200 font-work-sans">
                               Set the minimum income level for your target audience. This helps narrow down your demographic to users with specific purchasing power.
                             </div>
@@ -770,7 +769,7 @@ function FormContent() {
                 {/* Competitors */}
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 font-work-sans">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2 flex items-center font-sora">
-                    <Icon name="faBuilding" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faBuildingLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Competitors to Monitor
                   </h2>
                   <p className="text-gray-600 mb-4 font-work-sans">
@@ -796,7 +795,7 @@ function FormContent() {
                   }} />
 
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none font-work-sans">
-                        <Icon name="faSearch" className="h-5 w-5 text-[var(--secondary-color)] font-work-sans" solid={false} />
+                        <Icon iconId="faMagnifyingGlassLight" className="h-5 w-5 text-[var(--secondary-color)] font-work-sans"  />
                       </div>
                       <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center font-work-sans" onClick={() => {
                     const input = document.getElementById('competitorInput') as HTMLInputElement;
@@ -811,7 +810,7 @@ function FormContent() {
                   }}>
 
                         <div className="bg-[var(--accent-color)] rounded-full p-1.5 flex items-center justify-center w-6 h-6 hover:bg-[var(--interactive-color)] transition-colors font-work-sans">
-                          <Icon name="faPlus" className="h-3 w-3 text-white font-work-sans" solid={false} />
+                          <Icon iconId="faPlusLight" className="h-3 w-3 text-white font-work-sans"  />
                         </div>
                       </button>
                     </div>
@@ -829,8 +828,8 @@ function FormContent() {
                         setFieldValue('competitors', updatedCompetitors);
                       }}>
 
-                              <Icon name="faTrashCan" className="w-4 h-4 group-hover:hidden" solid={false} />
-                              <Icon name="faTrashCan" className="w-4 h-4 hidden group-hover:block" solid={true} />
+                              <Icon iconId="faTrashCanLight" className="w-4 h-4 group-hover:hidden"  />
+                              <Icon iconId="faTrashCanSolid" className="w-4 h-4 hidden group-hover:block"  />
                             </button>
                           </span>)}
                       </div>}

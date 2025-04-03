@@ -1,10 +1,11 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.216Z
 import React from 'react';
 import MarketplaceListProps from './influencers/index';
 import LoadingSpinner from '../../ui/spinner-examples';
 import { Influencer } from '@/types/influencer';
 import InfluencerCard from '@/src/components/features/campaigns/influencers/InfluencerCard';
 import { Button } from '@/components/ui/atoms/button/Button'
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 
 export interface MarketplaceListProps {
@@ -38,11 +39,11 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   if (error) {
     return (
       <div className="text-center py-10">
-        <Icon name="faCircleExclamation" className="text-4xl text-red-500 mb-3" />
+        <Icon iconId="faCircleExclamationLight" className="text-4xl text-red-500 mb-3" />
         <h3 className="text-xl font-bold mb-2">Error Loading Influencers</h3>
         <p className="text-gray-600 mb-4">{error}</p>
         <Button>
-          <Icon name="faRotate" className="mr-2" />
+          <Icon iconId="faRotateLight" className="mr-2" />
           Try Again
         </Button>
       </div>
@@ -52,11 +53,11 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   if (!influencers.length) {
     return (
       <div className="text-center py-10">
-        <Icon name="faSearch" className="text-4xl text-gray-400 mb-3" />
+        <Icon iconId="faMagnifyingGlassLight" className="text-4xl text-gray-400 mb-3" />
         <h3 className="text-xl font-bold mb-2">No Results Found</h3>
         <p className="text-gray-600 mb-4">{emptyStateMessage}</p>
         <Button>
-          <Icon name="faFilterSlash" className="mr-2" />
+          <Icon iconId="faFilterSlashLight" className="mr-2" />
           Clear Filters
         </Button>
       </div>

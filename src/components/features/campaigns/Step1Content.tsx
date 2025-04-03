@@ -1,3 +1,4 @@
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.219Z
 "use client";
 
 import React, { useState, useEffect, Suspense, useMemo, useRef, useCallback } from "react";
@@ -13,7 +14,7 @@ import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { toast } from "react-hot-toast";
 import { WizardSkeleton, FormSkeleton } from "@/components/ui/loading-skeleton";
 import Image from "next/image";
-import { Icon } from '@/components/ui/atoms/icons'
+import { Icon } from '@/components/ui/atoms/icon'
 import { EnumTransformers } from '@/utils/enum-transformers';
 // Import the payload sanitizer utilities
 import { sanitizeDraftPayload } from '@/utils/payload-sanitizer';
@@ -185,11 +186,11 @@ const StyledField = ({
           </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
         {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
         {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
-            <Icon name="faCalendar" className="w-5 h-5 font-work-sans" solid={false} />
+            <Icon iconId="faCalendarLight" className="w-5 h-5 font-work-sans"  />
           </div>}
         {/* Add chevron only for select elements */}
         {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container font-work-sans">
-            <Icon name="faChevronDown" className="w-5 h-5 font-work-sans" solid={false} />
+            <Icon iconId="faChevronDownLight" className="w-5 h-5 font-work-sans"  />
           </div>}
       </div>
       <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
@@ -432,7 +433,7 @@ const DateRangePicker = ({
         
         {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded font-work-sans">
             <div className="flex items-center font-work-sans">
-              <Icon name="faCircleInfo" className="w-4 h-4 mr-1 text-[var(--accent-color)] font-work-sans" solid={false} />
+              <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-1 text-[var(--accent-color)] font-work-sans"  />
               <span className="font-work-sans">Campaign Duration: {calculateDuration(startDate, endDate)}</span>
             </div>
           </div>}
@@ -643,7 +644,7 @@ const InfluencerEntry = ({
       <div className="flex justify-between items-center mb-3 font-work-sans">
         <h4 className="text-[var(--primary-color)] font-medium font-sora">Influencer #{index + 1}</h4>
         {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200 font-work-sans">
-            <Icon name="faClose" className="h-5 w-5" solid={false} />
+            <Icon iconId="faCloseLight" className="h-5 w-5"  />
           </button>}
       </div>
       
@@ -770,7 +771,7 @@ const InfluencerPreview = ({
   return <div className="bg-blue-50 rounded-md p-3 font-work-sans">
       <div className="flex items-start font-work-sans">
         {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center font-work-sans">
-            <Icon name="faUserLight" className="h-6 w-6 text-gray-500 font-work-sans" solid={false} />
+            <Icon iconId="faUserLight" className="h-6 w-6 text-gray-500 font-work-sans"  />
           </div>}
         <div className="font-work-sans">
           <div className="flex items-center font-work-sans">
@@ -778,7 +779,7 @@ const InfluencerPreview = ({
               {influencerData.displayName || handle}
             </p>
             {influencerData.verified && <span className="ml-1 text-blue-500 font-work-sans">
-                <Icon name="faCircleCheck" className="h-4 w-4" solid={true} />
+                <Icon iconId="faCircleCheckSolid" className="h-4 w-4"  />
               </span>}
           </div>
           <p className="text-sm text-gray-600 flex items-center font-work-sans">
@@ -1382,7 +1383,7 @@ function FormContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 font-work-sans">
                     <DateRangePicker startFieldName="startDate" endFieldName="endDate" label="Campaign Duration" />
 
-                    <StyledField label="Time Zone" name="timeZone" as="select" required icon={<Icon name="faGlobe" className="w-5 h-5" solid={false} />}>
+                    <StyledField label="Time Zone" name="timeZone" as="select" required icon={<Icon iconId="faGlobeLight" className="w-5 h-5"  />}>
 
                       <option value="">Select time zone</option>
                       <option value="UTC">UTC (Coordinated Universal Time)</option>
@@ -1404,19 +1405,19 @@ function FormContent() {
                 {/* Primary Contact */}
                 <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faUserLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Primary Contact
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                    <StyledField label="First Name" name="primaryContact.firstName" placeholder="Enter first name" required icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="First Name" name="primaryContact.firstName" placeholder="Enter first name" required icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
 
-                    <StyledField label="Last Name" name="primaryContact.surname" placeholder="Enter last name" required icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Last Name" name="primaryContact.surname" placeholder="Enter last name" required icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
 
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
-                    <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5"  />} />
 
-                    <StyledField label="Position" name="primaryContact.position" as="select" required icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
+                    <StyledField label="Position" name="primaryContact.position" as="select" required icon={<Icon iconId="faBuildingLight" className="w-5 h-5"  />}>
 
                       <option value="">Select Position</option>
                       <option value={Position.Manager}>{Position.Manager}</option>
@@ -1429,19 +1430,19 @@ function FormContent() {
                 {/* Secondary Contact */}
                 <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faUserGroup" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faUserGroupLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                    <StyledField label="First Name" name="secondaryContact.firstName" placeholder="Enter first name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="First Name" name="secondaryContact.firstName" placeholder="Enter first name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
 
-                    <StyledField label="Last Name" name="secondaryContact.surname" placeholder="Enter last name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Last Name" name="secondaryContact.surname" placeholder="Enter last name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
 
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
-                    <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5"  />} />
 
-                    <StyledField label="Position" name="secondaryContact.position" as="select" icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
+                    <StyledField label="Position" name="secondaryContact.position" as="select" icon={<Icon iconId="faBuildingLight" className="w-5 h-5"  />}>
 
                       <option value="">Select Position</option>
                       <option value={Position.Manager}>{Position.Manager}</option>
@@ -1455,7 +1456,7 @@ function FormContent() {
                 <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <div className="flex justify-between items-center mb-5 font-work-sans">
                     <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] flex items-center">
-                      <Icon name="faUser" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                      <Icon iconId="faUserLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                       Additional Contacts <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
                     </h2>
                     <button type="button" onClick={() => {
@@ -1467,7 +1468,7 @@ function FormContent() {
                   }];
                   setFieldValue('additionalContacts', contacts);
                 }} className="flex items-center text-sm font-medium bg-[var(--background-color)] border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
-                      <Icon name="faPlus" className="w-5 h-5 mr-1" solid={false} />
+                      <Icon iconId="faPlusLight" className="w-5 h-5 mr-1"  />
                       Add Contact
                     </button>
                   </div>
@@ -1479,21 +1480,21 @@ function FormContent() {
                   setFieldValue('additionalContacts', contacts);
                 }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200 font-work-sans" aria-label="Remove contact">
 
-                          <Icon name="faClose" className="h-5 w-5" solid={false} />
+                          <Icon iconId="faCloseLight" className="h-5 w-5"  />
                         </button>
 
                         <h3 className="text-md font-medium text-[var(--primary-color)] mb-3 font-sora">Contact {index + 3}</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                          <StyledField label="First Name" name={`additionalContacts.${index}.firstName`} placeholder="Enter first name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
+                          <StyledField label="First Name" name={`additionalContacts.${index}.firstName`} placeholder="Enter first name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
 
-                          <StyledField label="Last Name" name={`additionalContacts.${index}.surname`} placeholder="Enter last name" icon={<Icon name="faUser" className="w-5 h-5" solid={false} />} />
+                          <StyledField label="Last Name" name={`additionalContacts.${index}.surname`} placeholder="Enter last name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
 
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
-                          <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon name="faEnvelope" className="w-5 h-5" solid={false} />} />
+                          <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5"  />} />
 
-                          <StyledField label="Position" name={`additionalContacts.${index}.position`} as="select" icon={<Icon name="faBuilding" className="w-5 h-5" solid={false} />}>
+                          <StyledField label="Position" name={`additionalContacts.${index}.position`} as="select" icon={<Icon iconId="faBuildingLight" className="w-5 h-5"  />}>
 
                             <option value="">Select Position</option>
                             <option value={Position.Manager}>{Position.Manager}</option>
@@ -1502,7 +1503,7 @@ function FormContent() {
                           </StyledField>
                         </div>
                       </div>) : <div className="text-center py-8 border border-dashed border-[var(--divider-color)] rounded-lg bg-gray-50 font-work-sans">
-                      <Icon name="faUser" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70 font-work-sans" solid={false} />
+                      <Icon iconId="faUserLight" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70 font-work-sans"  />
                       <p className="mt-2 text-[var(--primary-color)] font-work-sans">No additional contacts added yet.</p>
                       <p className="text-sm text-[var(--secondary-color)] font-work-sans">Click "Add Contact" to include more team members.</p>
                     </div>}
@@ -1511,7 +1512,7 @@ function FormContent() {
                 {/* Influencers */}
                 <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faStar" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faStarLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Influencer Details
                   </h2>
                   <div className="mb-4 font-work-sans">
@@ -1535,7 +1536,7 @@ function FormContent() {
                       handle: ''
                     })} className="mt-3 flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)] font-work-sans">
 
-                            <Icon name="faPlus" className="h-5 w-5 mr-2" solid={false} />
+                            <Icon iconId="faPlusLight" className="h-5 w-5 mr-2"  />
                             Add Another Influencer
                           </button>
                         </div>}
@@ -1546,12 +1547,12 @@ function FormContent() {
                 {/* Budget Section */}
                 <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
                   <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon name="faMoneyBill" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" solid={false} />
+                    <Icon iconId="faMoneyBillLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
                     Budget
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-work-sans">
                     <div className="font-work-sans">
-                      <StyledField label="Currency" name="currency" as="select" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />}>
+                      <StyledField label="Currency" name="currency" as="select" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5"  />}>
 
                         <option value="">Select currency</option>
                         <option value={Currency.GBP}>GBP (£)</option>
@@ -1567,10 +1568,10 @@ function FormContent() {
                       </Field>
                     </div>
                     
-                    <StyledField label="Total Campaign Budget" name="totalBudget" type="number" placeholder="5000" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Total Campaign Budget" name="totalBudget" type="number" placeholder="5000" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5"  />} />
 
                     
-                    <StyledField label="Social Media Budget" name="socialMediaBudget" type="number" placeholder="3000" required icon={<Icon name="faMoneyBill" className="w-5 h-5" solid={false} />} />
+                    <StyledField label="Social Media Budget" name="socialMediaBudget" type="number" placeholder="3000" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5"  />} />
 
                   </div>
                 </div>

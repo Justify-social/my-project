@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/atoms/card/Card'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/organisms/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs/tabs'
 import { Badge } from '@/components/ui/atoms/badge/badge'
 import { Button } from '@/components/ui/atoms/button/Button'
@@ -10,22 +10,7 @@ import { Slider } from '@/components/ui/atoms/slider/slider';
 import { Switch } from '@/components/ui/atoms/switch/Switch'
 import { Select } from '@/components/ui/atoms/select/Select'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/molecules/feedback/alert'
-import { 
-  Search, 
-  Image, 
-  Layers, 
-  Copy, 
-  Check, 
-  Palette, 
-  Settings, 
-  AlertTriangle, 
-  FileCode, 
-  BarChart4,
-  Download,
-  Sparkles,
-  Loader2,
-  RefreshCw
-} from 'lucide-react';
+import { Icon } from '@/components/ui/atoms/icon';
 import { iconApi } from '../../api/icon-api';
 import { IconErrorBoundary } from './IconErrorBoundary';
 
@@ -45,14 +30,15 @@ const debug = (...args: any[]) => {
 export interface IconMetadata {
   id: string;
   name: string;
-  path: string;
-  category: string;
-  weight: string;
-  tags: string[];
-  viewBox: string;
-  width: number;
-  height: number;
   svgContent: string;
+  category?: string;
+  tags?: string[];
+  weight?: string;
+  version?: string;
+  path?: string;
+  viewBox?: string;
+  width?: number;
+  height?: number;
   usageCount?: number;
 }
 
@@ -71,7 +57,6 @@ interface IconCategory {
  */
 interface SearchFilters {
   category: string | null;
-  weight: string | null;
   minUsage: number;
 }
 
@@ -106,8 +91,7 @@ function IconLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({
     category: null,
-    weight: null,
-    minUsage: 0
+    minUsage: 0,
   });
   
   // State for selected icon and preview options
@@ -262,11 +246,6 @@ function IconLibrary() {
       filtered = filtered.filter(icon => icon.category === filters.category);
     }
     
-    // Apply weight filter with null checks
-    if (filters.weight) {
-      filtered = filtered.filter(icon => icon.weight === filters.weight);
-    }
-    
     // Apply usage count filter with null checks
     if (filters.minUsage > 0) {
       filtered = filtered.filter(icon => (icon.usageCount || 0) >= filters.minUsage);
@@ -364,77 +343,99 @@ function IconLibrary() {
 />`;
   };
   
+  // Add a helper function to format icon names
+  const formatIconName = (name: string): string => {
+    // Remove 'fa' prefix if it exists
+    let formattedName = name.startsWith('fa') ? name.substring(2) : name;
+    
+    // Convert camelCase to words with spaces
+    formattedName = formattedName.replace(/([A-Z])/g, ' $1');
+    
+    // Capitalize first letter
+    formattedName = formattedName.charAt(0).toUpperCase() + formattedName.slice(1);
+    
+    return formattedName.trim();
+  };
+  
   // Safely render SVG content with React
   const SafeSvgRenderer = ({ 
     svgContent, 
     size = 24, 
     color = 'currentColor',
-    className = '' 
+    className = '',
+    iconHoverEffect = false
   }: { 
     svgContent: string; 
     size?: number; 
     color?: string;
     className?: string;
+    iconHoverEffect?: boolean;
   }) => {
-    // Return empty div if no content
-    if (!svgContent || typeof svgContent !== 'string') {
+    // Create sanitized and processed SVG
+    const processedSvg = useMemo(() => {
+      if (!svgContent) return null;
+
+      try {
+        // Set default size if viewBox is not present
+        let cleanSvg = svgContent;
+
+        // Replace the fill attribute with the color prop value, or remove it to use currentColor
+        cleanSvg = cleanSvg.replace(/fill="[^"]*"/g, `fill="${color}"`);
+        
+        // Set explicit width and height attributes
+        cleanSvg = cleanSvg.replace(/<svg([^>]*)>/, `<svg$1 width="${size}" height="${size}">`);
+        
+        // Add hover effect data attribute if requested
+        if (iconHoverEffect) {
+          // Prepare both light and solid versions for hover effect
+          const lightVersion = cleanSvg;
+          const solidVersion = cleanSvg.replace(/weight="light"/g, 'weight="solid"');
+          
+          return {
+            light: lightVersion,
+            solid: solidVersion,
+            __html: lightVersion
+          };
+        }
+        
+        return { __html: cleanSvg };
+      } catch (error) {
+        console.error('Error processing SVG:', error);
+        return { __html: `<svg width="${size}" height="${size}" viewBox="0 0 24 24"><rect width="24" height="24" fill="red" opacity="0.2" /><text x="50%" y="50%" font-size="8" text-anchor="middle" fill="red">Error</text></svg>` };
+      }
+    }, [svgContent, size, color, iconHoverEffect]);
+
+    // If there's no SVG, show a placeholder
+    if (!processedSvg) {
       return (
         <div 
-          className={`flex items-center justify-center ${className}`}
+          className={`inline-flex items-center justify-center bg-gray-100 text-gray-400 rounded ${className}`} 
           style={{ width: size, height: size }}
         >
-          <div 
-            className="w-full h-full bg-gray-200 rounded-sm"
-            style={{ color }}
-          />
+          ?
         </div>
       );
     }
 
-    // If content doesn't contain SVG tag
-    if (!svgContent.includes('<svg')) {
+    // Handle hover effect with CSS
+    if (iconHoverEffect && processedSvg.light && processedSvg.solid) {
       return (
-        <div 
-          className={`flex items-center justify-center ${className}`}
-          style={{ width: size, height: size, color }}
-        >
-          <div className="w-3/4 h-3/4 border-2 border-current rounded-sm" />
+        <div className={`relative inline-block ${className}`}>
+          {/* Light version (default) */}
+          <div className="group-hover:opacity-0 transition-opacity duration-200">
+            <div dangerouslySetInnerHTML={{ __html: processedSvg.light }} />
+          </div>
+          
+          {/* Solid version (on hover) */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div dangerouslySetInnerHTML={{ __html: processedSvg.solid }} />
+          </div>
         </div>
       );
     }
 
-    try {
-      // Apply dynamic attributes (size and color)
-      let processedSvg = svgContent
-        // Set explicit width and height
-        .replace(/width=["'][^"']*["']/g, `width="${size}"`)
-        .replace(/height=["'][^"']*["']/g, `height="${size}"`)
-        // Add class if missing
-        .replace('<svg', `<svg class="${className}"`);
-      
-      // Add color if using currentColor
-      if (color !== 'currentColor' && processedSvg.includes('currentColor')) {
-        processedSvg = processedSvg.replace(/currentColor/g, color);
-      }
-
-      return (
-        <div
-          className={`inline-block ${className}`}
-          style={{ width: size, height: size, color }}
-          dangerouslySetInnerHTML={{ __html: processedSvg }}
-        />
-      );
-    } catch (error) {
-      console.error('Error rendering SVG:', error);
-      return (
-        <div 
-          className={`flex items-center justify-center ${className}`}
-          style={{ width: size, height: size, color }}
-        >
-          <div className="w-3/4 h-3/4 border-2 border-current diamond" />
-        </div>
-      );
-    }
+    // Regular rendering without hover effect
+    return <div className={className} dangerouslySetInnerHTML={processedSvg} />;
   };
   
   // Render loading state
@@ -442,7 +443,7 @@ function IconLibrary() {
     return (
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <Icon iconId="faSpinnerLight"  className="h-8 w-8 animate-spin mx-auto mb-4" />
           <div>Loading icon library...</div>
         </CardContent>
       </Card>
@@ -453,7 +454,7 @@ function IconLibrary() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
+        <Icon iconId="faTriangleExclamationLight"  className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           <div className="mb-4">{error}</div>
@@ -462,7 +463,7 @@ function IconLibrary() {
             size="sm"
             onClick={handleRetry}
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <Icon iconId="faRotateLight"  className="mr-2 h-4 w-4" />
             Retry
           </Button>
         </AlertDescription>
@@ -474,7 +475,7 @@ function IconLibrary() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Image className="mr-2 h-5 w-5" />
+          <Icon iconId="faQuestionLight"  className="mr-2 h-5 w-5" />
           Icon Library
         </CardTitle>
         <CardDescription>
@@ -486,21 +487,21 @@ function IconLibrary() {
         <div className="px-6 border-b">
           <TabsList className="w-full">
             <TabsTrigger value="browse" className="flex-1">
-              <Layers className="mr-2 h-4 w-4" />
+              <Icon iconId="faQuestionLight"  className="mr-2 h-4 w-4" />
               Browse
             </TabsTrigger>
             {selectedIcon && (
               <TabsTrigger value="preview" className="flex-1">
-                <Image className="mr-2 h-4 w-4" />
+                <Icon iconId="faQuestionLight"  className="mr-2 h-4 w-4" />
                 Preview
               </TabsTrigger>
             )}
             <TabsTrigger value="analytics" className="flex-1">
-              <BarChart4 className="mr-2 h-4 w-4" />
+              <Icon iconId="faQuestionLight"  className="mr-2 h-4 w-4" />
               Analytics
             </TabsTrigger>
             <TabsTrigger value="optimization" className="flex-1">
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Icon iconId="faQuestionLight"  className="mr-2 h-4 w-4" />
               Optimization
             </TabsTrigger>
           </TabsList>
@@ -511,7 +512,7 @@ function IconLibrary() {
           <div className="p-6 border-b">
             <div className="grid gap-4 md:grid-cols-[1fr_2fr] lg:grid-cols-[250px_1fr]">
               {/* Filters */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <h3 className="mb-2 text-sm font-medium">Categories</h3>
                   <div className="space-y-1">
@@ -522,51 +523,59 @@ function IconLibrary() {
                       onClick={() => setFilters({ ...filters, category: null })}
                     >
                       All Categories
-                      <Badge variant={filters.category === null ? "secondary" : "outline"} className="ml-auto">
-                        {icons.length}
+                    </Button>
+                    
+                    {/* Brand Icons */}
+                    <Button
+                      variant={filters.category === 'brands' ? "default" : "outline"}
+                      size="sm"
+                      className={`w-full justify-start font-medium ${filters.category === 'brands' ? "bg-primary text-white hover:bg-primary/90" : ""}`}
+                      onClick={() => setFilters({ ...filters, category: 'brands' })}
+                    >
+                      Brand
+                      <Badge variant={filters.category === 'brands' ? "secondary" : "outline"} className="ml-auto">
+                        {icons.filter(icon => icon.category === 'brands').length}
                       </Badge>
                     </Button>
                     
-                    {categories.map(category => (
-                      <Button
-                        key={category.id}
-                        variant={filters.category === category.id ? "default" : "outline"}
-                        size="sm"
-                        className={`w-full justify-start font-medium ${filters.category === category.id ? "bg-primary text-white hover:bg-primary/90" : ""}`}
-                        onClick={() => setFilters({ ...filters, category: category.id })}
-                      >
-                        {category.name}
-                        <Badge variant={filters.category === category.id ? "secondary" : "outline"} className="ml-auto">
-                          {category.count}
-                        </Badge>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="mb-2 text-sm font-medium">Weights</h3>
-                  <div className="space-y-1">
+                    {/* App Icons */}
                     <Button
-                      variant={filters.weight === null ? "default" : "outline"}
+                      variant={filters.category === 'app' ? "default" : "outline"}
                       size="sm"
-                      className={`w-full justify-start font-medium ${filters.weight === null ? "bg-primary text-white hover:bg-primary/90" : ""}`}
-                      onClick={() => setFilters({ ...filters, weight: null })}
+                      className={`w-full justify-start font-medium ${filters.category === 'app' ? "bg-primary text-white hover:bg-primary/90" : ""}`}
+                      onClick={() => setFilters({ ...filters, category: 'app' })}
                     >
-                      All Weights
+                      App
+                      <Badge variant={filters.category === 'app' ? "secondary" : "outline"} className="ml-auto">
+                        {icons.filter(icon => icon.category === 'app').length}
+                      </Badge>
                     </Button>
                     
-                    {weights.map(weight => (
-                      <Button
-                        key={weight}
-                        variant={filters.weight === weight ? "default" : "outline"}
-                        size="sm"
-                        className={`w-full justify-start font-medium ${filters.weight === weight ? "bg-primary text-white hover:bg-primary/90" : ""}`}
-                        onClick={() => setFilters({ ...filters, weight: weight })}
-                      >
-                        {weight.charAt(0).toUpperCase() + weight.slice(1)}
-                      </Button>
-                    ))}
+                    {/* KPI Icons */}
+                    <Button
+                      variant={filters.category === 'kpis' ? "default" : "outline"}
+                      size="sm"
+                      className={`w-full justify-start font-medium ${filters.category === 'kpis' ? "bg-primary text-white hover:bg-primary/90" : ""}`}
+                      onClick={() => setFilters({ ...filters, category: 'kpis' })}
+                    >
+                      KPIs
+                      <Badge variant={filters.category === 'kpis' ? "secondary" : "outline"} className="ml-auto">
+                        {icons.filter(icon => icon.category === 'kpis').length}
+                      </Badge>
+                    </Button>
+                    
+                    {/* Light/Solid Icons */}
+                    <Button
+                      variant={filters.category === 'light' || filters.category === 'solid' ? "default" : "outline"}
+                      size="sm"
+                      className={`w-full justify-start font-medium ${filters.category === 'light' || filters.category === 'solid' ? "bg-primary text-white hover:bg-primary/90" : ""}`}
+                      onClick={() => setFilters({ ...filters, category: 'light' })}
+                    >
+                      Icons
+                      <Badge variant={filters.category === 'light' || filters.category === 'solid' ? "secondary" : "outline"} className="ml-auto">
+                        {icons.filter(icon => icon.category === 'light' || icon.category === 'solid').length}
+                      </Badge>
+                    </Button>
                   </div>
                 </div>
                 
@@ -589,7 +598,7 @@ function IconLibrary() {
               {/* Search and Results */}
               <div className="space-y-4">
                 <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Icon iconId="faQuestionLight"  className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search icons by name or tags..."
                     className="pl-8"
@@ -612,19 +621,17 @@ function IconLibrary() {
                           onClick={() => handleSelectIcon(icon)}
                         >
                           <CardContent className="p-4 flex flex-col items-center justify-center">
-                            <div className="h-12 w-12 flex items-center justify-center mb-3 bg-slate-50 rounded-md p-2">
+                            <div className="h-12 w-12 flex items-center justify-center mb-3 bg-slate-50 rounded-md p-2 group">
                               <SafeSvgRenderer 
-                                svgContent={icon.svgContent} 
-                                size={32} 
-                                className="text-primary" 
+                                svgContent={icon.svgContent.replace(/weight="(.*?)"/, icon.category === 'light' || icon.category === 'solid' ? 'weight="light"' : 'weight="regular"')} 
+                                size={32}
+                                className="text-[#333333] group-hover:text-[#00BFFF] transition-colors duration-200"
+                                iconHoverEffect={true}
                               />
                             </div>
                             <div className="text-center">
                               <div className="text-sm font-medium truncate w-full">
-                                {icon.name}
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {icon.weight}
+                                {formatIconName(icon.name)}
                               </div>
                             </div>
                           </CardContent>
@@ -634,7 +641,7 @@ function IconLibrary() {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    <Image className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                    <Icon iconId="faQuestionLight"  className="h-12 w-12 mx-auto mb-4 opacity-30" />
                     <h3 className="text-lg font-medium mb-2">No Icons Found</h3>
                     <p>Try adjusting your search or filters</p>
                   </div>
@@ -746,7 +753,7 @@ function IconLibrary() {
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-base">
-                        <FileCode className="inline-block mr-2 h-4 w-4" />
+                        <Icon iconId="faQuestionLight"  className="inline-block mr-2 h-4 w-4" />
                         Code
                       </CardTitle>
                       <Button
@@ -757,12 +764,12 @@ function IconLibrary() {
                       >
                         {copied ? (
                           <>
-                            <Check className="mr-1 h-4 w-4" />
+                            <Icon iconId="faCheckLight"  className="mr-1 h-4 w-4" />
                             Copied
                           </>
                         ) : (
                           <>
-                            <Copy className="mr-1 h-4 w-4" />
+                            <Icon iconId="faQuestionLight"  className="mr-1 h-4 w-4" />
                             Copy
                           </>
                         )}
@@ -849,7 +856,7 @@ function IconLibrary() {
                       <div className="grid grid-cols-[100px_1fr]">
                         <span className="text-muted-foreground">Tags:</span>
                         <div className="flex flex-wrap gap-1">
-                          {selectedIcon.tags.map(tag => (
+                          {selectedIcon.tags?.map(tag => (
                             <Badge key={tag} variant="secondary" className="text-xs">
                               {tag}
                             </Badge>
@@ -863,7 +870,7 @@ function IconLibrary() {
             </div>
           ) : (
             <div className="p-6 text-center text-muted-foreground">
-              <Image className="h-12 w-12 mx-auto mb-4 opacity-30" />
+              <Icon iconId="faQuestionLight"  className="h-12 w-12 mx-auto mb-4 opacity-30" />
               <h3 className="text-lg font-medium mb-2">No Icon Selected</h3>
               <p>Select an icon from the browse tab to preview it</p>
             </div>
@@ -972,7 +979,7 @@ function IconLibrary() {
                 <CardContent>
                   <div className="space-y-4">
                     <Alert>
-                      <AlertTriangle className="h-4 w-4" />
+                      <Icon iconId="faTriangleExclamationLight"  className="h-4 w-4" />
                       <AlertTitle>Duplicate Icons</AlertTitle>
                       <AlertDescription>
                         <p>Found 5 icons with similar visual appearance that could be consolidated.</p>
@@ -983,7 +990,7 @@ function IconLibrary() {
                     </Alert>
                     
                     <Alert>
-                      <AlertTriangle className="h-4 w-4" />
+                      <Icon iconId="faTriangleExclamationLight"  className="h-4 w-4" />
                       <AlertTitle>Unused Icons</AlertTitle>
                       <AlertDescription>
                         <p>Found 12 icons that aren't currently used in the codebase.</p>
@@ -994,7 +1001,7 @@ function IconLibrary() {
                     </Alert>
                     
                     <Alert>
-                      <AlertTriangle className="h-4 w-4" />
+                      <Icon iconId="faTriangleExclamationLight"  className="h-4 w-4" />
                       <AlertTitle>SVG Optimization</AlertTitle>
                       <AlertDescription>
                         <p>8 icons could be optimized to reduce file size by approximately 15%.</p>
@@ -1044,7 +1051,7 @@ function IconLibrary() {
                     </div>
                     
                     <Button className="w-full">
-                      <Download className="mr-2 h-4 w-4" />
+                      <Icon iconId="faQuestionLight"  className="mr-2 h-4 w-4" />
                       Generate Optimization Report
                     </Button>
                   </div>
@@ -1070,7 +1077,7 @@ function IconLibrary() {
                         <span className="font-medium">Potential Impact:</span>
                         <div className="ml-2 flex">
                           {[1, 2, 3, 4, 5].map(i => (
-                            <Sparkles 
+                            <Icon iconId="faQuestionLight"  
                               key={`rec1-${i}`} 
                               className={`h-4 w-4 ${i <= 4 ? 'text-amber-500' : 'text-muted-foreground'}`} 
                             />
@@ -1088,7 +1095,7 @@ function IconLibrary() {
                         <span className="font-medium">Potential Impact:</span>
                         <div className="ml-2 flex">
                           {[1, 2, 3, 4, 5].map(i => (
-                            <Sparkles 
+                            <Icon iconId="faQuestionLight"  
                               key={`rec2-${i}`} 
                               className={`h-4 w-4 ${i <= 5 ? 'text-amber-500' : 'text-muted-foreground'}`} 
                             />
@@ -1106,7 +1113,7 @@ function IconLibrary() {
                         <span className="font-medium">Potential Impact:</span>
                         <div className="ml-2 flex">
                           {[1, 2, 3, 4, 5].map(i => (
-                            <Sparkles 
+                            <Icon iconId="faQuestionLight"  
                               key={`rec3-${i}`} 
                               className={`h-4 w-4 ${i <= 3 ? 'text-amber-500' : 'text-muted-foreground'}`} 
                             />
