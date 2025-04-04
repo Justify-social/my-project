@@ -14,7 +14,7 @@ import Image from 'next/image';
 import { Icon } from '@/components/ui/atoms/icon/Icon';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/atoms/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 import { Button } from "@/components/ui/atoms/button/Button";
 
 // Define a simple UI icon mapping for now until we can properly import UI_ICON_MAP

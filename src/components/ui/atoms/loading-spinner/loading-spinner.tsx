@@ -1,63 +1,77 @@
-'use client';
+"use client"
 
-import { Icon } from '@/components/ui/atoms/icon';
-import React from 'react';
-import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
-import { cn } from '@/lib/utils';
+import * as React from "react"
+import { IconAdapter } from "@/components/ui/atoms/icon/adapters";
+import { cn } from "@/lib/utils"
 
-export interface LoadingSpinnerProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  color?: 'default' | 'primary' | 'secondary' | 'muted';
+  withText?: boolean;
+  textPosition?: 'left' | 'right' | 'top' | 'bottom';
   label?: string;
-  className?: string;
-  labelClassName?: string;
-  center?: boolean;
 }
 
-const sizeClasses = {
-  xs: 'w-3 h-3',
-  sm: 'w-4 h-4',
-  md: 'w-5 h-5',
-  lg: 'w-6 h-6',
-  xl: 'w-8 h-8',
-};
+const sizeMap = {
+  xs: 'h-3 w-3',
+  sm: 'h-4 w-4',
+  md: 'h-6 w-6',
+  lg: 'h-8 w-8',
+  xl: 'h-10 w-10',
+  full: 'h-full w-full',
+}
 
-/**
- * LoadingSpinner Component
- * 
- * A versatile spinner component for loading states
- */
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = 'md',
-  label,
-  className,
-  labelClassName,
-  center = false,
-}) => {
-  const containerClasses = cn(
-    'flex items-center',
-    center && 'justify-center',
-    className
-  );
+const colorMap = {
+  default: 'text-foreground',
+  primary: 'text-primary',
+  secondary: 'text-secondary',
+  muted: 'text-muted-foreground',
+}
 
-  const spinnerClasses = cn(
-    'animate-spin text-primary',
-    sizeClasses[size]
-  );
+const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
+  ({ 
+    className, 
+    size = 'md', 
+    color = 'default',
+    withText = false,
+    textPosition = 'right',
+    label = "Loading...",
+    ...props 
+  }, ref) => {
+    return (
+      <div 
+        ref={ref}
+        className={cn(
+          "flex items-center gap-2",
+          textPosition === 'top' && "flex-col",
+          textPosition === 'bottom' && "flex-col-reverse",
+          textPosition === 'left' && "flex-row-reverse",
+          className
+        )}
+        {...props}
+      >
+        <IconAdapter 
+          iconId="faCircleNotchLight"
+          className={cn(
+            "animate-spin", 
+            sizeMap[size], 
+            colorMap[color]
+          )}
+        />
+        {(withText || label) && (
+          <span className={cn(
+            "text-sm", 
+            colorMap[color]
+          )}>
+            {label}
+          </span>
+        )}
+      </div>
+    )
+  }
+)
+LoadingSpinner.displayName = "LoadingSpinner"
 
-  const labelClasses = cn(
-    'ml-2 text-gray-700',
-    size === 'xs' && 'text-xs',
-    size === 'sm' && 'text-sm',
-    size === 'md' && 'text-base',
-    size === 'lg' && 'text-lg',
-    size === 'xl' && 'text-xl',
-    labelClassName
-  );
-
-  return (
-    <div className={containerClasses}>
-      <Icon iconId="faCircleNotchLight" className={spinnerClasses} variant="solid"/>
-      {label && <span className={labelClasses}>{label}</span>}
-    </div>
-  );
-}; 
+// Export both as default and named export
+export { LoadingSpinner }
+export default LoadingSpinner 

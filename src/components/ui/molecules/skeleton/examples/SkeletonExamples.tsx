@@ -1,14 +1,14 @@
 import React from 'react';
 import {
+  UIFormSkeleton as FormSkeleton,
+  UITableSkeleton as TableSkeleton,
+  UICampaignDetailSkeleton as CampaignDetailSkeleton,
+  UIDashboardSkeleton as DashboardSkeleton,
   WizardSkeleton,
   FormFieldSkeleton,
-  TableSkeleton,
-  FormSkeleton,
   AuthSkeleton,
-  SkeletonSection,
-  DashboardSkeleton,
-  CampaignDetailSkeleton 
-} from '@/components/ui/molecules/skeleton';
+  SkeletonSection
+} from '@/components/ui/molecules/skeleton/LoadingSkeleton';
 import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
 
 export function LoadingSkeletonExamples() {

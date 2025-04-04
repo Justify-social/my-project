@@ -6,11 +6,11 @@ This directory contains critical scripts that run during application startup or 
 
 ### Component Registry Validation
 
-**`validate-component-registry.js`**: Validates that all UI components are properly registered and follow the project's component architecture.
+**`validate-component-registry.mjs`**: Validates that all UI components are properly registered and follow the project's component architecture. Uses recursive directory scanning to find components and supports compound components.
 
 ```bash
 # Run the component registry validation
-node config/start-up/validate-component-registry.js
+node config/start-up/validate-component-registry.mjs
 ```
 
 ### Shadcn UI Index Updates
@@ -32,7 +32,7 @@ These scripts are typically executed during the application's build process or w
 ## Script Execution Order
 
 1. Configuration validation (`config/scripts/validate-config.js`)
-2. Component registry validation (`config/start-up/validate-component-registry.js`)
+2. Component registry validation (`config/start-up/validate-component-registry.mjs`)
 3. UI component updates (`config/start-up/update-shadcn-index.mjs`)
 
 ## Adding New Startup Scripts
@@ -45,3 +45,9 @@ When adding new startup scripts:
 4. Document any environment variables or configuration needed
 
 Each script should include proper error handling and informative console output to diagnose issues during startup. 
+
+2. Component registry validation (`config/start-up/validate-component-registry.mjs`)
+   - Validates that all components in the registry exist in the file system
+   - Ensures all components in the file system are in the registry
+   - Works with nested directories and compound components
+   - Provides clear error messages for missing components 

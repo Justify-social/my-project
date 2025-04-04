@@ -86,6 +86,10 @@ export interface ComponentMetadata {
   changeHistory: Change[];
   // Performance metrics
   performanceMetrics?: PerformanceMetrics;
+  // New properties
+  library?: 'atomic' | 'shadcn';
+  isNamespaced?: boolean;
+  originalName?: string;
 }
 
 /**

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@/components/ui';
 import { ComponentMetadata } from '../db/registry';
+import { ShadcnWrappers } from '../utils/shadcn-wrappers';
 
 interface ComponentDetailProps {
   component: ComponentMetadata;
@@ -9,6 +10,31 @@ interface ComponentDetailProps {
 export const ComponentDetail: React.FC<ComponentDetailProps> = ({
   component
 }) => {
+  // Render the component preview based on library type
+  const renderComponentPreview = () => {
+    // Check if this is a Shadcn component that has a wrapper
+    if (component.library === 'shadcn') {
+      // Safely check if there's a wrapper for this component name
+      const componentName = component.name as keyof typeof ShadcnWrappers;
+      
+      // If we have a specific wrapper for this Shadcn component, use it
+      if (ShadcnWrappers[componentName]) {
+        const ComponentWrapper = ShadcnWrappers[componentName];
+        return (
+          <div className="border rounded-md p-6 bg-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Preview</h3>
+            <div className="p-4 border rounded-md">
+              <ComponentWrapper />
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Fall back to default renderer or nothing if we can't render it
+    return null;
+  };
+  
   return (
     <div className="space-y-6">
       <div className="border-b pb-4">
@@ -17,7 +43,23 @@ export const ComponentDetail: React.FC<ComponentDetailProps> = ({
         {component.description && (
           <p className="mt-3 text-gray-700">{component.description}</p>
         )}
+        
+        {/* Display library information if available */}
+        {component.library && (
+          <div className="mt-2">
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+              component.library === 'shadcn' 
+                ? 'bg-purple-100 text-purple-800' 
+                : 'bg-green-100 text-green-800'
+            }`}>
+              {component.library === 'shadcn' ? 'Shadcn UI' : 'Atomic Design'}
+            </span>
+          </div>
+        )}
       </div>
+      
+      {/* Component Preview Section */}
+      {renderComponentPreview()}
 
       {component.props && component.props.length > 0 && (
         <section>

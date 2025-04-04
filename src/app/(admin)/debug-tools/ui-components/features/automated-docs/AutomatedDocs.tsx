@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/atoms/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui';
 import { Button } from '@/components/ui/atoms/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs';
 import { Input } from '@/components/ui/atoms/input';

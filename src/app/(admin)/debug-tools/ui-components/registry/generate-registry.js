@@ -6,8 +6,13 @@
 
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 const { join } = path;
 const { existsSync, readFileSync, readdirSync, writeFileSync } = fs;
+
+// Get current filename and directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Target directories to scan
 const COMPONENT_DIRS = [
@@ -16,10 +21,9 @@ const COMPONENT_DIRS = [
   { path: 'src/components/ui/organisms', category: 'organisms' }
 ];
 
-// Output file path
-const OUTPUT_PATH = join(process.cwd(), 'public', 'static');
+// Output file path - Single Source of Truth
+const OUTPUT_PATH = join(process.cwd(), 'public/static');
 const COMPONENT_REGISTRY_FILE = join(OUTPUT_PATH, 'component-registry.json');
-const ICON_REGISTRY_FILE = join(OUTPUT_PATH, 'icon-registry.json');
 
 // Keywords that might indicate mock data
 const MOCK_KEYWORDS = ['mock', 'fake', 'dummy', 'placeholder', 'sample'];
@@ -54,131 +58,98 @@ function pascalToKebab(str) {
 }
 
 /**
- * Scan directory recursively for React component files
+ * Detects and extracts compound components (Component.SubComponent pattern)
+ * @param {Array} components - Array of component metadata
+ * @returns {Array} Array of extracted compound components
  */
-function scanDirectory(dirPath, category) {
-  const components = [];
+function extractCompoundComponents(components) {
+  const compoundComponents = [];
   
-  // Check if directory exists
+  components.forEach(component => {
+    const filePath = path.resolve(process.cwd(), component.path);
+    if (!existsSync(filePath)) return;
+    
+    try {
+      const content = readFileSync(filePath, 'utf8');
+      
+      // Check for compound component patterns
+      const subComponentMatches = content.match(/export\s+const\s+(\w+)(?:Content|Trigger|Item|Header|Root|Title|Description|Footer|Close|Action)\s*=/g) || [];
+      
+      if (subComponentMatches.length > 0) {
+        // Extract sub-component names and add to registry
+        subComponentMatches.forEach(match => {
+          const subName = match.match(/export\s+const\s+(\w+)/)[1];
+          
+          compoundComponents.push({
+            id: `${component.category}-${component.name.toLowerCase()}-${subName.toLowerCase()}`,
+            name: subName,
+            category: component.category,
+            path: component.path,
+            importPath: component.importPath,
+            shadcnPath: component.shadcnPath,
+            description: `${subName} sub-component of ${component.name}`,
+            lastUpdated: new Date().toISOString(),
+            parentComponent: component.name,
+            isSubComponent: true
+          });
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing ${filePath}: ${error.message}`);
+    }
+  });
+  
+  return compoundComponents;
+}
+
+/**
+ * Recursively scans directories for component files
+ * @param {string} dirPath - Directory path to scan
+ * @param {string} category - Component category (atoms, molecules, organisms)
+ * @returns {Array} Array of component metadata
+ */
+function scanDirectoryRecursively(dirPath, category) {
+  let components = [];
+  
   if (!existsSync(dirPath)) {
     console.warn(`Directory not found: ${dirPath}`);
     return components;
   }
   
-  // Read directory contents
   const entries = readdirSync(dirPath, { withFileTypes: true });
   
   for (const entry of entries) {
     const fullPath = join(dirPath, entry.name);
     
     if (entry.isDirectory()) {
-      // Recursively scan subdirectories
-      const subComponents = scanDirectory(fullPath, category);
-      components.push(...subComponents);
+      // Scan subdirectories recursively
+      const subComponents = scanDirectoryRecursively(fullPath, category);
+      components = components.concat(subComponents);
     } else if (
       entry.isFile() && 
-      (entry.name.endsWith('.tsx') || entry.name.endsWith('.jsx')) &&
+      entry.name.endsWith('.tsx') && 
+      !entry.name.startsWith('index') &&
       !entry.name.includes('.test.') && 
       !entry.name.includes('.spec.')
     ) {
-      // Extract component name from filename
-      const baseName = path.basename(entry.name, path.extname(entry.name));
+      // Process component file
+      const baseName = path.basename(entry.name, '.tsx');
       
-      // Skip index files and files with lowercase first letter (likely not components)
-      if (baseName === 'index' || (baseName[0] === baseName[0].toLowerCase() && baseName[0] !== baseName[0].toUpperCase())) {
-        continue;
-      }
-      
-      // Check for mock data indicators in file content
-      const fileContent = readFileSync(fullPath, 'utf8');
-      
-      // Improved mock detection logic that's less aggressive
-      const containsMockData = MOCK_KEYWORDS.some(keyword => {
-        // Skip keywords in legitimate contexts
-        if (keyword.toLowerCase() === 'test') {
-          // If it's the word 'test', check if it's in a legitimate context
-          const hasLegitimateContext = LEGITIMATE_CONTEXTS.some(context => 
-            fileContent.toLowerCase().includes(context.toLowerCase())
-          );
-          if (hasLegitimateContext) return false;
-        }
-        
-        const keywordPattern = new RegExp(`\\b${keyword}\\b`, 'i');
-        if (!keywordPattern.test(fileContent)) return false;
-        
-        // Skip if it's in a legitimate context
-        const hasLegitimateContext = LEGITIMATE_CONTEXTS.some(context => 
-          fileContent.toLowerCase().includes(context.toLowerCase())
-        );
-        
-        // Skip if it's in a comment that indicates "not mock data"
-        const isExemptByComment = (
-          fileContent.includes(`// Not ${keyword}`) || 
-          fileContent.includes(`// Not a ${keyword}`) ||
-          fileContent.includes(`// Real data, not ${keyword}`) ||
-          fileContent.includes(`/* Not ${keyword} */`) ||
-          fileContent.includes(`// This is NOT ${keyword} data`) ||
-          fileContent.includes(`// No ${keyword} data used here`)
-        );
-        
-        // If in a file under /examples/ directory, assume it's legitimate example code, not mock data
-        const isInExamplesDirectory = fullPath.includes('/examples/');
-        
-        // If the file is called SomeComponentExample.tsx, it's likely a legitimate example
-        const isExampleComponent = baseName.toLowerCase().includes('example');
-        
-        // If in a UI component directory structure, trust the component more
-        const isInUIComponentDir = fullPath.includes('/components/ui/');
-        
-        return !(hasLegitimateContext || isExemptByComment || isInExamplesDirectory || isExampleComponent || isInUIComponentDir);
-      });
-      
-      // Skip files likely containing mock data - but with improved exemption checks
-      if (containsMockData && 
-          !fileContent.includes('// MOCK_DATA_EXEMPT') && 
-          !fileContent.includes('/* MOCK_DATA_EXEMPT */') &&
-          !fileContent.includes('// NOT_MOCK_DATA') &&
-          !fileContent.includes('/* NOT_MOCK_DATA */')) {
-        console.warn(`Skipping suspected mock data in: ${fullPath}`);
-        continue;
-      }
-      
-      // Create component metadata with kebab-case name
+      // Create component metadata
       const relativePath = path.relative(process.cwd(), fullPath).replace(/\\/g, '/');
+      const dirParts = path.dirname(relativePath).split('/');
+      const componentDir = dirParts[dirParts.length - 1];
       
-      // Extract the path relative to the UI components directory for correct registry key
-      const uiRelativePath = path.relative(
-        path.join(process.cwd(), 'src/components/ui'),
-        fullPath
-      ).replace(/\\/g, '/');
-      
-      // Use the directory structure in the component name for better organization
-      // This fixes the issue with nested components like organisms/card/MetricCard
-      const registryPath = uiRelativePath.replace(/\.tsx$|\.jsx$/, '');
-      
-      const kebabName = pascalToKebab(baseName);
-      
-      // Extract component exports from file content
-      const exports = extractComponentExports(fileContent, baseName);
-      console.log(`Found ${exports.length} exports in ${baseName} (${registryPath})`);
-      
-      const component = {
-        path: relativePath,
-        registryPath: registryPath, // Add the registry path for location lookup
-        name: kebabName,
-        originalName: baseName, // Store original name for reference
+      components.push({
+        id: `${category}-${componentDir}-${baseName}`.toLowerCase(),
+        name: baseName,
         category,
-        lastUpdated: new Date().toISOString(),
-        exports: exports.length > 0 ? exports : [baseName], // Use found exports or fallback to baseName
-        props: [],
+        path: relativePath,
+        importPath: `@/components/ui/${category}/${componentDir}/${baseName}`,
+        shadcnPath: `@/components/ui/${componentDir}`,
         description: `${baseName} ${category} component`,
-        examples: [],
-        dependencies: [],
-        version: '1.0.0',
-        changeHistory: []
-      };
-      
-      components.push(component);
+        lastUpdated: new Date().toISOString()
+      });
     }
   }
   
@@ -186,374 +157,164 @@ function scanDirectory(dirPath, category) {
 }
 
 /**
- * Extract component exports (named and default) from file content
+ * Extract component imports from the registry utils file
+ * @returns {Object} Map of component keys to import paths
  */
-function extractComponentExports(fileContent, baseName) {
-  const exports = [];
-  
-  // Match named exports like "export const ComponentName"
-  const namedExportsRegex = /export\s+(?:const|function|class|let|var)\s+([A-Za-z0-9_]+)/g;
-  let match;
-  while ((match = namedExportsRegex.exec(fileContent)) !== null) {
-    exports.push(match[1]);
-  }
-  
-  // Match default exports like "export default ComponentName"
-  const defaultExportRegex = /export\s+default\s+(?:const|function|class|let|var)?\s*([A-Za-z0-9_]+)?/;
-  const defaultMatch = fileContent.match(defaultExportRegex);
-  if (defaultMatch && defaultMatch[1]) {
-    exports.push(defaultMatch[1]);
-    // Mark as default export
-    exports.push(`default:${defaultMatch[1]}`);
-  } else if (fileContent.includes('export default')) {
-    // If export default exists but doesn't have a name, use the baseName
-    exports.push(`default:${baseName}`);
-  }
-  
-  // Match types exports
-  const typeExportsRegex = /export\s+(?:type|interface)\s+([A-Za-z0-9_]+)/g;
-  while ((match = typeExportsRegex.exec(fileContent)) !== null) {
-    exports.push(`type:${match[1]}`);
-  }
-  
-  return exports;
-}
-
-/**
- * Scan icons directory and generate icon metadata
- */
-function scanIcons() {
-  console.log('Scanning for icons...');
-  let icons = [];
-  
-  // We'll now use the same approach as registry-loader.ts that loads category-specific registries
-  const registryFiles = [
-    'app-icon-registry.json',
-    'brands-icon-registry.json',
-    'kpis-icon-registry.json',
-    'light-icon-registry.json',
-    'solid-icon-registry.json'
-  ];
-  
-  // Function to safely add icons from a registry file, matching the pattern in registry-loader.ts
-  const addIconsFromRegistry = (registryPath, fileName) => {
-    try {
-      if (existsSync(registryPath)) {
-        const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+function extractComponentImports() {
+  try {
+    const utilsPath = path.resolve(process.cwd(), 'src/app/(admin)/debug-tools/ui-components/utils/component-registry-utils.js');
+    if (!existsSync(utilsPath)) {
+      console.warn('Component registry utils file not found');
+      return {};
+    }
+    
+    const content = readFileSync(utilsPath, 'utf8');
+    
+    // Find the COMPONENT_IMPORTS object
+    const importsMatch = content.match(/export\s+const\s+COMPONENT_IMPORTS\s*=\s*\{([\s\S]*?)\};/);
+    if (!importsMatch || !importsMatch[1]) {
+      console.warn('COMPONENT_IMPORTS not found in registry utils');
+      return {};
+    }
+    
+    // Parse the imports into a map
+    const importMap = {};
+    const lines = importsMatch[1].split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('//') && line.includes(':'));
+    
+    lines.forEach(line => {
+      try {
+        // Extract key and import path
+        const keyMatch = line.match(/'([^']+)'/);
+        const pathMatch = line.match(/import\('([^']+)'\)/);
         
-        if (registry && Array.isArray(registry.icons)) {
-          console.log(`Found ${registry.icons.length} icons in ${fileName}`);
-          
-          // Add icons to the consolidated collection, ensuring each has required fields
-          registry.icons.forEach(icon => {
-            if (!icon.id) {
-              console.warn(`Skipping icon without ID in ${fileName}`);
-              return;
-            }
-            
-            // Add with default values for missing fields to ensure consistent structure
-            icons.push({
-              id: icon.id,
-              name: icon.name || icon.id,
-              category: icon.category || fileName.replace('-icon-registry.json', ''),
-              path: icon.path,
-              viewBox: icon.viewBox || '0 0 512 512',
-              width: icon.width || 24,
-              height: icon.height || 24,
-              map: icon.map || null,
-              usageCount: icon.usageCount || 0,
-            });
-          });
-        } else {
-          console.warn(`Invalid registry format in ${fileName}`);
+        if (keyMatch && pathMatch) {
+          const key = keyMatch[1];
+          const importPath = pathMatch[1];
+          importMap[key] = importPath;
         }
-      } else {
-        console.warn(`Registry file not found: ${fileName}`);
-      }
-    } catch (error) {
-      console.error(`Error loading ${fileName}:`, error);
-    }
-  };
-  
-  // Process each registry file
-  for (const fileName of registryFiles) {
-    const registryPath = join(process.cwd(), 'public', 'static', fileName);
-    addIconsFromRegistry(registryPath, fileName);
-  }
-  
-  const iconCount = icons.length;
-  if (iconCount === 0) {
-    console.warn('No icons found in registry files. Debug tools will have limited functionality.');
-  } else {
-    console.log(`Successfully loaded ${iconCount} total icons from category registries`);
-  }
-  
-  return icons;
-}
-
-/**
- * Prepares SVG content for React rendering by ensuring proper namespaces
- * and handling special attributes
- */
-function prepareSvgForReact(svgContent) {
-  if (!svgContent) return '';
-  
-  // Trim to get just the SVG content
-  let cleanContent = svgContent.trim();
-  
-  // If it's not a proper SVG tag, try to fix it
-  if (!cleanContent.startsWith('<svg')) {
-    const svgStartIndex = cleanContent.indexOf('<svg');
-    if (svgStartIndex >= 0) {
-      cleanContent = cleanContent.substring(svgStartIndex);
-    }
-  }
-  
-  // Ensure it ends with a proper closing tag
-  if (!cleanContent.endsWith('</svg>')) {
-    const svgEndIndex = cleanContent.lastIndexOf('</svg>');
-    if (svgEndIndex >= 0) {
-      cleanContent = cleanContent.substring(0, svgEndIndex + 6);
-    }
-  }
-  
-  return cleanContent;
-}
-
-/**
- * Extract an attribute value from SVG content
- */
-function extractSvgAttribute(svgContent, attributeName) {
-  if (!svgContent) return null;
-  
-  const regex = new RegExp(`${attributeName}=["']([^"']*)["']`);
-  const match = svgContent.match(regex);
-  
-  return match ? match[1] : null;
-}
-
-/**
- * Validate icon registry before saving
- */
-function validateIconRegistry(icons) {
-  console.log(`Validating ${icons.length} icons before saving...`);
-
-  let validSvgCount = 0;
-  let invalidSvgCount = 0;
-  let missingSvgCount = 0;
-  let fixedSvgCount = 0;
-
-  // Process each icon
-  const validatedIcons = icons.map(icon => {
-    // Check if SVG content exists
-    if (!icon.svgContent) {
-      console.warn(`Missing SVG content for icon: ${icon.id}`);
-      missingSvgCount++;
-      // Provide a fallback SVG
-      icon.svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>`;
-      return icon;
-    }
-
-    // Check if SVG content is valid
-    if (!icon.svgContent.includes('<svg')) {
-      console.warn(`Invalid SVG content for icon: ${icon.id}`);
-      invalidSvgCount++;
-      // Replace with fallback SVG
-      icon.svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>`;
-      return icon;
-    }
-
-    // Check if SVG content needs to be fixed
-    let needsFixing = false;
-    
-    // Check for namespace
-    if (!icon.svgContent.includes('xmlns=')) {
-      needsFixing = true;
-    }
-    
-    // Check for currentColor
-    if (!icon.svgContent.includes('currentColor')) {
-      needsFixing = true;
-    }
-    
-    // Apply fixes if needed
-    if (needsFixing) {
-      icon.svgContent = prepareSvgForReact(icon.svgContent);
-      fixedSvgCount++;
-    } else {
-      validSvgCount++;
-    }
-
-    return icon;
-  });
-
-  console.log(`Validation complete:
-- Valid SVG content: ${validSvgCount}
-- Fixed SVG content: ${fixedSvgCount}
-- Invalid SVG content: ${invalidSvgCount}
-- Missing SVG content: ${missingSvgCount}
-- Total icons: ${validatedIcons.length}
-  `);
-
-  return validatedIcons;
-}
-
-/**
- * Load SVG content for an icon from its path
- */
-function loadSvgContent(iconPath) {
-  if (!iconPath) {
-    return null;
-  }
-  
-  // Convert from path used in browser to filesystem path
-  // Icons are typically referenced as /icons/category/filename.svg
-  // But stored in public/icons/category/filename.svg
-  const fsPath = join(process.cwd(), 'public', iconPath);
-  
-  try {
-    if (existsSync(fsPath)) {
-      const svgContent = readFileSync(fsPath, 'utf8');
-      return svgContent.trim();
-    } else {
-      console.warn(`SVG file not found: ${fsPath}`);
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error loading SVG content from ${fsPath}:`, error);
-    return null;
-  }
-}
-
-/**
- * Main function to generate the component registry
- */
-function generateComponentRegistry() {
-  console.log('Generating static component registry...');
-  
-  try {
-    // Scan for components in each directory
-    let allComponents = [];
-    
-    for (const dir of COMPONENT_DIRS) {
-      const dirPath = join(process.cwd(), dir.path);
-      const components = scanDirectory(dirPath, dir.category);
-      console.log(`Found ${components.length} components in ${dir.path}`);
-      allComponents = [...allComponents, ...components];
-    }
-    
-    // Scan for icons using the single source of truth
-    const icons = scanIcons();
-    console.log(`Found ${icons.length} icons`);
-    
-    // Load SVG content for each icon
-    console.log('Loading SVG content for icons...');
-    let loadedCount = 0;
-    let missingCount = 0;
-    
-    icons.forEach(icon => {
-      const svgContent = loadSvgContent(icon.path);
-      if (svgContent) {
-        icon.svgContent = svgContent;
-        loadedCount++;
-      } else {
-        missingCount++;
-        console.warn(`Could not load SVG content for icon: ${icon.id} (path: ${icon.path})`);
+      } catch (err) {
+        // Skip lines that can't be parsed
       }
     });
     
-    console.log(`SVG content loading complete:
-- Successfully loaded: ${loadedCount}
-- Failed to load: ${missingCount}
-- Total icons: ${icons.length}
-`);
-    
-    // Ensure output directory exists
-    if (!existsSync(OUTPUT_PATH)) {
-      fs.mkdirSync(OUTPUT_PATH, { recursive: true });
-    }
-    
-    // Save component registry
-    const registry = {
-      components: allComponents,
-      generatedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: '1.0.0'
-    };
-    
-    writeFileSync(
-      COMPONENT_REGISTRY_FILE, 
-      JSON.stringify(registry, null, 2)
-    );
-    
-    console.log(`Static component registry generated at ${COMPONENT_REGISTRY_FILE} with ${allComponents.length} components`);
-    
-    // Save icon registry if there are icons
-    if (icons.length > 0) {
-      // First validate the icon SVG content
-      console.log(`Validating ${icons.length} icons before saving...`);
-      
-      let validCount = 0;
-      let fixedCount = 0;
-      let invalidCount = 0;
-      let missingCount = 0;
-      
-      // Validate each icon
-      icons.forEach(icon => {
-        if (!icon.svgContent) {
-          missingCount++;
-          return;
-        }
-        
-        const svgContent = icon.svgContent;
-        
-        // Very basic SVG validation
-        if (svgContent.trim().startsWith('<svg') && svgContent.trim().endsWith('</svg>')) {
-          validCount++;
-        } else if (svgContent.trim().includes('<svg') && svgContent.trim().includes('</svg>')) {
-          // Try to fix simple issues
-          icon.svgContent = svgContent.trim()
-            .replace(/^[^<]*(<svg)/, '$1')
-            .replace(/(<\/svg>)[^>]*$/, '$1');
-          fixedCount++;
-        } else {
-          invalidCount++;
-          console.warn(`Invalid SVG content for icon: ${icon.id}`);
-        }
-      });
-      
-      console.log('Validation complete:');
-      console.log(`- Valid SVG content: ${validCount}`);
-      console.log(`- Fixed SVG content: ${fixedCount}`);
-      console.log(`- Invalid SVG content: ${invalidCount}`);
-      console.log(`- Missing SVG content: ${missingCount}`);
-      console.log(`- Total icons: ${icons.length}`);
-      
-      // Save icon registry
-      const iconRegistry = {
-        icons,
-        generatedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        version: '1.0.0'
-      };
-      
-      writeFileSync(
-        ICON_REGISTRY_FILE, 
-        JSON.stringify(iconRegistry, null, 2)
-      );
-      
-      console.log(`Static icon registry generated at ${ICON_REGISTRY_FILE} with ${icons.length} icons`);
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error generating component registry:', error);
-    return false;
+    return importMap;
+  } catch (err) {
+    console.error('Error extracting component imports:', err);
+    return {};
   }
 }
 
-// Run the registry generator
-generateComponentRegistry();
+/**
+ * Scans the UI component directories and extracts metadata
+ * @returns {Array} Component metadata
+ */
+function generateComponentRegistry() {
+  let allComponents = [];
+  
+  try {
+    // Scan all atomic levels
+    COMPONENT_DIRS.forEach(({ path: dirPath, category }) => {
+      const fullPath = path.resolve(process.cwd(), dirPath);
+      const components = scanDirectoryRecursively(fullPath, category);
+      allComponents = allComponents.concat(components);
+    });
+    
+    // Extract compound components
+    const compoundComponents = extractCompoundComponents(allComponents);
+    allComponents = allComponents.concat(compoundComponents);
+    
+    // Extract component imports
+    const componentImports = extractComponentImports();
+    console.log(`Found ${Object.keys(componentImports).length} components in COMPONENT_IMPORTS`);
+    
+    // Add components from COMPONENT_IMPORTS that might be missing
+    Object.entries(componentImports).forEach(([key, importPath]) => {
+      // Check if component already exists
+      const exists = allComponents.some(comp => 
+        comp.importPath === importPath || 
+        comp.path === importPath.replace('@/', '') ||
+        comp.name.toLowerCase() === key
+      );
+      
+      if (!exists) {
+        // Extract category from import path
+        let category = 'atoms';
+        if (importPath.includes('/molecules/')) category = 'molecules';
+        if (importPath.includes('/organisms/')) category = 'organisms';
+        
+        // Extract component name from path
+        const pathParts = importPath.split('/');
+        const fileName = pathParts[pathParts.length - 1];
+        const componentName = fileName.charAt(0).toUpperCase() + fileName.slice(1);
+        
+        // Add the component
+        allComponents.push({
+          id: `${category}-${key}`,
+          name: componentName,
+          category,
+          path: importPath.replace('@/', ''),
+          importPath,
+          description: `${componentName} ${category} component`,
+          lastUpdated: new Date().toISOString(),
+          library: 'shadcn' // Mark all components as Shadcn
+        });
+      }
+    });
+    
+    // Mark all components as Shadcn library components
+    allComponents = allComponents.map(component => ({
+      ...component,
+      library: 'shadcn'
+    }));
+    
+    console.log(`Generated registry with ${allComponents.length} total components (all marked as shadcn)`);
+    
+    // Return ALL components
+    return allComponents;
+  } catch (error) {
+    console.error("Error generating component registry:", error);
+    return [];
+  }
+}
 
-// Export the function
-export { generateComponentRegistry }; 
+// Writes to the static file for use by other parts of the app
+function writeRegistryToFile() {
+  const allComponents = generateComponentRegistry();
+  
+  // Create registry object
+  const registry = {
+    components: allComponents,
+    lastUpdated: new Date().toISOString(),
+    version: '1.0.0',
+    metadata: {
+      generatedAt: new Date().toISOString(),
+      count: allComponents.length,
+      atomsCount: allComponents.filter(c => c.category === 'atoms').length,
+      moleculesCount: allComponents.filter(c => c.category === 'molecules').length,
+      organismsCount: allComponents.filter(c => c.category === 'organisms').length,
+      compoundCount: allComponents.filter(c => c.isSubComponent).length
+    }
+  };
+  
+  // Ensure output directory exists
+  if (!existsSync(OUTPUT_PATH)) {
+    fs.mkdirSync(OUTPUT_PATH, { recursive: true });
+  }
+  
+  // Write to the SSOT location only
+  writeFileSync(COMPONENT_REGISTRY_FILE, JSON.stringify(registry, null, 2));
+  console.log(`✅ Updated component registry with ${allComponents.length} components (${allComponents.filter(c => c.isSubComponent).length} compound components)`);
+  console.log(`✅ Saved to ${COMPONENT_REGISTRY_FILE} (SSOT)`);
+}
+
+// Run the registry generator
+writeRegistryToFile();
+
+// Components for direct import
+const components = generateComponentRegistry();
+
+// Export for ES modules
+export { components, generateComponentRegistry };
+export default { components, generateComponentRegistry }; 

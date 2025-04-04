@@ -3,11 +3,12 @@
 import { Icon } from '@/components/ui/atoms/icon';
 import * as React from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
-import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+import { IconAdapter } from "@/components/ui/atoms/icon/adapters";
 
 import { cn } from "@/lib/utils"
 
 const ContextMenu = ContextMenuPrimitive.Root
+ContextMenu.displayName = "ContextMenu"
 
 const ContextMenuTrigger = ContextMenuPrimitive.Trigger
 
@@ -182,8 +183,9 @@ const ContextMenuShortcut = ({
 }
 ContextMenuShortcut.displayName = "ContextMenuShortcut"
 
+export default ContextMenu;
+
 export {
-  ContextMenu,
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,

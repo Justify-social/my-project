@@ -3,7 +3,7 @@
 
 import React, { useState, memo } from 'react';
 // Import UI components from atomic design structure
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@/components/ui';
 import { SectionHeader } from '@/components/ui/molecules/section-header';
 import { Modal } from '@/components/ui/organisms/modal';
 import { useRouter } from 'next/navigation';

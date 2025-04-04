@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/atoms/card';
+import { Card, CardContent } from '@/components/ui';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/atoms/alert';
 import { LoadingSpinner as Spinner } from '@/components/ui/atoms/loading-spinner';
 import { Icon } from '@/components/ui/atoms/icon';

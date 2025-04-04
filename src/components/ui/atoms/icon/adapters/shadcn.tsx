@@ -5,7 +5,7 @@ import { Icon } from '../Icon';
 import { IconProps } from '../types';
 
 /**
- * Interface for the ShadcnIcon component (matches Lucide icon interface)
+ * Interface for the ShadcnIcon component
  */
 export interface ShadcnIconProps {
   name: string;
@@ -19,7 +19,7 @@ export interface ShadcnIconProps {
 
 /**
  * ShadcnIcon adapter
- * Converts Shadcn/Lucide-style props to our internal Icon component props
+ * Converts Shadcn-style props to our internal Icon component props
  */
 export const ShadcnIcon: React.FC<ShadcnIconProps> = ({
   name,

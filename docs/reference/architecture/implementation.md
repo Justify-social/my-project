@@ -85,7 +85,7 @@ UI components were created with a consistent pattern:
 
 Key dependencies added:
 
-- `lucide-react`: For icons
+- `@fortawesome/fontawesome-svg-core`, `@fortawesome/pro-light-svg-icons`, `@fortawesome/pro-solid-svg-icons`: For icons (replaced lucide-react)
 - `clsx` and `tailwind-merge`: For managing conditional CSS classes
 - `tailwindcss`: For styling
 

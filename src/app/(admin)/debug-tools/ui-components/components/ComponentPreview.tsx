@@ -19,6 +19,8 @@ import {
   withDefaultProps 
 } from '../utils/component-registry-utils';
 import { ErrorBoundary } from 'react-error-boundary';
+// Import component wrappers manager
+import { getComponentWrapper, hasComponentWrapper, isShadcnComponent } from '../wrappers';
 
 // Default props for components that need it to render safely
 const SidebarWithDefaultProps = (props: any) => {
@@ -419,6 +421,22 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
           return;
         }
         
+        // New condition - Check if this is a Shadcn component using library metadata
+        if (component.library === 'shadcn') {
+          // Use original name for namespaced components
+          const componentName = component.originalName || component.name;
+          if (hasComponentWrapper(componentName)) {
+            const wrapper = getComponentWrapper(componentName);
+            if (wrapper) {
+              setComponentToRender(wrapper);
+              loadedComponentsRegistry.set(registryKey, wrapper);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+        
+        // Continue with existing checks for non-Shadcn components
         // Check if the component is in our pre-defined map
         const exportName = component.exports && component.exports.length > 0 
           ? component.exports[0] 
@@ -434,6 +452,15 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
         if (componentMap[component.name]) {
           setComponentToRender(componentMap[component.name]);
           loadedComponentsRegistry.set(registryKey, componentMap[component.name]);
+          setLoading(false);
+          return;
+        }
+        
+        // Check if this is a component with a dedicated wrapper
+        if (hasComponentWrapper(component.name)) {
+          const wrapper = getComponentWrapper(component.name);
+          setComponentToRender(wrapper);
+          loadedComponentsRegistry.set(registryKey, wrapper);
           setLoading(false);
           return;
         }
@@ -491,15 +518,52 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
           </div>
         }>
           <ErrorBoundary
-            fallbackRender={({ error }) => (
-              <div className="p-4 border border-red-200 rounded bg-red-50 text-red-600">
-                <h3 className="font-medium mb-2">Error rendering component</h3>
-                <div className="text-sm">{error.message}</div>
+            fallbackRender={({ error, resetErrorBoundary }) => (
+              <div className="p-4 border border-red-300 rounded bg-red-50 text-red-700">
+                <h3 className="font-medium mb-2">Component Failed to Render</h3>
+                <p className="text-sm mb-2">The component could not be rendered due to an error:</p>
+                <pre className="text-xs bg-red-100 p-2 rounded overflow-auto max-h-40">{error.message}</pre>
+                {error.stack && (
+                  <details className="mt-2">
+                    <summary className="text-xs cursor-pointer hover:text-red-900">View Stack Trace</summary>
+                    <pre className="mt-1 text-xs bg-red-100 p-2 rounded overflow-auto max-h-40">
+                      {error.stack}
+                    </pre>
+                  </details>
+                )}
+                <div className="mt-4 flex items-center justify-between">
+                  <button 
+                    onClick={resetErrorBoundary}
+                    className="px-3 py-1 bg-red-200 hover:bg-red-300 rounded text-sm"
+                  >
+                    Try Again
+                  </button>
+                  <span className="text-xs text-gray-500">Component: {component.name}</span>
+                </div>
               </div>
             )}
-            onError={(error: Error) => {
-              console.error('Error in component:', error);
+            onError={(error: Error, info: React.ErrorInfo) => {
+              // Enhanced logging with component details
+              console.error(`Error rendering component ${component.name}:`, {
+                component,
+                error,
+                componentInfo: info,
+                props: propValues
+              });
+              
+              // Log to server or analytics if needed
+              try {
+                // You could add server logging here in the future
+                // e.g., logToServer({ component, error, info });
+              } catch (logError) {
+                console.error('Failed to log error:', logError);
+              }
+              
               setRenderError(error);
+            }}
+            onReset={() => {
+              console.log(`Resetting error boundary for ${component.name}`);
+              setRenderError(null);
             }}
           >
             {React.createElement(componentToRender, propValues)}
@@ -509,7 +573,24 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
     } catch (err) {
       console.error('Error rendering component', err);
       setRenderError(err instanceof Error ? err : new Error(String(err)));
-      return null;
+      return (
+        <div className="p-4 border border-red-300 rounded bg-red-50 text-red-700">
+          <h3 className="font-medium mb-2">Component Initialization Failed</h3>
+          <p className="text-sm mb-2">The component could not be initialized:</p>
+          <pre className="text-xs bg-red-100 p-2 rounded overflow-auto max-h-40">
+            {err instanceof Error ? err.message : String(err)}
+          </pre>
+          <div className="mt-4 flex items-center justify-between">
+            <button 
+              onClick={() => setRenderError(null)}
+              className="px-3 py-1 bg-red-200 hover:bg-red-300 rounded text-sm"
+            >
+              Try Again
+            </button>
+            <span className="text-xs text-gray-500">Component: {component.name}</span>
+          </div>
+        </div>
+      );
     }
   };
   
@@ -575,9 +656,37 @@ export default function ComponentPreview({ component, onClose }: ComponentPrevie
           <CardTitle>{component.name}</CardTitle>
         </CardHeader>
         <CardContent className="py-6">
-          <div className="text-amber-500">Component not available for preview</div>
-          <div className="text-sm text-gray-500 mt-2">
-            This component is registered but not available in the component map for dynamic rendering.
+          <div className="p-4 border border-amber-300 rounded bg-amber-50 text-amber-800">
+            <h3 className="font-medium mb-2">Component Not Available</h3>
+            <p className="text-sm mb-3">
+              This component is registered in the component registry but could not be dynamically loaded.
+            </p>
+            
+            <details className="mt-2">
+              <summary className="text-xs cursor-pointer hover:text-amber-900 font-medium">Component Details</summary>
+              <div className="mt-2 text-xs space-y-1">
+                <div><strong>Name:</strong> {component.name}</div>
+                <div><strong>Path:</strong> {component.path}</div>
+                {component.exports && component.exports.length > 0 && (
+                  <div><strong>Exports:</strong> {component.exports.join(', ')}</div>
+                )}
+                {component.category && <div><strong>Category:</strong> {component.category}</div>}
+              </div>
+            </details>
+            
+            <details className="mt-2">
+              <summary className="text-xs cursor-pointer hover:text-amber-900 font-medium">Troubleshooting</summary>
+              <div className="mt-2 text-xs space-y-1 p-2 bg-amber-100 rounded">
+                <p>Possible reasons for this issue:</p>
+                <ul className="list-disc list-inside pl-2 space-y-1">
+                  <li>The component file path in the registry is incorrect</li>
+                  <li>The component is not exported correctly from its module</li>
+                  <li>There was an error during the dynamic import process</li>
+                  <li>The component requires specific context providers that aren't available</li>
+                </ul>
+                <p className="mt-2">Try checking the browser console for more detailed error messages.</p>
+              </div>
+            </details>
           </div>
         </CardContent>
       </Card>

@@ -83,6 +83,7 @@ const COMPONENT_PATTERNS = [
   'src/components/ui/atoms/**/*.tsx',
   'src/components/ui/molecules/**/*.tsx',
   'src/components/ui/organisms/**/*.tsx',
+  'src/components/ui/*.tsx', // Add Shadcn components pattern
 ];
 
 // Files to ignore during discovery
@@ -318,23 +319,40 @@ function filePathToImportPath(filePath) {
 }
 
 /**
- * Determines the category (atom, molecule, organism) of a component based on its path
- * @param {string} filePath - The file path
- * @returns {string} - The category (atom, molecule, organism, or unknown)
+ * Determines the category of a component based on its file path
+ * Supports both Atomic Design and Shadcn components
+ * 
+ * @param {string} filePath - The file path of the component
+ * @returns {string} - One of: 'atom', 'molecule', 'organism'
  */
 function determineComponentCategory(filePath) {
-  if (filePath.includes('/atoms/')) return 'atom';
-  if (filePath.includes('/molecules/')) return 'molecule';
-  if (filePath.includes('/organisms/')) return 'organism';
-  return 'unknown';
+  // Handle Shadcn components (flat structure in ui directory)
+  if (filePath.match(/src\/components\/ui\/[a-z-]+\.tsx$/)) {
+    return 'atom'; // Shadcn components are considered atoms due to their flat structure
+  }
+  
+  // Handle Atomic Design components
+  if (filePath.includes('/atoms/')) {
+    return 'atom';
+  } else if (filePath.includes('/molecules/')) {
+    return 'molecule';
+  } else if (filePath.includes('/organisms/')) {
+    return 'organism';
+  }
+  
+  // Default to atom if unclear
+  return 'atom';
 }
 
 /**
- * Check if a file is likely to contain a UI component based on heuristics
+ * Checks if a file is likely to be a UI component based on path and naming
+ * 
  * @param {string} filePath - The file path to check
- * @returns {boolean} - True if the file likely contains a UI component
+ * @returns {boolean} - Whether the file is likely a UI component
  */
 function isLikelyUIComponent(filePath) {
+  if (!filePath) return false;
+  
   // Skip test and story files
   if (filePath.includes('.test.') || 
       filePath.includes('.spec.') || 
@@ -342,29 +360,41 @@ function isLikelyUIComponent(filePath) {
     return false;
   }
   
-  // Skip utility files
-  if (filePath.includes('/utils/') || 
-      filePath.includes('/helpers/') || 
-      filePath.includes('/constants/')) {
+  // Skip node_modules and .next directories
+  if (filePath.includes('node_modules/') || filePath.includes('.next/')) {
     return false;
   }
   
-  // Skip hook files
-  if (filePath.includes('hook') || filePath.match(/use[A-Z]/)) {
-    return false;
+  // Check for Shadcn components - flat structure in ui directory
+  if (filePath.match(/src\/components\/ui\/[a-z-]+\.tsx$/)) {
+    return true;
   }
   
-  // Skip context files
-  if (filePath.includes('context') || filePath.includes('provider')) {
-    return false;
+  // Check for atomic design patterns
+  if (filePath.includes('/atoms/') || 
+      filePath.includes('/molecules/') || 
+      filePath.includes('/organisms/')) {
+    
+    // Skip specific non-component files
+    if (filePath.includes('/utils/') || 
+        filePath.includes('/styles/') || 
+        filePath.includes('/constants/') ||
+        filePath.includes('/hooks/') ||
+        filePath.includes('/types/')) {
+      return false;
+    }
+    
+    // Standard component naming check
+    const baseName = path.basename(filePath, path.extname(filePath));
+    
+    // Component files should have PascalCase or camelCase names
+    // (only count it as a component if name starts with a letter and no dashes/underscores)
+    if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(baseName)) {
+      return true;
+    }
   }
   
-  // Skip type definition files
-  if (filePath.endsWith('.d.ts')) {
-    return false;
-  }
-  
-  return true;
+  return false;
 }
 
 /**

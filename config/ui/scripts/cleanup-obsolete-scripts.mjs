@@ -102,7 +102,7 @@ const MIGRATED_FILES = [
   {
     oldPath: 'deleted-scripts/validate-component-registry.js',
     action: 'obsolete',
-    reason: 'Component registry validation is now handled by config/start-up/validate-component-registry.js'
+    reason: 'Component registry validation is now handled by config/start-up/validate-component-registry.mjs'
   },
   {
     oldPath: 'deleted-scripts/validate-components.js',

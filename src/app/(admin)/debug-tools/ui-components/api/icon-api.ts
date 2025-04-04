@@ -533,4 +533,124 @@ export const iconApi: IconApi = {
     console.warn('Using fallback icon registry with limited icons');
     return { items: fallbackIcons };
   }
-}; 
+};
+
+/**
+ * Fetches the icon registry from the server
+ * @returns IconRegistryResponse
+ */
+export async function fetchIconRegistry(): Promise<IconRegistryResponse> {
+  try {
+    // Updated to use category-specific registry files directly
+    // We no longer rely on the redundant icon-registry.json
+    const registryFiles = [
+      '/static/app-icon-registry.json',
+      '/static/brands-icon-registry.json',
+      '/static/kpis-icon-registry.json',
+      '/static/light-icon-registry.json',
+      '/static/solid-icon-registry.json'
+    ];
+    
+    // Fetch all registry files in parallel
+    const registryPromises = registryFiles.map(file => 
+      fetch(file, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${file}: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+    );
+    
+    // Wait for all registry files to be fetched
+    const registries = await Promise.all(registryPromises);
+    
+    // Consolidate all icons into a single array
+    const allIcons: IconMetadata[] = [];
+    registries.forEach(registry => {
+      if (registry && registry.icons && Array.isArray(registry.icons)) {
+        allIcons.push(...registry.icons);
+      }
+    });
+    
+    return {
+      success: true,
+      icons: allIcons,
+      metadata: {
+        total: allIcons.length,
+        categories: registryFiles.map(file => file.split('-')[0].substring(8))
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching icon registry:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      icons: [],
+      metadata: {
+        total: 0,
+        categories: []
+      }
+    };
+  }
+}
+
+/**
+ * Get icon from consolidated registry file - use registry files directly
+ */
+export async function getIconFromRegistry(iconId: string): Promise<IconResponse> {
+  try {
+    // First try to find the icon in one of the category-specific registries
+    const categoryRegistries = [
+      '/static/app-icon-registry.json',
+      '/static/brands-icon-registry.json',
+      '/static/kpis-icon-registry.json',
+      '/static/light-icon-registry.json',
+      '/static/solid-icon-registry.json'
+    ];
+    
+    // Try to determine which category this icon belongs to
+    let foundIcon: IconMetadata | null = null;
+    
+    // Try each registry file until we find the icon
+    for (const registryUrl of categoryRegistries) {
+      const response = await fetch(registryUrl);
+      
+      if (response.ok) {
+        const registry = await response.json();
+        
+        if (registry && registry.icons && Array.isArray(registry.icons)) {
+          // Look for exact ID match
+          const icon = registry.icons.find((icon: IconMetadata) => icon.id === iconId);
+          
+          if (icon) {
+            foundIcon = icon;
+            break;
+          }
+        }
+      }
+    }
+    
+    if (foundIcon) {
+      return {
+        success: true,
+        icon: foundIcon
+      };
+    } else {
+      return {
+        success: false,
+        error: `Icon not found: ${iconId}`
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching icon:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+} 

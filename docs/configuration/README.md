@@ -34,7 +34,7 @@ config/
 │   └── validate-config.js
 ├── start-up/         # Application startup scripts
 │   ├── update-shadcn-index.mjs
-│   └── validate-component-registry.js
+│   └── validate-component-registry.mjs
 ├── ui/               # UI component configuration
 │   ├── component-registry-manager.mjs
 │   ├── components.json
@@ -118,7 +118,7 @@ Configuration for UI components and registries:
 Critical scripts that run during application startup:
 
 - **start-up/update-shadcn-index.mjs**: Updates Shadcn UI component indexes
-- **start-up/validate-component-registry.js**: Validates UI components
+- **start-up/validate-component-registry.mjs**: Validates UI components
 
 ### Configuration Scripts
 

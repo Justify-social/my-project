@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs';
 import { Badge } from '@/components/ui/atoms/badge';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/atoms/table';

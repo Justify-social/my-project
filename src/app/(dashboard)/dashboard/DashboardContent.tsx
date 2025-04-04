@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { Skeleton } from "@/components/ui/atoms/skeleton";
-import { Card } from "@/components/ui/atoms/card";
+import { Card } from "@/components/ui";
 import CalendarDashboard from "@/components/ui/organisms/calendar/CalendarDashboard";
 import UpcomingCampaignsCard from "@/components/ui/organisms/card/UpcomingCampaignsCard";
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';

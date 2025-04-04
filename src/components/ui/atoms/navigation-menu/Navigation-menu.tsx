@@ -4,27 +4,12 @@ import { Icon } from '@/components/ui/atoms/icon';
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { cva } from "class-variance-authority"
-import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+import { IconAdapter } from "@/components/ui/atoms/icon/adapters";
 
 import { cn } from "@/lib/utils"
 
-const NavigationMenu = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative z-10 flex max-w-max flex-1 items-center justify-center",
-      className
-    )}
-    {...props}
-  >
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-))
-NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
+const NavigationMenu = NavigationMenuPrimitive.Root
+NavigationMenu.displayName = "NavigationMenu"
 
 const NavigationMenuList = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.List>,
@@ -115,9 +100,9 @@ const NavigationMenuIndicator = React.forwardRef<
 NavigationMenuIndicator.displayName =
   NavigationMenuPrimitive.Indicator.displayName
 
+export default NavigationMenu
+
 export {
-  navigationMenuTriggerStyle,
-  NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuContent,
@@ -125,4 +110,5 @@ export {
   NavigationMenuLink,
   NavigationMenuIndicator,
   NavigationMenuViewport,
+  navigationMenuTriggerStyle,
 }

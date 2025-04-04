@@ -42,7 +42,7 @@ const deprecatedPatterns = [
   { type: 'legacy', pattern: /setup-components\.js$/, locations: ['.'] },
   
   // Files replaced by new structure
-  { type: 'structure', pattern: /validate-component-registry\.js$/, locations: ['scripts'] },
+  { type: 'structure', pattern: /validate-component-registry\.js$/, locations: ['config/start-up', 'scripts'] },
   
   // Old script backups
   { type: 'backup', pattern: /\.(old|bak|backup)$/, locations: ['scripts'] },

@@ -3,11 +3,12 @@
 import { Icon } from '@/components/ui/atoms/icon';
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { IconAdapter } from "@/components/ui/utils/font-awesome-adapter";
+import { IconAdapter } from "@/components/ui/atoms/icon/adapters";
 
 import { cn } from "@/lib/utils"
 
 const DropdownMenu = DropdownMenuPrimitive.Root
+DropdownMenu.displayName = "DropdownMenu"
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 
@@ -183,8 +184,11 @@ const DropdownMenuShortcut = ({
 }
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
 
+// Export DropdownMenu as default
+export default DropdownMenu
+
+// Export subcomponents as named exports
 export {
-  DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -198,5 +202,5 @@ export {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
+  DropdownMenuRadioGroup
 }

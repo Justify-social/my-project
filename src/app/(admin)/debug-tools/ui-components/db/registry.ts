@@ -23,6 +23,11 @@ export interface ComponentMetadata {
   tags?: string[];
   dependencies?: string[];
   usedBy?: string[];
+  // New fields for component library management
+  originalName?: string;      // Original name before namespacing
+  isNamespaced?: boolean;     // Whether this component has been namespaced
+  library?: 'atomic' | 'shadcn'; // The component library this belongs to
+  exportName?: string;        // Specific export name to use for resolution
 }
 
 export interface ComponentRegistryData {
@@ -31,4 +36,5 @@ export interface ComponentRegistryData {
   version: string;
 }
 
+// Single Source of Truth for component registry
 export const STATIC_REGISTRY_PATH = '/static/component-registry.json'; 

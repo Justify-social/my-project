@@ -14,6 +14,20 @@ Our UI component library follows a clean, modular structure:
 
 ## Recent Optimizations
 
+### Icon Adapter Path Update (2025-04-03)
+
+FontAwesome adapter paths have been updated for better organization:
+
+1. **Relocated Adapter Components**
+   - Moved from `/components/ui/utils/font-awesome-adapter.tsx` to `/components/ui/atoms/icon/adapters/`
+   - Added compatibility layers to maintain backward compatibility
+   - All components still function with existing import paths
+
+2. **Improved Documentation**
+   - Updated references to remove mentions of lucide-react
+   - Clarified that FontAwesome Pro is the standard icon system
+   - Added deprecation notices to old import paths
+
 ### Icon System Unification (2025-03-27)
 
 We've completed a major optimization of the icon system:

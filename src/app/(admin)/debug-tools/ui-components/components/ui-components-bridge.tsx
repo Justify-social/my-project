@@ -12,7 +12,7 @@
 export { Button } from '@/components/ui/atoms/button/Button';
 export { Badge } from '@/components/ui/atoms/badge/badge';
 export { Input } from '@/components/ui/atoms/input/Input';
-export { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/atoms/card/Card';
+export { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/organisms/card/Card';
 
 // Remove separator if it doesn't exist
 // export { Separator } from '@/components/ui/atoms/separator';

@@ -254,25 +254,19 @@ A comprehensive UI component browser is available at `/debug-tools/ui-components
 
 ## Icon System
 
-The project uses FontAwesome Pro for icons, with:
+The application uses a combination of FontAwesome Pro icons and custom app icons. 
 
-1. **Directory Organization**:
-   - `/public/static/icon-registry.json`: Single source of truth for all icons
-   - `/icons/brands/`: Social media platform icons
-   - `/icons/light/`: UI icons in light style (default state)
-   - `/icons/solid/`: UI icons in solid style (hover/active states)
-   - `/icons/app/`: Application-specific custom icons
+### Icon Single Source of Truth (SSOT)
 
-2. **Icon Management**:
-   - Centralized registry with consistent naming
-   - Utility functions for icon path generation
-   - Automatic downloading and optimization
-   - Standardized kebab-case naming without 'fa-' prefix
+The five category-specific registry files serve as the SSOT for all icons:
 
-3. **Icon Component**:
-   - Built-in error handling
-   - Support for all icon variants and sizes
-   - Semantic icon naming for improved accessibility
+- `/public/static/app-icon-registry.json`: Application-specific icons
+- `/public/static/brands-icon-registry.json`: Brand/social media icons
+- `/public/static/kpis-icon-registry.json`: KPI-related icons
+- `/public/static/light-icon-registry.json`: Light FontAwesome icons (default state)
+- `/public/static/solid-icon-registry.json`: Solid FontAwesome icons (hover state)
+
+These registries are automatically consolidated at runtime by the `registry-loader.ts` file.
 
 ## Master Toolkit Architecture
 
