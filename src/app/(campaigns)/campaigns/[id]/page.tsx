@@ -62,7 +62,6 @@ enum Position {
 // };
 
 // Import the asset components
-import { AssetPreview } from '@/components/ui/card-asset-preview'
 import { AssetCard } from '@/components/ui/card-asset'
 
 // Remove local enum definitions that conflict with imported ones
@@ -806,7 +805,8 @@ const ObjectivesSection: React.FC<{
               <Icon
                 // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
                 iconId={`kpis${capitalizeCamelCase(campaign.primaryKPI)}`}
-                className="w-6 h-6 mr-2"
+                // Add filter to force icon to white
+                className="w-6 h-6 mr-2 filter brightness-0 invert"
                 solid="true" // Keep as string for React prop handling
               />
               <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>

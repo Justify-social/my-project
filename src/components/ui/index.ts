@@ -34,7 +34,6 @@ export { default as MetricsComparison } from './metrics-comparison';
 
 // Asset card components - category-first naming
 export { default as CardAsset } from './card-asset';
-export { default as CardAssetPreview } from './card-asset-preview';
 
 // Typography components - category-first naming
 export { default as TypographyText } from './typography-text';
