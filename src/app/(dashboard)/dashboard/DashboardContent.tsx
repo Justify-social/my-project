@@ -6,13 +6,14 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
-import { Skeleton, Card, Icon } from "@/components/ui";
+import { Card, Icon } from "@/components/ui";
+import Skeleton, { TableSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import useSWR from 'swr';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button/Button'
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { TableSkeleton } from '@/components/ui/loading-skeleton';
+
 
 // Define IconName type locally if it's not available
 type IconName = string;
@@ -37,7 +38,7 @@ interface IconProps {
 
 // Spinner for loading states
 const Spinner: React.FC = () =>
-<div className="animate-pulse space-y-2 w-full font-work-sans">
+  <div className="animate-pulse space-y-2 w-full font-work-sans">
     <div className="h-5 bg-gray-200 rounded w-1/3 mb-2 font-work-sans"></div>
     <div className="h-4 bg-gray-200 rounded w-1/2 font-work-sans"></div>
     <div className="h-4 bg-gray-200 rounded w-2/3 mt-2 font-work-sans"></div>
@@ -56,15 +57,15 @@ const Toast: React.FC<ToastProps> = ({
   const config = {
     error: {
       bg: "bg-red-600",
-      icon: (props: IconProps) => <Icon iconId="faXCircleLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />
+      icon: (props: IconProps) => <Icon iconId="faXCircleLight" {...props} className="text-[var(--secondary-color)] font-work-sans" />
     },
     success: {
       bg: "bg-green-600",
-      icon: (props: IconProps) => <Icon iconId="faCheckCircleLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />
+      icon: (props: IconProps) => <Icon iconId="faCheckCircleLight" {...props} className="text-[var(--secondary-color)] font-work-sans" />
     },
     info: {
       bg: "bg-[var(--accent-color)]",
-      icon: (props: IconProps) => <Icon iconId="faBellAlertLight" {...props}  className="text-[var(--secondary-color)] font-work-sans" />
+      icon: (props: IconProps) => <Icon iconId="faBellAlertLight" {...props} className="text-[var(--secondary-color)] font-work-sans" />
     }
   }[type];
   const Icon = config.icon;
@@ -79,9 +80,9 @@ const Toast: React.FC<ToastProps> = ({
     y: 20
   }} className={`fixed bottom-4 right-4 ${config.bg} text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center space-x-2 z-50 font-work-sans`}>
 
-      <Icon className="w-4 h-4 sm:w-5 sm:h-5" solid={false} />
-      <span className="font-medium text-sm font-work-sans">{message}</span>
-    </motion.div>;
+    <Icon className="w-4 h-4 sm:w-5 sm:h-5" solid={false} />
+    <span className="font-medium text-sm font-work-sans">{message}</span>
+  </motion.div>;
 };
 
 // Error display component for sections
@@ -92,14 +93,14 @@ const ErrorDisplay: React.FC<{
   message,
   onRetry
 }) => <div className="bg-white rounded-lg border border-red-200 p-6 text-center font-work-sans">
-    <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4 font-work-sans">
-      <Icon iconId="faXCircleLight" className="w-8 h-8 text-red-500 font-work-sans"  />
-    </div>
-    <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2 font-sora">Something went wrong!</h3>
-    <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">
-      {message}
-    </p>
-    {onRetry && <button onClick={onRetry} className="group inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors font-work-sans">
+      <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4 font-work-sans">
+        <Icon iconId="faXCircleLight" className="w-8 h-8 text-red-500 font-work-sans" />
+      </div>
+      <h3 className="text-lg font-medium text-[var(--primary-color)] mb-2 font-sora">Something went wrong!</h3>
+      <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">
+        {message}
+      </p>
+      {onRetry && <button onClick={onRetry} className="group inline-flex items-center px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-opacity-90 transition-colors font-work-sans">
 
         <Icon iconId="faArrowRightLight" className="w-4 h-4 mr-2" />
         <span className="font-work-sans">Try again</span>
@@ -110,7 +111,6 @@ const ErrorDisplay: React.FC<{
 interface CardProps {
   title: string;
   description?: string;
-  iconName?: IconName; // @deprecated - use iconId instead
   iconId?: string; // New property for explicit icon ID with variant suffix
   children: React.ReactNode;
   actions?: React.ReactNode;
@@ -118,7 +118,6 @@ interface CardProps {
 const DashboardCard: React.FC<CardProps> = ({
   title,
   description,
-  iconName,
   iconId,
   children,
   actions
@@ -132,21 +131,21 @@ const DashboardCard: React.FC<CardProps> = ({
 
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3 font-work-sans">
       <div className="flex items-center font-work-sans">
-        {(iconName || iconId) && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3 font-work-sans">
-            <Icon 
-              {... (iconId ? { iconId } : { name: iconName })} 
-              className="w-5 h-5 text-[var(--accent-color)] font-work-sans" 
-              solid={false} 
-            />
-          </div>}
+        {iconId && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2.5 rounded-lg mr-3 font-work-sans">
+          <Icon
+            iconId={iconId}
+            className="w-5 h-5 text-[var(--accent-color)] font-work-sans"
+            solid={false}
+          />
+        </div>}
         <div className="font-work-sans">
           <h2 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h2>
           {description && <p className="text-sm text-[var(--secondary-color)] mt-0.5 font-work-sans">{description}</p>}
         </div>
       </div>
       {actions && <div className="flex space-x-2 ml-auto sm:ml-0 font-work-sans">
-          {actions}
-        </div>}
+        {actions}
+      </div>}
     </div>
     <div className="space-y-4 font-work-sans">
       {children}
@@ -205,13 +204,13 @@ const DashboardStatusBadge: React.FC<StatusBadgeProps> = ({
   };
   return <span className={`inline-flex items-center ${sizeClasses} rounded-full font-medium 
       ${config.color} border shadow-sm font-work-sans`}>
-      <Icon 
-        iconId={config.iconId} 
-        className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"} 
-        solid={false} 
-      />
-      {config.label}
-    </span>;
+    <Icon
+      iconId={config.iconId}
+      className={size === "sm" ? "w-3 h-3 mr-1" : "w-4 h-4 mr-1.5"}
+      solid={false}
+    />
+    {config.label}
+  </span>;
 };
 
 // Reusable Components
@@ -219,7 +218,6 @@ interface MetricCardProps {
   title: string;
   value: number | string;
   trend?: number;
-  iconName?: IconName; // @deprecated - use iconId instead
   iconId?: string; // New property for explicit icon ID with variant suffix
   imageSrc?: string; // Add support for direct SVG images
   description?: string;
@@ -231,7 +229,6 @@ const DashboardMetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   trend,
-  iconName,
   iconId,
   imageSrc,
   description,
@@ -242,29 +239,30 @@ const DashboardMetricCard: React.FC<MetricCardProps> = ({
       <div className="flex items-center font-work-sans">
         <div className="mr-3 p-2 bg-[var(--accent-color)] rounded-lg flex items-center justify-center w-9 h-9 font-work-sans">
           {imageSrc ?
-        <img
-          src={imageSrc}
-          alt={title}
-          className="w-5 h-5"
-          style={{ filter: 'brightness(0) invert(1)' }} /> :
+            <img
+              src={imageSrc}
+              alt={title}
+              className="w-5 h-5"
+              style={{ filter: 'brightness(0) invert(1)' }} /> :
 
-        /* Use iconId if provided, fall back to legacy iconName if not */
-        <Icon 
-          {... (iconId ? { iconId } : { name: iconName })}
-          className="w-5 h-5 text-white font-work-sans" 
-          solid={true} 
-        />
-        }
+            /* Use iconId directly */
+            (iconId && <Icon
+              iconId={iconId}
+              className="w-5 h-5 text-white font-work-sans"
+            // Removed redundant solid prop - variant is determined by iconId suffix
+            // solid={true} 
+            />)
+          }
         </div>
         <h3 className="text-sm font-medium text-[var(--secondary-color)] font-sora">{title}</h3>
       </div>
-      
+
       {trend !== undefined && <span className={`inline-flex items-center mr-2 ${trend >= 0 ? 'text-green-600' : 'text-red-600'} font-work-sans`}>
-          {trend >= 0 ? <Icon iconId="faChevronUpLight" className="w-3 h-3 mr-1"  /> : <Icon iconId="faChevronDownLight" className="w-3 h-3 mr-1"  />}
-          {Math.abs(trend)}%
-        </span>}
+        {trend >= 0 ? <Icon iconId="faChevronUpLight" className="w-3 h-3 mr-1" /> : <Icon iconId="faChevronDownLight" className="w-3 h-3 mr-1" />}
+        {Math.abs(trend)}%
+      </span>}
     </div>
-    
+
     <div className="mt-1 pl-11 font-work-sans">
       <div className="text-2xl font-bold text-[var(--primary-color)] font-work-sans">
         {format === "currency" && "$"}
@@ -433,7 +431,6 @@ interface ChartCardProps {
   title: string;
   description?: string;
   children: React.ReactNode;
-  iconName?: IconName; // @deprecated - use iconId instead
   iconId?: string; // New property for explicit icon ID with variant suffix
   actions?: React.ReactNode;
 }
@@ -441,19 +438,18 @@ const ChartCard: React.FC<ChartCardProps> = ({
   title,
   description,
   children,
-  iconName,
   iconId,
   actions
 }) => <div className="bg-white rounded-xl border border-[var(--divider-color)] shadow-sm p-4 sm:p-6 font-work-sans" data-cy="chart-card">
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 font-work-sans">
       <div className="flex items-center font-work-sans">
-        {(iconName || iconId) && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2 rounded-lg mr-3 font-work-sans">
-            <Icon 
-              {... (iconId ? { iconId } : { name: iconName })}
-              className="w-5 h-5 text-[var(--accent-color)] font-work-sans" 
-              solid={false} 
-            />
-          </div>}
+        {iconId && <div className="bg-[var(--accent-color)] bg-opacity-10 p-2 rounded-lg mr-3 font-work-sans">
+          <Icon
+            iconId={iconId}
+            className="w-5 h-5 text-[var(--accent-color)] font-work-sans"
+            solid={false}
+          />
+        </div>}
         <div className="font-work-sans">
           <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">{title}</h3>
           {description && <p className="text-sm text-[var(--secondary-color)] font-work-sans">{description}</p>}
@@ -502,7 +498,7 @@ interface InfluencerMetrics {
 const fetcher = async (url: string) => {
   try {
     const response = await fetch(url);
-    
+
     // Check for non-OK response
     if (!response.ok) {
       const errorText = await response.text();
@@ -511,13 +507,13 @@ const fetcher = async (url: string) => {
         campaigns: []
       };
     }
-    
+
     try {
       const data = await response.json();
-      
+
       // Transform based on response format
       let transformedCampaigns = [];
-      
+
       if (data.success && Array.isArray(data.data)) {
         // Standard format
         transformedCampaigns = data.data.map(mapCampaign);
@@ -528,7 +524,7 @@ const fetcher = async (url: string) => {
         // Campaigns property format
         transformedCampaigns = data.campaigns;
       }
-      
+
       return {
         success: true,
         campaigns: transformedCampaigns
@@ -563,7 +559,7 @@ const mapCampaign = (campaign: any, index: number) => {
       // Error handling
     }
   }
-  
+
   // Parse primary contact safely
   let contactData = { firstName: '', surname: '' };
   if (campaign.primaryContact) {
@@ -577,21 +573,21 @@ const mapCampaign = (campaign: any, index: number) => {
       // Error handling
     }
   }
-  
+
   // Ensure valid dates
   const processDate = (dateInput: any): string => {
     if (!dateInput) return new Date().toISOString();
-    
+
     // If it's already a string ISO date
     if (typeof dateInput === 'string' && dateInput.includes('T')) {
       return dateInput;
     }
-    
+
     // If it's a date object
     if (dateInput instanceof Date) {
       return dateInput.toISOString();
     }
-    
+
     // If it's a string but not ISO format (convert to ISO)
     if (typeof dateInput === 'string') {
       try {
@@ -603,11 +599,11 @@ const mapCampaign = (campaign: any, index: number) => {
         // Error handling
       }
     }
-    
+
     // Default fallback
     return new Date().toISOString();
   };
-  
+
   const mappedCampaign = {
     id: campaign.id || `temp-${index}`,
     campaignName: campaign.name || campaign.campaignName || 'Untitled Campaign',
@@ -621,7 +617,7 @@ const mapCampaign = (campaign: any, index: number) => {
     createdAt: processDate(campaign.createdAt),
     status: (campaign.status || 'draft').toLowerCase()
   };
-  
+
   return mappedCampaign;
 };
 
@@ -950,373 +946,372 @@ const CalendarMonthView: React.FC<{
   month,
   events
 }) => {
-  // Define the event type to include all necessary properties
-  type CalendarEvent = {
-    id: string | number;
-    title: string;
-    start: Date;
-    end?: Date;
-    platform?: string;
-    budget?: number;
-    kpi?: string;
-    status?: string;
-    statusText?: string;
-    statusClass?: string;
-    color?: string;
-  };
+    // Define the event type to include all necessary properties
+    type CalendarEvent = {
+      id: string | number;
+      title: string;
+      start: Date;
+      end?: Date;
+      platform?: string;
+      budget?: number;
+      kpi?: string;
+      status?: string;
+      statusText?: string;
+      statusClass?: string;
+      color?: string;
+    };
 
-  const [currentMonth, setCurrentMonth] = useState(month);
-  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const calendarRef = useRef<HTMLDivElement>(null);
-  
-  // Also add validation for events to prevent errors
-  const validEvents = useMemo(() => {
-    return events.filter(event => 
-      event && 
-      event.id && 
-      event.title && 
-      event.start instanceof Date && 
-      !isNaN(event.start.getTime())
-    ) as CalendarEvent[];
-  }, [events]);
-  
-  // Calculate campaign positions for timeline bars
-  const calculateCampaignRows = (events: CalendarEvent[]) => {
-    if (!events || events.length === 0) return { rows: [], eventPositions: {} };
-    
-    // Sort events by start date and duration
-    const sortedEvents = [...events].sort((a, b) => {
-      const aStart = new Date(a.start).getTime();
-      const bStart = new Date(b.start).getTime();
-      
-      // First sort by start date
-      if (aStart !== bStart) {
-        return aStart - bStart;
-      }
-      
-      // If start dates are the same, sort by duration (shorter first)
-      const aEnd = a.end ? new Date(a.end).getTime() : aStart + 86400000;
-      const bEnd = b.end ? new Date(b.end).getTime() : bStart + 86400000;
-      return (aEnd - aStart) - (bEnd - bStart);
-    });
-    
-    // Assign row positions (track occupied slots)
-    const rows: Array<Array<CalendarEvent>> = [];
-    const eventPositions: Record<string | number, number> = {};
-    
-    sortedEvents.forEach(event => {
-      // Skip invalid events
-      if (!event || !event.id) return;
-      
-      // Find the first available row
-      let rowIndex = 0;
-      let foundRow = false;
-      
-      while (!foundRow) {
-        if (!rows[rowIndex]) {
-          rows[rowIndex] = [];
-        }
-        
-        // Check if this row has space for the event
-        const hasOverlap = rows[rowIndex].some(existingEvent => {
-          const eventStart = new Date(event.start);
-          const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
-          const existingStart = new Date(existingEvent.start);
-          const existingEnd = existingEvent.end ? new Date(existingEvent.end) : new Date(existingStart.getTime() + 86400000);
-          
-          return (eventStart < existingEnd && eventEnd > existingStart);
-        });
-        
-        if (!hasOverlap) {
-          rows[rowIndex].push(event);
-          eventPositions[event.id] = rowIndex;
-          foundRow = true;
-        } else {
-          rowIndex++;
-        }
-      }
-    });
-    
-    return { rows, eventPositions };
-  };
-  
-  // Calculate event positions
-  const { rows, eventPositions } = useMemo(() => 
-    calculateCampaignRows(validEvents), 
-    [validEvents]
-  );
-  
-  const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-  };
-  
-  const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-  };
-  
-  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-  const monthName = monthStart.toLocaleString('default', {
-    month: 'long'
-  });
-  const year = monthStart.getFullYear();
+    const [currentMonth, setCurrentMonth] = useState(month);
+    const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+    const calendarRef = useRef<HTMLDivElement>(null);
 
-  // Generate calendar days
-  const days = [];
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-  
-  // Get the first day of the month (0-6, where 0 is Sunday)
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-  // Adjust to make Monday the first day (0-6, where 0 is Monday)
-  const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-  
-  // Create day objects
-  for (let i = 1; i <= daysInMonth; i++) {
-    const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
-    const isToday = new Date().toDateString() === currentDate.toDateString();
-    
-    days.push({
-      day: i,
-      isToday,
-      date: currentDate
-    });
-  }
-  
-  // Helper function for positioning event bars
-  const getEventBarStyle = (event: CalendarEvent, rowIndex: number) => {
-    if (!calendarRef.current) return {};
-    
-    // Get event dates
-    const eventStart = new Date(event.start);
-    const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
-    
-    // Adjust dates to calendar view
+    // Also add validation for events to prevent errors
+    const validEvents = useMemo(() => {
+      return events.filter(event =>
+        event &&
+        event.id &&
+        event.title &&
+        event.start instanceof Date &&
+        !isNaN(event.start.getTime())
+      ) as CalendarEvent[];
+    }, [events]);
+
+    // Calculate campaign positions for timeline bars
+    const calculateCampaignRows = (events: CalendarEvent[]) => {
+      if (!events || events.length === 0) return { rows: [], eventPositions: {} };
+
+      // Sort events by start date and duration
+      const sortedEvents = [...events].sort((a, b) => {
+        const aStart = new Date(a.start).getTime();
+        const bStart = new Date(b.start).getTime();
+
+        // First sort by start date
+        if (aStart !== bStart) {
+          return aStart - bStart;
+        }
+
+        // If start dates are the same, sort by duration (shorter first)
+        const aEnd = a.end ? new Date(a.end).getTime() : aStart + 86400000;
+        const bEnd = b.end ? new Date(b.end).getTime() : bStart + 86400000;
+        return (aEnd - aStart) - (bEnd - bStart);
+      });
+
+      // Assign row positions (track occupied slots)
+      const rows: Array<Array<CalendarEvent>> = [];
+      const eventPositions: Record<string | number, number> = {};
+
+      sortedEvents.forEach(event => {
+        // Skip invalid events
+        if (!event || !event.id) return;
+
+        // Find the first available row
+        let rowIndex = 0;
+        let foundRow = false;
+
+        while (!foundRow) {
+          if (!rows[rowIndex]) {
+            rows[rowIndex] = [];
+          }
+
+          // Check if this row has space for the event
+          const hasOverlap = rows[rowIndex].some(existingEvent => {
+            const eventStart = new Date(event.start);
+            const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
+            const existingStart = new Date(existingEvent.start);
+            const existingEnd = existingEvent.end ? new Date(existingEvent.end) : new Date(existingStart.getTime() + 86400000);
+
+            return (eventStart < existingEnd && eventEnd > existingStart);
+          });
+
+          if (!hasOverlap) {
+            rows[rowIndex].push(event);
+            eventPositions[event.id] = rowIndex;
+            foundRow = true;
+          } else {
+            rowIndex++;
+          }
+        }
+      });
+
+      return { rows, eventPositions };
+    };
+
+    // Calculate event positions
+    const { rows, eventPositions } = useMemo(() =>
+      calculateCampaignRows(validEvents),
+      [validEvents]
+    );
+
+    const prevMonth = () => {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    };
+
+    const nextMonth = () => {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    };
+
     const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-    
-    const displayStart = eventStart < monthStart ? monthStart : eventStart;
-    const displayEnd = eventEnd > monthEnd ? monthEnd : eventEnd;
-    
-    // Get day cells for calculating positions later
-    return {
-      startDay: displayStart.getDate(),
-      endDay: displayEnd.getDate(),
-      rowIndex: rowIndex,
-      color: event.color || getCampaignColor(event.platform || 'other')
-    };
-  };
-  
-  // Helper function for getting colors based on platform
-  const getCampaignColor = (platform: string): string => {
-    const colors: Record<string, string> = {
-      'instagram': '#E1306C',
-      'facebook': '#3b5998',
-      'twitter': '#1DA1F2',
-      'tiktok': '#000000',
-      'youtube': '#FF0000',
-      'linkedin': '#0077B5',
-      'other': '#00BFFF',
-      'x-twitter': '#000000' // X (formerly Twitter) color
-    };
-    
-    return colors[platform.toLowerCase()] || colors.other;
-  };
-  
-  // Add this state at the component level (around line 1445)
-  const [barPositions, setBarPositions] = useState<Record<string, { left: number; top: number; width: number }>>({});
-
-  // Add this useEffect at the component level
-  useEffect(() => {
-    if (!calendarRef.current) return;
-    
-    const newPositions: Record<string, { left: number; top: number; width: number }> = {};
-    
-    validEvents.forEach((event) => {
-      const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
-      
-      // Skip if required data is missing
-      if (!barStyle.startDay || !barStyle.endDay) return;
-      
-      const startCell = calendarRef.current!.querySelector(`[data-day="${barStyle.startDay}"]`);
-      const endCell = calendarRef.current!.querySelector(`[data-day="${barStyle.endDay}"]`);
-      
-      if (!startCell || !endCell) return;
-      
-      const calendarRect = calendarRef.current!.getBoundingClientRect();
-      const startRect = startCell.getBoundingClientRect();
-      const endRect = endCell.getBoundingClientRect();
-      
-      newPositions[String(event.id)] = {
-        left: startRect.left - calendarRect.left + 2,
-        top: startRect.top - calendarRect.top + 18 + (barStyle.rowIndex * 5),
-        width: (endRect.right - startRect.left) - 4
-      };
+    const monthName = monthStart.toLocaleString('default', {
+      month: 'long'
     });
-    
-    setBarPositions(newPositions);
-  }, [validEvents, eventPositions]);
-  
-  return (
-    <div 
-      className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans"
-      ref={calendarRef}
-    >
-      <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)] font-work-sans">
-        <h3 className="text-base font-semibold text-center font-sora">{format(currentMonth, 'MMMM yyyy')}</h3>
-        <div className="flex space-x-2 font-work-sans">
-          <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
-            <Icon iconId="faChevronLeftLight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" />
-          </button>
-          <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
-            <Icon iconId="faChevronRightLight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" />
-          </button>
+    const year = monthStart.getFullYear();
+
+    // Generate calendar days
+    const days = [];
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+
+    // Get the first day of the month (0-6, where 0 is Sunday)
+    const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+    // Adjust to make Monday the first day (0-6, where 0 is Monday)
+    const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+    // Create day objects
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
+      const isToday = new Date().toDateString() === currentDate.toDateString();
+
+      days.push({
+        day: i,
+        isToday,
+        date: currentDate
+      });
+    }
+
+    // Helper function for positioning event bars
+    const getEventBarStyle = (event: CalendarEvent, rowIndex: number) => {
+      if (!calendarRef.current) return {};
+
+      // Get event dates
+      const eventStart = new Date(event.start);
+      const eventEnd = event.end ? new Date(event.end) : new Date(eventStart.getTime() + 86400000);
+
+      // Adjust dates to calendar view
+      const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+      const displayStart = eventStart < monthStart ? monthStart : eventStart;
+      const displayEnd = eventEnd > monthEnd ? monthEnd : eventEnd;
+
+      // Get day cells for calculating positions later
+      return {
+        startDay: displayStart.getDate(),
+        endDay: displayEnd.getDate(),
+        rowIndex: rowIndex,
+        color: event.color || getCampaignColor(event.platform || 'other')
+      };
+    };
+
+    // Helper function for getting colors based on platform
+    const getCampaignColor = (platform: string): string => {
+      const colors: Record<string, string> = {
+        'instagram': '#E1306C',
+        'facebook': '#3b5998',
+        'twitter': '#1DA1F2',
+        'tiktok': '#000000',
+        'youtube': '#FF0000',
+        'linkedin': '#0077B5',
+        'other': '#00BFFF',
+        'x-twitter': '#000000' // X (formerly Twitter) color
+      };
+
+      return colors[platform.toLowerCase()] || colors.other;
+    };
+
+    // Add this state at the component level (around line 1445)
+    const [barPositions, setBarPositions] = useState<Record<string, { left: number; top: number; width: number }>>({});
+
+    // Add this useEffect at the component level
+    useEffect(() => {
+      if (!calendarRef.current) return;
+
+      const newPositions: Record<string, { left: number; top: number; width: number }> = {};
+
+      validEvents.forEach((event) => {
+        const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
+
+        // Skip if required data is missing
+        if (!barStyle.startDay || !barStyle.endDay) return;
+
+        const startCell = calendarRef.current!.querySelector(`[data-day="${barStyle.startDay}"]`);
+        const endCell = calendarRef.current!.querySelector(`[data-day="${barStyle.endDay}"]`);
+
+        if (!startCell || !endCell) return;
+
+        const calendarRect = calendarRef.current!.getBoundingClientRect();
+        const startRect = startCell.getBoundingClientRect();
+        const endRect = endCell.getBoundingClientRect();
+
+        newPositions[String(event.id)] = {
+          left: startRect.left - calendarRect.left + 2,
+          top: startRect.top - calendarRect.top + 18 + (barStyle.rowIndex * 5),
+          width: (endRect.right - startRect.left) - 4
+        };
+      });
+
+      setBarPositions(newPositions);
+    }, [validEvents, eventPositions]);
+
+    return (
+      <div
+        className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden h-full flex flex-col font-work-sans"
+        ref={calendarRef}
+      >
+        <div className="p-4 flex items-center justify-between border-b border-[var(--divider-color)] font-work-sans">
+          <h3 className="text-base font-semibold text-center font-sora">{format(currentMonth, 'MMMM yyyy')}</h3>
+          <div className="flex space-x-2 font-work-sans">
+            <button onClick={prevMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
+              <Icon iconId="faChevronLeftLight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" />
+            </button>
+            <button onClick={nextMonth} className="group p-1 rounded-md hover:bg-[var(--background-color)] font-work-sans">
+              <Icon iconId="faChevronRightLight" className="w-5 h-5 text-[var(--secondary-color)] font-work-sans" />
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <div className="overflow-x-auto flex-grow font-work-sans">
-        {/* Day headers with consistent width */}
-        <div className="grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)] font-work-sans">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => (
-            <div key={day} className="flex justify-center items-center py-1 font-work-sans">{day}</div>
-          ))}
-        </div>
-        
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans relative" style={{ minHeight: '300px' }}>
-          {/* Empty cells for days not in this month at the beginning */}
-          {Array.from({ length: adjustedFirstDay }).map((_, index) => (
-            <div key={`empty-start-${index}`} className="calendar-cell h-20 bg-gray-50 rounded-md"></div>
-          ))}
-          
-          {/* Actual days in the month */}
-          {days.map((day, dayIndex) => (
-            <div 
-              key={`day-${day.day}`} 
-              className={`calendar-cell h-20 p-1 rounded-md relative ${
-                day.isToday ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white hover:bg-gray-50'
-              }`}
-              data-day={day.day}
-              data-date={day.date.toISOString()}
-              style={{ minHeight: '80px' }}
-            >
-              <div className="text-xs font-medium text-[var(--secondary-color)]">{day.day}</div>
-            </div>
-          ))}
-          
-          {/* Empty cells for days not in this month at the end */}
-          {Array.from({ length: (7 - ((adjustedFirstDay + daysInMonth) % 7)) % 7 }).map((_, index) => (
-            <div key={`empty-end-${index}`} className="calendar-cell h-20 bg-gray-50 rounded-md"></div>
-          ))}
-          
-          {/* Event bars layer */}
-          {validEvents.map((event) => {
-            const barPosition = barPositions[String(event.id)];
-            if (!barPosition) return null;
-            
-            const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
-            
-            return (
+
+        <div className="overflow-x-auto flex-grow font-work-sans">
+          {/* Day headers with consistent width */}
+          <div className="grid grid-cols-7 text-center py-2 px-1 text-xs font-medium text-[var(--secondary-color)] font-work-sans">
+            {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((day) => (
+              <div key={day} className="flex justify-center items-center py-1 font-work-sans">{day}</div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 gap-1 px-1 pb-2 font-work-sans relative" style={{ minHeight: '300px' }}>
+            {/* Empty cells for days not in this month at the beginning */}
+            {Array.from({ length: adjustedFirstDay }).map((_, index) => (
+              <div key={`empty-start-${index}`} className="calendar-cell h-20 bg-gray-50 rounded-md"></div>
+            ))}
+
+            {/* Actual days in the month */}
+            {days.map((day, dayIndex) => (
               <div
-                key={`event-${event.id}`}
-                className={`absolute z-10 rounded-sm px-1 py-0.5 text-xs font-medium text-white overflow-hidden whitespace-nowrap cursor-pointer
-                           ${event.status === 'completed' ? 'bg-gray-500' : 
-                             event.status === 'active' ? 'bg-green-500' : 
-                             event.status === 'upcoming' ? 'bg-blue-500' : 'bg-[var(--accent-color)]'}`}
-                style={{
-                  left: `${barPosition.left}px`,
-                  top: `${barPosition.top}px`,
-                  width: `${barPosition.width}px`,
-                  backgroundColor: barStyle.color
-                }}
-                onClick={() => handleEventClick(event)}
-                onMouseEnter={(e) => {
-                  setHoveredEvent(String(event.id));
-                  setTooltipPosition({ 
-                    x: e.clientX, 
-                    y: e.clientY 
-                  });
-                }}
-                onMouseLeave={() => setHoveredEvent(null)}
+                key={`day-${day.day}`}
+                className={`calendar-cell h-20 p-1 rounded-md relative ${day.isToday ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white hover:bg-gray-50'
+                  }`}
+                data-day={day.day}
+                data-date={day.date.toISOString()}
+                style={{ minHeight: '80px' }}
               >
-                {event.title}
+                <div className="text-xs font-medium text-[var(--secondary-color)]">{day.day}</div>
               </div>
-            );
-          })}
+            ))}
+
+            {/* Empty cells for days not in this month at the end */}
+            {Array.from({ length: (7 - ((adjustedFirstDay + daysInMonth) % 7)) % 7 }).map((_, index) => (
+              <div key={`empty-end-${index}`} className="calendar-cell h-20 bg-gray-50 rounded-md"></div>
+            ))}
+
+            {/* Event bars layer */}
+            {validEvents.map((event) => {
+              const barPosition = barPositions[String(event.id)];
+              if (!barPosition) return null;
+
+              const barStyle = getEventBarStyle(event, eventPositions[event.id] || 0);
+
+              return (
+                <div
+                  key={`event-${event.id}`}
+                  className={`absolute z-10 rounded-sm px-1 py-0.5 text-xs font-medium text-white overflow-hidden whitespace-nowrap cursor-pointer
+                           ${event.status === 'completed' ? 'bg-gray-500' :
+                      event.status === 'active' ? 'bg-green-500' :
+                        event.status === 'upcoming' ? 'bg-blue-500' : 'bg-[var(--accent-color)]'}`}
+                  style={{
+                    left: `${barPosition.left}px`,
+                    top: `${barPosition.top}px`,
+                    width: `${barPosition.width}px`,
+                    backgroundColor: barStyle.color
+                  }}
+                  onClick={() => handleEventClick(event)}
+                  onMouseEnter={(e) => {
+                    setHoveredEvent(String(event.id));
+                    setTooltipPosition({
+                      x: e.clientX,
+                      y: e.clientY
+                    });
+                  }}
+                  onMouseLeave={() => setHoveredEvent(null)}
+                >
+                  {event.title}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-      
-      {/* Tooltip for event details */}
-      {hoveredEvent && (
-        <div 
-          className="fixed z-50 bg-white rounded-md shadow-lg border border-[var(--divider-color)] p-3 max-w-xs"
-          style={{
-            left: `${tooltipPosition.x + 10}px`,
-            top: `${tooltipPosition.y + 10}px`
-          }}
-        >
-          {(() => {
-            const event = validEvents.find(e => String(e.id) === hoveredEvent);
-            if (!event) return null;
-            
-            return (
-              <>
-                <h4 className="font-semibold text-sm font-sora">{event.title}</h4>
-                <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
-                  <div className="flex items-center font-work-sans">
-                    <Icon iconId="faCalendarLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
-                    <span>
-                      {format(new Date(event.start), 'MMM d, yyyy')} 
-                      {event.end && ` - ${format(new Date(event.end), 'MMM d, yyyy')}`}
-                    </span>
-                  </div>
-                  {event.platform && (
-                    <div className="flex items-center mt-1 font-work-sans">
-                      <Icon iconId="faHashtagLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
-                      <span>{event.platform}</span>
-                    </div>
-                  )}
-                  {event.budget && (
-                    <div className="flex items-center mt-1 font-work-sans">
-                      <Icon iconId="faDollarSignLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
-                      <span>${event.budget.toLocaleString()}</span>
-                    </div>
-                  )}
-                  {event.status && (
-                    <div className="mt-2 font-work-sans">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${event.statusClass || 'bg-gray-100'}`}>
-                        {event.statusText || event.status}
+
+        {/* Tooltip for event details */}
+        {hoveredEvent && (
+          <div
+            className="fixed z-50 bg-white rounded-md shadow-lg border border-[var(--divider-color)] p-3 max-w-xs"
+            style={{
+              left: `${tooltipPosition.x + 10}px`,
+              top: `${tooltipPosition.y + 10}px`
+            }}
+          >
+            {(() => {
+              const event = validEvents.find(e => String(e.id) === hoveredEvent);
+              if (!event) return null;
+
+              return (
+                <>
+                  <h4 className="font-semibold text-sm font-sora">{event.title}</h4>
+                  <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">
+                    <div className="flex items-center font-work-sans">
+                      <Icon iconId="faCalendarLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
+                      <span>
+                        {format(new Date(event.start), 'MMM d, yyyy')}
+                        {event.end && ` - ${format(new Date(event.end), 'MMM d, yyyy')}`}
                       </span>
                     </div>
-                  )}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      )}
-      
-      {/* Status legend */}
-      <div className="p-2 flex flex-wrap gap-2 border-t border-[var(--divider-color)]">
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-blue-100 border border-blue-400 rounded-sm"></span>
-          <span>Draft</span>
-        </div>
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-green-100 border border-green-400 rounded-sm"></span>
-          <span>Active</span>
-        </div>
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-yellow-100 border border-yellow-400 rounded-sm"></span>
-          <span>In Review</span>
-        </div>
-        <div className="flex items-center text-xs text-[var(--secondary-color)]">
-          <span className="w-3 h-3 inline-block mr-1 bg-gray-100 border border-gray-400 rounded-sm"></span>
-          <span>Completed</span>
+                    {event.platform && (
+                      <div className="flex items-center mt-1 font-work-sans">
+                        <Icon iconId="faHashtagLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
+                        <span>{event.platform}</span>
+                      </div>
+                    )}
+                    {event.budget && (
+                      <div className="flex items-center mt-1 font-work-sans">
+                        <Icon iconId="faDollarSignLight" className="w-3 h-3 mr-1 text-[var(--secondary-color)]" />
+                        <span>${event.budget.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {event.status && (
+                      <div className="mt-2 font-work-sans">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${event.statusClass || 'bg-gray-100'}`}>
+                          {event.statusText || event.status}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* Status legend */}
+        <div className="p-2 flex flex-wrap gap-2 border-t border-[var(--divider-color)]">
+          <div className="flex items-center text-xs text-[var(--secondary-color)]">
+            <span className="w-3 h-3 inline-block mr-1 bg-blue-100 border border-blue-400 rounded-sm"></span>
+            <span>Draft</span>
+          </div>
+          <div className="flex items-center text-xs text-[var(--secondary-color)]">
+            <span className="w-3 h-3 inline-block mr-1 bg-green-100 border border-green-400 rounded-sm"></span>
+            <span>Active</span>
+          </div>
+          <div className="flex items-center text-xs text-[var(--secondary-color)]">
+            <span className="w-3 h-3 inline-block mr-1 bg-yellow-100 border border-yellow-400 rounded-sm"></span>
+            <span>In Review</span>
+          </div>
+          <div className="flex items-center text-xs text-[var(--secondary-color)]">
+            <span className="w-3 h-3 inline-block mr-1 bg-gray-100 border border-gray-400 rounded-sm"></span>
+            <span>Completed</span>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 // Above the DashboardContent component, right after all interface declarations
 // Helper function to generate SVG path data from chart points
@@ -1370,30 +1365,30 @@ const generateAreaPath = (linePath: string): string => {
 // (if they were removed, add them back)
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case 'Performance':return 'bg-blue-500';
-    case 'Audience':return 'bg-purple-500';
-    case 'Content':return 'bg-green-500';
-    case 'Strategy':return 'bg-yellow-500';
-    default:return 'bg-gray-500';
+    case 'Performance': return 'bg-blue-500';
+    case 'Audience': return 'bg-purple-500';
+    case 'Content': return 'bg-green-500';
+    case 'Strategy': return 'bg-yellow-500';
+    default: return 'bg-gray-500';
   }
 };
 
 const getCategoryTextColor = (category: string) => {
   switch (category) {
-    case 'Performance':return 'text-blue-500 bg-blue-100';
-    case 'Audience':return 'text-purple-500 bg-purple-100';
-    case 'Content':return 'text-green-500 bg-green-100';
-    case 'Strategy':return 'text-yellow-500 bg-yellow-100';
-    default:return 'text-gray-500 bg-gray-100';
+    case 'Performance': return 'text-blue-500 bg-blue-100';
+    case 'Audience': return 'text-purple-500 bg-purple-100';
+    case 'Content': return 'text-green-500 bg-green-100';
+    case 'Strategy': return 'text-yellow-500 bg-yellow-100';
+    default: return 'text-gray-500 bg-gray-100';
   }
 };
 
 const getImpactBadgeColor = (impact: string) => {
   switch (impact) {
-    case 'High':return 'bg-red-100 text-red-700';
-    case 'Medium':return 'bg-yellow-100 text-yellow-700';
-    case 'Low':return 'bg-green-100 text-green-700';
-    default:return 'bg-gray-100 text-gray-700';
+    case 'High': return 'bg-red-100 text-red-700';
+    case 'Medium': return 'bg-yellow-100 text-yellow-700';
+    case 'Low': return 'bg-green-100 text-green-700';
+    default: return 'bg-gray-100 text-gray-700';
   }
 };
 
@@ -1475,7 +1470,7 @@ export default function DashboardContent({
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const calendarRef = useRef<HTMLDivElement>(null);
   const [barPositions, setBarPositions] = useState<Record<string, { left: number; top: number; width: number }>>({});
-  
+
   // Update the SWR hook type with improved configuration
   const {
     data: campaignsData,
@@ -1489,7 +1484,7 @@ export default function DashboardContent({
     revalidateIfStale: true,
     revalidateOnReconnect: true
   });
-  
+
   // Process campaigns for different views
   const activeCampaigns = useMemo(() => {
     return campaignsData?.campaigns?.filter((campaign) => campaign.submissionStatus === "submitted" && new Date(campaign.startDate) <= new Date() && (!campaign.endDate || new Date(campaign.endDate) >= new Date())) || [];
@@ -1498,11 +1493,11 @@ export default function DashboardContent({
   // Process campaign data for the calendar
   const calendarEvents = useMemo(() => {
     if (!campaignsData || !campaignsData.campaigns || !campaignsData.campaigns.length) return [];
-    
+
     // Helper function to get status text
     const getStatusText = (status: string): string => {
       const normalizedStatus = status?.toLowerCase() || 'draft';
-      
+
       switch (normalizedStatus) {
         case 'draft':
           return 'Draft';
@@ -1520,7 +1515,7 @@ export default function DashboardContent({
           return status || 'Draft';
       }
     };
-    
+
     // Calendar events for the upcoming campaigns - include ALL campaigns for the calendar
     return campaignsData.campaigns.map(campaign => ({
       id: campaign.id,
@@ -1533,7 +1528,7 @@ export default function DashboardContent({
       statusText: getStatusText(campaign.submissionStatus)
     }));
   }, [campaignsData]);
-  
+
   // No need to maintain separate upcomingCampaigns here since they are filtered in the UpcomingCampaignsCard component
 
   const metrics = useMemo(() => ({
@@ -1681,24 +1676,24 @@ export default function DashboardContent({
     opacity: 1,
     y: 0
   }} className="bg-white rounded-xl border border-[var(--divider-color)] overflow-hidden shadow-sm">
-    <div className={`h-2 ${getCategoryColor(insight.category)} font-work-sans`} />
-    <div className="p-5 font-work-sans">
-      <div className="flex items-center mb-3 font-work-sans">
-        <span className={`${getCategoryTextColor(insight.category)} text-xs font-medium px-2.5 py-0.5 rounded-full bg-opacity-15 font-work-sans`}>
-          {insight.category}
-        </span>
-        <span className={`ml-2 ${getImpactBadgeColor(insight.impact)} text-xs font-medium px-2 py-0.5 rounded-full font-work-sans`}>
-          {insight.impact} Impact
-        </span>
-      </div>
-      <h3 className="text-base font-semibold text-[var(--primary-color)] mb-2 font-sora">{insight.title}</h3>
-      <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">{insight.description}</p>
-      <button onClick={() => onAction(insight.action)} className="group w-full px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center font-work-sans">
-        <span className="font-work-sans">Take Action</span>
-        <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-2" />
-      </button>
-    </div>
-  </motion.div>;
+        <div className={`h-2 ${getCategoryColor(insight.category)} font-work-sans`} />
+        <div className="p-5 font-work-sans">
+          <div className="flex items-center mb-3 font-work-sans">
+            <span className={`${getCategoryTextColor(insight.category)} text-xs font-medium px-2.5 py-0.5 rounded-full bg-opacity-15 font-work-sans`}>
+              {insight.category}
+            </span>
+            <span className={`ml-2 ${getImpactBadgeColor(insight.impact)} text-xs font-medium px-2 py-0.5 rounded-full font-work-sans`}>
+              {insight.impact} Impact
+            </span>
+          </div>
+          <h3 className="text-base font-semibold text-[var(--primary-color)] mb-2 font-sora">{insight.title}</h3>
+          <p className="text-sm text-[var(--secondary-color)] mb-4 font-work-sans">{insight.description}</p>
+          <button onClick={() => onAction(insight.action)} className="group w-full px-4 py-2 bg-[var(--accent-color)] text-white text-sm rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center font-work-sans">
+            <span className="font-work-sans">Take Action</span>
+            <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-2" />
+          </button>
+        </div>
+      </motion.div>;
 
   // Return the JSX for the dashboard
   return (
@@ -1711,7 +1706,7 @@ export default function DashboardContent({
           </h2>
           <div className="flex space-x-3 font-work-sans">
             <select
-              className="rounded-lg border border-[var(--divider-color)] pl-3 pr-8 py-2 text-sm text-[var(--primary-color)] focus:ring-[var(--accent-color)] font-work-sans" 
+              className="rounded-lg border border-[var(--divider-color)] pl-3 pr-8 py-2 text-sm text-[var(--primary-color)] focus:ring-[var(--accent-color)] font-work-sans"
               defaultValue="30"
               data-cy="time-period-select"
             >
@@ -1720,54 +1715,46 @@ export default function DashboardContent({
               <option value="30">Last 30 days</option>
               <option value="90">Last 90 days</option>
             </select>
-            
+
             <button
               onClick={handleExport}
               className="inline-flex items-center rounded-lg border border-[var(--divider-color)] px-4 py-2 text-sm text-[var(--primary-color)] hover:bg-gray-50 transition-colors font-work-sans"
               data-cy="export-button"
             >
-              <Icon iconId="faDownloadLight" className="w-4 h-4 mr-2 text-[var(--secondary-color)]"  />
+              <Icon iconId="faDownloadLight" className="w-4 h-4 mr-2 text-[var(--secondary-color)]" />
               Export
             </button>
-            
+
             <button
               onClick={handleNewCampaign}
               className="bg-[var(--accent-color)] hover:bg-[#0096cc] text-white px-4 py-2 rounded-lg flex items-center transition-colors duration-200 font-work-sans"
               data-cy="new-campaign-button"
             >
-              <Icon iconId="faPlusLight" className="w-4 h-4 mr-2"  />
+              <Icon iconId="faPlusLight" className="w-4 h-4 mr-2" />
               <span className="font-work-sans">New Campaign</span>
             </button>
           </div>
         </div>
-        
+
         {/* Calendar and Campaign Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 font-work-sans">
           {/* Calendar */}
           <div className="col-span-12 lg:col-span-6 font-work-sans">
-            <CalendarDashboard month={currentDate} events={calendarEvents} />
+            <CalendarMonthView month={currentDate} events={calendarEvents} />
           </div>
-          
+
           {/* Campaign Cards - Align with calendar */}
           <div className="col-span-12 lg:col-span-6 font-work-sans">
-            <ErrorBoundary
+            {/* Commented out the ErrorBoundary and usage of the missing component */}
+            {/* <ErrorBoundary 
               fallback={
-                <div className="h-full border border-[var(--divider-color)] rounded-lg bg-white overflow-hidden p-4">
-                  <h3 className="text-sm font-medium text-[var(--secondary-color)] mb-3">Upcoming</h3>
-                  <div className="text-center py-4 border border-dashed border-[var(--divider-color)] rounded-lg">
-                    <p className="text-sm text-red-500 mb-2">Unable to display campaigns</p>
-                    <button 
-                      onClick={() => window.location.reload()} 
-                      className="text-xs px-3 py-1.5 bg-[var(--accent-color)] text-white rounded-md"
-                    >
-                      Refresh
-                    </button>
-                  </div>
-                </div>
+                <ErrorDisplay 
+                  message="Could not load upcoming campaigns."
+                />
               }
             >
-              <UpcomingCampaignsCard 
-                campaigns={Array.isArray(campaignsData?.campaigns) ? 
+              <UpcomingCampaignsCard
+                campaigns={Array.isArray(campaignsData?.campaigns) ?
                   campaignsData.campaigns.map(c => ({
                     ...c,
                     id: c.id,
@@ -1784,17 +1771,17 @@ export default function DashboardContent({
                 onNewCampaign={handleNewCampaign}
                 onSelectCampaign={(id: number | string) => router.push(`/campaigns/${id}`)}
               />
-            </ErrorBoundary>
+            </ErrorBoundary> */}
           </div>
         </div>
       </div>
-      
+
       {/* Performance Metrics Section */}
       <div className="mb-5 sm:mb-8 font-work-sans">
         <div className="flex items-center justify-between mb-3 sm:mb-4 font-work-sans">
           <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary-color)] font-sora">Performance</h2>
         </div>
-        
+
         {/* Performance Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-work-sans">
           <DashboardMetricCard
@@ -1804,7 +1791,7 @@ export default function DashboardContent({
             iconId="faMegaphoneLight"
             description={`+${metrics.stats.campaignChange} campaigns`} />
 
-          
+
           <DashboardMetricCard
             title="Survey Responses"
             value={metrics.stats.surveyResponses}
@@ -1812,7 +1799,7 @@ export default function DashboardContent({
             iconId="faCommentDotsLight"
             description={`${metrics.stats.surveyChange < 0 ? '' : '+'}${metrics.stats.surveyChange} responses`} />
 
-          
+
           <DashboardMetricCard
             title="Live Campaigns"
             value={metrics.stats.liveCampaigns}
@@ -1820,7 +1807,7 @@ export default function DashboardContent({
             iconId="faPlayLight"
             description={`${metrics.stats.liveChange > 0 ? '+' : ''}${metrics.stats.liveChange} active`} />
 
-          
+
           <DashboardMetricCard
             title="Credits Available"
             value={metrics.stats.creditsAvailable}
@@ -1842,7 +1829,7 @@ export default function DashboardContent({
             </button>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg border border-[var(--divider-color)] font-work-sans">
           <div className="flex border-b border-[var(--divider-color)] font-work-sans">
             <button className="group px-4 py-3 text-sm font-medium text-[var(--accent-color)] border-b-2 border-[var(--accent-color)] font-work-sans">
@@ -1858,7 +1845,7 @@ export default function DashboardContent({
               <span className="font-work-sans">Comments</span>
             </button>
           </div>
-          
+
           {/* Social profiles content */}
           <div className="overflow-hidden p-4 font-work-sans">
             <table className="min-w-full">
@@ -1925,7 +1912,7 @@ export default function DashboardContent({
               </tbody>
             </table>
           </div>
-          
+
           {/* Security check box */}
           <div className="mt-1 border-t border-gray-200 p-4 font-work-sans">
             <div className="flex justify-between items-center font-work-sans">
@@ -1953,13 +1940,13 @@ export default function DashboardContent({
             <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-1" />
           </a>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
           {/* Youth Momentum Insight Card */}
           <div className="bg-[#e6f7ff] border border-[#bae6fd] rounded-lg p-5 relative overflow-hidden font-work-sans">
             <div className="flex items-start mb-3 font-work-sans">
               <div className="bg-[var(--accent-color)] p-2 rounded-md mr-3 font-work-sans">
-                <Icon iconId="faChartLineLight" className="w-5 h-5 text-white font-work-sans"  />
+                <Icon iconId="faChartLineLight" className="w-5 h-5 text-white font-work-sans" />
               </div>
               <div className="flex-1 font-work-sans">
                 <h3 className="text-base font-semibold text-[#0c4a6e] font-sora">Youth Momentum: Boosting Performance Among 18-24-Year-Olds</h3>
@@ -1974,7 +1961,7 @@ export default function DashboardContent({
               </button>
             </div>
           </div>
-          
+
           {/* Low Engagement Alert Card */}
           <div className="bg-gray-100 border border-gray-200 rounded-lg p-5 relative overflow-hidden font-work-sans">
             <div className="absolute top-0 right-0 p-1 font-work-sans">
@@ -1984,7 +1971,7 @@ export default function DashboardContent({
             </div>
             <div className="flex items-start mb-3 font-work-sans">
               <div className="bg-gray-300 p-2 rounded-md mr-3 font-work-sans">
-                <Icon iconId="faTriangleExclamationLight" className="w-5 h-5 text-gray-600 font-work-sans"  />
+                <Icon iconId="faTriangleExclamationLight" className="w-5 h-5 text-gray-600 font-work-sans" />
               </div>
               <div className="flex-1 font-work-sans">
                 <h3 className="text-base font-semibold text-gray-700 font-sora">Low Engagement on "NextGen Focus: Amplify Impact"</h3>
@@ -2005,7 +1992,7 @@ export default function DashboardContent({
             <span className="font-work-sans">Manage</span>
           </button>
         </div>
-        
+
         {/* Campaigns table */}
         <div className="bg-white rounded-lg border border-[var(--divider-color)] overflow-hidden font-work-sans">
           <div className="overflow-x-auto font-work-sans">
@@ -2020,13 +2007,14 @@ export default function DashboardContent({
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {isLoadingCampaigns ?
-                <tr>
+                  <tr>
                     <td colSpan={4} className="py-8">
-                      <TableSkeleton rows={3} cols={4} hasHeader={false} />
+                      {/* Removed hasHeader prop */}
+                      <TableSkeleton rows={3} columns={4} />
                     </td>
                   </tr> :
 
-                <>
+                  <>
                     <tr className="hover:bg-gray-50 cursor-pointer">
                       <td className="py-3 px-4">
                         <div className="flex items-center font-work-sans">
@@ -2044,8 +2032,8 @@ export default function DashboardContent({
                           <div className="flex items-center font-work-sans">
                             <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
                               <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
-                              width: '75%'
-                            }}></div>
+                                width: '75%'
+                              }}></div>
                             </div>
                             <span className="text-xs font-medium font-work-sans">12,314$</span>
                           </div>
@@ -2072,8 +2060,8 @@ export default function DashboardContent({
                           <div className="flex items-center font-work-sans">
                             <div className="w-24 bg-gray-200 rounded-full h-1.5 mr-2 font-work-sans">
                               <div className="bg-[var(--accent-color)] h-1.5 rounded-full font-work-sans" style={{
-                              width: '60%'
-                            }}></div>
+                                width: '60%'
+                              }}></div>
                             </div>
                             <span className="text-xs font-medium font-work-sans">10,461$</span>
                           </div>
@@ -2111,7 +2099,7 @@ export default function DashboardContent({
                 <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
               </div>
             </div>
-            
+
             {/* Chart */}
             <div className="mt-4 h-48 relative font-work-sans">
               {/* Simulated chart with lines */}
@@ -2126,7 +2114,7 @@ export default function DashboardContent({
                     <span className="font-work-sans">1k</span>
                     <span className="font-work-sans">0</span>
                   </div>
-                  
+
                   {/* X-axis grid lines */}
                   <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
                     <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
@@ -2135,7 +2123,7 @@ export default function DashboardContent({
                     <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
                     <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
                   </div>
-                  
+
                   {/* Line chart with actual data */}
                   <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
                     <defs>
@@ -2147,7 +2135,7 @@ export default function DashboardContent({
                     <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,20 280,25 300,20" stroke="#0ea5e9" strokeWidth="2" fill="none" />
                     <path d="M0,80 C20,70 40,60 60,50 C80,40 100,30 120,35 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient)" />
                   </svg>
-                  
+
                   {/* X-axis labels */}
                   <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
                     <span className="font-work-sans">01 Aug</span>
@@ -2161,7 +2149,7 @@ export default function DashboardContent({
                 </div>
               </div>
             </div>
-            
+
             {/* Event marker */}
             <div className="mt-6 flex items-center font-work-sans">
               <div className="px-2 py-1 bg-[#e6f7ff] text-[#0ea5e9] text-xs rounded flex items-center font-work-sans">
@@ -2170,7 +2158,7 @@ export default function DashboardContent({
               </div>
             </div>
           </div>
-          
+
           {/* Right side - Latest mentions */}
           <div className="font-work-sans">
             <div className="mb-3 flex justify-between items-center font-work-sans">
@@ -2186,7 +2174,7 @@ export default function DashboardContent({
                 <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 font-medium ml-1 rounded-md font-work-sans">3M</span>
               </div>
             </div>
-            
+
             {/* Chart */}
             <div className="mt-4 h-48 relative font-work-sans">
               {/* Simulated chart with lines */}
@@ -2201,7 +2189,7 @@ export default function DashboardContent({
                     <span className="font-work-sans">1k</span>
                     <span className="font-work-sans">0</span>
                   </div>
-                  
+
                   {/* X-axis grid lines */}
                   <div className="absolute left-0 top-0 w-full h-full border-b border-gray-200 font-work-sans">
                     <div className="absolute left-0 top-0 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
@@ -2210,7 +2198,7 @@ export default function DashboardContent({
                     <div className="absolute left-0 top-3/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
                     <div className="absolute left-0 top-4/5 w-full h-1/5 border-b border-gray-100 font-work-sans"></div>
                   </div>
-                  
+
                   {/* Line chart (simulated with SVG path) */}
                   <svg className="absolute left-0 top-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
                     <defs>
@@ -2222,7 +2210,7 @@ export default function DashboardContent({
                     <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15" stroke="#0ea5e9" strokeWidth="2" fill="none" />
                     <path d="M0,80 C20,75 40,70 60,80 C80,90 100,60 120,50 C140,40 160,30 180,20 C200,10 220,5 240,15 C260,25 280,20 300,15 L300,100 L0,100 Z" fill="url(#blue-gradient-2)" />
                   </svg>
-                  
+
                   {/* X-axis labels */}
                   <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-500 mt-2 font-work-sans">
                     <span className="font-work-sans">01 Aug</span>

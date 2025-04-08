@@ -18,7 +18,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from './card';
-import { getIconClasses } from './utils/icon-integration';
+import { LightIcon } from './icon';
 
 export interface KpiCardProps {
   title: string;
@@ -63,27 +63,33 @@ const KpiCard: React.FC<KpiCardProps> = ({
 }) => {
   // Determine trend direction if not explicitly provided
   const determinedTrend = trend || (
-    change === 0 ? 'neutral' : 
-    change && change > 0 ? 'up' : 'down'
+    change === 0 ? 'neutral' :
+      change && change > 0 ? 'up' : 'down'
   );
-  
+
   // Get appropriate trend icon
-  const trendIcon = determinedTrend === 'up' ? 'arrow-up' : 
-                    determinedTrend === 'down' ? 'arrow-down' : 
-                    'minus';
-  
+  const trendIcon = determinedTrend === 'up' ? 'arrow-up' :
+    determinedTrend === 'down' ? 'arrow-down' :
+      'minus';
+
   // Get trend color based on direction
-  const trendColorClass = determinedTrend === 'up' ? trendColor.up : 
-                          determinedTrend === 'down' ? trendColor.down : 
-                          trendColor.neutral;
-  
+  const trendColorClass = determinedTrend === 'up' ? trendColor.up :
+    determinedTrend === 'down' ? trendColor.down :
+      trendColor.neutral;
+
   // Format the value
   const formattedValue = formatter(value);
-  
+
+  // Define placeholder icons or use actual Icon component
+  const TrendIconPlaceholder = determinedTrend === 'up' ? '▲' :
+    determinedTrend === 'down' ? '▼' :
+      '-';
+  const HeaderIconPlaceholder = icon ? '*' : ''; // Simple placeholder for header icon
+
   return (
-    <Card 
-      className={cn('p-4 transition-all hover:shadow-md', 
-        onClick && 'cursor-pointer', 
+    <Card
+      className={cn('p-4 transition-all hover:shadow-md',
+        onClick && 'cursor-pointer',
         cardClassName
       )}
       onClick={onClick}
@@ -95,26 +101,30 @@ const KpiCard: React.FC<KpiCardProps> = ({
           </h3>
           {icon && (
             <div className="p-2 bg-primary/10 rounded-full">
-              <i className={cn(getIconClasses(icon), 'text-primary')}></i>
+              {/* <i className={cn(getIconClasses(icon), 'text-primary')}></i> */}
+              {/* <span className="text-primary">{HeaderIconPlaceholder}</span> */}{/* Placeholder Removed */}
+              <LightIcon iconId={icon} className="text-primary" />
             </div>
           )}
         </div>
-        
+
         <div className="flex flex-col space-y-1">
           <span className={cn('text-2xl font-bold', valueClassName)}>
             {formattedValue}
           </span>
-          
+
           {subtitle && (
             <span className="text-xs text-gray-500 dark:text-gray-400">
               {subtitle}
             </span>
           )}
         </div>
-        
+
         {typeof change !== 'undefined' && (
           <div className="flex items-center space-x-1 mt-2">
-            <i className={cn(getIconClasses(trendIcon), trendColorClass)}></i>
+            {/* <i className={cn(getIconClasses(trendIcon), trendColorClass)}></i> */}
+            {/* <span className={cn(trendColorClass)}>{TrendIconPlaceholder}</span> */}{/* Placeholder Removed */}
+            <LightIcon iconId={trendIcon} className={cn(trendColorClass)} />
             <span className={cn('text-sm font-medium', trendColorClass)}>
               {change > 0 ? '+' : ''}{change}%
             </span>

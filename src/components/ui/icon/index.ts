@@ -18,33 +18,35 @@
 // --------------------
 // While these components are exported here, it's recommended to import them
 // directly from their source files to avoid any potential barrel file issues
-export { 
+export {
   Icon,
-  SolidIcon, 
-  LightIcon 
+  SolidIcon,
+  LightIcon
 } from './icon';
-export { 
-  HoverIcon 
+/* // Removed export for deleted file
+export {
+  HoverIcon
 } from './hover-icon';
+*/
 
 // Icon Context
 // -----------
-export { 
+/* // Removed export for deleted file
+export {
   default as IconContext,
-  IconContextProvider, 
-  useIconContext 
+  IconContextProvider,
+  useIconContext
 } from './icon-context';
+*/
 
 // Icon Registry & Data
 // -------------------
-export { 
+/* // Removed export from non-existent file
+export {
   iconRegistry,
   consolidateRegistries
 } from './icon-registry-loader';
-export { 
-  UI_ICON_MAP,
-  getSolidUIIcon
-} from './icon-semantic-map';
+*/
 
 // Icon Utility Functions
 // ---------------------
@@ -53,9 +55,6 @@ export {
   findIconById,
   getIconPath,
   iconExists,
-  getIconBaseName,
-  getIconCacheKey,
-  normalizeIconName
 } from './icons';
 export {
   // Variant management
@@ -80,16 +79,16 @@ export {
   type ActionType,
   type IconType,
   type IconVariant,
-  
+
   // Constants
   SIZE_CLASSES,
   PLATFORM_ICON_TYPE_MAP,
-  
+
   // Component props interfaces
   type IconProps,
   type PlatformIconProps,
   type SafeIconProps,
-  
+
   // Registry data interfaces
   type IconMetadata,
   type IconRegistryData,

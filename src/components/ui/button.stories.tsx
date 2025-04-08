@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { Button, ButtonProps } from './button';
-import { getIconClasses } from './utils/icon-integration';
 
 const meta: Meta<typeof Button> = {
   title: 'UI/Atoms/Button',
@@ -92,7 +91,7 @@ export const WithIcon: Story = {
   args: {
     children: (
       <>
-        <i className={`${getIconClasses('plus')} mr-2`}></i>
+        <span className="mr-2">➕</span>
         Add Item
       </>
     ),
@@ -103,7 +102,7 @@ export const IconOnly: Story = {
   args: {
     size: 'icon',
     'aria-label': 'Add item',
-    children: <i className={getIconClasses('plus')}></i>,
+    children: <span>➕</span>,
   },
 };
 
@@ -121,7 +120,7 @@ export const Loading: Story = {
     disabled: true,
     children: (
       <>
-        <i className={`${getIconClasses('spinner')} animate-spin mr-2`}></i>
+        <span className="animate-spin mr-2">⏳</span>
         Loading...
       </>
     ),

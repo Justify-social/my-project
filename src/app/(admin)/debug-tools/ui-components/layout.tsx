@@ -2,23 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { getIconClasses } from '@/components/ui/utils/icon-integration';
+// import { getIconClasses } from '@/components/ui/utils/icon-integration';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LightIcon } from '@/components/ui/icon';
 
 export default function ComponentBrowserLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname() || '';
-  
+  // const pathname = usePathname() || ''; // No longer needed for nav links
+
+  /* // Remove complex nav links
   const navLinks = [
     { href: '/debug-tools/ui-components', label: 'Component Browser', icon: 'grid-2' },
     { href: '/debug-tools/ui-components/render-type-comparison', label: 'Server vs Client', icon: 'code-compare' },
     { href: '/debug-tools/ui-components/server-test', label: 'Server Test', icon: 'server' },
     { href: '/debug-tools/ui-components/client-test', label: 'Client Test', icon: 'browser' },
   ];
+  */
 
   return (
     <ThemeProvider defaultTheme="light">
@@ -26,14 +29,15 @@ export default function ComponentBrowserLayout({
         <header className="border-b bg-background">
           <div className="container flex items-center justify-between h-14">
             <div className="flex items-center gap-8">
-              <Link 
-                href="/debug-tools/ui-components" 
+              <Link
+                href="/debug-tools/ui-components"
                 className="font-semibold text-lg flex items-center"
               >
-                <i className={`${getIconClasses('layer-group')} mr-2 text-primary`}></i>
+                <LightIcon iconId="layer-group" className="mr-2 text-primary" />
                 UI Components
               </Link>
-              
+
+              {/* Remove nav section 
               <nav className="hidden md:flex items-center gap-6">
                 {navLinks.map((link) => {
                   const isActive = 
@@ -50,20 +54,21 @@ export default function ComponentBrowserLayout({
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      <i className={`${getIconClasses(link.icon)} mr-1.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}></i>
+                      <LightIcon iconId={link.icon} className={`mr-1.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                       {link.label}
                     </Link>
                   );
                 })}
               </nav>
+              */}
             </div>
-            
+
             <div className="flex items-center gap-4">
               <ThemeToggle />
             </div>
           </div>
         </header>
-        
+
         <main className="flex-1 pb-12">
           {children}
         </main>

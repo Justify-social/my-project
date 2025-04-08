@@ -4,13 +4,13 @@
  * Provides standardized icon path resolution and utility functions
  */
 
-import { IconStyle, IconMetadata, IconRegistryData } from './icon-types';
+import { IconStyle, IconMetadata } from './icon-types';
 
-// IMPORTANT: The icon registry is the single source of truth for icons
-import { iconRegistry } from './icon-registry-loader';
+// IMPORTANT: Import the generated registry data
+import { iconRegistryData } from '@/lib/generated/icon-registry'; // Use path alias
 
-// Use registry directly with type safety
-const registry = iconRegistry;
+// Use registry data directly with type safety
+const registry = iconRegistryData; // Use the imported data object
 
 // Debug flag
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -18,368 +18,69 @@ const DEBUG = process.env.NODE_ENV === 'development';
 // Helper for debug logging
 const debug = (...args: any[]) => {
   if (DEBUG) {
-    console.log('[Icons]', ...args);
+    // console.log('[Icons]', ...args); // Commented out debug logs
   }
 };
 
-// Map of icon styles to directory names
-const STYLE_FOLDERS: Record<IconStyle, string> = {
-  'solid': 'solid',
-  'light': 'light',
-  'regular': 'regular',
-  'brand': 'brands'
-};
-
-// App-specific icons that should use the app directory
-const APP_ICONS = [
-  'creative-asset-testing',
-  'brand-health',
-  'brand-lift',
-  'campaigns',
-  'help',
-  'home',
-  'influencers',
-  'mmm',
-  'reports',
-  'settings',
-  'billing'
-];
-
-// Standard FontAwesome icons that shouldn't be in the app directory
-const STANDARD_ICONS = [
-  'profile-image',
-  'magnifying-glass',
-  'coins'
-];
-
 /**
- * Normalize icon names to handle various formats
- */
-export function normalizeIconName(name: string): string {
-  if (!name) return 'faQuestion';
-
-  // Handle semantic names by looking up in registry
-  const semanticMatch = registry.icons.find(icon => icon.semantic === name);
-  if (semanticMatch) {
-    return semanticMatch.map || 'faQuestion';
-  }
-
-  // Handle platform names by looking up in registry
-  const platformMatch = registry.icons.find(icon => icon.platform === name);
-  if (platformMatch) {
-    return platformMatch.map || 'faQuestion';
-  }
-
-  // App icon special handling - normalize app prefixed icons
-  if (name.startsWith('app') || name.includes('app_') || name.includes('app-')) {
-    // Strip any non-alphanumeric characters and standardize casing
-    const cleanName = name.replace(/[^a-zA-Z0-9]/g, '');
-
-    // Special case for MMM which should be appMMM not appMmm
-    if (cleanName.toLowerCase() === 'appmmm') {
-      return 'appMMM';
-    }
-
-    // Convert to proper camelCase with app prefix
-    // First letter after 'app' should be uppercase
-    if (cleanName.toLowerCase().startsWith('app')) {
-      const appPrefix = 'app';
-      const restOfName = cleanName.slice(3); // Remove 'app'
-
-      if (restOfName.length > 0) {
-        return appPrefix + restOfName.charAt(0).toUpperCase() + restOfName.slice(1);
-      }
-    }
-  }
-
-  // Convert hyphenated icon names (fa-xmark) to camelCase (faXmark)
-  if (name.includes('-')) {
-    // Extract prefix and icon name parts
-    const parts = name.split('-');
-    const prefix = parts[0];
-
-    // Convert remaining parts to camelCase
-    const iconName = parts.slice(1).map((part, index) =>
-      index > 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part
-    ).join('');
-
-    // Combine prefix with capitalized icon name
-    return prefix + iconName.charAt(0).toUpperCase() + iconName.slice(1);
-  }
-
-  // Handle app icons with underscores (convert to camelCase if needed)
-  if (name.includes('_')) {
-    return name.replace(/_([a-z])/gi, (_, char) => char.toUpperCase());
-  }
-
-  // Add 'fa' prefix if missing and not app/kpis prefixed
-  if (!name.startsWith('fa') && !name.startsWith('app') && !name.startsWith('kpis')) {
-    return `fa${name.charAt(0).toUpperCase()}${name.slice(1)}`;
-  }
-
-  return name;
-}
-
-/**
- * Find an icon in the registry by its FontAwesome map name
- */
-function findIconByMapName(mapName: string): IconMetadata | null {
-  if (!registry?.icons || !Array.isArray(registry.icons)) {
-    debug('Icon registry is not properly loaded or not an array');
-    return null;
-  }
-
-  const icon = registry.icons.find((item: IconMetadata) => item.map === mapName);
-  debug(icon ? `Found icon by map name '${mapName}'` : `Icon '${mapName}' not found by map name`);
-  return icon || null;
-}
-
-/**
- * Find an icon by its ID in the registry
- * If icon ID not found, tries to add Light/Solid suffix and check again
- * @param id Icon ID to find
- * @returns The icon details or undefined if not found
+ * Find an icon by its ID in the registry.
+ * @param id The exact Icon ID to find (e.g., 'faUserLight', 'appHome').
+ * @returns The icon metadata or null if not found.
  */
 export function findIconById(id: string): IconMetadata | null {
+  // Use the imported registry data
   if (!registry?.icons || !Array.isArray(registry.icons)) {
-    debug('Icon registry is not properly loaded or not an array');
+    debug('Icon registry data is not properly loaded or not an array');
     return null;
   }
 
-  // Direct lookup
-  let icon = registry.icons.find((item: IconMetadata) =>
-    item.id === id ||
-    item.id === `${id.toLowerCase()}` ||
-    (item as any).kebabId === toKebabCase(id)
-  );
+  // Direct lookup using the provided ID
+  const icon = registry.icons.find((item: IconMetadata) => item.id === id);
 
-  // If not found, try with Light/Solid suffixes
-  if (!icon && !id.endsWith('Light') && !id.endsWith('Solid')) {
-    // Try with Light suffix
-    icon = registry.icons.find((item: IconMetadata) => item.id === `${id}Light`);
-
-    // If still not found, try with Solid suffix
-    if (!icon) {
-      icon = registry.icons.find((item: IconMetadata) => item.id === `${id}Solid`);
-
-      if (icon) {
-        debug(`Found icon with Solid suffix: ${icon.id}`);
-      }
-    } else {
-      debug(`Found icon with Light suffix: ${icon.id}`);
-    }
-  }
-
-  debug(icon ? `Found icon by ID '${id}'` : `Icon '${id}' not found by ID`);
+  // debug(icon ? `Found icon by ID '${id}'` : `Icon '${id}' not found by ID`); // Commented out
   return icon || null;
 }
 
 /**
- * Try to find an icon by its alternatives if the primary name isn't found
+ * Get the path to an icon image file using only the registry.
+ *
+ * @param iconId - The exact Icon ID with variant suffix (e.g., 'faUserLight', 'faUserSolid', 'appHome')
+ * @returns URL to the icon image file from the registry or a fallback path.
  */
-function findIconByAlternatives(name: string): IconMetadata | null {
-  // Get alternatives from registry
-  const alternatives = registry.icons
-    .filter(icon => icon.alternatives && Array.isArray(icon.alternatives) && icon.alternatives.includes(name))
-    .map(icon => icon.map)
-    .filter((mapName): mapName is string => !!mapName); // Filter out null/undefined values
+export function getIconPath(iconId: string): string {
+  const defaultFallbackPath = '/icons/light/faQuestionLight.svg'; // Consistent fallback
 
-  if (alternatives && alternatives.length > 0) {
-    for (const alt of alternatives) {
-      const iconByMap = findIconByMapName(alt);
-      if (iconByMap) return iconByMap;
-
-      const iconById = findIconById(alt);
-      if (iconById) return iconById;
-    }
-  }
-  return null;
-}
-
-/**
- * Generate a standardized FontAwesome icon path for fallback when not in registry
- * 
- * This maintains the design system by using a predictable path based on naming conventions
- */
-function generateFontAwesomeIconPath(name: string, variant: IconStyle = 'light'): string {
-  // Handle explicit suffixes in the name that should override the variant
-  const hasSolidSuffix = name.endsWith('Solid');
-  const hasLightSuffix = name.endsWith('Light');
-
-  // Determine the effective variant and base name
-  let effectiveVariant = variant;
-  let baseName = name;
-
-  if (hasSolidSuffix) {
-    effectiveVariant = 'solid';
-    // Strip the Solid suffix for path generation if needed
-    if (name.endsWith('Solid') && !name.includes('faSolid')) {
-      baseName = name.substring(0, name.length - 5);
-    }
-  } else if (hasLightSuffix) {
-    effectiveVariant = 'light';
-    // Strip the Light suffix for path generation if needed
-    if (name.endsWith('Light') && !name.includes('faLight')) {
-      baseName = name.substring(0, name.length - 5);
-    }
-  }
-
-  // Remove 'fa' prefix to get the actual icon name
-  const iconName = baseName.startsWith('fa') ? baseName.substring(2).toLowerCase() : baseName.toLowerCase();
-
-  // Convert from camelCase to kebab-case for FA format compatibility
-  const kebabName = toKebabCase(iconName);
-
-  // Create the path using the style folder and full icon ID to match registry pattern
-  const folder = STYLE_FOLDERS[effectiveVariant] || 'light';
-
-  // Check if we should use an app-specific path
-  if (kebabName.startsWith('app')) {
-    return `/icons/app/${kebabName.substring(3).toLowerCase()}.svg`;
-  }
-
-  // Create path that matches registry pattern with full ID
-  if (effectiveVariant === 'solid') {
-    return `/icons/${folder}/fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}Solid.svg`;
-  } else if (effectiveVariant === 'light') {
-    return `/icons/${folder}/fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}Light.svg`;
-  } else if (effectiveVariant === 'brand') {
-    return `/icons/brands/brands${iconName.charAt(0).toUpperCase() + iconName.slice(1)}.svg`;
-  }
-
-  // Default path format
-  return `/icons/${folder}/fa${iconName.charAt(0).toUpperCase() + iconName.slice(1)}${folder.charAt(0).toUpperCase() + folder.slice(1)}.svg`;
-}
-
-/**
- * Get the path to an icon image file
- * First looks for the icon in the registry, then falls back to a generative approach
- * 
- * @param iconId - Icon ID with explicit variant suffix (e.g., faUserLight, faUserSolid)
- * @param variant - Legacy parameter, only used as fallback if iconId doesn't have suffix
- * @returns URL to the icon image file
- */
-export function getIconPath(iconId: string, variant: IconStyle = 'light'): string {
   if (!iconId) {
-    return '/icons/solid/faQuestionLight.svg'; // Default fallback
+    // debug('No iconId provided, returning default fallback path.'); // Commented out
+    return defaultFallbackPath;
   }
 
-  // Normalize app icons with dashes or underscores to the correct format
-  if (
-    iconId.startsWith('app') &&
-    (iconId.includes('-') || iconId.includes('_'))
-  ) {
-    // Remove dashes and underscores and convert to proper camelCase
-    const parts = iconId.replace(/[-_]/g, ' ').split(' ');
-    const firstPart = parts[0]; // 'app'
-    const restParts = parts.slice(1).map(part =>
-      part.charAt(0).toUpperCase() + part.slice(1)
-    ).join('');
-    iconId = firstPart + restParts;
-    debug(`Normalized icon ID from format with dashes/underscores to: ${iconId}`);
-  }
+  // Attempt to find the icon directly by its ID in the registry
+  const iconMetadata = findIconById(iconId);
 
-  // Determine variant from the iconId suffix BEFORE stripping it
-  const hasSolidSuffix = iconId.endsWith('Solid');
-  const hasLightSuffix = iconId.endsWith('Light');
-  const effectiveVariant = hasSolidSuffix ? 'solid' : hasLightSuffix ? 'light' : variant;
-
-  // Strip suffix AFTER determining variant, before registry lookup
-  let baseIconId = iconId.replace(/(Light|Solid)$/, '');
-
-  // Normalize app icon names further (remove hyphens, ensure camelCase) AFTER stripping suffix
-  if (baseIconId.startsWith('app') && baseIconId.includes('-')) {
-    const parts = baseIconId.split('-');
-    baseIconId = parts[0] + parts.slice(1).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
-    debug(`Normalized hyphenated app icon ID to: ${baseIconId}`);
-  }
-
-  // Find in registry using the base ID (without suffix)
-  const iconMetadata = findIconById(baseIconId);
-
-  // Determine the final path
-  let finalPath: string;
-
-  // Determine folder based on the *originally determined* variant
-  const folder = STYLE_FOLDERS[effectiveVariant] || 'light';
-
-  // Check if it's an app icon
-  if (baseIconId.startsWith('app')) {
-    // For app icons, always generate the path based on the normalized base ID
-    finalPath = `/icons/app/${baseIconId}.svg`;
-    debug(`Generating app icon path for ${baseIconId}: ${finalPath}`);
+  if (iconMetadata?.path) {
+    // debug(`Found icon '${id}', using path from registry: ${iconMetadata.path}`); // Commented out
+    return iconMetadata.path;
   } else {
-    // For FontAwesome icons, generate path using the *original iconId* (which includes the correct suffix)
-    finalPath = `/icons/${folder}/${iconId}.svg`;
-    debug(`Generating standard icon path for ${iconId} (variant: ${effectiveVariant}): ${finalPath}`);
+    // debug(`Icon '${id}' not found in registry. Returning fallback path.`); // Commented out
+    // Check if it looks like an app icon trying to use a variant
+    if (iconId.startsWith('app') && (iconId.endsWith('Light') || iconId.endsWith('Solid'))) {
+      const baseAppId = iconId.replace(/(Light|Solid)$/, '');
+      const baseAppIcon = findIconById(baseAppId);
+      if (baseAppIcon?.path) {
+        // debug(`Attempted to use variant for app icon '${id}'. Found base app icon '${baseAppId}'. Returning its path: ${baseAppIcon.path}`); // Commented out
+        return baseAppIcon.path; // Return the base app icon path
+      }
+    }
+    return defaultFallbackPath;
   }
-
-  // Optionally log if registry path differs (for debugging)
-  if (iconMetadata && iconMetadata.path && iconMetadata.path !== finalPath) {
-    debug(`Registry path (${iconMetadata.path}) differs from generated path (${finalPath}) for ${iconId}. Using generated path.`);
-  }
-
-  return finalPath;
 }
 
 /**
- * Check if an icon exists in the registry
+ * Check if an icon exists in the registry by its ID.
  */
-export function iconExists(name: string): boolean {
-  const normalizedName = normalizeIconName(name);
-
-  // Check by map name
-  const iconByMap = findIconByMapName(normalizedName);
-  if (iconByMap) return true;
-
-  // Check by ID
-  const iconById = findIconById(normalizedName);
-  if (iconById) return true;
-
-  // Check by alternatives
-  const iconByAlternative = findIconByAlternatives(normalizedName);
-  if (iconByAlternative) return true;
-
-  return false;
-}
-
-/**
- * Get the base name of an icon without fa/fas/far prefix
- */
-export function getIconBaseName(name: string): string {
-  const normalizedName = normalizeIconName(name);
-
-  if (normalizedName.startsWith('fa')) {
-    // Remove fa prefix
-    return normalizedName.substring(2);
-  }
-
-  return normalizedName;
-}
-
-/**
- * Generate a cache key for an icon to use in memoization
- */
-export function getIconCacheKey(name: string, variant: IconStyle = 'light'): string {
-  return `${normalizeIconName(name)}_${variant}`;
-}
-
-/**
- * Convert a string to kebab-case
- */
-export function toKebabCase(str: string): string {
-  // First handle special cases like 'CircleNotch' → 'circle-notch'
-  const specialCaseRegex = /([a-z])([A-Z])/g;
-  const kebabStr = str
-    // Replace uppercase letters with - followed by lowercase letter
-    .replace(specialCaseRegex, '$1-$2')
-    .toLowerCase();
-
-  // Special case handling for specific icons
-  if (kebabStr === 'circlenotch') return 'circle-notch';
-  if (kebabStr === 'chartline') return 'chart-line';
-  if (kebabStr === 'arrowleft') return 'arrow-left';
-  if (kebabStr === 'magnifyingglassplus') return 'magnifying-glass-plus';
-
-  return kebabStr;
+export function iconExists(iconId: string): boolean {
+  if (!iconId) return false;
+  const icon = findIconById(iconId);
+  return !!icon; // Returns true if icon is found, false otherwise
 }

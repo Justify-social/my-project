@@ -45,7 +45,7 @@ export { default as NotificationSonner } from './notification-sonner';
 
 // Icons and Navigation components
 export { Icon } from './icon/icon';
-export { default as IconContext, IconContextProvider, useIconContext } from './icon/icon-context';
+// export { default as IconContext, IconContextProvider, useIconContext } from './icon/icon-context'; // Removed export for deleted file
 export { default as Sidebar } from './navigation/sidebar';
 export { default as Header } from './navigation/header';
 export { default as MenuMobile, MenuMobileBase } from './navigation/mobile-menu';

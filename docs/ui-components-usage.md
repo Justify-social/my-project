@@ -31,41 +31,61 @@ import { Button, type ButtonProps } from '@/components/ui';
 
 ## Available Components
 
-The UI component library includes the following components:
+The UI component library includes the following components, primarily exported from `@/components/ui`:
 
-### Basic Components
-- `Button`: Standard button component with various variants and sizes
-- `Card`: Container component with header, content, and footer sections
-- `Input`: Text input component
-- `Select`: Dropdown select component
+### Core Components
+- `Button` (and `ButtonProps`)
+- `Card` (and `CardHeader`, `CardFooter`, `CardTitle`, `CardDescription`, `CardContent`)
+- `Input`
+- `Select` (and `SelectContent`, `SelectItem`, `SelectTrigger`, `SelectValue`)
+- `Tabs` (and `TabsList`, `TabsTrigger`, `TabsContent`)
+- `Table` (Note: Sub-components like `TableHeader`, `TableCell` might need direct import from `./table`)
+- `Alert` (and `AlertTitle`, `AlertDescription`)
+- `Badge`
+- `Avatar` (and `AvatarImage`, `AvatarFallback`)
+- `ThemeToggle`
+- `Icon` (Note: Import directly from `@/components/ui/icon/icon` recommended)
 
-### Layout Components
-- `Tabs`: Tab navigation component
+### Visualization Components
+- `ChartLine`
+- `ChartBar`
+- `ChartPie`
+- `ChartArea`
+- `ChartRadar`
+- `ChartScatter`
+- `ChartFunnel`
 
-### Data Components
-- Charts: `LineChart`, `BarChart`, `PieChart`, `AreaChart`, `RadarChart`, `ScatterChart`, `FunnelChart`
-- KPI Components: `KpiCard`, `MetricsDashboard`, `MetricComparison`
+### KPI & Metrics Components
+- `CardKpi`
+- `MetricsDashboard`
+- `MetricsComparison`
 
-### Client Components
-- `Button` (client version): Enhanced interactive version of button
-- `Card` (client version): Enhanced interactive version of card
+### Domain-Specific Cards
+- `CardAsset`
+- `CardAssetPreview`
 
-### Other Components
-- `ThemeToggle`: Component for switching between light and dark themes
-- `Icon`: Universal icon component supporting multiple icon libraries
+### Typography Components
+- `TypographyText`
+- `TypographyHeading`
 
-## Examples
+### Navigation Components
+- `Sidebar`
+- `Header`
+- `MenuMobile`
 
-Examples of all components can be found at:
-`/debug-tools/ui-components/examples/`
+### Form Components
+- `SearchBar`
 
-The examples are organized by category:
-- Basic Components (`/examples/basics/`)
-- Layout Components (`/examples/layouts/`)
-- Data Components (`/examples/data/`)
-- Form Components (`/examples/forms/`)
-- Theme Components (`/examples/themes/`)
-- Pattern Examples (`/examples/patterns/`)
+### Notification Components
+- `NotificationSonner`
+
+### Loading Components
+- `LoadingSpinner`
+- `LoadingSkeleton` (and variants like `DashboardSkeleton`, `TableSkeleton`)
+
+### Client Component Variants
+- `Button` (client - import from `@/components/ui/client/button-client`)
+- `Card` (client - import from `@/components/ui/client/card-client`)
 
 ## Adding a New Component
 
@@ -74,7 +94,7 @@ When adding a new component:
 1. Create the component file in `src/components/ui/`
 2. Export the component from `src/components/ui/index.ts`
 3. Add appropriate JSDoc documentation to the component
-4. Create example usage in the relevant category under `/examples/`
+4. Consider adding a basic rendering of the component to the `/debug-tools/ui-components` page for visual reference.
 
 ## SSOT Validation
 

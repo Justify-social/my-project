@@ -6,10 +6,10 @@
  */
 
 // Use require() for CommonJS compatibility
-const { webpack: configureWebpack } = require('./config/platform/next/module/webpack.js');
-const { images: imagesConfig } = require('./config/platform/next/module/images.js');
-const pathsConfig = require('./config/platform/next/module/paths.js');
-const { mergeConfigurations } = require('./config/utils.js');
+const { webpack: configureWebpack } = require('./module/webpack.js');
+const { images: imagesConfig } = require('./module/images.js');
+const pathsConfig = require('./module/paths.js');
+const { mergeConfigurations } = require('../../utils.js');
 
 /**
  * Base Next.js configuration
@@ -31,9 +31,6 @@ const baseNextConfig = {
     ignoreBuildErrors: false,
     tsconfigPath: './tsconfig.json',
   },
-
-  // Analytics
-  analyticsId: process.env.NEXT_TELEMETRY_DISABLED ? null : process.env.NEXT_PUBLIC_ANALYTICS_ID,
 };
 
 /**

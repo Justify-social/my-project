@@ -10,7 +10,7 @@ import { NotificationSonner } from '@/components/ui/notification-sonner';
 import { Suspense } from 'react';
 import { connection } from 'next/server';
 // Import IconContextProvider for consistent icon behavior
-import { IconContextProvider } from '@/components/ui/icon/icon-context';
+// import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import
 import { SidebarProvider } from '@/providers/SidebarProvider';
 import { SearchProvider } from '@/contexts/SearchContext';
 // Import the new auth state provider
@@ -52,26 +52,28 @@ export default function RootLayout({
         <UserProvider>
           {/* Add AuthStateProvider as the SSOT for auth state */}
           <AuthStateProvider>
+            {/* // Removed IconContextProvider wrapper
             <IconContextProvider 
               defaultVariant="light" 
               defaultSize="md"
               iconBasePath="/icons"
             >
-              <SidebarProvider>
-                <SearchProvider>
-                  <NotificationSonner />
-                  <Suspense>
-                    <UTSSR />
-                  </Suspense>
-                  <ClientLayout>
-                    <main className="min-h-screen bg-gray-100">
-                      {children}
-                    </main>
-                  </ClientLayout>
-                  <Toaster />
-                </SearchProvider>
-              </SidebarProvider>
-            </IconContextProvider>
+            */}
+            <SidebarProvider>
+              <SearchProvider>
+                <NotificationSonner />
+                <Suspense>
+                  <UTSSR />
+                </Suspense>
+                <ClientLayout>
+                  <main className="min-h-screen bg-gray-100">
+                    {children}
+                  </main>
+                </ClientLayout>
+                <Toaster />
+              </SearchProvider>
+            </SidebarProvider>
+            {/* </IconContextProvider> */}
           </AuthStateProvider>
         </UserProvider>
       </body>

@@ -10,13 +10,14 @@ import React from 'react';
 import { ShadcnIcon } from '../shadcn-adapter';
 import { IconAdapter } from '../font-awesome-adapter';
 import { Icon } from '../../icon';
-import { UI_ICON_MAP } from '../../icon-semantic-map';
+// Removed import for deleted semantic map
+// import { UI_ICON_MAP } from '../../icon-semantic-map';
 
 export const AdapterTest: React.FC = () => {
   return (
     <div className="p-6 space-y-8">
       <h1 className="text-2xl font-bold">Icon Adapter Tests</h1>
-      
+
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Core Icon Component (SSOT Implementation)</h2>
         <div className="flex gap-4 items-center">
@@ -38,7 +39,7 @@ export const AdapterTest: React.FC = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">ShadcnIcon Adapter (Canonical Adapter)</h2>
         <div className="flex gap-4 items-center">
@@ -60,7 +61,7 @@ export const AdapterTest: React.FC = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">IconAdapter (Legacy Adapter)</h2>
         <div className="flex gap-4 items-center">
@@ -82,25 +83,25 @@ export const AdapterTest: React.FC = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Semantic Mapping Test</h2>
+        <h2 className="text-xl font-semibold">Semantic Mapping Test (Now uses direct ID)</h2>
         <div className="flex gap-4 items-center">
           <div className="flex flex-col items-center">
-            <Icon iconId={UI_ICON_MAP.settings} />
-            <p className="text-sm mt-1">UI_ICON_MAP.settings</p>
+            <Icon iconId="faGearLight" />
+            <p className="text-sm mt-1">Direct ID ('faGearLight')</p>
           </div>
           <div className="flex flex-col items-center">
-            <ShadcnIcon iconId={UI_ICON_MAP.settings} />
+            <ShadcnIcon iconId="faGearLight" />
             <p className="text-sm mt-1">With ShadcnIcon</p>
           </div>
           <div className="flex flex-col items-center">
-            <IconAdapter iconId={UI_ICON_MAP.settings} />
+            <IconAdapter iconId="faGearLight" />
             <p className="text-sm mt-1">With IconAdapter</p>
           </div>
         </div>
       </section>
-      
+
       <div className="mt-8 p-4 bg-gray-100 rounded">
         <h3 className="font-medium">SSOT Validation Results:</h3>
         <p>All adapters ultimately render through the core Icon component, maintaining SSOT principles.</p>

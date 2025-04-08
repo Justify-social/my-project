@@ -10,8 +10,6 @@ import React, { useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/icon/icon';
-import { HoverIcon } from '@/components/ui/icon/hover-icon';
-import { UI_ICON_MAP, hasSemanticIcon } from '@/components/ui/icon/icon-semantic-map';
 import { iconExists } from '@/components/ui/icon/icons';
 
 /**
@@ -28,60 +26,54 @@ interface SidebarItemProps {
   onClick?: () => void;
 }
 
-function SidebarItem({ 
-  href, 
-  label, 
-  icon, 
-  isActive, 
-  isExpanded, 
+function SidebarItem({
+  href,
+  label,
+  icon,
+  isActive,
+  isExpanded,
   children,
   onClick
 }: SidebarItemProps) {
-  // Determine the correct icon ID based on semantic mapping or direct reference
-  const getIconId = useCallback((iconName: string, isItemActive: boolean) => {
-    // If icon is a semantic name in our map, use it
-    if (hasSemanticIcon(iconName)) {
-      return isItemActive 
-        ? UI_ICON_MAP[iconName].replace('Light', 'Solid') 
-        : UI_ICON_MAP[iconName];
-    }
+  // Determine icon ID directly from prop and active state
+  let iconId = '';
+  const isAppIcon = icon?.startsWith('app');
+  const active = isActive || false; // Provide default for isActive
 
-    // For direct icon references, ensure proper suffix for the variant
-    if (iconName) {
-      // If icon already has a proper suffix, use as is
-      if (iconName.endsWith('Light') || iconName.endsWith('Solid')) {
-        return isItemActive 
-          ? iconName.replace('Light', 'Solid') 
-          : iconName;
-      }
-      
-      // Add the appropriate suffix
-      return `${iconName}${isItemActive ? 'Solid' : 'Light'}`;
+  if (icon) {
+    // Handle App Icons separately - they don't have variants
+    if (isAppIcon) {
+      iconId = icon;
     }
-    
-    // Fallback for missing icons
-    return isItemActive ? 'faCircleSolid' : 'faCircleLight';
-  }, []);
+    // Handle regular icons
+    else if (icon.endsWith('Light') || icon.endsWith('Solid')) {
+      iconId = active ? icon.replace('Light', 'Solid') : icon.replace('Solid', 'Light');
+    } else {
+      // Assume it's a base name, add appropriate suffix
+      iconId = `${icon}${active ? 'Solid' : 'Light'}`;
+    }
+  } else {
+    // Fallback if no icon prop provided
+    iconId = active ? 'faCircleSolid' : 'faCircleLight';
+  }
 
-  // Verify if the icon exists before rendering
-  const iconId = icon ? getIconId(icon, isActive || false) : '';
   const iconAvailable = icon && iconExists(iconId);
 
   return (
     <li>
-      <Link 
+      <Link
         href={href}
         className={cn(
           "flex items-center py-2 px-3 text-sm rounded-md transition-colors duration-150",
-          isActive 
-            ? "bg-primary/10 text-primary font-medium" 
+          active
+            ? "bg-primary/10 text-primary font-medium"
             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
           !isExpanded && "justify-center"
         )}
         onClick={onClick}
       >
         {iconAvailable ? (
-          <HoverIcon 
+          <Icon
             iconId={iconId}
             className={cn(
               "w-5 h-5",
@@ -90,7 +82,7 @@ function SidebarItem({
           />
         ) : icon ? (
           // Fallback for icons that don't exist
-          <span 
+          <span
             className={cn(
               "flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full",
               isExpanded ? "mr-2" : "mx-auto"
@@ -100,7 +92,7 @@ function SidebarItem({
             {icon.charAt(0).toUpperCase()}
           </span>
         ) : null}
-        
+
         {isExpanded && <span>{label}</span>}
         {!isExpanded && !icon && <span className="truncate w-5">{label.charAt(0)}</span>}
       </Link>
@@ -150,17 +142,30 @@ export function Sidebar({
   // Active path detection
   const isActive = useCallback((path: string) => {
     // Exact match or parent path match
-    return activePath === path || 
+    return activePath === path ||
       (path !== '/' && activePath.startsWith(path));
   }, [activePath]);
-  
+
   // Active parent detection
   const hasActiveChild = useCallback((item: { children?: any[] }) => {
     return item.children?.some(child => isActive(child.href));
   }, [isActive]);
-  
+
+  // Helper to get icon ID for parent items (like folders)
+  const getParentIconId = (itemIcon: string | undefined, isActiveParent: boolean | undefined) => {
+    const active = isActiveParent || false; // Default to false
+    if (!itemIcon) return 'faFolderLight';
+    if (itemIcon.startsWith('app')) return itemIcon;
+
+    if (itemIcon.endsWith('Light') || itemIcon.endsWith('Solid')) {
+      return active ? itemIcon.replace('Light', 'Solid') : itemIcon.replace('Solid', 'Light');
+    } else {
+      return `${itemIcon}${active ? 'Solid' : 'Light'}`;
+    }
+  };
+
   return (
-    <aside 
+    <aside
       className={cn(
         "flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300",
         isExpanded ? "w-56" : "w-16",
@@ -181,20 +186,20 @@ export function Sidebar({
             <span className="font-medium text-gray-900 dark:text-white">{title}</span>
           </div>
         )}
-        
+
         <button
           onClick={onToggle}
           className="p-1 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
           data-testid="sidebar-toggle"
         >
-          <HoverIcon 
-            iconId={isExpanded ? UI_ICON_MAP.chevronLeft : UI_ICON_MAP.chevronRight}
+          <Icon
+            iconId={isExpanded ? "faChevronLeftLight" : "faChevronRightLight"}
             className="w-4 h-4"
           />
         </button>
       </div>
-      
+
       {/* Navigation items */}
       <nav className="flex-1 py-4 overflow-y-auto">
         <ul className="space-y-1 px-2">
@@ -205,18 +210,15 @@ export function Sidebar({
                   <div
                     className={cn(
                       "flex items-center py-2 px-3 text-sm rounded-md cursor-pointer",
-                      hasActiveChild(item)
+                      (hasActiveChild(item) || false) // Default here too
                         ? "bg-primary/10 text-primary font-medium"
                         : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
                       !isExpanded && "justify-center"
                     )}
                   >
-                    {item.icon && iconExists(item.icon) && (
-                      <HoverIcon 
-                        iconId={hasActiveChild(item) 
-                          ? item.icon.replace('Light', 'Solid')
-                          : item.icon
-                        }
+                    {item.icon && (
+                      <Icon
+                        iconId={getParentIconId(item.icon, hasActiveChild(item))}
                         className={cn(
                           "w-5 h-5",
                           isExpanded ? "mr-2" : "mx-auto"
@@ -226,8 +228,8 @@ export function Sidebar({
                     {isExpanded && (
                       <>
                         <span className="flex-1">{item.label}</span>
-                        <HoverIcon 
-                          iconId={UI_ICON_MAP.chevronDown}
+                        <Icon
+                          iconId={"faChevronDownLight"}
                           className="w-3 h-3"
                         />
                       </>
@@ -236,7 +238,7 @@ export function Sidebar({
                       <span className="truncate w-5">{item.label.charAt(0)}</span>
                     )}
                   </div>
-                  
+
                   {isExpanded && (
                     <ul className="mt-1 ml-6 space-y-1">
                       {item.children.map((child, childIndex) => (
@@ -254,7 +256,7 @@ export function Sidebar({
                   )}
                 </li>
               ) : (
-                <SidebarItem 
+                <SidebarItem
                   href={item.href}
                   label={item.label}
                   icon={item.icon}

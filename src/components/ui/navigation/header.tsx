@@ -14,8 +14,6 @@ import { MenuMobile } from '@/components/ui/navigation/mobile-menu';
 import { navItems, settingsNavItem } from "./config";
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
-import { HoverIcon } from '@/components/ui/icon/hover-icon';
-import { UI_ICON_MAP, hasSemanticIcon } from '@/components/ui/icon/icon-semantic-map';
 import { iconExists } from '@/components/ui/icon/icons';
 import { cn } from '@/lib/utils';
 
@@ -37,36 +35,33 @@ const Header: React.FC<HeaderProps> = ({
   const { user } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Determine if the coins icon exists and get the appropriate ID
-  const coinsIconId = hasSemanticIcon('coins') ? UI_ICON_MAP.coins : 'faCoinsSolid';
+  // Define icon IDs directly
+  const coinsIconId = "faCoinsLight";
   const hasCoinsIcon = iconExists(coinsIconId);
 
-  // Determine if the bell icon exists and get the appropriate ID
-  const bellIconId = hasSemanticIcon('bell') ? UI_ICON_MAP.bell : 'faBellSolid';
+  const bellIconId = "faBellLight";
   const hasBellIcon = iconExists(bellIconId);
 
-  // Determine if the user icon exists and get the appropriate ID
-  const userIconId = hasSemanticIcon('userCircle') ? UI_ICON_MAP.userCircle : 'faCircleUserSolid';
+  const userIconId = "faUserCircleLight";
   const hasUserIcon = iconExists(userIconId);
 
-  // Menu icon for mobile
-  const menuIconId = hasSemanticIcon('menu') ? UI_ICON_MAP.menu : 'faBars';
+  const menuIconId = "faBarsLight"; // Use Light variant from map
   const hasMenuIcon = iconExists(menuIconId);
 
   return (
     <>
-      <header 
+      <header
         className="fixed top-0 left-0 w-full z-50 bg-white border-b font-sora"
         data-testid="header" // Aid for testing
       >
         <div className="flex items-center justify-between px-4 py-3 font-work-sans">
           {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
           <Link href="/dashboard" className="flex items-center space-x-2">
-            <Image 
-              src="/logo.png" 
-              alt="Justify Logo" 
-              width={40} 
-              height={40} 
+            <Image
+              src="/logo.png"
+              alt="Justify Logo"
+              width={40}
+              height={40}
               onError={(e) => {
                 // Fallback for logo if image fails to load
                 e.currentTarget.style.display = 'none';
@@ -91,14 +86,14 @@ const Header: React.FC<HeaderProps> = ({
                 <Link href="/billing">
                   <div className="flex items-center space-x-1 cursor-pointer font-work-sans">
                     {hasCoinsIcon ? (
-                      <HoverIcon 
-                        iconId={coinsIconId.replace('Light', 'Solid')} // Always use solid for these navigation icons
-                        className="w-6 h-6" 
-                        data-testid="coins-icon" 
+                      <Icon
+                        iconId="faCoinsSolid" // Use Solid ID directly
+                        className="w-6 h-6"
+                        data-testid="coins-icon"
                       />
                     ) : (
                       // Fallback if icon doesn't exist
-                      <div 
+                      <div
                         className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs"
                         title="Coins icon not found"
                       >
@@ -112,15 +107,15 @@ const Header: React.FC<HeaderProps> = ({
                 {/* Notifications - positioned directly adjacent to coins */}
                 <div className="relative font-work-sans ml-1">
                   {hasBellIcon ? (
-                    <HoverIcon 
-                      iconId={bellIconId.replace('Light', 'Solid')} // Always use solid for these navigation icons
-                      className="w-6 h-6" 
-                      title="Notifications" 
+                    <Icon
+                      iconId="faBellSolid" // Use Solid ID directly
+                      className="w-6 h-6"
+                      title="Notifications"
                       data-testid="notifications-icon"
                     />
                   ) : (
                     // Fallback if icon doesn't exist
-                    <div 
+                    <div
                       className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs"
                       title="Notifications icon not found"
                     >
@@ -136,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Mobile Menu Button */}
             <button
               onClick={() => {
@@ -151,8 +146,8 @@ const Header: React.FC<HeaderProps> = ({
               data-testid="mobile-menu-toggle"
             >
               {hasMenuIcon ? (
-                <HoverIcon 
-                  iconId={menuIconId} 
+                <Icon
+                  iconId={menuIconId} // Already Light variant from variable
                   className="w-6 h-6"
                 />
               ) : (
@@ -167,7 +162,7 @@ const Header: React.FC<HeaderProps> = ({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16" 
+                    d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
               )}
@@ -178,15 +173,15 @@ const Header: React.FC<HeaderProps> = ({
               {user && (
                 <Link href="/settings">
                   {hasUserIcon ? (
-                    <HoverIcon 
-                      iconId={userIconId.replace('Light', 'Solid')} // Always use solid for these navigation icons
-                      className="w-8 h-8" 
-                      title="Profile" 
+                    <Icon
+                      iconId="faUserCircleSolid" // Use Solid ID directly
+                      className="w-8 h-8"
+                      title="Profile"
                       data-testid="user-profile-icon"
                     />
                   ) : user.picture ? (
                     // Use user profile picture if available and icon is missing
-                    <Image 
+                    <Image
                       src={user.picture}
                       alt="User Profile"
                       width={32}
@@ -195,7 +190,7 @@ const Header: React.FC<HeaderProps> = ({
                     />
                   ) : (
                     // Ultimate fallback
-                    <div 
+                    <div
                       className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs"
                       title="User profile icon not found"
                     >
@@ -218,7 +213,7 @@ const Header: React.FC<HeaderProps> = ({
         remainingCredits={remainingCredits}
         notificationsCount={notificationsCount}
         companyName={companyName}
-        user={user} 
+        user={user}
       />
     </>
   );

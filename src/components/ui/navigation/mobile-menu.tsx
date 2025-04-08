@@ -11,8 +11,6 @@ import { cn } from '@/lib/utils';
 import { UserProfile } from '@auth0/nextjs-auth0/client';
 import Image from 'next/image';
 import { Icon } from '@/components/ui/icon/icon';
-import { HoverIcon } from '@/components/ui/icon/hover-icon';
-import { UI_ICON_MAP, hasSemanticIcon } from '@/components/ui/icon/icon-semantic-map';
 import { iconExists } from '@/components/ui/icon/icons';
 
 // Define sidebar item types
@@ -79,7 +77,7 @@ export function MobileMenuBase({
 }: MobileMenuBaseProps) {
   // Track which sections are expanded in the menu
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-  
+
   // Close menu when pressing Escape key
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -87,14 +85,14 @@ export function MobileMenuBase({
         onClose();
       }
     };
-    
+
     document.addEventListener('keydown', handleEscapeKey);
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
     };
   }, [isOpen, onClose]);
-  
+
   // Prevent body scrolling when menu is open
   useEffect(() => {
     if (isOpen) {
@@ -102,12 +100,12 @@ export function MobileMenuBase({
     } else {
       document.body.style.overflow = '';
     }
-    
+
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
-  
+
   // Toggle a section's expanded state
   const toggleSection = (id: string) => {
     setExpandedSections(prev => ({
@@ -116,54 +114,32 @@ export function MobileMenuBase({
     }));
   };
 
-  // Get the appropriate icon based on semantic mapping or direct reference
-  const getIconComponent = (iconName: string, isActive: boolean = false) => {
-    // First try semantic mapping
-    let finalIconId = '';
-    if (hasSemanticIcon(iconName)) {
-      finalIconId = isActive 
-        ? UI_ICON_MAP[iconName].replace('Light', 'Solid') 
-        : UI_ICON_MAP[iconName];
-    } 
-    // Then try direct icon reference
-    else if (iconName) {
-      // If icon already has variant suffix, use as is
-      if (iconName.endsWith('Light') || iconName.endsWith('Solid')) {
-        finalIconId = isActive 
-          ? iconName.replace('Light', 'Solid') 
-          : iconName;
-      } else {
-        // Add appropriate suffix
-        finalIconId = `${iconName}${isActive ? 'Solid' : 'Light'}`;
-      }
-    }
-
-    // Check if icon exists
-    if (finalIconId && iconExists(finalIconId)) {
-      return (
-        <HoverIcon 
-          iconId={finalIconId} 
-          className="w-5 h-5"
-        />
-      );
-    }
-
-    // Fallback for missing icon
-    return (
-      <div 
-        className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full"
-        title={`Icon '${iconName}' not found`}
-      >
-        {iconName ? iconName.charAt(0).toUpperCase() : '?'}
-      </div>
-    );
-  };
-  
   // Render a single navigation item
   const renderItem = (item: SidebarItem, depth = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedSections[item.id];
-    
+
+    // Determine icon ID directly from item.icon and item.isActive
+    let itemIconId = '';
+    const isAppIcon = item.icon?.startsWith('app');
+    const active = item.isActive || false; // Provide default
+
+    if (item.icon) {
+      // Handle App Icons separately - they don't have variants
+      if (isAppIcon) {
+        itemIconId = item.icon;
+      }
+      // Handle regular icons
+      else if (item.icon.endsWith('Light') || item.icon.endsWith('Solid')) {
+        itemIconId = active ? item.icon.replace('Light', 'Solid') : item.icon.replace('Solid', 'Light');
+      } else {
+        itemIconId = `${item.icon}${active ? 'Solid' : 'Light'}`;
+      }
+    } else {
+      itemIconId = active ? 'faCircleSolid' : 'faCircleLight'; // Fallback
+    }
+    const iconAvailable = item.icon && iconExists(itemIconId);
+
     return (
       <li key={item.id} className="w-full" data-testid={`mobile-menu-item-${item.id}`}>
         <a
@@ -183,14 +159,26 @@ export function MobileMenuBase({
             'flex items-center py-3 px-4 text-base font-medium w-full',
             'border-b border-gray-100',
             'hover:bg-[var(--accent-color)]/10',
-            item.isActive && 'bg-[var(--accent-color)]/20 text-[var(--accent-color)]',
+            active && 'bg-[var(--accent-color)]/20 text-[var(--accent-color)]',
             item.isDisabled && 'opacity-50 cursor-not-allowed pointer-events-none',
             depth > 0 && 'py-2 pl-8 border-b-0'
           )}
         >
           {item.icon && (
             <span className="flex-shrink-0 mr-3">
-              {getIconComponent(item.icon, item.isActive)}
+              {iconAvailable ? (
+                <Icon
+                  iconId={itemIconId}
+                  className="w-5 h-5"
+                />
+              ) : (
+                <div
+                  className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full"
+                  title={`Icon '${item.icon}' not found`}
+                >
+                  {item.icon ? item.icon.charAt(0).toUpperCase() : '?'}
+                </div>
+              )}
             </span>
           )}
           <span className="flex-grow">{item.label}</span>
@@ -200,20 +188,14 @@ export function MobileMenuBase({
             </span>
           )}
           {hasChildren && (
-            hasSemanticIcon('chevronDown') ? (
-              <HoverIcon 
-                iconId={isExpanded ? UI_ICON_MAP.chevronDown.replace('Light', 'Solid') : UI_ICON_MAP.chevronRight} 
-                className="ml-2 w-4 h-4"
-              />
-            ) : (
-              <HoverIcon 
-                iconId={isExpanded ? "faChevronDownLight" : "faChevronRightLight"} 
-                className="ml-2 w-4 h-4"
-              />
-            )
+            // Use direct icon IDs
+            <Icon
+              iconId={isExpanded ? "faChevronDownSolid" : "faChevronRightLight"}
+              className="ml-2 w-4 h-4"
+            />
           )}
         </a>
-        
+
         {hasChildren && isExpanded && (
           <ul className="bg-gray-50">
             {item.children?.map((child: SidebarItem) => renderItem(child, depth + 1))}
@@ -222,11 +204,11 @@ export function MobileMenuBase({
       </li>
     );
   };
-  
+
   // Get the close icon
-  const closeIconId = hasSemanticIcon('close') ? UI_ICON_MAP.close : 'faXmarkLight';
+  const closeIconId = "faXmarkLight"; // Use direct ID
   const hasCloseIcon = iconExists(closeIconId);
-  
+
   return (
     <>
       {/* Mobile menu overlay */}
@@ -239,7 +221,7 @@ export function MobileMenuBase({
         aria-hidden="true"
         data-testid="mobile-menu-overlay"
       />
-      
+
       {/* Mobile menu container */}
       <div
         className={cn(
@@ -264,11 +246,11 @@ export function MobileMenuBase({
               data-testid="mobile-menu-close"
             >
               {hasCloseIcon ? (
-                <HoverIcon iconId={closeIconId} className="w-5 h-5" />
+                <Icon iconId={closeIconId} className="w-5 h-5" />
               ) : (
                 // Fallback for missing close icon
-                <svg 
-                  viewBox="0 0 24 24" 
+                <svg
+                  viewBox="0 0 24 24"
                   className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
@@ -283,7 +265,7 @@ export function MobileMenuBase({
             </button>
           </div>
         )}
-        
+
         {/* Close button (if no header) */}
         {!header && (
           <div className="flex justify-end p-4">
@@ -295,11 +277,11 @@ export function MobileMenuBase({
               data-testid="mobile-menu-close-alt"
             >
               {hasCloseIcon ? (
-                <HoverIcon iconId={closeIconId} className="w-5 h-5" />
+                <Icon iconId={closeIconId} className="w-5 h-5" />
               ) : (
                 // Fallback for missing close icon
-                <svg 
-                  viewBox="0 0 24 24" 
+                <svg
+                  viewBox="0 0 24 24"
                   className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
@@ -314,14 +296,14 @@ export function MobileMenuBase({
             </button>
           </div>
         )}
-        
+
         {/* Navigation */}
         <nav className="overflow-y-auto h-[calc(100%-4rem)]">
           <ul className="py-2">
             {items.map(item => renderItem(item))}
           </ul>
         </nav>
-        
+
         {/* Footer area */}
         {footer && (
           <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4">
@@ -368,18 +350,18 @@ export function MobileMenu({
     isActive: false
   });
 
-  // Get coins and bell icon IDs
-  const coinsIconId = hasSemanticIcon('coins') ? UI_ICON_MAP.coins : 'faCoinsLight';
-  const bellIconId = hasSemanticIcon('bell') ? UI_ICON_MAP.bell : 'faBellLight';
+  // Get coins and bell icon IDs directly
+  const coinsIconId = "faCoinsLight";
+  const bellIconId = "faBellLight";
 
   // Header content
   const headerContent = (
     <div className="flex items-center space-x-2">
-      <Image 
-        src="/logo.png" 
-        alt={companyName} 
-        width={32} 
-        height={32} 
+      <Image
+        src="/logo.png"
+        alt={companyName}
+        width={32}
+        height={32}
         onError={(e) => {
           // Fallback for logo if it fails to load
           e.currentTarget.style.display = 'none';
@@ -395,8 +377,9 @@ export function MobileMenu({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
+          {/* Use direct ID */}
           {iconExists(coinsIconId) ? (
-            <HoverIcon iconId={coinsIconId} className="w-5 h-5" />
+            <Icon iconId={coinsIconId} className="w-5 h-5" />
           ) : (
             // Fallback for missing coins icon
             <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs">
@@ -405,11 +388,12 @@ export function MobileMenu({
           )}
           <span className="text-sm font-medium">{remainingCredits} credits</span>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <div className="relative">
+            {/* Use direct ID */}
             {iconExists(bellIconId) ? (
-              <HoverIcon iconId={bellIconId} className="w-5 h-5" />
+              <Icon iconId={bellIconId} className="w-5 h-5" />
             ) : (
               // Fallback for missing bell icon
               <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs">
@@ -425,13 +409,13 @@ export function MobileMenu({
           <span className="text-sm">Notifications</span>
         </div>
       </div>
-      
+
       {user && (
         <div className="flex items-center space-x-3 pt-2 border-t border-gray-200">
-          <Image 
-            src={user.picture || "/icons/light/user.svg"} 
-            alt="Profile" 
-            width={32} 
+          <Image
+            src={user.picture || "/icons/light/user.svg"}
+            alt="Profile"
+            width={32}
             height={32}
             className="rounded-full"
             onError={(e) => {

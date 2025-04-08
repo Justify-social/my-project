@@ -11,28 +11,11 @@ import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/error-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { Icon } from '@/components/ui/icon/Icon';
+import { Icon } from '@/components/ui/icon/icon';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
 import { Button } from "@/components/ui";
-
-// Define a simple UI icon mapping for now until we can properly import UI_ICON_MAP
-const UI_ICON_MAP: Record<string, string> = {
-  'info': 'faInfoCircle',
-  'warning': 'faExclamationTriangle',
-  'success': 'faCheckCircle',
-  'error': 'faTimesCircle',
-  'lightning': 'faLightningBolt',
-  'documentText': 'faFileText',
-  'users': 'faUsers',
-  'calendar': 'faCalendar',
-  'chart': 'faChartBar',
-  'target': 'faTarget',
-  'trophy': 'faTrophy',
-  'check': 'faCheck',
-  'globe': 'faGlobe'
-};
 
 // Define types locally instead of importing
 // These will be used to define our component props and state
@@ -232,7 +215,7 @@ interface APICampaignResponse {
 
 
     // ... audience fields if needed ...
-  };creativeAssets: any[];
+  }; creativeAssets: any[];
   creativeRequirements: any[];
 }
 
@@ -343,19 +326,17 @@ const formatKpiName = (kpi: string): string => {
 interface MetricCardProps {
   title: string;
   value: string | number;
-  iconName?: string; // @deprecated - use iconId instead
-  iconId?: string;
+  iconId?: string; // Made iconId primary
   trend?: "up" | "down" | "none";
   subtext?: string;
   format?: "number" | "currency" | "percent" | "text";
-  platformIcon?: Platform;
+  platformIcon?: Platform; // Keep platform specific logic for now
 }
 
 const CampaignMetricCard = ({
   title,
   value,
-  iconName,
-  iconId,
+  iconId, // Use iconId directly
   trend = "none",
   subtext,
   format = "text",
@@ -384,9 +365,10 @@ const CampaignMetricCard = ({
     trendIcon = <Icon iconId="faArrowDownLight" className="inline-block h-4 w-4 ml-1" />;
     trendColor = "text-red-600";
   }
-  
+
   // Get platform icon for display
   const getPlatformIcon = () => {
+    // Keep existing platform-specific image logic
     if (platformIcon && title === "Platform") {
       if (typeof value === 'string') {
         const platform = value.toLowerCase();
@@ -409,16 +391,17 @@ const CampaignMetricCard = ({
         }
       }
     }
+    // Use iconId directly if provided, otherwise fallback
     return (
-          <Icon 
-            name={UI_ICON_MAP[iconId] || `fa${iconId.charAt(0).toUpperCase() + iconId.slice(1)}`} 
-            className="h-5 w-5 text-[var(--accent-color)]" 
-            iconType="static" 
-            solid={false} 
-          />
+      <Icon
+        // Pass iconId directly, including in the fallback case
+        iconId={iconId || "faQuestionCircleLight"}
+        className="h-5 w-5 text-[var(--accent-color)]"
+        iconType="static" // Assuming iconType is a valid prop for Icon
+      />
     );
   };
-  
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)] font-work-sans transform transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-[var(--accent-color)]">
       <div className="flex justify-between items-start font-work-sans">
@@ -429,14 +412,14 @@ const CampaignMetricCard = ({
               <div className="flex items-center">
                 {value}
                 <span className={`${trendColor} font-work-sans ml-1`}>{trendIcon}</span>
-        </div>
+              </div>
             ) : (
               <>
                 {formattedValue}
                 <span className={`${trendColor} font-work-sans ml-1`}>{trendIcon}</span>
               </>
             )}
-      </div>
+          </div>
           {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">{subtext}</div>}
         </div>
         <div className="p-3 bg-[rgba(0,191,255,0.1)] rounded-full font-work-sans">
@@ -451,8 +434,7 @@ const CampaignMetricCard = ({
 interface DataCardProps {
   title: string;
   description?: string;
-  iconName?: string; // @deprecated - use iconId instead
-  iconId?: string;
+  iconId?: string; // Made iconId primary
   children: React.ReactNode;
   className?: string;
   actions?: React.ReactNode;
@@ -461,8 +443,7 @@ interface DataCardProps {
 const DataCard: React.FC<DataCardProps> = ({
   title,
   description,
-  iconName,
-  iconId,
+  iconId, // Use iconId directly
   children,
   className = '',
   actions
@@ -471,13 +452,10 @@ const DataCard: React.FC<DataCardProps> = ({
     <CardHeader className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
-          <Icon 
-            {... (iconId 
-              ? { iconId } 
-              : { name: UI_ICON_MAP[iconName || ''] || `fa${(iconName || '').charAt(0).toUpperCase() + (iconName || '').slice(1)}` }
-            )}
+          <Icon
+            iconId={iconId || "faQuestionCircleLight"} // Use iconId, provide a default fallback
             className="h-5 w-5 text-[var(--accent-color)]"
-            aria-hidden="true" 
+            aria-hidden="true"
           />
         </div>
         <div>
@@ -486,8 +464,8 @@ const DataCard: React.FC<DataCardProps> = ({
         </div>
       </div>
       {actions && <div className="flex space-x-2">
-          {actions}
-        </div>}
+        {actions}
+      </div>}
     </CardHeader>
     <CardContent className="px-4 py-5 sm:p-6 bg-white">
       {children}
@@ -499,8 +477,7 @@ const DataCard: React.FC<DataCardProps> = ({
 interface DataRowProps {
   label: string;
   value: React.ReactNode;
-  iconName?: string; // @deprecated - use iconId instead
-  iconId?: string;
+  iconId?: string; // Made iconId primary
   tooltip?: string;
   featured?: boolean;
 }
@@ -508,26 +485,24 @@ interface DataRowProps {
 const DataRow = ({
   label,
   value,
-  iconName,
-  iconId,
+  iconId, // Use iconId directly
   tooltip,
   featured = false
 }: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'} font-work-sans`}>
     <div className="w-1/3 flex-shrink-0 font-work-sans">
       <div className="flex items-center text-[var(--secondary-color)] font-work-sans">
-        {(iconName || iconId) && <span className="mr-2 flex-shrink-0 font-work-sans">
-            <Icon 
-              {... (iconId 
-                ? { iconId } 
-                : { name: UI_ICON_MAP[iconName || ''] || `fa${(iconName || '').charAt(0).toUpperCase() + (iconName || '').slice(1)}` }
-              )}
-              className="h-4 w-4" 
-            />
-          </span>}
+        {/* Use iconId directly */}
+        {iconId && <span className="mr-2 flex-shrink-0 font-work-sans">
+          <Icon
+            iconId={iconId}
+            className="h-4 w-4"
+          />
+        </span>}
         <span className={`${featured ? 'font-medium' : ''} font-work-sans`}>{label}</span>
         {tooltip && <span className="ml-1 cursor-help font-work-sans" title={tooltip}>
-            {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-work-sans" />}
-          </span>}
+          {/* Assuming faCircleInfoLight exists */}
+          {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-work-sans" />}
+        </span>}
       </div>
     </div>
     <div className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'} font-work-sans`}>
@@ -541,52 +516,52 @@ const AudienceSection: React.FC<{
 }> = ({
   audience
 }) => {
-  if (!audience) return null;
-  
-  // Helper function to get audience percentage for visualization
-  const getAgePercentage = (value: string): number => {
-    if (value.includes('+')) {
-      return 100; // Full for 65+
-    }
-    const parts = value.split('-');
-    if (parts.length === 2) {
-      return ((parseInt(parts[0]) + parseInt(parts[1])) / 2) / 65 * 100; // Normalize to percentage
-    }
-    return 0;
-  };
+    if (!audience) return null;
 
-  // Sorting age ranges by their numeric value
-  const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort((a, b) => {
-    const aValue = parseInt(a.split('-')[0] || a.replace('+', ''));
-    const bValue = parseInt(b.split('-')[0] || b.replace('+', ''));
-    return aValue - bValue;
-  });
+    // Helper function to get audience percentage for visualization
+    const getAgePercentage = (value: string): number => {
+      if (value.includes('+')) {
+        return 100; // Full for 65+
+      }
+      const parts = value.split('-');
+      if (parts.length === 2) {
+        return ((parseInt(parts[0]) + parseInt(parts[1])) / 2) / 65 * 100; // Normalize to percentage
+      }
+      return 0;
+    };
 
-  return <DataCard title="Audience Demographics" iconId="faUserGroupLight" description="Target audience information for this campaign">
+    // Sorting age ranges by their numeric value
+    const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort((a, b) => {
+      const aValue = parseInt(a.split('-')[0] || a.replace('+', ''));
+      const bValue = parseInt(b.split('-')[0] || b.replace('+', ''));
+      return aValue - bValue;
+    });
+
+    return <DataCard title="Audience Demographics" iconId="faUserGroupLight" description="Target audience information for this campaign">
       <div className="space-y-6 font-work-sans">
         {/* Demographics Section */}
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-start mb-4">
-            <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
+            <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
             <h3 className="font-medium text-gray-800 font-sora">Demographics</h3>
-        </div>
+          </div>
 
           {/* Age Range */}
           <div className="mb-5">
             <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Age Range</h4>
             <div className="grid grid-cols-6 gap-1">
               {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range) => (
-                <div 
-                  key={range} 
-                  className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range) 
-                    ? 'bg-[var(--accent-color)] text-white font-medium' 
+                <div
+                  key={range}
+                  className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range)
+                    ? 'bg-[var(--accent-color)] text-white font-medium'
                     : 'bg-gray-100 text-gray-500'}`}
                 >
-                {range}
+                  {range}
                 </div>
               ))}
+            </div>
           </div>
-        </div>
 
           {/* Gender */}
           <div className="mb-5">
@@ -595,7 +570,7 @@ const AudienceSection: React.FC<{
               {audience.demographics.gender && audience.demographics.gender.length > 0 ? (
                 audience.demographics.gender.map((gender, idx) => (
                   <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                  {gender}
+                    {gender}
                   </span>
                 ))
               ) : (
@@ -611,12 +586,12 @@ const AudienceSection: React.FC<{
               {audience.demographics.education && audience.demographics.education.length > 0 ? (
                 audience.demographics.education.map((education, idx) => (
                   <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                    {education === 'some_college' ? 'Some College' : 
-                     education === 'professional' ? 'Professional Degree' : 
-                     education === 'bachelors' ? 'Bachelor\'s Degree' : 
-                     education === 'associates' ? 'Associate\'s Degree' : 
-                     education === 'high_school' ? 'High School' : 
-                     education === 'graduate' ? 'Graduate Degree' : education}
+                    {education === 'some_college' ? 'Some College' :
+                      education === 'professional' ? 'Professional Degree' :
+                        education === 'bachelors' ? 'Bachelor\'s Degree' :
+                          education === 'associates' ? 'Associate\'s Degree' :
+                            education === 'high_school' ? 'High School' :
+                              education === 'graduate' ? 'Graduate Degree' : education}
                   </span>
                 ))
               ) : (
@@ -636,7 +611,7 @@ const AudienceSection: React.FC<{
           {/* Locations */}
           <div className="mb-5">
             <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Locations</h4>
-          <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {audience.demographics.locations && audience.demographics.locations.length > 0 ? (
                 audience.demographics.locations.map((location, idx) => (
                   <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
@@ -646,8 +621,8 @@ const AudienceSection: React.FC<{
               ) : (
                 <span className="text-gray-500 text-sm">Not specified</span>
               )}
+            </div>
           </div>
-        </div>
 
           {/* Languages */}
           <div className="mb-5">
@@ -685,7 +660,7 @@ const AudienceSection: React.FC<{
         )}
       </div>
     </DataCard>;
-};
+  };
 
 // Add this Step5-style Asset Preview component 
 const CampaignDetailAssetPreview = ({
@@ -693,7 +668,7 @@ const CampaignDetailAssetPreview = ({
   fileName,
   type,
   className = ''
-}: {url: string;fileName: string;type: string;className?: string;}) => {
+}: { url: string; fileName: string; type: string; className?: string; }) => {
   const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
   const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -704,7 +679,7 @@ const CampaignDetailAssetPreview = ({
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!videoRef.current) return;
-    
+
     if (isPlaying) {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -721,13 +696,13 @@ const CampaignDetailAssetPreview = ({
   useEffect(() => {
     if (isVideo && videoRef.current) {
       const video = videoRef.current;
-      
+
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
-      
+
       video.addEventListener('play', handlePlay);
       video.addEventListener('pause', handlePause);
-      
+
       return () => {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
@@ -754,21 +729,21 @@ const CampaignDetailAssetPreview = ({
         if (video.currentTime >= 5) {
           video.currentTime = 0;
           if (isPlaying) {
-          video.play().catch(err => {
-            console.error('Error replaying video:', err);
+            video.play().catch(err => {
+              console.error('Error replaying video:', err);
               setIsPlaying(false);
-          });
+            });
           }
         }
       };
-      
+
       const handleEnded = () => {
         video.currentTime = 0;
         if (isPlaying) {
-        video.play().catch(err => {
-          console.error('Error replaying video:', err);
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
             setIsPlaying(false);
-        });
+          });
         }
       };
 
@@ -785,28 +760,28 @@ const CampaignDetailAssetPreview = ({
       };
     }
   }, [isVideo, url, isPlaying]);
-  
+
   return (
-    <div 
+    <div
       className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       {/* Image preview */}
       {isImage && <img src={url} alt={fileName} className="w-full h-full object-cover" />}
-      
+
       {/* Video preview with play/pause button */}
       {isVideo && (
         <div className="relative w-full h-full" onClick={togglePlayPause}>
-          <video 
-            ref={videoRef} 
-            src={url} 
-            className="w-full h-full object-cover" 
-            muted 
-            playsInline 
-            loop 
+          <video
+            ref={videoRef}
+            src={url}
+            className="w-full h-full object-cover"
+            muted
+            playsInline
+            loop
           />
-          
+
           {/* Play/Pause button that appears on hover */}
           {isVideo && isHovering && (
             <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
@@ -815,22 +790,22 @@ const CampaignDetailAssetPreview = ({
                 className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
                 aria-label={isPlaying ? "Pause video" : "Play video"}
               >
-                <Icon 
-                  name={isPlaying ? "faPause" : "faPlay"} 
-                  className="h-6 w-6 text-white" 
-                  iconType="button" 
-                  solid={true} 
+                <Icon
+                  name={isPlaying ? "faPause" : "faPlay"}
+                  className="h-6 w-6 text-white"
+                  iconType="button"
+                  solid={true}
                 />
               </button>
             </div>
           )}
         </div>
       )}
-      
+
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400"  />
+          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400" />
         </div>
       )}
     </div>
@@ -844,155 +819,155 @@ const ObjectivesSection: React.FC<{
   campaign
 }) => <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
 
-    <div className="space-y-6 font-work-sans">
-      {/* Primary KPI with enhanced styling */}
-      <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
-        <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
-        {campaign.primaryKPI ? (
-          <div className="bg-[var(--accent-color)] text-white px-3 py-2 rounded-md inline-flex items-center">
-            <div className="w-6 h-6 mr-2 filter brightness-0 invert">
-              <Image 
-                src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/icons/kpis/Brand_Awareness.svg"} 
-                alt={formatKpiName(campaign.primaryKPI)} 
-                width={24} 
-                height={24} 
-              />
-            </div>
-            <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>
-          </div>
-        ) : (
-          <div className="text-gray-500">Not specified</div>
-        )}
-      </div>
-
-      {/* Secondary KPIs with enhanced styling */}
-      {campaign.secondaryKPIs && campaign.secondaryKPIs.length > 0 && (
+      <div className="space-y-6 font-work-sans">
+        {/* Primary KPI with enhanced styling */}
         <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
-          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
-          <div className="flex flex-wrap gap-2 font-work-sans">
-            {campaign.secondaryKPIs.map((kpi, index) => (
-              <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
-                <div className="w-5 h-5 mr-2">
-                  <Image 
-                    src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/icons/kpis/Brand_Awareness.svg"} 
-                    alt={formatKpiName(kpi)} 
-                    width={20} 
-                    height={20} 
-                  />
+          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
+          {campaign.primaryKPI ? (
+            <div className="bg-[var(--accent-color)] text-white px-3 py-2 rounded-md inline-flex items-center">
+              <div className="w-6 h-6 mr-2 filter brightness-0 invert">
+                <Image
+                  src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/icons/kpis/Brand_Awareness.svg"}
+                  alt={formatKpiName(campaign.primaryKPI)}
+                  width={24}
+                  height={24}
+                />
               </div>
-                <span>{formatKpiName(kpi)}</span>
-              </span>
-            ))}
+              <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>
+            </div>
+          ) : (
+            <div className="text-gray-500">Not specified</div>
+          )}
         </div>
-      </div>
-      )}
 
-      {/* Messaging Section with enhanced icons and styling */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-        <h3 className="font-medium text-gray-800 mb-4 font-sora">Messaging</h3>
-        
-        {/* Main Message */}
-        <div className="space-y-6">
-          <div className="flex items-start">
-            <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
-              <span className="text-base text-gray-800 block">{campaign.mainMessage || 'Not specified'}</span>
-                </div>
-          </div>
-          
-          {/* Hashtags */}
-          <div className="flex items-start">
-            <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
-              <span className="text-base text-gray-800 block">{campaign.hashtags || 'Not specified'}</span>
+        {/* Secondary KPIs with enhanced styling */}
+        {campaign.secondaryKPIs && campaign.secondaryKPIs.length > 0 && (
+          <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
+            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
+            <div className="flex flex-wrap gap-2 font-work-sans">
+              {campaign.secondaryKPIs.map((kpi, index) => (
+                <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
+                  <div className="w-5 h-5 mr-2">
+                    <Image
+                      src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/icons/kpis/Brand_Awareness.svg"}
+                      alt={formatKpiName(kpi)}
+                      width={20}
+                      height={20}
+                    />
+                  </div>
+                  <span>{formatKpiName(kpi)}</span>
+                </span>
+              ))}
             </div>
           </div>
-          
-          {/* Memorability Score */}
-          <div className="flex items-start">
-            <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
-              <span className="text-base text-gray-800 block">{campaign.memorability || 'Not specified'}</span>
+        )}
+
+        {/* Messaging Section with enhanced icons and styling */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <h3 className="font-medium text-gray-800 mb-4 font-sora">Messaging</h3>
+
+          {/* Main Message */}
+          <div className="space-y-6">
+            <div className="flex items-start">
+              <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
+                <span className="text-base text-gray-800 block">{campaign.mainMessage || 'Not specified'}</span>
+              </div>
+            </div>
+
+            {/* Hashtags */}
+            <div className="flex items-start">
+              <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
+                <span className="text-base text-gray-800 block">{campaign.hashtags || 'Not specified'}</span>
+              </div>
+            </div>
+
+            {/* Memorability Score */}
+            <div className="flex items-start">
+              <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
+                <span className="text-base text-gray-800 block">{campaign.memorability || 'Not specified'}</span>
+              </div>
+            </div>
+
+            {/* Key Benefits */}
+            <div className="flex items-start">
+              <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
+                <span className="text-base text-gray-800 block">{campaign.keyBenefits || 'Not specified'}</span>
+              </div>
             </div>
           </div>
-          
-          {/* Key Benefits */}
-          <div className="flex items-start">
-            <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
-              <span className="text-base text-gray-800 block">{campaign.keyBenefits || 'Not specified'}</span>
+
+          <h3 className="font-medium text-gray-800 mt-8 mb-4 font-sora">Expected Outcomes</h3>
+
+          {/* Expected Achievements */}
+          <div className="space-y-6">
+            <div className="flex items-start">
+              <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
+                <span className="text-base text-gray-800 block">{campaign.expectedAchievements || 'Not specified'}</span>
+              </div>
             </div>
-          </div>
-        </div>
-        
-        <h3 className="font-medium text-gray-800 mt-8 mb-4 font-sora">Expected Outcomes</h3>
-        
-        {/* Expected Achievements */}
-        <div className="space-y-6">
-          <div className="flex items-start">
-            <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
-              <span className="text-base text-gray-800 block">{campaign.expectedAchievements || 'Not specified'}</span>
+
+            {/* Impact on Purchase Intent */}
+            <div className="flex items-start">
+              <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
+                <span className="text-base text-gray-800 block">{campaign.purchaseIntent || 'Not specified'}</span>
+              </div>
             </div>
-          </div>
-          
-          {/* Impact on Purchase Intent */}
-          <div className="flex items-start">
-            <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
-              <span className="text-base text-gray-800 block">{campaign.purchaseIntent || 'Not specified'}</span>
-            </div>
-          </div>
-          
-          {/* Brand Perception Change */}
-          <div className="flex items-start">
-            <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-            <div className="flex-1">
-              <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
-              <span className="text-base text-gray-800 block">{campaign.brandPerception || 'Not specified'}</span>
+
+            {/* Brand Perception Change */}
+            <div className="flex items-start">
+              <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
+                <span className="text-base text-gray-800 block">{campaign.brandPerception || 'Not specified'}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </DataCard>;
+    </DataCard>;
 const AudienceInsightsSection: React.FC<{
   audience: CampaignDetail['audience'] | null;
 }> = ({
   audience
 }) => {
-  if (!audience) return null; // Early return if no audience data
+    if (!audience) return null; // Early return if no audience data
 
-  return <DataCard title="Audience Insights" iconId="userCircle" className="col-span-2">
+    return <DataCard title="Audience Insights" iconId="userCircle" className="col-span-2">
       <div className="grid grid-cols-2 gap-8 font-work-sans">
         {/* Screening Questions */}
         <div className="font-work-sans">
           <h3 className="text-lg font-medium mb-4 font-sora">Screening Questions</h3>
           <div className="space-y-2 font-work-sans">
             {audience.demographics.interests.map((interest) => <div key={interest} className="p-3 bg-gray-50 rounded-lg font-work-sans">
-                {interest}
-              </div>)}
+              {interest}
+            </div>)}
           </div>
         </div>
-        
+
         {/* Competitors */}
         <div className="font-work-sans">
           <h3 className="text-lg font-medium mb-4 font-sora">Competitors</h3>
           <div className="flex flex-wrap gap-2 font-work-sans">
             {audience.demographics.interests.map((interest) => <span key={interest} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-work-sans">
-                {interest}
-              </span>)}
+              {interest}
+            </span>)}
           </div>
         </div>
       </div>
     </DataCard>;
-};
+  };
 
 // Add Creative Requirements Section
 const CreativeRequirementsSection: React.FC<{
@@ -1001,15 +976,15 @@ const CreativeRequirementsSection: React.FC<{
   requirements
 }) => <DataCard title="Creative Requirements" iconId="documentText" description="Campaign creative specifications">
 
-    <div className="space-y-2 font-work-sans">
-      {requirements && requirements.length > 0 ? requirements.map((req) => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start font-work-sans">
-            {<Icon iconId="faFileLight" className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-work-sans" />}
-            <span className="text-gray-700 font-work-sans">{req.requirement}</span>
-          </div>) : <div className="p-3 bg-gray-50 rounded-lg font-work-sans">
+      <div className="space-y-2 font-work-sans">
+        {requirements && requirements.length > 0 ? requirements.map((req) => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start font-work-sans">
+          {<Icon iconId="faFileLight" className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-work-sans" />}
+          <span className="text-gray-700 font-work-sans">{req.requirement}</span>
+        </div>) : <div className="p-3 bg-gray-50 rounded-lg font-work-sans">
           <p className="text-gray-500 italic font-work-sans">No requirements specified</p>
         </div>}
-    </div>
-  </DataCard>;
+      </div>
+    </DataCard>;
 
 // 1. Define strict types for all possible string operations
 type StringOperation = {
@@ -1183,10 +1158,10 @@ const capitalize = (str: string): string => {
 };
 
 // StatusBadge component with semantic icons
-const CampaignStatusBadge = ({ status }: {status?: string;}) => {
+const CampaignStatusBadge = ({ status }: { status?: string; }) => {
   let statusColor = "bg-gray-100 text-gray-700";
   let statusIcon = <Icon iconId="faCircleQuestionLight" className="h-4 w-4 mr-1" />;
-  
+
   switch (status?.toLowerCase()) {
     case 'draft':
       statusColor = "bg-yellow-50 text-yellow-700";
@@ -1224,11 +1199,11 @@ const CampaignStatusBadge = ({ status }: {status?: string;}) => {
       statusColor = "bg-gray-100 text-gray-700";
       statusIcon = <Icon iconId="faCircleQuestionLight" className="h-4 w-4 mr-1" />;
   }
-  
+
   return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor} font-work-sans`}>
-      {statusIcon}
-      {capitalize(status || 'Unknown')}
-    </span>;
+    {statusIcon}
+    {capitalize(status || 'Unknown')}
+  </span>;
 };
 
 // Add missing utility functions
@@ -1275,11 +1250,11 @@ const safeCurrency = (value: Currency | string | undefined | null): string => {
 };
 
 // Error status badge for displaying API errors
-const ErrorStatusBadge = ({ message }: {message: string;}) => {
+const ErrorStatusBadge = ({ message }: { message: string; }) => {
   return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm font-work-sans">
-      <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-2" />
-      <span className="font-work-sans">{message}</span>
-    </div>;
+    <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-2" />
+    <span className="font-work-sans">{message}</span>
+  </div>;
 };
 
 export default function CampaignDetail() {
@@ -1369,7 +1344,7 @@ export default function CampaignDetail() {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
         console.log(`Fetching campaign data for ID: ${params.id}`);
@@ -1614,38 +1589,38 @@ export default function CampaignDetail() {
       <div className="max-w-4xl mx-auto p-5 animate-pulse font-work-sans">
         {/* Header Skeleton */}
         <div className="h-8 bg-gray-200 rounded w-1/3 mb-8 font-work-sans" />
-        
+
         {/* Campaign Details Section */}
-        <Skeleton 
-          title={true} 
-          titleWidth="w-1/4" 
+        <Skeleton
+          title={true}
+          titleWidth="w-1/4"
           actionButton={true}
           lines={3}
           className="mb-6" />
 
 
         {/* Objectives Section */}
-        <Skeleton 
-          title={true} 
-          titleWidth="w-1/3" 
+        <Skeleton
+          title={true}
+          titleWidth="w-1/3"
           actionButton={true}
           lines={4}
           className="mb-6" />
 
 
         {/* Audience Section */}
-        <Skeleton 
-          title={true} 
-          titleWidth="w-1/4" 
+        <Skeleton
+          title={true}
+          titleWidth="w-1/4"
           actionButton={true}
           lines={3}
           className="mb-6" />
 
 
         {/* Creative Assets Section */}
-        <Skeleton 
-          title={true} 
-          titleWidth="w-1/4" 
+        <Skeleton
+          title={true}
+          titleWidth="w-1/4"
           actionButton={true}
           lines={3}
           className="mb-6" />
@@ -1655,250 +1630,250 @@ export default function CampaignDetail() {
   }
   if (error && !data) {
     return <div className="py-10 font-work-sans">
-        <ErrorFallback error={new Error(error)} />
-      </div>;
+      <ErrorFallback error={new Error(error)} />
+    </div>;
   }
   return <div className="min-h-screen bg-gray-50 font-work-sans">
-      {/* Header Section */}
-      <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans shadow-sm`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-work-sans">
-          {error && <div className="mb-4 font-work-sans">
-              <ErrorStatusBadge message={error} />
-            </div>}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between font-work-sans">
-            <div className="flex items-center space-x-4 font-work-sans">
-              <button 
-                onClick={() => window.history.back()} 
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-work-sans"
-                aria-label="Go back"
-              >
-                <Icon iconId="faChevronLeftLight" 
-                  className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans" 
-                   
-                  />
-              </button>
-              <div className="font-work-sans">
-                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
-                <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-work-sans">
-                  <CampaignStatusBadge status={error ? "error" : data?.submissionStatus} />
-                  <span className="mx-2 font-work-sans text-gray-400">•</span>
-                  <span className="font-work-sans">Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
-                </div>
+    {/* Header Section */}
+    <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans shadow-sm`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-work-sans">
+        {error && <div className="mb-4 font-work-sans">
+          <ErrorStatusBadge message={error} />
+        </div>}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between font-work-sans">
+          <div className="flex items-center space-x-4 font-work-sans">
+            <button
+              onClick={() => window.history.back()}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-work-sans"
+              aria-label="Go back"
+            >
+              <Icon iconId="faChevronLeftLight"
+                className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans"
+
+              />
+            </button>
+            <div className="font-work-sans">
+              <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
+              <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-work-sans">
+                <CampaignStatusBadge status={error ? "error" : data?.submissionStatus} />
+                <span className="mx-2 font-work-sans text-gray-400">•</span>
+                <span className="font-work-sans">Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
               </div>
             </div>
-            
-            <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
-              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-                <Icon iconId="faPrintLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
-                <span className="font-work-sans">Print</span>
-              </button>
-              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-                <Icon iconId="faShareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
-                <span className="font-work-sans">Share</span>
-              </button>
-              <button 
-                onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)} 
-                className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans" 
-                disabled={!!error}
-              >
-                <Icon iconId="faPenToSquareSolid" className="h-4 w-4 mr-2 text-white !text-white" />
-                <span className="font-work-sans">Edit Campaign</span>
-              </button>
-            </div>
+          </div>
+
+          <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
+            <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
+              <Icon iconId="faPrintLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
+              <span className="font-work-sans">Print</span>
+            </button>
+            <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
+              <Icon iconId="faShareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
+              <span className="font-work-sans">Share</span>
+            </button>
+            <button
+              onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
+              className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans"
+              disabled={!!error}
+            >
+              <Icon iconId="faPenToSquareSolid" className="h-4 w-4 mr-2 text-white !text-white" />
+              <span className="font-work-sans">Edit Campaign</span>
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
-        {/* Key Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-work-sans">
-          <CampaignMetricCard 
-            title="Total Budget" 
-            value={error ? "N/A" : data?.totalBudget || 0} 
-            iconName="dollarSign" 
-            format={error ? "text" : "currency"} 
-          />
-          <CampaignMetricCard 
-            title="Campaign Duration" 
-            value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")} 
-            iconName="calendar" 
-          />
-        </div>
+    {/* Main Content */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
+      {/* Key Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-work-sans">
+        <CampaignMetricCard
+          title="Total Budget"
+          value={error ? "N/A" : data?.totalBudget || 0}
+          iconId="dollarSign"
+          format={error ? "text" : "currency"}
+        />
+        <CampaignMetricCard
+          title="Campaign Duration"
+          value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")}
+          iconId="calendar"
+        />
+      </div>
 
-        {/* Campaign Details & Primary Contact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          <DataCard title="Campaign Details" iconId="documentText" description="Basic campaign information">
-            <div className="space-y-3 font-work-sans">
-              <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
-              <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
-              <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
-              <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconName="calendar" />
-              <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconName="calendar" />
-              <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconName="clock" />
-              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconName="dollarSign" />
-              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconName="dollarSign" featured={true} />
-              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconName="dollarSign" />
-              <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconName="globe" />
-            </div>
-          </DataCard>
+      {/* Campaign Details & Primary Contact */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
+        <DataCard title="Campaign Details" iconId="documentText" description="Basic campaign information">
+          <div className="space-y-3 font-work-sans">
+            <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
+            <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
+            <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
+            <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconId="calendar" />
+            <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconId="calendar" />
+            <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconId="clock" />
+            <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconId="dollarSign" />
+            <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconId="dollarSign" featured={true} />
+            <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconId="dollarSign" />
+            <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconId="globe" />
+          </div>
+        </DataCard>
 
-          <DataCard title="Primary Contact" iconId="userCircle" description="Primary point of contact for this campaign">
-            <div className="space-y-3 font-work-sans">
-              <div className="flex items-center mb-4 font-work-sans">
-                <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
-                  {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
-                </div>
-                <div className="font-work-sans">
-                  <h4 className="text-[var(--primary-color)] font-semibold font-sora">
-                    {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
-                  </h4>
-                  <p className="text-[var(--secondary-color)] text-sm font-work-sans">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
-                </div>
+        <DataCard title="Primary Contact" iconId="userCircle" description="Primary point of contact for this campaign">
+          <div className="space-y-3 font-work-sans">
+            <div className="flex items-center mb-4 font-work-sans">
+              <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
+                {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
               </div>
-              
-              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
-                    {data?.primaryContact?.email || "N/A"}
-                  </a>} iconName="mail" />
-
-              <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconName="building" />
+              <div className="font-work-sans">
+                <h4 className="text-[var(--primary-color)] font-semibold font-sora">
+                  {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+                </h4>
+                <p className="text-[var(--secondary-color)] text-sm font-work-sans">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
+              </div>
             </div>
 
-            {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
-                <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
-                <div className="space-y-3 font-work-sans">
-                  <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconName="userCircle" />
-                  <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
-                        {data.secondaryContact.email}
-                      </a>} iconName="mail" />
-                  <DataRow label="Position" value={data.secondaryContact.position} iconName="building" />
-                </div>
-              </div>}
-          </DataCard>
-        </div>
+            <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
+              {data?.primaryContact?.email || "N/A"}
+            </a>} iconId="mail" />
 
-        {/* Objectives & Audience */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          {error ? <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
-              <div className="space-y-5 font-work-sans">
-                <div className="font-work-sans">
-                  <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
-                  <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
-                </div>
-                <div className="font-work-sans">
-                  <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
-                  <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
-                </div>
-                <div className="space-y-3 pt-2 font-work-sans">
-                  <DataRow label="Main Message" value="N/A" iconName="lightBulb" />
-                  <DataRow label="Brand Perception" value="N/A" iconName="chart" />
-                  <DataRow label="Hashtags" value="N/A" iconName="tag" />
-                  <DataRow label="Key Benefits" value="N/A" iconName="circleCheck" />
-                  <DataRow label="Memorability" value="N/A" iconName="bookmark" />
-                  <DataRow label="Expected Achievements" value="N/A" iconName="trendUp" />
-                  <DataRow label="Purchase Intent" value="N/A" iconName="dollarSign" />
-                </div>
-              </div>
-            </DataCard> : data && <ObjectivesSection campaign={data} />}
-          
-          {error ? <DataCard title="Target Audience" iconId="userGroup" description="Detailed audience targeting information">
-              <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-                <p className="font-work-sans">N/A</p>
-              </div>
-            </DataCard> : data && <AudienceSection audience={data.audience} />}
-        </div>
+            <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconId="building" />
+          </div>
 
-        {/* Creative Assets */}
-        <div className="mb-6 font-work-sans">
-          <DataCard title="Creative Assets" iconId="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
-            {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-                {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
-                <p className="font-work-sans">No creative assets available</p>
-              </div> : 
-              <div>
-                {data && data.creativeAssets && Array.isArray(data.creativeAssets) && data.creativeAssets.length > 0 ? 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-work-sans">
-                    {data.creativeAssets.map((asset: any, index: number) => 
-                      <AssetCard 
-                        key={asset.id || index}
-                        asset={{
-                          id: asset.id,
-                          name: asset.assetName || asset.name,
-                          url: asset.url,
-                          type: asset.type,
-                          platform: asset.platform || data.platform,
-                          influencerHandle: asset.influencerHandle || data.influencerHandle,
-                          description: asset.description || asset.whyInfluencer,
-                          budget: asset.budget,
-                          size: asset.size,
-                          duration: asset.duration
-                        }}
-                        currency={data.currency}
-                        defaultPlatform={data.platform}
-                        className="font-work-sans"
-                      />
-                    )}
-                  </div> 
-                  : 
-                  <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                      <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="font-work-sans">No creative assets uploaded yet</p>
-                  </div>
-                }
-              </div>
-            }
-          </DataCard>
-        </div>
+          {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
+            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
+            <div className="space-y-3 font-work-sans">
+              <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconId="userCircle" />
+              <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
+                {data.secondaryContact.email}
+              </a>} iconId="mail" />
+              <DataRow label="Position" value={data.secondaryContact.position} iconId="building" />
+            </div>
+          </div>}
+        </DataCard>
+      </div>
 
-        {/* Campaign Features */}
-        <div className="mb-6 font-work-sans">
-          <DataCard title="Campaign Features" iconId="bolt" description="Additional features enabled for this campaign">
-            {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                <p className="font-work-sans">N/A</p>
-              </div> : 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
-                {data?.features && data.features.length > 0 ? 
-                  data.features.map((feature: string, index: number) => {
-                    const featureKey = feature as keyof typeof featureIconsMap;
-                    return (
-                      <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
-                        <div className="flex items-start">
-                          <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
-                            {featureIconsMap[featureKey] ? 
-                              <Image 
-                                src={featureIconsMap[featureKey].icon} 
-                                width={28} 
-                                height={28} 
-                                alt={featureIconsMap[featureKey].title} 
-                                className="w-7 h-7" 
-                              /> : 
-                              <Icon iconId="faBoltLight" 
-                                className="h-7 w-7 text-[var(--accent-color)]" 
-                                 
-                              />
-                            }
-                          </div>
-                          <div className="ml-4">
-                            <h4 className="font-medium text-[var(--primary-color)] font-sora text-lg mb-1">
-                              {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
-                            </h4>
-                            <p className="text-sm text-[var(--secondary-color)] mt-1 font-work-sans">
-                              {getFeatureDescription(feature)}
-                            </p>
-                          </div>
+      {/* Objectives & Audience */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
+        {error ? <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
+          <div className="space-y-5 font-work-sans">
+            <div className="font-work-sans">
+              <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
+              <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
+            </div>
+            <div className="font-work-sans">
+              <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
+              <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
+            </div>
+            <div className="space-y-3 pt-2 font-work-sans">
+              <DataRow label="Main Message" value="N/A" iconId="lightBulb" />
+              <DataRow label="Brand Perception" value="N/A" iconId="chart" />
+              <DataRow label="Hashtags" value="N/A" iconId="tag" />
+              <DataRow label="Key Benefits" value="N/A" iconId="circleCheck" />
+              <DataRow label="Memorability" value="N/A" iconId="bookmark" />
+              <DataRow label="Expected Achievements" value="N/A" iconId="trendUp" />
+              <DataRow label="Purchase Intent" value="N/A" iconId="dollarSign" />
+            </div>
+          </div>
+        </DataCard> : data && <ObjectivesSection campaign={data} />}
+
+        {error ? <DataCard title="Target Audience" iconId="userGroup" description="Detailed audience targeting information">
+          <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
+            <p className="font-work-sans">N/A</p>
+          </div>
+        </DataCard> : data && <AudienceSection audience={data.audience} />}
+      </div>
+
+      {/* Creative Assets */}
+      <div className="mb-6 font-work-sans">
+        <DataCard title="Creative Assets" iconId="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
+          {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
+            {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
+            <p className="font-work-sans">No creative assets available</p>
+          </div> :
+            <div>
+              {data && data.creativeAssets && Array.isArray(data.creativeAssets) && data.creativeAssets.length > 0 ?
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-work-sans">
+                  {data.creativeAssets.map((asset: any, index: number) =>
+                    <AssetCard
+                      key={asset.id || index}
+                      asset={{
+                        id: asset.id,
+                        name: asset.assetName || asset.name,
+                        url: asset.url,
+                        type: asset.type,
+                        platform: asset.platform || data.platform,
+                        influencerHandle: asset.influencerHandle || data.influencerHandle,
+                        description: asset.description || asset.whyInfluencer,
+                        budget: asset.budget,
+                        size: asset.size,
+                        duration: asset.duration
+                      }}
+                      currency={data.currency}
+                      defaultPlatform={data.platform}
+                      className="font-work-sans"
+                    />
+                  )}
+                </div>
+                :
+                <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
+                  <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="font-work-sans">No creative assets uploaded yet</p>
+                </div>
+              }
+            </div>
+          }
+        </DataCard>
+      </div>
+
+      {/* Campaign Features */}
+      <div className="mb-6 font-work-sans">
+        <DataCard title="Campaign Features" iconId="bolt" description="Additional features enabled for this campaign">
+          {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
+            <p className="font-work-sans">N/A</p>
+          </div> :
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
+              {data?.features && data.features.length > 0 ?
+                data.features.map((feature: string, index: number) => {
+                  const featureKey = feature as keyof typeof featureIconsMap;
+                  return (
+                    <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
+                      <div className="flex items-start">
+                        <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
+                          {featureIconsMap[featureKey] ?
+                            <Image
+                              src={featureIconsMap[featureKey].icon}
+                              width={28}
+                              height={28}
+                              alt={featureIconsMap[featureKey].title}
+                              className="w-7 h-7"
+                            /> :
+                            <Icon iconId="faBoltLight"
+                              className="h-7 w-7 text-[var(--accent-color)]"
+
+                            />
+                          }
+                        </div>
+                        <div className="ml-4">
+                          <h4 className="font-medium text-[var(--primary-color)] font-sora text-lg mb-1">
+                            {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
+                          </h4>
+                          <p className="text-sm text-[var(--secondary-color)] mt-1 font-work-sans">
+                            {getFeatureDescription(feature)}
+                          </p>
                         </div>
                       </div>
-                    );
-                  }) : 
-                  <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                      <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="font-work-sans">No features enabled for this campaign</p>
-                  </div>
-                }
-              </div>
-            }
-          </DataCard>
-        </div>
+                    </div>
+                  );
+                }) :
+                <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
+                  <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="font-work-sans">No features enabled for this campaign</p>
+                </div>
+              }
+            </div>
+          }
+        </DataCard>
       </div>
-    </div>;
+    </div>
+  </div>;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button as ServerButton, ButtonProps } from '@/components/ui';
-import { getIconClasses } from '@/components/ui/utils/icon-integration';
+// import { getIconClasses } from '@/components/ui/utils/icon-integration';
 
 /**
  * @component ButtonClient
@@ -21,35 +21,35 @@ import { getIconClasses } from '@/components/ui/utils/icon-integration';
  *   Interactive Button
  * </Button>
  */
-export function Button({ 
-  children, 
+export function Button({
+  children,
   leftIcon,
   rightIcon,
   isLoading,
   isDisabled,
   onClick,
-  ...props 
+  ...props
 }: ButtonProps & {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isLoading?: boolean;
   isDisabled?: boolean;
 }) {
   const [isClicked, setIsClicked] = useState(false);
-  
+
   // Handle button click with visual feedback
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setIsClicked(true);
     onClick?.(e);
-    
+
     // Reset clicked state after animation
     setTimeout(() => {
       setIsClicked(false);
     }, 200);
   };
-  
+
   return (
-    <ServerButton 
-      {...props} 
+    <ServerButton
+      {...props}
       disabled={isDisabled || isLoading}
       leftIcon={isLoading ? 'spinner' : leftIcon}
       rightIcon={rightIcon}

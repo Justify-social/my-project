@@ -90,13 +90,13 @@ export const ShadcnIcon = forwardRef<HTMLSpanElement, ShadcnIconProps>(
   ({ iconId, className, size, variant, onClick, ...props }, ref) => {
     // Convert the onClick handler to the format expected by Icon
     const handleClick = onClick ? () => onClick({} as React.MouseEvent<HTMLElement>) : undefined;
-    
+
     // Render using the core Icon component (SSOT implementation)
     return (
       <Icon
+        ref={ref}
         iconId={iconId}
         size={size as IconSize}
-        variant={variant as IconVariant}
         className={combinedClassNames(iconVariants({ size, variant }), className)}
         onClick={handleClick}
         {...props}
