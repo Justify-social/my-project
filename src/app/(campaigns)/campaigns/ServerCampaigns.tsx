@@ -10,7 +10,7 @@ import { Spinner } from '@/components/ui/spinner/Spinner'
 export default function ServerCampaigns() {
   return (
     <Suspense fallback={
-    <div className="flex flex-col items-center justify-center py-12 font-work-sans">
+      <div className="flex flex-col items-center justify-center py-12 font-work-sans">
         <LoadingSpinner className="w-12 h-12 text-[#0ea5e9] font-work-sans" />
         <p className="mt-4 text-gray-500 font-work-sans">Loading campaigns...</p>
       </div>

@@ -4,36 +4,36 @@
  */
 
 // Re-export components with consistent casing
-export { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
+export {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   CardDescription,
-  CardFooter 
+  CardFooter
 } from '@/components/ui/card';
 
-export { 
-  Badge 
+export {
+  Badge
 } from '@/components/ui/badge';
 
-export { 
-  Button 
+export {
+  Button
 } from '@/components/ui/button';
 
-export { 
-  Input 
+export {
+  Input
 } from '@/components/ui/input';
 
-export { 
-  Label 
+export {
+  Label
 } from '@/components/ui/label';
 
-export { 
-  ScrollArea 
+export {
+  ScrollArea
 } from '@/components/ui/scroll-area';
 
-export { 
+export {
   Select,
   SelectContent,
   SelectItem,
@@ -41,43 +41,43 @@ export {
   SelectValue
 } from '@/components/ui/select';
 
-export { 
-  Slider 
+export {
+  Slider
 } from '@/components/ui/slider';
 
-export { 
-  Spinner 
+export {
+  Spinner
 } from '@/components/ui/spinner';
 
-export { 
-  Switch 
+export {
+  Switch
 } from '@/components/ui/switch';
 
-export { 
+export {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow 
+  TableRow
 } from '@/components/ui/table';
 
-export { 
+export {
   Tabs,
   TabsContent,
   TabsList,
-  TabsTrigger 
+  TabsTrigger
 } from '@/components/ui/tabs';
 
-export { 
+export {
   Alert,
   AlertTitle,
-  AlertDescription 
+  AlertDescription
 } from '@/components/ui/alert';
 
-export { 
+export {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger 
+  AccordionTrigger
 } from '@/components/ui/accordion'; 

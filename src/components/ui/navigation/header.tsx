@@ -11,11 +11,19 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { MenuMobile } from '@/components/ui/navigation/mobile-menu';
-import { navItems, settingsNavItem } from "./config";
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
 import { iconExists } from '@/components/ui/icon/icons';
 import { cn } from '@/lib/utils';
+import { useSearch } from '@/providers/SearchProvider';
+import { SearchResultsDisplay } from './search-results-display';
+
+// Define NavItem locally
+interface NavItem {
+  label: string;
+  href: string;
+  icon: string;
+}
 
 interface HeaderProps {
   companyName: string;
@@ -23,6 +31,8 @@ interface HeaderProps {
   notificationsCount: number;
   profileImageUrl?: string;
   onMenuClick?: () => void;
+  navItems: NavItem[]; // Use local NavItem
+  settingsNavItem: NavItem; // Use local NavItem
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -30,10 +40,13 @@ const Header: React.FC<HeaderProps> = ({
   remainingCredits,
   notificationsCount,
   profileImageUrl = "/icons/solid/user-circle.svg",
-  onMenuClick
+  onMenuClick,
+  navItems,
+  settingsNavItem
 }) => {
   const { user } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { handleSearch, isSearching } = useSearch();
 
   // Define icon IDs directly
   const coinsIconId = "faCoinsLight";
@@ -71,9 +84,20 @@ const Header: React.FC<HeaderProps> = ({
             <span className="font-bold text-black text-xl font-work-sans">{companyName}</span>
           </Link>
 
-          {/* Center: Search Bar (hidden on mobile) */}
+          {/* Center: Search Bar Container (hidden on mobile) */}
           <div className="hidden md:flex flex-grow justify-center px-4 font-work-sans">
-            <SearchBar className="w-full max-w-lg" />
+            {/* Wrapper for SearchBar + Results - THIS is now relative */}
+            <div className="relative w-full max-w-lg">
+              <SearchBar
+                className="w-full" // SearchBar itself doesn't need max-w-lg now, wrapper handles it
+                placeholder="Search campaigns..."
+                onSearch={handleSearch}
+                autoSearch={true}
+                debounce={300}
+              />
+              {/* Results are positioned relative to the wrapper above */}
+              <SearchResultsDisplay />
+            </div>
           </div>
 
           {/* Right: Icon Group */}
@@ -208,8 +232,8 @@ const Header: React.FC<HeaderProps> = ({
       <MenuMobile
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        navItems={navItems}
-        settingsNavItem={settingsNavItem}
+        navItems={navItems} // Pass navItems prop
+        settingsNavItem={settingsNavItem} // Pass settingsNavItem prop
         remainingCredits={remainingCredits}
         notificationsCount={notificationsCount}
         companyName={companyName}

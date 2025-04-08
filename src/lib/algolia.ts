@@ -23,7 +23,9 @@ export async function searchCampaigns(query: string): Promise<CampaignSearchResu
   if (!query || query.trim() === '') {
     return [];
   }
-  
+
+  const fetchTimerLabel = `Algolia Fetch: ${query}`;
+  console.time(fetchTimerLabel); // Start fetch timer
   try {
     // Use the Algolia REST API directly
     const url = `https://${appId}-dsn.algolia.net/1/indexes/${indexName}/query`;
@@ -38,16 +40,18 @@ export async function searchCampaigns(query: string): Promise<CampaignSearchResu
         params: `query=${encodeURIComponent(query)}`
       })
     });
-    
+
     if (!response.ok) {
       throw new Error(`Algolia search failed: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     return data.hits as CampaignSearchResult[];
   } catch (error) {
     console.error('Error searching campaigns:', error);
     return [];
+  } finally {
+    console.timeEnd(fetchTimerLabel); // End fetch timer
   }
 }
 
@@ -81,18 +85,18 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
         }))
       })
     })
-    .then(response => {
-      if (!response.ok) {
-        return response.json().then(errorData => {
-          throw new Error(`Algolia indexing failed: ${JSON.stringify(errorData)}`);
-        });
-      }
-      console.log(`Successfully indexed ${records.length} campaigns!`);
-    })
-    .catch(error => {
-      console.error('Error indexing campaigns:', error);
-      throw error;
-    });
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(errorData => {
+            throw new Error(`Algolia indexing failed: ${JSON.stringify(errorData)}`);
+          });
+        }
+        console.log(`Successfully indexed ${records.length} campaigns!`);
+      })
+      .catch(error => {
+        console.error('Error indexing campaigns:', error);
+        throw error;
+      });
   } catch (error) {
     console.error('Error indexing campaigns:', error);
     return Promise.reject(error);

@@ -81,7 +81,7 @@ export function SearchBar({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
+
       timeoutRef.current = setTimeout(() => {
         onSearch(newValue);
       }, debounce);
@@ -159,8 +159,8 @@ export function SearchBar({
     <div className={cn('relative', className)}>
       {/* Search Icon */}
       <div className={cn('absolute top-1/2 -translate-y-1/2', getIconPosition())}>
-        <Icon 
-          iconId="faSearchLight" 
+        <Icon
+          iconId="faSearchLight"
           className={cn('text-gray-400', getIconSize())}
         />
       </div>

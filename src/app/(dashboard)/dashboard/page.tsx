@@ -29,9 +29,9 @@ const DashboardLoadingSkeleton = () => {
 import AuthCheck from '@/components/features/users/AuthCheck';
 
 // Dynamic import
-const DashboardContentComponent = nextDynamic(() => import('./DashboardContent'), { 
-  ssr: true, 
-  loading: () => <DashboardLoadingSkeleton /> 
+const DashboardContentComponent = nextDynamic(() => import('./DashboardContent'), {
+  ssr: true,
+  loading: () => <DashboardLoadingSkeleton />
 });
 
 export default function Dashboard() {
@@ -41,7 +41,7 @@ export default function Dashboard() {
     name: 'User',
     role: 'user'
   };
-  
+
   return (
     <AuthCheck>
       <div className="px-4 md:px-6 py-6 font-work-sans">

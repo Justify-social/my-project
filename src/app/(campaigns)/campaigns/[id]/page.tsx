@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import { Analytics } from '@/lib/analytics/analytics';
-import ErrorFallback from '@/components/error-fallback';
-import { Skeleton } from '@/components/ui/skeleton';
+import ErrorFallback from '@/components/features/core/error-handling/ErrorFallback';
+import Skeleton from '@/components/ui/loading-skeleton';
 import Image from 'next/image';
 import { Icon } from '@/components/ui/icon/icon';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
@@ -62,8 +62,8 @@ const UI_ICON_MAP: Record<string, string> = {
 };
 
 // Import the asset components
-import { AssetPreview } from '@/components/ui/card/asset-card/components/AssetPreview'
-import { AssetCard } from '@/components/ui/card/asset-card/AssetCard'
+import { AssetPreview } from '@/components/ui/card-asset-preview'
+import { AssetCard } from '@/components/ui/card-asset'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -1633,247 +1633,251 @@ export default function CampaignDetail() {
       <ErrorFallback error={new Error(error)} />
     </div>;
   }
-  return <div className="min-h-screen bg-gray-50 font-work-sans">
-    {/* Header Section */}
-    <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans shadow-sm`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-work-sans">
-        {error && <div className="mb-4 font-work-sans">
-          <ErrorStatusBadge message={error} />
-        </div>}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between font-work-sans">
-          <div className="flex items-center space-x-4 font-work-sans">
-            <button
-              onClick={() => window.history.back()}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-work-sans"
-              aria-label="Go back"
-            >
-              <Icon iconId="faChevronLeftLight"
-                className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans"
 
-              />
-            </button>
-            <div className="font-work-sans">
-              <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
-              <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-work-sans">
-                <CampaignStatusBadge status={error ? "error" : data?.submissionStatus} />
-                <span className="mx-2 font-work-sans text-gray-400">•</span>
-                <span className="font-work-sans">Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
+  // Wrap the main content in an ErrorBoundary using the 'fallback' prop
+  return <ErrorBoundary fallback={<ErrorFallback error={error ? new Error(error) : new Error('Unknown error')} resetErrorBoundary={() => { /* TODO: Add reset logic, e.g., re-trigger data fetch */ }} />}>
+    <div className="min-h-screen bg-gray-50 font-work-sans">
+      {/* Header Section */}
+      <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans shadow-sm`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-work-sans">
+          {error && <div className="mb-4 font-work-sans">
+            <ErrorStatusBadge message={error} />
+          </div>}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between font-work-sans">
+            <div className="flex items-center space-x-4 font-work-sans">
+              <button
+                onClick={() => window.history.back()}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-work-sans"
+                aria-label="Go back"
+              >
+                <Icon iconId="faChevronLeftLight"
+                  className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans"
+
+                />
+              </button>
+              <div className="font-work-sans">
+                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
+                <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-work-sans">
+                  <CampaignStatusBadge status={error ? "error" : data?.submissionStatus} />
+                  <span className="mx-2 font-work-sans text-gray-400">•</span>
+                  <span className="font-work-sans">Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
-            <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-              <Icon iconId="faPrintLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
-              <span className="font-work-sans">Print</span>
-            </button>
-            <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-              <Icon iconId="faShareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
-              <span className="font-work-sans">Share</span>
-            </button>
-            <button
-              onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
-              className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans"
-              disabled={!!error}
-            >
-              <Icon iconId="faPenToSquareSolid" className="h-4 w-4 mr-2 text-white !text-white" />
-              <span className="font-work-sans">Edit Campaign</span>
-            </button>
+            <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
+              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
+                <Icon iconId="faPrintLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
+                <span className="font-work-sans">Print</span>
+              </button>
+              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
+                <Icon iconId="faShareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
+                <span className="font-work-sans">Share</span>
+              </button>
+              <button
+                onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
+                className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans"
+                disabled={!!error}
+              >
+                <Icon iconId="faPenToSquareSolid" className="h-4 w-4 mr-2 text-white !text-white" />
+                <span className="font-work-sans">Edit Campaign</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Main Content */}
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
-      {/* Key Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-work-sans">
-        <CampaignMetricCard
-          title="Total Budget"
-          value={error ? "N/A" : data?.totalBudget || 0}
-          iconId="dollarSign"
-          format={error ? "text" : "currency"}
-        />
-        <CampaignMetricCard
-          title="Campaign Duration"
-          value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")}
-          iconId="calendar"
-        />
-      </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-work-sans">
+          <CampaignMetricCard
+            title="Total Budget"
+            value={error ? "N/A" : data?.totalBudget || 0}
+            iconId="dollarSign"
+            format={error ? "text" : "currency"}
+          />
+          <CampaignMetricCard
+            title="Campaign Duration"
+            value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")}
+            iconId="calendar"
+          />
+        </div>
 
-      {/* Campaign Details & Primary Contact */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-        <DataCard title="Campaign Details" iconId="documentText" description="Basic campaign information">
-          <div className="space-y-3 font-work-sans">
-            <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
-            <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
-            <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
-            <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconId="calendar" />
-            <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconId="calendar" />
-            <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconId="clock" />
-            <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconId="dollarSign" />
-            <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconId="dollarSign" featured={true} />
-            <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconId="dollarSign" />
-            <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconId="globe" />
-          </div>
-        </DataCard>
+        {/* Campaign Details & Primary Contact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
+          <DataCard title="Campaign Details" iconId="documentText" description="Basic campaign information">
+            <div className="space-y-3 font-work-sans">
+              <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
+              <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
+              <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
+              <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconId="calendar" />
+              <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconId="calendar" />
+              <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconId="clock" />
+              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconId="dollarSign" />
+              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconId="dollarSign" featured={true} />
+              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconId="dollarSign" />
+              <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconId="globe" />
+            </div>
+          </DataCard>
 
-        <DataCard title="Primary Contact" iconId="userCircle" description="Primary point of contact for this campaign">
-          <div className="space-y-3 font-work-sans">
-            <div className="flex items-center mb-4 font-work-sans">
-              <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
-                {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
+          <DataCard title="Primary Contact" iconId="userCircle" description="Primary point of contact for this campaign">
+            <div className="space-y-3 font-work-sans">
+              <div className="flex items-center mb-4 font-work-sans">
+                <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
+                  {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
+                </div>
+                <div className="font-work-sans">
+                  <h4 className="text-[var(--primary-color)] font-semibold font-sora">
+                    {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+                  </h4>
+                  <p className="text-[var(--secondary-color)] text-sm font-work-sans">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
+                </div>
+              </div>
+
+              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
+                {data?.primaryContact?.email || "N/A"}
+              </a>} iconId="mail" />
+
+              <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconId="building" />
+            </div>
+
+            {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
+              <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
+              <div className="space-y-3 font-work-sans">
+                <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconId="userCircle" />
+                <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
+                  {data.secondaryContact.email}
+                </a>} iconId="mail" />
+                <DataRow label="Position" value={data.secondaryContact.position} iconId="building" />
+              </div>
+            </div>}
+          </DataCard>
+        </div>
+
+        {/* Objectives & Audience */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
+          {error ? <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
+            <div className="space-y-5 font-work-sans">
+              <div className="font-work-sans">
+                <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
+                <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
               </div>
               <div className="font-work-sans">
-                <h4 className="text-[var(--primary-color)] font-semibold font-sora">
-                  {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
-                </h4>
-                <p className="text-[var(--secondary-color)] text-sm font-work-sans">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
+                <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
+                <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
+              </div>
+              <div className="space-y-3 pt-2 font-work-sans">
+                <DataRow label="Main Message" value="N/A" iconId="lightBulb" />
+                <DataRow label="Brand Perception" value="N/A" iconId="chart" />
+                <DataRow label="Hashtags" value="N/A" iconId="tag" />
+                <DataRow label="Key Benefits" value="N/A" iconId="circleCheck" />
+                <DataRow label="Memorability" value="N/A" iconId="bookmark" />
+                <DataRow label="Expected Achievements" value="N/A" iconId="trendUp" />
+                <DataRow label="Purchase Intent" value="N/A" iconId="dollarSign" />
               </div>
             </div>
+          </DataCard> : data && <ObjectivesSection campaign={data} />}
 
-            <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
-              {data?.primaryContact?.email || "N/A"}
-            </a>} iconId="mail" />
-
-            <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconId="building" />
-          </div>
-
-          {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
-            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
-            <div className="space-y-3 font-work-sans">
-              <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconId="userCircle" />
-              <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
-                {data.secondaryContact.email}
-              </a>} iconId="mail" />
-              <DataRow label="Position" value={data.secondaryContact.position} iconId="building" />
+          {error ? <DataCard title="Target Audience" iconId="userGroup" description="Detailed audience targeting information">
+            <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
+              <p className="font-work-sans">N/A</p>
             </div>
-          </div>}
-        </DataCard>
-      </div>
+          </DataCard> : data && <AudienceSection audience={data.audience} />}
+        </div>
 
-      {/* Objectives & Audience */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-        {error ? <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
-          <div className="space-y-5 font-work-sans">
-            <div className="font-work-sans">
-              <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
-              <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
-            </div>
-            <div className="font-work-sans">
-              <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
-              <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
-            </div>
-            <div className="space-y-3 pt-2 font-work-sans">
-              <DataRow label="Main Message" value="N/A" iconId="lightBulb" />
-              <DataRow label="Brand Perception" value="N/A" iconId="chart" />
-              <DataRow label="Hashtags" value="N/A" iconId="tag" />
-              <DataRow label="Key Benefits" value="N/A" iconId="circleCheck" />
-              <DataRow label="Memorability" value="N/A" iconId="bookmark" />
-              <DataRow label="Expected Achievements" value="N/A" iconId="trendUp" />
-              <DataRow label="Purchase Intent" value="N/A" iconId="dollarSign" />
-            </div>
-          </div>
-        </DataCard> : data && <ObjectivesSection campaign={data} />}
+        {/* Creative Assets */}
+        <div className="mb-6 font-work-sans">
+          <DataCard title="Creative Assets" iconId="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
+            {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
+              {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
+              <p className="font-work-sans">No creative assets available</p>
+            </div> :
+              <div>
+                {data && data.creativeAssets && Array.isArray(data.creativeAssets) && data.creativeAssets.length > 0 ?
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-work-sans">
+                    {data.creativeAssets.map((asset: any, index: number) =>
+                      <AssetCard
+                        key={asset.id || index}
+                        asset={{
+                          id: asset.id,
+                          name: asset.assetName || asset.name,
+                          url: asset.url,
+                          type: asset.type,
+                          platform: asset.platform || data.platform,
+                          influencerHandle: asset.influencerHandle || data.influencerHandle,
+                          description: asset.description || asset.whyInfluencer,
+                          budget: asset.budget,
+                          size: asset.size,
+                          duration: asset.duration
+                        }}
+                        currency={data.currency}
+                        defaultPlatform={data.platform}
+                        className="font-work-sans"
+                      />
+                    )}
+                  </div>
+                  :
+                  <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
+                    <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="font-work-sans">No creative assets uploaded yet</p>
+                  </div>
+                }
+              </div>
+            }
+          </DataCard>
+        </div>
 
-        {error ? <DataCard title="Target Audience" iconId="userGroup" description="Detailed audience targeting information">
-          <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-            <p className="font-work-sans">N/A</p>
-          </div>
-        </DataCard> : data && <AudienceSection audience={data.audience} />}
-      </div>
+        {/* Campaign Features */}
+        <div className="mb-6 font-work-sans">
+          <DataCard title="Campaign Features" iconId="bolt" description="Additional features enabled for this campaign">
+            {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
+              <p className="font-work-sans">N/A</p>
+            </div> :
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
+                {data?.features && data.features.length > 0 ?
+                  data.features.map((feature: string, index: number) => {
+                    const featureKey = feature as keyof typeof featureIconsMap;
+                    return (
+                      <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
+                        <div className="flex items-start">
+                          <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
+                            {featureIconsMap[featureKey] ?
+                              <Image
+                                src={featureIconsMap[featureKey].icon}
+                                width={28}
+                                height={28}
+                                alt={featureIconsMap[featureKey].title}
+                                className="w-7 h-7"
+                              /> :
+                              <Icon iconId="faBoltLight"
+                                className="h-7 w-7 text-[var(--accent-color)]"
 
-      {/* Creative Assets */}
-      <div className="mb-6 font-work-sans">
-        <DataCard title="Creative Assets" iconId="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
-          {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-            {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
-            <p className="font-work-sans">No creative assets available</p>
-          </div> :
-            <div>
-              {data && data.creativeAssets && Array.isArray(data.creativeAssets) && data.creativeAssets.length > 0 ?
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-work-sans">
-                  {data.creativeAssets.map((asset: any, index: number) =>
-                    <AssetCard
-                      key={asset.id || index}
-                      asset={{
-                        id: asset.id,
-                        name: asset.assetName || asset.name,
-                        url: asset.url,
-                        type: asset.type,
-                        platform: asset.platform || data.platform,
-                        influencerHandle: asset.influencerHandle || data.influencerHandle,
-                        description: asset.description || asset.whyInfluencer,
-                        budget: asset.budget,
-                        size: asset.size,
-                        duration: asset.duration
-                      }}
-                      currency={data.currency}
-                      defaultPlatform={data.platform}
-                      className="font-work-sans"
-                    />
-                  )}
-                </div>
-                :
-                <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                  <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="font-work-sans">No creative assets uploaded yet</p>
-                </div>
-              }
-            </div>
-          }
-        </DataCard>
-      </div>
-
-      {/* Campaign Features */}
-      <div className="mb-6 font-work-sans">
-        <DataCard title="Campaign Features" iconId="bolt" description="Additional features enabled for this campaign">
-          {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-            <p className="font-work-sans">N/A</p>
-          </div> :
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
-              {data?.features && data.features.length > 0 ?
-                data.features.map((feature: string, index: number) => {
-                  const featureKey = feature as keyof typeof featureIconsMap;
-                  return (
-                    <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
-                      <div className="flex items-start">
-                        <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
-                          {featureIconsMap[featureKey] ?
-                            <Image
-                              src={featureIconsMap[featureKey].icon}
-                              width={28}
-                              height={28}
-                              alt={featureIconsMap[featureKey].title}
-                              className="w-7 h-7"
-                            /> :
-                            <Icon iconId="faBoltLight"
-                              className="h-7 w-7 text-[var(--accent-color)]"
-
-                            />
-                          }
-                        </div>
-                        <div className="ml-4">
-                          <h4 className="font-medium text-[var(--primary-color)] font-sora text-lg mb-1">
-                            {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
-                          </h4>
-                          <p className="text-sm text-[var(--secondary-color)] mt-1 font-work-sans">
-                            {getFeatureDescription(feature)}
-                          </p>
+                              />
+                            }
+                          </div>
+                          <div className="ml-4">
+                            <h4 className="font-medium text-[var(--primary-color)] font-sora text-lg mb-1">
+                              {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
+                            </h4>
+                            <p className="text-sm text-[var(--secondary-color)] mt-1 font-work-sans">
+                              {getFeatureDescription(feature)}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                }) :
-                <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                  <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="font-work-sans">No features enabled for this campaign</p>
-                </div>
-              }
-            </div>
-          }
-        </DataCard>
+                    );
+                  }) :
+                  <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
+                    <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="font-work-sans">No features enabled for this campaign</p>
+                  </div>
+                }
+              </div>
+            }
+          </DataCard>
+        </div>
       </div>
     </div>
-  </div>;
+  </ErrorBoundary>; // Close ErrorBoundary
 }

@@ -7,21 +7,21 @@ export async function POST(req: Request) {
   try {
     // This should be secured with proper authentication
     // Only authenticated admin users should be allowed to index campaigns
-    
+
     // Extract campaigns from request body
     const body = await req.json();
     const { campaigns } = body;
-    
+
     if (!campaigns || !Array.isArray(campaigns)) {
       return NextResponse.json(
         { error: 'Invalid request. Campaigns array is required.' },
         { status: 400 }
       );
     }
-    
+
     // Index campaigns to Algolia
     await indexCampaigns(campaigns);
-    
+
     return NextResponse.json(
       { success: true, message: `Successfully indexed ${campaigns.length} campaigns.` }
     );
@@ -38,10 +38,9 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     console.log('Starting campaign indexing process...');
-    
-    // This should be secured with proper authentication
-    // Only authenticated admin users should be allowed to reindex all campaigns
-    
+
+    // Authentication/Authorization is handled by middleware
+
     try {
       // Fetch all campaigns directly from the database
       console.log('Fetching campaigns from database...');
@@ -51,16 +50,16 @@ export async function GET() {
         },
         take: 100  // Limit to 100 campaigns for performance
       });
-      
+
       console.log(`Found ${campaigns.length} campaigns in the database.`);
-      
+
       if (!campaigns.length) {
         return NextResponse.json(
           { warning: 'No campaigns found to index.' },
           { status: 200 }
         );
       }
-      
+
       // Transform campaigns for Algolia
       console.log('Transforming campaigns for Algolia...');
       const algoliaRecords = campaigns.map((campaign: any) => ({
@@ -74,11 +73,11 @@ export async function GET() {
         startDate: campaign.startDate ? new Date(campaign.startDate).toISOString() : '',
         endDate: campaign.endDate ? new Date(campaign.endDate).toISOString() : '',
       }));
-      
+
       // Index to Algolia
       console.log(`Indexing ${algoliaRecords.length} campaigns to Algolia...`);
       await indexCampaigns(algoliaRecords);
-      
+
       console.log('Indexing complete!');
       return NextResponse.json({
         success: true,

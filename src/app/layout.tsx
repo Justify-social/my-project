@@ -12,7 +12,7 @@ import { connection } from 'next/server';
 // Import IconContextProvider for consistent icon behavior
 // import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import
 import { SidebarProvider } from '@/providers/SidebarProvider';
-import { SearchProvider } from '@/contexts/SearchContext';
+import { SearchProvider } from '@/providers/SearchProvider';
 // Import the new auth state provider
 import { AuthStateProvider } from '@/lib/auth/authCoordinator';
 

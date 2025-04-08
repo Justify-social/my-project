@@ -15,18 +15,18 @@ interface LoadingSpinnerProps {
    * @default "md"
    */
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  
+
   /**
    * Color of the spinner
    * @default "primary"
    */
   color?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
-  
+
   /**
    * Text label to display with the spinner
    */
   label?: string;
-  
+
   /**
    * Additional class names
    */
@@ -36,11 +36,11 @@ interface LoadingSpinnerProps {
 /**
  * LoadingSpinner component for indicating loading states
  */
-export function LoadingSpinner({ 
-  size = 'md', 
+export function LoadingSpinner({
+  size = 'md',
   color = 'primary',
   label,
-  className 
+  className
 }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'w-4 h-4 border-2',
@@ -48,7 +48,7 @@ export function LoadingSpinner({
     lg: 'w-12 h-12 border-4',
     xl: 'w-16 h-16 border-4'
   };
-  
+
   const colorClasses = {
     primary: 'border-blue-600 border-b-transparent',
     secondary: 'border-gray-600 border-b-transparent',
@@ -57,10 +57,10 @@ export function LoadingSpinner({
     warning: 'border-amber-600 border-b-transparent',
     info: 'border-cyan-600 border-b-transparent'
   };
-  
+
   return (
     <div className="flex flex-col items-center justify-center">
-      <div 
+      <div
         className={cn(
           "animate-spin rounded-full border-solid",
           sizeClasses[size],
