@@ -41,25 +41,25 @@ enum Position {
 }
 
 // Define UI_ICON_MAP for use in the component
-const UI_ICON_MAP: Record<string, string> = {
-  "lightBulb": "faLightbulbLight",
-  "chart": "faChartLineLight",
-  "tag": "faTagLight",
-  "circleCheck": "faCircleCheckLight",
-  "bookmark": "faBookmark",
-  "trendUp": "faTrendUp",
-  "dollarSign": "faDollarSignLight",
-  "calendar": "faCalendarLight",
-  "documentText": "faFileLines",
-  "userCircle": "faUserCircleLight",
-  "mail": "faEnvelopeLight",
-  "building": "faBuildingLight",
-  "lightning": "faBolt",
-  "userGroup": "faUserGroupLight",
-  "photo": "faImage",
-  "globe": "faGlobeLight",
-  "bolt": "faBolt"
-};
+// const UI_ICON_MAP: Record<string, string> = {
+//   "lightBulb": "faLightbulbLight",
+//   "chart": "faChartLineLight",
+//   "tag": "faTagLight",
+//   "circleCheck": "faCircleCheckLight",
+//   "bookmark": "faBookmark",
+//   "trendUp": "faTrendUp",
+//   "dollarSign": "faDollarSignLight",
+//   "calendar": "faCalendarLight",
+//   "documentText": "faFileLines",
+//   "userCircle": "faUserCircleLight",
+//   "mail": "faEnvelopeLight",
+//   "building": "faBuildingLight",
+//   "lightning": "faBolt",
+//   "userGroup": "faUserGroupLight",
+//   "photo": "faImage",
+//   "globe": "faGlobeLight",
+//   "bolt": "faBolt"
+// };
 
 // Import the asset components
 import { AssetPreview } from '@/components/ui/card-asset-preview'
@@ -258,98 +258,99 @@ const slideIn = {
   }
 };
 
+// --- REMOVE START --- 
 // Add a KPI mapping with icons
-const kpiIconsMap = {
-  adRecall: {
-    title: "Ad Recall",
-    icon: "/icons/kpis/Ad_Recall.svg"
-  },
-  brandAwareness: {
-    title: "Brand Awareness",
-    icon: "/icons/kpis/Brand_Awareness.svg"
-  },
-  consideration: {
-    title: "Consideration",
-    icon: "/icons/kpis/Consideration.svg"
-  },
-  messageAssociation: {
-    title: "Message Association",
-    icon: "/icons/kpis/Message_Association.svg"
-  },
-  brandPreference: {
-    title: "Brand Preference",
-    icon: "/icons/kpis/Brand_Preference.svg"
-  },
-  purchaseIntent: {
-    title: "Purchase Intent",
-    icon: "/icons/kpis/Purchase_Intent.svg"
-  },
-  actionIntent: {
-    title: "Action Intent",
-    icon: "/icons/kpis/Action_Intent.svg"
-  },
-  recommendationIntent: {
-    title: "Recommendation Intent",
-    icon: "/icons/kpis/Brand_Preference.svg" // Using Brand Preference icon as a fallback
-  },
-  advocacy: {
-    title: "Advocacy",
-    icon: "/icons/kpis/Advocacy.svg"
-  }
-};
+// const kpiIconsMap = {
+//   adRecall: {
+//     title: "Ad Recall",
+//     icon: "/icons/kpis/Ad_Recall.svg"
+//   },
+//   brandAwareness: {
+//     title: "Brand Awareness",
+//     icon: "/icons/kpis/Brand_Awareness.svg"
+//   },
+//   consideration: {
+//     title: "Consideration",
+//     icon: "/icons/kpis/Consideration.svg"
+//   },
+//   messageAssociation: {
+//     title: "Message Association",
+//     icon: "/icons/kpis/Message_Association.svg"
+//   },
+//   brandPreference: {
+//     title: "Brand Preference",
+//     icon: "/icons/kpis/Brand_Preference.svg"
+//   },
+//   purchaseIntent: {
+//     title: "Purchase Intent",
+//     icon: "/icons/kpis/Purchase_Intent.svg"
+//   },
+//   actionIntent: {
+//     title: "Action Intent",
+//     icon: "/icons/kpis/Action_Intent.svg"
+//   },
+//   recommendationIntent: {
+//     title: "Recommendation Intent",
+//     icon: "/icons/kpis/Brand_Preference.svg" // Using Brand Preference icon as a fallback
+//   },
+//   advocacy: {
+//     title: "Advocacy",
+//     icon: "/icons/kpis/Advocacy.svg"
+//   }
+// };
 
 // Feature icons mapping
-const featureIconsMap = {
-  CREATIVE_ASSET_TESTING: {
-    title: "Creative Asset Testing",
-    icon: "/icons/app/Creative_Asset_Testing.svg"
-  },
-  BRAND_LIFT: {
-    title: "Brand Lift",
-    icon: "/icons/app/Brand_Lift.svg"
-  },
-  BRAND_HEALTH: {
-    title: "Brand Health",
-    icon: "/icons/app/Brand_Health.svg"
-  },
-  MIXED_MEDIA_MODELLING: {
-    title: "Mixed Media Modelling",
-    icon: "/icons/app/MMM.svg"
-  }
-};
+// const featureIconsMap = {
+//   CREATIVE_ASSET_TESTING: {
+//     title: "Creative Asset Testing",
+//     icon: "/icons/app/Creative_Asset_Testing.svg"
+//   },
+//   BRAND_LIFT: {
+//     title: "Brand Lift",
+//     icon: "/icons/app/Brand_Lift.svg"
+//   },
+//   BRAND_HEALTH: {
+//     title: "Brand Health",
+//     icon: "/icons/app/Brand_Health.svg"
+//   },
+//   MIXED_MEDIA_MODELLING: {
+//     title: "Mixed Media Modelling",
+//     icon: "/icons/app/MMM.svg"
+//   }
+// };
+// --- REMOVE END --- 
 
-// Format feature name for display
+// Format feature name for display - REMOVE MAP USAGE
 const formatFeatureName = (feature: string): string => {
   if (!feature) return "N/A";
-  return featureIconsMap[feature as keyof typeof featureIconsMap]?.title || feature.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  return feature.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-// Format KPI name for display
+// Format KPI name for display - REMOVE MAP USAGE
 const formatKpiName = (kpi: string): string => {
   if (!kpi) return "N/A";
-  // Get from map or format manually
-  return kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.title || kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+  return kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 };
 
 // Updated MetricCard component
 interface MetricCardProps {
   title: string;
   value: string | number;
-  iconId?: string; // Made iconId primary
+  iconId?: string;
   trend?: "up" | "down" | "none";
   subtext?: string;
   format?: "number" | "currency" | "percent" | "text";
-  platformIcon?: Platform; // Keep platform specific logic for now
+  // REMOVE platformIcon PROP
 }
 
 const CampaignMetricCard = ({
   title,
   value,
-  iconId, // Use iconId directly
+  iconId,
   trend = "none",
   subtext,
   format = "text",
-  platformIcon
+  // REMOVE platformIcon PROP
 }: MetricCardProps) => {
   // Format the value based on the format prop
   let formattedValue = value;
@@ -375,41 +376,6 @@ const CampaignMetricCard = ({
     trendColor = "text-red-600";
   }
 
-  // Get platform icon for display
-  const getPlatformIcon = () => {
-    // Keep existing platform-specific image logic
-    if (platformIcon && title === "Platform") {
-      if (typeof value === 'string') {
-        const platform = value.toLowerCase();
-        if (platform.includes('instagram')) {
-          return <Image src="/icons/brands/instagram.svg" width={24} height={24} alt="Instagram" />;
-        } else if (platform.includes('facebook')) {
-          return <Image src="/icons/brands/facebook.svg" width={24} height={24} alt="Facebook" />;
-        } else if (platform.includes('twitter') || platform.includes('x')) {
-          return <Image src="/icons/brands/x-twitter.svg" width={24} height={24} alt="Twitter" />;
-        } else if (platform.includes('tiktok')) {
-          return <Image src="/icons/brands/tiktok.svg" width={24} height={24} alt="TikTok" />;
-        } else if (platform.includes('youtube')) {
-          return <Image src="/icons/brands/youtube.svg" width={24} height={24} alt="YouTube" />;
-        } else if (platform.includes('linkedin')) {
-          return <Image src="/icons/brands/linkedin.svg" width={24} height={24} alt="LinkedIn" />;
-        } else if (platform.includes('pinterest')) {
-          return <Image src="/icons/brands/pinterest.svg" width={24} height={24} alt="Pinterest" />;
-        } else if (platform.includes('reddit')) {
-          return <Image src="/icons/brands/reddit.svg" width={24} height={24} alt="Reddit" />;
-        }
-      }
-    }
-    // Use iconId directly if provided, otherwise fallback
-    return (
-      <Icon
-        // Pass iconId directly, including in the fallback case
-        iconId={iconId || "faQuestionCircleLight"}
-        className="h-5 w-5 text-[var(--accent-color)]"
-      />
-    );
-  };
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)] font-work-sans transform transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-[var(--accent-color)]">
       <div className="flex justify-between items-start font-work-sans">
@@ -431,7 +397,11 @@ const CampaignMetricCard = ({
           {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">{subtext}</div>}
         </div>
         <div className="p-3 bg-[rgba(0,191,255,0.1)] rounded-full font-work-sans">
-          {getPlatformIcon()}
+          {/* Ensure Icon uses iconId directly */}
+          <Icon
+            iconId={iconId || "faQuestionCircleLight"}
+            className="h-5 w-5 text-[var(--accent-color)]"
+          />
         </div>
       </div>
     </div>
@@ -834,11 +804,10 @@ const ObjectivesSection: React.FC<{
           {campaign.primaryKPI ? (
             <div className="bg-[var(--accent-color)] text-white px-3 py-2 rounded-md inline-flex items-center">
               <Icon
-                // Construct the icon ID assuming a 'kpis/' prefix
-                iconId={`kpis/${capitalize(campaign.primaryKPI)}`}
+                // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
+                iconId={`kpis${capitalizeCamelCase(campaign.primaryKPI)}`}
                 className="w-6 h-6 mr-2"
-                // Use solid variant for contrast on accent background - Pass as string
-                solid="true"
+                solid="true" // Keep as string for React prop handling
               />
               <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>
             </div>
@@ -855,11 +824,10 @@ const ObjectivesSection: React.FC<{
               {campaign.secondaryKPIs.map((kpi, index) => (
                 <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
                   <Icon
-                    // Construct the icon ID assuming a 'kpis/' prefix
-                    iconId={`kpis/${capitalize(kpi)}`}
+                    // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
+                    iconId={`kpis${capitalizeCamelCase(kpi)}`}
                     className="w-5 h-5 mr-2"
-                    // Use light variant on light background
-                    solid={false}
+                    solid="false" // Keep as string for React prop handling
                   />
                   <span>{formatKpiName(kpi)}</span>
                 </span>
@@ -1160,7 +1128,22 @@ function validateCampaignData(data: any): CampaignValidation {
 
 // Helper function to capitalize a string
 const capitalize = (str: string): string => {
+  if (!str) return str; // Added check for empty string
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+// NEW HELPER: Capitalize camelCase strings (e.g., adRecall -> AdRecall)
+const capitalizeCamelCase = (str: string): string => {
+  if (!str) return str;
+  // Find the split point between lowercase and uppercase
+  const match = str.match(/[a-z]([A-Z])/);
+  if (match && match.index !== undefined) {
+    const splitIndex = match.index + 1;
+    // Capitalize the first part, append the rest
+    return capitalize(str.substring(0, splitIndex)) + str.substring(splitIndex);
+  }
+  // If no camelCase split found, just capitalize the whole string
+  return capitalize(str);
 };
 
 // StatusBadge component with semantic icons
@@ -1665,34 +1648,34 @@ export default function CampaignDetail() {
           <CampaignMetricCard
             title="Total Budget"
             value={error ? "N/A" : data?.totalBudget || 0}
-            iconId="dollarSign"
+            iconId="faDollarSignLight"
             format={error ? "text" : "currency"}
           />
           <CampaignMetricCard
             title="Campaign Duration"
             value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")}
-            iconId="calendar"
+            iconId="faCalendarLight"
           />
         </div>
 
         {/* Campaign Details & Primary Contact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          <DataCard title="Campaign Details" iconId="documentText" description="Basic campaign information">
+          <DataCard title="Campaign Details" iconId="faFileLinesLight" description="Basic campaign information">
             <div className="space-y-3 font-work-sans">
               <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
               <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
               <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
-              <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconId="calendar" />
-              <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconId="calendar" />
-              <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconId="clock" />
-              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconId="dollarSign" />
-              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconId="dollarSign" featured={true} />
-              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconId="dollarSign" />
-              <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconId="globe" />
+              <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconId="faCalendarLight" />
+              <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconId="faCalendarLight" />
+              <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconId="faClockLight" />
+              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconId="faDollarSignLight" />
+              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconId="faDollarSignLight" featured={true} />
+              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconId="faDollarSignLight" />
+              <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconId="faGlobeLight" />
             </div>
           </DataCard>
 
-          <DataCard title="Primary Contact" iconId="userCircle" description="Primary point of contact for this campaign">
+          <DataCard title="Primary Contact" iconId="faUserCircleLight" description="Primary point of contact for this campaign">
             <div className="space-y-3 font-work-sans">
               <div className="flex items-center mb-4 font-work-sans">
                 <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
@@ -1708,19 +1691,18 @@ export default function CampaignDetail() {
 
               <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
                 {data?.primaryContact?.email || "N/A"}
-              </a>} iconId="mail" />
-
-              <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconId="building" />
+              </a>} iconId="faEnvelopeLight" />
+              <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconId="faBuildingLight" />
             </div>
 
             {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
               <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
               <div className="space-y-3 font-work-sans">
-                <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconId="userCircle" />
+                <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconId="faUserCircleLight" />
                 <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
                   {data.secondaryContact.email}
-                </a>} iconId="mail" />
-                <DataRow label="Position" value={data.secondaryContact.position} iconId="building" />
+                </a>} iconId="faEnvelopeLight" />
+                <DataRow label="Position" value={data.secondaryContact.position} iconId="faBuildingLight" />
               </div>
             </div>}
           </DataCard>
@@ -1739,18 +1721,18 @@ export default function CampaignDetail() {
                 <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
               </div>
               <div className="space-y-3 pt-2 font-work-sans">
-                <DataRow label="Main Message" value="N/A" iconId="lightBulb" />
-                <DataRow label="Brand Perception" value="N/A" iconId="chart" />
-                <DataRow label="Hashtags" value="N/A" iconId="tag" />
-                <DataRow label="Key Benefits" value="N/A" iconId="circleCheck" />
-                <DataRow label="Memorability" value="N/A" iconId="bookmark" />
-                <DataRow label="Expected Achievements" value="N/A" iconId="trendUp" />
-                <DataRow label="Purchase Intent" value="N/A" iconId="dollarSign" />
+                <DataRow label="Main Message" value="N/A" iconId="faLightbulbLight" />
+                <DataRow label="Brand Perception" value="N/A" iconId="faChartLineLight" />
+                <DataRow label="Hashtags" value="N/A" iconId="faTagLight" />
+                <DataRow label="Key Benefits" value="N/A" iconId="faCircleCheckLight" />
+                <DataRow label="Memorability" value="N/A" iconId="faBookmarkLight" />
+                <DataRow label="Expected Achievements" value="N/A" iconId="faTrendUpLight" />
+                <DataRow label="Purchase Intent" value="N/A" iconId="faDollarSignLight" />
               </div>
             </div>
           </DataCard> : data && <ObjectivesSection campaign={data} />}
 
-          {error ? <DataCard title="Target Audience" iconId="userGroup" description="Detailed audience targeting information">
+          {error ? <DataCard title="Target Audience" iconId="faUserGroupLight" description="Detailed audience targeting information">
             <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
               <p className="font-work-sans">N/A</p>
             </div>
@@ -1759,7 +1741,7 @@ export default function CampaignDetail() {
 
         {/* Creative Assets */}
         <div className="mb-6 font-work-sans">
-          <DataCard title="Creative Assets" iconId="photo" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
+          <DataCard title="Creative Assets" iconId="faImageLight" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
             {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
               {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
               <p className="font-work-sans">No creative assets available</p>
@@ -1808,17 +1790,20 @@ export default function CampaignDetail() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
                 {data?.features && data.features.length > 0 ?
                   data.features.map((feature: string, index: number) => {
-                    // Construct the icon ID assuming an 'app/' prefix and capitalizing
-                    const featureIconId = `app/${capitalize(feature.replace(/_/g, ''))}`;
+                    // Construct the icon ID using app{CapitalizedFeatureName} format
+                    // Remove underscores, then capitalize
+                    const capitalizedFeature = feature.split('_').map(capitalize).join('');
+                    const featureIconId = `app${capitalizedFeature}`;
                     return (
                       <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
                         <div className="flex items-start">
                           <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
-                            {/* Replace Image with Icon component */}
+                            {/* Use Icon component with constructed ID */}
                             <Icon
                               iconId={featureIconId}
                               className="h-7 w-7 text-[var(--accent-color)]"
-                              fallbackIconId="faBoltLight"
+                            // Remove the fallbackIconId prop
+                            // fallbackIconId="faBoltLight"
                             />
                           </div>
                           <div className="ml-4">
