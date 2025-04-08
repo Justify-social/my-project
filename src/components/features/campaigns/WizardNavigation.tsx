@@ -5,7 +5,7 @@ import React from 'react';
 import { useCampaignWizardContext } from '@/src/components/features/campaigns/wizard/CampaignWizardContext';
 import { AutosaveIndicator } from './wizard/AutosaveIndicator';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon'
 
 interface WizardNavigationProps {
   className?: string;

@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import Header from '@/components/ui/organisms/navigation/header';
-import Sidebar from '@/components/ui/organisms/navigation/sidebar';
-import { SidebarProvider, useSidebar } from "@/providers/SidebarProvider";
-import { SearchProvider } from '@/contexts/SearchContext';
+import { Header } from '@/components/ui/navigation/header';
+import { Sidebar } from '@/components/ui/navigation/sidebar';
+import { useSidebar } from "@/providers/SidebarProvider";
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { LoadingSpinner } from '@/components/ui/atoms/loading-spinner';
-import { Icon } from '@/components/ui/atoms/icon';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Icon } from '@/components/ui/icon/icon';
 import Link from "next/link";
 import Image from "next/image";
 
@@ -154,39 +153,34 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const sidebarHeader = null;
 
   return (
-    <SearchProvider>
-      <div className="min-h-screen bg-white font-work-sans">
-        <Header
-          companyName="Justify"
-          remainingCredits={100}
-          notificationsCount={3}
-          onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
+    <div className="min-h-screen bg-white font-work-sans">
+      <Header
+        companyName="Justify"
+        remainingCredits={100}
+        notificationsCount={3}
+        onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
 
+      <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300">
         <Sidebar
           items={sidebarItems}
-          header={sidebarHeader}
-          footer={sidebarFooter}
-          isMobileOpen={isMobileOpen}
-          onMobileClose={() => setIsMobileOpen(false)}
-          width="240px"
+          activePath={pathname}
+          isExpanded={isOpen}
+          onToggle={toggle}
+          onItemClick={() => setIsMobileOpen(false)}
         />
-        <div className={`transition-all duration-200 ${isOpen ? 'md:ml-60' : 'md:ml-16'} pt-16 font-work-sans`}>
-          <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
-            {children}
-          </main>
-        </div>
       </div>
-    </SearchProvider>
+      <div className={`transition-all duration-200 ${isOpen ? 'md:ml-60' : 'md:ml-16'} pt-16 font-work-sans`}>
+        <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 };
 
-// Outer component that provides the SidebarProvider
+// Export the ClientLayoutInner directly since SidebarProvider is now in RootLayout
 const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
-  return (
-    <SidebarProvider>
-      <ClientLayoutInner>{children}</ClientLayoutInner>
-    </SidebarProvider>
-  );
+  return <ClientLayoutInner>{children}</ClientLayoutInner>;
 };
 
 export default ClientLayout;

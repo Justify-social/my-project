@@ -6,23 +6,19 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend as RechartsLegend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
-import { Skeleton } from "@/components/ui/atoms/skeleton";
-import { Card } from "@/components/ui";
-import CalendarDashboard from "@/components/ui/organisms/calendar/CalendarDashboard";
-import UpcomingCampaignsCard from "@/components/ui/organisms/card/UpcomingCampaignsCard";
+import { Skeleton, Card, Icon } from "@/components/ui";
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import useSWR from 'swr';
 import Image from 'next/image';
-import { Button } from '@/components/ui/atoms/button/Button'
+import { Button } from '@/components/ui/button/Button'
 import { format } from 'date-fns';
-import { Icon } from "@/components/ui/atoms/icon/Icon";
-import { TableSkeleton } from '@/components/ui/molecules/skeleton';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 // Define IconName type locally if it's not available
 type IconName = string;
 
 // Import dynamically loaded components and ensure they are exported correctly.
-const CalendarUpcoming = dynamic(() => import("@/components/ui/organisms/calendar/CalendarUpcoming"), {
+const CalendarUpcoming = dynamic(() => import("@/components/features/dashboard/CalendarUpcoming"), {
   ssr: false
 });
 

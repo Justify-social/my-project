@@ -5,7 +5,7 @@ import { z } from 'zod'; // For input validation
 import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 import { getSession } from '@auth0/nextjs-auth0';
 import { connectToDatabase } from '@/lib/db';
-import { tryCatch } from '@/middlewares/api';
+import { tryCatch } from '@/config/middleware/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 
 type RouteParams = { params: { id: string } }

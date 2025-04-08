@@ -2,20 +2,20 @@
 'use client';
 
 import React, { useEffect, useState, Suspense, useMemo, useCallback, useRef } from 'react';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Badge } from '@/components/ui/badge';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/error-fallback';
-import { Skeleton } from '@/components/ui/atoms/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { Icon } from '@/components/ui/atoms/icon/Icon';
+import { Icon } from '@/components/ui/icon/Icon';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
-import { Button } from "@/components/ui/atoms/button/Button";
+import { Button } from "@/components/ui";
 
 // Define a simple UI icon mapping for now until we can properly import UI_ICON_MAP
 const UI_ICON_MAP: Record<string, string> = {
@@ -79,8 +79,8 @@ const UI_ICON_MAP: Record<string, string> = {
 };
 
 // Import the asset components
-import { AssetPreview } from '@/components/ui/organisms/card/asset-card/components/AssetPreview'
-import { AssetCard } from '@/components/ui/organisms/card/asset-card/AssetCard'
+import { AssetPreview } from '@/components/ui/card/asset-card/components/AssetPreview'
+import { AssetCard } from '@/components/ui/card/asset-card/AssetCard'
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums

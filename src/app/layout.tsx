@@ -6,9 +6,15 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Toaster } from 'react-hot-toast';
-import { Toaster as ShadcnToaster } from '@/components/ui/molecules/sonner/Sonner';
+import { NotificationSonner } from '@/components/ui/notification-sonner';
 import { Suspense } from 'react';
 import { connection } from 'next/server';
+// Import IconContextProvider for consistent icon behavior
+import { IconContextProvider } from '@/components/ui/icon/icon-context';
+import { SidebarProvider } from '@/providers/SidebarProvider';
+import { SearchProvider } from '@/contexts/SearchContext';
+// Import the new auth state provider
+import { AuthStateProvider } from '@/lib/auth/authCoordinator';
 
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
@@ -44,16 +50,29 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
-          <ShadcnToaster />
-          <Suspense>
-            <UTSSR />
-          </Suspense>
-          <ClientLayout>
-            <main className="min-h-screen bg-gray-100">
-              {children}
-            </main>
-          </ClientLayout>
-          <Toaster />
+          {/* Add AuthStateProvider as the SSOT for auth state */}
+          <AuthStateProvider>
+            <IconContextProvider 
+              defaultVariant="light" 
+              defaultSize="md"
+              iconBasePath="/icons"
+            >
+              <SidebarProvider>
+                <SearchProvider>
+                  <NotificationSonner />
+                  <Suspense>
+                    <UTSSR />
+                  </Suspense>
+                  <ClientLayout>
+                    <main className="min-h-screen bg-gray-100">
+                      {children}
+                    </main>
+                  </ClientLayout>
+                  <Toaster />
+                </SearchProvider>
+              </SidebarProvider>
+            </IconContextProvider>
+          </AuthStateProvider>
         </UserProvider>
       </body>
     </html>

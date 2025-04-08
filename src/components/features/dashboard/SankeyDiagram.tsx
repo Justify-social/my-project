@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import Plotly to avoid SSR issues
-const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
+import { ResponsiveContainer, Sankey, Tooltip } from 'recharts';
 
 export interface SankeyNode {
   id: string; // unique identifier
@@ -55,7 +52,6 @@ export const sampleSankeyData: SankeyData = {
   { source: "social", target: "paid", value: 800 },
   { source: "print", target: "social", value: 200 },
   { source: "ooh", target: "social", value: 150 }]
-
 };
 
 const SankeyDiagram: React.FC<SankeyProps> = ({
@@ -68,33 +64,39 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
 }) => {
   const [highlightedNode, setHighlightedNode] = useState<string | null>(null);
 
-  // Process data for Plotly Sankey diagram
-  const { node, link, colorscale } = useMemo(() => {
-    const node = {
-      label: data.nodes.map((n) => n.name),
-      color: data.nodes.map((n) => getColorForNodeType(n.type)),
-      customdata: data.nodes.map((n) => n.id)
-    };
+  // Transform the data to Recharts Sankey format
+  const rechartsSankeyData = useMemo(() => {
+    // Recharts Sankey requires nodes with name property and numeric index-based links
+    const nodeMap: Record<string, number> = {};
+    
+    // Create formatted nodes with indices
+    const nodes = data.nodes.map((node, index) => {
+      nodeMap[node.id] = index; // Store index mapping
+      return {
+        name: node.name,
+        value: node.value,
+        // Store original data for reference
+        _originalId: node.id,
+        _type: node.type
+      };
+    });
+    
+    // Create index-based links
+    const links = data.links.map(link => ({
+      source: nodeMap[link.source],
+      target: nodeMap[link.target],
+      value: link.value,
+      // Store original data
+      _sourceId: link.source,
+      _targetId: link.target,
+      _conversionRate: link.conversionRate
+    }));
+    
+    return { nodes, links };
+  }, [data]);
 
-    const link = {
-      source: data.links.map((l) => data.nodes.findIndex((n) => n.id === l.source)),
-      target: data.links.map((l) => data.nodes.findIndex((n) => n.id === l.target)),
-      value: data.links.map((l) => l.value),
-      color: getColorForLinks(data, colorMode),
-      customdata: data.links.map((l) => ({
-        sourceId: l.source,
-        targetId: l.target,
-        conversionRate: l.conversionRate
-      }))
-    };
-
-    return { node, link, colorscale: getLinkColorScale() };
-  }, [data, colorMode, highlightedNode]);
-
-  const handleNodeClick = (event: any) => {
-    if (!event.points || !event.points[0] || !event.points[0].customdata) return;
-
-    const nodeId = event.points[0].customdata;
+  const handleNodeClick = (nodeData: any) => {
+    const nodeId = nodeData._originalId;
     setHighlightedNode(highlightedNode === nodeId ? null : nodeId);
     onNodeClick?.(nodeId);
   };
@@ -123,37 +125,27 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
       </div>
       
       <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-        {/* @ts-expect-error - Plotly typedefs are not perfect */}
-        <Plot
-          data={[
-          {
-            type: 'sankey',
-            orientation: 'h',
-            node: node,
-            link: link,
-            valueformat: ',',
-            valuesuffix: ' users',
-            arrangement: 'snap'
-          } as any]
-          }
-          layout={{
-            font: { size: 12 },
-            height,
-            width,
-            margin: { l: 0, r: 0, b: 0, t: 10 },
-            paper_bgcolor: 'transparent',
-            plot_bgcolor: 'transparent',
-            hovermode: 'closest',
-            hoverlabel: { bgcolor: '#FFF', bordercolor: '#DDD', font: { size: 12 } }
-          }}
-          config={{
-            responsive: true,
-            displayModeBar: false
-          }}
-          onClick={handleNodeClick}
-          onHover={handleLinkClick}
-          style={{ width: '100%', height: '100%' }} />
-
+        <ResponsiveContainer width="100%" height={500}>
+          <Sankey
+            data={rechartsSankeyData}
+            nodePadding={50}
+            nodeWidth={10}
+            link={{ 
+              stroke: '#77c878',
+              strokeOpacity: 0.5,
+            }}
+            node={{ 
+              fill: '#3182CE',
+              stroke: '#eee',
+              onClick: handleNodeClick
+            }}
+          >
+            <Tooltip 
+              formatter={(value: number) => [`${value.toLocaleString()} users`, 'Value']}
+              labelFormatter={(name: string) => name}
+            />
+          </Sankey>
+        </ResponsiveContainer>
       </div>
       
       {highlightedNode &&
@@ -202,7 +194,6 @@ const SankeyDiagram: React.FC<SankeyProps> = ({
         <p className="font-work-sans">The Sankey diagram visualizes user flow between marketing channels. Click on any node to see detailed information.</p>
       </div>
     </div>);
-
 };
 
 function getColorForNodeType(type: string): string {

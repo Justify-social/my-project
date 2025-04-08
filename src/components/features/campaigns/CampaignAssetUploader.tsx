@@ -8,9 +8,9 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon'
 // Fix Spinner import - use the correct component from loading-spinner
-import { LoadingSpinner as Spinner } from '@/components/ui/atoms/loading-spinner'
+import { LoadingSpinner as Spinner } from '@/components/ui/loading-spinner'
 import { generateCorrelationId, sanitizeFileName, logAndShowError, enhancedFileTypeDetection, extractAssetUrl } from "@/utils/file-utils";
 
 export interface UploadedAsset {

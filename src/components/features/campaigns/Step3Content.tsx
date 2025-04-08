@@ -10,10 +10,11 @@ import "rc-slider/assets/index.css";
 import { useWizard } from "@/components/features/campaigns/WizardContext";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { _LoadingSpinner } from '@/components/ui/loading-spinner';
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
+import { WizardSkeleton } from "@/components/ui";
 import { toast } from "react-hot-toast";
-import { Tooltip } from "@/components/ui/atoms/tooltip";
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+import { Tooltip } from "@/components/ui";
+import { Spinner } from '@/components/ui/spinner/Spinner'
+import { Icon } from '@/components/ui/icon/icon';
 
 // =============================================================================
 // TYPES & INTERFACES

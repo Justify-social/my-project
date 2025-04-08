@@ -12,9 +12,9 @@ import { useWizard } from "@/components/features/campaigns/WizardContext";
 import Header from "@/components/features/campaigns/Header";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { toast } from "react-hot-toast";
-import { WizardSkeleton, FormSkeleton } from "@/components/ui/loading-skeleton";
+import { WizardSkeleton, FormSkeleton } from "@/components/ui";
 import Image from "next/image";
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon'
 import { EnumTransformers } from '@/utils/enum-transformers';
 // Import the payload sanitizer utilities
 import { sanitizeDraftPayload } from '@/utils/payload-sanitizer';

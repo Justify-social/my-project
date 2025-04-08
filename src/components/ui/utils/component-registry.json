@@ -1,0 +1,487 @@
+{
+  "components": [
+    {
+      "name": "ThemeToggle",
+      "description": "A button that toggles between light and dark themes",
+      "category": "atom",
+      "renderType": "client",
+      "filePath": "/src/components/ui/theme-toggle.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* <ThemeToggle />"
+      ],
+      "relatedComponents": []
+    },
+    {
+      "name": "Tabs",
+      "description": "A tabs component",
+      "category": "molecule",
+      "renderType": "client",
+      "filePath": "/src/components/ui/tabs.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    {
+      "name": "Table",
+      "description": "A table component",
+      "category": "molecule",
+      "renderType": "server",
+      "filePath": "/src/components/ui/table.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    {
+      "name": "Select",
+      "description": "A select component",
+      "category": "atom",
+      "renderType": "client",
+      "filePath": "/src/components/ui/select.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    {
+      "name": "Input",
+      "description": "A input component",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/input.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    {
+      "name": "Card",
+      "description": "A versatile card component for containing content and actions",
+      "category": "molecule",
+      "renderType": "server",
+      "filePath": "/src/components/ui/card.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    },
+    {
+      "name": "Button",
+      "description": "A reusable button component that supports different variants, sizes, and states.",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/button.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx",
+        "* ```tsx"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    },
+    {
+      "name": "Badge",
+      "description": "A badge component",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/badge.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "relatedComponents": []
+    },
+    {
+      "name": "Avatar",
+      "description": "A avatar component",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/avatar.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "relatedComponents": []
+    },
+    {
+      "name": "Alert",
+      "description": "A alert component",
+      "category": "molecule",
+      "renderType": "server",
+      "filePath": "/src/components/ui/alert.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "relatedComponents": []
+    },
+    {
+      "name": "CardClient",
+      "description": "Client-side interactive Card component with hover effects and state",
+      "category": "molecule",
+      "renderType": "client",
+      "filePath": "/src/components/ui/client/card-client.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* <Card>"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    },
+    {
+      "name": "ButtonClient",
+      "description": "Client-side interactive version of the Button component with enhanced functionality",
+      "category": "atom",
+      "renderType": "client",
+      "filePath": "/src/components/ui/client/button-client.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* <Button>Click me</Button>",
+        "* <Button variant=\"outline\" onClick={() => alert('Clicked')}>"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    }
+  ],
+  "byName": {
+    "themetoggle": {
+      "name": "ThemeToggle",
+      "description": "A button that toggles between light and dark themes",
+      "category": "atom",
+      "renderType": "client",
+      "filePath": "/src/components/ui/theme-toggle.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* <ThemeToggle />"
+      ],
+      "relatedComponents": []
+    },
+    "tabs": {
+      "name": "Tabs",
+      "description": "A tabs component",
+      "category": "molecule",
+      "renderType": "client",
+      "filePath": "/src/components/ui/tabs.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    "table": {
+      "name": "Table",
+      "description": "A table component",
+      "category": "molecule",
+      "renderType": "server",
+      "filePath": "/src/components/ui/table.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    "select": {
+      "name": "Select",
+      "description": "A select component",
+      "category": "atom",
+      "renderType": "client",
+      "filePath": "/src/components/ui/select.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    "input": {
+      "name": "Input",
+      "description": "A input component",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/input.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [],
+      "relatedComponents": []
+    },
+    "card": {
+      "name": "Card",
+      "description": "A versatile card component for containing content and actions",
+      "category": "molecule",
+      "renderType": "server",
+      "filePath": "/src/components/ui/card.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    },
+    "button": {
+      "name": "Button",
+      "description": "A reusable button component that supports different variants, sizes, and states.",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/button.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx",
+        "* ```tsx"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    },
+    "badge": {
+      "name": "Badge",
+      "description": "A badge component",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/badge.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "relatedComponents": []
+    },
+    "avatar": {
+      "name": "Avatar",
+      "description": "A avatar component",
+      "category": "atom",
+      "renderType": "server",
+      "filePath": "/src/components/ui/avatar.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "relatedComponents": []
+    },
+    "alert": {
+      "name": "Alert",
+      "description": "A alert component",
+      "category": "molecule",
+      "renderType": "server",
+      "filePath": "/src/components/ui/alert.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* ```tsx"
+      ],
+      "relatedComponents": []
+    },
+    "cardclient": {
+      "name": "CardClient",
+      "description": "Client-side interactive Card component with hover effects and state",
+      "category": "molecule",
+      "renderType": "client",
+      "filePath": "/src/components/ui/client/card-client.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* <Card>"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    },
+    "buttonclient": {
+      "name": "ButtonClient",
+      "description": "Client-side interactive version of the Button component with enhanced functionality",
+      "category": "atom",
+      "renderType": "client",
+      "filePath": "/src/components/ui/client/button-client.tsx",
+      "status": "stable",
+      "props": [],
+      "examples": [
+        "* <Button>Click me</Button>",
+        "* <Button variant=\"outline\" onClick={() => alert('Clicked')}>"
+      ],
+      "author": "Frontend Team",
+      "relatedComponents": []
+    }
+  },
+  "byCategory": {
+    "atom": [
+      {
+        "name": "Avatar",
+        "description": "A avatar component",
+        "category": "atom",
+        "renderType": "server",
+        "filePath": "/src/components/ui/avatar.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* ```tsx"
+        ],
+        "relatedComponents": []
+      },
+      {
+        "name": "Badge",
+        "description": "A badge component",
+        "category": "atom",
+        "renderType": "server",
+        "filePath": "/src/components/ui/badge.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* ```tsx"
+        ],
+        "relatedComponents": []
+      },
+      {
+        "name": "Button",
+        "description": "A reusable button component that supports different variants, sizes, and states.",
+        "category": "atom",
+        "renderType": "server",
+        "filePath": "/src/components/ui/button.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* ```tsx",
+          "* ```tsx"
+        ],
+        "author": "Frontend Team",
+        "relatedComponents": []
+      },
+      {
+        "name": "ButtonClient",
+        "description": "Client-side interactive version of the Button component with enhanced functionality",
+        "category": "atom",
+        "renderType": "client",
+        "filePath": "/src/components/ui/client/button-client.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* <Button>Click me</Button>",
+          "* <Button variant=\"outline\" onClick={() => alert('Clicked')}>"
+        ],
+        "author": "Frontend Team",
+        "relatedComponents": []
+      },
+      {
+        "name": "Input",
+        "description": "A input component",
+        "category": "atom",
+        "renderType": "server",
+        "filePath": "/src/components/ui/input.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [],
+        "relatedComponents": []
+      },
+      {
+        "name": "Select",
+        "description": "A select component",
+        "category": "atom",
+        "renderType": "client",
+        "filePath": "/src/components/ui/select.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [],
+        "relatedComponents": []
+      },
+      {
+        "name": "ThemeToggle",
+        "description": "A button that toggles between light and dark themes",
+        "category": "atom",
+        "renderType": "client",
+        "filePath": "/src/components/ui/theme-toggle.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* <ThemeToggle />"
+        ],
+        "relatedComponents": []
+      }
+    ],
+    "molecule": [
+      {
+        "name": "Alert",
+        "description": "A alert component",
+        "category": "molecule",
+        "renderType": "server",
+        "filePath": "/src/components/ui/alert.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* ```tsx"
+        ],
+        "relatedComponents": []
+      },
+      {
+        "name": "Card",
+        "description": "A versatile card component for containing content and actions",
+        "category": "molecule",
+        "renderType": "server",
+        "filePath": "/src/components/ui/card.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* ```tsx"
+        ],
+        "author": "Frontend Team",
+        "relatedComponents": []
+      },
+      {
+        "name": "CardClient",
+        "description": "Client-side interactive Card component with hover effects and state",
+        "category": "molecule",
+        "renderType": "client",
+        "filePath": "/src/components/ui/client/card-client.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [
+          "* <Card>"
+        ],
+        "author": "Frontend Team",
+        "relatedComponents": []
+      },
+      {
+        "name": "Table",
+        "description": "A table component",
+        "category": "molecule",
+        "renderType": "server",
+        "filePath": "/src/components/ui/table.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [],
+        "relatedComponents": []
+      },
+      {
+        "name": "Tabs",
+        "description": "A tabs component",
+        "category": "molecule",
+        "renderType": "client",
+        "filePath": "/src/components/ui/tabs.tsx",
+        "status": "stable",
+        "props": [],
+        "examples": [],
+        "relatedComponents": []
+      }
+    ],
+    "organism": [],
+    "template": [],
+    "page": [],
+    "unknown": []
+  },
+  "allCategories": [
+    "atom",
+    "molecule",
+    "organism",
+    "template",
+    "page"
+  ],
+  "generatedAt": "2025-04-06T14:23:20.149Z",
+  "totalComponents": 12
+}

@@ -4,9 +4,9 @@ import MarketplaceListProps from './influencers/index';
 import LoadingSpinner from '../../ui/spinner-examples';
 import { Influencer } from '@/types/influencer';
 import InfluencerCard from '@/src/components/features/campaigns/influencers/InfluencerCard';
-import { Button } from '@/components/ui/atoms/button/Button'
-import { Icon } from '@/components/ui/atoms/icon'
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+import { Button } from '@/components/ui/button/Button'
+import { Icon } from '@/components/ui/icon'
+import { Spinner } from '@/components/ui/spinner/Spinner'
 
 export interface MarketplaceListProps {
   influencers: Influencer[];

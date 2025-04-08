@@ -1,116 +1,73 @@
-/**
- * UI Component Library Layout
- * 
- * This layout provides the structure for the UI Component Library.
- * It includes a dynamic sidebar component and the main content area.
- */
 'use client';
 
-import React, { ErrorInfo } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import dynamic from 'next/dynamic';
+import { getIconClasses } from '@/components/ui/utils/icon-integration';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
-// Create an error boundary component
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Error in UI Components layout:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      const isChunkLoadError = this.state.error?.message.includes('ChunkLoadError') || 
-                              this.state.error?.message.includes('Loading chunk');
-      
-      return (
-        <div className="p-8 bg-red-50 border border-red-200 rounded-md m-4">
-          <h2 className="text-xl font-semibold text-red-700 mb-4">
-            {isChunkLoadError ? 'Component Loading Error' : 'Something went wrong'}
-          </h2>
-          <p className="text-red-600 mb-4">
-            {isChunkLoadError 
-              ? 'Failed to load required component chunks. This may be due to network issues or a problem with the component browser.' 
-              : this.state.error?.message}
-          </p>
-          <div className="mt-6">
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-            >
-              Reload Page
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-// Simple fallback sidebar for when the dynamic import fails
-const SidebarFallback = () => (
-  <div className="w-64 bg-gray-100 p-4">
-    <div className="text-lg font-semibold mb-4">UI Components</div>
-    <div className="text-sm text-red-500">
-      Failed to load sidebar. Please refresh the page.
-    </div>
-  </div>
-);
-
-// Load the sidebar with improved error handling
-const DynamicStyledSidebar = dynamic(
-  () => import('./components/DynamicStyledSidebar').then(mod => mod.default).catch(err => {
-    console.error('Failed to load sidebar:', err);
-    return SidebarFallback;
-  }),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="w-64 bg-gray-100 p-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-            <div className="h-4 bg-gray-200 rounded w-4/6"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-);
-
-export default function UIComponentsLayout({
+export default function ComponentBrowserLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname() || '';
-  const isUIComponentsPath = pathname === '/debug-tools/ui-components' || pathname.startsWith('/debug-tools/ui-components/');
   
+  const navLinks = [
+    { href: '/debug-tools/ui-components', label: 'Component Browser', icon: 'grid-2' },
+    { href: '/debug-tools/ui-components/render-type-comparison', label: 'Server vs Client', icon: 'code-compare' },
+    { href: '/debug-tools/ui-components/server-test', label: 'Server Test', icon: 'server' },
+    { href: '/debug-tools/ui-components/client-test', label: 'Client Test', icon: 'browser' },
+  ];
+
   return (
-    <ErrorBoundary>
-      <div className="flex min-h-screen bg-background">
-        {/* Use our custom sidebar for UI components pages */}
-        {isUIComponentsPath && <DynamicStyledSidebar />}
+    <ThemeProvider defaultTheme="light">
+      <div className="flex flex-col min-h-screen">
+        <header className="border-b bg-background">
+          <div className="container flex items-center justify-between h-14">
+            <div className="flex items-center gap-8">
+              <Link 
+                href="/debug-tools/ui-components" 
+                className="font-semibold text-lg flex items-center"
+              >
+                <i className={`${getIconClasses('layer-group')} mr-2 text-primary`}></i>
+                UI Components
+              </Link>
+              
+              <nav className="hidden md:flex items-center gap-6">
+                {navLinks.map((link) => {
+                  const isActive = 
+                    pathname === link.href || 
+                    (pathname !== '/debug-tools/ui-components' && pathname.startsWith(link.href));
+                  
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`text-sm flex items-center ${
+                        isActive 
+                          ? 'font-medium text-primary'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <i className={`${getIconClasses(link.icon)} mr-1.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}></i>
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
         
-        {/* Main content with proper margin for sidebar */}
-        <main className="flex-1">
+        <main className="flex-1 pb-12">
           {children}
         </main>
       </div>
-    </ErrorBoundary>
+    </ThemeProvider>
   );
 } 

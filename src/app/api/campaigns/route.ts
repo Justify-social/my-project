@@ -4,7 +4,7 @@ import { Prisma, Platform, Position, KPI, Currency, SubmissionStatus, CreativeAs
 import { prisma } from '@/lib/prisma'
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger'
 import { v4 as uuidv4 } from 'uuid'
-import { withValidation, tryCatch } from '@/middlewares/api'
+import { withValidation, tryCatch } from '@/config/middleware/api'
 
 // Define schemas for campaign creation validation
 // Note: Frontend uses 'Instagram', backend uses 'INSTAGRAM' - transformation required

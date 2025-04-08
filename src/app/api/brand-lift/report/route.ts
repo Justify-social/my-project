@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { tryCatch } from '@/middlewares/api';
+import { tryCatch } from '@/config/middleware/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 
 export async function GET() {

@@ -12,14 +12,17 @@ This directory contains essential icon management, validation, and processing sc
 | `check-light-icons.mjs` | Validates light icon registry | After modifying light icons |
 | `check-solid-icons.mjs` | Validates solid icon registry | After modifying solid icons |
 | `validate-solid-registry.mjs` | Deep validation of solid registry | Quality assurance |
+| `validate-icon-registry.js` | Validates all registry files for required fields | Periodic validation checks |
+| `validate-id-ssot.mjs` | Verifies SSOT compliance | During code reviews |
 | `lock-registry-files.sh` | Secures registry files as read-only | After any registry modifications |
 | `merge-icon-registries.mjs` | Merges icons from staging to main registries | When new icons are ready for production |
 | `audit-icons.mjs` | Audits icon usage across codebase | Quarterly maintenance |
 | `audit-icon-usage.mjs` | Detailed icon usage analysis | When optimizing icon use |
-| `validate-id-ssot.mjs` | Verifies SSOT compliance | During code reviews |
 | `eslint-rule-icon-id.js` | ESLint rule for iconId usage | Integrated with lint process |
 | `scan-icon-references.js` | Scans for modern icon references | During code maintenance |
 | `verify-icon-rendering.mjs` | Tests icon rendering | When debugging icon issues |
+| `fix-icon-imports.sh` | Fixes incorrect icon import paths | When refactoring components |
+| `update-icon-imports.sh` | Updates icon import patterns | During codebase standardization |
 
 ## Icon Registry SSOT
 

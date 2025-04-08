@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon'
 interface AssetPreviewProps {
   url: string;
   fileName: string;

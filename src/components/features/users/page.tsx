@@ -4,13 +4,13 @@
 import React, { useState, memo } from 'react';
 // Import UI components from atomic design structure
 import { Card } from '@/components/ui';
-import { SectionHeader } from '@/components/ui/molecules/section-header';
-import { Modal } from '@/components/ui/organisms/modal';
+import { SectionHeader } from '@/components/ui/section-header';
+import { Modal } from '@/components/ui/modal';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/atoms/icon'
-import { iconComponentFactory } from '@/components/ui/atoms/icon';
+import { Icon } from '@/components/ui/icon'
+import { iconComponentFactory } from '@/components/ui/icon';
 interface PaymentMethod {
   id: number;
   cardType: string;

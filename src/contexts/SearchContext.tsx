@@ -1,24 +1,10 @@
+"use client";
+
 import React, { createContext, useContext, useState, useCallback, ReactNode, useMemo } from 'react';
-import SearchContextProps from './SearchContext.types';
-import SearchProviderProps from './SearchContext.types';
+import { SearchContextProps, SearchProviderProps } from './SearchContext.types';
 import { searchCampaigns, CampaignSearchResult } from '@/lib/algolia';
 
-interface SearchContextProps {
-  query: string;
-  results: CampaignSearchResult[];
-  isSearching: boolean;
-  isOpen: boolean;
-  handleSearch: (query: string) => Promise<void>;
-  clearSearch: () => void;
-  openSearch: () => void;
-  closeSearch: () => void;
-}
-
 const SearchContext = createContext<SearchContextProps | undefined>(undefined);
-
-interface SearchProviderProps {
-  children: ReactNode;
-}
 
 export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
   const [query, setQuery] = useState('');

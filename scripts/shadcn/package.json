@@ -1,6 +1,0 @@
-{
-  "name": "shadcn-scripts",
-  "type": "module",
-  "private": true,
-  "description": "Scripts for shadcn/ui integration"
-} 

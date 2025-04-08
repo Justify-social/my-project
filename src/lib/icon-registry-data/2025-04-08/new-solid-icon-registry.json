@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2024-04-03T15:45:00Z",
+  "generatedAt": "2024-04-03T15:45:00Z",
+  "description": "Registry for new solid icons to be added - separate from main registry until ready for production",
+  "icons": [
+    {
+      "category": "solid",
+      "id": "faExampleSolid",
+      "name": "Example",
+      "path": "/icons/solid/faExampleSolid.svg",
+      "faVersion": "fas fa-example"
+    }
+  ]
+} 

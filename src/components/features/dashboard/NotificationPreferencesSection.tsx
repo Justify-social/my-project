@@ -8,7 +8,7 @@ import Card from '@/components/settings/shared/Card';
 import SectionHeader from '@/components/settings/shared/SectionHeader';
 import ToggleSwitch from '@/components/settings/shared/ToggleSwitch';
 import ActionButtons from '@/components/settings/shared/ActionButtons';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon/icon';
 
 interface NotificationPreferences {
   campaignUpdates: boolean;
@@ -20,6 +20,19 @@ interface NotificationPreferencesSectionProps {
   initialData: NotificationPreferences;
   onSave: (data: NotificationPreferences) => Promise<void>;
 }
+
+// Define component aliases for the warning, success, and static icons
+const WarningIcon = ({ className }: { className?: string }) => (
+  <Icon iconId="faTriangleExclamationLight" className={className} />
+);
+
+const SuccessIcon = ({ className }: { className?: string }) => (
+  <Icon iconId="faCircleCheckLight" className={className} />
+);
+
+const StaticIcon = ({ className, iconId }: { className?: string, iconId: string }) => (
+  <Icon iconId={iconId} className={className} />
+);
 
 const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionProps> = ({
   initialData,

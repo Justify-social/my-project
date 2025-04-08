@@ -1,45 +1,52 @@
 # UI Component Scripts
 
-This directory contains scripts related to UI component management, validation, and processing.
+This directory contains scripts for managing UI Components with the Single Source of Truth (SSOT) pattern.
 
-## Available Scripts
+## SSOT Validation Scripts
 
-| Script | Description |
-|--------|-------------|
-| `validate-component-paths.mjs` | Validates component paths and references in the registry |
-| `analyze-component-usage.cjs` | Analyzes the usage of UI components across the codebase |
-| `ComponentRegistryPlugin.cjs` | Webpack plugin for component registry management |
-| `cleanup-redundant-files.js` | Removes redundant component files |
-| `check-naming-consistency.js` | Checks naming consistency across components |
-| `cleanup-backups.mjs` | Manages component backup files |
-| `backup-ui-components.js` | Creates backups of UI components before modifications |
+- **validate-ssot.sh**: Validates compliance with SSOT principles
+  - Usage: `bash scripts/ui/validate-ssot.sh`
+  - Checks for direct imports, missing exports, and duplicate components
 
-## File Format Preferences
+## Import Management Scripts
 
-- `.mjs` files are preferred for ECMAScript modules
-- `.cjs` files are used for CommonJS modules (especially for webpack plugins)
-- `.js` files are maintained for backward compatibility where needed
+- **fix-imports.sh**: Automatically fixes non-compliant imports
+  - Usage: `bash scripts/ui/fix-imports.sh`
+  - Converts direct component imports to use the central index.ts
+
+## Organization Scripts
+
+- **reorganize-examples.sh**: Restructures example files by category
+  - Usage: `bash scripts/ui/reorganize-examples.sh`
+  - Organizes examples into basics, layouts, data, forms, themes, and patterns
+
+## Cleanup Scripts
+
+- **cleanup-old-directories.sh**: Removes old UI component directories
+  - Usage: `bash scripts/ui/cleanup-old-directories.sh`
+  - Safely removes deprecated component directories
+
+- **tree-shake.sh**: Tree-shakes the scripts/ui directory
+  - Usage: `bash scripts/ui/tree-shake.sh`
+  - Removes deprecated script files
 
 ## Usage
 
-Scripts should be run from the project root using npm:
+To run these scripts:
 
 ```bash
-npm run ui:validate-paths     # Runs validate-component-paths.mjs
-npm run ui:analyze-usage      # Runs analyze-component-usage.cjs
-npm run ui:backup             # Runs backup-ui-components.js
-npm run ui:cleanup-backups    # Runs cleanup-backups.mjs
+# Basic usage
+bash scripts/ui/[script-name].sh
+
+# Or make executable first
+chmod +x scripts/ui/[script-name].sh
+./scripts/ui/[script-name].sh
 ```
 
-## Component Registry
+## SSOT Implementation Guidelines
 
-These scripts interact with the component registry located at:
-- `config/ui/component-registry.json` - Primary component registry
+1. **Define Once**: Each component is defined in a single file
+2. **Export Once**: All components are exported from index.ts
+3. **Import Once**: All imports use the central index.ts
 
-## Guidelines
-
-- All UI component-related scripts should be placed in this directory
-- Always maintain backward compatibility with existing component usage
-- Follow the [file organization preferences](/docs/preferences/file-organization.md)
-- Document any script changes in relevant documentation
-- When refactoring UI scripts, update this README
+See full documentation in `docs/ui-components-usage.md` 

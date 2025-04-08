@@ -6,7 +6,7 @@ import Card from './shared/Card';
 import SectionHeader from './shared/SectionHeader';
 import InputField from './shared/InputField';
 import ActionButtons from './shared/ActionButtons';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon/icon';
 
 interface PasswordChangeData {
   currentPassword: string;
@@ -17,6 +17,11 @@ interface PasswordChangeData {
 interface PasswordManagementSectionProps {
   onSave: (data: PasswordChangeData) => Promise<void>;
 }
+
+// Define the ButtonIcon component
+const ButtonIcon = ({ iconId, className }: { iconId: string, className?: string }) => (
+  <Icon iconId={iconId} className={className} />
+);
 
 const PasswordManagementSection: React.FC<PasswordManagementSectionProps> = ({ onSave }) => {
   const initialData: PasswordChangeData = {

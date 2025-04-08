@@ -8,12 +8,29 @@ import { motion } from 'framer-motion';
 import Card from '@/components/settings/shared/Card';
 import SectionHeader from '@/components/settings/shared/SectionHeader';
 import ActionButtons from '@/components/settings/shared/ActionButtons';
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon/icon';
 
 interface ProfilePictureSectionProps {
   currentImageUrl: string | null;
   onSave: (file: File | null, shouldRemove: boolean) => Promise<void>;
 }
+
+// Define icon components
+const WarningIcon = ({ className }: { className?: string }) => (
+  <Icon iconId="faTriangleExclamationLight" className={className} />
+);
+
+const SuccessIcon = ({ className }: { className?: string }) => (
+  <Icon iconId="faCircleCheckLight" className={className} />
+);
+
+const DeleteIcon = ({ className }: { className?: string }) => (
+  <Icon iconId="faTrashCanLight" className={className} />
+);
+
+const ButtonIcon = ({ iconId, className }: { iconId: string, className?: string }) => (
+  <Icon iconId={iconId} className={className} />
+);
 
 const ProfilePictureSection: React.FC<ProfilePictureSectionProps> = ({
   currentImageUrl,

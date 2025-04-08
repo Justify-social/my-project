@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Icon } from '@/components/ui/atoms/icon';
+import { Icon } from '@/components/ui/icon/icon';
 
 interface CalendarEvent {
   id: number | string;

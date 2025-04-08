@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/atoms/icon';
+import { Icon } from '@/components/ui/icon';
 
 interface NavItemProps {
   href: string;

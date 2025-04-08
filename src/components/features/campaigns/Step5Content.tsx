@@ -6,12 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { useWizard } from "@/components/features/campaigns/WizardContext";
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { Icon } from '@/components/ui/atoms/icon'
+import { WizardSkeleton } from "@/components/ui";
+import { Icon } from '@/components/ui/icon'
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
-import { AssetCard } from '@/components/ui/organisms/card/asset-card/AssetCard'
+import { AssetCard } from '@/components/ui/card/asset-card/AssetCard'
 
 // Create simple error boundary component if not available
 class ErrorBoundary extends React.Component<{children: React.ReactNode; FallbackComponent: React.ComponentType<{error: Error}>}, {hasError: boolean; error: Error | null}> {

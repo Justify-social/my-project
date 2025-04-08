@@ -1,0 +1,155 @@
+/**
+ * @component LineChart
+ * @category data
+ * @subcategory visualization
+ * @description Responsive line chart component based on Recharts with support for multiple data series
+ */
+'use client';
+
+import React from 'react';
+import { 
+  ResponsiveContainer, 
+  LineChart as RechartsLineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend,
+  ReferenceLine 
+} from 'recharts';
+import { format, parseISO, isValid } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { LineChartProps } from './types';
+
+/**
+ * Custom tooltip formatter for date values
+ */
+const formatDate = (dateStr: string, dateFormat = 'MMM d'): string => {
+  try {
+    const date = parseISO(dateStr);
+    if (isValid(date)) {
+      return format(date, dateFormat);
+    }
+  } catch (e) {
+    // If not a valid date string, return as is
+  }
+  return dateStr;
+};
+
+/**
+ * LineChart component for visualizing trends over time
+ */
+export default function LineChart({
+  data = [],
+  xKey = 'date',
+  xField, // Support both naming conventions
+  yKey,
+  lines = [],
+  height = 300,
+  grid = true,
+  legend = true,
+  tooltip = true,
+  dateFormat = 'MMM d',
+  className,
+}: LineChartProps) {
+  if (!data?.length) {
+    return null;
+  }
+  
+  // Use xField if provided, otherwise fall back to xKey for backward compatibility
+  const xAxisKey = xField || xKey;
+  
+  // Convert yKey to lines array format if provided
+  const linesConfig = lines.length > 0 
+    ? lines 
+    : Array.isArray(yKey) 
+      ? yKey.map(key => ({ dataKey: key })) 
+      : yKey 
+        ? [{ dataKey: yKey }] 
+        : [];
+
+  return (
+    <div className={cn("w-full", className)} style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsLineChart
+          data={data}
+          margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+        >
+          {/* X-Axis with date formatting */}
+          <XAxis 
+            dataKey={xAxisKey} 
+            tickFormatter={dateStr => formatDate(dateStr, dateFormat)}
+            tick={{ fontSize: 12 }}
+            axisLine={{ stroke: '#E5E7EB' }}
+            tickLine={{ stroke: '#E5E7EB' }}
+          />
+          
+          {/* Y-Axis */}
+          <YAxis 
+            width={35}
+            tick={{ fontSize: 12 }}
+            axisLine={{ stroke: '#E5E7EB' }}
+            tickLine={{ stroke: '#E5E7EB' }}
+          />
+          
+          {/* Grid lines */}
+          {grid && (
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+          )}
+          
+          {/* Tooltip */}
+          {tooltip && (
+            <Tooltip 
+              formatter={(value: number) => [`${value}`, '']}
+              labelFormatter={dateStr => formatDate(dateStr as string, dateFormat)}
+              contentStyle={{ 
+                borderRadius: '6px', 
+                border: '1px solid #E5E7EB',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)' 
+              }}
+            />
+          )}
+          
+          {/* Legend */}
+          {legend && <Legend wrapperStyle={{ paddingTop: '10px' }} />}
+          
+          {/* Zero reference line */}
+          <ReferenceLine y={0} stroke="#E5E7EB" />
+          
+          {/* Data lines */}
+          {linesConfig.map((line, index) => (
+            <Line
+              key={line.dataKey}
+              type="monotone"
+              dataKey={line.dataKey}
+              name={line.name || line.dataKey}
+              stroke={line.stroke || getColorByIndex(index)}
+              activeDot={{ r: 6 }}
+              dot={{ r: 3 }}
+              strokeWidth={2}
+            />
+          ))}
+        </RechartsLineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/**
+ * Get a color from our palette based on index
+ */
+function getColorByIndex(index: number): string {
+  const colors = [
+    '#3B82F6', // blue-500
+    '#EF4444', // red-500
+    '#10B981', // emerald-500
+    '#F59E0B', // amber-500
+    '#8B5CF6', // violet-500
+    '#EC4899', // pink-500
+    '#6366F1', // indigo-500
+    '#14B8A6', // teal-500
+  ];
+  
+  return colors[index % colors.length];
+} 

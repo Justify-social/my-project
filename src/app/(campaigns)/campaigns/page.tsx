@@ -5,9 +5,9 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Icon } from '@/components/ui/atoms/icon'
+import { Icon } from '@/components/ui/icon/icon'
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { Skeleton } from "@/components/ui/atoms/skeleton";
+import { Skeleton } from "@/components/ui";
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format

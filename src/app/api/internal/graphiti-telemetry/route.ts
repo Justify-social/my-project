@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
-import { getGraphitiTelemetry } from '@/middlewares/cursor-ai/graphiti-check-enforcer';
+import { getGraphitiTelemetry } from '@/config/middleware/cursor-ai';
 
 // Internal API endpoint to retrieve Graphiti telemetry data
 // This is for monitoring and debugging purposes only

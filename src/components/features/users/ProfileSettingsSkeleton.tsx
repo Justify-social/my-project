@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SkeletonSection } from '@/components/ui/molecules/skeleton/SkeletonSection'
+import { SkeletonSection } from '@/components/ui/skeleton/SkeletonSection'
 import Card from '@/components/settings/shared/Card';
 
 /**

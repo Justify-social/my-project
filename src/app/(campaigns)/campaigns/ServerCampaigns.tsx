@@ -5,7 +5,7 @@ export const revalidate = 0;
 import { Suspense } from 'react';
 import LoadingSpinner from '../../../components/ui/spinner-examples';
 import ClientCampaignList from '@/src/components/features/users/profile/page';
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+import { Spinner } from '@/components/ui/spinner/Spinner'
 
 export default function ServerCampaigns() {
   return (

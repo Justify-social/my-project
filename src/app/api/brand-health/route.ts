@@ -1,6 +1,7 @@
 // src/app/api/brand-health/route.ts
 import { NextResponse } from 'next/server';
-import { tryCatch } from '@/middlewares/api';
+import { getSession } from '@auth0/nextjs-auth0';
+import { tryCatch } from '@/config/middleware/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 
 export async function GET() {

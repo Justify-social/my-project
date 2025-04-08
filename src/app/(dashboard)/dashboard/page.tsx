@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 // Import dynamic separately to avoid name conflicts with export const dynamic
 import { default as nextDynamic } from 'next/dynamic';
 // Fix the loading skeleton import
-import { Skeleton } from "@/components/ui/atoms/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 // Create a custom skeleton component to use as fallback
 const DashboardLoadingSkeleton = () => {
   return <div className="animate-pulse space-y-4 p-4">

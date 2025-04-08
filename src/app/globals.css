@@ -64,69 +64,93 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
     --divider-color: #D1D5DB;      /* French Grey */
     --interactive-color: #3182CE;  /* Medium Blue */
     
-    /* Shadcn variables mapped to our brand colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Shadcn variables mapped to our brand colors with proper HSL values */
+    --background: 0 0% 100%;         /* White #FFFFFF */
+    --foreground: 224 47% 20%;       /* Dark gray approximating Jet #333333 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;               /* White */
+    --card-foreground: 224 47% 20%;  /* Dark gray */
  
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;            /* White */
+    --popover-foreground: 224 47% 20%; /* Dark gray */
  
-    --primary: 222.2 47.4% 11.2%; /* Using Jet #333333 */
-    --primary-foreground: 210 40% 98%;
+    --primary: 224 47% 20%;          /* Jet #333333 */
+    --primary-foreground: 0 0% 100%; /* White */
  
-    --secondary: 215 19% 35%; /* Using Payne's Grey #4A5568 */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 19% 35%;        /* Payne's Grey #4A5568 */
+    --secondary-foreground: 0 0% 100%; /* White */
  
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 96.1%;          /* Light gray */
+    --muted-foreground: 215 16% 47%; /* Medium gray */
  
-    --accent: 195.1 100% 50%; /* Using Deep Sky Blue #00BFFF */
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 195 100% 50%;          /* Deep Sky Blue #00BFFF */
+    --accent-foreground: 224 47% 20%; /* Dark gray */
  
-    --interactive: 209 70% 50%; /* Using Medium Blue #3182CE */
-    --interactive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;        /* Red */
+    --destructive-foreground: 0 0% 100%; /* White */
+
+    --success: 142 76% 36%;          /* Green */
+    --success-foreground: 0 0% 100%; /* White */
+    
+    --warning: 38 92% 50%;           /* Amber */
+    --warning-foreground: 224 47% 20%; /* Dark gray */
  
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --interactive: 209 70% 50%;      /* Medium Blue #3182CE */
+    --interactive-foreground: 0 0% 100%; /* White */
  
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 215 32% 82%;           /* Soft gray border */
+    --input: 215 32% 82%;            /* Same as border */
+    --ring: 224 47% 20%;             /* Dark gray for focus rings */
  
-    --radius: 0.5rem;
+    --radius: 0.5rem;               /* Border radius for components */
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 224 47% 10%;       /* Darker version of primary */
+    --foreground: 0 0% 95%;          /* Off-white */
  
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 47% 10%;             /* Dark background */
+    --card-foreground: 0 0% 95%;     /* Off-white */
  
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 47% 10%;          /* Dark background */
+    --popover-foreground: 0 0% 95%;  /* Off-white */
  
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 95%;             /* Off-white as primary in dark mode */
+    --primary-foreground: 224 47% 20%; /* Original primary */
  
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 28% 17%;        /* Darker version of secondary */
+    --secondary-foreground: 0 0% 95%; /* Off-white */
  
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 28% 17%;            /* Darker muted background */
+    --muted-foreground: 215 20% 65%; /* Lighter muted text */
  
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 195 70% 35%;           /* Darker accent */
+    --accent-foreground: 0 0% 95%;   /* Off-white */
  
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;        /* Darker red */
+    --destructive-foreground: 0 0% 95%; /* Off-white */
+
+    --success: 142 76% 25%;          /* Darker green */
+    --success-foreground: 0 0% 95%;  /* Off-white */
+    
+    --warning: 38 92% 40%;           /* Darker amber */
+    --warning-foreground: 0 0% 95%;  /* Off-white */
  
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --interactive: 209 70% 40%;      /* Darker interactive */
+    --interactive-foreground: 0 0% 95%; /* Off-white */
+ 
+    --border: 215 28% 17%;           /* Darker border */
+    --input: 215 28% 17%;            /* Same as border */
+    --ring: 215 20% 65%;             /* Lighter ring for focus */
+  }
+
+  /* Base styles for all elements */
+  * {
+    border-color: hsl(var(--border)); /* Direct CSS property instead of @apply */
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
@@ -143,9 +167,10 @@ input[type="radio"]:focus {
   box-shadow: 0 0 0 1px var(--secondary-color);
 }
 
+/* Force app to use class-based dark mode instead of system preference */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #FFFFFF; /* Keep background white even in dark mode */
+  :root:not(.dark) {
+    --background-color: #FFFFFF; /* Keep background white even in dark mode by default */
     --primary-color: #333333;    /* Keep text dark for readability on white */
   }
 }
@@ -154,453 +179,37 @@ input[type="radio"]:focus {
    BASE ELEMENTS & TYPOGRAPHY
    ========================================= */
 body {
-  background-color: white;
+  background-color: hsl(var(--background));
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  color: var(--primary-color);
+  color: hsl(var(--foreground));
   font-family: 'Work Sans', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Sora', sans-serif;
-  color: var(--primary-color);
+  color: hsl(var(--foreground));
 }
 
 a {
-  color: var(--accent-color);
+  color: hsl(var(--accent));
   text-decoration: none;
 }
 
-/* This ensures any potential gaps are also white */
+/* This ensures any potential gaps are also the correct background color */
 #__next {
-  background-color: white;
+  background-color: hsl(var(--background));
 }
 
 html {
-  background-color: white;
+  background-color: hsl(var(--background));
 }
 
-/* Ensure all main containers have white background */
+/* Ensure all main containers have correct background */
 .min-h-screen, 
-main, 
-div[class*='bg-white'] {
-  background-color: white;
-}
-
-/* =========================================================================
-   KPI (Key Performance Indicators) Icons and Definitions
-   ========================================================================= */
-
-/* 
- * This section provides styling and information about all the KPI icons used
- * in the survey design interface. Each KPI has a specific icon, definition,
- * example of usage, and related styling to ensure consistent presentation.
- */
-
-/* Common styling for all KPI icons */
-.kpi-icon {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.kpi-icon-large {
-  width: 32px;
-  height: 32px;
-}
-
-.kpi-title {
-  color: var(--accent-color);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-}
-
-.kpi-definition {
-  margin-bottom: 4px;
-  font-size: 0.9rem;
-}
-
-.kpi-example {
-  color: var(--secondary-color);
-  font-size: 0.85rem;
-  font-style: italic;
-}
-
-/* 
- * KPI: Brand Awareness
- * SVG: /icons/kpis/Brand_Awareness.svg
- * Verb: Boost Brand Awareness
- * Description: The increase in recognition of your brand.
- * Example: Your brand name is recognised by 30% more people after the campaign.
- * Funnel Location: Top Funnel
- */
-.kpi-brand-awareness {
-  --kpi-color: var(--accent-color);
-}
-.kpi-brand-awareness::before {
-  content: "";
-  background-image: url('/icons/kpis/Brand_Awareness.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Ad Recall
- * SVG: /icons/kpis/Ad_Recall.svg
- * Verb: Maximise Ad Recall
- * Description: The percentage of people who remember seeing your advertisement.
- * Example: After a week, 60% of viewers can recall your ad's main message.
- * Funnel Location: Top Funnel
- */
-.kpi-ad-recall {
-  --kpi-color: var(--accent-color);
-}
-.kpi-ad-recall::before {
-  content: "";
-  background-image: url('/icons/kpis/Ad_Recall.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Consideration
- * SVG: /icons/kpis/Consideration.svg
- * Verb: Drive Consideration
- * Description: The percentage of people considering purchasing from your brand.
- * Example: 25% of your audience considers buying your product after seeing your campaign.
- * Funnel Location: Mid Funnel
- */
-.kpi-consideration {
-  --kpi-color: var(--accent-color);
-}
-.kpi-consideration::before {
-  content: "";
-  background-image: url('/icons/kpis/Consideration.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Message Association
- * SVG: /icons/kpis/Message_Association.svg
- * Verb: Strengthen Message Association
- * Description: How well people link your key messages to your brand.
- * Example: When hearing your slogan, 70% of people associate it directly with your brand.
- * Funnel Location: Mid Funnel
- */
-.kpi-message-association {
-  --kpi-color: var(--accent-color);
-}
-.kpi-message-association::before {
-  content: "";
-  background-image: url('/icons/kpis/Message_Association.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Brand Preference
- * SVG: /icons/kpis/Brand_Preference.svg
- * Verb: Grow Brand Preference
- * Description: Preference for your brand over competitors.
- * Example: 40% of customers prefer your brand when choosing between similar products.
- * Funnel Location: Mid Funnel
- */
-.kpi-brand-preference {
-  --kpi-color: var(--accent-color);
-}
-.kpi-brand-preference::before {
-  content: "";
-  background-image: url('/icons/kpis/Brand_Preference.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Purchase Intent
- * SVG: /icons/kpis/Purchase_Intent.svg
- * Verb: Drive Purchase Intent
- * Description: Likelihood of purchasing your product or service.
- * Example: 50% of viewers intend to buy your product after seeing the ad.
- * Funnel Location: Mid Funnel
- */
-.kpi-purchase-intent {
-  --kpi-color: var(--accent-color);
-}
-.kpi-purchase-intent::before {
-  content: "";
-  background-image: url('/icons/kpis/Purchase_Intent.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Action Intent
- * SVG: /icons/kpis/Action_Intent.svg
- * Verb: Motivate Action
- * Description: Likelihood of taking a specific action related to your brand.
- * Example: 35% of people are motivated to visit your website after the campaign.
- * Funnel Location: Bottom Funnel
- */
-.kpi-action-intent {
-  --kpi-color: var(--accent-color);
-}
-.kpi-action-intent::before {
-  content: "";
-  background-image: url('/icons/kpis/Action_Intent.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Recommendation Intent
- * SVG: /icons/kpis/Recommendation_Intent.svg (fallback to Brand_Preference.svg)
- * Verb: Generate Recommendations
- * Description: Likelihood of recommending your brand to others.
- * Example: 45% of customers are willing to recommend your brand to friends and family.
- * Funnel Location: Bottom Funnel
- */
-.kpi-recommendation-intent {
-  --kpi-color: var(--accent-color);
-}
-.kpi-recommendation-intent::before {
-  content: "";
-  background-image: url('/icons/kpis/Brand_Preference.svg'); /* Using this as fallback per original code */
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* 
- * KPI: Advocacy
- * SVG: /icons/kpis/Advocacy.svg
- * Verb: Foster Brand Advocacy
- * Description: Willingness to actively promote your brand.
- * Example: 20% of your customers regularly share your brand on social media or write positive reviews.
- * Funnel Location: Bottom Funnel
- */
-.kpi-advocacy {
-  --kpi-color: var(--accent-color);
-}
-.kpi-advocacy::before {
-  content: "";
-  background-image: url('/icons/kpis/Advocacy.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* Alternative implementation for the KPI icon filter */
-.blue-icon {
-  filter: brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%);
-}
-
-/* KPI tooltip styling */
-.kpi-tooltip {
-  position: absolute;
-  z-index: 9999;
-  background-color: white;
-  border: 1px solid var(--divider-color);
-  border-radius: 8px;
-  padding: 12px;
-  width: 280px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.kpi-tooltip-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.kpi-tooltip-title {
-  font-weight: 600;
-  color: var(--accent-color);
-  margin-left: 8px;
-}
-
-/* =========================================================================
-   App Icons and Navigation Elements
-   ========================================================================= */
-
-/* 
- * This section provides styling for application icons used throughout the
- * interface for navigation, feature indicators, and UI elements.
- */
-
-/* Common styling for all app icons */
-.app-icon {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.app-icon-large {
-  width: 32px;
-  height: 32px;
-}
-
-.app-icon-active {
-  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%);
-}
-
-/* 
- * Icon: Home
- * SVG: /icons/app/Home.svg
- * Purpose: Main dashboard/home navigation
- */
-.icon-home {
-  background-image: url('/icons/app/Home.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Campaigns
- * SVG: /icons/app/Campaigns.svg
- * Purpose: Campaign management and overview
- */
-.icon-campaigns {
-  background-image: url('/icons/app/Campaigns.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Brand Lift
- * SVG: /icons/app/Brand_Lift.svg
- * Purpose: Brand lift studies and metrics
- */
-.icon-brand-lift {
-  background-image: url('/icons/app/Brand_Lift.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Brand Health
- * SVG: /icons/app/Brand_Health.svg
- * Purpose: Brand health monitoring and metrics
- */
-.icon-brand-health {
-  background-image: url('/icons/app/Brand_Health.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Creative Asset Testing
- * SVG: /icons/app/Creative_Asset_Testing.svg
- * Purpose: Testing and analysis of creative assets
- */
-.icon-creative-testing {
-  background-image: url('/icons/app/Creative_Asset_Testing.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: MMM (Marketing Mix Modeling)
- * SVG: /icons/app/MMM.svg
- * Purpose: Marketing mix modeling analytics
- */
-.icon-mmm {
-  background-image: url('/icons/app/MMM.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Influencers
- * SVG: /icons/app/Influencers.svg
- * Purpose: Influencer marketing and management
- */
-.icon-influencers {
-  background-image: url('/icons/app/Influencers.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Reports
- * SVG: /icons/app/Reports.svg
- * Purpose: Analytics and reporting dashboards
- */
-.icon-reports {
-  background-image: url('/icons/app/Reports.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Billing
- * SVG: /icons/app/Billing.svg
- * Purpose: Billing and subscription management
- */
-.icon-billing {
-  background-image: url('/icons/app/Billing.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Settings
- * SVG: /icons/app/Settings.svg
- * Purpose: Application and user settings
- */
-.icon-settings {
-  background-image: url('/icons/app/Settings.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* 
- * Icon: Help
- * SVG: /icons/app/Help.svg
- * Purpose: Help resources and documentation
- */
-.icon-help {
-  background-image: url('/icons/app/Help.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* Navigation item styling */
-.nav-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.nav-item:hover {
-  background-color: rgba(0, 191, 255, 0.1);
-}
-
-.nav-item-active {
-  background-color: rgba(0, 191, 255, 0.15);
-  font-weight: 500;
-}
-
-.nav-item-text {
-  margin-left: 8px;
+main {
+  background-color: hsl(var(--background));
 }
 
 /* =========================================
@@ -669,77 +278,6 @@ div[class*='bg-white'] {
   }
 }
 
-/* =========================================================================
-   Icon hover effects
-   ========================================================================= */
-
-/* Icon hover effects for testing */
-.ui-icon-hover {
-  transition: opacity 0.3s ease;
-}
-
-.ui-icon-hover-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 24px;
-  height: 24px;
-}
-
-.ui-icon-hover-container .ui-icon-hover-solid {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  color: var(--accent-color);
-}
-
-.ui-icon-hover-container:hover .ui-icon-hover-solid {
-  opacity: 1;
-}
-
-.ui-icon-hover-container:hover .ui-icon-hover-light {
-  opacity: 0;
-}
-
-/* Common hover effects for both KPI and App icons */
-.kpi-icon-hover, .app-icon-hover {
-  transition: color 0.2s ease;
-}
-
-.kpi-icon-hover:hover, .app-icon-hover:hover {
-  color: var(--accent-color);
-}
-
-/* Consistent hover behavior for KPI and App icons in groups */
-.group:hover .kpi-icon img, 
-.group:hover .app-icon img {
-  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%) !important;
-}
-
-/* Consistent hover behavior for direct hover */
-.kpi-icon:hover img, 
-.app-icon:hover img {
-  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%) !important;
-}
-
-/* Apply the same active class styling to both icon types */
-.kpi-icon-active img,
-.app-icon-active img {
-  filter: brightness(0) saturate(100%) invert(60%) sepia(75%) saturate(5000%) hue-rotate(180deg) brightness(102%) contrast(101%) !important;
-}
-
-.platform-icon-hover {
-  transition: transform 0.2s ease;
-}
-
-.platform-icon-hover:hover {
-  transform: scale(1.1);
-}
-
 /* Add calendar styles for campaign timeline bars */
 .calendar-cell {
   min-height: 80px;
@@ -750,18 +288,6 @@ div[class*='bg-white'] {
 @media (max-width: 768px) {
   .calendar-cell {
     min-height: 60px;
-  }
-}
-/*
----break---
-
-*/
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 }
 

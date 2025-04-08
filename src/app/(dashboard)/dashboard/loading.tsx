@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skeleton } from "@/components/ui/atoms/skeleton";
+import { DashboardSkeleton } from "@/components/ui/loading-skeleton";
 
 export default function Loading() {
   return (

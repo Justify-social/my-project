@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/molecules/tabs';
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
-import { Label } from '@/components/ui/atoms/label';
-import { Switch } from '@/components/ui/atoms/switch';
-import { Badge } from '@/components/ui/atoms/badge';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/atoms/alert';
-import { Icon } from '@/components/ui/atoms/icon';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Icon } from '@/components/ui/icon';
 
 interface WebhookEvent {
   id: string;

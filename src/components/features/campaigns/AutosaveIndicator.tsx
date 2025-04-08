@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useCampaignWizardContext } from '@/src/components/features/campaigns/wizard/CampaignWizardContext';
-import { Spinner } from '@/components/ui/atoms/spinner/Spinner'
+import { Spinner } from '@/components/ui/spinner/Spinner'
 
 /**
  * Formats a date to a readable time string

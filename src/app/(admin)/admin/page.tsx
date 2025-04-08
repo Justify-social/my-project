@@ -7,10 +7,10 @@ export const revalidate = 60; // Revalidate every 60 seconds
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { toast } from 'react-hot-toast';
-import { Card, CardHeader, CardContent } from '@/components/ui/organisms/card';
-import { Tabs } from '@/components/ui/molecules/tabs/basic-tabs/Tabs'
-import { Button } from '@/components/ui/atoms/button/Button'
-import { Icon } from '@/components/ui/atoms/icon';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Tabs } from '@/components/ui/tabs/basic-tabs/Tabs'
+import { Button } from '@/components/ui/button/Button'
+import { Icon } from '@/components/ui/icon';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@auth0/nextjs-auth0';
 import type { UserProfile } from '@auth0/nextjs-auth0/client';

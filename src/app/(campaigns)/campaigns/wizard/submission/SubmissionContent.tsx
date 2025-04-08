@@ -4,8 +4,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Icon } from '@/components/ui/atoms/icon'
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
+import { Icon } from '@/components/ui/icon'
+import { WizardSkeleton } from "@/components/ui";
 import ErrorBoundary from '@/components/ui/error/ErrorBoundary';
 import ErrorFallback from '@/components/error-fallback';
 import { EnumTransformers } from '@/utils/enum-transformers';

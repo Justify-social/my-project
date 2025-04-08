@@ -1,9 +1,19 @@
+/**
+ * Tailwind CSS Configuration
+ * This is the definitive configuration for Tailwind CSS in this project.
+ */
+
+import { fontFamily } from "tailwindcss/defaultTheme";
+import plugin from "tailwindcss/plugin";
+import animate from "tailwindcss-animate";
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
+  darkMode: ["class"],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -15,27 +25,69 @@ module.exports = {
     },
     extend: {
       colors: {
-        primary: '#333333',    // Jet
-        secondary: '#4A5568',  // Payne's Grey
-        accent: '#00BFFF',     // Deep Sky Blue
-        background: '#FFFFFF', // White
-        divider: '#D1D5DB',    // French Grey
-        interactive: '#3182CE', // Medium Blue
-        border: 'hsl(var(--border))', // Required for shadcn/ui components
-      },
-      borderColor: {
-        DEFAULT: 'hsl(var(--border))',
-      },
-      textColor: {
-        foreground: 'hsl(var(--foreground))',
-      },
-      backgroundColor: {
-        background: 'hsl(var(--background))',
+        // Brand color palette
+        jet: "#333333",
+        paynesgrey: "#4A5568",
+        deepskyblue: "#00BFFF",
+        frenchgrey: "#D1D5DB",
+        mediumblue: "#3182CE",
+        
+        // Shadcn mapped colors
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        interactive: {
+          DEFAULT: "hsl(var(--interactive))",
+          foreground: "hsl(var(--interactive-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+        heading: ["Sora", ...fontFamily.sans],
+        body: ["Work Sans", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
@@ -53,5 +105,7 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  plugins: [animate],
+};
+
+export default config; 
