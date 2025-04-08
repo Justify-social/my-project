@@ -112,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
                     {hasCoinsIcon ? (
                       <Icon
                         iconId="faCoinsSolid" // Use Solid ID directly
-                        className="w-6 h-6"
+                        className="w-6 h-6 text-[var(--primary-color)]" // Set to primary color (black)
                         data-testid="coins-icon"
                       />
                     ) : (
@@ -133,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({
                   {hasBellIcon ? (
                     <Icon
                       iconId="faBellSolid" // Use Solid ID directly
-                      className="w-6 h-6"
+                      className="w-6 h-6 text-[var(--primary-color)]" // Set to primary color (black)
                       title="Notifications"
                       data-testid="notifications-icon"
                     />
@@ -199,7 +199,7 @@ const Header: React.FC<HeaderProps> = ({
                   {hasUserIcon ? (
                     <Icon
                       iconId="faUserCircleSolid" // Use Solid ID directly
-                      className="w-8 h-8"
+                      className="w-8 h-8 text-[var(--primary-color)]" // Set to primary color (black)
                       title="Profile"
                       data-testid="user-profile-icon"
                     />

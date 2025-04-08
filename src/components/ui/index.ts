@@ -34,6 +34,7 @@ export { default as MetricsComparison } from './metrics-comparison';
 
 // Asset card components - category-first naming
 export { default as CardAsset } from './card-asset';
+export { AssetCardSubmission } from './card-asset-submission';
 
 // Typography components - category-first naming
 export { default as TypographyText } from './typography-text';
@@ -63,7 +64,7 @@ export { Avatar, AvatarImage, AvatarFallback } from './avatar';
 
 // Loading Components - category-first naming
 export { LoadingSpinner } from './loading-spinner';
-export { default as LoadingSkeleton, DashboardSkeleton, TableSkeleton } from './loading-skeleton';
+export { default as LoadingSkeleton, DashboardSkeleton, TableSkeleton, WizardSkeleton } from './loading-skeleton';
 
 // Utilities
 export * from './utils';

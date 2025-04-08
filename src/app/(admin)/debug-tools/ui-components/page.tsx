@@ -4,172 +4,262 @@
  * This page displays key UI components from @/components/ui for visual reference.
  */
 
+'use client';
+
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import {
   Button, ButtonProps,
-  Card, CardHeader, CardTitle, CardContent,
+  Card, CardHeader, CardTitle, CardContent, CardDescription,
   Badge,
   Input,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-  ThemeToggle,
   Avatar, AvatarImage, AvatarFallback,
   Alert, AlertTitle, AlertDescription,
   Table,
   Tabs, TabsList, TabsTrigger, TabsContent,
 } from "@/components/ui";
 import { LightIcon, SolidIcon, Icon } from '@/components/ui/icon';
+import { uiComponentMap, UIComponentMapEntry, ComponentCategory } from '@/lib/ui-component-map';
+import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
+import ErrorFallback from '@/components/features/core/error-handling/ErrorFallback';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { iconRegistryData } from '@/lib/generated/icon-registry';
+import { IconMetadata } from '@/components/ui/icon/icon-types';
+import { Button as UiButton } from '@/components/ui/button';
+
+const CATEGORIES: { name: ComponentCategory; icon: string }[] = [
+  { name: 'Atom', icon: 'faAtomSolid' },
+  { name: 'Molecule', icon: 'faDnaSolid' },
+  { name: 'Organism', icon: 'faBacteriumSolid' },
+];
+
+// Simple Error fallback for component preview
+const PreviewErrorFallback = ({ error }: { error: Error }) => (
+  <div className="border border-red-300 bg-red-50 p-4 rounded text-red-700">
+    <h3 className="font-bold">Component Preview Error</h3>
+    <pre className="text-xs mt-2">{error.message}</pre>
+  </div>
+);
 
 export default function ComponentBrowserPage() {
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<UIComponentMapEntry | null>(null);
+  const [PreviewComponent, setPreviewComponent] = useState<React.ComponentType<any> | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [allIcons, setAllIcons] = useState<IconMetadata[]>([]); // State for icon library
+  const [iconCategories, setIconCategories] = useState<string[]>([]); // State for unique icon categories
+  const [selectedIconCategory, setSelectedIconCategory] = useState<string | null>(null); // State for selected icon category
+
+  // Fetch all icons and extract categories
+  useEffect(() => {
+    try {
+      const icons = iconRegistryData.icons;
+      setAllIcons(icons);
+      // Extract unique categories, filtering out undefined/null and sorting
+      // Convert Set to Array before spreading
+      const categories = Array.from(
+        new Set(icons.map(icon => icon.category).filter(Boolean))
+      ).sort() as string[];
+      setIconCategories(categories);
+    } catch (error) {
+      console.error("Failed to load icon registry:", error);
+      // Handle error appropriately
+    }
+  }, []);
+
+  // Effect to load component for preview
+  useEffect(() => {
+    if (!selectedComponent) {
+      setPreviewComponent(null);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingPreview(true);
+    setPreviewComponent(null); // Clear previous preview
+
+    const loadComponent = async () => {
+      try {
+        // Construct the full dynamic import path
+        // Add Webpack comment to exclude non-code files
+        const componentModule = await import(
+          /* webpackExclude: /\.md$/ */
+          `@/components/ui/${selectedComponent.path}`
+        );
+        const Component = componentModule[selectedComponent.componentName];
+
+        if (Component && isMounted) {
+          setPreviewComponent(() => Component); // Use functional update for safety
+        } else if (isMounted) {
+          throw new Error(`Component '${selectedComponent.componentName}' not found in module '@/components/ui/${selectedComponent.path}'`);
+        }
+      } catch (error) {
+        console.error("Error loading component preview:", error);
+        if (isMounted) {
+          setPreviewComponent(null); // Ensure preview is cleared on error
+          // Optionally set an error state to display to the user
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingPreview(false);
+        }
+      }
+    };
+
+    loadComponent();
+
+    return () => {
+      isMounted = false; // Cleanup flag
+    };
+  }, [selectedComponent]);
+
+  const handleCategoryClick = (category: ComponentCategory) => {
+    setSelectedCategory(category);
+    setSelectedComponent(null); // Reset component selection when category changes
+    setPreviewComponent(null);
+  };
+
+  const handleComponentClick = (component: UIComponentMapEntry) => {
+    setSelectedComponent(component);
+  };
+
+  const filteredComponents = selectedCategory
+    ? uiComponentMap.filter(comp => comp.category === selectedCategory)
+    : [];
+
+  // Basic props for preview components (customize as needed)
+  const getPreviewProps = (componentName: string): any => {
+    switch (componentName) {
+      case 'Button': return { children: 'Click Me' };
+      case 'Icon': return { iconId: 'faCheckSolid' };
+      case 'Card': return { children: <CardContent>Card Content</CardContent> };
+      case 'Input': return { placeholder: 'Enter text...' };
+      case 'SearchBar': return { placeholder: 'Search...' };
+      // Add more default props for other components
+      default: return {};
+    }
+  };
+
   return (
-    <div className="container py-6 space-y-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">UI Component Browser</h1>
-        <div className="flex items-center gap-4">
-          <ThemeToggle />
-        </div>
-      </div>
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6">UI Component Browser</h1>
 
-      {/* Section for Buttons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Button</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4 items-center">
-          <Button>Default</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="destructive">Destructive</Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button variant="link">Link</Button>
-          <Button disabled>Disabled</Button>
-          <Button><LightIcon iconId="faArrowRightLight" className="mr-2" /> Icon Left</Button>
-          <Button>Icon Right <LightIcon iconId="faCheckLight" className="ml-2" /></Button>
-          <Button size="lg">Large</Button>
-          <Button size="sm">Small</Button>
-          <Button size="icon"><LightIcon iconId="faGearLight" /></Button>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="components">
+        <TabsList className="mb-6">
+          <TabsTrigger value="components">Components</TabsTrigger>
+          <TabsTrigger value="icons">Icon Library</TabsTrigger>
+        </TabsList>
 
-      {/* Section for Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Card</CardTitle>
-        </CardHeader>
-        <CardContent>
-          This is the content area of a standard card.
-        </CardContent>
-      </Card>
+        {/* Components Tab */}
+        <TabsContent value="components">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {CATEGORIES.map(cat => (
+              <Card
+                key={cat.name}
+                className={`cursor-pointer hover:shadow-lg transition-shadow ${selectedCategory === cat.name ? 'border-blue-500 ring-2 ring-blue-500' : ''}`}
+                onClick={() => handleCategoryClick(cat.name)}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{cat.name}</CardTitle>
+                  <Icon iconId={cat.icon} className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xs text-muted-foreground">
+                    {cat.name === 'Atom' ? 'Basic building blocks' :
+                      cat.name === 'Molecule' ? 'Combinations of atoms' :
+                        'Complex UI structures'}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-      {/* Section for Badge */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Badge</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4 items-center">
-          <Badge>Default</Badge>
-          <Badge variant="secondary">Secondary</Badge>
-          <Badge variant="destructive">Destructive</Badge>
-          <Badge variant="outline">Outline</Badge>
-        </CardContent>
-      </Card>
+          {selectedCategory && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">{selectedCategory} Components</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {filteredComponents.length > 0 ? (
+                  filteredComponents.map(comp => (
+                    <Card
+                      key={comp.name}
+                      className={`cursor-pointer p-4 text-center hover:bg-gray-50 ${selectedComponent?.name === comp.name ? 'border-blue-500 ring-1 ring-blue-500' : ''}`}
+                      onClick={() => handleComponentClick(comp)}
+                    >
+                      <p className="text-sm font-medium truncate">{comp.name}</p>
+                    </Card>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground col-span-full">No components found in this category.</p>
+                )}
+              </div>
+            </div>
+          )}
 
-      {/* Section for Alert */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Alert</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert>
-            <LightIcon iconId="faTriangleExclamationLight" />
-            <AlertTitle>Heads up!</AlertTitle>
-            <AlertDescription>This is a default alert.</AlertDescription>
-          </Alert>
-          <Alert variant="destructive">
-            <LightIcon iconId="faDiamondExclamationLight" />
-            <AlertTitle>Error!</AlertTitle>
-            <AlertDescription>This is a destructive alert.</AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+          {selectedComponent && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Preview: {selectedComponent.name}</h2>
+              <Card className="p-6 min-h-[200px] flex items-center justify-center">
+                <ErrorBoundary fallback={<PreviewErrorFallback error={new Error('Failed to render component')} />}>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    {isLoadingPreview && <LoadingSpinner />}
+                    {!isLoadingPreview && PreviewComponent && (
+                      <PreviewComponent {...getPreviewProps(selectedComponent.componentName)} />
+                    )}
+                    {!isLoadingPreview && !PreviewComponent && (
+                      <p className="text-red-500">Could not load component preview.</p>
+                    )}
+                  </Suspense>
+                </ErrorBoundary>
+              </Card>
+            </div>
+          )}
+        </TabsContent>
 
-      {/* Section for Avatar */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Avatar</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4 items-center">
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <Avatar>
-            <AvatarFallback>JD</AvatarFallback>
-          </Avatar>
-        </CardContent>
-      </Card>
+        {/* Icon Library Tab */}
+        <TabsContent value="icons">
+          <h2 className="text-xl font-semibold mb-4">Icon Library</h2>
 
-      {/* Section for Input */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Input</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Input placeholder="Enter text here..." />
-        </CardContent>
-      </Card>
+          {/* Category Filters */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <UiButton
+              variant={selectedIconCategory === null ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedIconCategory(null)}
+            >
+              All ({allIcons.length})
+            </UiButton>
+            {iconCategories.map(category => {
+              const count = allIcons.filter(icon => icon.category === category).length;
+              return (
+                <UiButton
+                  key={category}
+                  variant={selectedIconCategory === category ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedIconCategory(category)}
+                >
+                  {category} ({count})
+                </UiButton>
+              );
+            })}
+          </div>
 
-      {/* Section for Select */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Select</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="apple">Apple</SelectItem>
-              <SelectItem value="banana">Banana</SelectItem>
-              <SelectItem value="blueberry">Blueberry</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {/* Section for Tabs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Tabs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="account">
-            <TabsList>
-              <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="password">Password</TabsTrigger>
-            </TabsList>
-            <TabsContent value="account">Account details go here.</TabsContent>
-            <TabsContent value="password">Password settings go here.</TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      {/* Section for Icons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Icon</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4 items-center">
-          <Icon iconId="faUserLight" />
-          <LightIcon iconId="faGearLight" />
-          <SolidIcon iconId="faCheckSolid" />
-          <Icon iconId="faArrowRightLight" />
-          <Icon iconId="faTrashCanLight" size="lg" />
-          <Icon iconId="faChartLineLight" size="sm" />
-          <Icon iconId="brandsFacebook" /> { /* Brand Icon */}
-          <Icon iconId="appHome" size="xl" /> { /* Example App Icon */}
-        </CardContent>
-      </Card>
-
+          {allIcons.length > 0 ? (
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
+              {/* Filter icons based on selected category */}
+              {allIcons
+                .filter(iconMeta => selectedIconCategory === null || iconMeta.category === selectedIconCategory)
+                .map(iconMeta => (
+                  <Card key={iconMeta.id} className="flex flex-col items-center justify-center text-center hover:bg-gray-50 aspect-square">
+                    <Icon iconId={iconMeta.id} className="w-3/5 h-3/5 mb-1" />
+                    <p className="text-[10px] break-all mt-auto">{iconMeta.name || iconMeta.id}</p>
+                  </Card>
+                ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">Icon registry could not be loaded.</p>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 } 

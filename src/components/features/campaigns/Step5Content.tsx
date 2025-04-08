@@ -6,16 +6,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { useWizard } from "@/components/features/campaigns/WizardContext";
-import { WizardSkeleton } from "@/components/ui";
+import { LoadingSkeleton } from "@/components/ui"; // Correct import
 import { Icon } from '@/components/ui/icon'
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
-import { AssetCard } from '@/components/ui/card/asset-card/AssetCard'
+import { AssetCardSubmission } from '@/components/ui/card-asset-submission'; // Import the new component
 
 // Create simple error boundary component if not available
-class ErrorBoundary extends React.Component<{children: React.ReactNode; FallbackComponent: React.ComponentType<{error: Error}>}, {hasError: boolean; error: Error | null}> {
-  constructor(props: {children: React.ReactNode; FallbackComponent: React.ComponentType<{error: Error}>}) {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode; FallbackComponent: React.ComponentType<{ error: Error }> }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: React.ReactNode; FallbackComponent: React.ComponentType<{ error: Error }> }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
@@ -79,22 +79,22 @@ const SummarySection: React.FC<SummarySectionProps> = ({
   children
 }) => {
   return <div className="bg-white rounded-xl p-6 shadow-sm border border-[var(--divider-color)] mb-6 transition-all hover:shadow-md">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center">
-          <div className="h-8 w-8 bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] rounded-full flex items-center justify-center mr-3 font-semibold">
-            {stepNumber}
-          </div>
-          <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
+    <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center">
+        <div className="h-8 w-8 bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] rounded-full flex items-center justify-center mr-3 font-semibold">
+          {stepNumber}
         </div>
-        <button onClick={onEdit} className="group text-[var(--primary-color)] text-sm flex items-center transition-colors duration-200" aria-label={`Edit ${title}`}>
-          <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200"  />
-          <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Edit</span>
-        </button>
+        <h2 className="text-lg font-semibold text-[var(--primary-color)]">{title}</h2>
       </div>
-      <div className="pl-11">
-        {children}
-      </div>
-    </div>;
+      <button onClick={onEdit} className="group text-[var(--primary-color)] text-sm flex items-center transition-colors duration-200" aria-label={`Edit ${title}`}>
+        <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" />
+        <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Edit</span>
+      </button>
+    </div>
+    <div className="pl-11">
+      {children}
+    </div>
+  </div>;
 };
 
 // Add a new KPIDisplay component for displaying KPI with their associated icons
@@ -149,14 +149,14 @@ const KPIDisplay: React.FC<KPIDisplayProps> = ({
     displayText
   } = getKpiInfo(kpi);
   return <div className="flex items-center text-[var(--accent-color)] font-medium">
-      <div className="mr-2 relative w-5 h-5 flex-shrink-0">
-        <Image src={iconPath} alt={displayText} fill className="object-contain blue-icon" style={{
+    <div className="mr-2 relative w-5 h-5 flex-shrink-0">
+      <Image src={iconPath} alt={displayText} fill className="object-contain blue-icon" style={{
         filter: 'brightness(0) invert(50%) sepia(40%) saturate(1000%) hue-rotate(175deg) brightness(95%) contrast(90%)'
       }} />
 
-      </div>
-      <span>{displayText}</span>
-    </div>;
+    </div>
+    <span>{displayText}</span>
+  </div>;
 };
 
 // Now update the DataItem component to handle KPI display
@@ -192,18 +192,18 @@ const DataItem: React.FC<DataItemProps> = ({
     }
     return value;
   };
-  
+
   return <div className={`mb-4 ${featured ? 'bg-[rgba(0,191,255,0.05)] p-3 rounded-md' : ''} ${className}`}>
-      <div className="flex items-start">
-        {icon && <div className="mr-2 mt-0.5 flex-shrink-0">{icon}</div>}
-        <div className="flex-1">
-          <p className={`text-sm text-[var(--secondary-color)] mb-1 font-medium ${className.includes('text-lg') ? 'text-base' : ''}`}>{label}</p>
-          <div className={`font-medium text-[var(--primary-color)] ${featured ? className.includes('text-lg') ? 'text-xl' : 'text-lg' : ''}`}>
-        {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
-          </div>
+    <div className="flex items-start">
+      {icon && <div className="mr-2 mt-0.5 flex-shrink-0">{icon}</div>}
+      <div className="flex-1">
+        <p className={`text-sm text-[var(--secondary-color)] mb-1 font-medium ${className.includes('text-lg') ? 'text-base' : ''}`}>{label}</p>
+        <div className={`font-medium text-[var(--primary-color)] ${featured ? className.includes('text-lg') ? 'text-xl' : 'text-lg' : ''}`}>
+          {isKPI ? <KPIDisplay kpi={String(value)} /> : displayValue()}
         </div>
       </div>
-    </div>;
+    </div>
+  </div>;
 };
 
 // Update the audience interface to include the properties we're using
@@ -275,7 +275,7 @@ interface MergedData {
   overview: Record<string, any>;
   objectives: Record<string, any>;
   audience: AudienceData;
-  
+
   // Add property to store step-specific data for handling different data schemas
   step1?: {
     influencers?: Array<{
@@ -297,7 +297,7 @@ interface MergedData {
     }>;
     [key: string]: any;
   };
-  
+
   // Allow for any other properties that might exist
   [key: string]: any;
 }
@@ -431,15 +431,15 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
 
       // Extract influencer handle with fallbacks
       const influencerHandle = asset.influencerHandle || typeof asset.details === 'object' && asset.details?.influencerHandle || '';
-      
+
       // Extract platform with comprehensive fallbacks
       // If the influencer handle includes @, it's likely an Instagram handle
-      const platformValue = asset.platform || 
-                         data.platform || 
-                         (typeof asset.details === 'object' && asset.details?.platform) || 
-                         (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') || 
-                         'Instagram';  // Default to Instagram as the most common platform
-      
+      const platformValue = asset.platform ||
+        data.platform ||
+        (typeof asset.details === 'object' && asset.details?.platform) ||
+        (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') ||
+        'Instagram';  // Default to Instagram as the most common platform
+
       return {
         id: asset.id || `asset-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         assetName: asset.name || '',
@@ -461,17 +461,17 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
     return data.creativeAssets.map((asset: any) => {
       // Extract whyInfluencer with fallbacks
       const whyInfluencerValue = asset.whyInfluencer || asset.description || typeof asset.details === 'object' && asset.details?.whyInfluencer || '';
-      
+
       // Extract influencer handle with fallbacks
       const influencerHandle = asset.influencerHandle || typeof asset.details === 'object' && asset.details?.influencerHandle || '';
-      
+
       // Extract platform with comprehensive fallbacks
-      const platformValue = asset.platform || 
-                          data.platform || 
-                          (typeof asset.details === 'object' && asset.details?.platform) || 
-                          (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') || 
-                          'Instagram';  // Default to Instagram as the most common platform
-      
+      const platformValue = asset.platform ||
+        data.platform ||
+        (typeof asset.details === 'object' && asset.details?.platform) ||
+        (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') ||
+        'Instagram';  // Default to Instagram as the most common platform
+
       return {
         ...asset,
         assetName: asset.assetName || asset.name || '',
@@ -489,18 +489,18 @@ const extractCreativeAssets = (data: any, isWizardSchema: boolean): any[] => {
     return data.creative.creativeAssets.map((asset: any) => {
       // Extract whyInfluencer with fallbacks
       const whyInfluencerValue = asset.whyInfluencer || asset.description || typeof asset.details === 'object' && asset.details?.whyInfluencer || '';
-      
+
       // Extract influencer handle with fallbacks
       const influencerHandle = asset.influencerHandle || typeof asset.details === 'object' && asset.details?.influencerHandle || '';
-      
+
       // Extract platform with comprehensive fallbacks
-      const platformValue = asset.platform || 
-                          data.platform || 
-                          data.creative?.platform || 
-                          (typeof asset.details === 'object' && asset.details?.platform) || 
-                          (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') || 
-                          'Instagram';  // Default to Instagram as the most common platform
-      
+      const platformValue = asset.platform ||
+        data.platform ||
+        data.creative?.platform ||
+        (typeof asset.details === 'object' && asset.details?.platform) ||
+        (influencerHandle && influencerHandle.includes('@') ? 'Instagram' : '') ||
+        'Instagram';  // Default to Instagram as the most common platform
+
       return {
         ...asset,
         assetName: asset.assetName || asset.name || '',
@@ -528,12 +528,12 @@ const fetchInfluencerDetails = async (campaignId: string, handle: string, platfo
         'Cache-Control': 'no-cache'
       }
     });
-    
+
     if (!response.ok) {
       console.warn(`Failed to fetch additional influencer details: ${response.status}`);
       return null;
     }
-    
+
     const data = await response.json();
     console.log('Received influencer details:', data);
     return data.success ? data.data : null;
@@ -563,13 +563,13 @@ const normalizeApiData = (data: any): MergedData => {
 
   // Enhanced influencer extraction logic
   let influencers = [];
-  
+
   // Check all possible locations for influencer data - log attempts for debugging
   console.log("Checking for influencers in data.influencers:", Array.isArray(data.influencers) ? data.influencers.length : "not an array");
   console.log("Checking for influencers in data.Influencer:", Array.isArray(data.Influencer) ? data.Influencer.length : "not an array");
   console.log("Checking for influencers in data.overview?.influencers:", Array.isArray(data.overview?.influencers) ? data.overview.influencers.length : "not an array");
   console.log("Checking for influencers in data.step1?.influencers:", Array.isArray(data.step1?.influencers) ? data.step1.influencers.length : "not an array");
-  
+
   // Prisma might return the relation as "Influencer" instead of "influencers"
   if (Array.isArray(data.Influencer) && data.Influencer.length > 0) {
     console.log("Found influencers in Prisma relation:", data.Influencer);
@@ -590,14 +590,14 @@ const normalizeApiData = (data: any): MergedData => {
   } else {
     console.log("No influencers found in any expected location");
   }
-  
+
   // Normalize the influencer data to the expected format
   const normalizedInfluencers = influencers.map((inf: any) => {
     console.log("Normalizing influencer:", inf);
-    
+
     // Extract the Phyllo API data properties that might be nested
     const phylloData = inf.phylloData || inf.validationData || inf;
-    
+
     return {
       id: inf.id || phylloData.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
       handle: inf.handle || inf.influencerHandle || inf.username || 'unknown',
@@ -612,7 +612,7 @@ const normalizeApiData = (data: any): MergedData => {
       phylloData: phylloData
     };
   });
-  
+
   console.log("Normalized influencers:", normalizedInfluencers);
 
   // Continue with extracting other data...
@@ -639,7 +639,7 @@ const normalizeApiData = (data: any): MergedData => {
     targeting: data.targeting || {},
     competitors: Array.isArray(data.competitors) ? data.competitors : data.audience?.competitors || []
   } : data.audience || {};
-  
+
   // In the returned object, ensure we include the normalized influencers
   return {
     // Map fields to consistent names, handling both schema types
@@ -725,11 +725,11 @@ const normalizeApiData = (data: any): MergedData => {
     } : data.audience || {},
     // Using our extracted creativeAssets
     creativeAssets: creativeAssets,
-    creativeRequirements: Array.isArray(data.creativeRequirements) ? data.creativeRequirements : 
-      (isWizardSchema && Array.isArray(data.requirements) ? 
+    creativeRequirements: Array.isArray(data.creativeRequirements) ? data.creativeRequirements :
+      (isWizardSchema && Array.isArray(data.requirements) ?
         data.requirements.map((req: any) => ({
           requirement: req
-        })) : 
+        })) :
         []),
     contacts: data.contacts || [],
     // Use our normalized influencers
@@ -850,19 +850,19 @@ const FeatureIcon: React.FC<FeatureIconProps> = ({
   } else {
     iconPath = '/icons/app/Campaigns.svg'; // Default icon
   }
-  
+
   return <div className="flex items-center">
     <div className="w-5 h-5 mr-2 flex-shrink-0">
-      <Image 
-        src={iconPath} 
-        alt={altText} 
+      <Image
+        src={iconPath}
+        alt={altText}
         width={20}
         height={20}
         className="object-contain"
       />
-      </div>
-      <span>{altText}</span>
-    </div>;
+    </div>
+    <span>{altText}</span>
+  </div>;
 };
 
 // Custom Asset Preview component for Step 5 (with play/pause controls)
@@ -887,7 +887,7 @@ const Step5AssetPreview = ({
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!videoRef.current) return;
-    
+
     if (isPlaying) {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -904,13 +904,13 @@ const Step5AssetPreview = ({
   useEffect(() => {
     if (isVideo && videoRef.current) {
       const video = videoRef.current;
-      
+
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
-      
+
       video.addEventListener('play', handlePlay);
       video.addEventListener('pause', handlePause);
-      
+
       return () => {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
@@ -937,21 +937,21 @@ const Step5AssetPreview = ({
         if (video.currentTime >= 5) {
           video.currentTime = 0;
           if (isPlaying) {
-          video.play().catch(err => {
-            console.error('Error replaying video:', err);
+            video.play().catch(err => {
+              console.error('Error replaying video:', err);
               setIsPlaying(false);
-          });
+            });
           }
         }
       };
-      
+
       const handleEnded = () => {
         video.currentTime = 0;
         if (isPlaying) {
-        video.play().catch(err => {
-          console.error('Error replaying video:', err);
+          video.play().catch(err => {
+            console.error('Error replaying video:', err);
             setIsPlaying(false);
-        });
+          });
         }
       };
 
@@ -968,28 +968,28 @@ const Step5AssetPreview = ({
       };
     }
   }, [isVideo, url, isPlaying]);
-  
+
   return (
-    <div 
+    <div
       className={`relative rounded-lg overflow-hidden bg-gray-100 ${className}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       {/* Image preview */}
       {isImage && <img src={url} alt={fileName} className="w-full h-full object-cover" />}
-      
+
       {/* Video preview with play/pause button */}
       {isVideo && (
         <div className="relative w-full h-full" onClick={togglePlayPause}>
-          <video 
-            ref={videoRef} 
-            src={url} 
-            className="w-full h-full object-cover" 
-            muted 
-            playsInline 
-            loop 
+          <video
+            ref={videoRef}
+            src={url}
+            className="w-full h-full object-cover"
+            muted
+            playsInline
+            loop
           />
-          
+
           {/* Play/Pause button that appears on hover */}
           {isVideo && isHovering && (
             <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
@@ -998,30 +998,29 @@ const Step5AssetPreview = ({
                 className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
                 aria-label={isPlaying ? "Pause video" : "Play video"}
               >
-                <Icon 
-                  name={isPlaying ? "faPause" : "faPlay"} 
-                  className="h-6 w-6 text-white" 
-                  iconType="button" 
-                  solid={true} 
+                <Icon
+                  iconId={isPlaying ? "faPauseSolid" : "faPlaySolid"} // Correct prop and IDs
+                  className="h-6 w-6 text-white"
+                // Removed invalid props
                 />
               </button>
             </div>
           )}
-          
+
           {/* Video label in the bottom corner */}
           <div className="absolute bottom-3 left-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded-md text-xs font-medium">
             <div className="flex items-center">
-              <Icon iconId="faVideoLight" className="h-3 w-3 mr-1"  /> 
+              <Icon iconId="faVideoLight" className="h-3 w-3 mr-1" />
               Video
             </div>
           </div>
         </div>
       )}
-      
+
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
         <div className="flex items-center justify-center p-8">
-          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400"  />
+          <Icon iconId="faInfoLight" className="h-12 w-12 text-gray-400" />
         </div>
       )}
     </div>
@@ -1112,12 +1111,12 @@ function Step5Content() {
   // Add a type-safe check for properties
   const enhanceNormalizeApiData = (data: any): MergedData => {
     const baseData = normalizeApiData(data);
-    
+
     // Check if we should add the step1 property for later use - only if it exists in source data
     if (data?.step1) {
       baseData.step1 = data.step1;
     }
-    
+
     return baseData;
   };
 
@@ -1150,12 +1149,12 @@ function Step5Content() {
   // Check if we have minimal data
   const hasMinimalData = useMemo(() => {
     return Boolean(
-      displayData && 
-      Object.keys(displayData).length > 0 && 
+      displayData &&
+      Object.keys(displayData).length > 0 &&
       (displayData.campaignName || (displayData.overview && displayData.overview.name))
     );
   }, [displayData]);
-  
+
   // Simplified data fetching approach - directly fetch from API
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -1214,7 +1213,7 @@ function Step5Content() {
     };
     fetchCampaignData();
   }, [campaignId, reloadCampaignData, contextData]);
-  
+
   // Validate when we have data
   useEffect(() => {
     if (displayData && Object.keys(displayData).length > 0) {
@@ -1229,11 +1228,11 @@ function Step5Content() {
       console.log('Root influencers:', displayData.influencers);
       console.log('Step1 influencers:', displayData?.step1?.influencers);
       console.log('Overview influencers:', displayData?.overview?.influencers);
-      
+
       // If no influencers found but campaign ID exists, try to fetch them directly
       if ((!displayData.influencers || !Array.isArray(displayData.influencers) || displayData.influencers.length === 0) && campaignId) {
         console.log('No influencers found in display data, attempting to fetch directly');
-        
+
         // Make an API call specifically for Step 1 data which contains the influencers
         const fetchStep1Data = async () => {
           try {
@@ -1242,16 +1241,16 @@ function Step5Content() {
                 'Cache-Control': 'no-cache'
               }
             });
-            
+
             if (!response.ok) {
               console.warn('Failed to fetch Step 1 data');
               return;
             }
-            
+
             const result = await response.json();
             if (result.success && result.data && Array.isArray(result.data.influencers)) {
               console.log('Successfully fetched Step 1 influencers:', result.data.influencers);
-              
+
               // Transform the influencers
               const enhancedInfluencers = await Promise.all(result.data.influencers.map(async (inf: any) => {
                 // Try to fetch additional details for each influencer
@@ -1259,7 +1258,7 @@ function Step5Content() {
                 if (inf.platform && inf.handle) {
                   additionalData = await fetchInfluencerDetails(campaignId, inf.handle, inf.platform);
                 }
-                
+
                 return {
                   id: inf.id || `inf-${Math.random().toString(36).substring(2, 9)}`,
                   handle: inf.handle,
@@ -1272,7 +1271,7 @@ function Step5Content() {
                   verified: additionalData?.verified || false
                 };
               }));
-              
+
               // Update the campaign data
               setCampaignData(prev => ({
                 ...prev,
@@ -1283,7 +1282,7 @@ function Step5Content() {
             console.error('Error fetching Step 1 data:', error);
           }
         };
-        
+
         fetchStep1Data();
       }
       // If influencer data exists but is minimal, enhance it
@@ -1305,13 +1304,13 @@ function Step5Content() {
           }
           return inf; // Return unchanged if already enriched
         });
-        
+
         // Update campaign data with enhanced influencers if they were modified
         const needsUpdate = enhancedInfluencers.some((inf, idx) => {
           const original = displayData.influencers?.[idx];
           return original && (inf.name !== original.name || inf.followers !== original.followers || inf.avatarUrl !== original.avatarUrl);
         });
-        
+
         if (needsUpdate) {
           console.log('Updating influencer data with enhanced values:', enhancedInfluencers);
           setCampaignData(prev => ({
@@ -1324,7 +1323,7 @@ function Step5Content() {
   }, [displayData, campaignId]);
 
   if (!isClientSide) {
-    return <WizardSkeleton step={5} />;
+    return <LoadingSkeleton />; // Correct usage
   }
 
   // Navigate to edit a specific step
@@ -1443,61 +1442,61 @@ function Step5Content() {
   };
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">
-        <WizardSkeleton step={5} />
-      </div>;
+      <LoadingSkeleton />; // Correct usage
+    </div>;
   }
   if (error) {
     // Special handling for "not found" errors
     const isNotFoundError = typeof error === 'string' && (error.includes("404 Not Found") || error.includes("not found"));
     return <div className="p-6 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-red-800 font-semibold text-lg mb-2">Error Loading Campaign</h3>
-        <p className="text-red-600 mb-4">{String(error)}</p>
-        
-        {/* Add a reset button to clear any cached state */}
-        <button onClick={handleReset} className="mb-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+      <h3 className="text-red-800 font-semibold text-lg mb-2">Error Loading Campaign</h3>
+      <p className="text-red-600 mb-4">{String(error)}</p>
 
-          Reset Cache & Reload
-        </button>
-        
-        {isNotFoundError ? <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
-            <h4 className="text-lg font-medium mb-3">Campaign Not Found</h4>
-            <p className="mb-4">
-              The campaign with ID {campaignId} couldn't be found in the database. It may have been deleted or never existed.
-            </p>
-            <div className="flex flex-col space-y-4">
-              <Link href="/campaigns" className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 w-full md:w-auto">
+      {/* Add a reset button to clear any cached state */}
+      <button onClick={handleReset} className="mb-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
 
-                View All Campaigns
-              </Link>
-              
-              <Link href="/campaigns/wizard/step-1" className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full md:w-auto">
+        Reset Cache & Reload
+      </button>
 
-                Create New Campaign
-              </Link>
-            </div>
-          </div> : <div className="bg-red-100 p-4 rounded-md mb-4">
-            <h4 className="font-medium mb-2">Debugging Information:</h4>
-            <p className="text-sm">Campaign ID: {campaignId || 'Not provided'}</p>
-            <p className="text-sm">Data loaded: {Object.keys(contextData || {}).length > 0 ? 'Yes, from context' : 'No'}</p>
-            <p className="text-sm">Direct API data loaded: {Object.keys(campaignData || {}).length > 0 ? 'Yes' : 'No'}</p>
-            <p className="text-sm">Fetch attempts: {fetchAttempts}</p>
-            <p className="text-sm">Error type: {error.includes("API Error") ? "API Response Error" : error.includes("fetch") ? "Network Error" : "Other Error"}</p>
-            
-            {/* Add a debugging tool to check database connection */}
-            <div className="mt-4">
-              <p className="text-sm font-medium mb-2">Troubleshooting Steps:</p>
-              <ol className="list-decimal pl-5 text-sm space-y-1">
-                <li>Check that campaign ID {campaignId} exists in your database</li>
-                <li>Verify API route <code>/api/campaigns/{campaignId}</code> is working correctly</li>
-                <li>Check browser console logs for detailed API responses and errors</li>
-                <li>Try accessing the campaign from the regular campaigns list view</li>
-                <li>Inspect your server logs for backend errors</li>
-              </ol>
-            </div>
-          </div>}
-        
-        <div className="flex space-x-3">
-          <button onClick={() => {
+      {isNotFoundError ? <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
+        <h4 className="text-lg font-medium mb-3">Campaign Not Found</h4>
+        <p className="mb-4">
+          The campaign with ID {campaignId} couldn't be found in the database. It may have been deleted or never existed.
+        </p>
+        <div className="flex flex-col space-y-4">
+          <Link href="/campaigns" className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 w-full md:w-auto">
+
+            View All Campaigns
+          </Link>
+
+          <Link href="/campaigns/wizard/step-1" className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full md:w-auto">
+
+            Create New Campaign
+          </Link>
+        </div>
+      </div> : <div className="bg-red-100 p-4 rounded-md mb-4">
+        <h4 className="font-medium mb-2">Debugging Information:</h4>
+        <p className="text-sm">Campaign ID: {campaignId || 'Not provided'}</p>
+        <p className="text-sm">Data loaded: {Object.keys(contextData || {}).length > 0 ? 'Yes, from context' : 'No'}</p>
+        <p className="text-sm">Direct API data loaded: {Object.keys(campaignData || {}).length > 0 ? 'Yes' : 'No'}</p>
+        <p className="text-sm">Fetch attempts: {fetchAttempts}</p>
+        <p className="text-sm">Error type: {error.includes("API Error") ? "API Response Error" : error.includes("fetch") ? "Network Error" : "Other Error"}</p>
+
+        {/* Add a debugging tool to check database connection */}
+        <div className="mt-4">
+          <p className="text-sm font-medium mb-2">Troubleshooting Steps:</p>
+          <ol className="list-decimal pl-5 text-sm space-y-1">
+            <li>Check that campaign ID {campaignId} exists in your database</li>
+            <li>Verify API route <code>/api/campaigns/{campaignId}</code> is working correctly</li>
+            <li>Check browser console logs for detailed API responses and errors</li>
+            <li>Try accessing the campaign from the regular campaigns list view</li>
+            <li>Inspect your server logs for backend errors</li>
+          </ol>
+        </div>
+      </div>}
+
+      <div className="flex space-x-3">
+        <button onClick={() => {
           setError(null);
           setIsLoading(true);
           setFetchAttempts(0);
@@ -1510,15 +1509,15 @@ function Step5Content() {
           }, 500);
         }} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
 
-            Try Again
-          </button>
-          <button onClick={() => router.push('/campaigns')} className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50">
+          Try Again
+        </button>
+        <button onClick={() => router.push('/campaigns')} className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50">
 
-            Return to Campaigns
-          </button>
-          
-          {/* Add a button to manually test the API */}
-          <button onClick={async () => {
+          Return to Campaigns
+        </button>
+
+        {/* Add a button to manually test the API */}
+        <button onClick={async () => {
           try {
             console.log("Testing API endpoint manually...");
             setIsLoading(true);
@@ -1553,606 +1552,606 @@ function Step5Content() {
           }
         }} className="px-4 py-2 border border-yellow-300 bg-yellow-50 text-yellow-800 rounded-md hover:bg-yellow-100">
 
-            Test API Endpoint
-          </button>
-        </div>
-      </div>;
+          Test API Endpoint
+        </button>
+      </div>
+    </div>;
   }
   return <div className="w-full max-w-7xl mx-auto px-4 py-8 bg-white min-h-screen">
-      {/* Add Reset Button at top when we have campaign ID but no/minimal data */}
-      {campaignId && (!hasMinimalData || error) && <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-          <h3 className="font-medium text-blue-800 mb-2">Having trouble viewing this campaign?</h3>
-          <p className="text-blue-700 mb-3">
-            {!hasMinimalData ? "Campaign data is not loading properly. You can try resetting the page cache." : "Some campaign data may be missing. You can try resetting to reload all data."}
-          </p>
-          <button onClick={handleReset} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+    {/* Add Reset Button at top when we have campaign ID but no/minimal data */}
+    {campaignId && (!hasMinimalData || error) && <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4">
+      <h3 className="font-medium text-blue-800 mb-2">Having trouble viewing this campaign?</h3>
+      <p className="text-blue-700 mb-3">
+        {!hasMinimalData ? "Campaign data is not loading properly. You can try resetting the page cache." : "Some campaign data may be missing. You can try resetting to reload all data."}
+      </p>
+      <button onClick={handleReset} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
 
-            Reset & Reload Page
-          </button>
-        </div>}
+        Reset & Reload Page
+      </button>
+    </div>}
 
-      {/* Warning if we have some data but it's incomplete */}
-      {hasMinimalData && Object.keys(displayData).length < 5 && !error && (
-        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
-          <h3 className="font-medium text-yellow-800 mb-2">Limited Campaign Data</h3>
-          <p className="text-yellow-700 mb-3">
-            We found some basic information for this campaign, but detailed data might be missing.
-          </p>
-        </div>
-      )}
-
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-1">Campaign Creation</h1>
-        <p className="text-[var(--secondary-color)]">Review your campaign details and submit</p>
+    {/* Warning if we have some data but it's incomplete */}
+    {hasMinimalData && Object.keys(displayData).length < 5 && !error && (
+      <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+        <h3 className="font-medium text-yellow-800 mb-2">Limited Campaign Data</h3>
+        <p className="text-yellow-700 mb-3">
+          We found some basic information for this campaign, but detailed data might be missing.
+        </p>
       </div>
+    )}
 
-      <div className="space-y-6">
-        {/* Step 1: Campaign Details */}
-        <SummarySection title="Campaign Details" stepNumber={1} onEdit={() => navigateToStep(1)}>
-          {/* Basic Information Section */}
-              <h3 className="font-medium text-gray-800 mb-4">Basic Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <div className="space-y-4">
-                <DataItem 
-                  label="Campaign Name" 
-                  value={displayData.campaignName || 'Not specified'} 
-                  icon={
-                    <div className="relative mr-3">
-                      <Image 
-                        src="/icons/app/Campaigns.svg" 
-                        alt="Campaigns" 
-                        width={22} 
-                        height={22} 
-                        className="filter brightness-0"
-                        style={{ filter: 'invert(32%) sepia(9%) saturate(1265%) hue-rotate(182deg) brightness(91%) contrast(88%)' }}
-                      />
-                    </div>
-                  }
-                  featured={true} 
-                  className="text-lg p-4 border-l-4 border-[var(--accent-color)] bg-[rgba(0,191,255,0.08)]"
-                />
-                
-                <DataItem 
-                  label="Business Goal for this Campaign" 
-                  value={displayData.description || 'Not specified'} 
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                  <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon iconId="faCalendarLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
-                  
-                  <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon iconId="faCalendarLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
-                </div>
+    <div className="mb-8">
+      <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-1">Campaign Creation</h1>
+      <p className="text-[var(--secondary-color)]">Review your campaign details and submit</p>
+    </div>
 
-                {displayData.startDate && displayData.endDate && (
-                  <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
-                    <div className="flex items-start">
-                      <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]"  />
-                      <span className="flex-1">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
-                </div>
+    <div className="space-y-6">
+      {/* Step 1: Campaign Details */}
+      <SummarySection title="Campaign Details" stepNumber={1} onEdit={() => navigateToStep(1)}>
+        {/* Basic Information Section */}
+        <h3 className="font-medium text-gray-800 mb-4">Basic Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div className="space-y-4">
+              <DataItem
+                label="Campaign Name"
+                value={displayData.campaignName || 'Not specified'}
+                icon={
+                  <div className="relative mr-3">
+                    <Image
+                      src="/icons/app/Campaigns.svg"
+                      alt="Campaigns"
+                      width={22}
+                      height={22}
+                      className="filter brightness-0"
+                      style={{ filter: 'invert(32%) sepia(9%) saturate(1265%) hue-rotate(182deg) brightness(91%) contrast(88%)' }}
+                    />
                   </div>
-                )}
+                }
+                featured={true}
+                className="text-lg p-4 border-l-4 border-[var(--accent-color)] bg-[rgba(0,191,255,0.08)]"
+              />
+
+              <DataItem
+                label="Business Goal for this Campaign"
+                value={displayData.description || 'Not specified'}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <DataItem label="Start Date" value={displayData.startDate ? formatDate(displayData.startDate) : 'Not specified'} icon={<Icon iconId="faCalendarLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />} />
+
+                <DataItem label="End Date" value={displayData.endDate ? formatDate(displayData.endDate) : 'Not specified'} icon={<Icon iconId="faCalendarLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />} />
               </div>
-            </div>
-            
-            {/* Budget Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <h3 className="font-medium text-gray-800 mb-4">Budget Information</h3>
-              
-              <div className="space-y-4">
-                <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
-                
-                <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} featured={true} />
-                
-                <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2"  />} />
-              </div>
-            </div>
-          </div>
-          
-          {/* Contact Information Section */}
-          <h3 className="font-medium text-gray-800 mb-4">Contact Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Primary Contact */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <h3 className="font-medium text-gray-800 mb-4">Primary Contact</h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Name</span>
-                    <span className="text-base text-gray-800 block font-medium">
-                      {`${displayData.primaryContact?.firstName || ''} ${displayData.primaryContact?.surname || displayData.primaryContact?.lastName || ''}`}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Email</span>
-                    <span className="text-base text-gray-800 block font-medium">
-                      {displayData.primaryContact?.email || 'Not specified'}
-                    </span>
-              </div>
-            </div>
-                
-                <div className="flex items-start">
-                  <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Position</span>
-                    <span className="text-base text-gray-800 block font-medium">
-                      {displayData.primaryContact?.position || 'Not specified'}
-                    </span>
-          </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Secondary Contact */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <h3 className="font-medium text-gray-800 mb-4">Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span></h3>
-              
-              {displayData.secondaryContact?.firstName || displayData.secondaryContact?.email ? (
-              <div className="space-y-4">
+
+              {displayData.startDate && displayData.endDate && (
+                <div className="mt-3 text-sm text-[var(--primary-color)] bg-blue-50 p-2 rounded">
                   <div className="flex items-start">
-                    <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                    <div className="flex-1">
-                      <span className="text-sm text-gray-500 mb-1 block">Name</span>
-                      <span className="text-base text-gray-800 block font-medium">
-                        {`${displayData.secondaryContact?.firstName || ''} ${displayData.secondaryContact?.surname || displayData.secondaryContact?.lastName || ''}`}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                    <div className="flex-1">
-                      <span className="text-sm text-gray-500 mb-1 block">Email</span>
-                      <span className="text-base text-gray-800 block font-medium">
-                        {displayData.secondaryContact?.email || 'Not specified'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                    <div className="flex-1">
-                      <span className="text-sm text-gray-500 mb-1 block">Position</span>
-                      <span className="text-base text-gray-800 block font-medium">
-                        {displayData.secondaryContact?.position || 'Not specified'}
-                      </span>
-                    </div>
+                    <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-3 mt-0.5 text-[var(--accent-color)]" />
+                    <span className="flex-1">Campaign Duration: {calculateDuration(displayData.startDate, displayData.endDate)}</span>
                   </div>
                 </div>
-              ) : (
-                <div className="text-gray-500 italic">No secondary contact added</div>
               )}
             </div>
           </div>
-          
-          {/* Influencer Details Section */}
-          <h3 className="font-medium text-gray-800 mb-4">Influencer Details</h3>
+
+          {/* Budget Information */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-            <h3 className="font-medium text-gray-800 mb-4">Influencers</h3>
-            
-            {displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0 ? (
-              <div className="space-y-6">
-                {displayData.influencers.map((influencer, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.1)] to-white border-b border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-gray-800 flex items-center">
-                          <span className="bg-[var(--accent-color)] text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm">{index + 1}</span>
-                          Influencer #{index + 1}
-                        </h4>
-                        {influencer.verified && (
-                          <span className="inline-flex items-center text-blue-500 bg-blue-50 px-2 py-1 rounded-full text-sm">
-                            <Icon iconId="faCheckSolid" className="h-3 w-3 mr-1"  />
-                            Verified
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="flex items-center">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden mr-5 flex-shrink-0 border-2 border-[var(--accent-color)]">
-                          {influencer.avatarUrl ? (
-                            <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)]">
-                              <Icon iconId="faUserLight" className="h-10 w-10"  />
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div>
-                          <p className="font-semibold text-gray-800 text-lg mb-1">{influencer.name || influencer.handle}</p>
-                          <p className="text-[var(--accent-color)] mb-2 font-medium">@{influencer.handle}</p>
-                          <div className="flex flex-col space-y-1">
-                            {influencer.followers && (
-                              <p className="text-sm text-gray-600 flex items-center">
-                                <Icon iconId="faUsersLight" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]"  />
-                                {typeof influencer.followers === 'number' 
-                                  ? `${new Intl.NumberFormat().format(influencer.followers)} followers` 
-                                  : influencer.followers}
-                              </p>
-                            )}
-                            {influencer.engagement && (
-                              <p className="text-sm text-gray-600 flex items-center">
-                                <Icon iconId="faChartLineLight" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]"  />
-                                {influencer.engagement} engagement
-                              </p>
-                            )}
-                    </div>
+            <h3 className="font-medium text-gray-800 mb-4">Budget Information</h3>
+
+            <div className="space-y-4">
+              <DataItem label="Currency" value={displayData.currency || 'USD'} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />} />
+
+              <DataItem label="Total Budget" value={formatCurrency(displayData.totalBudget, displayData.currency)} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />} featured={true} />
+
+              <DataItem label="Social Media Budget" value={formatCurrency(displayData.socialMediaBudget, displayData.currency)} icon={<Icon iconId="faMoneyBillLight" className="h-4 w-4 text-[var(--secondary-color)] mr-2" />} />
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information Section */}
+        <h3 className="font-medium text-gray-800 mb-4">Contact Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Primary Contact */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 className="font-medium text-gray-800 mb-4">Primary Contact</h3>
+
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Name</span>
+                  <span className="text-base text-gray-800 block font-medium">
+                    {`${displayData.primaryContact?.firstName || ''} ${displayData.primaryContact?.surname || displayData.primaryContact?.lastName || ''}`}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Email</span>
+                  <span className="text-base text-gray-800 block font-medium">
+                    {displayData.primaryContact?.email || 'Not specified'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Position</span>
+                  <span className="text-base text-gray-800 block font-medium">
+                    {displayData.primaryContact?.position || 'Not specified'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Contact */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 className="font-medium text-gray-800 mb-4">Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span></h3>
+
+            {displayData.secondaryContact?.firstName || displayData.secondaryContact?.email ? (
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Name</span>
+                    <span className="text-base text-gray-800 block font-medium">
+                      {`${displayData.secondaryContact?.firstName || ''} ${displayData.secondaryContact?.surname || displayData.secondaryContact?.lastName || ''}`}
+                    </span>
                   </div>
                 </div>
 
-                      <div className="space-y-4 flex flex-col justify-center">
-                        <div className="flex items-start bg-gray-50 p-3 rounded-lg">
-                          {/* Platform icon based on platform name */}
-                          <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center mr-3 flex-shrink-0">
-                            <img 
-                              src={
-                                (influencer.platform || '').toLowerCase().includes('instagram') ? '/icons/brands/instagram.svg' :
-                                (influencer.platform || '').toLowerCase().includes('facebook') ? '/icons/brands/facebook.svg' :
-                                (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? '/icons/brands/x-twitter.svg' :
-                                (influencer.platform || '').toLowerCase().includes('tiktok') ? '/icons/brands/tiktok.svg' :
-                                (influencer.platform || '').toLowerCase().includes('youtube') ? '/icons/brands/youtube.svg' :
-                                (influencer.platform || '').toLowerCase().includes('linkedin') ? '/icons/brands/linkedin.svg' :
-                                (influencer.platform || '').toLowerCase().includes('pinterest') ? '/icons/brands/pinterest.svg' :
-                                (influencer.platform || '').toLowerCase().includes('reddit') ? '/icons/brands/reddit.svg' :
-                                (influencer.platform || '').toLowerCase().includes('github') ? '/icons/brands/github.svg' :
-                                '/icons/brands/instagram.svg' // Default to Instagram if unknown
-                              } 
-                              alt={`${influencer.platform || 'Social'} platform`}
-                              className="h-5 w-5 brightness-0 invert" // Apply filter to make icon white
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <span className="text-sm text-gray-500 block">Platform</span>
-                            <span className="text-base text-gray-800 font-medium block">
-                              {influencer.platform || 'Not specified'}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {/* Only show description if it exists and isn't the default "No description available" */}
-                        {influencer.description && !influencer.description.includes('No description available') && (
-                          <div className="flex items-start bg-gray-50 p-3 rounded-lg">
-                            <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center mr-3 flex-shrink-0">
-                              <Icon iconId="faInfoCircleLight" className="h-5 w-5 text-[var(--accent-color)]"  />
-                            </div>
-                            <div className="flex-1">
-                              <span className="text-sm text-gray-500 block">Description</span>
-                              <span className="text-base text-gray-800 block line-clamp-2">{influencer.description}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                      </div>
-                    ))}
+                <div className="flex items-start">
+                  <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Email</span>
+                    <span className="text-base text-gray-800 block font-medium">
+                      {displayData.secondaryContact?.email || 'Not specified'}
+                    </span>
                   </div>
+                </div>
+
+                <div className="flex items-start">
+                  <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-500 mb-1 block">Position</span>
+                    <span className="text-base text-gray-800 block font-medium">
+                      {displayData.secondaryContact?.position || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : (
-              // Show loading state if influencers might be loading
-              isLoading ? (
-                <div className="bg-gray-50 p-6 rounded-md text-center">
-                  <div className="mb-3 animate-spin">
-                    <Icon iconId="faCircleNotchLight" className="h-10 w-10 text-gray-400 mx-auto"  />
-                </div>
-                  <p className="text-gray-600 mb-2">Loading influencer data...</p>
-                </div>
-              ) : (
-                // Show message when no influencers found
-                <div className="bg-gray-50 p-8 rounded-md text-center">
-                  <div className="mb-4 bg-gray-100 p-4 rounded-full inline-flex items-center justify-center">
-                    <Icon iconId="faUserGroupLight" className="h-12 w-12 text-[var(--accent-color)] opacity-70"  />
-                  </div>
-                  <p className="text-gray-700 font-medium mb-3">No influencers added to this campaign yet.</p>
-                  <p className="text-gray-500 mb-4">Add influencers to better track and manage your campaign's reach.</p>
-                  <button 
-                    onClick={() => navigateToStep(1)} 
-                    className="px-5 py-2.5 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors inline-flex items-center font-medium"
-                  >
-                    <Icon iconId="faPlusLight" className="h-4 w-4 mr-2"  />
-                    Add Influencers in Step 1
-                  </button>
-                </div>
-              )
+              <div className="text-gray-500 italic">No secondary contact added</div>
             )}
           </div>
-        </SummarySection>
+        </div>
 
-        {/* Step 2: Objectives & Messaging */}
-        <SummarySection title="Objectives & Messaging" stepNumber={2} onEdit={() => navigateToStep(2)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column - Objectives */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <h3 className="font-medium text-gray-800 mb-4">Objectives</h3>
-              
-              {/* Primary KPI */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-gray-600 mb-2 block">Primary KPI</label>
-                {displayData.primaryKPI ? (
-                  <div className="bg-[var(--accent-color)] text-white px-3 py-1.5 rounded-md inline-flex items-center">
-                    <div className="w-5 h-5 mr-2 filter brightness-0 invert">
-                      <Image 
-                        src={`/KPIs/${displayData.primaryKPI === 'adRecall' ? 'Ad_Recall' : 
-                                displayData.primaryKPI === 'brandAwareness' ? 'Brand_Awareness' : 
-                                displayData.primaryKPI === 'consideration' ? 'Consideration' : 
-                                displayData.primaryKPI === 'messageAssociation' ? 'Message_Association' : 
-                                displayData.primaryKPI === 'brandPreference' ? 'Brand_Preference' : 
-                                displayData.primaryKPI === 'purchaseIntent' ? 'Purchase_Intent' : 
-                                displayData.primaryKPI === 'actionIntent' ? 'Action_Intent' : 
-                                displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation_Intent' : 
-                                displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`} 
-                        alt={formatKPI(displayData.primaryKPI)}
-                        width={20}
-                        height={20}
-                        className="object-contain"
-                      />
+        {/* Influencer Details Section */}
+        <h3 className="font-medium text-gray-800 mb-4">Influencer Details</h3>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <h3 className="font-medium text-gray-800 mb-4">Influencers</h3>
+
+          {displayData.influencers && Array.isArray(displayData.influencers) && displayData.influencers.length > 0 ? (
+            <div className="space-y-6">
+              {displayData.influencers.map((influencer, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="p-4 bg-gradient-to-r from-[rgba(0,191,255,0.1)] to-white border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-800 flex items-center">
+                        <span className="bg-[var(--accent-color)] text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm">{index + 1}</span>
+                        Influencer #{index + 1}
+                      </h4>
+                      {influencer.verified && (
+                        <span className="inline-flex items-center text-blue-500 bg-blue-50 px-2 py-1 rounded-full text-sm">
+                          <Icon iconId="faCheckSolid" className="h-3 w-3 mr-1" />
+                          Verified
+                        </span>
+                      )}
                     </div>
-                    <span>{displayData.primaryKPI === 'adRecall' ? 'Ad Recall' : 
-                          displayData.primaryKPI === 'brandAwareness' ? 'Brand Awareness' : 
-                          displayData.primaryKPI === 'consideration' ? 'Consideration' : 
-                          displayData.primaryKPI === 'messageAssociation' ? 'Message Association' : 
-                          displayData.primaryKPI === 'brandPreference' ? 'Brand Preference' : 
-                          displayData.primaryKPI === 'purchaseIntent' ? 'Purchase Intent' : 
-                          displayData.primaryKPI === 'actionIntent' ? 'Action Intent' : 
-                          displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation Intent' : 
-                          displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 
-                          formatKPI(displayData.primaryKPI)}</span>
                   </div>
+
+                  <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center">
+                      <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden mr-5 flex-shrink-0 border-2 border-[var(--accent-color)]">
+                        {influencer.avatarUrl ? (
+                          <img src={influencer.avatarUrl} alt={influencer.handle} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)]">
+                            <Icon iconId="faUserLight" className="h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-gray-800 text-lg mb-1">{influencer.name || influencer.handle}</p>
+                        <p className="text-[var(--accent-color)] mb-2 font-medium">@{influencer.handle}</p>
+                        <div className="flex flex-col space-y-1">
+                          {influencer.followers && (
+                            <p className="text-sm text-gray-600 flex items-center">
+                              <Icon iconId="faUsersLight" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" />
+                              {typeof influencer.followers === 'number'
+                                ? `${new Intl.NumberFormat().format(influencer.followers)} followers`
+                                : influencer.followers}
+                            </p>
+                          )}
+                          {influencer.engagement && (
+                            <p className="text-sm text-gray-600 flex items-center">
+                              <Icon iconId="faChartLineLight" className="h-3.5 w-3.5 mr-1.5 text-[var(--secondary-color)]" />
+                              {influencer.engagement} engagement
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 flex flex-col justify-center">
+                      <div className="flex items-start bg-gray-50 p-3 rounded-lg">
+                        {/* Platform icon based on platform name */}
+                        <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center mr-3 flex-shrink-0">
+                          <img
+                            src={
+                              (influencer.platform || '').toLowerCase().includes('instagram') ? '/icons/brands/instagram.svg' :
+                                (influencer.platform || '').toLowerCase().includes('facebook') ? '/icons/brands/facebook.svg' :
+                                  (influencer.platform || '').toLowerCase().includes('twitter') || (influencer.platform || '').toLowerCase().includes('x') ? '/icons/brands/x-twitter.svg' :
+                                    (influencer.platform || '').toLowerCase().includes('tiktok') ? '/icons/brands/tiktok.svg' :
+                                      (influencer.platform || '').toLowerCase().includes('youtube') ? '/icons/brands/youtube.svg' :
+                                        (influencer.platform || '').toLowerCase().includes('linkedin') ? '/icons/brands/linkedin.svg' :
+                                          (influencer.platform || '').toLowerCase().includes('pinterest') ? '/icons/brands/pinterest.svg' :
+                                            (influencer.platform || '').toLowerCase().includes('reddit') ? '/icons/brands/reddit.svg' :
+                                              (influencer.platform || '').toLowerCase().includes('github') ? '/icons/brands/github.svg' :
+                                                '/icons/brands/instagram.svg' // Default to Instagram if unknown
+                            }
+                            alt={`${influencer.platform || 'Social'} platform`}
+                            className="h-5 w-5 brightness-0 invert" // Apply filter to make icon white
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm text-gray-500 block">Platform</span>
+                          <span className="text-base text-gray-800 font-medium block">
+                            {influencer.platform || 'Not specified'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Only show description if it exists and isn't the default "No description available" */}
+                      {influencer.description && !influencer.description.includes('No description available') && (
+                        <div className="flex items-start bg-gray-50 p-3 rounded-lg">
+                          <div className="h-10 w-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center mr-3 flex-shrink-0">
+                            <Icon iconId="faInfoCircleLight" className="h-5 w-5 text-[var(--accent-color)]" />
+                          </div>
+                          <div className="flex-1">
+                            <span className="text-sm text-gray-500 block">Description</span>
+                            <span className="text-base text-gray-800 block line-clamp-2">{influencer.description}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Show loading state if influencers might be loading
+            isLoading ? (
+              <div className="bg-gray-50 p-6 rounded-md text-center">
+                <div className="mb-3 animate-spin">
+                  <Icon iconId="faCircleNotchLight" className="h-10 w-10 text-gray-400 mx-auto" />
+                </div>
+                <p className="text-gray-600 mb-2">Loading influencer data...</p>
+              </div>
+            ) : (
+              // Show message when no influencers found
+              <div className="bg-gray-50 p-8 rounded-md text-center">
+                <div className="mb-4 bg-gray-100 p-4 rounded-full inline-flex items-center justify-center">
+                  <Icon iconId="faUserGroupLight" className="h-12 w-12 text-[var(--accent-color)] opacity-70" />
+                </div>
+                <p className="text-gray-700 font-medium mb-3">No influencers added to this campaign yet.</p>
+                <p className="text-gray-500 mb-4">Add influencers to better track and manage your campaign's reach.</p>
+                <button
+                  onClick={() => navigateToStep(1)}
+                  className="px-5 py-2.5 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-color)]/90 transition-colors inline-flex items-center font-medium"
+                >
+                  <Icon iconId="faPlusLight" className="h-4 w-4 mr-2" />
+                  Add Influencers in Step 1
+                </button>
+              </div>
+            )
+          )}
+        </div>
+      </SummarySection>
+
+      {/* Step 2: Objectives & Messaging */}
+      <SummarySection title="Objectives & Messaging" stepNumber={2} onEdit={() => navigateToStep(2)}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column - Objectives */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h3 className="font-medium text-gray-800 mb-4">Objectives</h3>
+
+            {/* Primary KPI */}
+            <div className="mb-6">
+              <label className="text-sm font-medium text-gray-600 mb-2 block">Primary KPI</label>
+              {displayData.primaryKPI ? (
+                <div className="bg-[var(--accent-color)] text-white px-3 py-1.5 rounded-md inline-flex items-center">
+                  <div className="w-5 h-5 mr-2 filter brightness-0 invert">
+                    <Image
+                      src={`/KPIs/${displayData.primaryKPI === 'adRecall' ? 'Ad_Recall' :
+                        displayData.primaryKPI === 'brandAwareness' ? 'Brand_Awareness' :
+                          displayData.primaryKPI === 'consideration' ? 'Consideration' :
+                            displayData.primaryKPI === 'messageAssociation' ? 'Message_Association' :
+                              displayData.primaryKPI === 'brandPreference' ? 'Brand_Preference' :
+                                displayData.primaryKPI === 'purchaseIntent' ? 'Purchase_Intent' :
+                                  displayData.primaryKPI === 'actionIntent' ? 'Action_Intent' :
+                                    displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation_Intent' :
+                                      displayData.primaryKPI === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`}
+                      alt={formatKPI(displayData.primaryKPI)}
+                      width={20}
+                      height={20}
+                      className="object-contain"
+                    />
+                  </div>
+                  <span>{displayData.primaryKPI === 'adRecall' ? 'Ad Recall' :
+                    displayData.primaryKPI === 'brandAwareness' ? 'Brand Awareness' :
+                      displayData.primaryKPI === 'consideration' ? 'Consideration' :
+                        displayData.primaryKPI === 'messageAssociation' ? 'Message Association' :
+                          displayData.primaryKPI === 'brandPreference' ? 'Brand Preference' :
+                            displayData.primaryKPI === 'purchaseIntent' ? 'Purchase Intent' :
+                              displayData.primaryKPI === 'actionIntent' ? 'Action Intent' :
+                                displayData.primaryKPI === 'recommendationIntent' ? 'Recommendation Intent' :
+                                  displayData.primaryKPI === 'advocacy' ? 'Advocacy' :
+                                    formatKPI(displayData.primaryKPI)}</span>
+                </div>
+              ) : (
+                <div className="text-gray-500">None selected</div>
+              )}
+            </div>
+
+            {/* Secondary KPIs */}
+            <div className="mb-6">
+              <label className="text-sm font-medium text-gray-600 mb-2 block">Secondary KPIs</label>
+              <div className="flex flex-wrap gap-2">
+                {displayData.secondaryKPIs && displayData.secondaryKPIs.length > 0 ? (
+                  displayData.secondaryKPIs.map((kpi, index) => (
+                    <div key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
+                      <div className="w-5 h-5 mr-2">
+                        <Image
+                          src={`/KPIs/${kpi === 'adRecall' ? 'Ad_Recall' :
+                            kpi === 'brandAwareness' ? 'Brand_Awareness' :
+                              kpi === 'consideration' ? 'Consideration' :
+                                kpi === 'messageAssociation' ? 'Message_Association' :
+                                  kpi === 'brandPreference' ? 'Brand_Preference' :
+                                    kpi === 'purchaseIntent' ? 'Purchase_Intent' :
+                                      kpi === 'actionIntent' ? 'Action_Intent' :
+                                        kpi === 'recommendationIntent' ? 'Recommendation_Intent' :
+                                          kpi === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`}
+                          alt={formatKPI(kpi)}
+                          width={20}
+                          height={20}
+                          className="object-contain"
+                        />
+                      </div>
+                      <span>{kpi === 'adRecall' ? 'Ad Recall' :
+                        kpi === 'brandAwareness' ? 'Brand Awareness' :
+                          kpi === 'consideration' ? 'Consideration' :
+                            kpi === 'messageAssociation' ? 'Message Association' :
+                              kpi === 'brandPreference' ? 'Brand Preference' :
+                                kpi === 'purchaseIntent' ? 'Purchase Intent' :
+                                  kpi === 'actionIntent' ? 'Action Intent' :
+                                    kpi === 'recommendationIntent' ? 'Recommendation Intent' :
+                                      kpi === 'advocacy' ? 'Advocacy' :
+                                        formatKPI(kpi)}</span>
+                    </div>
+                  ))
                 ) : (
                   <div className="text-gray-500">None selected</div>
                 )}
-                </div>
-
-              {/* Secondary KPIs */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-gray-600 mb-2 block">Secondary KPIs</label>
-                <div className="flex flex-wrap gap-2">
-                  {displayData.secondaryKPIs && displayData.secondaryKPIs.length > 0 ? (
-                    displayData.secondaryKPIs.map((kpi, index) => (
-                      <div key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
-                        <div className="w-5 h-5 mr-2">
-                          <Image 
-                            src={`/KPIs/${kpi === 'adRecall' ? 'Ad_Recall' : 
-                                  kpi === 'brandAwareness' ? 'Brand_Awareness' : 
-                                  kpi === 'consideration' ? 'Consideration' : 
-                                  kpi === 'messageAssociation' ? 'Message_Association' : 
-                                  kpi === 'brandPreference' ? 'Brand_Preference' : 
-                                  kpi === 'purchaseIntent' ? 'Purchase_Intent' : 
-                                  kpi === 'actionIntent' ? 'Action_Intent' : 
-                                  kpi === 'recommendationIntent' ? 'Recommendation_Intent' : 
-                                  kpi === 'advocacy' ? 'Advocacy' : 'Brand_Awareness'}.svg`} 
-                            alt={formatKPI(kpi)}
-                            width={20}
-                            height={20}
-                            className="object-contain"
-                          />
-                      </div>
-                        <span>{kpi === 'adRecall' ? 'Ad Recall' : 
-                              kpi === 'brandAwareness' ? 'Brand Awareness' : 
-                              kpi === 'consideration' ? 'Consideration' : 
-                              kpi === 'messageAssociation' ? 'Message Association' : 
-                              kpi === 'brandPreference' ? 'Brand Preference' : 
-                              kpi === 'purchaseIntent' ? 'Purchase Intent' : 
-                              kpi === 'actionIntent' ? 'Action Intent' : 
-                              kpi === 'recommendationIntent' ? 'Recommendation Intent' : 
-                              kpi === 'advocacy' ? 'Advocacy' : 
-                              formatKPI(kpi)}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-gray-500">None selected</div>
-                  )}
-                  </div>
-                </div>
-
-              {/* Features */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-gray-600 mb-2 block">Features</label>
-                <div className="flex flex-wrap gap-2">
-                  {displayData.features && displayData.features.length > 0 ? (
-                    displayData.features.map((feature: string, index: number) => (
-                      <div key={index} className="inline-flex items-center p-2 bg-gray-50 rounded-md">
-                        <FeatureIcon feature={feature} className="flex-shrink-0" />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-gray-500">No features selected</div>
-                  )}
-                </div>
               </div>
             </div>
-            
-            {/* Right Column - Messaging */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-              <div className="space-y-6">
-                <h3 className="font-medium text-gray-800 mb-4">Messaging</h3>
-                
-                {/* Main Message */}
-                <div className="flex items-start">
-                  <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.mainMessage || displayData?.objectives?.mainMessage || 'Not specified'}
-                    </span>
-                  </div>
+
+            {/* Features */}
+            <div className="mb-6">
+              <label className="text-sm font-medium text-gray-600 mb-2 block">Features</label>
+              <div className="flex flex-wrap gap-2">
+                {displayData.features && displayData.features.length > 0 ? (
+                  displayData.features.map((feature: string, index: number) => (
+                    <div key={index} className="inline-flex items-center p-2 bg-gray-50 rounded-md">
+                      <FeatureIcon feature={feature} className="flex-shrink-0" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500">No features selected</div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Messaging */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div className="space-y-6">
+              <h3 className="font-medium text-gray-800 mb-4">Messaging</h3>
+
+              {/* Main Message */}
+              <div className="flex items-start">
+                <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.mainMessage || displayData?.objectives?.mainMessage || 'Not specified'}
+                  </span>
                 </div>
-                
-                {/* Hashtags */}
-                <div className="flex items-start">
-                  <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.hashtags || displayData?.objectives?.hashtags || 'Not specified'}
-                    </span>
-                  </div>
+              </div>
+
+              {/* Hashtags */}
+              <div className="flex items-start">
+                <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.hashtags || displayData?.objectives?.hashtags || 'Not specified'}
+                  </span>
                 </div>
-                
-                {/* Memorability Score */}
-                <div className="flex items-start">
-                  <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.memorability || displayData?.objectives?.memorability || 'Not specified'}
-                    </span>
-                  </div>
+              </div>
+
+              {/* Memorability Score */}
+              <div className="flex items-start">
+                <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.memorability || displayData?.objectives?.memorability || 'Not specified'}
+                  </span>
                 </div>
-                
-                {/* Key Benefits */}
-                <div className="flex items-start">
-                  <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.keyBenefits || displayData?.objectives?.keyBenefits || 'Not specified'}
-                    </span>
-                  </div>
+              </div>
+
+              {/* Key Benefits */}
+              <div className="flex items-start">
+                <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.keyBenefits || displayData?.objectives?.keyBenefits || 'Not specified'}
+                  </span>
                 </div>
-                
-                <h3 className="font-medium text-gray-800 mb-4 mt-8">Expected Outcomes</h3>
-                
-                {/* Expected Achievements */}
-                <div className="flex items-start">
-                  <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.expectedAchievements || displayData?.objectives?.expectedAchievements || 'Not specified'}
-                    </span>
-                  </div>
+              </div>
+
+              <h3 className="font-medium text-gray-800 mb-4 mt-8">Expected Outcomes</h3>
+
+              {/* Expected Achievements */}
+              <div className="flex items-start">
+                <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.expectedAchievements || displayData?.objectives?.expectedAchievements || 'Not specified'}
+                  </span>
                 </div>
-                
-                {/* Impact on Purchase Intent */}
-                <div className="flex items-start">
-                  <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.purchaseIntent || displayData?.objectives?.purchaseIntent || 'Not specified'}
-                    </span>
-                  </div>
+              </div>
+
+              {/* Impact on Purchase Intent */}
+              <div className="flex items-start">
+                <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.purchaseIntent || displayData?.objectives?.purchaseIntent || 'Not specified'}
+                  </span>
                 </div>
-                
-                {/* Brand Perception Change */}
-                <div className="flex items-start">
-                  <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"  />
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
-                    <span className="text-base text-gray-800 block">
-                      {displayData.brandPerception || displayData?.objectives?.brandPerception || 'Not specified'}
-                    </span>
-                  </div>
+              </div>
+
+              {/* Brand Perception Change */}
+              <div className="flex items-start">
+                <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
+                  <span className="text-base text-gray-800 block">
+                    {displayData.brandPerception || displayData?.objectives?.brandPerception || 'Not specified'}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        </SummarySection>
+        </div>
+      </SummarySection>
 
-        {/* Step 3: Audience & Competitors */}
-        <SummarySection title="Audience Targeting" stepNumber={3} onEdit={() => navigateToStep(3)}>
-          {displayData.audience || displayData?.audience ? (
-            <div className="space-y-6">
-              {/* Demographics Section */}
-              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex items-start mb-4">
-                  <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
-                  <h3 className="font-medium text-gray-800">Demographics</h3>
-                </div>
+      {/* Step 3: Audience & Competitors */}
+      <SummarySection title="Audience Targeting" stepNumber={3} onEdit={() => navigateToStep(3)}>
+        {displayData.audience || displayData?.audience ? (
+          <div className="space-y-6">
+            {/* Demographics Section */}
+            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex items-start mb-4">
+                <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
+                <h3 className="font-medium text-gray-800">Demographics</h3>
+              </div>
 
-                {/* Age Range */}
-                <div className="mb-5">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
-                  <div className="grid grid-cols-6 gap-1">
-                    {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range, index) => {
-                  // Check if this age range is selected
-                  const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
-                      const percentage = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience] 
-                                       ? Number(displayData.audience[ageKey as keyof typeof displayData.audience]) 
-                                       : 0;
-                      return (
-                        <div key={range} className={`text-center py-1.5 text-xs rounded ${percentage > 0 ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
-                          {range}
-                        </div>
-                      );
-                })}
-                  </div>
-                </div>
-
-                {/* Gender */}
-                <div className="mb-5">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Gender</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {displayData.audience && displayData.audience.genders && 
-                     Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ? (
-                      displayData.audience.genders.map((g: any, idx: number) => (
-                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                          {g.gender || g.toString()}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-sm">Not specified</span>
-                    )}
-                  </div>
+              {/* Age Range */}
+              <div className="mb-5">
+                <h4 className="text-gray-700 font-medium mb-3 text-sm">Age Range</h4>
+                <div className="grid grid-cols-6 gap-1">
+                  {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range, index) => {
+                    // Check if this age range is selected
+                    const ageKey = range === '65+' ? 'age65plus' : `age${range.replace('-', '')}`;
+                    const percentage = displayData.audience && displayData.audience[ageKey as keyof typeof displayData.audience]
+                      ? Number(displayData.audience[ageKey as keyof typeof displayData.audience])
+                      : 0;
+                    return (
+                      <div key={range} className={`text-center py-1.5 text-xs rounded ${percentage > 0 ? 'bg-[var(--accent-color)] text-white font-medium' : 'bg-gray-100 text-gray-500'}`}>
+                        {range}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Location Section */}
-              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex items-start mb-4">
-                  <Icon iconId="faMapLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
-                  <h3 className="font-medium text-gray-800">Location</h3>
+              {/* Gender */}
+              <div className="mb-5">
+                <h4 className="text-gray-700 font-medium mb-3 text-sm">Gender</h4>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.audience && displayData.audience.genders &&
+                    Array.isArray(displayData.audience.genders) && displayData.audience.genders.length > 0 ? (
+                    displayData.audience.genders.map((g: any, idx: number) => (
+                      <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                        {g.gender || g.toString()}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Not specified</span>
+                  )}
                 </div>
+              </div>
+            </div>
 
-                {/* Locations */}
-                <div className="mb-5">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Locations</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {displayData.audience && displayData.audience.locations && 
-                     Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ? (
-                      displayData.audience.locations.map((l: any, idx: number) => (
-                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                          {typeof l === 'string' ? l : l.location || l.name || ''}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-sm">Not specified</span>
-                    )}
-                  </div>
-                </div>
+            {/* Location Section */}
+            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex items-start mb-4">
+                <Icon iconId="faMapLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
+                <h3 className="font-medium text-gray-800">Location</h3>
+              </div>
 
-                {/* Languages */}
-                <div className="mb-4">
-                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Languages</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {displayData.audience && displayData.audience.languages && 
-                     Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ? (
-                      displayData.audience.languages.map((l: any, idx: number) => (
-                        <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                          {typeof l === 'string' ? l : l.language || l.toString()}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 text-sm">Not specified</span>
-                    )}
-                  </div>
+              {/* Locations */}
+              <div className="mb-5">
+                <h4 className="text-gray-700 font-medium mb-3 text-sm">Locations</h4>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.audience && displayData.audience.locations &&
+                    Array.isArray(displayData.audience.locations) && displayData.audience.locations.length > 0 ? (
+                    displayData.audience.locations.map((l: any, idx: number) => (
+                      <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                        {typeof l === 'string' ? l : l.location || l.name || ''}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Not specified</span>
+                  )}
                 </div>
               </div>
 
-              {/* Screening Questions */}
-              {displayData.audience && displayData.audience.screeningQuestions && 
-               Array.isArray(displayData.audience.screeningQuestions) && displayData.audience.screeningQuestions.length > 0 && (
+              {/* Languages */}
+              <div className="mb-4">
+                <h4 className="text-gray-700 font-medium mb-3 text-sm">Languages</h4>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.audience && displayData.audience.languages &&
+                    Array.isArray(displayData.audience.languages) && displayData.audience.languages.length > 0 ? (
+                    displayData.audience.languages.map((l: any, idx: number) => (
+                      <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                        {typeof l === 'string' ? l : l.language || l.toString()}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Not specified</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Screening Questions */}
+            {displayData.audience && displayData.audience.screeningQuestions &&
+              Array.isArray(displayData.audience.screeningQuestions) && displayData.audience.screeningQuestions.length > 0 && (
                 <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                   <div className="flex items-start mb-4">
-                    <Icon iconId="faQuestionCircleLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
+                    <Icon iconId="faQuestionCircleLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
                     <h3 className="font-medium text-gray-800">Screening Questions</h3>
                   </div>
                   <div className="space-y-2">
@@ -2167,68 +2166,68 @@ function Step5Content() {
                 </div>
               )}
 
-              {/* Advanced Targeting */}
-              <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex items-start mb-4">
-                  <Icon iconId="faFilterLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
-                  <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
+            {/* Advanced Targeting */}
+            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex items-start mb-4">
+                <Icon iconId="faFilterLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
+                <h3 className="font-medium text-gray-800">Advanced Targeting</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Education Level */}
+                <div>
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Education Level</h4>
+                  {displayData.audience?.educationLevel ? (
+                    <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
+                      {String(displayData.audience.educationLevel)}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500 text-sm">Not specified</span>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Education Level */}
-                  <div>
-                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Education Level</h4>
-                    {displayData.audience?.educationLevel ? (
-                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
-                        {String(displayData.audience.educationLevel)}
-                      </span>
-                    ) : (
-                      <span className="text-gray-500 text-sm">Not specified</span>
-                    )}
-                  </div>
+                {/* Income Level */}
+                <div>
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Income Level</h4>
+                  {displayData.audience?.incomeLevel ? (
+                    <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
+                      {formatCurrency(Number(displayData.audience.incomeLevel) || 0, displayData.currency || 'USD')}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500 text-sm">Not specified</span>
+                  )}
+                </div>
 
-                  {/* Income Level */}
-                  <div>
-                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Income Level</h4>
-                    {displayData.audience?.incomeLevel ? (
-                      <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm inline-block">
-                        {formatCurrency(Number(displayData.audience.incomeLevel) || 0, displayData.currency || 'USD')}
-                      </span>
-                    ) : (
-                      <span className="text-gray-500 text-sm">Not specified</span>
-                    )}
-                  </div>
-
-                  {/* Job Titles */}
-                  <div>
-                    <h4 className="text-gray-700 font-medium mb-3 text-sm">Job Titles</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {displayData.audience?.jobTitles ? (
-                        Array.isArray(displayData.audience.jobTitles) ? (
-                          displayData.audience.jobTitles.map((title: string, idx: number) => (
-                            <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                              {title}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                            {String(displayData.audience.jobTitles)}
+                {/* Job Titles */}
+                <div>
+                  <h4 className="text-gray-700 font-medium mb-3 text-sm">Job Titles</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {displayData.audience?.jobTitles ? (
+                      Array.isArray(displayData.audience.jobTitles) ? (
+                        displayData.audience.jobTitles.map((title: string, idx: number) => (
+                          <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                            {title}
                           </span>
-                        )
+                        ))
                       ) : (
-                        <span className="text-gray-500 text-sm">Not specified</span>
-                      )}
-                    </div>
+                        <span className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                          {String(displayData.audience.jobTitles)}
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-gray-500 text-sm">Not specified</span>
+                    )}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Competitors Section (if available) */}
-              {displayData.audience && displayData.audience.competitors && 
-               Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 && (
+            {/* Competitors Section (if available) */}
+            {displayData.audience && displayData.audience.competitors &&
+              Array.isArray(displayData.audience.competitors) && displayData.audience.competitors.length > 0 && (
                 <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
                   <div className="flex items-start mb-4">
-                    <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"  />
+                    <Icon iconId="faBuildingLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
                     <h3 className="font-medium text-gray-800">Competitors to Monitor</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -2241,67 +2240,67 @@ function Step5Content() {
 
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <Icon iconId="faUserLight" className="h-10 w-10 text-gray-400 mx-auto mb-2"  />
-              <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
-              <button onClick={() => navigateToStep(3)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto">
-                <Icon iconId="faEditLight" className="h-4 w-4 mr-1"  />
-                Edit audience targeting
-              </button>
-            </div>
-          )}
-        </SummarySection>
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-6 text-center">
+            <Icon iconId="faUserLight" className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+            <p className="text-gray-500">Audience data not available. Please complete Step 3.</p>
+            <button onClick={() => navigateToStep(3)} className="mt-3 text-sm text-[var(--accent-color)] hover:underline flex items-center justify-center mx-auto">
+              <Icon iconId="faEditLight" className="h-4 w-4 mr-1" />
+              Edit audience targeting
+            </button>
+          </div>
+        )}
+      </SummarySection>
 
-        {/* Step 4: Creative Assets */}
-        <SummarySection title="Creative Assets" stepNumber={4} onEdit={() => navigateToStep(4)}>
+      {/* Step 4: Creative Assets */}
+      <SummarySection title="Creative Assets" stepNumber={4} onEdit={() => navigateToStep(4)}>
 
-          {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => {
-                return (
-                  <AssetCard 
-                    key={asset.id || index}
-                    asset={{
-                      id: asset.id,
-                      name: asset.assetName || asset.name,
-                      url: asset.url,
-                      type: asset.type,
-                      // Check all possible places for platform information
-                      platform: asset.platform || 
-                               (asset.influencerHandle && asset.influencerHandle.includes('@') ? 'Instagram' : null) || 
-                               displayData.platform ||
-                               'Instagram', // Default to Instagram if no platform is found
-                      influencerHandle: asset.influencerHandle,
-                      description: asset.whyInfluencer,
-                      budget: asset.budget
-                    }}
-                    currency={displayData.currency}
-                    defaultPlatform={displayData.platform || 'Instagram'} // Provide a default platform
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <Icon iconId="faImageLight" className="h-10 w-10 text-gray-400 mx-auto mb-2"  />
-              <p className="text-gray-500">No creative assets have been added yet.</p>
-              <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--primary-color)] flex items-center justify-center mx-auto group transition-colors duration-200">
-                <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200"  />
-                <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Add creative assets</span>
-              </button>
-            </div>
-          )}
-        </SummarySection>
-      </div>
+        {displayData.creativeAssets && Array.isArray(displayData.creativeAssets) && displayData.creativeAssets.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => {
+              return (
+                <AssetCardSubmission // Use the new component
+                  key={asset.id || index}
+                  asset={{
+                    id: asset.id,
+                    name: asset.assetName || asset.name,
+                    url: asset.url,
+                    type: asset.type,
+                    // Pass platform directly without fallback
+                    platform: asset.platform ||
+                      (asset.influencerHandle && asset.influencerHandle.includes('@') ? 'Instagram' : undefined) ||
+                      displayData.platform,
+                    influencerHandle: asset.influencerHandle,
+                    description: asset.whyInfluencer,
+                    budget: asset.budget
+                  }}
+                  currency={displayData.currency}
+                  // Pass defaultPlatform directly without fallback
+                  defaultPlatform={displayData.platform}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-6 text-center">
+            <Icon iconId="faImageLight" className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+            <p className="text-gray-500">No creative assets have been added yet.</p>
+            <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--primary-color)] flex items-center justify-center mx-auto group transition-colors duration-200">
+              <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" />
+              <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Add creative assets</span>
+            </button>
+          </div>
+        )}
+      </SummarySection>
+    </div>
 
-      {/* Add ProgressBar component at the bottom */}
-      <div className="mt-12 mb-8">
-        <ProgressBar currentStep={5} onStepClick={step => navigateToStep(step)} onBack={() => navigateToStep(4)} onNext={handleSubmit} onSaveDraft={handleSaveDraft} disableNext={false} isFormValid={true} isDirty={false} isSaving={isSaving || isSubmitting} />
+    {/* Add ProgressBar component at the bottom */}
+    <div className="mt-12 mb-8">
+      <ProgressBar currentStep={5} onStepClick={step => navigateToStep(step)} onBack={() => navigateToStep(4)} onNext={handleSubmit} onSaveDraft={handleSaveDraft} disableNext={false} isFormValid={true} isDirty={false} isSaving={isSaving || isSubmitting} />
 
-      </div>
-    </div>;
+    </div>
+  </div>;
 }
 
 // Main component rendering the form
@@ -2310,7 +2309,7 @@ function FormContent() {
   const searchParams = useSearchParams();
   const campaignId = searchParams ? searchParams.get('id') : null;
   const { data, loading, campaignData } = useWizard();
-  
+
   // Navigation handlers
   const navigateToStep = (step: number) => {
     router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`);
@@ -2318,7 +2317,7 @@ function FormContent() {
 
   // Render loading state
   if (loading) {
-    return <WizardSkeleton step={5} />;
+    return <LoadingSkeleton />; // Correct usage
   }
 
   return (
@@ -2327,18 +2326,18 @@ function FormContent() {
         <h1 className="text-2xl font-semibold text-gray-900 mb-2 font-sora">Campaign Review</h1>
         <p className="text-gray-500">Review your campaign details before submission</p>
       </div>
-      
+
       {/* Summary sections would render here */}
       <div className="bg-white p-4 rounded-lg">
         <p>Campaign summary and review content</p>
       </div>
-      
+
       <ProgressBar
         currentStep={5}
         onStepClick={navigateToStep}
         onBack={() => navigateToStep(4)}
-        onNext={() => {}}
-        onSaveDraft={() => {}}
+        onNext={() => { }}
+        onSaveDraft={() => { }}
         disableNext={false}
         isFormValid={true}
         isDirty={false}
@@ -2351,18 +2350,18 @@ function FormContent() {
 // Export the wrapper component
 export default function Step5ContentWrapper() {
   const [isMounted, setIsMounted] = useState(false);
-  
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   if (!isMounted) {
-    return <WizardSkeleton step={5} />;
+    return <LoadingSkeleton />; // Correct usage
   }
-  
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <Suspense fallback={<WizardSkeleton step={5} />}>
+      <Suspense fallback={<LoadingSkeleton />}>{/* Correct usage */}
         <Step5Content />
       </Suspense>
     </ErrorBoundary>

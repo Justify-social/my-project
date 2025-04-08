@@ -6,7 +6,7 @@
  */
 'use client';
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { getIconPath } from './icons';
 import { IconProps, IconSize, IconVariant, SIZE_CLASSES } from './icon-types';
 
@@ -25,6 +25,10 @@ export const Icon: React.FC<IconProps> = memo(({
   onClick,
   ...rest
 }) => {
+  // State to hold SVG content
+  const [svgContent, setSvgContent] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   // Get context values
   // const context = useIconContext(); // Removed unused context call
 
@@ -39,39 +43,95 @@ export const Icon: React.FC<IconProps> = memo(({
   // Determine the path using the single source of truth
   const iconPath = getIconPath(iconId);
 
-  // Debug logging for development
+  // Effect to fetch SVG content
   useEffect(() => {
-    if (DEBUG) {
-      // console.log(`[Icon] Rendering icon: ${iconId}, path: ${iconPath}, isAppIcon: ${isAppIcon}`); // Commented out debug log
+    if (!iconPath) {
+      setError(`Icon path not found for ID: ${iconId}`);
+      setSvgContent(null); // Clear previous content if path is invalid
+      return;
     }
-  }, [iconId, iconPath, isAppIcon]);
+
+    let isCancelled = false; // Flag to prevent state update on unmounted component
+
+    const fetchSvg = async () => {
+      try {
+        const response = await fetch(iconPath);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch SVG: ${response.status} ${response.statusText}`);
+        }
+        const text = await response.text();
+        if (!isCancelled) {
+          // Basic modification: Ensure fill="currentColor" on path elements if missing
+          const sanitizedText = text
+            .replace(/<path(?![^>]*fill=)([^>]*)>/g, '<path fill="currentColor"$1>'); // Add fill if missing
+
+          setSvgContent(sanitizedText);
+          setError(null); // Clear previous errors
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          const message = err instanceof Error ? err.message : 'Unknown error fetching SVG';
+          console.error(`[Icon] Error fetching SVG for ${iconId} from ${iconPath}:`, message);
+          setError(message);
+          setSvgContent(null); // Clear content on error
+        }
+      }
+    };
+
+    // Reset state before fetching new icon
+    setSvgContent(null);
+    setError(null);
+    fetchSvg();
+
+    // Cleanup function to prevent state updates if component unmounts before fetch completes
+    return () => {
+      isCancelled = true;
+    };
+  }, [iconId, iconPath]); // Re-run effect if iconId or derived iconPath changes
 
   // Handle dynamic classes
   const sizeClass = SIZE_CLASSES[size] || 'w-5 h-5';
   const combinedClasses = `inline-block ${sizeClass} ${className || ''}`.trim();
 
+  // Render error state
+  if (error && DEBUG) {
+    return (
+      <span
+        className={`${combinedClasses} border border-dashed border-red-500 text-red-500 flex items-center justify-center`}
+        title={`Error loading ${iconId}: ${error}`}
+        {...rest}
+      >
+        !
+      </span>
+    );
+  }
+
+  // Render loading/empty state (optional, could show a placeholder)
+  if (!svgContent) {
+    // Return a simple span or a placeholder skeleton
+    return <span className={combinedClasses} title={title ? `${title} (loading)` : `Loading ${iconId}...`} {...rest}></span>;
+  }
+
+  // Render the SVG inline
   return (
-    <span
-      className={combinedClasses}
-      title={title}
-      onClick={onClick}
-      {...rest}
-    >
-      <img
-        src={iconPath}
-        alt={title || `${iconId} icon`}
-        className="w-full h-full"
-        loading="lazy"
-        onError={(e) => {
-          if (DEBUG) {
-            console.error(`[Icon] Failed to load icon: ${iconId}, path: ${iconPath}`);
-            // Show broken image visually in dev mode
-            (e.target as HTMLImageElement).style.border = '1px dashed red';
-            (e.target as HTMLImageElement).style.padding = '2px';
-          }
-        }}
+    <>
+      {/* Add style to ensure direct SVG child scales */}
+      <style>{`
+        .${combinedClasses.split(' ').join('.')} > svg {
+          width: 100%;
+          height: 100%;
+        }
+      `}</style>
+      <span
+        className={combinedClasses}
+        title={title}
+        onClick={onClick}
+        {...rest}
+        // Use dangerouslySetInnerHTML to render the fetched SVG content
+        // Ensure that the source of SVGs is trusted to avoid XSS risks.
+        dangerouslySetInnerHTML={{ __html: svgContent }}
       />
-    </span>
+    </>
   );
 });
 

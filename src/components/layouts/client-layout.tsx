@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Icon } from '@/components/ui/icon/icon';
 import Link from "next/link";
 import Image from "next/image";
+import SidebarUIComponents from "@/components/ui/navigation/sidebar-ui-components";
 
 // Define NavItem interface (matching the one defined in header.tsx)
 interface NavItem {
@@ -166,6 +167,9 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     icon: "appSettings" // Or the appropriate icon name
   };
 
+  // Determine if we are on the UI components debug page
+  const isUIComponentsPage = pathname.startsWith('/debug-tools/ui-components');
+
   return (
     <div className="min-h-screen bg-white font-work-sans">
       <Header
@@ -177,15 +181,21 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
         settingsNavItem={settingsNavItem}
       />
 
+      {/* Conditionally render the correct sidebar */}
       <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300">
-        <Sidebar
-          items={sidebarItems}
-          activePath={pathname}
-          onItemClick={() => setIsMobileOpen(false)}
-          title="Justify"
-        />
+        {isUIComponentsPage ? (
+          <SidebarUIComponents />
+        ) : (
+          <Sidebar
+            items={sidebarItems}
+            activePath={pathname}
+            onItemClick={() => setIsMobileOpen(false)}
+            title="Justify"
+          />
+        )}
       </div>
-      <div className={`transition-margin duration-200 md:ml-64 pt-16 font-work-sans`}>
+      {/* Adjust margin based on whether the standard sidebar is shown */}
+      <div className={`transition-margin duration-200 ${!isUIComponentsPage ? 'md:ml-64' : ''} pt-16 font-work-sans`}>
         <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
           {children}
         </main>

@@ -62,7 +62,7 @@ export function LoadingSkeleton({
   const items = Array.from({ length: count }, (_, i) => i);
 
   return (
-    <div 
+    <div
       className={cn(
         "flex",
         count > 1 ? "flex-col" : "",
@@ -98,13 +98,13 @@ export function LoadingSkeleton({
  * @param {number} columns - Number of columns per row
  * @param {string} className - Additional CSS classes
  */
-export function TableSkeleton({ 
-  rows = 5, 
-  columns = 4, 
-  className 
-}: { 
-  rows?: number; 
-  columns?: number; 
+export function TableSkeleton({
+  rows = 5,
+  columns = 4,
+  className
+}: {
+  rows?: number;
+  columns?: number;
   className?: string;
 }) {
   return (
@@ -112,19 +112,19 @@ export function TableSkeleton({
       {/* Header row */}
       <div className="flex mb-4 gap-4">
         {Array.from({ length: columns }).map((_, i) => (
-          <div 
-            key={`header-${i}`} 
+          <div
+            key={`header-${i}`}
             className="h-6 bg-gray-300 dark:bg-gray-700 rounded flex-1"
           />
         ))}
       </div>
-      
+
       {/* Data rows */}
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div key={`row-${rowIndex}`} className="flex mb-3 gap-4">
           {Array.from({ length: columns }).map((_, colIndex) => (
-            <div 
-              key={`cell-${rowIndex}-${colIndex}`} 
+            <div
+              key={`cell-${rowIndex}-${colIndex}`}
               className="h-4 bg-gray-200 dark:bg-gray-800 rounded flex-1"
             />
           ))}
@@ -143,8 +143,8 @@ export function DashboardSkeleton({ className }: { className?: string }) {
       {/* Header area with metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div 
-            key={`metric-${i}`} 
+          <div
+            key={`metric-${i}`}
             className="bg-white dark:bg-gray-800 animate-pulse rounded-xl p-5 border border-gray-200 dark:border-gray-700 space-y-4"
           >
             <div className="flex items-center gap-3">
@@ -185,6 +185,85 @@ export function DashboardSkeleton({ className }: { className?: string }) {
       <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 animate-pulse">
         <div className="h-5 w-48 bg-gray-300 dark:bg-gray-700 rounded mb-6"></div>
         <TableSkeleton rows={3} columns={5} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * WizardSkeleton component for displaying loading state on campaign wizard pages
+ */
+export function WizardSkeleton({
+  step = 1,
+  stepContent,
+  className
+}: {
+  step?: number;
+  stepContent?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("max-w-6xl mx-auto px-6 py-8 space-y-6", className)}>
+      {/* Wizard header */}
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <div className="h-8 w-48 bg-gray-300 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-64 bg-gray-200 dark:bg-gray-600 rounded"></div>
+        </div>
+        <div className="h-10 w-24 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      </div>
+
+      {/* Step indicator */}
+      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+        <div
+          className="h-2 bg-blue-500 rounded-full animate-pulse"
+          style={{ width: `${(step / 5) * 100}%` }}
+        ></div>
+      </div>
+
+      {/* Step content or default skeleton */}
+      {stepContent || (
+        <div className="space-y-6">
+          {/* Default form fields */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse space-y-5">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded"></div>
+              <div className="h-6 w-40 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            </div>
+
+            {/* Form fields - different per step */}
+            {Array.from({ length: 3 + step }).map((_, i) => (
+              <div key={`field-${i}`} className="space-y-2">
+                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                <div className="h-10 w-full bg-gray-100 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700"></div>
+              </div>
+            ))}
+          </div>
+
+          {step >= 2 && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse space-y-5">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                <div className="h-6 w-48 bg-gray-300 dark:bg-gray-700 rounded"></div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={`opt-${i}`} className="h-12 bg-gray-100 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700"></div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bottom navigation */}
+      <div className="sticky bottom-0 bg-white dark:bg-gray-900 p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+        <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="flex gap-3">
+          <div className="h-10 w-28 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-10 w-28 bg-gray-300 dark:bg-gray-600 rounded"></div>
+        </div>
       </div>
     </div>
   );

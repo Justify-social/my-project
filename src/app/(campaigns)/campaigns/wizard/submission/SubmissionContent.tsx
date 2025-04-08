@@ -6,13 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/icon'
 import { WizardSkeleton } from "@/components/ui";
-import ErrorBoundary from '@/components/ui/error/ErrorBoundary';
+import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import ErrorFallback from '@/components/features/core/error-handling/ErrorFallback';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ProgressBar } from '@/components/ui/progress-bar';
+import ProgressBar from '@/components/features/campaigns/ProgressBar';
 import { toast } from 'react-hot-toast';
 
 function SubmissionContent() {
@@ -218,7 +218,7 @@ function SubmissionContent() {
 
       <button onClick={() => router.push(`/campaigns/${campaignId}`)} className="flex items-center bg-[#00BFFF] text-white px-5 py-2 rounded-md hover:bg-blue-600 font-['Work Sans'] font-work-sans">
 
-        <Icon iconId="faInfoLight" className="w-5 h-5 mr-2" />
+        <Icon iconId="faCircleInfoLight" className="w-5 h-5 mr-2" />
         View Full Details
       </button>
     </div>

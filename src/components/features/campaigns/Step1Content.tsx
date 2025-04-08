@@ -2,9 +2,6 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, useMemo, useRef, useCallback } from "react";
-import FormValues from '../../../utils/form-transformers';
-import HTMLInputElement from '../../ui/radio/types/index';
-import InfluencerData from '../../../utils/form-transformers';
 import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage, useFormikContext, FieldArray } from "formik";
 import * as Yup from "yup";
@@ -12,49 +9,47 @@ import { useWizard } from "@/components/features/campaigns/WizardContext";
 import Header from "@/components/features/campaigns/Header";
 import ProgressBar from "@/components/features/campaigns/ProgressBar";
 import { toast } from "react-hot-toast";
-import { WizardSkeleton, FormSkeleton } from "@/components/ui";
+import { LoadingSkeleton } from "@/components/ui";
 import Image from "next/image";
 import { Icon } from '@/components/ui/icon'
 import { EnumTransformers } from '@/utils/enum-transformers';
-// Import the payload sanitizer utilities
 import { sanitizeDraftPayload } from '@/utils/payload-sanitizer';
-// Add this import
 import { DateService } from '@/utils/date-service';
 
 // Use an env variable to decide whether to disable validations.
 // When NEXT_PUBLIC_DISABLE_VALIDATION is "true", the validation schema will be empty.
 const disableValidation = process.env.NEXT_PUBLIC_DISABLE_VALIDATION === "true";
 const OverviewSchema = disableValidation ? Yup.object() // no validations in test mode
-: Yup.object().shape({
-  name: Yup.string().required("Campaign name is required"),
-  businessGoal: Yup.string().max(3000, "Maximum 3000 characters").required("Business goal is required"),
-  startDate: Yup.string().required("Start date is required"),
-  endDate: Yup.string().required("End date is required").test('is-after-start-date', 'End date must be after start date', function (endDate) {
-    const {
-      startDate
-    } = this.parent;
-    if (!startDate || !endDate) return true; // Skip validation if dates aren't provided
-    return new Date(endDate) > new Date(startDate);
-  }),
-  timeZone: Yup.string().required("Time zone is required"),
-  primaryContact: Yup.object().shape({
-    firstName: Yup.string().required("First name is required"),
-    surname: Yup.string().required("Surname is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    position: Yup.string().required("Position is required")
-  }),
-  secondaryContact: Yup.object().shape({
-    firstName: Yup.string(),
-    surname: Yup.string(),
-    email: Yup.string().email("Invalid email"),
-    position: Yup.string()
-  }),
-  currency: Yup.string().required("Currency is required"),
-  totalBudget: Yup.number().min(0, "Budget must be positive").required("Total campaign budget is required"),
-  socialMediaBudget: Yup.number().min(0, "Budget must be positive").required("Social media budget is required"),
-  platform: Yup.string().required("Platform is required"),
-  influencerHandle: Yup.string().required("Influencer handle is required")
-});
+  : Yup.object().shape({
+    name: Yup.string().required("Campaign name is required"),
+    businessGoal: Yup.string().max(3000, "Maximum 3000 characters").required("Business goal is required"),
+    startDate: Yup.string().required("Start date is required"),
+    endDate: Yup.string().required("End date is required").test('is-after-start-date', 'End date must be after start date', function (endDate) {
+      const {
+        startDate
+      } = this.parent;
+      if (!startDate || !endDate) return true; // Skip validation if dates aren't provided
+      return new Date(endDate) > new Date(startDate);
+    }),
+    timeZone: Yup.string().required("Time zone is required"),
+    primaryContact: Yup.object().shape({
+      firstName: Yup.string().required("First name is required"),
+      surname: Yup.string().required("Surname is required"),
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      position: Yup.string().required("Position is required")
+    }),
+    secondaryContact: Yup.object().shape({
+      firstName: Yup.string(),
+      surname: Yup.string(),
+      email: Yup.string().email("Invalid email"),
+      position: Yup.string()
+    }),
+    currency: Yup.string().required("Currency is required"),
+    totalBudget: Yup.number().min(0, "Budget must be positive").required("Total campaign budget is required"),
+    socialMediaBudget: Yup.number().min(0, "Budget must be positive").required("Social media budget is required"),
+    platform: Yup.string().required("Platform is required"),
+    influencerHandle: Yup.string().required("Influencer handle is required")
+  });
 
 // First, add these enums at the top of your file
 enum Currency {
@@ -172,29 +167,29 @@ const StyledField = ({
   ...props
 }: any) => {
   return <div className="mb-5 font-work-sans">
-      <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-        {label}
-        {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
-      </label>
-      <div className="relative font-work-sans">
-        {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
-            {icon}
-          </div>}
-        {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon ${as === "select" ? "appearance-none" : ""}`} {...props}>
+    <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+      {label}
+      {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
+    </label>
+    <div className="relative font-work-sans">
+      {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
+        {icon}
+      </div>}
+      {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon ${as === "select" ? "appearance-none" : ""}`} {...props}>
 
-            {children}
-          </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
-        {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
-        {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
-            <Icon iconId="faCalendarLight" className="w-5 h-5 font-work-sans"  />
-          </div>}
-        {/* Add chevron only for select elements */}
-        {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container font-work-sans">
-            <Icon iconId="faChevronDownLight" className="w-5 h-5 font-work-sans"  />
-          </div>}
-      </div>
-      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
-    </div>;
+        {children}
+      </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
+      {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
+      {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
+        <Icon iconId="faCalendarLight" className="w-5 h-5 font-work-sans" />
+      </div>}
+      {/* Add chevron only for select elements */}
+      {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container font-work-sans">
+        <Icon iconId="faChevronDownLight" className="w-5 h-5 font-work-sans" />
+      </div>}
+    </div>
+    <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
+  </div>;
 };
 
 // Custom date field component to handle the calendar icon issue
@@ -205,15 +200,15 @@ const DateField = ({
   ...props
 }: any) => {
   return <div className="mb-5 font-work-sans">
-      <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-        {label}
-        {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
-      </label>
-      <div className="relative font-work-sans">
-        <Field type="date" id={name} name={name} className="w-full p-2.5 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
-      </div>
-      <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
-    </div>;
+    <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+      {label}
+      {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
+    </label>
+    <div className="relative font-work-sans">
+      <Field type="date" id={name} name={name} className="w-full p-2.5 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
+    </div>
+    <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
+  </div>;
 };
 
 // Define extended wizard data interface
@@ -347,7 +342,7 @@ const ExchangeRateHandler = ({
 
 
 
-}: {currency: string;onRatesFetched: (data: any) => void;}) => {
+}: { currency: string; onRatesFetched: (data: any) => void; }) => {
   useEffect(() => {
     if (!currency) return;
     fetchExchangeRates(currency).then((data) => {
@@ -368,7 +363,7 @@ const DateRangePicker = ({
 
 
 
-}: {startFieldName: string;endFieldName: string;label: string;}) => {
+}: { startFieldName: string; endFieldName: string; label: string; }) => {
   const {
     values,
     setFieldValue,
@@ -397,48 +392,48 @@ const DateRangePicker = ({
     return nextDay.toISOString().split('T')[0];
   })() : '';
   return <div className="mb-5 font-work-sans">
-      <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-        {label} <span className="text-[var(--accent-color)] font-work-sans">*</span>
-      </label>
-      
-      <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 font-work-sans">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
-          <div className="font-work-sans">
-            <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
-              Start Date
-            </label>
-            <div className="relative font-work-sans">
-              <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={new Date().toISOString().split('T')[0]} // Minimum is today
+    <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+      {label} <span className="text-[var(--accent-color)] font-work-sans">*</span>
+    </label>
+
+    <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 font-work-sans">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+        <div className="font-work-sans">
+          <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
+            Start Date
+          </label>
+          <div className="relative font-work-sans">
+            <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={new Date().toISOString().split('T')[0]} // Minimum is today
             />
-            </div>
-            {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
-                {errors[startFieldName as keyof FormValues] as string}
-              </div>}
           </div>
-          
-          <div className="font-work-sans">
-            <label htmlFor={endFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
-              End Date
-            </label>
-            <div className="relative font-work-sans">
-              <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={(e) => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={minEndDate} // End date must be at least the day after start date
-            disabled={!startDate} // Disable until start date is selected
-            />
-            </div>
-            {errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
-                {errors[endFieldName as keyof FormValues] as string}
-              </div>}
-          </div>
-        </div>
-        
-        {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded font-work-sans">
-            <div className="flex items-center font-work-sans">
-              <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-1 text-[var(--accent-color)] font-work-sans"  />
-              <span className="font-work-sans">Campaign Duration: {calculateDuration(startDate, endDate)}</span>
-            </div>
+          {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
+            {errors[startFieldName as keyof FormValues] as string}
           </div>}
+        </div>
+
+        <div className="font-work-sans">
+          <label htmlFor={endFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
+            End Date
+          </label>
+          <div className="relative font-work-sans">
+            <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={(e) => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={minEndDate} // End date must be at least the day after start date
+              disabled={!startDate} // Disable until start date is selected
+            />
+          </div>
+          {errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
+            {errors[endFieldName as keyof FormValues] as string}
+          </div>}
+        </div>
       </div>
-    </div>;
+
+      {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded font-work-sans">
+        <div className="flex items-center font-work-sans">
+          <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-1 text-[var(--accent-color)] font-work-sans" />
+          <span className="font-work-sans">Campaign Duration: {calculateDuration(startDate, endDate)}</span>
+        </div>
+      </div>}
+    </div>
+  </div>;
 };
 
 // Helper function to calculate duration between dates
@@ -586,7 +581,7 @@ const InfluencerEntry = ({
 
 
 
-}: {index: number;remove: () => void;arrayHelpers: any;}) => {
+}: { index: number; remove: () => void; arrayHelpers: any; }) => {
   const {
     values,
     setFieldValue,
@@ -641,59 +636,59 @@ const InfluencerEntry = ({
   }, [influencer.platform, influencer.handle, debouncedValidate]);
   const hasError = touched.influencers?.[index] && ((errors.influencers?.[index] as any)?.platform || (errors.influencers?.[index] as any)?.handle);
   return <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 mb-4 font-work-sans">
-      <div className="flex justify-between items-center mb-3 font-work-sans">
-        <h4 className="text-[var(--primary-color)] font-medium font-sora">Influencer #{index + 1}</h4>
-        {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200 font-work-sans">
-            <Icon iconId="faCloseLight" className="h-5 w-5"  />
-          </button>}
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
-        <div className="font-work-sans">
-          <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-            Platform <span className="text-[var(--accent-color)] font-work-sans">*</span>
-          </label>
-          <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] appearance-none ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-[var(--divider-color)]'}`}>
-            <option value="">Select platform</option>
-            <option value={Platform.Instagram}>Instagram</option>
-            <option value={Platform.YouTube}>YouTube</option>
-            <option value={Platform.TikTok}>TikTok</option>
-          </Field>
-          <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
-        </div>
-        
-        <div className="font-work-sans">
-          <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-            Influencer Handle <span className="text-[var(--accent-color)] font-work-sans">*</span>
-          </label>
-          <div className="relative font-work-sans">
-            <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-[var(--divider-color)]'}`} />
+    <div className="flex justify-between items-center mb-3 font-work-sans">
+      <h4 className="text-[var(--primary-color)] font-medium font-sora">Influencer #{index + 1}</h4>
+      {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200 font-work-sans">
+        <Icon iconId="faCloseLight" className="h-5 w-5" />
+      </button>}
+    </div>
 
-            {isValidating && <div className="absolute right-2 top-2 font-work-sans">
-                <img src="/icons/light/spinner.svg" className="h-5 w-5 text-[var(--primary-color)] animate-spin font-work-sans" alt="Loading" />
-              </div>}
-          </div>
-          <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
-
-          {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">Type at least 3 characters to search</div>}
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
+      <div className="font-work-sans">
+        <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+          Platform <span className="text-[var(--accent-color)] font-work-sans">*</span>
+        </label>
+        <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] appearance-none ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-[var(--divider-color)]'}`}>
+          <option value="">Select platform</option>
+          <option value={Platform.Instagram}>Instagram</option>
+          <option value={Platform.YouTube}>YouTube</option>
+          <option value={Platform.TikTok}>TikTok</option>
+        </Field>
+        <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
       </div>
-      
-      {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center font-work-sans">
-          <div className="animate-spin mr-2 font-work-sans">
-            <img src="/icons/light/spinner.svg" className="h-4 w-4" alt="Loading" />
-          </div>
-          Validating influencer...
-        </div>}
-      
-      {validationResult && <div className="mt-3 font-work-sans">
-          <InfluencerPreview platform={influencer.platform} handle={influencer.handle} data={validationResult} />
-        </div>}
-      
-      {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-amber-600 text-sm font-work-sans">
-          No data found for this influencer.
-        </div>}
-    </div>;
+
+      <div className="font-work-sans">
+        <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+          Influencer Handle <span className="text-[var(--accent-color)] font-work-sans">*</span>
+        </label>
+        <div className="relative font-work-sans">
+          <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-[var(--divider-color)]'}`} />
+
+          {isValidating && <div className="absolute right-2 top-2 font-work-sans">
+            <Icon iconId="faCircleNotchLight" className="h-5 w-5 text-[var(--primary-color)] animate-spin" /> {/* Replaced img with Icon */}
+          </div>}
+        </div>
+        <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
+
+        {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">Type at least 3 characters to search</div>}
+      </div>
+    </div>
+
+    {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center font-work-sans">
+      <div className="animate-spin mr-2 font-work-sans">
+        <Icon iconId="faCircleNotchLight" className="h-4 w-4" /> {/* Replaced img with Icon */}
+      </div>
+      Validating influencer...
+    </div>}
+
+    {validationResult && <div className="mt-3 font-work-sans">
+      <InfluencerPreview platform={influencer.platform} handle={influencer.handle} data={validationResult} />
+    </div>}
+
+    {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-amber-600 text-sm font-work-sans">
+      No data found for this influencer.
+    </div>}
+  </div>;
 };
 
 // Update the InfluencerPreview component to accept data directly
@@ -705,7 +700,7 @@ const InfluencerPreview = ({
 
 
 
-}: {platform: string;handle: string;data?: InfluencerData;}) => {
+}: { platform: string; handle: string; data?: InfluencerData; }) => {
   const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -732,112 +727,118 @@ const InfluencerPreview = ({
   }, [platform, handle, data]);
   if (isLoading) {
     return <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center font-work-sans">
-        <div className="animate-spin mr-2 font-work-sans">
-          <img src="/icons/light/spinner.svg" className="h-4 w-4 text-[var(--primary-color)] font-work-sans" alt="Loading" />
-        </div>
-        <p className="text-sm text-gray-600 font-work-sans">Validating influencer...</p>
-      </div>;
+      <div className="animate-spin mr-2 font-work-sans">
+        <Icon iconId="faCircleNotchLight" className="h-4 w-4 text-[var(--primary-color)]" /> {/* Replaced img with Icon */}
+      </div>
+      <p className="text-sm text-gray-600 font-work-sans">Validating influencer...</p>
+    </div>;
   }
   if (error) {
     return <div className="bg-red-50 rounded-md p-3 font-work-sans">
-        <p className="text-sm text-red-600 font-work-sans">{error}</p>
-      </div>;
+      <p className="text-sm text-red-600 font-work-sans">{error}</p>
+    </div>;
   }
   if (!influencerData) {
     return <div className="bg-amber-50 rounded-md p-3 font-work-sans">
-        <p className="text-sm text-amber-600 font-work-sans">
-          No data available for this influencer.
-        </p>
-      </div>;
+      <p className="text-sm text-amber-600 font-work-sans">
+        No data available for this influencer.
+      </p>
+    </div>;
   }
 
-  // Convert platform name to lowercase for standard format
-  const getPlatformName = (platformName: string): string => {
+  // Convert platform name to lowercase for standard format and return filename stem
+  const getPlatformFilenameStem = (platformName: string): string => {
     const name = platformName.toLowerCase();
-    if (name.includes('instagram')) return 'instagram';
-    if (name.includes('tiktok')) return 'tiktok';
-    if (name.includes('youtube')) return 'youtube';
-    if (name.includes('facebook')) return 'facebook';
-    if (name.includes('twitter') || name.includes('x')) return 'x-twitter';
-    if (name.includes('linkedin')) return 'linkedin';
-    if (name.includes('pinterest')) return 'pinterest';
-    if (name.includes('reddit')) return 'reddit';
-    return 'instagram'; // Default fallback
+    if (name.includes('instagram')) return 'brandsInstagram';
+    if (name.includes('tiktok')) return 'brandsTiktok';
+    if (name.includes('youtube')) return 'brandsYoutube';
+    if (name.includes('facebook')) return 'brandsFacebook';
+    if (name.includes('twitter') || name.includes('x')) return 'brandsXTwitter'; // Match registry id
+    if (name.includes('linkedin')) return 'brandsLinkedin';
+    // Add other potential platforms from registry if needed
+    // if (name.includes('github')) return 'brandsGithub'; 
+    return 'brandsInstagram'; // Default fallback (consider a more generic icon or error handling)
   };
 
-  // Get normalized platform name
-  const platformName = getPlatformName(platform);
+  // Get normalized platform filename stem
+  const platformFilenameStem = getPlatformFilenameStem(platform);
 
   return <div className="bg-blue-50 rounded-md p-3 font-work-sans">
-      <div className="flex items-start font-work-sans">
-        {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center font-work-sans">
-            <Icon iconId="faUserLight" className="h-6 w-6 text-gray-500 font-work-sans"  />
-          </div>}
-        <div className="font-work-sans">
-          <div className="flex items-center font-work-sans">
-            <p className="font-medium text-[var(--primary-color)] font-work-sans">
-              {influencerData.displayName || handle}
-            </p>
-            {influencerData.verified && <span className="ml-1 text-blue-500 font-work-sans">
-                <Icon iconId="faCircleCheckSolid" className="h-4 w-4"  />
-              </span>}
-          </div>
-          <p className="text-sm text-gray-600 flex items-center font-work-sans">
-            <img
-            src={`/icons/brands/${platformName}.svg`}
-            alt={platformName}
-            className="h-4 w-4 mr-1.5 inline-block"
-            style={{ position: 'relative', top: '-1px' }} />
-
-            @{handle}
+    <div className="flex items-start font-work-sans">
+      {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center font-work-sans">
+        <Icon iconId="faUserLight" className="h-6 w-6 text-gray-500 font-work-sans" />
+      </div>}
+      <div className="font-work-sans">
+        <div className="flex items-center font-work-sans">
+          <p className="font-medium text-[var(--primary-color)] font-work-sans">
+            {influencerData.displayName || handle}
           </p>
-          <div className="mt-1 flex space-x-3 text-xs text-gray-500 font-work-sans">
-            <span className="font-work-sans">{influencerData.followerCount?.toLocaleString() || 'Unknown'} followers</span>
-            {influencerData.engagementRate && <span className="font-work-sans">{influencerData.engagementRate.toFixed(2)}% engagement</span>}
-          </div>
+          {influencerData.verified && <span className="ml-1 text-blue-500 font-work-sans">
+            <Icon iconId="faCircleCheckSolid" className="h-4 w-4" />
+          </span>}
+        </div>
+        <p className="text-sm text-gray-600 flex items-center font-work-sans">
+          {/* Use Image component for consistent brand icon rendering */}
+          <Image
+            src={`/icons/brands/${platformFilenameStem}.svg`} // Dynamically set the src based on platform filename stem
+            alt={platform} // Use original platform name for alt text
+            width={16} // Set appropriate width
+            height={16} // Set appropriate height
+            className="mr-1.5 inline-block relative top-[-1px]" // Apply necessary styling
+          />
+          @{handle}
+        </p>
+        <div className="mt-1 flex space-x-3 text-xs text-gray-500 font-work-sans">
+          <span className="font-work-sans">{influencerData.followerCount?.toLocaleString() || 'Unknown'} followers</span>
+          {influencerData.engagementRate && <span className="font-work-sans">{influencerData.engagementRate.toFixed(2)}% engagement</span>}
         </div>
       </div>
-      {influencerData.description && <p className="mt-2 text-sm text-gray-600 line-clamp-2 font-work-sans">{influencerData.description}</p>}
-    </div>;
+    </div>
+    {influencerData.description && <p className="mt-2 text-sm text-gray-600 line-clamp-2 font-work-sans">{influencerData.description}</p>}
+  </div>;
 };
 
 // Separate the search params logic into its own component
-function FormContent() {
+function Step1Content() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const wizardContext = useWizard();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [exchangeRateData, setExchangeRateData] = useState<any>(null);
+  const campaignId = searchParams ? searchParams.get('id') : null;
+  const {
+    data,
+    loading,
+    updateCampaignData,
+    campaignData: contextCampaignData,
+    reloadCampaignData
+  } = useWizard();
 
-  // Destructure context with proper type checking
-  if (!wizardContext) {
-    throw new Error('Wizard context is required');
-  }
+  // Move the *entire* destructuring earlier to ensure all variables are defined before use
   const {
     formData,
     updateFormData,
-    data,
     isEditing,
-    campaignData,
-    updateCampaignData
-  } = wizardContext;
+    additionalContacts,
+    currency,
+    totalBudget,
+    socialMediaBudget,
+    influencers,
+    primaryContact,
+    secondaryContact,
+    businessGoal,
+    name,
+    startDate,
+    endDate,
+    timeZone
+  } = contextCampaignData || {}; // Add default empty object for safety
 
-  // Get campaign ID from search params
-  const campaignId = searchParams?.get('id');
+  const [detectedTimezone, setDetectedTimezone] = useState('');
+  const [exchangeRateData, setExchangeRateData] = useState<any>(null); // State to hold exchange rate data
 
-  // Update the formatDate function to better handle empty date objects
-  const formatDate = (date: any) => {
-    console.log('Formatting date:', date);
+  // Add local state for submission status and errors
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    // Use DateService instead of custom logic
-    const formattedDate = DateService.toFormDate(date);
-    console.log('DateService formatted date:', formattedDate);
-
-    // Return empty string instead of null for form fields
-    return formattedDate || '';
-  };
+  // Add formikRef at the top level
+  const formikRef = useRef<any>(null);
 
   // Helper function to safely access nested properties
   const safeGet = (obj: any, path: string, defaultValue: any = '') => {
@@ -853,32 +854,46 @@ function FormContent() {
     return current !== null && current !== undefined ? current : defaultValue;
   };
 
+  // Update the formatDate function to better handle empty date objects
+  const formatDate = (date: any) => {
+    console.log('Formatting date:', date);
+
+    // Use DateService instead of custom logic
+    const formattedDate = DateService.toFormDate(date);
+    console.log('DateService formatted date:', formattedDate);
+
+    // Return empty string instead of null for form fields
+    return formattedDate || '';
+  };
+
   // Create initial values using the defaultValues and existing data
   const initialValues = useMemo(() => {
-    if (isEditing && campaignData) {
+    if (!contextCampaignData) return defaultFormValues;
+
+    if (isEditing && contextCampaignData) {
       return {
-        name: safeGet(campaignData, 'campaignName', defaultFormValues.name),
-        businessGoal: safeGet(campaignData, 'description', defaultFormValues.businessGoal),
-        startDate: formatDate(campaignData.startDate) || defaultFormValues.startDate,
-        endDate: formatDate(campaignData.endDate) || defaultFormValues.endDate,
-        timeZone: safeGet(campaignData, 'timeZone', defaultFormValues.timeZone),
+        name: safeGet(contextCampaignData, 'campaignName', defaultFormValues.name),
+        businessGoal: safeGet(contextCampaignData, 'description', defaultFormValues.businessGoal),
+        startDate: formatDate(contextCampaignData.startDate) || defaultFormValues.startDate,
+        endDate: formatDate(contextCampaignData.endDate) || defaultFormValues.endDate,
+        timeZone: safeGet(contextCampaignData, 'timeZone', defaultFormValues.timeZone),
         primaryContact: {
-          firstName: safeGet(campaignData, 'primaryContact.firstName', defaultFormValues.primaryContact.firstName),
-          surname: safeGet(campaignData, 'primaryContact.surname', defaultFormValues.primaryContact.surname),
-          email: safeGet(campaignData, 'primaryContact.email', defaultFormValues.primaryContact.email),
-          position: safeGet(campaignData, 'primaryContact.position', defaultFormValues.primaryContact.position)
+          firstName: safeGet(contextCampaignData, 'primaryContact.firstName', defaultFormValues.primaryContact.firstName),
+          surname: safeGet(contextCampaignData, 'primaryContact.surname', defaultFormValues.primaryContact.surname),
+          email: safeGet(contextCampaignData, 'primaryContact.email', defaultFormValues.primaryContact.email),
+          position: safeGet(contextCampaignData, 'primaryContact.position', defaultFormValues.primaryContact.position)
         },
         secondaryContact: {
-          firstName: safeGet(campaignData, 'secondaryContact.firstName', defaultFormValues.secondaryContact.firstName),
-          surname: safeGet(campaignData, 'secondaryContact.surname', defaultFormValues.secondaryContact.surname),
-          email: safeGet(campaignData, 'secondaryContact.email', defaultFormValues.secondaryContact.email),
-          position: safeGet(campaignData, 'secondaryContact.position', defaultFormValues.secondaryContact.position)
+          firstName: safeGet(contextCampaignData, 'secondaryContact.firstName', defaultFormValues.secondaryContact.firstName),
+          surname: safeGet(contextCampaignData, 'secondaryContact.surname', defaultFormValues.secondaryContact.surname),
+          email: safeGet(contextCampaignData, 'secondaryContact.email', defaultFormValues.secondaryContact.email),
+          position: safeGet(contextCampaignData, 'secondaryContact.position', defaultFormValues.secondaryContact.position)
         },
-        currency: safeGet(campaignData, 'currency', defaultFormValues.currency),
-        totalBudget: safeGet(campaignData, 'totalBudget', defaultFormValues.totalBudget),
-        socialMediaBudget: safeGet(campaignData, 'socialMediaBudget', defaultFormValues.socialMediaBudget),
-        influencers: Array.isArray(campaignData.influencers) ? campaignData.influencers : defaultFormValues.influencers,
-        additionalContacts: campaignData.contacts && typeof campaignData.contacts === 'string' ? JSON.parse(campaignData.contacts) : []
+        currency: safeGet(contextCampaignData, 'currency', defaultFormValues.currency),
+        totalBudget: safeGet(contextCampaignData, 'totalBudget', defaultFormValues.totalBudget),
+        socialMediaBudget: safeGet(contextCampaignData, 'socialMediaBudget', defaultFormValues.socialMediaBudget),
+        influencers: Array.isArray(contextCampaignData.influencers) ? contextCampaignData.influencers : defaultFormValues.influencers,
+        additionalContacts: contextCampaignData.contacts && typeof contextCampaignData.contacts === 'string' ? JSON.parse(contextCampaignData.contacts) : []
       };
     }
 
@@ -911,14 +926,14 @@ function FormContent() {
       };
     }
     return defaultFormValues;
-  }, [isEditing, campaignData, data]);
+  }, [contextCampaignData, data, defaultFormValues, isEditing]);
 
   // Modify the handleSubmit function to use EnumTransformers
   const handleSubmit = async (values: FormValues) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true); // Use local state
+    setError(null); // Use local state
     try {
-      setIsSubmitting(true);
-      setError(null);
-
       // Validate required fields client-side before submission
       const requiredFields = ['name', 'businessGoal', 'startDate', 'endDate', 'timeZone', 'currency'];
       const missingFields = requiredFields.filter((field) => !values[field as keyof FormValues]);
@@ -1111,7 +1126,7 @@ function FormContent() {
         localStorage.setItem('lastCampaignId', newCampaignId.toString());
 
         // Only update URL if needed - avoid full page refresh
-        const currentId = searchParams.get('id');
+        const currentId = searchParams?.get('id');
         if (!currentId && typeof router.replace === 'function') {
           // Simple URL update, Next.js App Router has no shallow option
           router.replace(`/campaigns/wizard/step-1?id=${newCampaignId}`);
@@ -1135,21 +1150,16 @@ function FormContent() {
       setError(message);
       toast.error(message);
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Use local state
     }
   };
 
   // Update handleSaveDraft function with defensive programming
   const handleSaveDraft = async (values: FormValues) => {
-    // Prevent multiple submissions
-    if (isSubmitting) {
-      console.log('Submission already in progress, ignoring duplicate request');
-      return;
-    }
+    if (isSubmitting) return;
+    setIsSubmitting(true); // Use local state
+    setError(null); // Use local state
     try {
-      setIsSubmitting(true);
-      setError(null);
-
       // Create a draft-friendly payload using the sanitization utility
       const sanitizedPayload = sanitizeDraftPayload({
         ...values,
@@ -1180,7 +1190,7 @@ function FormContent() {
         localStorage.setItem('lastCampaignId', newCampaignId.toString());
 
         // Only update URL if needed - avoid full page refresh
-        const currentId = searchParams.get('id');
+        const currentId = searchParams?.get('id');
         if (!currentId && typeof router.replace === 'function') {
           // Simple URL update, Next.js App Router has no shallow option
           router.replace(`/campaigns/wizard/step-1?id=${newCampaignId}`);
@@ -1205,21 +1215,18 @@ function FormContent() {
       setError(message);
       toast.error(message);
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Use local state
     }
   };
-
-  // Add formikRef at the top of the component where other refs are defined
-  const formikRef = useRef<any>(null);
 
   // Update useEffect for form initialization
   useEffect(() => {
     // Only proceed if we have loaded data and a formik instance
-    if (!formikRef.current || !wizardContext.hasLoadedData || !wizardContext.campaignData) return;
-    console.log('Updating form with WizardContext data:', wizardContext.campaignData);
+    if (!formikRef.current || !contextCampaignData) return;
+    console.log('Updating form with WizardContext data:', contextCampaignData);
 
     // Get the campaign data
-    const campaignData = wizardContext.campaignData;
+    const campaignData = contextCampaignData;
 
     // Debug logs to see what we're working with  
     console.log('Start Date:', campaignData.startDate);
@@ -1324,29 +1331,22 @@ function FormContent() {
     });
 
     // This is to prevent re-initialization
-  }, [wizardContext.hasLoadedData, wizardContext.campaignData]);
-  if (isLoading) {
-    return <WizardSkeleton step={1} />;
-  }
-  if (error) {
-    return <div className="p-6 bg-red-50 border border-red-200 rounded-md shadow-sm font-work-sans">
-        <h3 className="text-red-800 font-semibold font-sora">Error</h3>
-        <p className="text-red-600 font-work-sans">{error}</p>
-        <button onClick={() => router.push('/campaigns')} className="mt-4 px-4 py-2 bg-accent-color text-white rounded-md hover:bg-accent-color/90 transition-colors duration-200 font-work-sans">
+  }, [contextCampaignData]);
 
-          Return to Campaigns
-        </button>
-      </div>;
+  // If no campaign data is available yet, show loading state
+  if (loading || !contextCampaignData) {
+    return <LoadingSkeleton />;
   }
+
   return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-[var(--background-color)] font-work-sans">
-      <div className="mb-8 font-work-sans">
-        <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-2 font-sora">Campaign Creation</h1>
-        <p className="text-[var(--secondary-color)] font-work-sans">Complete all required fields to create your campaign</p>
-      </div>
+    <div className="mb-8 font-work-sans">
+      <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-2 font-sora">Campaign Creation</h1>
+      <p className="text-[var(--secondary-color)] font-work-sans">Complete all required fields to create your campaign</p>
+    </div>
 
-      <Formik innerRef={formikRef} initialValues={initialValues} validationSchema={ValidationSchema} onSubmit={handleSubmit} enableReinitialize={true}>
+    <Formik innerRef={formikRef} initialValues={initialValues} validationSchema={ValidationSchema} onSubmit={handleSubmit} enableReinitialize={true}>
 
-        {({
+      {({
         values,
         isValid,
         dirty,
@@ -1365,101 +1365,100 @@ function FormContent() {
           await handleSubmit(values);
         };
         return <>
-              <Form className="space-y-8">
-                {/* Campaign Details */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
-                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Image src="/icons/app/Campaigns.svg" alt="Campaigns" width={16} height={16} className="mr-2 text-black font-work-sans" />
+          <Form className="space-y-8">
+            {/* Campaign Details */}
+            <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+              <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                <Image src="/icons/app/appCampaigns.svg" alt="Campaign Details" width={16} height={16} className="mr-2" /> {/* Corrected icon path */}
+                Campaign Details
+              </h2>
 
-                    Campaign Details
-                  </h2>
-                  
-                  <StyledField label="Campaign Name" name="name" placeholder="Enter your campaign name" required />
-
-
-                  <StyledField label="What business goals does this campaign support?" name="businessGoal" as="textarea" rows={4} placeholder="e.g. Increase market share by 5% in the next quarter. Launch a new product line targeting millennials." required />
+              <StyledField label="Campaign Name" name="name" placeholder="Enter your campaign name" required />
 
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 font-work-sans">
-                    <DateRangePicker startFieldName="startDate" endFieldName="endDate" label="Campaign Duration" />
+              <StyledField label="What business goals does this campaign support?" name="businessGoal" as="textarea" rows={4} placeholder="e.g. Increase market share by 5% in the next quarter. Launch a new product line targeting millennials." required />
 
-                    <StyledField label="Time Zone" name="timeZone" as="select" required icon={<Icon iconId="faGlobeLight" className="w-5 h-5"  />}>
 
-                      <option value="">Select time zone</option>
-                      <option value="UTC">UTC (Coordinated Universal Time)</option>
-                      <option value="GMT">GMT (Greenwich Mean Time)</option>
-                      <option value="America/New_York">EST (Eastern Standard Time)</option>
-                      <option value="America/Chicago">CST (Central Standard Time)</option>
-                      <option value="America/Denver">MST (Mountain Standard Time)</option>
-                      <option value="America/Los_Angeles">PST (Pacific Standard Time)</option>
-                      <option value="Europe/London">BST (British Summer Time)</option>
-                      <option value="Europe/Paris">CET (Central European Time)</option>
-                      <option value="Europe/Athens">EET (Eastern European Time)</option>
-                      <option value="Asia/Tokyo">JST (Japan Standard Time)</option>
-                      <option value="Asia/Shanghai">CST (China Standard Time)</option>
-                      <option value="Australia/Sydney">AEST (Australian Eastern Standard Time)</option>
-                    </StyledField>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 font-work-sans">
+                <DateRangePicker startFieldName="startDate" endFieldName="endDate" label="Campaign Duration" />
 
-                {/* Primary Contact */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
-                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon iconId="faUserLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
-                    Primary Contact
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                    <StyledField label="First Name" name="primaryContact.firstName" placeholder="Enter first name" required icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
+                <StyledField label="Time Zone" name="timeZone" as="select" required icon={<Icon iconId="faGlobeLight" className="w-5 h-5" />}>
 
-                    <StyledField label="Last Name" name="primaryContact.surname" placeholder="Enter last name" required icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
+                  <option value="">Select time zone</option>
+                  <option value="UTC">UTC (Coordinated Universal Time)</option>
+                  <option value="GMT">GMT (Greenwich Mean Time)</option>
+                  <option value="America/New_York">EST (Eastern Standard Time)</option>
+                  <option value="America/Chicago">CST (Central Standard Time)</option>
+                  <option value="America/Denver">MST (Mountain Standard Time)</option>
+                  <option value="America/Los_Angeles">PST (Pacific Standard Time)</option>
+                  <option value="Europe/London">BST (British Summer Time)</option>
+                  <option value="Europe/Paris">CET (Central European Time)</option>
+                  <option value="Europe/Athens">EET (Eastern European Time)</option>
+                  <option value="Asia/Tokyo">JST (Japan Standard Time)</option>
+                  <option value="Asia/Shanghai">CST (China Standard Time)</option>
+                  <option value="Australia/Sydney">AEST (Australian Eastern Standard Time)</option>
+                </StyledField>
+              </div>
+            </div>
 
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
-                    <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5"  />} />
+            {/* Primary Contact */}
+            <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+              <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                <Icon iconId="faUserLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" />
+                Primary Contact
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+                <StyledField label="First Name" name="primaryContact.firstName" placeholder="Enter first name" required icon={<Icon iconId="faUserLight" className="w-5 h-5" />} />
 
-                    <StyledField label="Position" name="primaryContact.position" as="select" required icon={<Icon iconId="faBuildingLight" className="w-5 h-5"  />}>
+                <StyledField label="Last Name" name="primaryContact.surname" placeholder="Enter last name" required icon={<Icon iconId="faUserLight" className="w-5 h-5" />} />
 
-                      <option value="">Select Position</option>
-                      <option value={Position.Manager}>{Position.Manager}</option>
-                      <option value={Position.Director}>{Position.Director}</option>
-                      <option value={Position.VP}>{Position.VP}</option>
-                    </StyledField>
-                  </div>
-                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
+                <StyledField label="Email" name="primaryContact.email" type="email" placeholder="email@example.com" required icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5" />} />
 
-                {/* Secondary Contact */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
-                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon iconId="faUserGroupLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
-                    Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                    <StyledField label="First Name" name="secondaryContact.firstName" placeholder="Enter first name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
+                <StyledField label="Position" name="primaryContact.position" as="select" required icon={<Icon iconId="faBuildingLight" className="w-5 h-5" />}>
 
-                    <StyledField label="Last Name" name="secondaryContact.surname" placeholder="Enter last name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
+                  <option value="">Select Position</option>
+                  <option value={Position.Manager}>{Position.Manager}</option>
+                  <option value={Position.Director}>{Position.Director}</option>
+                  <option value={Position.VP}>{Position.VP}</option>
+                </StyledField>
+              </div>
+            </div>
 
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
-                    <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5"  />} />
+            {/* Secondary Contact */}
+            <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+              <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                <Icon iconId="faUserGroupLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" />
+                Secondary Contact <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+                <StyledField label="First Name" name="secondaryContact.firstName" placeholder="Enter first name" icon={<Icon iconId="faUserLight" className="w-5 h-5" />} />
 
-                    <StyledField label="Position" name="secondaryContact.position" as="select" icon={<Icon iconId="faBuildingLight" className="w-5 h-5"  />}>
+                <StyledField label="Last Name" name="secondaryContact.surname" placeholder="Enter last name" icon={<Icon iconId="faUserLight" className="w-5 h-5" />} />
 
-                      <option value="">Select Position</option>
-                      <option value={Position.Manager}>{Position.Manager}</option>
-                      <option value={Position.Director}>{Position.Director}</option>
-                      <option value={Position.VP}>{Position.VP}</option>
-                    </StyledField>
-                  </div>
-                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
+                <StyledField label="Email" name="secondaryContact.email" type="email" placeholder="email@example.com" icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5" />} />
 
-                {/* Additional Contacts */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
-                  <div className="flex justify-between items-center mb-5 font-work-sans">
-                    <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] flex items-center">
-                      <Icon iconId="faUserLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
-                      Additional Contacts <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
-                    </h2>
-                    <button type="button" onClick={() => {
+                <StyledField label="Position" name="secondaryContact.position" as="select" icon={<Icon iconId="faBuildingLight" className="w-5 h-5" />}>
+
+                  <option value="">Select Position</option>
+                  <option value={Position.Manager}>{Position.Manager}</option>
+                  <option value={Position.Director}>{Position.Director}</option>
+                  <option value={Position.VP}>{Position.VP}</option>
+                </StyledField>
+              </div>
+            </div>
+
+            {/* Additional Contacts */}
+            <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+              <div className="flex justify-between items-center mb-5 font-work-sans">
+                <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] flex items-center">
+                  <Icon iconId="faUserLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" />
+                  Additional Contacts <span className="text-sm font-normal text-[var(--secondary-color)] ml-2 font-work-sans">(Optional)</span>
+                </h2>
+                <button type="button" onClick={() => {
                   const contacts = [...values.additionalContacts, {
                     firstName: '',
                     surname: '',
@@ -1468,137 +1467,143 @@ function FormContent() {
                   }];
                   setFieldValue('additionalContacts', contacts);
                 }} className="flex items-center text-sm font-medium bg-[var(--background-color)] border border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 px-3 py-1 rounded-md transition-colors duration-200 font-work-sans">
-                      <Icon iconId="faPlusLight" className="w-5 h-5 mr-1"  />
-                      Add Contact
-                    </button>
-                  </div>
+                  <Icon iconId="faPlusLight" className="w-5 h-5 mr-1" />
+                  Add Contact
+                </button>
+              </div>
 
-                  {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-[var(--divider-color)] rounded-lg p-4 relative shadow-sm bg-white font-work-sans">
-                        <button type="button" onClick={() => {
+              {values.additionalContacts && values.additionalContacts.length > 0 ? values.additionalContacts.map((contact: Contact, index: number) => <div key={index} className="mb-6 border border-[var(--divider-color)] rounded-lg p-4 relative shadow-sm bg-white font-work-sans">
+                <button type="button" onClick={() => {
                   const contacts = [...values.additionalContacts];
                   contacts.splice(index, 1);
                   setFieldValue('additionalContacts', contacts);
                 }} className="absolute top-2 right-2 text-[var(--secondary-color)] hover:text-[var(--accent-color)] transition-colors duration-200 font-work-sans" aria-label="Remove contact">
 
-                          <Icon iconId="faCloseLight" className="h-5 w-5"  />
-                        </button>
+                  <Icon iconId="faCloseLight" className="h-5 w-5" />
+                </button>
 
-                        <h3 className="text-md font-medium text-[var(--primary-color)] mb-3 font-sora">Contact {index + 3}</h3>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-                          <StyledField label="First Name" name={`additionalContacts.${index}.firstName`} placeholder="Enter first name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
+                <h3 className="text-md font-medium text-[var(--primary-color)] mb-3 font-sora">Contact {index + 3}</h3>
 
-                          <StyledField label="Last Name" name={`additionalContacts.${index}.surname`} placeholder="Enter last name" icon={<Icon iconId="faUserLight" className="w-5 h-5"  />} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+                  <StyledField label="First Name" name={`additionalContacts.${index}.firstName`} placeholder="Enter first name" icon={<Icon iconId="faUserLight" className="w-5 h-5" />} />
 
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
-                          <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5"  />} />
+                  <StyledField label="Last Name" name={`additionalContacts.${index}.surname`} placeholder="Enter last name" icon={<Icon iconId="faUserLight" className="w-5 h-5" />} />
 
-                          <StyledField label="Position" name={`additionalContacts.${index}.position`} as="select" icon={<Icon iconId="faBuildingLight" className="w-5 h-5"  />}>
-
-                            <option value="">Select Position</option>
-                            <option value={Position.Manager}>{Position.Manager}</option>
-                            <option value={Position.Director}>{Position.Director}</option>
-                            <option value={Position.VP}>{Position.VP}</option>
-                          </StyledField>
-                        </div>
-                      </div>) : <div className="text-center py-8 border border-dashed border-[var(--divider-color)] rounded-lg bg-gray-50 font-work-sans">
-                      <Icon iconId="faUserLight" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70 font-work-sans"  />
-                      <p className="mt-2 text-[var(--primary-color)] font-work-sans">No additional contacts added yet.</p>
-                      <p className="text-sm text-[var(--secondary-color)] font-work-sans">Click "Add Contact" to include more team members.</p>
-                    </div>}
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 font-work-sans">
+                  <StyledField label="Email" name={`additionalContacts.${index}.email`} type="email" placeholder="email@example.com" icon={<Icon iconId="faEnvelopeLight" className="w-5 h-5" />} />
 
-                {/* Influencers */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
-                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon iconId="faStarLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
-                    Influencer Details
-                  </h2>
-                  <div className="mb-4 font-work-sans">
-                    <p className="text-gray-600 text-sm mb-4 font-work-sans">
-                      Add the influencers you want to work with for this campaign. You can add multiple influencers.
-                    </p>
-                    
-                    <FieldArray name="influencers">
-                      {({
+                  <StyledField label="Position" name={`additionalContacts.${index}.position`} as="select" icon={<Icon iconId="faBuildingLight" className="w-5 h-5" />}>
+
+                    <option value="">Select Position</option>
+                    <option value={Position.Manager}>{Position.Manager}</option>
+                    <option value={Position.Director}>{Position.Director}</option>
+                    <option value={Position.VP}>{Position.VP}</option>
+                  </StyledField>
+                </div>
+              </div>) : <div className="text-center py-8 border border-dashed border-[var(--divider-color)] rounded-lg bg-gray-50 font-work-sans">
+                <Icon iconId="faUserLight" className="w-12 h-12 mx-auto text-[var(--accent-color)] opacity-70 font-work-sans" />
+                <p className="mt-2 text-[var(--primary-color)] font-work-sans">No additional contacts added yet.</p>
+                <p className="text-sm text-[var(--secondary-color)] font-work-sans">Click "Add Contact" to include more team members.</p>
+              </div>}
+            </div>
+
+            {/* Influencers */}
+            <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+              <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                <Icon iconId="faStarLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" />
+                Influencer Details
+              </h2>
+              <div className="mb-4 font-work-sans">
+                <p className="text-gray-600 text-sm mb-4 font-work-sans">
+                  Add the influencers you want to work with for this campaign. You can add multiple influencers.
+                </p>
+
+                <FieldArray name="influencers">
+                  {({
                     push,
                     remove,
                     form
                   }: any) => <div className="font-work-sans">
-                          {values.influencers && values.influencers.length > 0 ? values.influencers.map((influencer: Influencer, index: number) => <InfluencerEntry key={index} index={index} remove={() => remove(index)} arrayHelpers={{
-                      push,
-                      remove
-                    }} />) : null}
-                          
-                          <button type="button" onClick={() => push({
-                      platform: '',
-                      handle: ''
-                    })} className="mt-3 flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)] font-work-sans">
+                      {values.influencers && values.influencers.length > 0 ? values.influencers.map((influencer: Influencer, index: number) => <InfluencerEntry key={index} index={index} remove={() => remove(index)} arrayHelpers={{
+                        push,
+                        remove
+                      }} />) : null}
 
-                            <Icon iconId="faPlusLight" className="h-5 w-5 mr-2"  />
-                            Add Another Influencer
-                          </button>
-                        </div>}
-                    </FieldArray>
-                  </div>
-                </div>
+                      <button type="button" onClick={() => push({
+                        platform: '',
+                        handle: ''
+                      })} className="mt-3 flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)] font-work-sans">
 
-                {/* Budget Section */}
-                <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
-                  <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
-                    <Icon iconId="faMoneyBillLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans"  />
-                    Budget
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-work-sans">
-                    <div className="font-work-sans">
-                      <StyledField label="Currency" name="currency" as="select" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5"  />}>
+                        <Icon iconId="faPlusLight" className="h-5 w-5 mr-2" />
+                        Add Another Influencer
+                      </button>
+                    </div>}
+                </FieldArray>
+              </div>
+            </div>
 
-                        <option value="">Select currency</option>
-                        <option value={Currency.GBP}>GBP (£)</option>
-                        <option value={Currency.USD}>USD ($)</option>
-                        <option value={Currency.EUR}>EUR (€)</option>
-                      </StyledField>
-                      <Field name="currency">
-                        {({
+            {/* Budget Section */}
+            <div className="bg-[var(--background-color)] rounded-xl p-6 shadow-sm border border-[var(--divider-color)] font-work-sans">
+              <h2 className="text-lg font-bold font-sora text-[var(--primary-color)] mb-5 flex items-center">
+                <Icon iconId="faMoneyBillLight" className="w-5 h-5 mr-2 text-[var(--accent-color)] font-work-sans" />
+                Budget
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-work-sans">
+                <div className="font-work-sans">
+                  <StyledField label="Currency" name="currency" as="select" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5" />}>
+
+                    <option value="">Select currency</option>
+                    <option value={Currency.GBP}>GBP (£)</option>
+                    <option value={Currency.USD}>USD ($)</option>
+                    <option value={Currency.EUR}>EUR (€)</option>
+                  </StyledField>
+                  <Field name="currency">
+                    {({
                       field
 
 
-                    }: {field: any;}) => <ExchangeRateHandler currency={field.value} onRatesFetched={setExchangeRateData} />}
-                      </Field>
-                    </div>
-                    
-                    <StyledField label="Total Campaign Budget" name="totalBudget" type="number" placeholder="5000" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5"  />} />
-
-                    
-                    <StyledField label="Social Media Budget" name="socialMediaBudget" type="number" placeholder="3000" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5"  />} />
-
-                  </div>
+                    }: { field: any; }) => <ExchangeRateHandler currency={field.value} onRatesFetched={setExchangeRateData} />}
+                  </Field>
                 </div>
-              </Form>
 
-              {/* Add extra bottom padding to prevent progress bar overlap */}
-              <div className="pb-24 font-work-sans"></div>
+                <StyledField label="Total Campaign Budget" name="totalBudget" type="number" placeholder="5000" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5" />} />
 
-              <ProgressBar currentStep={1} onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)} onBack={null} onNext={handleNextStep} onSaveDraft={() => handleSaveDraft(values)} disableNext={isSubmitting || !isValid} isFormValid={isValid} isDirty={dirty} isSaving={isSubmitting} />
 
-            </>;
+                <StyledField label="Social Media Budget" name="socialMediaBudget" type="number" placeholder="3000" required icon={<Icon iconId="faMoneyBillLight" className="w-5 h-5" />} />
+
+              </div>
+            </div>
+          </Form>
+
+          {/* Add extra bottom padding to prevent progress bar overlap */}
+          <div className="pb-24 font-work-sans"></div>
+
+          <ProgressBar currentStep={1} onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}`)} onBack={null} onNext={handleNextStep} onSaveDraft={() => handleSaveDraft(values)} disableNext={isSubmitting || !isValid} isFormValid={isValid} isDirty={dirty} isSaving={isSubmitting} />
+
+        </>;
       }}
-      </Formik>
-    </div>;
+    </Formik>
+  </div>;
 }
 
-// Main component with Suspense boundary
-export default function Step1Content() {
+// Replace the Step1ContentWrapper with this new default export
+export default function Step1Page() {
   const [isClientSide, setIsClientSide] = useState(false);
 
   useEffect(() => {
     setIsClientSide(true);
   }, []);
 
+  // Render loading skeleton on the server or during initial client render
   if (!isClientSide) {
-    return <WizardSkeleton step={1} />;
+    return <LoadingSkeleton />;
   }
 
-  return <FormContent />;
+  // Render the actual content within Suspense on the client side
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <Step1Content />
+    </Suspense>
+  );
 }

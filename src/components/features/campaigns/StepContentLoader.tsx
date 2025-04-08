@@ -1,17 +1,19 @@
 "use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { Skeleton } from "@/components/ui/skeleton";
+// import { Skeleton } from "@/components/ui/skeleton"; // Remove incorrect import
 import Step1Content from './Step1Content';
 import Step2Content from './Step2Content';
 import Step3Content from './Step3Content';
 import Step4Content from './Step4Content';
 import Step5Content from './Step5Content';
+import { LoadingSkeleton } from '@/components/ui';
+import { useWizard } from './WizardContext';
 
 // Define a simple ErrorBoundary component
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-  constructor(props: {children: React.ReactNode}) {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -57,7 +59,7 @@ export function StepLoader({ step }: StepLoaderProps) {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<WizardSkeleton step={step} />}>
+      <Suspense fallback={<LoadingSkeleton />}>
         {renderContent()}
       </Suspense>
     </ErrorBoundary>

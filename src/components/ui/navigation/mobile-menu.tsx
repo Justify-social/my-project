@@ -332,9 +332,9 @@ export function MobileMenu({
   companyName,
   user
 }: MobileMenuProps) {
-  // Convert NavItems to SidebarItems
-  const sidebarItems: SidebarItem[] = navItems.map(item => ({
-    id: item.href,
+  // Convert NavItems to SidebarItems, providing fallback for navItems
+  const sidebarItems: SidebarItem[] = (navItems || []).map(item => ({
+    id: item.href, // Use href as a unique ID for simplicity here
     label: item.label,
     href: item.href,
     icon: item.icon,

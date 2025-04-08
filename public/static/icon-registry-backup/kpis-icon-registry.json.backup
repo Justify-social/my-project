@@ -55,8 +55,15 @@
       "name": "Purchase intent",
       "faVersion": null,
       "path": "/icons/kpis/kpisPurchaseIntent.svg"
+    },
+    {
+      "category": "kpis",
+      "id": "kpisRecommendationIntent",
+      "name": "Recommendation intent",
+      "faVersion": null,
+      "path": "/icons/kpis/kpisRecommendationIntent.svg"
     }
   ],
   "category": "kpis",
-  "iconCount": 8
+  "iconCount": 9
 }
