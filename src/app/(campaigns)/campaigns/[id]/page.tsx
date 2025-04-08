@@ -211,11 +211,20 @@ interface APICampaignResponse {
     email: string;
     position: string;
   };
-  audience: null | {
-
-
-    // ... audience fields if needed ...
-  }; creativeAssets: any[];
+  // Update to reflect actual usage in processing logic
+  demographics?: { // Optional based on usage like result.demographics?.
+    ageDistribution?: Record<string, number>;
+    gender?: string[];
+    educationLevel?: string;
+    incomeLevel?: number | string; // Assuming incomeLevel might be number or string
+    jobTitles?: string[];
+  };
+  locations?: Array<{ location?: string }>; // Based on result.locations.map((loc: any) => loc.location || '')
+  targeting?: { // Based on result.targeting?.languages
+    languages?: Array<{ language?: string }>;
+  };
+  // audience: null | {}; // Removed based on usage, fields seem top-level
+  creativeAssets: any[];
   creativeRequirements: any[];
 }
 
@@ -397,7 +406,6 @@ const CampaignMetricCard = ({
         // Pass iconId directly, including in the fallback case
         iconId={iconId || "faQuestionCircleLight"}
         className="h-5 w-5 text-[var(--accent-color)]"
-        iconType="static" // Assuming iconType is a valid prop for Icon
       />
     );
   };
@@ -791,7 +799,7 @@ const CampaignDetailAssetPreview = ({
                 aria-label={isPlaying ? "Pause video" : "Play video"}
               >
                 <Icon
-                  name={isPlaying ? "faPause" : "faPlay"}
+                  iconId={isPlaying ? "faPause" : "faPlay"} // Changed name to iconId
                   className="h-6 w-6 text-white"
                   iconType="button"
                   solid={true}
@@ -817,22 +825,21 @@ const ObjectivesSection: React.FC<{
   campaign: CampaignDetail;
 }> = ({
   campaign
-}) => <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
+}) => <DataCard title="Campaign Objectives" iconId="faBoltLight" description="Key objectives and performance indicators">
 
       <div className="space-y-6 font-work-sans">
-        {/* Primary KPI with enhanced styling */}
+        {/* Primary KPI with enhanced styling using Icon */}
         <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
           <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
           {campaign.primaryKPI ? (
             <div className="bg-[var(--accent-color)] text-white px-3 py-2 rounded-md inline-flex items-center">
-              <div className="w-6 h-6 mr-2 filter brightness-0 invert">
-                <Image
-                  src={kpiIconsMap[campaign.primaryKPI as keyof typeof kpiIconsMap]?.icon || "/icons/kpis/Brand_Awareness.svg"}
-                  alt={formatKpiName(campaign.primaryKPI)}
-                  width={24}
-                  height={24}
-                />
-              </div>
+              <Icon
+                // Construct the icon ID assuming a 'kpis/' prefix
+                iconId={`kpis/${capitalize(campaign.primaryKPI)}`}
+                className="w-6 h-6 mr-2"
+                // Use solid variant for contrast on accent background - Pass as string
+                solid="true"
+              />
               <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>
             </div>
           ) : (
@@ -840,21 +847,20 @@ const ObjectivesSection: React.FC<{
           )}
         </div>
 
-        {/* Secondary KPIs with enhanced styling */}
+        {/* Secondary KPIs with enhanced styling using Icon */}
         {campaign.secondaryKPIs && campaign.secondaryKPIs.length > 0 && (
           <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
             <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
             <div className="flex flex-wrap gap-2 font-work-sans">
               {campaign.secondaryKPIs.map((kpi, index) => (
                 <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
-                  <div className="w-5 h-5 mr-2">
-                    <Image
-                      src={kpiIconsMap[kpi as keyof typeof kpiIconsMap]?.icon || "/icons/kpis/Brand_Awareness.svg"}
-                      alt={formatKpiName(kpi)}
-                      width={20}
-                      height={20}
-                    />
-                  </div>
+                  <Icon
+                    // Construct the icon ID assuming a 'kpis/' prefix
+                    iconId={`kpis/${capitalize(kpi)}`}
+                    className="w-5 h-5 mr-2"
+                    // Use light variant on light background
+                    solid={false}
+                  />
                   <span>{formatKpiName(kpi)}</span>
                 </span>
               ))}
@@ -1117,7 +1123,7 @@ if (typeof window !== 'undefined') {
     return originalToString.call(this);
   };
   String.prototype.toUpperCase = function () {
-    console.log('toUpperCase called on:', this);
+    // console.log('toUpperCase called on:', this); // Commented out to reduce console noise
     return originalToUpperCase.call(this);
   };
 }
@@ -1340,7 +1346,7 @@ export default function CampaignDetail() {
     const fetchData = async () => {
       debugLog({ type: 'LIFECYCLE', message: 'fetchData called', data: { id: params?.id } });
       if (!params?.id) {
-        setError(new Error('Campaign ID is missing'));
+        setError('Campaign ID is missing'); // Pass string instead of Error object
         setLoading(false);
         return;
       }
@@ -1483,6 +1489,13 @@ export default function CampaignDetail() {
     }
   }, [params?.id, useFallbackData]); // Remove testMode and fallbackData to prevent extra rerenders
 
+  // Define handler for resetting error state
+  const handleResetError = useCallback(() => {
+    console.log("Attempting to reset error state...");
+    setError(null); // Reset error state
+    setLoading(true); // Set loading to true to trigger refetch in useEffect
+  }, []); // Dependencies array is empty as it doesn't depend on component state/props directly needing re-creation
+
   // Move the format functions here, before they're used in stress testing
   // Format currency with better type handling
   const formatCurrency = (value: number | string, currencyCode: Currency | string | undefined) => {
@@ -1584,58 +1597,16 @@ export default function CampaignDetail() {
   }
 
   // Ensure we have data before rendering the component
-  if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto p-5 animate-pulse font-work-sans">
-        {/* Header Skeleton */}
-        <div className="h-8 bg-gray-200 rounded w-1/3 mb-8 font-work-sans" />
+  // Loading state is handled by src/app/(campaigns)/campaigns/[id]/loading.tsx via Suspense
 
-        {/* Campaign Details Section */}
-        <Skeleton
-          title={true}
-          titleWidth="w-1/4"
-          actionButton={true}
-          lines={3}
-          className="mb-6" />
-
-
-        {/* Objectives Section */}
-        <Skeleton
-          title={true}
-          titleWidth="w-1/3"
-          actionButton={true}
-          lines={4}
-          className="mb-6" />
-
-
-        {/* Audience Section */}
-        <Skeleton
-          title={true}
-          titleWidth="w-1/4"
-          actionButton={true}
-          lines={3}
-          className="mb-6" />
-
-
-        {/* Creative Assets Section */}
-        <Skeleton
-          title={true}
-          titleWidth="w-1/4"
-          actionButton={true}
-          lines={3}
-          className="mb-6" />
-
-      </div>);
-
-  }
   if (error && !data) {
     return <div className="py-10 font-work-sans">
-      <ErrorFallback error={new Error(error)} />
+      <ErrorFallback error={new Error(error)} resetErrorBoundary={handleResetError} />
     </div>;
   }
 
   // Wrap the main content in an ErrorBoundary using the 'fallback' prop
-  return <ErrorBoundary fallback={<ErrorFallback error={error ? new Error(error) : new Error('Unknown error')} resetErrorBoundary={() => { /* TODO: Add reset logic, e.g., re-trigger data fetch */ }} />}>
+  return <ErrorBoundary fallback={<ErrorFallback error={error ? new Error(error) : new Error('Unknown error')} resetErrorBoundary={handleResetError} />}>
     <div className="min-h-screen bg-gray-50 font-work-sans">
       {/* Header Section */}
       <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans shadow-sm`}>
@@ -1757,7 +1728,7 @@ export default function CampaignDetail() {
 
         {/* Objectives & Audience */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          {error ? <DataCard title="Campaign Objectives" iconId="lightning" description="Key objectives and performance indicators">
+          {error ? <DataCard title="Campaign Objectives" iconId="faBoltLight" description="Key objectives and performance indicators">
             <div className="space-y-5 font-work-sans">
               <div className="font-work-sans">
                 <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
@@ -1830,35 +1801,30 @@ export default function CampaignDetail() {
 
         {/* Campaign Features */}
         <div className="mb-6 font-work-sans">
-          <DataCard title="Campaign Features" iconId="bolt" description="Additional features enabled for this campaign">
+          <DataCard title="Campaign Features" iconId="faBoltLight" description="Additional features enabled for this campaign">
             {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
               <p className="font-work-sans">N/A</p>
             </div> :
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
                 {data?.features && data.features.length > 0 ?
                   data.features.map((feature: string, index: number) => {
-                    const featureKey = feature as keyof typeof featureIconsMap;
+                    // Construct the icon ID assuming an 'app/' prefix and capitalizing
+                    const featureIconId = `app/${capitalize(feature.replace(/_/g, ''))}`;
                     return (
                       <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
                         <div className="flex items-start">
                           <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
-                            {featureIconsMap[featureKey] ?
-                              <Image
-                                src={featureIconsMap[featureKey].icon}
-                                width={28}
-                                height={28}
-                                alt={featureIconsMap[featureKey].title}
-                                className="w-7 h-7"
-                              /> :
-                              <Icon iconId="faBoltLight"
-                                className="h-7 w-7 text-[var(--accent-color)]"
-
-                              />
-                            }
+                            {/* Replace Image with Icon component */}
+                            <Icon
+                              iconId={featureIconId}
+                              className="h-7 w-7 text-[var(--accent-color)]"
+                              fallbackIconId="faBoltLight"
+                            />
                           </div>
                           <div className="ml-4">
                             <h4 className="font-medium text-[var(--primary-color)] font-sora text-lg mb-1">
-                              {featureIconsMap[featureKey]?.title || formatFeatureName(feature)}
+                              {/* Use formatted name without map lookup */}
+                              {formatFeatureName(feature)}
                             </h4>
                             <p className="text-sm text-[var(--secondary-color)] mt-1 font-work-sans">
                               {getFeatureDescription(feature)}
