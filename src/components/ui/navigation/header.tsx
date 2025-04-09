@@ -1,6 +1,6 @@
 /**
  * @component Header
- * @category navigation
+ * @category oragnism
  * @subcategory header
  * @description Main application header with navigation, search and user controls
  */

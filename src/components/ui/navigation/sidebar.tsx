@@ -1,6 +1,6 @@
 /**
  * @component Sidebar
- * @category navigation
+ * @category oragnism
  * @subcategory sidebar
  * @description Main application sidebar navigation with expandable/collapsible structure
  */

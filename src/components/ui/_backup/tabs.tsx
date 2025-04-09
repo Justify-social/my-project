@@ -1,3 +1,8 @@
+/**
+ * @component Tabs
+ * @category molecule
+ * @description A tabs component
+ */
 "use client"
 
 import * as React from "react"

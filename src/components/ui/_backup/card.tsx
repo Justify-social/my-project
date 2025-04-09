@@ -1,3 +1,28 @@
+/**
+ * @component Card
+ * @category molecule
+ * @renderType server
+ * @description A versatile card component for containing content and actions
+ * @status stable
+ * @author Frontend Team
+ * @since 2023-04-06
+ * 
+ * @example
+ * ```tsx
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Card Title</CardTitle>
+ *     <CardDescription>Card Description</CardDescription>
+ *   </CardHeader>
+ *   <CardContent>
+ *     <p>Card Content</p>
+ *   </CardContent>
+ *   <CardFooter>
+ *     <p>Card Footer</p>
+ *   </CardFooter>
+ * </Card>
+ * ```
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -17,6 +42,10 @@ const Card = React.forwardRef<
 ))
 Card.displayName = "Card"
 
+/**
+ * @renderType server
+ * @description Header section of a card, usually contains title and description
+ */
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -29,6 +58,10 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = "CardHeader"
 
+/**
+ * @renderType server
+ * @description Title component for card headers
+ */
 const CardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -44,6 +77,10 @@ const CardTitle = React.forwardRef<
 ))
 CardTitle.displayName = "CardTitle"
 
+/**
+ * @renderType server
+ * @description Descriptive text component for card headers
+ */
 const CardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -56,6 +93,10 @@ const CardDescription = React.forwardRef<
 ))
 CardDescription.displayName = "CardDescription"
 
+/**
+ * @renderType server
+ * @description Main content area of a card
+ */
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -64,6 +105,10 @@ const CardContent = React.forwardRef<
 ))
 CardContent.displayName = "CardContent"
 
+/**
+ * @renderType server
+ * @description Footer section of a card, usually contains actions
+ */
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

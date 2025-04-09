@@ -1,3 +1,8 @@
+/**
+ * @component Input
+ * @category atom
+ * @description A input component
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

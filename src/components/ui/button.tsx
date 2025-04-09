@@ -1,72 +1,56 @@
-/**
- * @component Button
- * @category atom
- * @renderType server
- * @description A reusable button component that supports different variants, sizes, and states.
- * @status stable
- * @author Frontend Team
- * @since 2023-04-06
- * 
- * @example
- * ```tsx
- * <Button>Default Button</Button>
- * ```
- * 
- * @example
- * ```tsx
- * <Button variant="outline" leftIcon="check">
- *   With Icon
- * </Button>
- * ```
- */
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
 
-import React from 'react';
-import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "@radix-ui/react-slot";
+import { cn } from "@/lib/utils"
 
-import { cn } from "@/lib/utils";
-import { buttonStyles } from "@/components/ui/utils/theme-override";
-// import { getIconClasses } from "@/components/ui/utils/icon-integration"; // Removed import for deleted file
-import { LightIcon } from '@/components/ui/icon';
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonStyles> {
-  leftIcon?: string;
-  rightIcon?: string;
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  asChild?: boolean;
-  iconLeft?: string;
-  iconRight?: string;
-  iconOnly?: string;
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, iconLeft, iconRight, iconOnly, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-
-    // Determine CSS classes for icons (replace with actual Icon component later if needed)
-    // const leftIconClass = iconLeft ? getIconClasses(iconLeft) : '';
-    // const rightIconClass = iconRight ? getIconClasses(iconRight) : '';
-    // const onlyIconClass = iconOnly ? getIconClasses(iconOnly) : '';
-
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonStyles({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      >
-        {/* Render icons and children - Placeholder logic */}
-        {iconLeft && <LightIcon iconId={iconLeft} className="mr-2" />}
-        {iconOnly && <LightIcon iconId={iconOnly} />}
-        {!iconOnly && children}
-        {iconRight && <LightIcon iconId={iconRight} className="ml-2" />}
-      </Comp>
-    );
+      />
+    )
   }
-);
+)
+Button.displayName = "Button"
 
-Button.displayName = "Button";
-
-export { Button };
+export { Button, buttonVariants }
