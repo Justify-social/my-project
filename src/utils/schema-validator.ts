@@ -35,6 +35,7 @@ async function validateSchema(): Promise<ValidationResult> { // Add return type
   const results: ModelStatus[] = await Promise.all(models.map(async (model): Promise<ModelStatus> => { // Type the results array and map return
     try {
       // Use findFirst as a safe check - accessing prisma[model] dynamically still needs `as any`
+      // @ts-expect-error - Explicitly ignore implicit any for dynamic model access in validation
       await (prisma[model] as any).findFirst({});
       return {
         model,
@@ -74,6 +75,7 @@ async function validateModel(modelName: string): Promise<ModelStatus> { // Add p
     }
 
     // Use findFirst as a safe check
+    // @ts-expect-error - Explicitly ignore implicit any for dynamic model access in validation
     await (prisma[modelName] as any).findFirst({});
     return {
       model: modelName,
