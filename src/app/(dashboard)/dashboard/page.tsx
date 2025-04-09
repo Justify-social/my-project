@@ -37,7 +37,7 @@ interface DashboardUser {
 
 // Dynamic import - Correct path to DashboardContent and use correct skeleton
 const DashboardContentComponent = nextDynamic(() => import('./DashboardContent'), {
-  ssr: true,
+  ssr: false, // Disable SSR for client-side charting library
   loading: () => <DashboardLoadingSkeleton />
 });
 
