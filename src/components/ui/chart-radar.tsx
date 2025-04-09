@@ -2,8 +2,24 @@
  * @component RadarChart
  * @category organism
  * @renderType server
- * @description A responsive radar chart component for visualizing multivariate data
+ * @description A responsive radar chart component for visualizing multivariate data across several categories.
  * @since 2023-07-15
+ * @param {RadarChartProps} props - The props for the RadarChart component.
+ * @param {RadarDataPoint[]} props.data - The dataset for the chart. Each object should have a key matching `angleKey` and keys matching the values in `categories`.
+ * @param {string[]} props.categories - An array of strings representing the different data series (radars) to plot.
+ * @param {string} props.angleKey - The key in the data objects that defines the different axes (spokes) of the radar.
+ * @param {number | string} [props.height=300] - The height of the chart container.
+ * @param {number | string} [props.width='100%'] - The width of the chart container.
+ * @param {string[]} [props.colors] - Optional array of hex color strings for the radar series.
+ * @param {string} [props.title] - Optional title displayed above the chart.
+ * @param {string} [props.className] - Additional CSS classes for the container div.
+ * @param {boolean} [props.showLegend=true] - Whether to display the legend.
+ * @param {number} [props.strokeWidth=2] - The width of the radar lines.
+ * @param {number} [props.fillOpacity=0.2] - The opacity of the filled area under the radar lines.
+ * @param {string} [props.gridColor='#E2E8F0'] - Color of the polar grid lines.
+ * @param {number | string} [props.outerRadius='80%'] - The outer radius of the radar chart (percentage or pixel value).
+ * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
+ * @returns {React.ReactElement} The rendered radar chart.
  * 
  * @example
  * <RadarChart 
@@ -55,7 +71,7 @@ export interface RadarChartProps {
 
 const DEFAULT_COLORS = ['#3182CE', '#00BFFF', '#4A5568', '#333333', '#38B2AC'];
 
-const RadarChart: React.FC<RadarChartProps> = ({
+export const RadarChart: React.FC<RadarChartProps> = ({
   data,
   categories,
   angleKey,
@@ -78,7 +94,7 @@ const RadarChart: React.FC<RadarChartProps> = ({
       )}
 
       <ResponsiveContainer width={width} height={height}>
-        <RechartsRadarChart 
+        <RechartsRadarChart
           data={data}
           outerRadius={outerRadius}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
@@ -86,7 +102,7 @@ const RadarChart: React.FC<RadarChartProps> = ({
           <PolarGrid stroke={gridColor} />
           <PolarAngleAxis dataKey={angleKey} tick={{ fontSize: 12 }} />
           <PolarRadiusAxis angle={30} tick={{ fontSize: 10 }} />
-          
+
           {categories.map((category, index) => (
             <Radar
               key={category}
@@ -98,10 +114,10 @@ const RadarChart: React.FC<RadarChartProps> = ({
               strokeWidth={strokeWidth}
             />
           ))}
-          
+
           <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{ 
+            contentStyle={{
               fontSize: '12px',
               backgroundColor: 'white',
               border: '1px solid #E2E8F0',
@@ -109,10 +125,10 @@ const RadarChart: React.FC<RadarChartProps> = ({
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           />
-          
+
           {showLegend && (
-            <Legend 
-              verticalAlign="bottom" 
+            <Legend
+              verticalAlign="bottom"
               align="center"
               height={36}
               iconSize={20}
@@ -123,6 +139,4 @@ const RadarChart: React.FC<RadarChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default RadarChart; 
+}; 

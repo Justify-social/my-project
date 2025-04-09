@@ -2,8 +2,26 @@
  * @component BarChart
  * @category organism
  * @renderType server
- * @description A responsive bar chart component for comparing categorical data
+ * @description A responsive bar chart component for comparing categorical data, supporting horizontal and vertical layouts.
  * @since 2023-07-15
+ * @param {BarChartProps} props - The props for the BarChart component.
+ * @param {DataPoint[]} props.data - The dataset for the chart.
+ * @param {string} props.xKey - The key in the data objects for the category axis (horizontal layout) or value axis (vertical layout).
+ * @param {string | string[]} props.yKey - The key(s) in the data objects for the value axis (horizontal layout) or category axis (vertical layout).
+ * @param {number | string} [props.height=300] - The height of the chart container.
+ * @param {number | string} [props.width='100%'] - The width of the chart container.
+ * @param {string[]} [props.colors] - Optional array of hex color strings for the bars.
+ * @param {string} [props.title] - Optional title displayed above the chart.
+ * @param {string} [props.className] - Additional CSS classes for the container div.
+ * @param {'vertical' | 'horizontal'} [props.layout='horizontal'] - The layout orientation of the chart.
+ * @param {boolean} [props.showGrid=true] - Whether to display the Cartesian grid.
+ * @param {boolean} [props.showLegend=true] - Whether to display the legend.
+ * @param {number} [props.barSize=20] - The width or height of the bars.
+ * @param {number} [props.barGap=4] - The gap between bars of the same category (for grouped charts).
+ * @param {string} [props.gridColor='#E2E8F0'] - Color of the grid lines.
+ * @param {Function} [props.tickFormatter] - Custom formatter function for axis tick labels.
+ * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
+ * @returns {React.ReactElement} The rendered bar chart.
  * 
  * @example
  * <BarChart 
@@ -55,7 +73,7 @@ export interface BarChartProps {
 
 const DEFAULT_COLORS = ['#3182CE', '#00BFFF', '#4A5568', '#333333', '#38B2AC'];
 
-const BarChart: React.FC<BarChartProps> = ({
+export const BarChart: React.FC<BarChartProps> = ({
   data,
   xKey,
   yKey,
@@ -93,24 +111,24 @@ const BarChart: React.FC<BarChartProps> = ({
           {showGrid && (
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
           )}
-          
-          <XAxis 
+
+          <XAxis
             dataKey={layout === 'horizontal' ? xKey : undefined}
             type={layout === 'horizontal' ? 'category' : 'number'}
             tick={{ fontSize: 12 }}
             tickFormatter={tickFormatter}
           />
-          
-          <YAxis 
+
+          <YAxis
             dataKey={layout === 'vertical' ? xKey : undefined}
             type={layout === 'vertical' ? 'category' : 'number'}
             tick={{ fontSize: 12 }}
             tickFormatter={tickFormatter}
           />
-          
+
           <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{ 
+            contentStyle={{
               fontSize: '12px',
               backgroundColor: 'white',
               border: '1px solid #E2E8F0',
@@ -118,16 +136,16 @@ const BarChart: React.FC<BarChartProps> = ({
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           />
-          
+
           {showLegend && (
-            <Legend 
-              verticalAlign="bottom" 
+            <Legend
+              verticalAlign="bottom"
               height={36}
               iconSize={20}
               wrapperStyle={{ fontSize: '12px' }}
             />
           )}
-          
+
           {yKeys.map((key, index) => (
             <Bar
               key={key}
@@ -141,6 +159,4 @@ const BarChart: React.FC<BarChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default BarChart; 
+}; 

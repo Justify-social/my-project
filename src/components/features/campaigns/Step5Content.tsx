@@ -11,7 +11,7 @@ import { Icon } from '@/components/ui/icon'
 import Link from "next/link";
 import { EnumTransformers } from '@/utils/enum-transformers';
 import Image from "next/image";
-import { AssetCardSubmission } from '@/components/ui/card-asset-submission'; // Import the new component
+import { AssetCard } from '@/components/ui/card-asset'; // Import the standard AssetCard
 
 // Create simple error boundary component if not available
 class ErrorBoundary extends React.Component<{ children: React.ReactNode; FallbackComponent: React.ComponentType<{ error: Error }> }, { hasError: boolean; error: Error | null }> {
@@ -2260,14 +2260,13 @@ function Step5Content() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayData.creativeAssets.map((asset: CreativeAsset, index: number) => {
               return (
-                <AssetCardSubmission // Use the new component
+                <AssetCard
                   key={asset.id || index}
                   asset={{
                     id: asset.id,
                     name: asset.assetName || asset.name,
                     url: asset.url,
                     type: asset.type,
-                    // Pass platform directly without fallback
                     platform: asset.platform ||
                       (asset.influencerHandle && asset.influencerHandle.includes('@') ? 'Instagram' : undefined) ||
                       displayData.platform,
@@ -2276,21 +2275,13 @@ function Step5Content() {
                     budget: asset.budget
                   }}
                   currency={displayData.currency}
-                  // Pass defaultPlatform directly without fallback
                   defaultPlatform={displayData.platform}
                 />
               );
             })}
           </div>
         ) : (
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <Icon iconId="faImageLight" className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-500">No creative assets have been added yet.</p>
-            <button onClick={() => navigateToStep(4)} className="mt-3 text-sm text-[var(--primary-color)] flex items-center justify-center mx-auto group transition-colors duration-200">
-              <Icon iconId="faPenToSquareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)] transition-colors duration-200" />
-              <span className="group-hover:text-[var(--accent-color)] transition-colors duration-200">Add creative assets</span>
-            </button>
-          </div>
+          <p className="text-gray-500">No creative assets added.</p>
         )}
       </SummarySection>
     </div>

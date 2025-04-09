@@ -2,16 +2,18 @@
  * @component AssetCard
  * @category organism
  * @subcategory card
- * @description Card component displaying asset information with preview, title, platform, and budget
+ * @description Card component displaying asset information with preview, title, platform, and budget using standard Card components.
  */
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { cn } from '@/utils/string/utils';
+import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
-// Remove typography import until we create it
-// import { Text } from '@/components/ui/typography'
-import { AssetCardProps } from './types';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+} from "@/components/ui/card";
 
 /**
  * Formats currency values for display
@@ -30,15 +32,32 @@ const formatCurrency = (value?: number | string, currency: string = 'USD') => {
 };
 
 /**
- * Helper to check if platform is specified
+ * Helper to check if platform should be displayed.
+ * Handles null/undefined values for both platform and defaultPlatform.
  */
-const hasPlatform = (platform?: string, defaultPlatform?: string) => {
-  return platform && platform !== 'null' && platform !== 'undefined' &&
-    (!defaultPlatform || platform !== defaultPlatform);
+const hasPlatform = (platform?: string | undefined, defaultPlatform?: string | undefined): platform is string => {
+  // Check if platform is a non-empty string, and not explicitly 'null' or 'undefined'
+  const isPlatformValid = typeof platform === 'string' && platform.trim() !== '' && platform !== 'null' && platform !== 'undefined';
+
+  if (!isPlatformValid) {
+    return false; // Don't display if platform itself is invalid
+  }
+
+  // If defaultPlatform is not provided or invalid, display the valid platform
+  const isDefaultPlatformValid = typeof defaultPlatform === 'string' && defaultPlatform.trim() !== '' && defaultPlatform !== 'null' && defaultPlatform !== 'undefined';
+  if (!isDefaultPlatformValid) {
+    return true; // Display valid platform if default is invalid/missing
+  }
+
+  // Only display if platform is valid AND different from the valid defaultPlatform
+  return platform !== defaultPlatform;
 };
 
 /**
- * Props for the AssetPreview component
+ * @component AssetPreview
+ * @category molecule
+ * @subcategory display
+ * @description Renders a preview for image or video assets with hover controls for video.
  */
 interface AssetPreviewProps {
   url?: string;
@@ -49,9 +68,6 @@ interface AssetPreviewProps {
   [key: string]: any;
 }
 
-/**
- * Asset preview component for images and videos
- */
 const AssetPreview = ({
   url,
   fileName,
@@ -155,7 +171,7 @@ const AssetPreview = ({
   return (
     <div
       className={cn(
-        "relative rounded-lg overflow-hidden bg-gray-100 w-full aspect-square",
+        "relative rounded-t-lg overflow-hidden bg-muted w-full aspect-square",
         className
       )}
       onMouseEnter={() => setIsHovering(true)}
@@ -166,15 +182,16 @@ const AssetPreview = ({
       {isImage && (
         <img
           src={url}
-          alt={fileName}
+          alt={fileName ?? 'Asset preview'}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
       )}
 
       {/* Video preview with play/pause button */}
       {isVideo && (
         <div
-          className="relative w-full h-full overflow-hidden"
+          className="relative w-full h-full overflow-hidden cursor-pointer"
           onClick={togglePlayPause}
         >
           <video
@@ -184,19 +201,21 @@ const AssetPreview = ({
             muted
             playsInline
             loop
+            preload="metadata"
           />
 
-          {/* Play/Pause button that appears on hover */}
-          {isHovering && (
-            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-opacity duration-200">
+          {/* Play/Pause button overlay */}
+          {(isHovering || !isPlaying) && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200">
               <button
+                type="button"
                 onClick={togglePlayPause}
-                className="w-16 h-16 bg-gray-600 bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-90 transition-all duration-200 z-10 absolute group"
+                className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors duration-200 z-10 group"
                 aria-label={isPlaying ? "Pause video" : "Play video"}
               >
                 <Icon
                   iconId={isPlaying ? "faPauseSolid" : "faPlaySolid"}
-                  className="h-6 w-6 text-white"
+                  className="h-5 w-5 text-white"
                 />
               </button>
             </div>
@@ -206,10 +225,10 @@ const AssetPreview = ({
 
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
-        <div className="flex items-center justify-center p-8">
+        <div className="flex items-center justify-center h-full w-full p-8">
           <Icon
-            iconId="faInfoLight"
-            className="h-12 w-12 text-gray-400"
+            iconId="faFileLinesLight"
+            className="h-12 w-12 text-muted-foreground"
           />
         </div>
       )}
@@ -217,40 +236,65 @@ const AssetPreview = ({
   );
 };
 
+// --- Local Types (or import from shared) ---
+interface AssetData {
+  id?: number | string;
+  name?: string;
+  url?: string;
+  type?: string;
+  platform?: string | undefined; // Allow undefined
+  influencerHandle?: string;
+  description?: string;
+  budget?: number | string;
+}
+
+// Ensure this interface is defined
+export interface AssetCardProps {
+  asset?: AssetData;
+  currency?: string;
+  defaultPlatform?: string | undefined; // Allow undefined
+  className?: string; // Will apply to CardContent
+  cardClassName?: string; // Will apply to Card root
+  showTypeLabel?: boolean;
+  [key: string]: any; // Allow passing other props like onClick
+}
+
 /**
  * AssetCard component displays a card with asset information including preview, title, platform, 
- * influencer details, description, and budget.
+ * influencer details, description, and budget, using standard Card components.
+ * Handles optional platform property.
  */
 export function AssetCard({
   asset,
   currency = 'USD',
-  defaultPlatform,
+  defaultPlatform, // Now accepts undefined
   className,
+  cardClassName,
   showTypeLabel = false,
   ...props
-}: AssetCardProps) {
+}: AssetCardProps) { // Uses updated AssetCardProps
   if (!asset) return null;
 
   const {
     name,
     url,
     type,
-    platform,
+    platform, // Can be undefined
     influencerHandle,
     description,
     budget
   } = asset;
 
   return (
-    <div
+    <Card
       className={cn(
-        "flex flex-col overflow-hidden bg-white rounded-xl shadow-sm border border-gray-200",
+        "flex flex-col overflow-hidden",
         "hover:shadow-md transition-shadow duration-200",
-        className
+        props.onClick && "cursor-pointer",
+        cardClassName
       )}
       {...props}
     >
-      {/* Asset Preview */}
       <AssetPreview
         url={url}
         fileName={name}
@@ -258,71 +302,63 @@ export function AssetCard({
         showTypeLabel={showTypeLabel}
       />
 
-      {/* Asset Information */}
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-start justify-between">
-          {/* Asset Name & Type Icon */}
-          <div className="flex items-center min-w-0 mr-2"> { /* Container for name and icon */}
-            <p className="font-semibold text-gray-900 flex-shrink truncate text-lg mr-2">
-              {name}
-            </p>
-            {/* Add Type Icon Here */}
-            <div className="flex-shrink-0 text-gray-400">
-              {type?.includes('video') && <Icon iconId="faVideoLight" className="h-4 w-4" title="Video" />}
-              {type?.includes('image') && <Icon iconId="faCameraLight" className="h-4 w-4" title="Image" />}
-              {!type?.includes('video') && !type?.includes('image') && <Icon iconId="faFileLight" className="h-4 w-4" title="File" />}
-            </div>
+      <CardHeader className="flex-row items-start justify-between pb-2 pt-4 px-4">
+        <div className="flex items-center min-w-0 mr-2 flex-grow">
+          <p className="font-semibold text-foreground flex-shrink truncate text-base mr-2">
+            {name}
+          </p>
+          <div className="flex-shrink-0 text-muted-foreground">
+            {type?.includes('video') && <Icon iconId="faVideoLight" className="h-4 w-4" title="Video" />}
+            {type?.includes('image') && <Icon iconId="faCameraLight" className="h-4 w-4" title="Image" />}
+            {!type?.includes('video') && !type?.includes('image') && <Icon iconId="faFileLight" className="h-4 w-4" title="File" />}
           </div>
-
-          {/* Platform (if specified and different from default) */}
-          {hasPlatform(platform, defaultPlatform) && (
-            <div className="flex-shrink-0 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-medium flex items-center">
-              <Icon
-                iconId={platform?.toLowerCase() === 'instagram' ? 'faInstagramLight' :
-                  platform?.toLowerCase() === 'tiktok' ? 'faTiktokLight' :
-                    platform?.toLowerCase() === 'youtube' ? 'faYoutubeLight' :
-                      'faHashtagLight'}
-                className="h-3 w-3 mr-1"
-              />
-              {platform}
-            </div>
-          )}
         </div>
-
-        {/* Influencer Handle (if available) */}
-        {influencerHandle && (
-          <div className="mt-2 flex items-center text-gray-600">
+        {hasPlatform(platform, defaultPlatform) && (
+          <div className="flex-shrink-0 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-medium flex items-center whitespace-nowrap">
             <Icon
-              iconId="faUserLight"
+              iconId={platform.toLowerCase() === 'instagram' ? 'faInstagram' :
+                platform.toLowerCase() === 'tiktok' ? 'faTiktok' :
+                  platform.toLowerCase() === 'youtube' ? 'faYoutube' :
+                    'faHashtag'}
               className="h-3 w-3 mr-1"
             />
-            <span className="text-gray-600 text-sm">
+            {platform}
+          </div>
+        )}
+      </CardHeader>
+
+      <CardContent className={cn("px-4 pb-4 flex flex-col flex-grow", className)}>
+        {influencerHandle && (
+          <div className="mt-1 flex items-center text-muted-foreground">
+            <Icon
+              iconId="faUserLight"
+              className="h-3 w-3 mr-1.5"
+            />
+            <span className="text-muted-foreground text-sm">
               {influencerHandle}
             </span>
           </div>
         )}
 
-        {/* Description (if available) */}
         {description && (
-          <p className="mt-3 text-gray-600 line-clamp-2 text-sm">
+          <p className="mt-2 text-muted-foreground line-clamp-2 text-sm flex-grow">
             {description}
           </p>
         )}
 
-        {/* Budget (if available) */}
         {budget !== undefined && budget !== null && (
-          <div className="mt-auto pt-3 flex items-center text-gray-800">
+          <div className="mt-auto pt-3 flex items-center text-foreground">
             <Icon
               iconId="faDollarSignLight"
-              className="h-3 w-3 mr-2"
+              className="h-3 w-3 mr-1.5"
             />
             <span className="font-medium text-sm">
               {formatCurrency(budget, currency)}
             </span>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

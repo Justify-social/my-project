@@ -2,8 +2,31 @@
  * @component ScatterChart
  * @category organism
  * @renderType server
- * @description A responsive scatter chart component for visualizing correlations and distributions
+ * @description A responsive scatter chart component for visualizing correlations and distributions between two or three variables.
  * @since 2023-07-15
+ * @param {ScatterChartProps} props - The props for the ScatterChart component.
+ * @param {ScatterDataPoint[]} props.data - The dataset for the chart.
+ * @param {string} props.xKey - The key in the data objects for the x-axis values.
+ * @param {string} props.yKey - The key in the data objects for the y-axis values.
+ * @param {string} [props.zKey] - Optional key in the data objects for the z-axis values (influences point size).
+ * @param {string} [props.nameKey] - Optional key in the data objects for the name of each point (used in legend/tooltip).
+ * @param {number | string} [props.height=300] - The height of the chart container.
+ * @param {number | string} [props.width='100%'] - The width of the chart container.
+ * @param {string} [props.color='#3182CE'] - The color used for the scatter points and lines.
+ * @param {string} [props.title] - Optional title displayed above the chart.
+ * @param {string} [props.className] - Additional CSS classes for the container div.
+ * @param {boolean} [props.showGrid=true] - Whether to display the Cartesian grid.
+ * @param {boolean} [props.showLegend=true] - Whether to display the legend.
+ * @param {string} [props.xAxisLabel] - Label text displayed below the x-axis.
+ * @param {string} [props.yAxisLabel] - Label text displayed to the left of the y-axis.
+ * @param {Function} [props.xTickFormatter] - Custom formatter function for x-axis tick labels.
+ * @param {Function} [props.yTickFormatter] - Custom formatter function for y-axis tick labels.
+ * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
+ * @param {string} [props.gridColor='#E2E8F0'] - Color of the grid lines.
+ * @param {[number | string, number | string]} [props.xDomain=['auto', 'auto']] - Domain (min, max) for the x-axis.
+ * @param {[number | string, number | string]} [props.yDomain=['auto', 'auto']] - Domain (min, max) for the y-axis.
+ * @param {[number | string, number | string]} [props.zDomain=[0, 1000]] - Domain (min, max) for the z-axis (point size).
+ * @returns {React.ReactElement} The rendered scatter chart.
  * 
  * @example
  * <ScatterChart 
@@ -64,7 +87,7 @@ export interface ScatterChartProps {
   zDomain?: [number | string, number | string];
 }
 
-const ScatterChart: React.FC<ScatterChartProps> = ({
+export const ScatterChart: React.FC<ScatterChartProps> = ({
   data,
   xKey,
   yKey,
@@ -98,29 +121,29 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
         >
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />}
-          <XAxis 
-            dataKey={xKey} 
-            name={xAxisLabel || xKey} 
-            type="number" 
-            domain={xDomain} 
+          <XAxis
+            dataKey={xKey}
+            name={xAxisLabel || xKey}
+            type="number"
+            domain={xDomain}
             tickFormatter={xTickFormatter}
           >
             {xAxisLabel && <Label value={xAxisLabel} position="bottom" offset={5} />}
           </XAxis>
-          
-          <YAxis 
-            dataKey={yKey} 
-            name={yAxisLabel || yKey} 
-            type="number" 
-            domain={yDomain} 
+
+          <YAxis
+            dataKey={yKey}
+            name={yAxisLabel || yKey}
+            type="number"
+            domain={yDomain}
             tickFormatter={yTickFormatter}
           >
             {yAxisLabel && <Label value={yAxisLabel} angle={-90} position="left" offset={10} />}
           </YAxis>
-          
+
           {zKey && <ZAxis dataKey={zKey} domain={zDomain} range={[20, 200]} />}
-          
-          <Tooltip 
+
+          <Tooltip
             cursor={{ strokeDasharray: '3 3' }}
             formatter={tooltipFormatter}
             contentStyle={{
@@ -131,26 +154,24 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           />
-          
+
           {showLegend && (
-            <Legend 
-              verticalAlign="top" 
+            <Legend
+              verticalAlign="top"
               height={36}
               iconSize={10}
               wrapperStyle={{ fontSize: '12px' }}
             />
           )}
-          
-          <Scatter 
-            name={nameKey || "Data Points"} 
-            data={data} 
-            fill={color} 
+
+          <Scatter
+            name={nameKey || "Data Points"}
+            data={data}
+            fill={color}
             line={{ stroke: color, strokeWidth: 1 }}
           />
         </RechartsScatterChart>
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default ScatterChart; 
+}; 

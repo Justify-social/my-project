@@ -1,3 +1,5 @@
+please now review /docs and every single file mark it out of 10 for SSOT and ease
+
 # Directory Structure
 
 This document outlines the primary directory structure for the project.

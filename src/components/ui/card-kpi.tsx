@@ -2,7 +2,7 @@
  * @component KpiCard
  * @category organism
  * @renderType server
- * @description A card component for displaying key performance indicators with trend visualization
+ * @description A card component for displaying key performance indicators with trend visualization using standard Card components.
  * @since 2023-07-15
  * 
  * @example
@@ -17,8 +17,16 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Card } from './card';
-import { LightIcon } from './icon';
+// Use standard Card sub-components
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  // CardFooter // Not used in this layout yet
+} from "@/components/ui/card";
+// Use standard Icon component
+import { Icon } from "@/components/ui/icon/icon";
 
 export interface KpiCardProps {
   title: string;
@@ -41,15 +49,15 @@ export interface KpiCardProps {
   onClick?: () => void;
 }
 
-const KpiCard: React.FC<KpiCardProps> = ({
+export const KpiCard: React.FC<KpiCardProps> = ({
   title,
   value,
   icon,
   change,
   changeLabel = 'vs last period',
   subtitle,
-  className,
-  cardClassName,
+  className, // className applies to the inner content wrapper now
+  cardClassName, // cardClassName applies to the main Card element
   valueClassName,
   titleClassName,
   trend,
@@ -61,18 +69,18 @@ const KpiCard: React.FC<KpiCardProps> = ({
   formatter = (val) => String(val),
   onClick
 }) => {
-  // Determine trend direction if not explicitly provided
+  // Determine trend direction
   const determinedTrend = trend || (
     change === 0 ? 'neutral' :
       change && change > 0 ? 'up' : 'down'
   );
 
-  // Get appropriate trend icon
-  const trendIcon = determinedTrend === 'up' ? 'arrow-up' :
-    determinedTrend === 'down' ? 'arrow-down' :
-      'minus';
+  // Get appropriate trend icon ID
+  const trendIconId = determinedTrend === 'up' ? 'faArrowUp' :
+    determinedTrend === 'down' ? 'faArrowDown' :
+      'faMinus'; // Assuming FontAwesome IDs
 
-  // Get trend color based on direction
+  // Get trend color class
   const trendColorClass = determinedTrend === 'up' ? trendColor.up :
     determinedTrend === 'down' ? trendColor.down :
       trendColor.neutral;
@@ -80,64 +88,52 @@ const KpiCard: React.FC<KpiCardProps> = ({
   // Format the value
   const formattedValue = formatter(value);
 
-  // Define placeholder icons or use actual Icon component
-  const TrendIconPlaceholder = determinedTrend === 'up' ? '▲' :
-    determinedTrend === 'down' ? '▼' :
-      '-';
-  const HeaderIconPlaceholder = icon ? '*' : ''; // Simple placeholder for header icon
-
   return (
     <Card
-      className={cn('p-4 transition-all hover:shadow-md',
+      className={cn(
+        'transition-all hover:shadow-md',
         onClick && 'cursor-pointer',
-        cardClassName
+        cardClassName // Apply card-specific class name here
       )}
       onClick={onClick}
     >
-      <div className={cn('flex flex-col space-y-2', className)}>
-        <div className="flex justify-between items-start">
-          <h3 className={cn('text-sm font-medium text-gray-500 dark:text-gray-400', titleClassName)}>
-            {title}
-          </h3>
-          {icon && (
-            <div className="p-2 bg-primary/10 rounded-full">
-              {/* <i className={cn(getIconClasses(icon), 'text-primary')}></i> */}
-              {/* <span className="text-primary">{HeaderIconPlaceholder}</span> */}{/* Placeholder Removed */}
-              <LightIcon iconId={icon} className="text-primary" />
-            </div>
-          )}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className={cn('text-sm font-medium', titleClassName)}>
+          {title}
+        </CardTitle>
+        {icon && (
+          // Optional: Consider consistent styling for icon container if reused
+          // <div className="p-2 bg-primary/10 rounded-full">
+          <Icon iconId={icon} className="h-4 w-4 text-muted-foreground" /> // Adjusted styling
+          // </div>
+        )}
+      </CardHeader>
+      <CardContent className={cn("space-y-1", className)}> {/* Apply general className here */}
+        <div className={cn("text-2xl font-bold", valueClassName)}>
+          {formattedValue}
         </div>
-
-        <div className="flex flex-col space-y-1">
-          <span className={cn('text-2xl font-bold', valueClassName)}>
-            {formattedValue}
-          </span>
-
-          {subtitle && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {subtitle}
-            </span>
-          )}
-        </div>
-
+        {subtitle && (
+          <p className="text-xs text-muted-foreground">
+            {subtitle}
+          </p>
+        )}
         {typeof change !== 'undefined' && (
-          <div className="flex items-center space-x-1 mt-2">
-            {/* <i className={cn(getIconClasses(trendIcon), trendColorClass)}></i> */}
-            {/* <span className={cn(trendColorClass)}>{TrendIconPlaceholder}</span> */}{/* Placeholder Removed */}
-            <LightIcon iconId={trendIcon} className={cn(trendColorClass)} />
+          <div className="flex items-center space-x-1 pt-1"> {/* Added pt-1 */}
+            <Icon iconId={trendIconId} className={cn("h-4 w-4", trendColorClass)} />
             <span className={cn('text-sm font-medium', trendColorClass)}>
               {change > 0 ? '+' : ''}{change}%
             </span>
             {changeLabel && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+              <span className="text-xs text-muted-foreground ml-1">
                 {changeLabel}
               </span>
             )}
           </div>
         )}
-      </div>
+      </CardContent>
+      {/* <CardFooter> // Footer could be used if there are actions
+        
+      </CardFooter> */}
     </Card>
   );
-};
-
-export default KpiCard; 
+}; 

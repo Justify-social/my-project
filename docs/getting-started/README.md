@@ -11,7 +11,6 @@ If you're new to the project, follow these steps:
 3.  **[Directory Structure](../architecture/directory-structure.md)** - Understand how the codebase is organised.
 4.  **[Contribution Guide](../CONTRIBUTING.md)** - Learn our development workflow and how to make your first contribution.
 5.  **[Code Standards](../standards/code-standards.md)** - Familiarise yourself with our coding practices.
-6.  **[Glossary](./glossary.md)** - Understand our project terminology (if it exists - verify).
 
 ## Development Setup
 
@@ -48,7 +47,6 @@ This directory contains essential introductory information:
 | Document | Description |
 |----------|-------------|
 | [Project Overview](./project-overview.md) | High-level explanation of Justify and its purpose |
-| [Glossary](./glossary.md) | Definitions of project-specific terms and acronyms (if exists) |
 
 ## Next Steps
 

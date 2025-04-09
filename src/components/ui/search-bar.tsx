@@ -2,20 +2,21 @@
  * @component SearchBar
  * @category atom
  * @subcategory search
- * @description A search input component with icon and optional clear button
+ * @description A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.
  */
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from './icon/icon';
+import { Input } from '@/components/ui/input'; // Import Shadcn Input
 
-export interface SearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
-  /** Current search value */
-  value?: string;
+export interface SearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange' | 'value'> { // Omit value as well for controlled component pattern
+  /** Current search value (controlled) */
+  value: string; // Make value controlled
   /** Callback when search value changes */
-  onChange?: (value: string) => void;
-  /** Callback when search is submitted */
+  onChange: (value: string) => void; // Make onChange required for controlled component
+  /** Callback when search is submitted (Enter or debounced) */
   onSearch?: (value: string) => void;
   /** Placeholder text */
   placeholder?: string;
@@ -27,20 +28,23 @@ export interface SearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInput
   debounce?: number;
   /** Whether to focus the input on mount */
   autoFocus?: boolean;
-  /** Size variant */
+  /** Size variant - affects padding and icon sizes */
   size?: 'sm' | 'md' | 'lg';
-  /** Additional classes */
+  /** Additional classes for the wrapper div */
   className?: string;
+  /** Additional classes specifically for the Input component */
+  inputClassName?: string;
   /** Whether the search is currently loading */
   isLoading?: boolean;
 }
 
 /**
- * Search bar component with configurable behavior
+ * Search bar component built upon Shadcn Input, with configurable behavior.
+ * This is a controlled component: 'value' and 'onChange' props are required.
  */
 export function SearchBar({
-  value: propValue,
-  onChange,
+  value, // Controlled value from props
+  onChange, // Controlled onChange from props
   onSearch,
   placeholder = 'Search...',
   showClear = true,
@@ -49,19 +53,12 @@ export function SearchBar({
   autoFocus = false,
   size = 'md',
   className,
+  inputClassName, // New prop for input specific styling
   isLoading = false,
-  ...props
+  ...props // Pass remaining InputHTMLAttributes to the Input component
 }: SearchBarProps) {
-  const [value, setValue] = useState(propValue || '');
   const inputRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Sync with prop value
-  useEffect(() => {
-    if (propValue !== undefined && propValue !== value) {
-      setValue(propValue);
-    }
-  }, [propValue]);
 
   // Auto focus
   useEffect(() => {
@@ -70,11 +67,19 @@ export function SearchBar({
     }
   }, [autoFocus]);
 
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setValue(newValue);
-    onChange?.(newValue);
+    onChange(newValue); // Call prop onChange directly
 
     // Handle auto search with debounce
     if (autoSearch && onSearch) {
@@ -90,9 +95,10 @@ export function SearchBar({
 
   // Handle clear button click
   const handleClear = () => {
-    setValue('');
-    onChange?.('');
+    onChange(''); // Call prop onChange directly
     if (autoSearch && onSearch) {
+      // Clear any pending debounce and search immediately with empty string
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       onSearch('');
     }
     if (inputRef.current) {
@@ -103,95 +109,125 @@ export function SearchBar({
   // Handle key down (for Enter key)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSearch) {
+      // Clear any pending debounce if user presses Enter
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       onSearch(value);
     }
   };
 
-  // Calculate size classes
-  const getSizeClasses = () => {
+  // Calculate size-dependent padding classes for the Input component
+  const getInputPaddingClasses = () => {
     switch (size) {
       case 'sm':
-        return 'h-8 text-sm pl-8 pr-8';
+        return 'pl-8 pr-8'; // Padding for icons
       case 'lg':
-        return 'h-12 text-lg pl-12 pr-12';
-      default:
-        return 'h-10 text-base pl-10 pr-10';
+        return 'pl-12 pr-12'; // Padding for icons
+      default: // md
+        return 'pl-10 pr-10'; // Padding for icons
     }
   };
 
-  // Calculate icon sizes
+  // Calculate icon sizes based on input size
   const getIconSize = () => {
     switch (size) {
       case 'sm':
         return 'w-3.5 h-3.5';
       case 'lg':
         return 'w-5 h-5';
-      default:
+      default: // md
         return 'w-4 h-4';
     }
   };
 
-  // Calculate icon position
+  // Calculate icon position based on input size
   const getIconPosition = () => {
     switch (size) {
       case 'sm':
         return 'left-2.5';
       case 'lg':
         return 'left-4';
-      default:
+      default: // md
         return 'left-3';
     }
   };
 
-  // Calculate clear button position
+  // Calculate clear button/spinner position based on input size
   const getClearPosition = () => {
     switch (size) {
       case 'sm':
         return 'right-2.5';
       case 'lg':
         return 'right-4';
-      default:
+      default: // md
         return 'right-3';
     }
   };
 
+  // Map SearchBar size prop to Input size prop if needed, or use padding classes
+  // Note: Shadcn Input doesn't have explicit sm/lg height variants by default,
+  // height is controlled by h-* classes. We'll apply height classes if needed.
+  const getInputHeightClass = () => {
+    switch (size) {
+      case 'sm': return 'h-8';
+      case 'lg': return 'h-12';
+      default: return 'h-10'; // Default Shadcn input height
+    }
+  }
+
+
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn('relative w-full', className)}>
       {/* Search Icon */}
-      <div className={cn('absolute top-1/2 -translate-y-1/2', getIconPosition())}>
+      <div className={cn(
+        'absolute top-1/2 -translate-y-1/2 pointer-events-none', // Added pointer-events-none
+        getIconPosition()
+      )}>
         <Icon
-          iconId="faSearchLight"
-          className={cn('text-gray-400', getIconSize())}
+          iconId="faSearchLight" // Consider making icon prop configurable?
+          className={cn('text-muted-foreground', getIconSize())} // Use muted-foreground
         />
       </div>
 
-      {/* Search Input */}
-      <input
+      {/* Search Input - Use Shadcn Input component */}
+      <Input
         ref={inputRef}
-        type="text"
+        type="text" // Use text type, can be overridden via props if needed
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          'w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700',
-          'rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-          getSizeClasses()
+          getInputHeightClass(),
+          getInputPaddingClasses(),
+          // Remove custom styles now handled by Shadcn Input base styles:
+          // 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700',
+          // 'rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+          inputClassName // Apply specific input classes passed via prop
         )}
         disabled={isLoading}
-        {...props}
+        {...props} // Spread remaining props (like name, id, aria-*, etc.)
       />
 
       {/* Loading Spinner or Clear Button */}
       {(isLoading || (showClear && value.length > 0)) && (
-        <div className={cn('absolute top-1/2 -translate-y-1/2', getClearPosition())}>
+        <div className={cn(
+          'absolute top-1/2 -translate-y-1/2',
+          getClearPosition()
+        )}>
           {isLoading ? (
-            <div className={cn('animate-spin rounded-full border-2 border-gray-300 border-t-blue-600', getIconSize())} />
+            <div className={cn(
+              'animate-spin rounded-full border-2 border-border border-t-primary', // Use theme colors
+              getIconSize()
+            )}
+            />
           ) : (
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 hover:text-gray-600 focus:outline-none"
+              className={cn(
+                "text-muted-foreground hover:text-foreground focus:outline-none rounded-full", // Use theme colors
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" // Add focus ring
+              )}
               aria-label="Clear search"
             >
               <Icon iconId="faTimesLight" className={getIconSize()} />

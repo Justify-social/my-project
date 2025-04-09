@@ -2,7 +2,21 @@
  * @component LineChart
  * @category organism
  * @subcategory visualization
- * @description Responsive line chart component based on Recharts with support for multiple data series
+ * @description Responsive line chart component based on Recharts with support for multiple data series.
+ * It handles date formatting on the X-axis and provides customizable tooltips and legends.
+ * @param {LineChartProps} props - The props for the LineChart component.
+ * @param {object[]} [props.data=[]] - The dataset for the chart.
+ * @param {string} [props.xKey='date'] - Deprecated: Use xField instead. The key for the x-axis data (usually time).
+ * @param {string} [props.xField] - The key for the x-axis data (usually time). Overrides xKey.
+ * @param {string | string[]} [props.yKey] - Deprecated: Use lines instead. The key(s) for the y-axis data.
+ * @param {LineData[]} [props.lines=[]] - Configuration array for data lines (dataKey, name, stroke).
+ * @param {number} [props.height=300] - The height of the chart container.
+ * @param {boolean} [props.grid=true] - Whether to display the Cartesian grid.
+ * @param {boolean} [props.legend=true] - Whether to display the legend.
+ * @param {boolean} [props.tooltip=true] - Whether to display the tooltip on hover.
+ * @param {string} [props.dateFormat='MMM d'] - The date format string (using date-fns format tokens) for the x-axis and tooltip.
+ * @param {string} [props.className] - Additional CSS classes to apply to the container div.
+ * @returns {React.ReactElement | null} The rendered line chart or null if no data is provided.
  */
 'use client';
 
@@ -20,7 +34,27 @@ import {
 } from 'recharts';
 import { format, parseISO, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { LineChartProps, LineData } from './types';
+
+// Define types directly in the file as a workaround
+export interface LineData {
+  dataKey: string;
+  name?: string;
+  stroke?: string;
+}
+
+export interface LineChartProps {
+  data?: object[];
+  xKey?: string; // Deprecated: Use xField
+  xField?: string;
+  yKey?: string | string[]; // Deprecated: Use lines
+  lines?: LineData[];
+  height?: number | string;
+  grid?: boolean;
+  legend?: boolean;
+  tooltip?: boolean;
+  dateFormat?: string;
+  className?: string;
+}
 
 /**
  * Custom tooltip formatter for date values
@@ -40,7 +74,7 @@ const formatDate = (dateStr: string, dateFormat = 'MMM d'): string => {
 /**
  * LineChart component for visualizing trends over time
  */
-export default function LineChart({
+export function LineChart({
   data = [],
   xKey = 'date',
   xField, // Support both naming conventions

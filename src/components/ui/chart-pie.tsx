@@ -2,8 +2,23 @@
  * @component PieChart
  * @category organism
  * @renderType server
- * @description A responsive pie chart component for visualizing proportional data
+ * @description A responsive pie chart component for visualizing proportional data.
  * @since 2023-07-15
+ * @param {PieChartProps} props - The props for the PieChart component.
+ * @param {PieDataPoint[]} props.data - The dataset for the chart. Each object requires keys matching `nameKey` and `dataKey`.
+ * @param {string} props.nameKey - The key in the data objects for the name of each pie slice.
+ * @param {string} props.dataKey - The key in the data objects for the numeric value of each pie slice.
+ * @param {number | string} [props.height=300] - The height of the chart container.
+ * @param {number | string} [props.width='100%'] - The width of the chart container.
+ * @param {string[]} [props.colors] - Optional array of hex color strings for the pie slices.
+ * @param {string} [props.title] - Optional title displayed above the chart.
+ * @param {string} [props.className] - Additional CSS classes for the container div.
+ * @param {number | string} [props.innerRadius=0] - The inner radius of the pie (for creating donut charts). Can be pixels or percentage.
+ * @param {number | string} [props.outerRadius='80%'] - The outer radius of the pie. Can be pixels or percentage.
+ * @param {number} [props.paddingAngle=2] - The angle padding between pie slices.
+ * @param {boolean} [props.showLegend=true] - Whether to display the legend.
+ * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
+ * @returns {React.ReactElement} The rendered pie chart.
  * 
  * @example
  * <PieChart 
@@ -71,11 +86,11 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
   return (
-    <text 
-      x={x} 
-      y={y} 
-      fill="white" 
-      textAnchor={x > cx ? 'start' : 'end'} 
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? 'start' : 'end'}
       dominantBaseline="central"
       fontSize={12}
     >
@@ -84,7 +99,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-const PieChart: React.FC<PieChartProps> = ({
+export const PieChart: React.FC<PieChartProps> = ({
   data,
   nameKey,
   dataKey,
@@ -123,10 +138,10 @@ const PieChart: React.FC<PieChartProps> = ({
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Pie>
-          
+
           <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{ 
+            contentStyle={{
               fontSize: '12px',
               backgroundColor: 'white',
               border: '1px solid #E2E8F0',
@@ -134,11 +149,11 @@ const PieChart: React.FC<PieChartProps> = ({
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           />
-          
+
           {showLegend && (
-            <Legend 
+            <Legend
               layout="horizontal"
-              verticalAlign="bottom" 
+              verticalAlign="bottom"
               align="center"
               wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
             />
@@ -147,6 +162,4 @@ const PieChart: React.FC<PieChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default PieChart; 
+}; 

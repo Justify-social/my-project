@@ -1,11 +1,13 @@
 /**
- * Form Data Transformation Utilities
+ * Form Data Transformation & Mapping Utilities
  * 
- * This module provides utilities for transforming form data into API-compatible formats.
- * It ensures consistent data handling between the UI and API layers.
+ * This module provides interfaces and utilities for transforming form data 
+ * between UI Form Values and API Payloads.
  */
 
-import { Platform, Position, KPI, Feature, Currency } from '@prisma/client';
+import { Platform, Position, KPI, Feature, Currency, Prisma } from '@prisma/client';
+
+// --- Modern Form Value & API Payload Types --- 
 
 // Types for form values
 export interface ContactFormValues {
@@ -163,6 +165,8 @@ export interface CampaignApiPayload {
   creativeRequirements?: CreativeRequirementApiPayload[];
 }
 
+// --- Modern Form Transformers ---
+
 /**
  * Transform campaign form data to API payload format
  * @param formValues Form values from the campaign form
@@ -195,7 +199,7 @@ export function transformCampaignFormData(formValues: CampaignFormValues): Campa
  */
 export function transformContactData(contactData?: ContactFormValues): ContactApiPayload | undefined {
   if (!contactData) return undefined;
-  
+
   return {
     name: contactData.name,
     email: contactData.email,
@@ -211,7 +215,7 @@ export function transformContactData(contactData?: ContactFormValues): ContactAp
  */
 export function transformBudgetData(budgetData?: BudgetFormValues): BudgetApiPayload | undefined {
   if (!budgetData) return undefined;
-  
+
   return {
     total: Number(budgetData.total),
     currency: budgetData.currency,
@@ -286,6 +290,8 @@ export function transformCreativeRequirementData(requirementData: CreativeRequir
   };
 }
 
+// --- Enum Utilities (SSOT) ---
+
 /**
  * Enum handling utilities for consistent casing
  */
@@ -304,7 +310,7 @@ export const EnumUtils = {
           return 'Instagram';
       }
     },
-    
+
     fromString(platform: string): Platform {
       switch (platform.toLowerCase()) {
         case 'instagram':
@@ -317,14 +323,14 @@ export const EnumUtils = {
           return 'INSTAGRAM' as Platform;
       }
     },
-    
+
     options: () => [
       { value: 'INSTAGRAM' as Platform, label: 'Instagram' },
       { value: 'YOUTUBE' as Platform, label: 'YouTube' },
       { value: 'TIKTOK' as Platform, label: 'TikTok' }
     ]
   },
-  
+
   // Position enum utilities
   Position: {
     toString(position: Position): string {
@@ -339,7 +345,7 @@ export const EnumUtils = {
           return 'Manager';
       }
     },
-    
+
     fromString(position: string): Position {
       switch (position.toLowerCase()) {
         case 'manager':
@@ -353,14 +359,14 @@ export const EnumUtils = {
           return 'Manager' as Position;
       }
     },
-    
+
     options: () => [
       { value: 'Manager' as Position, label: 'Manager' },
       { value: 'Director' as Position, label: 'Director' },
       { value: 'VP' as Position, label: 'VP' }
     ]
   },
-  
+
   // KPI enum utilities
   KPI: {
     toString(kpi: KPI): string {
@@ -387,7 +393,7 @@ export const EnumUtils = {
           return 'Brand Awareness';
       }
     },
-    
+
     fromString(kpi: string): KPI {
       switch (kpi.toLowerCase().replace(/[_\s-]/g, '')) {
         case 'adrecall':
@@ -419,7 +425,7 @@ export const EnumUtils = {
           return 'BRAND_AWARENESS' as KPI;
       }
     },
-    
+
     options: () => [
       { value: 'AD_RECALL' as KPI, label: 'Ad Recall' },
       { value: 'BRAND_AWARENESS' as KPI, label: 'Brand Awareness' },
@@ -432,7 +438,7 @@ export const EnumUtils = {
       { value: 'ADVOCACY' as KPI, label: 'Advocacy' }
     ]
   },
-  
+
   // Currency enum utilities
   Currency: {
     toString(currency: Currency): string {
@@ -447,7 +453,7 @@ export const EnumUtils = {
           return 'USD';
       }
     },
-    
+
     fromString(currency: string): Currency {
       switch (currency.toUpperCase()) {
         case 'USD':
@@ -460,11 +466,12 @@ export const EnumUtils = {
           return 'USD' as Currency;
       }
     },
-    
+
     options: () => [
       { value: 'USD' as Currency, label: 'USD' },
       { value: 'GBP' as Currency, label: 'GBP' },
       { value: 'EUR' as Currency, label: 'EUR' }
     ]
   }
+  // TODO: Add Feature enum helpers here if needed by transformers
 }; 

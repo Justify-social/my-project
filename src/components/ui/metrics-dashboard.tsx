@@ -2,8 +2,16 @@
  * @component MetricsDashboard
  * @category organism
  * @subcategory visualization
- * @description A responsive dashboard layout for displaying multiple KPIs and metrics in a grid
+ * @description A responsive dashboard layout for displaying multiple KPIs and metrics in a grid.
  * @since 2023-07-15
+ * @param {MetricsDashboardProps} props - The props for the MetricsDashboard component.
+ * @param {string} [props.title] - Optional title displayed above the grid.
+ * @param {string} [props.description] - Optional description displayed below the title.
+ * @param {KpiCardProps[]} [props.metrics=[]] - An array of KpiCardProps objects to display in the grid.
+ * @param {string} [props.className] - Additional CSS classes for the main container div.
+ * @param {1 | 2 | 3 | 4} [props.columns=3] - The number of columns for the grid layout (responsive).
+ * @param {React.ReactNode} [props.children] - Optional additional content to render below the grid.
+ * @returns {React.ReactElement} The rendered metrics dashboard layout.
  * 
  * @example
  * <MetricsDashboard
@@ -20,13 +28,25 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import CardKpi from './card-kpi';
-import { MetricsDashboardProps } from './types';
+// Use named imports now
+import { KpiCard, KpiCardProps } from './card-kpi';
+// import { MetricsDashboardProps } from './types'; // Removed import
+
+// Define MetricsDashboardProps locally using imported KpiCardProps
+export interface MetricsDashboardProps {
+  title?: string;
+  description?: string;
+  metrics?: KpiCardProps[]; // Use the imported KpiCardProps
+  className?: string;
+  columns?: 1 | 2 | 3 | 4;
+  children?: React.ReactNode;
+}
+
 
 /**
  * Component for displaying multiple KPI metrics in a responsive dashboard layout
  */
-export function MetricsDashboard({
+export function MetricsDashboard({ // Changed export default to export
   title,
   description,
   metrics = [],
@@ -46,6 +66,7 @@ export function MetricsDashboard({
       case 4:
         return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
       default:
+        // Default to 3 columns if invalid number provided
         return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
     }
   };
@@ -56,23 +77,28 @@ export function MetricsDashboard({
       {(title || description) && (
         <div className="space-y-1">
           {title && (
-            <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2> // Use theme color
           )}
           {description && (
-            <p className="text-gray-500 dark:text-gray-400">{description}</p>
+            <p className="text-muted-foreground">{description}</p> // Use theme color
           )}
         </div>
       )}
 
       {/* Metrics grid */}
-      <div className={cn('grid gap-4', getGridClass())}>
-        {metrics.map((metric, index) => (
-          <CardKpi
-            key={index}
-            {...metric}
-          />
-        ))}
-      </div>
+      {Array.isArray(metrics) && metrics.length > 0 ? (
+        <div className={cn('grid gap-4', getGridClass())}>
+          {metrics.map((metric, index) => (
+            <KpiCard
+              key={index}
+              {...metric}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No metrics to display.</p> // Handle empty state
+      )}
+
 
       {/* Additional content */}
       {children && (
@@ -84,4 +110,4 @@ export function MetricsDashboard({
   );
 }
 
-export default MetricsDashboard; 
+// Removed export default MetricsDashboard; 

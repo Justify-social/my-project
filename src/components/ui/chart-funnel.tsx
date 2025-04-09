@@ -2,8 +2,21 @@
  * @component FunnelChart
  * @category organism
  * @renderType server
- * @description A responsive funnel chart component for visualizing sequential data flows and conversion rates
+ * @description A responsive funnel chart component for visualizing sequential data flows and conversion rates.
  * @since 2023-07-15
+ * @param {FunnelChartProps} props - The props for the FunnelChart component.
+ * @param {FunnelDataPoint[]} props.data - The dataset for the chart (requires 'name' and 'value' keys).
+ * @param {number | string} [props.height=400] - The height of the chart container.
+ * @param {number | string} [props.width='100%'] - The width of the chart container.
+ * @param {string[]} [props.colors] - Optional array of hex color strings for funnel segments.
+ * @param {string} [props.title] - Optional title displayed above the chart.
+ * @param {string} [props.className] - Additional CSS classes for the container div.
+ * @param {boolean} [props.isAnimationActive=true] - Whether to animate the funnel segments on render.
+ * @param {boolean} [props.showLabels=true] - Whether to display labels on the funnel segments.
+ * @param {'inside' | 'outside' | 'center'} [props.labelPosition='inside'] - Position of the labels.
+ * @param {boolean} [props.showPercentage=true] - Whether to show percentage values within the labels.
+ * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
+ * @returns {React.ReactElement} The rendered funnel chart.
  * 
  * @example
  * <FunnelChart 
@@ -53,7 +66,7 @@ const DEFAULT_COLORS = [
   '#00BFFF', '#4A5568', '#333333', '#38B2AC'
 ];
 
-const FunnelChart: React.FC<FunnelChartProps> = ({
+export const FunnelChart: React.FC<FunnelChartProps> = ({
   data,
   height = 400,
   width = '100%',
@@ -69,7 +82,7 @@ const FunnelChart: React.FC<FunnelChartProps> = ({
   const renderLabelContent = (props: any) => {
     const { value, percent, x, y, width, height, name } = props;
     const percentValue = (percent * 100).toFixed(0);
-    
+
     return (
       <g transform={`translate(${x + width / 2}, ${y + height / 2})`}>
         <text
@@ -135,9 +148,9 @@ const FunnelChart: React.FC<FunnelChartProps> = ({
             nameKey="name"
           >
             {data.map((entry, index) => (
-              <Cell 
-                key={`cell-${index}`} 
-                fill={colors[index % colors.length]} 
+              <Cell
+                key={`cell-${index}`}
+                fill={colors[index % colors.length]}
               />
             ))}
             {showLabels && (
@@ -151,6 +164,4 @@ const FunnelChart: React.FC<FunnelChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default FunnelChart; 
+}; 

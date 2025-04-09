@@ -2,8 +2,25 @@
  * @component AreaChart
  * @category organism
  * @renderType server
- * @description A responsive area chart component for visualizing cumulative data over time
+ * @description A responsive area chart component for visualizing cumulative or quantitative data over time or categories.
  * @since 2023-07-15
+ * @param {AreaChartProps} props - The props for the AreaChart component.
+ * @param {DataPoint[]} props.data - The dataset for the chart.
+ * @param {string} props.xKey - The key in the data objects for the x-axis values (categories or time).
+ * @param {string | string[]} props.yKey - The key(s) in the data objects for the y-axis values (numeric).
+ * @param {number | string} [props.height=300] - The height of the chart container.
+ * @param {number | string} [props.width='100%'] - The width of the chart container.
+ * @param {Array<{stroke: string; fill: string}>} [props.colors] - Optional array of color objects (stroke and fill) for the area series.
+ * @param {string} [props.title] - Optional title displayed above the chart.
+ * @param {string} [props.className] - Additional CSS classes for the container div.
+ * @param {boolean} [props.showGrid=true] - Whether to display the Cartesian grid.
+ * @param {boolean} [props.showLegend=true] - Whether to display the legend.
+ * @param {string} [props.stackId] - Optional stack ID. If provided, areas with the same ID will be stacked.
+ * @param {number} [props.strokeWidth=2] - The width of the area outline stroke.
+ * @param {string} [props.gridColor='#E2E8F0'] - Color of the grid lines.
+ * @param {Function} [props.tickFormatter] - Custom formatter function for axis tick labels.
+ * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
+ * @returns {React.ReactElement} The rendered area chart.
  * 
  * @example
  * <AreaChart 
@@ -63,7 +80,7 @@ const DEFAULT_COLORS = [
   { stroke: '#38B2AC', fill: 'rgba(56, 178, 172, 0.2)' }
 ];
 
-const AreaChart: React.FC<AreaChartProps> = ({
+export const AreaChart: React.FC<AreaChartProps> = ({
   data,
   xKey,
   yKey,
@@ -97,21 +114,21 @@ const AreaChart: React.FC<AreaChartProps> = ({
           {showGrid && (
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
           )}
-          
-          <XAxis 
-            dataKey={xKey} 
+
+          <XAxis
+            dataKey={xKey}
             tick={{ fontSize: 12 }}
             tickFormatter={tickFormatter}
           />
-          
-          <YAxis 
+
+          <YAxis
             tick={{ fontSize: 12 }}
             tickFormatter={tickFormatter}
           />
-          
+
           <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{ 
+            contentStyle={{
               fontSize: '12px',
               backgroundColor: 'white',
               border: '1px solid #E2E8F0',
@@ -119,19 +136,19 @@ const AreaChart: React.FC<AreaChartProps> = ({
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           />
-          
+
           {showLegend && (
-            <Legend 
-              verticalAlign="bottom" 
+            <Legend
+              verticalAlign="bottom"
               height={36}
               iconSize={20}
               wrapperStyle={{ fontSize: '12px' }}
             />
           )}
-          
+
           {yKeys.map((key, index) => {
             const colorIndex = index % colors.length;
-            
+
             return (
               <Area
                 key={key}
@@ -150,6 +167,4 @@ const AreaChart: React.FC<AreaChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default AreaChart; 
+}; 

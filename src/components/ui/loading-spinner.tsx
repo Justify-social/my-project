@@ -50,12 +50,12 @@ export function LoadingSpinner({
   };
 
   const colorClasses = {
-    primary: 'border-blue-600 border-b-transparent',
-    secondary: 'border-gray-600 border-b-transparent',
-    success: 'border-green-600 border-b-transparent',
-    danger: 'border-red-600 border-b-transparent',
-    warning: 'border-amber-600 border-b-transparent',
-    info: 'border-cyan-600 border-b-transparent'
+    primary: 'border-primary border-b-transparent',
+    secondary: 'border-secondary border-b-transparent',
+    success: 'border-success border-b-transparent',
+    danger: 'border-destructive border-b-transparent',
+    warning: 'border-warning border-b-transparent',
+    info: 'border-accent border-b-transparent'
   };
 
   return (
@@ -68,13 +68,11 @@ export function LoadingSpinner({
           className
         )}
         role="status"
-        aria-label="Loading"
+        aria-label={label || "Loading"}
       >
         <span className="sr-only">Loading...</span>
       </div>
-      {label && <p className="mt-2 text-sm text-gray-600">{label}</p>}
+      {label && <p className="mt-2 text-sm text-muted-foreground">{label}</p>}
     </div>
   );
-}
-
-export default LoadingSpinner; 
+} 
