@@ -5,8 +5,6 @@ import './globals.css'
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
-import { Toaster } from 'react-hot-toast';
-import { NotificationSonner } from '@/components/ui/notification-sonner';
 import { Suspense } from 'react';
 import { connection } from 'next/server';
 // Import IconContextProvider for consistent icon behavior
@@ -15,6 +13,8 @@ import { SidebarProvider } from '@/providers/SidebarProvider';
 import { SearchProvider } from '@/providers/SearchProvider';
 // Import the new auth state provider
 import { AuthStateProvider } from '@/lib/auth/authCoordinator';
+// Import Shadcn Toaster
+import { Toaster } from "@/components/ui/toaster";
 
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
@@ -61,7 +61,8 @@ export default function RootLayout({
             */}
             <SidebarProvider>
               <SearchProvider>
-                <NotificationSonner />
+                {/* Remove NotificationSonner element */}
+                {/* <NotificationSonner /> */}
                 <Suspense>
                   <UTSSR />
                 </Suspense>
@@ -70,6 +71,7 @@ export default function RootLayout({
                     {children}
                   </main>
                 </ClientLayout>
+                {/* Render Shadcn Toaster */}
                 <Toaster />
               </SearchProvider>
             </SidebarProvider>

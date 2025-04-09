@@ -6,7 +6,6 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 import plugin from "tailwindcss/plugin";
 import animate from "tailwindcss-animate";
-import lineClamp from "@tailwindcss/line-clamp";
 
 /** @type {import('tailwindcss').Config} */
 const config = {
@@ -140,7 +139,6 @@ const config = {
 	},
 	plugins: [
 		animate,
-		lineClamp
 	],
 };
 

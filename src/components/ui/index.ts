@@ -61,6 +61,7 @@ export { KpiCard } from "./card-kpi";
 // export { SearchBar } from "./search-bar"; // Removed incorrect assumption
 // export { SectionHeader } from "./section-header"; // Removed incorrect assumption
 // export { ThemeToggle } from "./theme-toggle"; // Removed incorrect assumption
+export { CalendarUpcoming } from "./calendar-upcoming";
 
 // Chart Components (export explicitly)
 export { LineChart } from "./chart-line";
@@ -74,5 +75,6 @@ export { BarChart } from "./chart-bar";
 // Other Custom Components (export explicitly)
 export { MetricsComparison } from "./metrics-comparison";
 export { MetricsDashboard } from "./metrics-dashboard";
+export { UpcomingCampaignsTable } from "./card-upcoming-campaign";
 
 // Note: icon, navigation, utils, client directories are not exported here.
