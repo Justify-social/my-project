@@ -49,8 +49,7 @@ interface SelectedUserData {
 // GET user details - Super Admin only
 export async function GET(
   request: NextRequest,
-  // Revert to precise inline type definition for the context
-  { params }: { params: { id: string } }
+  context: GetUserContext // Use the defined interface
 ) {
   try {
     // Verify Super Admin status
@@ -62,7 +61,7 @@ export async function GET(
       }, { status: 403 });
     }
 
-    const { id } = params; // Access id directly from destructured params
+    const { id } = context.params; // Access id via context.params
     if (!id) {
       return NextResponse.json({
         success: false,

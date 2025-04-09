@@ -33,6 +33,20 @@ const CATEGORIES: { name: ComponentCategory; icon: string }[] = [
   { name: 'Organism', icon: 'faBacteriumSolid' },
 ];
 
+// Define fixed category order and names
+const FIXED_ICON_CATEGORIES = ['All', 'App', 'Brands', 'Hover', 'KPIs', 'Light', 'Solid'];
+
+// Helper function to get base name and variant from icon ID
+const getIconInfo = (id: string): { baseName: string; variant: 'light' | 'solid' | 'brand' | 'other' } | null => {
+  if (id.endsWith('Light')) return { baseName: id.slice(0, -5), variant: 'light' };
+  if (id.endsWith('Solid')) return { baseName: id.slice(0, -5), variant: 'solid' };
+  if (id.startsWith('faBrands')) return { baseName: id, variant: 'brand' }; // Treat brands separately
+  // Add more specific checks if needed for App/KPIs if they have patterns
+  // Simple fallback for baseName if no clear pattern
+  const baseName = id.startsWith('fa') ? id.slice(2) : id;
+  return { baseName: baseName.toLowerCase(), variant: 'other' };
+};
+
 // Simple Error fallback for component preview
 const PreviewErrorFallback = ({ error }: { error: Error }) => (
   <div className="border border-red-300 bg-red-50 p-4 rounded text-red-700">
@@ -46,24 +60,61 @@ export default function ComponentBrowserPage() {
   const [selectedComponent, setSelectedComponent] = useState<UIComponentMapEntry | null>(null);
   const [PreviewComponent, setPreviewComponent] = useState<React.ComponentType<any> | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const [allIcons, setAllIcons] = useState<IconMetadata[]>([]); // State for icon library
-  const [iconCategories, setIconCategories] = useState<string[]>([]); // State for unique icon categories
-  const [selectedIconCategory, setSelectedIconCategory] = useState<string | null>(null); // State for selected icon category
+  const [allIcons, setAllIcons] = useState<IconMetadata[]>([]);
+  const [iconCategories, setIconCategories] = useState<string[]>([]);
+  const [selectedIconCategory, setSelectedIconCategory] = useState<string>('All'); // Default to All
+  const [hoverPairs, setHoverPairs] = useState<{ lightId: string; solidId: string; name?: string }[]>([]);
 
-  // Fetch all icons and extract categories
   useEffect(() => {
     try {
       const icons = iconRegistryData.icons;
       setAllIcons(icons);
-      // Extract unique categories, filtering out undefined/null and sorting
-      // Convert Set to Array before spreading
-      const categories = Array.from(
-        new Set(icons.map(icon => icon.category).filter(Boolean))
-      ).sort() as string[];
-      setIconCategories(categories);
+
+      // Find light/solid pairs for Hover category
+      const lightIcons = icons.filter(icon => icon.id.endsWith('Light'));
+      const solidIconsMap = new Map(icons.filter(icon => icon.id.endsWith('Solid')).map(icon => [icon.id, icon]));
+      const pairs = lightIcons.map(lightIcon => {
+        const lightInfo = getIconInfo(lightIcon.id);
+        if (!lightInfo || lightInfo.variant !== 'light') return null;
+        const solidId = lightInfo.baseName + 'Solid';
+        if (solidIconsMap.has(solidId)) {
+          return { lightId: lightIcon.id, solidId, name: lightIcon.name };
+        }
+        return null;
+      }).filter(Boolean) as { lightId: string; solidId: string; name?: string }[];
+      setHoverPairs(pairs);
+
+      // Generate category counts based on FIXED_ICON_CATEGORIES
+      const categoryCounts: Record<string, number> = {};
+      FIXED_ICON_CATEGORIES.forEach(cat => { categoryCounts[cat] = 0 });
+      categoryCounts['All'] = icons.length;
+      categoryCounts['Hover'] = pairs.length;
+
+      icons.forEach(icon => {
+        const category = icon.category;
+        if (category && FIXED_ICON_CATEGORIES.includes(category)) {
+          categoryCounts[category]++;
+        }
+        // Also count Light/Solid explicitly based on ID suffix
+        if (icon.id.endsWith('Light')) categoryCounts['Light']++;
+        if (icon.id.endsWith('Solid')) categoryCounts['Solid']++;
+        if (icon.id.startsWith('faBrands')) categoryCounts['Brands']++;
+        // Add logic for App/KPIs if they have specific patterns or use the category field
+        if (category === 'App') categoryCounts['App']++;
+        if (category === 'KPIs') categoryCounts['KPIs']++;
+      });
+
+      // Store counts for rendering buttons (can refine this structure)
+      const categoryButtonsData = FIXED_ICON_CATEGORIES.map(cat => ({
+        name: cat,
+        count: categoryCounts[cat] || 0
+      }));
+      // For simplicity, we'll just use FIXED_ICON_CATEGORIES for button rendering
+      // and calculate counts dynamically or pass categoryCounts
+      setIconCategories(FIXED_ICON_CATEGORIES); // Use fixed list for rendering order
+
     } catch (error) {
       console.error("Failed to load icon registry:", error);
-      // Handle error appropriately
     }
   }, []);
 
@@ -138,6 +189,14 @@ export default function ComponentBrowserPage() {
       // Add more default props for other components
       default: return {};
     }
+  };
+
+  // Function to get counts based purely on the category field
+  const getCategoryCount = (category: string): number => {
+    if (category === 'All') return allIcons.length;
+    if (category === 'Hover') return hoverPairs.length;
+    // Count all other categories based on the 'category' property in the data
+    return allIcons.filter(icon => icon.category === category.toLowerCase()).length;
   };
 
   return (
@@ -219,17 +278,11 @@ export default function ComponentBrowserPage() {
         <TabsContent value="icons">
           <h2 className="text-xl font-semibold mb-4">Icon Library</h2>
 
-          {/* Category Filters */}
+          {/* Category Filters - Use fixed order */}
           <div className="flex flex-wrap gap-2 mb-6">
-            <UiButton
-              variant={selectedIconCategory === null ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedIconCategory(null)}
-            >
-              All ({allIcons.length})
-            </UiButton>
-            {iconCategories.map(category => {
-              const count = allIcons.filter(icon => icon.category === category).length;
+            {FIXED_ICON_CATEGORIES.map(category => {
+              const count = getCategoryCount(category);
+              // Always render the button, even if count is 0
               return (
                 <UiButton
                   key={category}
@@ -245,25 +298,60 @@ export default function ComponentBrowserPage() {
 
           {allIcons.length > 0 ? (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
-              {/* Filter icons based on selected category */}
-              {allIcons
-                .filter(iconMeta => selectedIconCategory === null || iconMeta.category === selectedIconCategory)
-                .map(iconMeta => (
+              {/* Conditional Rendering based on selected category */}
+              {selectedIconCategory === 'Hover' ? (
+                hoverPairs.map(pair => (
                   <Card
-                    key={iconMeta.id}
-                    className="flex flex-col items-center text-center hover:bg-gray-50 aspect-square pt-2"
+                    key={pair.lightId}
+                    // Add group class for hover effects
+                    className="group flex flex-col items-center text-center hover:bg-gray-50 aspect-square pt-2 cursor-pointer"
                   >
+                    {/* Render both, control visibility/display with group-hover */}
                     <Icon
-                      iconId={iconMeta.id}
-                      className="w-[55%] h-[55%]"
+                      iconId={pair.lightId}
+                      // Default: show light, use foreground color. Hover: hide
+                      className="w-[55%] h-[55%] text-foreground group-hover:hidden"
                     />
-                    <p
-                      className="text-xs break-all pt-1"
-                    >
-                      {iconMeta.name || iconMeta.id}
+                    <Icon
+                      iconId={pair.solidId}
+                      // Default: hide. Hover: show solid, use accent color
+                      className="w-[55%] h-[55%] text-[#00BFFF] hidden group-hover:block"
+                    />
+                    <p className="text-xs break-all pt-1 mt-auto">
+                      {/* Display base name derived from ID if name is missing */}
+                      {pair.name || getIconInfo(pair.lightId)?.baseName || pair.lightId}
                     </p>
                   </Card>
-                ))}
+                ))
+              ) : (
+                allIcons
+                  // Filter based purely on the category field (or show all)
+                  .filter(iconMeta => {
+                    const isAll = selectedIconCategory === 'All';
+                    const categoryToCompare = selectedIconCategory.toLowerCase();
+                    const iconCategory = iconMeta.category;
+                    const categoryMatch = iconCategory === categoryToCompare;
+                    return isAll || categoryMatch;
+                  })
+                  .map(iconMeta => (
+                    <Card
+                      key={iconMeta.id}
+                      // Add group class for hover effects
+                      className="group flex flex-col items-center text-center hover:bg-gray-50 aspect-square pt-2 cursor-pointer"
+                    >
+                      {/* Use fill-foreground for default color */}
+                      <Icon
+                        iconId={iconMeta.id}
+                        // Default: use foreground fill. Hover: use accent fill
+                        className="w-[55%] h-[55%] fill-foreground group-hover:fill-[#00BFFF]"
+                      />
+                      <p className="text-xs break-all pt-1 mt-auto">
+                        {/* Display base name derived from ID if name is missing */}
+                        {iconMeta.name || getIconInfo(iconMeta.id)?.baseName || iconMeta.id}
+                      </p>
+                    </Card>
+                  ))
+              )}
             </div>
           ) : (
             <p className="text-muted-foreground">Icon registry could not be loaded.</p>
