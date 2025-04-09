@@ -2,7 +2,6 @@
 
 // Data fetching optimization
 export const dynamic = 'force-dynamic'; // Force dynamic rendering
-export const revalidate = 60; // Revalidate every 60 seconds
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';

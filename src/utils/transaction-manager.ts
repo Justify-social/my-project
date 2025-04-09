@@ -167,21 +167,21 @@ export class TransactionManager {
     // Execute with retries
     while (true) {
       attemptCount++;
-      
+
       try {
         // Set up a timeout if specified
         const timeoutPromise = txOptions.timeout
           ? new Promise<never>((_, reject) => {
-              setTimeout(() => {
-                reject(new TransactionError(
-                  `Transaction timed out after ${txOptions.timeout}ms`,
-                  TransactionErrorType.TIMEOUT,
-                  { transactionId, metadata: txOptions.metadata, attemptCount }
-                ));
-              }, txOptions.timeout);
-            })
+            setTimeout(() => {
+              reject(new TransactionError(
+                `Transaction timed out after ${txOptions.timeout}ms`,
+                TransactionErrorType.TIMEOUT,
+                { transactionId, metadata: txOptions.metadata, attemptCount }
+              ));
+            }, txOptions.timeout);
+          })
           : null;
-          
+
         // Execute the transaction with the specified isolation level
         const txResult = await Promise.race([
           this.prisma.$transaction(
@@ -190,7 +190,7 @@ export class TransactionManager {
               if (txOptions.isolation) {
                 await tx.$executeRawUnsafe(`SET TRANSACTION ISOLATION LEVEL ${txOptions.isolation}`);
               }
-              
+
               return await fn(tx);
             },
             {
@@ -200,10 +200,10 @@ export class TransactionManager {
           ),
           ...(timeoutPromise ? [timeoutPromise] : [])
         ]);
-        
+
         const endTime = new Date();
         const durationMs = endTime.getTime() - startTime.getTime();
-        
+
         // Log successful transaction completion
         if (txOptions.logging) {
           logger.info({
@@ -215,7 +215,7 @@ export class TransactionManager {
             model: txOptions.metadata?.modelName
           });
         }
-        
+
         return {
           data: txResult,
           timing: {
@@ -223,18 +223,18 @@ export class TransactionManager {
             endTime,
             durationMs
           },
-          metadata: txOptions.metadata || { 
-            operation: TransactionOperation.CUSTOM, 
-            modelName: 'unknown' 
+          metadata: txOptions.metadata || {
+            operation: TransactionOperation.CUSTOM,
+            modelName: 'unknown'
           }
         };
       } catch (error) {
         const errorInfo = this.parseError(error);
-        
+
         // Determine if this error is retryable
-        const isRetryable = this.isRetryableError(errorInfo.type) && 
-                            attemptCount < (txOptions.maxRetries || 3);
-        
+        const isRetryable = this.isRetryableError(errorInfo.type) &&
+          attemptCount < (txOptions.maxRetries || 3);
+
         // Log the error
         if (txOptions.logging) {
           logger.error({
@@ -248,11 +248,11 @@ export class TransactionManager {
             error: error instanceof Error ? error.stack : String(error)
           });
         }
-        
+
         // Retry if possible, otherwise throw
         if (isRetryable) {
           const delayMs = this.calculateRetryDelay(attemptCount, txOptions.retryDelayMs || 100);
-          
+
           if (txOptions.logging) {
             logger.info({
               message: `Retrying transaction in ${delayMs}ms`,
@@ -262,11 +262,11 @@ export class TransactionManager {
               delayMs
             });
           }
-          
+
           await new Promise(resolve => setTimeout(resolve, delayMs));
           continue;
         }
-        
+
         // Throw a standardized transaction error
         throw new TransactionError(
           errorInfo.message,
@@ -281,7 +281,7 @@ export class TransactionManager {
       }
     }
   }
-  
+
   /**
    * Parse Prisma and other errors into standardized transaction error types
    */
@@ -331,10 +331,10 @@ export class TransactionManager {
         message: error.message
       };
     }
-    
+
     // Handle generic errors
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     // Check for common PostgreSQL error patterns
     if (errorMessage.includes('deadlock detected')) {
       return {
@@ -352,13 +352,13 @@ export class TransactionManager {
         message: 'Transaction timeout'
       };
     }
-    
+
     return {
       type: TransactionErrorType.UNKNOWN,
       message: `Unknown error: ${errorMessage}`
     };
   }
-  
+
   /**
    * Determine if an error is retryable
    */
@@ -370,7 +370,7 @@ export class TransactionManager {
       TransactionErrorType.SERIALIZATION
     ].includes(errorType);
   }
-  
+
   /**
    * Calculate exponential backoff delay for retries
    */
@@ -380,7 +380,7 @@ export class TransactionManager {
     const jitter = Math.random() * baseDelay;
     return Math.min(exponentialDelay + jitter, 10000); // Cap at 10 seconds
   }
-  
+
   /**
    * Helper method for common create operations
    */
@@ -408,7 +408,7 @@ export class TransactionManager {
       }
     ).then(result => result.data);
   }
-  
+
   /**
    * Helper method for common update operations with string or number ID
    */
@@ -435,14 +435,14 @@ export class TransactionManager {
         metadata: {
           operation: TransactionOperation.UPDATE,
           modelName: model,
-          recordIds: [id],
+          recordIds: [String(id)],
           userId: options?.userId,
           description: options?.description
         }
       }
     ).then(result => result.data);
   }
-  
+
   /**
    * Helper method for common delete operations with string or number ID
    */
@@ -467,14 +467,14 @@ export class TransactionManager {
         metadata: {
           operation: TransactionOperation.DELETE,
           modelName: model,
-          recordIds: [id],
+          recordIds: [String(id)],
           userId: options?.userId,
           description: options?.description
         }
       }
     ).then(result => result.data);
   }
-  
+
   /**
    * Helper method for batch operations within a single transaction
    */

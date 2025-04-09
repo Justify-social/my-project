@@ -2,7 +2,7 @@
 // This is a redirect file for backward compatibility
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "lib": [
       "dom",
       "dom.iterable",

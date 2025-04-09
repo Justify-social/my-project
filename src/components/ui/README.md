@@ -87,6 +87,8 @@ import { buttonStyles } from "@/components/ui/utils/theme-override";
 
 ## Icon Integration
 
+**IMPORTANT:** This project uses **FontAwesome Pro** icons exclusively, rendered via the central `<Icon>` component (`@/components/ui/icon/icon`). **Do NOT install or use `lucide-react` or other icon libraries.**
+
 Components use FontAwesome Pro icons through the icon-integration utility:
 
 ```tsx
