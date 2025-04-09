@@ -1,143 +1,54 @@
-# Project Scripts Architecture
+# Project Scripts
 
-This directory contains a holistic, well-organized collection of utilities and scripts for managing various aspects of the project. The scripts are structured following solid software engineering principles to ensure maintainability, clarity, and efficiency.
+This directory contains utility and automation scripts for the project. For a high-level overview for documentation readers, see `/docs/scripts/README.md`.
 
-> **New Master Toolkit Available!** 
-> 
-> Try our new unified script interface that provides centralized access to all scripts:
-> ```bash
-> node scripts/master/master-toolkit.mjs help
-> ```
-> See [Master Script Architecture](./master/README.md) for details.
+## Master Toolkit (`master/`)
 
-## Directory Structure
+A unified command-line interface, `master-toolkit.mjs`, provides centralised access to many scripts. Run it with `help` for available commands:
 
-```
-scripts/
-├── master/                # Master toolkit and script architecture
-│   ├── master-toolkit.mjs # Unified entry point for all scripts
-│   └── README.md          # Master architecture documentation
-├── consolidated/           # Single source of truth for consolidated scripts
-├── icons/                  # Icon management scripts
-│   └── README.md           # Documentation for icon scripts
-├── ui/                     # UI component management scripts
-│   └── README.md           # Documentation for UI scripts
-├── config/                 # Configuration management scripts
-│   ├── config-organizer.mjs    # Organizes configuration files
-│   └── migrate-config.mjs      # Updates configuration references
-├── build/                  # Build process scripts
-├── utils/                  # Utility scripts
-├── cleanup/                # Cleanup and maintenance scripts
-├── linting/                # Code quality scripts
-├── docs/                   # Documentation scripts
-└── db/                     # Database scripts
+```bash
+node scripts/master/master-toolkit.mjs help
 ```
 
-## Architecture Principles
+See `scripts/master/README.md` for detailed usage.
 
-Our script architecture follows these key principles:
+## Directory Structure & Purpose
 
-1. **Single Source of Truth**: Each functionality has one definitive implementation
-2. **Logical Organization**: Scripts are grouped by domain and purpose
-3. **Unified Interface**: Common entry points for related functionality
-4. **Progressive Complexity**: Simple operations are easy, complex operations are possible
-5. **Documentation First**: Every script directory includes comprehensive documentation
-6. **ESM Preference**: Modern ES modules (.mjs) are preferred for new scripts
-7. **Backward Compatibility**: Support for existing workflows while moving forward
+Scripts are organised into the following subdirectories:
 
-## Script Categories
+*   `cleanup/`: Scripts for codebase cleanup and maintenance (e.g., `cleanup-codebase.sh`).
+*   `components/`: Scripts related to component generation or management.
+*   `config/`: Scripts for validating or managing the configuration in `/config` (e.g., `validate-config.js`).
+*   `icons/`: Icon management (downloading, auditing, registry generation).
+*   `linting/`: Code style and linting related utilities.
+*   `master/`: The Master Toolkit script and its documentation.
+*   `migration/`: Scripts used for codebase migrations or specific refactoring tasks (e.g., `fix-legacy-ui-paths.js`).
+*   `testing/`: Scripts related to test setup or standardisation (e.g., `standardize-tests.sh`).
+*   `tree-shake/`: Scripts for analysing or managing unused code.
+*   `ui/`: UI component specific scripts (e.g., validation, analysis, backups).
+*   `utils/`: General utility scripts supporting other categories.
+*   `validation/`: General validation scripts (e.g., `validate-navigation-paths.js`).
 
-### Core Scripts
+Refer to the `README.md` within each subdirectory (if present) for details on its specific scripts and usage.
 
-- **master-toolkit.js**: Unified command-line interface for all script functionality
-- **config-organizer.mjs**: Manages configuration file organization
-- **migrate-config.mjs**: Updates references to configuration files
+## Usage
 
-### Icon Management
-
-The `icons/` directory contains scripts for managing UI icons:
-
-- **download-icons.mjs**: Downloads and processes icon files
-- **audit-icons.mjs**: Analyzes icon usage and validates integrity
-
-### UI Component Management
-
-The `ui/` directory contains scripts for UI component management:
-
-- **validate-component-paths.mjs**: Validates component paths
-- **analyze-component-usage.cjs**: Analyzes component usage
-- **backup-ui-components.js**: Creates component backups
-
-### File Organization
-
-Several scripts maintain the project's clean directory structure:
-
-- **config/scripts/config-organizer.mjs**: Organizes configuration files
-- **tree-shake/tree-shake.mjs**: Identifies and removes deprecated files
-
-## Usage Guidelines
-
-### General Pattern
-
-Most scripts follow this usage pattern:
+While the Master Toolkit is preferred, individual scripts can often be run directly:
 
 ```bash
 node scripts/<category>/<script-name>.mjs [options]
+# or for shell scripts:
+./scripts/<category>/<script-name>.sh [options]
 ```
 
-### Master Toolkit
+Check individual script files or their READMEs for specific usage instructions.
 
-The master toolkit provides a unified interface:
+## Contributing
 
-```bash
-node scripts/master-toolkit.js <category> <command> [options]
-```
+When adding new scripts:
 
-Example:
-```bash
-# Run icon audit
-node scripts/master-toolkit.js icons audit
-
-# Organize configuration files
-node scripts/master-toolkit.js config organize
-```
-
-### NPM Scripts
-
-Common operations are available through npm scripts:
-
-```bash
-# Icon management
-npm run icons:download
-npm run icons:validate
-
-# UI component management
-npm run ui:validate-paths
-npm run ui:analyze-usage
-```
-
-## Development Guidelines
-
-When creating new scripts:
-
-1. **Location**: Place scripts in the appropriate category directory
-2. **Format**: Use `.mjs` for ES modules, `.cjs` for CommonJS modules
-3. **Documentation**: Update the relevant README.md with usage instructions
-4. **Interfaces**: Maintain consistent CLI interfaces across scripts
-5. **Error Handling**: Include robust error handling and user feedback
-6. **Testing**: Include testing mechanisms for script functionality
-7. **Single Responsibility**: Each script should have a clear, focused purpose
-
-## Implementation Notes
-
-- Scripts are interconnected through a cohesive architecture while maintaining isolation
-- Shared utilities are available in the `utils/` directory
-- Configuration can be environment-specific using the `NODE_ENV` variable
-- All scripts include detailed help output with the `--help` flag
-
-## Future Improvements
-
-- Complete migration to ES modules (.mjs) format
-- Enhanced type checking with TypeScript or JSDoc
-- Further consolidation of duplicate functionality
-- Expanded test coverage for script functionality
+1.  Place the script in the most relevant subdirectory.
+2.  Prefer `.mjs` for Node scripts (ES Modules).
+3.  Update or create a `README.md` in the subdirectory explaining the script.
+4.  Consider integrating the script into the Master Toolkit if appropriate.
+5.  Ensure consistent command-line interfaces and error handling.
