@@ -8,14 +8,13 @@ export const dynamic = 'force-dynamic'; // Force dynamic rendering
 
 // Regular imports
 import { Suspense } from 'react';
-// Import dynamic separately to avoid name conflicts with export const dynamic
-import { default as nextDynamic } from 'next/dynamic';
 // Import SSOT LoadingSkeleton
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 // Correct AuthCheck import path using alias
 import AuthCheck from '@/components/features/users/AuthCheck';
 // Import getSession for server-side auth
 import { getSession } from '@auth0/nextjs-auth0';
+import ClientDashboard from './ClientDashboard'; // Import the new client component
 
 // Define the skeleton fallback using the imported SSOT component
 const DashboardLoadingSkeleton = () => {
@@ -34,12 +33,6 @@ interface DashboardUser {
   name: string;
   role: string;
 }
-
-// Dynamic import - Correct path to DashboardContent and use correct skeleton
-const DashboardContentComponent = nextDynamic(() => import('./DashboardContent'), {
-  ssr: false, // Disable SSR for client-side charting library
-  loading: () => <DashboardLoadingSkeleton />
-});
 
 // Make the component async to fetch session
 export default async function Dashboard() {
@@ -67,7 +60,7 @@ export default async function Dashboard() {
       <div className="px-4 md:px-6 py-6 font-work-sans">
         <Suspense fallback={<DashboardLoadingSkeleton />}>
           {/* Pass the mapped user data */}
-          <DashboardContentComponent user={userProp} />
+          <ClientDashboard user={userProp} />
         </Suspense>
       </div>
     </AuthCheck>
