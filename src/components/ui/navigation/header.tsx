@@ -10,7 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { MenuMobile } from '@/components/ui/navigation/mobile-menu';
+import { MobileMenu, type MenuItem } from '@/components/ui/navigation/mobile-menu';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
 import { iconExists } from '@/components/ui/icon/icons';
@@ -31,8 +31,8 @@ interface HeaderProps {
   notificationsCount: number;
   profileImageUrl?: string;
   onMenuClick?: () => void;
-  navItems: NavItem[]; // Use local NavItem
-  settingsNavItem: NavItem; // Use local NavItem
+  navItems: MenuItem[];
+  settingsNavItem: MenuItem;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -46,6 +46,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { handleSearch, isSearching } = useSearch();
 
   // Define icon IDs directly
@@ -91,9 +92,12 @@ const Header: React.FC<HeaderProps> = ({
               <SearchBar
                 className="w-full" // SearchBar itself doesn't need max-w-lg now, wrapper handles it
                 placeholder="Search campaigns..."
+                value={searchQuery}
+                onChange={setSearchQuery}
                 onSearch={handleSearch}
                 autoSearch={true}
                 debounce={300}
+                isLoading={isSearching}
               />
               {/* Results are positioned relative to the wrapper above */}
               <SearchResultsDisplay />
@@ -229,11 +233,11 @@ const Header: React.FC<HeaderProps> = ({
       </header>
 
       {/* Mobile Menu */}
-      <MenuMobile
+      <MobileMenu
         isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        navItems={navItems} // Pass navItems prop
-        settingsNavItem={settingsNavItem} // Pass settingsNavItem prop
+        onOpenChange={setIsMobileMenuOpen}
+        menuItems={navItems}
+        settingsItem={settingsNavItem}
         remainingCredits={remainingCredits}
         notificationsCount={notificationsCount}
         companyName={companyName}

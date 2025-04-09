@@ -209,7 +209,7 @@ export function SearchBar({
       />
 
       {/* Loading Spinner or Clear Button */}
-      {(isLoading || (showClear && value.length > 0)) && (
+      {(isLoading || (showClear && value && value.length > 0)) && (
         <div className={cn(
           'absolute top-1/2 -translate-y-1/2',
           getClearPosition()

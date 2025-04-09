@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Component Discovery Utility
  * 
@@ -9,145 +7,196 @@
 
 import fs from 'fs';
 import path from 'path';
-import { ComponentMetadata } from '@/components/ui/utils/classify';
+// Import shared types
+import {
+  type ComponentMetadata,
+  type ExtendedComponentMetadata,
+  type ComponentCategory,
+  type ComponentRenderType,
+  type ComponentStatus,
+  type ComponentRegistry,
+  CATEGORIES
+} from '../types'; // Adjust path if needed
 
 // Constants
 const UI_COMPONENTS_DIR = path.join(process.cwd(), 'src/components/ui');
-const CATEGORIES = ['atom', 'molecule', 'organism', 'template', 'page'] as const;
-export type ComponentCategory = typeof CATEGORIES[number];
 
-// Extended component metadata with filePath
-export interface ExtendedComponentMetadata extends ComponentMetadata {
-  filePath?: string;
-  documentationUrl?: string;
-  tags?: string[];
-}
+// --- Helper Functions for Metadata Extraction --- (Modeled after classify.ts logic)
 
-// Component registry type
-export type ComponentRegistry = {
-  components: ExtendedComponentMetadata[];
-  byCategory: Record<ComponentCategory, ExtendedComponentMetadata[]>;
-  byName: Record<string, ExtendedComponentMetadata>;
-  allCategories: readonly ComponentCategory[];
+/** Extracts a single value string for a given JSDoc tag. */
+const extractTagValue = (jsdoc: string, tagName: string): string | null => {
+  const match = jsdoc.match(new RegExp(`@${tagName}\\s+([^\\n\\r*]+)`));
+  return match?.[1]?.trim().replace(/\*+$/, '').trim() || null;
+};
+
+/** Extracts code examples from @example blocks. */
+const extractExamples = (jsdoc: string): string[] => {
+  const exampleMatches = [...jsdoc.matchAll(/@example(?:\s+\[[^\]]*\])?\s*```(?:tsx|jsx)?\s*([\s\S]*?)```/g)];
+  return exampleMatches.map(match => match[1].trim());
+};
+
+/** Validates and returns the component category. */
+const parseCategory = (jsdoc: string): ComponentCategory => {
+  const value = extractTagValue(jsdoc, 'category')?.toLowerCase();
+  if (value && CATEGORIES.includes(value as ComponentCategory)) {
+    return value as ComponentCategory;
+  }
+  return 'unknown'; // Default category
+};
+
+/** Validates and returns the component render type. */
+const parseRenderType = (jsdoc: string, fileContent: string): ComponentRenderType => {
+  const value = extractTagValue(jsdoc, 'renderType')?.toLowerCase();
+  if (value === 'server' || value === 'client') {
+    return value;
+  }
+  // Check for 'use client' directive as fallback
+  if (fileContent.match(/^\s*['\"]use client['\"]/m)) {
+    return 'client';
+  }
+  return 'server'; // Default render type
+};
+
+/** Validates and returns the component status. */
+const parseStatus = (jsdoc: string): ComponentStatus | undefined => {
+  const value = extractTagValue(jsdoc, 'status')?.toLowerCase();
+  const validStatuses: ComponentStatus[] = ['stable', 'beta', 'deprecated'];
+  if (value && validStatuses.includes(value as ComponentStatus)) {
+    return value as ComponentStatus;
+  }
+  return undefined; // Default: no status or invalid status
+};
+
+// --- Main Discovery and Registry Functions ---
+
+/**
+ * Parses JSDoc comments from a file content to extract component metadata.
+ */
+const extractComponentMetadata = (filePath: string): ExtendedComponentMetadata | null => {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+
+    // Use corrected regex to find the first JSDoc block
+    const jsdocMatch = content.match(/^\s*\/\*\*[\s\S]*?\*\//m);
+    if (!jsdocMatch) {
+      // console.warn(`No JSDoc block found in: ${filePath}`);
+      return null; // Skip files without JSDoc
+    }
+    const jsdoc = jsdocMatch[0];
+
+    // Extract metadata using helper functions
+    const metadata: ExtendedComponentMetadata = {
+      name: extractTagValue(jsdoc, 'component') || path.basename(filePath, path.extname(filePath)),
+      filePath: filePath.replace(process.cwd(), ''),
+      category: parseCategory(jsdoc),
+      subcategory: extractTagValue(jsdoc, 'subcategory'),
+      renderType: parseRenderType(jsdoc, content),
+      description: extractTagValue(jsdoc, 'description') || '',
+      status: parseStatus(jsdoc),
+      author: extractTagValue(jsdoc, 'author') || '',
+      since: extractTagValue(jsdoc, 'since') || '',
+      examples: extractExamples(jsdoc),
+      // Initialize other ExtendedComponentMetadata fields if needed
+      // documentationUrl: undefined,
+      // tags: [],
+    };
+
+    // Basic validation
+    if (!metadata.name) {
+      console.warn(`Could not determine component name for: ${filePath}`);
+      return null;
+    }
+
+    return metadata;
+  } catch (error) {
+    console.error(`Error reading or parsing file ${filePath}:`, error);
+    return null;
+  }
 };
 
 /**
- * Discover all UI components and extract their metadata
- * 
- * @returns Array of component metadata
+ * Recursively finds all .tsx files in a directory, excluding specified patterns.
  */
-export async function discoverComponents(): Promise<ExtendedComponentMetadata[]> {
-  const componentsDir = UI_COMPONENTS_DIR;
-  
+const findComponentFiles = (dir: string, results: string[] = []): string[] => {
   try {
-    // Read component directory
-    const files = await fs.promises.readdir(componentsDir);
-    
-    // Filter for TypeScript files excluding utils directory and index files
-    const componentFiles = files.filter(file => 
-      file.endsWith('.tsx') && 
-      !file.startsWith('index') &&
-      !file.includes('utils/')
-    );
-    
-    // Extract metadata from each component file
-    const componentsWithMetadata = await Promise.all(
-      componentFiles.map(async (file) => {
-        const filePath = path.join(componentsDir, file);
-        return getComponentMetadata(filePath);
-      })
-    );
-    
-    // Filter out any null values (components without metadata)
-    return componentsWithMetadata.filter(Boolean) as ExtendedComponentMetadata[];
-  } catch (error) {
-    console.error('Error discovering components:', error);
-    return [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        // Exclude specific directories more reliably
+        if (entry.name === 'utils' || entry.name === 'types' || entry.name === 'client' || entry.name === 'node_modules' || entry.name.startsWith('.')) {
+          continue;
+        }
+        findComponentFiles(fullPath, results);
+      } else if (entry.isFile() && entry.name.endsWith('.tsx') && !entry.name.includes('.stories.') && !entry.name.startsWith('index.')) {
+        results.push(fullPath);
+      }
+    }
+  } catch (readDirError) {
+    console.error(`Could not read directory ${dir}:`, readDirError);
   }
-}
+  return results;
+};
 
 /**
- * Group components by category (atom, molecule, organism, etc.)
- * 
- * @param components Array of component metadata
- * @returns Record with components grouped by category
+ * Discovers all UI components by finding files and extracting metadata.
  */
-export async function groupComponentsByCategory(
+export const discoverComponents = async (): Promise<ExtendedComponentMetadata[]> => {
+  console.log(`Starting component discovery in: ${UI_COMPONENTS_DIR}`);
+  const componentFiles = findComponentFiles(UI_COMPONENTS_DIR);
+  console.log(`Found ${componentFiles.length} potential component files.`);
+
+  const components = componentFiles
+    .map(extractComponentMetadata)
+    .filter((c): c is ExtendedComponentMetadata => c !== null);
+
+  console.log(`Successfully extracted metadata for ${components.length} components.`);
+  return components;
+};
+
+/**
+ * Group components by category.
+ */
+export function groupComponentsByCategory(
   components: ExtendedComponentMetadata[]
-): Promise<Record<ComponentCategory, ExtendedComponentMetadata[]>> {
-  // Initialize categories
+): Record<ComponentCategory, ExtendedComponentMetadata[]> {
   const grouped = CATEGORIES.reduce((acc, category) => {
     acc[category] = [];
     return acc;
   }, {} as Record<ComponentCategory, ExtendedComponentMetadata[]>);
-  
-  // Group components by category
+
   components.forEach(component => {
-    const category = component.category as ComponentCategory;
+    // Use the validated category from metadata
+    const category = component.category;
     if (grouped[category]) {
       grouped[category].push(component);
     } else {
-      // Default to atom if category is not recognized
-      grouped.atom.push(component);
+      // This case should ideally not happen if category is always validated
+      console.warn(`Component ${component.name} has unknown category: ${category}. Placing in 'unknown'.`);
+      grouped.unknown.push(component);
     }
   });
-  
+
   return grouped;
 }
 
 /**
- * Extract metadata from a component file
- * 
- * @param filePath Path to the component file
- * @returns Component metadata or null if extraction fails
- */
-export async function getComponentMetadata(filePath: string): Promise<ExtendedComponentMetadata | null> {
-  try {
-    // Read file content
-    const content = await fs.promises.readFile(filePath, 'utf-8');
-    
-    // Get file name without extension
-    const fileName = path.basename(filePath).replace('.tsx', '');
-    
-    // Import the classify utility to parse metadata
-    const { parseComponentMetadata } = await import('@/components/ui/utils/classify');
-    
-    // Parse metadata from file content
-    const metadata = parseComponentMetadata(content);
-    
-    if (!metadata) {
-      console.warn(`No metadata found for component: ${fileName}`);
-      return null;
-    }
-    
-    return {
-      ...metadata,
-      filePath: filePath.replace(process.cwd(), ''),
-    };
-  } catch (error) {
-    console.error(`Error extracting metadata for ${filePath}:`, error);
-    return null;
-  }
-}
-
-/**
- * Build a searchable component registry
- * 
- * @returns Component registry with various lookup methods
+ * Build a searchable component registry.
  */
 export async function buildComponentRegistry(): Promise<ComponentRegistry> {
-  // Discover all components
   const components = await discoverComponents();
-  
-  // Group by category
-  const byCategory = await groupComponentsByCategory(components);
-  
-  // Create name lookup
+  const byCategory = groupComponentsByCategory(components); // Use synchronous grouping
+
   const byName = components.reduce((acc, component) => {
-    acc[component.name.toLowerCase()] = component;
+    // Use component.name which should be valid based on extraction logic
+    if (component.name) {
+      acc[component.name.toLowerCase()] = component;
+    }
     return acc;
   }, {} as Record<string, ExtendedComponentMetadata>);
-  
+
   return {
     components,
     byCategory,
@@ -156,80 +205,49 @@ export async function buildComponentRegistry(): Promise<ComponentRegistry> {
   };
 }
 
-// Cache registry in development to avoid repeated file system access
+// Cache registry logic remains the same
 let cachedRegistry: ComponentRegistry | null = null;
 
-/**
- * Get component registry (cached in development)
- * 
- * @param forceRefresh Force refresh the registry
- * @returns Component registry
- */
 export async function getComponentRegistry(forceRefresh = false): Promise<ComponentRegistry> {
-  // If we already have a cached registry and don't need to refresh, return it
   if (!forceRefresh && cachedRegistry) {
     return cachedRegistry;
   }
-  
-  // In production, use the pre-built static registry
+
+  // Production check for static registry remains the same
   if (process.env.NODE_ENV === 'production') {
     try {
-      // Import the static registry JSON file
       const staticRegistryPath = path.join(process.cwd(), 'src/components/ui/utils/component-registry.json');
-      const staticRegistry = JSON.parse(fs.readFileSync(staticRegistryPath, 'utf-8'));
-      
+      const staticRegistryData = fs.readFileSync(staticRegistryPath, 'utf-8');
+      const staticRegistry: ComponentRegistry = JSON.parse(staticRegistryData);
       console.log('Using static component registry for production');
       cachedRegistry = staticRegistry;
       return staticRegistry;
     } catch (error) {
       console.error('Error loading static component registry:', error);
       console.warn('Falling back to dynamic component discovery');
-      // If static registry fails, fall back to dynamic discovery
     }
   }
-  
-  // For development or if static registry fails, build dynamically
+
   const registry = await buildComponentRegistry();
-  
-  // Cache the registry
   cachedRegistry = registry;
-  
   return registry;
 }
 
-/**
- * Search for components by name or description
- * 
- * @param query Search query
- * @param registry Component registry
- * @returns Matching components
- */
+// Search and getter functions remain largely the same, just ensure they use the registry correctly
+
 export async function searchComponents(
   query: string,
   registry: ComponentRegistry
 ): Promise<ExtendedComponentMetadata[]> {
   if (!query) return registry.components;
-  
   const normalizedQuery = query.toLowerCase();
-  
   return registry.components.filter(component => {
-    const name = component.name.toLowerCase();
-    const description = (component.description || '').toLowerCase();
-    
-    return (
-      name.includes(normalizedQuery) || 
-      description.includes(normalizedQuery)
-    );
+    const nameMatch = component.name?.toLowerCase().includes(normalizedQuery);
+    const descriptionMatch = component.description?.toLowerCase().includes(normalizedQuery);
+    return nameMatch || descriptionMatch;
   });
 }
 
-/**
- * Get a component by name
- * 
- * @param name Component name
- * @param registry Component registry
- * @returns Component metadata or undefined
- */
 export async function getComponentByName(
   name: string,
   registry: ComponentRegistry
@@ -237,16 +255,10 @@ export async function getComponentByName(
   return registry.byName[name.toLowerCase()];
 }
 
-/**
- * Filter components by category
- * 
- * @param category Category to filter by
- * @param registry Component registry
- * @returns Components in the specified category
- */
 export async function getComponentsByCategory(
   category: ComponentCategory,
   registry: ComponentRegistry
 ): Promise<ExtendedComponentMetadata[]> {
+  // Removed duplicated code block
   return registry.byCategory[category] || [];
 } 

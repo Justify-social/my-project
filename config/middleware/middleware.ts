@@ -51,6 +51,16 @@ export default async function middleware(req: NextRequest) {
   // Only apply auth check to admin routes and API routes that require auth
   if (path.startsWith('/admin') ||
     (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
+
+    // Log the path being checked by middleware
+    console.log(`[Middleware] Checking auth for API path: ${path}`);
+
+    // Allow debug tools API routes without session check
+    if (path.startsWith('/api/debug-tools')) {
+      console.log(`[Middleware] Allowing path: ${path}`); // Log allowing
+      return NextResponse.next();
+    }
+
     // Create a response object to pass to getSession
     const res = NextResponse.next();
     const session = await getSession(req, res);
@@ -58,6 +68,7 @@ export default async function middleware(req: NextRequest) {
       // Instead of redirecting, which interrupts rendering,
       // respond with a 401 status for API routes
       if (path.startsWith('/api')) {
+        console.error(`[Middleware] Unauthorized API access attempt: ${path}. Session not found.`); // Log before returning 401
         return new NextResponse(
           JSON.stringify({ error: 'Unauthorized' }),
           { status: 401, headers: { 'content-type': 'application/json' } }
@@ -109,7 +120,7 @@ async function handleAuthMiddleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/api/:path*',
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+    '/api/((?!auth/).*)',
+    '/((?!api/auth/|_next/static|_next/image|favicon.ico).*)',
   ],
 };
