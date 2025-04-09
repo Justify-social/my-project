@@ -39,10 +39,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap');
 
 /* Font Awesome base styles (since we disabled autoAddCss) */
-svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
+svg:not(:root).svg-inline--fa,
+svg:not(:host).svg-inline--fa {
   overflow: visible;
   box-sizing: content-box;
 }
+
 .svg-inline--fa {
   display: inline-block;
   height: 1em;
@@ -57,97 +59,156 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
 @layer base {
   :root {
     /* Original brand variables */
-    --primary-color: #333333;      /* Jet */
-    --secondary-color: #4A5568;    /* Payne's Grey */
-    --accent-color: #00BFFF;       /* Deep Sky Blue */
-    --background-color: #FFFFFF;   /* White */
-    --divider-color: #D1D5DB;      /* French Grey */
-    --interactive-color: #3182CE;  /* Medium Blue */
-    
+    --primary-color: #333333;
+    /* Jet */
+    --secondary-color: #4A5568;
+    /* Payne's Grey */
+    --accent-color: #00BFFF;
+    /* Deep Sky Blue */
+    --background-color: #FFFFFF;
+    /* White */
+    --divider-color: #D1D5DB;
+    /* French Grey */
+    --interactive-color: #3182CE;
+    /* Medium Blue */
+
     /* Shadcn variables mapped to our brand colors with proper HSL values */
-    --background: 0 0% 100%;         /* White #FFFFFF */
-    --foreground: 224 47% 20%;       /* Dark gray approximating Jet #333333 */
+    --background: 0 0% 100%;
+    /* White #FFFFFF */
+    --foreground: 0 0% 20%;
+    /* Jet #333333 */
 
-    --card: 0 0% 100%;               /* White */
-    --card-foreground: 224 47% 20%;  /* Dark gray */
- 
-    --popover: 0 0% 100%;            /* White */
-    --popover-foreground: 224 47% 20%; /* Dark gray */
- 
-    --primary: 224 47% 20%;          /* Jet #333333 */
-    --primary-foreground: 0 0% 100%; /* White */
- 
-    --secondary: 215 19% 35%;        /* Payne's Grey #4A5568 */
-    --secondary-foreground: 0 0% 100%; /* White */
- 
-    --muted: 210 40% 96.1%;          /* Light gray */
-    --muted-foreground: 215 16% 47%; /* Medium gray */
- 
-    --accent: 195 100% 50%;          /* Deep Sky Blue #00BFFF */
-    --accent-foreground: 224 47% 20%; /* Dark gray */
- 
-    --destructive: 0 84% 60%;        /* Red */
-    --destructive-foreground: 0 0% 100%; /* White */
+    --card: 0 0% 100%;
+    /* White */
+    --card-foreground: 0 0% 20%;
+    /* Jet #333333 */
 
-    --success: 142 76% 36%;          /* Green */
-    --success-foreground: 0 0% 100%; /* White */
-    
-    --warning: 38 92% 50%;           /* Amber */
-    --warning-foreground: 224 47% 20%; /* Dark gray */
- 
-    --interactive: 209 70% 50%;      /* Medium Blue #3182CE */
-    --interactive-foreground: 0 0% 100%; /* White */
- 
-    --border: 215 32% 82%;           /* Soft gray border */
-    --input: 215 32% 82%;            /* Same as border */
-    --ring: 224 47% 20%;             /* Dark gray for focus rings */
- 
-    --radius: 0.5rem;               /* Border radius for components */
+    --popover: 0 0% 100%;
+    /* White */
+    --popover-foreground: 0 0% 20%;
+    /* Jet #333333 */
+
+    --primary: 0 0% 20%;
+    /* Jet #333333 */
+    --primary-foreground: 0 0% 100%;
+    /* White */
+
+    --secondary: 215 19% 35%;
+    /* Payne's Grey #4A5568 */
+    --secondary-foreground: 0 0% 100%;
+    /* White */
+
+    --muted: 210 40% 96.1%;
+    /* Light gray */
+    --muted-foreground: 215 16% 47%;
+    /* Medium gray */
+
+    --accent: 195 100% 50%;
+    /* Deep Sky Blue #00BFFF */
+    --accent-foreground: 0 0% 20%;
+    /* Jet #333333 */
+
+    --destructive: 0 84% 60%;
+    /* Red */
+    --destructive-foreground: 0 0% 100%;
+    /* White */
+
+    --success: 142 76% 36%;
+    /* Green */
+    --success-foreground: 0 0% 100%;
+    /* White */
+
+    --warning: 38 92% 50%;
+    /* Amber */
+    --warning-foreground: 0 0% 20%;
+    /* Jet #333333 */
+
+    --interactive: 209 70% 50%;
+    /* Medium Blue #3182CE */
+    --interactive-foreground: 0 0% 100%;
+    /* White */
+
+    --border: 215 32% 82%;
+    /* Soft gray border */
+    --input: 215 32% 82%;
+    /* Same as border */
+    --ring: 0 0% 20%;
+    /* Jet #333333 for focus rings */
+
+    --radius: 0.5rem;
+    /* Border radius for components */
   }
- 
-  .dark {
-    --background: 224 47% 10%;       /* Darker version of primary */
-    --foreground: 0 0% 95%;          /* Off-white */
- 
-    --card: 224 47% 10%;             /* Dark background */
-    --card-foreground: 0 0% 95%;     /* Off-white */
- 
-    --popover: 224 47% 10%;          /* Dark background */
-    --popover-foreground: 0 0% 95%;  /* Off-white */
- 
-    --primary: 0 0% 95%;             /* Off-white as primary in dark mode */
-    --primary-foreground: 224 47% 20%; /* Original primary */
- 
-    --secondary: 215 28% 17%;        /* Darker version of secondary */
-    --secondary-foreground: 0 0% 95%; /* Off-white */
- 
-    --muted: 215 28% 17%;            /* Darker muted background */
-    --muted-foreground: 215 20% 65%; /* Lighter muted text */
- 
-    --accent: 195 70% 35%;           /* Darker accent */
-    --accent-foreground: 0 0% 95%;   /* Off-white */
- 
-    --destructive: 0 63% 31%;        /* Darker red */
-    --destructive-foreground: 0 0% 95%; /* Off-white */
 
-    --success: 142 76% 25%;          /* Darker green */
-    --success-foreground: 0 0% 95%;  /* Off-white */
-    
-    --warning: 38 92% 40%;           /* Darker amber */
-    --warning-foreground: 0 0% 95%;  /* Off-white */
- 
-    --interactive: 209 70% 40%;      /* Darker interactive */
-    --interactive-foreground: 0 0% 95%; /* Off-white */
- 
-    --border: 215 28% 17%;           /* Darker border */
-    --input: 215 28% 17%;            /* Same as border */
-    --ring: 215 20% 65%;             /* Lighter ring for focus */
+  .dark {
+    --background: 224 47% 10%;
+    /* Darker version of primary */
+    --foreground: 0 0% 95%;
+    /* Off-white */
+
+    --card: 224 47% 10%;
+    /* Dark background */
+    --card-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --popover: 224 47% 10%;
+    /* Dark background */
+    --popover-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --primary: 0 0% 95%;
+    /* Off-white as primary in dark mode */
+    --primary-foreground: 224 47% 20%;
+    /* Original primary */
+
+    --secondary: 215 28% 17%;
+    /* Darker version of secondary */
+    --secondary-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --muted: 215 28% 17%;
+    /* Darker muted background */
+    --muted-foreground: 215 20% 65%;
+    /* Lighter muted text */
+
+    --accent: 195 70% 35%;
+    /* Darker accent */
+    --accent-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --destructive: 0 63% 31%;
+    /* Darker red */
+    --destructive-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --success: 142 76% 25%;
+    /* Darker green */
+    --success-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --warning: 38 92% 40%;
+    /* Darker amber */
+    --warning-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --interactive: 209 70% 40%;
+    /* Darker interactive */
+    --interactive-foreground: 0 0% 95%;
+    /* Off-white */
+
+    --border: 215 28% 17%;
+    /* Darker border */
+    --input: 215 28% 17%;
+    /* Same as border */
+    --ring: 215 20% 65%;
+    /* Lighter ring for focus */
   }
 
   /* Base styles for all elements */
   * {
-    border-color: hsl(var(--border)); /* Direct CSS property instead of @apply */
+    border-color: hsl(var(--border));
+    /* Direct CSS property instead of @apply */
   }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -155,13 +216,13 @@ svg:not(:root).svg-inline--fa, svg:not(:host).svg-inline--fa {
 }
 
 /* Global form input styling for consistent branding */
-input[type="checkbox"], 
+input[type="checkbox"],
 input[type="radio"] {
   accent-color: var(--secondary-color);
   color: var(--secondary-color);
 }
 
-input[type="checkbox"]:focus, 
+input[type="checkbox"]:focus,
 input[type="radio"]:focus {
   outline-color: var(--secondary-color);
   box-shadow: 0 0 0 1px var(--secondary-color);
@@ -170,8 +231,10 @@ input[type="radio"]:focus {
 /* Force app to use class-based dark mode instead of system preference */
 @media (prefers-color-scheme: dark) {
   :root:not(.dark) {
-    --background-color: #FFFFFF; /* Keep background white even in dark mode by default */
-    --primary-color: #333333;    /* Keep text dark for readability on white */
+    --background-color: #FFFFFF;
+    /* Keep background white even in dark mode by default */
+    --primary-color: #333333;
+    /* Keep text dark for readability on white */
   }
 }
 
@@ -187,7 +250,12 @@ body {
   font-family: 'Work Sans', sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Sora', sans-serif;
   color: hsl(var(--foreground));
 }
@@ -207,7 +275,7 @@ html {
 }
 
 /* Ensure all main containers have correct background */
-.min-h-screen, 
+.min-h-screen,
 main {
   background-color: hsl(var(--background));
 }
@@ -220,15 +288,15 @@ main {
   .survey-preview-container {
     gap: 1rem;
   }
-  
+
   .creative-preview-wrapper {
     width: 90%;
   }
-  
+
   .platform-switcher-column {
     width: 90%;
   }
-  
+
   .survey-content-column {
     width: 90%;
     padding: 1.5rem;
@@ -240,16 +308,16 @@ main {
   .survey-preview-container {
     gap: 0.75rem;
   }
-  
+
   .creative-preview-wrapper {
     width: 95%;
   }
-  
+
   .platform-switcher-column {
     width: 95%;
     border-left: none;
   }
-  
+
   .survey-content-column {
     width: 95%;
     padding: 1.25rem;
@@ -261,17 +329,17 @@ main {
   .survey-preview-container {
     flex-direction: column;
   }
-  
+
   .creative-preview-wrapper {
     width: 100%;
     height: auto;
   }
-  
+
   .platform-switcher-column {
     width: 100%;
     border-left: none;
   }
-  
+
   .survey-content-column {
     width: 100%;
     padding: 1rem;
@@ -296,6 +364,7 @@ main {
   .animate-accordion-down {
     animation: accordion-down 0.2s ease-out;
   }
+
   .animate-accordion-up {
     animation: accordion-up 0.2s ease-out;
   }

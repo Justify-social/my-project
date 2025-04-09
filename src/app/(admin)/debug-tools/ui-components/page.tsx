@@ -309,13 +309,14 @@ export default function ComponentBrowserPage() {
                     {/* Render both, control visibility/display with group-hover */}
                     <Icon
                       iconId={pair.lightId}
-                      // Default: show light, use foreground color. Hover: hide
-                      className="w-[55%] h-[55%] text-foreground group-hover:hidden"
+                      // Default: show light, use foreground fill. Hover: hide
+                      className="w-[55%] h-[55%] fill-foreground group-hover:hidden"
                     />
                     <Icon
                       iconId={pair.solidId}
-                      // Default: hide. Hover: show solid, use accent color
-                      className="w-[55%] h-[55%] text-[#00BFFF] hidden group-hover:block"
+                      // Default: hide. Hover: show solid, use accent fill via inline style for specificity
+                      className="w-[55%] h-[55%] hidden group-hover:block"
+                      style={{ fill: '#00BFFF' }} // Apply accent color directly
                     />
                     <p className="text-xs break-all pt-1 mt-auto">
                       {/* Display base name derived from ID if name is missing */}

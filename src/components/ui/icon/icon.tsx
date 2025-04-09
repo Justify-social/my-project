@@ -61,8 +61,11 @@ export const Icon: React.FC<IconProps> = memo(({
         }
         const text = await response.text();
         if (!isCancelled) {
-          // Basic modification: Ensure fill="currentColor" on path elements if missing
+          // More robust sanitization:
+          // 1. Remove any internal <style> blocks to prevent overrides
+          // 2. Add fill="currentColor" to paths lacking an explicit fill attribute
           const sanitizedText = text
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/g, '') // Remove style blocks (compatible way)
             .replace(/<path(?![^>]*fill=)([^>]*)>/g, '<path fill="currentColor"$1>'); // Add fill if missing
 
           setSvgContent(sanitizedText);
