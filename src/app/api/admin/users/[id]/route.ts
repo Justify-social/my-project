@@ -15,7 +15,7 @@ async function isSuperAdmin() {
   try {
     const session = await getSession();
     if (!session || !session.user) return false;
-    
+
     // Cast user to Auth0User type to access custom claims
     const user = session.user as Auth0User;
     const roles = user['https://justify.social/roles'] || [];
@@ -26,31 +26,52 @@ async function isSuperAdmin() {
   }
 }
 
+// Define interface for the GET route context
+interface GetUserContext {
+  params: {
+    id: string;
+  };
+}
+
+// Define type for selected user data
+interface SelectedUserData {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  surname: string | null;
+  companyName: string | null;
+  profilePictureUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string | null; // Assuming role is optional/string
+}
+
 // GET user details - Super Admin only
 export async function GET(
   request: NextRequest,
+  // Revert to precise inline type definition for the context
   { params }: { params: { id: string } }
 ) {
   try {
     // Verify Super Admin status
     const superAdminCheck = await isSuperAdmin();
     if (!superAdminCheck) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Unauthorized access' 
+      return NextResponse.json({
+        success: false,
+        error: 'Unauthorized access'
       }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = params; // Access id directly from destructured params
     if (!id) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'User ID is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'User ID is required'
       }, { status: 400 });
     }
 
-    // Fetch user details
-    const user = await prisma.user.findUnique({
+    // Fetch user details and explicitly type the result
+    const user: SelectedUserData | null = await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -66,17 +87,17 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'User not found' 
+      return NextResponse.json({
+        success: false,
+        error: 'User not found'
       }, { status: 404 });
     }
 
     // Format user data for response
     const userData = {
       id: user.id,
-      name: user.firstName && user.surname 
-        ? `${user.firstName} ${user.surname}` 
+      name: user.firstName && user.surname
+        ? `${user.firstName} ${user.surname}`
         : user.email?.split('@')[0] || 'Unknown User',
       email: user.email || 'No email',
       firstName: user.firstName,
@@ -89,14 +110,14 @@ export async function GET(
       role: user.role || 'MEMBER',
     };
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       data: userData
     });
   } catch (error) {
     console.error('Error fetching user details:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Failed to fetch user details',
       details: process.env.NODE_ENV === 'development' ? String(error) : undefined
     }, { status: 500 });
