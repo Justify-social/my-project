@@ -12,7 +12,8 @@ import {
   CampaignApiPayload,
   transformCampaignFormData as _transformCampaignFormData,
   transformContactData as _transformContactData,
-  transformBudgetData as _transformBudgetData
+  transformBudgetData as _transformBudgetData,
+  EnumUtils
 } from './form-transformers';
 
 /**
@@ -122,7 +123,7 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
     ? {
       name: `${formValues.primaryContact.firstName || ''} ${formValues.primaryContact.surname || ''}`.trim(),
       email: formValues.primaryContact.email,
-      position: formValues.primaryContact.position
+      position: EnumUtils.Position.toString(EnumUtils.Position.fromString(formValues.primaryContact.position as string || 'Manager'))
     }
     : undefined;
 
@@ -131,15 +132,14 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
     ? {
       name: `${formValues.secondaryContact.firstName || ''} ${formValues.secondaryContact.surname || ''}`.trim(),
       email: formValues.secondaryContact.email,
-      position: formValues.secondaryContact.position
+      position: EnumUtils.Position.toString(EnumUtils.Position.fromString(formValues.secondaryContact.position as string || 'Manager'))
     }
     : undefined;
 
   // Transform budget
   const budget = {
     total: Number(formValues.totalBudget || 0),
-    currency: (formValues.currency as Currency) || Currency.USD,
-    // Add allocation if available
+    currency: EnumUtils.Currency.fromString(formValues.currency as string || 'USD'),
     allocation: Array.isArray(formValues.budgetAllocation)
       ? formValues.budgetAllocation.map((item: unknown) => {
         const typedItem = item as Record<string, unknown>;
@@ -170,13 +170,13 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
   const influencers = formValues.influencers
     ? formValues.influencers.map(inf => ({
       handle: inf.handle || '',
-      platform: enumConverters.platformToEnum(inf.platform as string || 'INSTAGRAM'),
+      platform: EnumUtils.Platform.fromString(inf.platform as string || 'INSTAGRAM'),
       url: (inf as Record<string, unknown>).url as string || '',
     }))
     : formValues.influencerHandle
       ? [{
         handle: formValues.influencerHandle,
-        platform: enumConverters.platformToEnum(formValues.platform as string || 'INSTAGRAM'),
+        platform: EnumUtils.Platform.fromString(formValues.platform as string || 'INSTAGRAM'),
         url: '',
       }]
       : [];
@@ -207,14 +207,13 @@ export function adaptLegacyFormToApi(formValues: LegacyCampaignForm): CampaignAp
     primaryContact,
     secondaryContact,
     budget,
-    primaryKPI: formValues.primaryKPI as KPI,
-    secondaryKPIs: (formValues.secondaryKPIs || []) as KPI[],
+    primaryKPI: EnumUtils.KPI.fromString(formValues.primaryKPI as string || 'BRAND_AWARENESS'),
+    secondaryKPIs: (formValues.secondaryKPIs || []).map(kpi => EnumUtils.KPI.fromString(kpi as string)),
     features: (formValues.features || []) as Feature[],
     audience,
     influencers,
     creativeAssets,
     creativeRequirements,
-    // Pass through any additional fields that might be needed
     ...(formValues.additionalData as Record<string, unknown> || {})
   };
 }
@@ -250,7 +249,7 @@ export function adaptApiToLegacyForm(apiData: unknown): LegacyCampaignForm {
       firstName: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'name')?.split(' ')[0] || '',
       surname: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'name')?.split(' ').slice(1).join(' ') || '',
       email: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'email') || '',
-      position: getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'position') || ''
+      position: EnumUtils.Position.toString(EnumUtils.Position.fromString(getStringProperty((typedApiData.primaryContact as Record<string, unknown>), 'position') || 'Manager'))
     }
     : undefined;
 
@@ -260,13 +259,13 @@ export function adaptApiToLegacyForm(apiData: unknown): LegacyCampaignForm {
       firstName: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'name')?.split(' ')[0] || '',
       surname: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'name')?.split(' ').slice(1).join(' ') || '',
       email: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'email') || '',
-      position: getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'position') || ''
+      position: EnumUtils.Position.toString(EnumUtils.Position.fromString(getStringProperty((typedApiData.secondaryContact as Record<string, unknown>), 'position') || 'Manager'))
     }
     : undefined;
 
   // Extract budget information
   const budgetData = typedApiData.budget as Record<string, unknown> || {};
-  const currency = getStringProperty(budgetData, 'currency') as Currency || Currency.USD;
+  const currency = EnumUtils.Currency.toString(EnumUtils.Currency.fromString(getStringProperty(budgetData, 'currency') || 'USD'));
   const totalBudget = getNumberProperty(budgetData, 'total') || 0;
 
   // Calculate social media budget from budget allocation
@@ -306,14 +305,14 @@ export function adaptApiToLegacyForm(apiData: unknown): LegacyCampaignForm {
       const influencer = inf as Record<string, unknown>;
       return {
         handle: getStringProperty(influencer, 'handle') || '',
-        platform: getStringProperty(influencer, 'platform') as Platform || Platform.INSTAGRAM,
+        platform: EnumUtils.Platform.toString(EnumUtils.Platform.fromString(getStringProperty(influencer, 'platform') || 'INSTAGRAM')),
         url: getStringProperty(influencer, 'url') || ''
       };
     })
     : [];
 
   // Get first influencer for legacy handling
-  const influencerHandleInfo = influencers.length > 0 ? influencers[0] : { handle: '', platform: Platform.INSTAGRAM };
+  const influencerHandleInfo = influencers.length > 0 ? influencers[0] : { handle: '', platform: 'Instagram' };
   const influencerHandle = influencerHandleInfo.handle;
   const platform = influencerHandleInfo.platform;
 
@@ -353,13 +352,9 @@ export function adaptApiToLegacyForm(apiData: unknown): LegacyCampaignForm {
     socialMediaBudget,
     primaryContact,
     secondaryContact,
-    primaryKPI: getStringProperty(typedApiData, 'primaryKPI'),
-    secondaryKPIs: Array.isArray(typedApiData.secondaryKPIs)
-      ? typedApiData.secondaryKPIs.map((kpi: unknown) => String(kpi))
-      : [],
-    features: Array.isArray(typedApiData.features)
-      ? typedApiData.features.map((feat: unknown) => String(feat))
-      : [],
+    primaryKPI: EnumUtils.KPI.toString(EnumUtils.KPI.fromString(getStringProperty(typedApiData, 'primaryKPI') || 'BRAND_AWARENESS')),
+    secondaryKPIs: (Array.isArray(typedApiData.secondaryKPIs) ? typedApiData.secondaryKPIs.map((kpi: unknown) => EnumUtils.KPI.toString(EnumUtils.KPI.fromString(String(kpi)))) : []),
+    features: Array.isArray(typedApiData.features) ? typedApiData.features.map((feat: unknown) => String(feat)) : [],
     targetAudience,
     competitors,
     assets,
@@ -368,7 +363,6 @@ export function adaptApiToLegacyForm(apiData: unknown): LegacyCampaignForm {
     platform,
     influencers,
     status: getStringProperty(typedApiData, 'status') || 'draft',
-    // Include the original data for reference if needed
     _originalData: typedApiData
   };
 }
@@ -476,137 +470,4 @@ export async function compatibleFetch(url: string, options: RequestInit = {}): P
 
   // Return error responses as is
   return response;
-}
-
-/**
- * Enum conversion utilities to handle case differences between UI and API
- */
-export const enumConverters = {
-  /**
-   * Convert UI-friendly platform name to API enum value
-   */
-  platformToEnum(platform: string): Platform {
-    switch (platform.toLowerCase()) {
-      case 'instagram':
-        return Platform.INSTAGRAM;
-      case 'youtube':
-        return Platform.YOUTUBE;
-      case 'tiktok':
-        return Platform.TIKTOK;
-      default:
-        return Platform.INSTAGRAM;
-    }
-  },
-
-  /**
-   * Convert API enum value to UI-friendly platform name
-   */
-  enumToPlatform(platform: Platform): string {
-    switch (platform) {
-      case Platform.INSTAGRAM:
-        return 'Instagram';
-      case Platform.YOUTUBE:
-        return 'YouTube';
-      case Platform.TIKTOK:
-        return 'TikTok';
-      default:
-        return 'Instagram';
-    }
-  },
-
-  /**
-   * Convert UI-friendly position name to API enum value
-   */
-  positionToEnum(position: string): Position {
-    switch (position.toLowerCase()) {
-      case 'manager':
-        return Position.Manager;
-      case 'director':
-        return Position.Director;
-      case 'vp':
-      case 'vice president':
-        return Position.VP;
-      default:
-        return Position.Manager;
-    }
-  },
-
-  /**
-   * Convert API enum value to UI-friendly position name
-   */
-  enumToPosition(position: Position): string {
-    switch (position) {
-      case Position.Manager:
-        return 'Manager';
-      case Position.Director:
-        return 'Director';
-      case Position.VP:
-        return 'VP';
-      default:
-        return 'Manager';
-    }
-  },
-
-  /**
-   * Convert UI-friendly KPI name to API enum value
-   */
-  kpiToEnum(kpi: string): KPI {
-    switch (kpi.toLowerCase().replace(/[_\s-]/g, '')) {
-      case 'adrecall':
-      case 'recall':
-        return KPI.AD_RECALL;
-      case 'brandawareness':
-      case 'awareness':
-        return KPI.BRAND_AWARENESS;
-      case 'consideration':
-        return KPI.CONSIDERATION;
-      case 'messageassociation':
-      case 'association':
-        return KPI.MESSAGE_ASSOCIATION;
-      case 'brandpreference':
-      case 'preference':
-        return KPI.BRAND_PREFERENCE;
-      case 'purchaseintent':
-      case 'purchase':
-        return KPI.PURCHASE_INTENT;
-      case 'actionintent':
-      case 'action':
-        return KPI.ACTION_INTENT;
-      case 'recommendationintent':
-      case 'recommendation':
-        return KPI.RECOMMENDATION_INTENT;
-      case 'advocacy':
-        return KPI.ADVOCACY;
-      default:
-        return KPI.BRAND_AWARENESS;
-    }
-  },
-
-  /**
-   * Convert API enum value to UI-friendly KPI name
-   */
-  enumToKpi(kpi: KPI): string {
-    switch (kpi) {
-      case KPI.AD_RECALL:
-        return 'Ad Recall';
-      case KPI.BRAND_AWARENESS:
-        return 'Brand Awareness';
-      case KPI.CONSIDERATION:
-        return 'Consideration';
-      case KPI.MESSAGE_ASSOCIATION:
-        return 'Message Association';
-      case KPI.BRAND_PREFERENCE:
-        return 'Brand Preference';
-      case KPI.PURCHASE_INTENT:
-        return 'Purchase Intent';
-      case KPI.ACTION_INTENT:
-        return 'Action Intent';
-      case KPI.RECOMMENDATION_INTENT:
-        return 'Recommendation Intent';
-      case KPI.ADVOCACY:
-        return 'Advocacy';
-      default:
-        return 'Brand Awareness';
-    }
-  }
-}; 
+} 
