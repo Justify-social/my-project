@@ -3,6 +3,7 @@
  * @category atom
  * @subcategory layout
  * @description Displays content within a fixed aspect ratio.
+ * @status stable
  */
 "use client"
 

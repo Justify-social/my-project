@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory layout
  * @description A container for grouping related content and actions.
+ * @status stable
  */
 import * as React from "react"
 

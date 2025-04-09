@@ -1,8 +1,9 @@
 /**
  * @component Alert
  * @category molecule
- * @subcategory feedback
+ * @subcategory notification
  * @description Displays a callout for user attention.
+ * @status stable
  */
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"

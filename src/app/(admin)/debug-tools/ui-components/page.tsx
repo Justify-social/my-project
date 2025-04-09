@@ -6,40 +6,29 @@
 
 'use client';
 
-import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
-  Button, ButtonProps,
-  Card, CardHeader, CardTitle, CardContent, CardDescription,
-  Badge,
-  Input,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-  Avatar, AvatarImage, AvatarFallback,
-  Alert, AlertTitle, AlertDescription,
-  Table,
+  Card, CardHeader, CardTitle, CardContent,
   Tabs, TabsList, TabsTrigger, TabsContent,
+  Alert, AlertTitle, AlertDescription,
 } from "@/components/ui";
-import { LightIcon, SolidIcon, Icon } from '@/components/ui/icon';
-import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
-import ErrorFallback from '@/components/features/core/error-handling/ErrorFallback';
+import { Icon } from '@/components/ui/icon';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { iconRegistryData } from '@/lib/generated/icon-registry';
 import { IconMetadata } from '@/components/ui/icon/icon-types';
 import { Button as UiButton } from '@/components/ui/button';
-import { type ComponentRegistry, type ExtendedComponentMetadata, type ComponentCategory, CATEGORIES } from './types';
+import { type ComponentRegistry, type ExtendedComponentMetadata, type ComponentCategory } from './types';
 import { cn } from '@/lib/utils';
 
-const CATEGORIES_DISPLAY: { name: ComponentCategory; icon: string }[] = CATEGORIES.map(cat => {
-  switch (cat) {
-    case 'atom': return { name: cat, icon: 'faAtomSolid' };
-    case 'molecule': return { name: cat, icon: 'faDnaSolid' };
-    case 'organism': return { name: cat, icon: 'faBacteriumSolid' };
-    case 'template': return { name: cat, icon: 'faObjectGroupSolid' };
-    case 'page': return { name: cat, icon: 'faFileSolid' };
-    case 'unknown': return { name: cat, icon: 'faQuestionSolid' };
-    default: return { name: cat, icon: 'faQuestionSolid' };
-  }
-}).filter(cat => cat.name !== 'unknown');
+const CATEGORIES_DISPLAY: Record<ComponentCategory, { icon: string }> = {
+  atom: { icon: 'faAtomSolid' },
+  molecule: { icon: 'faDnaSolid' },
+  organism: { icon: 'faBacteriumSolid' },
+  template: { icon: 'faObjectGroupSolid' },
+  page: { icon: 'faFileSolid' },
+  unknown: { icon: 'faQuestionSolid' },
+};
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -73,18 +62,18 @@ export default function ComponentBrowserPage() {
       setIsLoadingRegistry(true);
       setErrorLoadingRegistry(null);
       try {
-        const response = await fetch('/api/debug-tools/ui-components');
+        const response = await fetch('/static/component-registry.json');
         if (!response.ok) {
-          throw new Error(`Failed to fetch registry: ${response.statusText}`);
+          throw new Error(`Failed to fetch registry JSON: ${response.statusText}`);
         }
         const data: ComponentRegistry = await response.json();
         setRegistry(data);
-        if (!selectedCategory && data.allCategories.length > 0) {
+        if (!selectedCategory && data.allCategories && data.allCategories.length > 0) {
           const defaultCategory = data.allCategories.includes('atom') ? 'atom' : data.allCategories[0];
           setSelectedCategory(defaultCategory);
         }
       } catch (err) {
-        console.error("Error fetching component registry:", err);
+        console.error("Error fetching component registry JSON:", err);
         setErrorLoadingRegistry(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
         setIsLoadingRegistry(false);
@@ -125,21 +114,10 @@ export default function ComponentBrowserPage() {
     return registry.byCategory[selectedCategory] || [];
   }, [registry, selectedCategory]);
 
-  const getPreviewProps = (componentName: string): any => {
-    switch (componentName) {
-      case 'Button': return { children: 'Click Me' };
-      case 'Icon': return { iconId: 'faCheckSolid' };
-      case 'Card': return { children: <CardContent>Card Content</CardContent> };
-      case 'Input': return { placeholder: 'Enter text...' };
-      case 'SearchBar': return { placeholder: 'Search...' };
-      default: return {};
-    }
-  };
-
   const getCategoryCount = (category: string): number => {
     if (category === 'All') return allIcons.length;
     if (category === 'Hover') return hoverPairs.length;
-    return allIcons.filter(icon => icon.category === category.toLowerCase()).length;
+    return allIcons.filter(icon => icon.category?.toLowerCase() === category.toLowerCase()).length;
   };
 
   if (isLoadingRegistry) {
@@ -166,7 +144,7 @@ export default function ComponentBrowserPage() {
       <div className="container mx-auto py-8 px-4">
         <Alert>
           <AlertTitle>No Components Found</AlertTitle>
-          <AlertDescription>Could not load the component registry.</AlertDescription>
+          <AlertDescription>Could not load the component registry from /static/component-registry.json.</AlertDescription>
         </Alert>
       </div>
     );
@@ -185,7 +163,7 @@ export default function ComponentBrowserPage() {
         <TabsContent value="components">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
             {(registry.allCategories || []).map((category: ComponentCategory) => {
-              const catDisplay = CATEGORIES_DISPLAY.find(cd => cd.name === category);
+              const catDisplay = CATEGORIES_DISPLAY[category];
               const count = registry.byCategory[category]?.length || 0;
               if (count === 0 || category === 'unknown') return null;
 
@@ -200,7 +178,7 @@ export default function ComponentBrowserPage() {
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium capitalize">{category}</CardTitle>
-                    {<Icon iconId={catDisplay?.icon || 'faQuestionSolid'} className="h-4 w-4 text-muted-foreground" />}
+                    <Icon iconId={catDisplay?.icon || 'faQuestionSolid'} className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-xs text-secondary">
@@ -222,7 +200,7 @@ export default function ComponentBrowserPage() {
                   filteredComponents.map((comp: ExtendedComponentMetadata) => (
                     <Link
                       key={comp.name}
-                      href={`/debug-tools/ui-components/preview/${encodeURIComponent(comp.name)}`}
+                      href={`/debug-tools/ui-components/preview/${comp.name}`}
                       className="block border border-divider rounded-lg hover:shadow-md hover:border-Interactive transition-all duration-150 bg-background group"
                       passHref
                     >

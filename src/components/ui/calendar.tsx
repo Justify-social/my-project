@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory input
  * @description Displays a calendar grid allowing users to view dates and select single or multiple dates.
+ * @status stable
  */
 "use client"
 

@@ -1,8 +1,9 @@
 /**
  * @component Dialog
- * @category organism
+ * @category molecule
  * @subcategory overlay
- * @description A window overlaid on the primary window, rendering the content underneath inert.
+ * @description A window overlaid on either the primary window or another dialog window, rendering the content underneath inert.
+ * @status stable
  */
 "use client"
 

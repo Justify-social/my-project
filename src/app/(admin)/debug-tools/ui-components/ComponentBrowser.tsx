@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { type ExtendedComponentMetadata, type ComponentCategory } from './utils/discovery';
+import { type ExtendedComponentMetadata, type ComponentCategory } from './types';
 import { cn } from '@/lib/utils';
 
 // Define the props for the client component
@@ -74,47 +74,52 @@ export default function ComponentBrowser({ components }: ComponentBrowserProps) 
 
             {/* Component Grid */}
             <main className="flex-grow">
-                {selectedCategory ? (
-                    <> {/* Use Fragment */}
-                        <h2 className="text-xl font-semibold mb-4 text-primary">
-                            {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Components
+                {selectedCategory && (
+                    <React.Fragment>
+                        <h2 className="text-xl font-semibold mb-4 capitalize text-primary">
+                            {selectedCategory} Components
                         </h2>
                         {componentsToShow.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {componentsToShow.map((component) => (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {componentsToShow.map((comp: ExtendedComponentMetadata) => (
                                     <Link
-                                        key={component.name}
-                                        href={`/debug-tools/ui-components/${encodeURIComponent(component.name)}`}
-                                        className="block p-4 border border-divider rounded-lg hover:shadow-md hover:border-Interactive transition-all duration-150 bg-background group"
+                                        key={comp.name}
+                                        href={`/debug-tools/ui-components/preview/${comp.name.toLowerCase()}`}
+                                        className="block border border-divider rounded-lg hover:shadow-md hover:border-Interactive transition-all duration-150 bg-background group"
+                                        passHref
                                     >
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h3 className="text-md font-semibold text-primary group-hover:text-Interactive truncate">
-                                                {component.name}
-                                            </h3>
-                                            {component.status && (
-                                                <span
-                                                    className={cn(
-                                                        'text-xs font-medium px-2 py-0.5 rounded-full border',
-                                                        statusStyles[component.status] || statusStyles.development
-                                                    )}
-                                                >
-                                                    {component.status}
-                                                </span>
-                                            )}
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h3 className="text-md font-semibold text-primary group-hover:text-Interactive truncate">
+                                                    {comp.name}
+                                                </h3>
+                                                {comp.status && (
+                                                    <span
+                                                        className={cn(
+                                                            'text-xs font-medium px-2 py-0.5 rounded-full border whitespace-nowrap',
+                                                            statusStyles[comp.status] || statusStyles.development
+                                                        )}
+                                                    >
+                                                        {comp.status}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-secondary line-clamp-2">
+                                                {comp.description || 'No description available.'}
+                                            </p>
                                         </div>
-                                        <p className="text-sm text-secondary line-clamp-2">
-                                            {component.description || 'No description available.'}
-                                        </p>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-secondary">No components found in this category.</p>
+                            <p className="text-secondary col-span-full">No components found in the '{selectedCategory}' category.</p>
                         )}
-                    </> {/* Close Fragment */}
-                ) : (
-                <p className="text-secondary">Select a category to view components.</p>
-        )}
+                    </React.Fragment>
+                )}
+
+                {!selectedCategory && (
+                    <p className="text-secondary">Select a category to view components.</p>
+                )}
             </main>
         </div>
     );

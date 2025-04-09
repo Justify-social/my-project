@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory layout
  * @description A vertically stacked set of interactive headings that each reveal a section of content.
+ * @status stable
  */
 "use client"
 

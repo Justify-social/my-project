@@ -1,8 +1,9 @@
 /**
  * @component Collapsible
- * @category molecule
- * @subcategory layout
- * @description A content area that can be collapsed and expanded.
+ * @category layout
+ * @subcategory container
+ * @description An interactive component which expands/collapses its content.
+ * @status stable
  */
 "use client"
 

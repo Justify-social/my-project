@@ -1,8 +1,9 @@
 /**
  * @component ContextMenu
- * @category organism
- * @subcategory navigation
- * @description Displays a menu associated with an element, typically triggered by a right-click or long-press.
+ * @category molecule
+ * @subcategory menu
+ * @description Displays a menu located at the pointer, triggered by a right-click or long-press.
+ * @status stable
  */
 "use client"
 

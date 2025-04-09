@@ -1,8 +1,9 @@
 /**
  * @component Avatar
- * @category molecule
- * @subcategory display
- * @description An image element with a fallback for representing users or entities.
+ * @category atom
+ * @subcategory image
+ * @description Displays an image or a fallback for user profiles or entities.
+ * @status stable
  */
 "use client"
 

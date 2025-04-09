@@ -1,8 +1,9 @@
 /**
  * @component DatePicker
- * @category organism
+ * @category molecule
  * @subcategory input
- * @description Allows users to select a date from a calendar popover.
+ * @description A date picker component with calendar integration.
+ * @status stable
  * @since 2023-07-15
  */
 'use client'

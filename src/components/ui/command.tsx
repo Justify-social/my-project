@@ -1,8 +1,9 @@
 /**
  * @component Command
- * @category organism
+ * @category molecule
  * @subcategory input
- * @description Input component with filtering and keyboard navigation, often used for command palettes or searchable menus.
+ * @description Fast, composable command menu for React.
+ * @status stable
  */
 "use client"
 
@@ -46,7 +47,7 @@ const CommandInput = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
   <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <Icon iconId="faSearch" className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+    <Icon iconId="faMagnifyingGlassLight" className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(

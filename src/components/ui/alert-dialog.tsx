@@ -1,8 +1,9 @@
 /**
  * @component AlertDialog
- * @category organism
- * @subcategory feedback
- * @description A modal dialog that interrupts the user with important content, requiring acknowledgement.
+ * @category molecule
+ * @subcategory dialog
+ * @description A modal dialog that interrupts the user with important content, requiring acknowledgment.
+ * @status stable
  */
 "use client"
 

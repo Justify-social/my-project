@@ -72,7 +72,7 @@ const parseStatus = (jsdoc: string): ComponentStatus | undefined => {
 /**
  * Parses JSDoc comments from a file content to extract component metadata.
  */
-const extractComponentMetadata = (filePath: string): ExtendedComponentMetadata | null => {
+export const extractComponentMetadata = (filePath: string): ExtendedComponentMetadata | null => {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
 
@@ -117,7 +117,7 @@ const extractComponentMetadata = (filePath: string): ExtendedComponentMetadata |
 /**
  * Recursively finds all .tsx files in a directory, excluding specified patterns.
  */
-const findComponentFiles = (dir: string, results: string[] = []): string[] => {
+export const findComponentFiles = (dir: string, results: string[] = []): string[] => {
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -168,13 +168,12 @@ export function groupComponentsByCategory(
   }, {} as Record<ComponentCategory, ExtendedComponentMetadata[]>);
 
   components.forEach(component => {
-    // Use the validated category from metadata
     const category = component.category;
-    if (grouped[category]) {
+    if (CATEGORIES.includes(category)) {
       grouped[category].push(component);
     } else {
-      // This case should ideally not happen if category is always validated
-      console.warn(`Component ${component.name} has unknown category: ${category}. Placing in 'unknown'.`);
+      console.warn(`Component ${component.name} has unknown or invalid category: ${category}. Placing in 'unknown'.`);
+      if (!grouped.unknown) grouped.unknown = [];
       grouped.unknown.push(component);
     }
   });
@@ -187,10 +186,18 @@ export function groupComponentsByCategory(
  */
 export async function buildComponentRegistry(): Promise<ComponentRegistry> {
   const components = await discoverComponents();
-  const byCategory = groupComponentsByCategory(components); // Use synchronous grouping
 
-  const byName = components.reduce((acc, component) => {
-    // Use component.name which should be valid based on extraction logic
+  // --- Filter Components by Category ---
+  const allowedCategories: ComponentCategory[] = ['atom', 'molecule', 'organism'];
+  const filteredComponents = components.filter((component: ExtendedComponentMetadata) =>
+    allowedCategories.includes(component.category)
+  );
+  console.log(`[Discovery] Filtered ${components.length} total components down to ${filteredComponents.length} (atom, molecule, organism).`);
+  // -------------------------------------
+
+  // Build maps using the FILTERED components
+  const byCategory = groupComponentsByCategory(filteredComponents);
+  const byName = filteredComponents.reduce((acc: Record<string, ExtendedComponentMetadata>, component: ExtendedComponentMetadata) => {
     if (component.name) {
       acc[component.name.toLowerCase()] = component;
     }
@@ -198,10 +205,11 @@ export async function buildComponentRegistry(): Promise<ComponentRegistry> {
   }, {} as Record<string, ExtendedComponentMetadata>);
 
   return {
-    components,
+    components: filteredComponents, // Return filtered list
     byCategory,
     byName,
-    allCategories: CATEGORIES,
+    // Ensure allCategories only includes categories present in the filtered list
+    allCategories: CATEGORIES.filter(cat => byCategory[cat]?.length > 0),
   };
 }
 
