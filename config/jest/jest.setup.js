@@ -6,6 +6,10 @@
 
 // Import necessary testing libraries
 import '@testing-library/jest-dom';
+import { expect } from '@jest/globals';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+expect.extend(matchers);
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -51,10 +55,12 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
+/* // Mock removed as the target module no longer exists
 // Mock FontAwesome icon integration
 jest.mock('@/components/ui/utils/icon-integration', () => ({
   getIconClasses: jest.fn().mockImplementation((icon) => `fa-light fa-${icon}`),
 }));
+*/
 
 // Mock theme related utils
 jest.mock('next-themes', () => ({
@@ -70,15 +76,15 @@ class MockIntersectionObserver {
   constructor(callback) {
     this.callback = callback;
   }
-  
+
   observe() {
     return null;
   }
-  
+
   unobserve() {
     return null;
   }
-  
+
   disconnect() {
     return null;
   }

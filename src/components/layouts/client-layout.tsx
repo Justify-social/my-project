@@ -11,6 +11,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import Link from "next/link";
 import Image from "next/image";
 import SidebarUIComponents from "@/components/ui/navigation/sidebar-ui-components";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 
 // Define NavItem interface (matching the one defined in header.tsx)
 interface NavItem {
@@ -171,36 +172,39 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const isUIComponentsPage = pathname.startsWith('/debug-tools/ui-components');
 
   return (
-    <div className="min-h-screen bg-white font-work-sans">
-      <Header
-        companyName="Justify"
-        remainingCredits={100}
-        notificationsCount={3}
-        onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
-        navItems={navItems}
-        settingsNavItem={settingsNavItem}
-      />
+    <ThemeProvider defaultTheme="light">
+      <div className="min-h-screen bg-white font-work-sans">
+        <Header
+          companyName="Justify"
+          remainingCredits={100}
+          notificationsCount={3}
+          onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
+          navItems={navItems}
+          settingsNavItem={settingsNavItem}
+        />
 
-      {/* Conditionally render the correct sidebar */}
-      <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300">
-        {isUIComponentsPage ? (
-          <SidebarUIComponents />
-        ) : (
-          <Sidebar
-            items={sidebarItems}
-            activePath={pathname}
-            onItemClick={() => setIsMobileOpen(false)}
-            title="Justify"
-          />
-        )}
+        {/* Conditionally render the correct sidebar */}
+        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300">
+          {isUIComponentsPage ? (
+            <SidebarUIComponents />
+          ) : (
+            <Sidebar
+              items={sidebarItems}
+              activePath={pathname}
+              onItemClick={() => setIsMobileOpen(false)}
+              title="Justify"
+            />
+          )}
+        </div>
+
+        {/* Main content area */}
+        <div className={`transition-margin duration-200 md:ml-64 pt-16 font-work-sans`}>
+          <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
+            {children}
+          </main>
+        </div>
       </div>
-      {/* Apply margin unconditionally */}
-      <div className={`transition-margin duration-200 md:ml-64 pt-16 font-work-sans`}>
-        <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
-          {children}
-        </main>
-      </div>
-    </div>
+    </ThemeProvider>
   );
 };
 
