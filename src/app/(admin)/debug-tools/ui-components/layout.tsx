@@ -29,13 +29,13 @@ export default function ComponentBrowserLayout({
         <header className="border-b bg-background">
           <div className="container flex items-center justify-between h-14">
             <div className="flex items-center gap-8">
-              <Link
+              {/* <Link
                 href="/debug-tools/ui-components"
                 className="font-semibold text-lg flex items-center"
               >
                 <LightIcon iconId="layer-group" className="mr-2 text-primary" />
                 UI Components
-              </Link>
+              </Link> */}
 
               {/* Remove nav section 
               <nav className="hidden md:flex items-center gap-6">

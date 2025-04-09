@@ -128,6 +128,29 @@ async function handlePushEvent(payload: any): Promise<void> {
     return;
   }
 
+  /* // Commented out: Component processing logic seems outdated/broken
+  // Extract component changes from commits
+  const componentChanges = extractComponentChanges(commits, sender.login);
+  
+  if (componentChanges.length === 0) {
+    logger.info('No component changes detected');
+    return;
+  }
+  
+  // Process component changes
+  logger.info('Processing component changes', { 
+    count: componentChanges.length,
+    branch,
+    repository: repository.full_name
+  });
+  
+  // Queue background job to process changes
+  await processComponentChanges(componentChanges, {
+    repository: repository.full_name,
+    branch,
+    sender: sender.login,
+  });
+  */
   logger.info('Push event received, component processing temporarily disabled', { branch });
 }
 
@@ -146,11 +169,38 @@ async function handlePullRequestEvent(payload: any): Promise<void> {
 
   // If PR was merged, process like a push event
   if (merged) {
+    /* // Commented out: Component processing logic seems outdated/broken
+    // Extract files changed in the PR
+    const changedFiles = await getChangedFilesInPR(
+      payload.repository.full_name,
+      pullRequest.number
+    );
+    
+    const componentChanges = changedFiles
+      .filter(file => isComponentFile(file.filename))
+      .map(file => ({
+        path: file.filename,
+        type: mapChangeType(file.status),
+        commitId: pullRequest.merge_commit_sha,
+        author: pullRequest.merged_by.login,
+        timestamp: new Date(pullRequest.merged_at)
+      }));
+    
+    if (componentChanges.length > 0) {
+      await processComponentChanges(componentChanges, {
+        repository: payload.repository.full_name,
+        branch: pullRequest.base.ref,
+        sender: pullRequest.merged_by.login,
+        pullRequest: pullRequest.number
+      });
+    }
+    */
     logger.info('Merged PR event received, component processing temporarily disabled', { pullRequest: pullRequest.number });
   } else {
     // For opened/synchronized PRs, just create a preview or validation
-    // Preview creation logic might also be broken due to registry changes, commenting out for safety
+    /* // Commented out: Preview logic requires refactoring
     // await createPullRequestPreview(payload);
+    */
     logger.info('Opened/Sync PR event received, preview creation temporarily disabled', { pullRequest: pullRequest.number });
   }
 }

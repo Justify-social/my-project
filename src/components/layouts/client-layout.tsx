@@ -194,8 +194,8 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           />
         )}
       </div>
-      {/* Adjust margin based on whether the standard sidebar is shown */}
-      <div className={`transition-margin duration-200 ${!isUIComponentsPage ? 'md:ml-64' : ''} pt-16 font-work-sans`}>
+      {/* Apply margin unconditionally */}
+      <div className={`transition-margin duration-200 md:ml-64 pt-16 font-work-sans`}>
         <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
           {children}
         </main>

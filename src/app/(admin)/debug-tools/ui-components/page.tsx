@@ -249,9 +249,19 @@ export default function ComponentBrowserPage() {
               {allIcons
                 .filter(iconMeta => selectedIconCategory === null || iconMeta.category === selectedIconCategory)
                 .map(iconMeta => (
-                  <Card key={iconMeta.id} className="flex flex-col items-center justify-center text-center hover:bg-gray-50 aspect-square">
-                    <Icon iconId={iconMeta.id} className="w-3/5 h-3/5 mb-1" />
-                    <p className="text-[10px] break-all mt-auto">{iconMeta.name || iconMeta.id}</p>
+                  <Card
+                    key={iconMeta.id}
+                    className="flex flex-col items-center text-center hover:bg-gray-50 aspect-square pt-2"
+                  >
+                    <Icon
+                      iconId={iconMeta.id}
+                      className="w-[55%] h-[55%]"
+                    />
+                    <p
+                      className="text-xs break-all pt-1"
+                    >
+                      {iconMeta.name || iconMeta.id}
+                    </p>
                   </Card>
                 ))}
             </div>

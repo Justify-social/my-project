@@ -32,7 +32,7 @@ export async function PATCH(
     // Minimal object satisfying ResponseWithHeaders for the check call
     const dummyResponse = { headers: { set: () => { } } };
     try {
-      // Pass the dummy response object
+      // Pass the dummy response object and use constant for max count
       await limiter.check(dummyResponse, clientIp, RATE_LIMIT_MAX);
     } catch (limitError) {
       // If limiter.check throws, it means the limit was exceeded
