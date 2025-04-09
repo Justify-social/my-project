@@ -1,4 +1,64 @@
-# Directory Structure Planning
+# Directory Structure
+
+This document outlines the primary directory structure for the project.
+
+## Root Directory Overview
+
+```text
+/
+├── config/         # Centralised configuration files (See docs/configuration/README.md)
+├── docs/           # Project documentation (this directory)
+├── .cache/         # Cache files (gitignored)
+├── scripts/        # Utility and automation scripts (See docs/scripts/README.md)
+├── src/            # Application source code (Detailed below)
+├── archives/       # Archive of removed or deprecated files
+├── tests/          # Centralised test suites (Unit, Integration, E2E)
+└── public/         # Static assets served publicly
+```
+
+## `src/` Directory Structure (Application Code)
+
+```text
+src/
+├── app/               # Next.js App Router: Routing, pages, layouts, API routes
+│   ├── (groupings)/   # Route groups for organisation (e.g., (auth), (dashboard))
+│   ├── api/           # API route handlers
+│   └── layout.tsx     # Root application layout
+├── components/        # React components
+│   ├── features/      # Components implementing specific business features
+│   │   └── [feature-name]/ # Components grouped by feature
+│   ├── ui/            # Reusable UI library components (Atomic Design)
+│   │   ├── atoms/     # Basic building blocks (Button, Input) - Primarily managed by Shadcn structure now
+│   │   ├── molecules/ # Combinations of atoms (Card, Alert) - Primarily managed by Shadcn structure now
+│   │   ├── organisms/ # Complex component assemblies (Header, DataTable) - Primarily managed by Shadcn structure now
+│   │   ├── icon/      # Centralised Icon component using FontAwesome Pro
+│   │   └── index.ts   # Barrel file exporting UI components
+│   └── layouts/       # Page layout structures (e.g., SidebarLayout, AuthLayout)
+├── contexts/          # React Context providers (Prefer Zustand for global state)
+├── hooks/             # Custom React hooks (e.g., useAuth, useApi)
+├── lib/               # Core libraries, utils shared across client/server, external service clients
+│   ├── auth/          # Authentication utilities & configuration
+│   ├── constants/     # Application-wide constants
+│   ├── data-mapping/  # Data transformation logic (e.g., form -> API)
+│   ├── db/            # Database access utilities (Prisma client)
+│   ├── server/        # Server-only utilities
+│   └── types/         # Shared TypeScript types/interfaces (Consider moving specific types closer to usage)
+├── services/          # Business logic services (e.g., CampaignService, UserService)
+├── styles/            # Global styles, Tailwind base/plugins
+└── utils/             # General utility functions (date, string, validation etc.)
+```
+
+## Key Principles & Conventions
+
+*   **Modularity:** Group code by feature (`components/features`) or technical concern (`lib`, `hooks`, `utils`).
+*   **Clear Separation:** Distinguish between UI components (`components/ui`), feature logic (`components/features`, `services`), and core utilities (`lib`, `utils`).
+*   **Naming:** Use `kebab-case` for directories and non-component files. Use `PascalCase` for React component files (e.g., `Button.tsx`).
+*   **Imports:** Use absolute path aliases (`@/`) configured in `tsconfig.json`.
+*   **SSOT:** Configuration is centralised in `/config`, type definitions leverage Prisma where possible, core logic resides in `/lib` and `/services`.
+
+*For detailed UI component structure, see `docs/components/ui/README.md`.*
+*For configuration details, see `docs/configuration/README.md`.*
+*For script organisation, see `docs/scripts/README.md`.*
 
 ## Final Structure (Post-Unification)
 
@@ -312,209 +372,3 @@ src/components/ui/
     ├── Toast.tsx
     └── index.ts
 ```
-
-## Implemented Components
-
-- [x] Alert - An alert component for showing status messages
-- [x] Button - A customizable button component
-- [x] Card - A container component with multiple variants
-- [x] Checkbox - A form input checkbox component
-- [x] DatePicker - A component for selecting dates
-- [x] Input - A text input component with validation
-- [x] Modal - A dialog component for displaying content in a layer
-- [x] Pagination - A component for navigating through paginated data
-- [x] Radio - A radio button input component
-- [x] Select - A dropdown selection component
-- [x] Table - A data table component with sorting and pagination
-- [x] Tabs - A tabbed navigation component
-- [x] Toast - A notification component for temporary messages
-
-## UI Components Migration Completion Summary
-
-We have successfully completed the migration of all planned UI components to our new modular directory structure. This represents a major milestone in our codebase unification effort. The key achievements include:
-
-1. **Standardized Component Architecture**
-   - Every component now follows the same directory structure
-   - Consistent separation of types, styles, and component logic
-   - Standardized barrel files for cleaner imports
-
-2. **Enhanced Type Safety**
-   - Comprehensive TypeScript interfaces for all components
-   - Improved developer experience with better IntelliSense support
-   - Reduced potential for runtime errors
-
-3. **Improved Style Management**
-   - Consistent use of utility functions for styling
-   - Better theme consistency across components
-   - Easier customization points for future theming
-
-4. **Automated Migration**
-   - Created scripts to automate the migration of import statements
-   - Ensured backward compatibility during the transition
-   - Minimized manual effort required for adopting new components
-
-5. **Documentation & Examples**
-   - Added example usage for each component
-   - Included thorough JSDoc comments
-   - Created standalone example components where appropriate
-
-## Feature Components Progress
-
-| Feature Domain | Structure | Example Components | Migration Scripts | Identification | Migration |
-|----------------|:---------:|:------------------:|:-----------------:|:--------------:|:---------:|
-| Campaigns      |     ✅     |         ✅         |         ✅        |       ✅        |     ✅     |
-| Users          |     ✅     |         ✅         |         ✅        |       ✅        |     ✅     |
-| Settings       |     ✅     |         ✅         |         ✅        |       ✅        |     ✅     |
-| Dashboard      |     ✅     |         ✅         |         ✅        |       ✅        |     ✅     |
-
-### Campaign Components Organization
-
-```
-src/components/features/campaigns/
-├── wizard/
-│   ├── steps/              # Step-specific components (5 step components migrated)
-│   ├── audience-targeting/ # Audience targeting UI (completed)
-│   ├── shared/             # Shared utilities (StepContentLoader migrated)
-│   └── [core components]   # Main wizard components (WizardContext, WizardNavigation migrated)
-├── analytics/              # Campaign analytics components
-└── management/             # Campaign management components
-```
-
-## Final Unification Phase
-
-## Overview
-
-We're now implementing the final phase of the codebase unification project to address the remaining inconsistencies and establish best practices for long-term code quality. This phase builds upon the success of the previous phases and addresses additional requirements for a fully cohesive codebase.
-
-## Key Objectives
-
-### 1. Absolute Naming Consistency
-
-All files and directories will follow the kebab-case naming convention, with the exception of React component files which will continue to use PascalCase (e.g., `Button.tsx`). This will ensure that:
-
-- Import paths are predictable and consistent
-- File organization is intuitive
-- Auto-completion in editors works reliably
-
-```
-# Example of consistent naming
-
-src/
-├── components/
-│   ├── features/
-│   │   ├── auth/
-│   │   │   ├── login-form/
-│   │   │   │   ├── LoginForm.tsx
-│   │   │   │   ├── login-form.styles.ts
-│   │   │   │   └── index.ts
-```
-
-### 2. Centralized Documentation
-
-All documentation will be consolidated in the top-level `docs/` directory, following this structure:
-
-```
-docs/
-├── architecture/            # System architecture documentation
-├── components/              # Component documentation
-├── guides/                  # User and developer guides
-│   ├── developer/           # Developer guides
-│   └── user/                # User guides
-├── api/                     # API documentation
-├── processes/               # Development processes
-└── README.md                # Documentation index
-```
-
-### 3. Centralized Tests
-
-All tests will be moved to a centralized `tests/` directory that mirrors the project structure:
-
-```
-tests/
-├── unit/                    # Unit tests
-│   ├── components/
-│   ├── hooks/
-│   └── utils/
-├── integration/             # Integration tests
-│   ├── features/
-│   └── api/
-├── e2e/                     # End-to-end tests
-│   └── flows/
-└── README.md                # Testing documentation
-```
-
-### 4. Centralized Configuration
-
-Configuration files will be moved to a dedicated `config/` directory:
-
-```
-config/
-├── eslint/                  # ESLint configuration
-├── jest/                    # Jest configuration
-├── next/                    # Next.js configuration
-├── tailwind/                # Tailwind configuration
-└── README.md                # Configuration documentation
-```
-
-## Implementation Plan
-
-The implementation of this final phase will be carried out through the following steps:
-
-1. **Analysis and Planning**:
-   - Create detailed reports for each task
-   - Identify files and directories that need to be changed
-   - Develop a migration strategy
-
-2. **Documentation Consolidation**:
-   - Move documentation from `doc/` to `docs/`
-   - Create a comprehensive index
-   - Update links in existing documentation
-
-3. **Test Migration**:
-   - Create the centralized test structure
-   - Migrate tests from `src/__tests__/` to `tests/`
-   - Update test scripts in package.json
-
-4. **Configuration Centralization**:
-   - Create the `config/` directory
-   - Move configuration files
-   - Update references in package.json and scripts
-
-5. **Naming Conventions**:
-   - Rename files and directories to follow kebab-case
-   - Update import paths
-   - Fix any issues caused by renaming
-
-6. **Code Quality Improvements**:
-   - Run linting and fix errors
-   - Implement pre-commit hooks
-   - Ensure CI/CD checks are in place
-
-7. **Cleanup**:
-   - Remove backup and unused files
-   - Delete redundant scripts
-   - Clean up temporary directories
-
-## Timeline and Status
-
-The implementation of this final phase is currently in progress, with an estimated completion date of [ESTIMATED_DATE]. The current status is:
-
-- Documentation Consolidation: 🔄 In Progress
-- Test Migration: 🔄 In Progress
-- Configuration Centralization: 🔄 In Progress
-- Naming Conventions: 🔄 In Progress
-- Code Quality Improvements: 🔄 In Progress
-- Cleanup: 🔄 In Progress
-
-## Conclusion
-
-The final phase of the codebase unification project will complete the transformation of our codebase into a fully consistent, maintainable, and developer-friendly structure. By addressing the remaining inconsistencies and establishing clear patterns and practices, we will ensure that the codebase continues to be easily maintainable and scalable as the project grows.
-
-Upon completion, developers will benefit from:
-- Clear, consistent organization of code and resources
-- Comprehensive documentation in a central location
-- Well-organized and easy-to-run tests
-- Strong code quality enforcement
-- Clean, optimized codebase with no redundancy
-
-These improvements will significantly enhance developer productivity, reduce onboarding time for new team members, and ensure the long-term maintainability of the project. 

@@ -1,6 +1,15 @@
 # Guides
 
-This section contains step-by-step instructions and best practices to help you work with our codebase.
+This section contains practical, step-by-step guides for common development tasks and workflows.
+
+## Key Guides
+
+*   **[Developer Guide](./developer/developer-guide.md):** Essential standards, practices, and workflows for all developers contributing to the project.
+*   **(Add links to other guides as they are created, e.g., Deployment Guide, Troubleshooting Guide)**
+
+## Purpose
+
+Guides should provide clear, actionable instructions to help developers perform specific tasks efficiently and consistently.
 
 ## Getting Started
 
