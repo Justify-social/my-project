@@ -1,55 +1,54 @@
 // Using ES imports
-import { PrismaClient as _PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient as _PrismaClient, Position, Currency, Platform, KPI, Feature, SubmissionStatus, Status } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { randomUUID } from 'crypto'; // Import randomUUID
 
 /**
- * @typedef {Object} ModelStatus
- * @property {string} model
- * @property {boolean} exists
- * @property {number} [count]
- * @property {string} [error]
+ * Type definition for ModelStatus
  */
+interface ModelStatus {
+  model: string;
+  exists: boolean;
+  error?: string;
+}
 
 /**
- * @typedef {Object} ValidationResult
- * @property {ModelStatus[]} validModels
- * @property {ModelStatus[]} invalidModels
+ * Type definition for ValidationResult
  */
+interface ValidationResult {
+  validModels: ModelStatus[];
+  invalidModels: ModelStatus[];
+}
 
 /**
  * Validates all models defined in the Prisma schema against the database.
  * This is helpful for diagnosing missing tables or schema mismatches.
  * @returns {Promise<ValidationResult>}
  */
-async function validateSchema() {
-  // Get all models from Prisma client
-  const models = Object.keys(prisma).filter(key => 
-    typeof prisma[key] === 'object' && 
-    prisma[key] !== null &&
-    !['$on', '$connect', '$disconnect', '$use', '$transaction', '$executeRaw', '$queryRaw'].includes(key)
-  );
-  
+async function validateSchema(): Promise<ValidationResult> { // Add return type
+  // Get actual model names from DMMF
+  const models = Prisma.dmmf.datamodel.models.map(m => m.name);
+
   console.log(`Validating ${models.length} models against the database...`);
-  
+
   // Test each model with a simple query
-  const results = await Promise.all(models.map(async (model) => {
+  const results: ModelStatus[] = await Promise.all(models.map(async (model): Promise<ModelStatus> => { // Type the results array and map return
     try {
-      // Try to count records for this model
-      const count = await prisma[model].count();
-      return { 
-        model, 
-        exists: true, 
-        count 
+      // Use findFirst as a safe check - accessing prisma[model] dynamically still needs `as any`
+      await (prisma[model] as any).findFirst({});
+      return {
+        model,
+        exists: true,
       };
     } catch (error) {
-      return { 
-        model, 
-        exists: false, 
+      return {
+        model,
+        exists: false,
         error: error instanceof Error ? error.message : String(error)
       };
     }
   }));
-  
+
   // Split into valid and invalid models
   return {
     validModels: results.filter(r => r.exists),
@@ -59,29 +58,31 @@ async function validateSchema() {
 
 /**
  * Validates a specific model and returns detailed information.
- * @param {string} modelName 
+ * @param {string} modelName
  * @returns {Promise<ModelStatus>}
  */
-async function validateModel(modelName) {
+async function validateModel(modelName: string): Promise<ModelStatus> { // Add parameter and return type
   try {
-    if (!(modelName in prisma)) {
+    // Check against actual model names from DMMF
+    const actualModels = Prisma.dmmf.datamodel.models.map(m => m.name);
+    if (!actualModels.includes(modelName)) {
       return {
         model: modelName,
         exists: false,
-        error: `Model ${modelName} is not defined in the Prisma client`
+        error: `Model ${modelName} is not defined in the Prisma schema`
       };
     }
-    
-    const count = await prisma[modelName].count();
-    return { 
-      model: modelName, 
-      exists: true, 
-      count 
+
+    // Use findFirst as a safe check
+    await (prisma[modelName] as any).findFirst({});
+    return {
+      model: modelName,
+      exists: true,
     };
   } catch (error) {
-    return { 
-      model: modelName, 
-      exists: false, 
+    return {
+      model: modelName,
+      exists: false,
       error: error instanceof Error ? error.message : String(error)
     };
   }
@@ -93,57 +94,51 @@ async function validateModel(modelName) {
  */
 async function createSampleCampaign() {
   try {
-    // Try to access the CampaignWizard model
-    if (!('campaignWizard' in prisma)) {
-      return {
-        success: false,
-        error: "CampaignWizard model is not available in the Prisma client"
-      };
-    }
-    
+    // Access check already handled by validateModel/validateSchema if used prior
+
     // Create a sample campaign to test the CampaignWizard model
     const campaign = await prisma.campaignWizard.create({
       data: {
-        id: crypto.randomUUID(),
+        id: randomUUID(), // Use imported function
         name: "Test Campaign",
         businessGoal: "Testing database functionality",
         startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days in the future
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         timeZone: "UTC",
         primaryContact: {
           firstName: "John",
           surname: "Doe",
           email: "john@example.com",
-          position: "Manager"
+          position: Position.Manager // Use Enum
         },
         secondaryContact: {
           firstName: "Jane",
           surname: "Smith",
           email: "jane@example.com",
-          position: "Director"
+          position: Position.Director // Use Enum
         },
         budget: {
-          currency: "USD",
+          currency: Currency.USD, // Use Enum
           totalBudget: 10000,
           socialMediaBudget: 5000
         },
         updatedAt: new Date(),
-        status: "DRAFT",
+        status: Status.DRAFT, // Use Enum
         currentStep: 1,
         isComplete: false,
         step1Complete: true,
         step2Complete: false,
         step3Complete: false,
         step4Complete: false,
-        secondaryKPIs: [],
-        features: [],
+        secondaryKPIs: [], // Empty array is valid for enum array
+        features: [],      // Empty array is valid for enum array
         locations: [],
         competitors: [],
         assets: [],
         requirements: []
       }
     });
-    
+
     return {
       success: true,
       campaign
@@ -168,33 +163,33 @@ async function createSampleSubmission() {
         firstName: "John",
         surname: "Doe",
         email: "john@example.com",
-        position: "Manager"
+        position: Position.Manager // Use Enum
       }
     });
-    
+
     // Create a secondary contact
     const secondaryContact = await prisma.secondaryContact.create({
       data: {
         firstName: "Jane",
         surname: "Smith",
         email: "jane@example.com",
-        position: "Director"
+        position: Position.Director // Use Enum
       }
     });
-    
+
     // Now create the submission with references to the contacts
     const submission = await prisma.campaignWizardSubmission.create({
       data: {
         campaignName: "Test Submission",
         description: "Testing database functionality",
         startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days in the future
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         timeZone: "UTC",
         contacts: "John Doe, Jane Smith",
-        currency: "USD",
+        currency: Currency.USD, // Use Enum
         totalBudget: 10000,
         socialMediaBudget: 5000,
-        platform: "Instagram",
+        platform: Platform.INSTAGRAM, // Correct Enum Case
         influencerHandle: "@testinfluencer",
         primaryContactId: primaryContact.id,
         secondaryContactId: secondaryContact.id,
@@ -205,13 +200,13 @@ async function createSampleSubmission() {
         expectedAchievements: "Expected achievements",
         purchaseIntent: "High intent",
         brandPerception: "Positive perception",
-        primaryKPI: "brandAwareness",
-        secondaryKPIs: ["adRecall", "consideration"],
-        features: ["BRAND_LIFT", "CREATIVE_ASSET_TESTING"],
-        submissionStatus: "draft"
+        primaryKPI: KPI.BRAND_AWARENESS, // Correct Enum Case
+        secondaryKPIs: [KPI.AD_RECALL, KPI.CONSIDERATION], // Correct Enum Case
+        features: [Feature.BRAND_LIFT, Feature.CREATIVE_ASSET_TESTING],
+        submissionStatus: SubmissionStatus.draft
       }
     });
-    
+
     return {
       success: true,
       submission,
@@ -226,7 +221,8 @@ async function createSampleSubmission() {
   }
 }
 
-module.exports = {
+// Use ES module exports
+export {
   validateSchema,
   validateModel,
   createSampleCampaign,
