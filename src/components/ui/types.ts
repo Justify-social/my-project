@@ -60,11 +60,12 @@ export interface AssetPreviewProps {
 
 /**
  * Line chart configuration interface
+ * Renamed from LineConfig to LineData for clarity
  */
-export interface LineConfig {
+export interface LineData {
   /** Data key for the line's y values */
   dataKey: string;
-  /** Name of the line for the legend */
+  /** Name of the line for the legend (optional) */
   name?: string;
   /** Stroke color for the line */
   stroke?: string;
@@ -80,10 +81,10 @@ export interface LineChartProps {
   xKey?: string;
   /** The field name for the x-axis values (new prop to replace xKey) */
   xField?: string;
-  /** Array of data keys for the lines to draw */
+  /** Array of data keys for the lines to draw (use lines prop instead) */
   yKey?: string | string[];
-  /** Array of line configurations (new prop to replace yKey) */
-  lines?: LineConfig[];
+  /** Array of line configurations */
+  lines?: LineData[];
   /** Height of the chart in pixels */
   height?: number;
   /** Whether to show the grid */

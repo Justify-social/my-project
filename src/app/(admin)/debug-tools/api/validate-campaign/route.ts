@@ -8,16 +8,21 @@ type CampaignWithRelations = CampaignWizardSubmission & {
   audience?: Audience | null;
 };
 
+// Explicit type for Audience including the optional competitors relation
+// type AudienceWithCompetitors = Audience & { 
+//   competitors?: { id: number; name: string; audienceId: number }[] | null 
+// }; // Removed explicit type, rely on Prisma type inference
+
 export async function GET(
   request: NextRequest
 ) {
   const searchParams = request.nextUrl.searchParams;
   const campaignId = searchParams.get('id');
-  
+
   if (!campaignId) {
     return NextResponse.json({ error: 'Campaign ID is required' }, { status: 400 });
   }
-  
+
   try {
     // Fetch campaign with all related data
     const campaign = await prisma.campaignWizardSubmission.findUnique({
@@ -32,11 +37,11 @@ export async function GET(
         }
       }
     });
-    
+
     if (!campaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
-    
+
     // Process JSON fields
     let parsedContacts = null;
     let contactsParseError = null;
@@ -45,7 +50,7 @@ export async function GET(
     } catch (e) {
       contactsParseError = (e as Error).message;
     }
-    
+
     // Create objectives object from related fields
     const objectives = {
       mainMessage: campaign.mainMessage,
@@ -54,7 +59,7 @@ export async function GET(
       secondaryKPIs: campaign.secondaryKPIs,
       features: campaign.features
     };
-    
+
     // Structure the validation response
     const validationResult = {
       id: campaign.id,
@@ -110,15 +115,19 @@ export async function GET(
         },
       },
       step3: {
-        status: campaign.audience ? 'complete' : 'incomplete',
+        status: (Array.isArray(campaign.audience) ? campaign.audience.length > 0 : !!campaign.audience) ? 'complete' : 'incomplete',
         fields: {
           audience: {
             value: campaign.audience,
-            status: campaign.audience ? 'present' : 'missing',
+            status: (Array.isArray(campaign.audience) ? campaign.audience.length > 0 : !!campaign.audience) ? 'present' : 'missing',
           },
           competitors: {
-            value: campaign.audience?.competitors,
-            status: campaign.audience?.competitors?.length ? 'present' : 'missing',
+            value: (Array.isArray(campaign.audience) && campaign.audience.length > 0)
+              ? campaign.audience[0].competitors
+              : null,
+            status: (Array.isArray(campaign.audience) && campaign.audience.length > 0 && campaign.audience[0].competitors?.length)
+              ? 'present'
+              : 'missing',
           },
         },
       },
@@ -136,7 +145,7 @@ export async function GET(
         },
       },
     };
-    
+
     return NextResponse.json(validationResult);
   } catch (error) {
     console.error('Error validating campaign:', error);

@@ -1,6 +1,6 @@
 /**
  * @component TypographyText
- * @category typography
+ * @category atom
  * @subcategory text
  * @description A flexible typography component for displaying text with various styles
  */
@@ -72,11 +72,11 @@ export function TypographyText({
   // Build truncation classes
   const getTruncateClasses = () => {
     if (!truncate) return '';
-    
+
     if (lines && lines > 1) {
       return 'overflow-hidden display-webkit-box -webkit-box-orient-vertical line-clamp-' + lines;
     }
-    
+
     return 'truncate overflow-hidden text-ellipsis whitespace-nowrap';
   };
 

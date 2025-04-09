@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useCampaignWizardContext } from '@/src/components/features/campaigns/wizard/CampaignWizardContext';
-import { Spinner } from '@/components/ui/spinner/Spinner'
+import { useCampaignWizardContext } from '@/components/features/campaigns/CampaignWizardContext';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 /**
  * Formats a date to a readable time string
@@ -32,7 +32,7 @@ export function AutosaveIndicator() {
   if (isAutosaving) {
     return (
       <div className="flex items-center text-sm text-gray-500 font-work-sans">
-        <Spinner size="sm" className="mr-2" />
+        <LoadingSpinner size="sm" className="mr-2" />
         <span className="font-work-sans">Saving changes...</span>
       </div>);
 

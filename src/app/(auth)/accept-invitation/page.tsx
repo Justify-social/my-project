@@ -16,6 +16,10 @@ export default function AcceptInvitationPage() {
   const [invitationDetails, setInvitationDetails] = useState<any>(null);
 
   useEffect(() => {
+    if (!searchParams) {
+      return;
+    }
+
     const token = searchParams.get('token');
 
     if (!token) {
@@ -97,27 +101,27 @@ export default function AcceptInvitationPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 font-work-sans">
             {invitationDetails ?
-            <>You have been invited to join as a <span className="font-semibold font-work-sans">{invitationDetails.role.toLowerCase()}</span></> :
+              <>You have been invited to join as a <span className="font-semibold font-work-sans">{invitationDetails.role.toLowerCase()}</span></> :
 
-            'Verifying your invitation...'
+              'Verifying your invitation...'
             }
           </p>
         </div>
-        
+
         <div className="mt-8 space-y-6 font-work-sans">
           {isProcessing &&
-          <div className="flex justify-center font-work-sans">
+            <div className="flex justify-center font-work-sans">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 font-work-sans"></div>
               <p className="mt-4 text-center text-sm text-gray-600 font-work-sans">
                 {status === 'loading' ?
-              'Checking your login status...' :
-              'Processing your invitation...'}
+                  'Checking your login status...' :
+                  'Processing your invitation...'}
               </p>
             </div>
           }
-          
+
           {error &&
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 font-work-sans">
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 font-work-sans">
               <div className="flex font-work-sans">
                 <div className="flex-shrink-0 font-work-sans">
                   <svg className="h-5 w-5 text-red-400 font-work-sans" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -132,9 +136,9 @@ export default function AcceptInvitationPage() {
               </div>
             </div>
           }
-          
+
           {success &&
-          <div className="bg-green-50 border-l-4 border-green-400 p-4 font-work-sans">
+            <div className="bg-green-50 border-l-4 border-green-400 p-4 font-work-sans">
               <div className="flex font-work-sans">
                 <div className="flex-shrink-0 font-work-sans">
                   <svg className="h-5 w-5 text-green-400 font-work-sans" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -152,38 +156,43 @@ export default function AcceptInvitationPage() {
               </div>
             </div>
           }
-          
+
           {invitationDetails && status === 'unauthenticated' && !error &&
-          <div className="font-work-sans">
+            <div className="font-work-sans">
               <p className="text-center text-sm text-gray-600 mb-4 font-work-sans">
                 You need to sign in to accept this invitation.
               </p>
               <div className="flex justify-center font-work-sans">
                 <Link
-                href={`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-work-sans">
+                  href={`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-work-sans">
 
                   Sign in to accept
                 </Link>
               </div>
             </div>
           }
-          
+
           {invitationDetails && status === 'authenticated' && !isProcessing && !success && !error &&
-          <div className="font-work-sans">
+            <div className="font-work-sans">
               <p className="text-center text-sm text-gray-600 mb-4 font-work-sans">
                 Click the button below to accept this invitation and join the team.
               </p>
               <button
-              onClick={() => acceptInvitation(searchParams.get('token')!)}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-work-sans"
-              disabled={isProcessing}>
+                onClick={() => {
+                  const token = searchParams?.get('token');
+                  if (token) {
+                    acceptInvitation(token);
+                  }
+                }}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-work-sans"
+                disabled={isProcessing}>
 
                 Accept Invitation
               </button>
             </div>
           }
-          
+
           <div className="text-center mt-6 font-work-sans">
             <Link href="/" className="text-sm text-blue-600 hover:text-blue-500 font-work-sans">
               Return to home page

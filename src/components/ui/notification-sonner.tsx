@@ -1,6 +1,6 @@
 /**
  * @component NotificationSonner
- * @category notification
+ * @category atom
  * @subcategory toast
  * @description A toast notification system using Sonner
  */
@@ -68,7 +68,7 @@ export function NotificationSonner({
   ...props
 }: NotificationSonnerProps) {
   const { theme } = useTheme();
-  
+
   // Generate appropriate animation classes based on the animation prop
   const getAnimationClass = () => {
     switch (animation) {

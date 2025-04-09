@@ -1,6 +1,6 @@
 /**
  * @component TypographyHeading
- * @category typography
+ * @category atom
  * @subcategory heading
  * @description A heading component with various levels (h1-h6) following typographic best practices
  */
@@ -51,7 +51,7 @@ export function TypographyHeading({
         default: return '';
       }
     }
-    
+
     // Default sizes based on heading level
     switch (level) {
       case 1: return 'text-4xl md:text-5xl';

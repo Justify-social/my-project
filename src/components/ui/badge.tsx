@@ -1,6 +1,6 @@
 /**
  * @component Badge
- * @category ui
+ * @category atom
  * @subcategory feedback
  * @description A badge component for displaying status, counts, or labels
  * @status stable
@@ -37,7 +37,7 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  VariantProps<typeof badgeVariants> { }
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (

@@ -1,43 +1,47 @@
-import { handleAuth, handleCallback } from '@auth0/nextjs-auth0';
+import { handleAuth, handleCallback, Session } from '@auth0/nextjs-auth0';
 import { NextRequest } from 'next/server';
 
-export const GET = handleCallback({
-  afterCallback: async (req: NextRequest, session: any) => {
-    try {
-      // Log raw token data
-      console.log('Token data:', {
-        accessTokenClaims: session?.accessToken?.claims,
-        idTokenClaims: session?.idToken?.claims
-      });
+// Define the afterCallback handler separately for clarity
+const afterCallback = async (req: NextRequest, session: Session): Promise<Session> => {
+  try {
+    // // Log raw token data - Removed as accessToken/idToken are likely strings
+    // console.log('Token data:', {
+    //   accessTokenClaims: session?.accessToken?.claims,
+    //   idTokenClaims: session?.idToken?.claims
+    // });
 
-      // Get roles from all possible locations
-      const roles = [
-        ...(session?.accessToken?.claims?.roles || []),
-        ...(session?.idToken?.claims?.roles || []),
-        ...(session?.user?.roles || []),
-        ...(session?.user?.['https://justify.social/roles'] || [])
-      ];
+    // Get roles primarily from session.user where decoded claims are typically added
+    const roles = [
+      // ...(session?.accessToken?.claims?.roles || []), // Removed: Access token is likely string
+      // ...(session?.idToken?.claims?.roles || []),    // Removed: ID token is likely string
+      ...(session?.user?.roles || []), // Existing roles on user object
+      ...(session?.user?.['https://justify.social/roles'] || []) // Custom namespaced roles
+    ];
 
-      // Remove duplicates and filter out nulls/undefined
-      const uniqueRoles = Array.from(new Set(roles.filter(Boolean)));
-      
-      console.log('Processing roles:', {
-        email: session?.user?.email,
-        foundRoles: uniqueRoles,
-        accessToken: !!session?.accessToken,
-        idToken: !!session?.idToken
-      });
+    // Remove duplicates and filter out nulls/undefined
+    const uniqueRoles = Array.from(new Set(roles.filter(Boolean)));
 
-      // Update the session
-      if (session?.user) {
-        session.user.roles = uniqueRoles;
-        session.user.isSuperAdmin = uniqueRoles.includes('super_admin');
-      }
+    console.log('Processing roles in afterCallback:', { // Clarified log message
+      email: session?.user?.email,
+      foundRoles: uniqueRoles,
+      accessTokenProvided: !!session?.accessToken,
+      idTokenProvided: !!session?.idToken
+    });
 
-      return session;
-    } catch (error) {
-      console.error('Auth callback error:', error);
-      throw error;
+    // Update the session user object
+    if (session?.user) {
+      session.user.roles = uniqueRoles;
+      session.user.isSuperAdmin = uniqueRoles.includes('super_admin');
     }
+
+    return session;
+  } catch (error) {
+    console.error('Auth callback error:', error);
+    throw error;
   }
+};
+
+// Export GET using handleAuth with the specific callback handler
+export const GET = handleAuth({
+  callback: handleCallback({ afterCallback })
 }); 

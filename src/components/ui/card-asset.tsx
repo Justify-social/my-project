@@ -1,6 +1,6 @@
 /**
  * @component AssetCard
- * @category 
+ * @category organism
  * @subcategory card
  * @description Card component displaying asset information with preview, title, platform, and budget
  */

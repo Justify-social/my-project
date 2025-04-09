@@ -1,25 +1,30 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import CampaignWizardContextType from './wizard/CampaignWizardContext';
-import P from '../../../middlewares/check-permissions';
-import useCampaignWizard, { 
-  WizardStep, 
-  OverviewFormData, 
-  ObjectivesFormData, 
-  AudienceFormData, 
+// Remove incorrect relative import for type defined later in this file
+// import CampaignWizardContextType from './wizard/CampaignWizardContext'; 
+// Remove unused permissions import
+// import P from '@/config/middleware/api/check-permissions'; 
+// Import CampaignFormData type correctly
+import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer'; // Renamed to avoid conflict
+
+import useCampaignWizard, {
+  WizardStep,
+  OverviewFormData,
+  ObjectivesFormData,
+  AudienceFormData,
   AssetFormData,
-  CampaignFormData
-} from '@/hooks/useCampaignWizard';
+  // CampaignFormData // Already imported above, remove potential duplicate import here
+} from '@/hooks/use-campaign-wizard';
 
 // Re-export types from the hook for convenience
-export type { 
-  WizardStep, 
-  OverviewFormData, 
-  ObjectivesFormData, 
-  AudienceFormData, 
+export type {
+  WizardStep,
+  OverviewFormData,
+  ObjectivesFormData,
+  AudienceFormData,
   AssetFormData,
-  CampaignFormData
+  WizardCampaignFormData as CampaignFormData // Re-export with original intended name
 };
 
 // Define the context type based on the hook return type
@@ -66,11 +71,11 @@ export function CampaignWizardProvider({
  */
 export function useCampaignWizardContext(): CampaignWizardContextType {
   const context = useContext(CampaignWizardContext);
-  
+
   if (context === null) {
     throw new Error('useCampaignWizardContext must be used within a CampaignWizardProvider');
   }
-  
+
   return context;
 }
 
@@ -84,7 +89,7 @@ export function withCampaignWizard<P extends object>(
 ) {
   return function WithCampaignWizard(props: P & Omit<CampaignWizardProviderProps, 'children'>) {
     const { campaignId, initialStep, enableAutosave, ...rest } = props;
-    
+
     return (
       <CampaignWizardProvider
         campaignId={campaignId}
@@ -94,7 +99,7 @@ export function withCampaignWizard<P extends object>(
         <ComponentWithContext {...rest as P} />
       </CampaignWizardProvider>
     );
-    
+
     // Inner component that consumes the context
     function ComponentWithContext(componentProps: P) {
       const contextProps = useCampaignWizardContext();

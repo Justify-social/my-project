@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0/edge';
-import { graphitiCheckEnforcer } from './cursor-ai';
+// import { graphitiCheckEnforcer } from './cursor-ai';
 
 // Expanded static asset detection
 function isStaticAsset(path: string): boolean {
-  return path.startsWith('/_next') || 
-         path.includes('/images/') || 
-         path.includes('/icons/') ||    // Add icons path exclusion
-         path.endsWith('.svg') ||       // All SVG files
-         path.endsWith('.ico') ||
-         path.endsWith('.png') ||
-         path.endsWith('.css') ||
-         path.endsWith('.js');
+  return path.startsWith('/_next') ||
+    path.includes('/images/') ||
+    path.includes('/icons/') ||    // Add icons path exclusion
+    path.endsWith('.svg') ||       // All SVG files
+    path.endsWith('.ico') ||
+    path.endsWith('.png') ||
+    path.endsWith('.css') ||
+    path.endsWith('.js');
 }
 
 // Public paths that bypass auth
@@ -31,23 +31,26 @@ function isPublicPath(path: string): boolean {
 // Remove withMiddlewareAuthRequired wrapper
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  
+
   // Allow public paths and static assets to bypass all middleware
   if (isPublicPath(path) || isStaticAsset(path)) {
     return NextResponse.next();
   }
-  
+
   // For CursorAI API requests, apply the Graphiti check enforcer
   if (path.startsWith('/api/cursor-ai') || req.headers.get('user-agent')?.includes('CursorAI')) {
-    return graphitiCheckEnforcer(req, async () => {
-      // Continue with the regular middleware pipeline after Graphiti check
-      return handleAuthMiddleware(req);
-    });
+    // Since graphitiCheckEnforcer is removed, just proceed with auth check for now
+    // TODO: Re-integrate Graphiti check if needed
+    // return graphitiCheckEnforcer(req, async () => {
+    //   // Continue with the regular middleware pipeline after Graphiti check
+    //   return handleAuthMiddleware(req);
+    // });
+    return handleAuthMiddleware(req);
   }
-  
+
   // Only apply auth check to admin routes and API routes that require auth
-  if (path.startsWith('/admin') || 
-      (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
+  if (path.startsWith('/admin') ||
+    (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
     // Create a response object to pass to getSession
     const res = NextResponse.next();
     const session = await getSession(req, res);
@@ -63,7 +66,7 @@ export default async function middleware(req: NextRequest) {
       // For admin routes, redirect to login
       return NextResponse.redirect(new URL('/api/auth/login', req.url));
     }
-    
+
     // Role-based auth only for admin routes
     if (path.startsWith('/admin')) {
       const userRoles = session.user?.roles || [];
@@ -72,7 +75,7 @@ export default async function middleware(req: NextRequest) {
       }
     }
   }
-  
+
   // For all other paths, allow rendering without auth redirect
   return NextResponse.next();
 }
@@ -87,7 +90,7 @@ async function handleAuthMiddleware(req: NextRequest) {
   if (path.startsWith('/admin')) {
     // Get roles directly from the session
     const userRoles = session?.user?.roles || [];
-    
+
     console.log('Auth Check:', {
       email: session?.user?.email,
       path,

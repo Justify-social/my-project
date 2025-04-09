@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
+import { CampaignWizard } from '@prisma/client';
 
 // Schema for test operations
 const TestRequestSchema = z.object({
@@ -30,16 +31,16 @@ export async function POST(request: NextRequest) {
     // Parse and validate request
     const body = await request.json();
     const validationResult = TestRequestSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Invalid request', details: validationResult.error.errors },
         { status: 400 }
       );
     }
-    
+
     const { operation, id, name, testId, isolation, additionalOperations } = validationResult.data;
-    
+
     // Handle different operations
     switch (operation) {
       case 'create':
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
  */
 async function handleCreate(name: string, testId: string) {
   const startTime = new Date();
-  
+
   try {
     // Create a test campaign
     const campaign = await prisma.campaignWizard.create({
@@ -84,9 +85,9 @@ async function handleCreate(name: string, testId: string) {
         createdAt: new Date()
       }
     });
-    
+
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: true,
       data: campaign,
@@ -98,7 +99,7 @@ async function handleCreate(name: string, testId: string) {
     });
   } catch (error) {
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : String(error),
@@ -116,7 +117,7 @@ async function handleCreate(name: string, testId: string) {
  */
 async function handleUpdate(id: string, name: string) {
   const startTime = new Date();
-  
+
   try {
     // Update a campaign
     const campaign = await prisma.campaignWizard.update({
@@ -126,9 +127,9 @@ async function handleUpdate(id: string, name: string) {
         updatedAt: new Date()
       }
     });
-    
+
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: true,
       data: campaign,
@@ -140,7 +141,7 @@ async function handleUpdate(id: string, name: string) {
     });
   } catch (error) {
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : String(error),
@@ -158,15 +159,15 @@ async function handleUpdate(id: string, name: string) {
  */
 async function handleDelete(id: string) {
   const startTime = new Date();
-  
+
   try {
     // Delete a campaign
     const campaign = await prisma.campaignWizard.delete({
       where: { id }
     });
-    
+
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: true,
       data: campaign,
@@ -178,7 +179,7 @@ async function handleDelete(id: string) {
     });
   } catch (error) {
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : String(error),
@@ -200,7 +201,7 @@ async function handleBatch(name: string, testId: string, additionalOperations: A
   step?: number;
 }>) {
   const startTime = new Date();
-  
+
   try {
     // Create the main campaign
     const campaign = await prisma.campaignWizard.create({
@@ -214,16 +215,17 @@ async function handleBatch(name: string, testId: string, additionalOperations: A
         createdAt: new Date()
       }
     });
-    
+
     // Create additional records based on the request
     const additionalRecords = [];
-    
+
     for (const op of additionalOperations) {
       if (op.type === 'influencer') {
         const influencer = await prisma.influencer.create({
           data: {
-            campaignWizardId: campaign.id,
+            campaignWizardId: (campaign as CampaignWizard).id,
             platform: op.platform || 'INSTAGRAM',
+            handle: `influencer_${randomUUID().substring(0, 8)}`,
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -232,18 +234,20 @@ async function handleBatch(name: string, testId: string, additionalOperations: A
       } else if (op.type === 'history') {
         const history = await prisma.wizardHistory.create({
           data: {
-            campaignWizardId: campaign.id,
+            campaignWizardId: (campaign as CampaignWizard).id,
             step: op.step || 1,
-            data: JSON.stringify({ testData: true }),
+            action: 'BATCH_TEST',
+            changes: JSON.stringify({ testData: true }),
+            performedBy: 'SYSTEM_TEST',
             timestamp: new Date()
           }
         });
         additionalRecords.push(history);
       }
     }
-    
+
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: true,
       data: {
@@ -258,7 +262,7 @@ async function handleBatch(name: string, testId: string, additionalOperations: A
     });
   } catch (error) {
     const endTime = new Date();
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : String(error),

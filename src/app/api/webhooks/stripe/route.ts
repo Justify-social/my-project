@@ -3,16 +3,23 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { Analytics } from '@/lib/analytics/analytics';
+import Stripe from 'stripe';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-async function handleSubscriptionCreated(subscription: any) {
-  const customer = await stripe.customers.retrieve(subscription.customer as string);
-  
-  // Update user subscription status
+async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+  const customerResponse = await stripe.customers.retrieve(subscription.customer as string);
+
+  if (customerResponse.deleted || !('email' in customerResponse) || !customerResponse.email) {
+    console.error(`Customer ${subscription.customer} not found or has no email.`);
+    return;
+  }
+
+  const customer = customerResponse as Stripe.Customer;
+
   await prisma.user.update({
     where: {
-      email: customer.email!,
+      email: customer.email,
     },
     data: {
       stripeSubscriptionId: subscription.id,
@@ -28,7 +35,7 @@ async function handleSubscriptionCreated(subscription: any) {
   });
 }
 
-async function handleSubscriptionUpdated(subscription: any) {
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   await prisma.user.update({
     where: {
       stripeSubscriptionId: subscription.id,
@@ -44,7 +51,7 @@ async function handleSubscriptionUpdated(subscription: any) {
   });
 }
 
-async function handleSubscriptionDeleted(subscription: any) {
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   await prisma.user.update({
     where: {
       stripeSubscriptionId: subscription.id,
@@ -67,7 +74,8 @@ export async function POST(req: Request) {
     }
 
     const body = await req.text();
-    const signature = headers().get('stripe-signature');
+    const headerList = await headers();
+    const signature = headerList.get('stripe-signature');
 
     if (!signature) {
       return NextResponse.json(

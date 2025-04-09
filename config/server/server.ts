@@ -12,8 +12,8 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 
-// Import actual implementation
-import { setupServer } from './src/lib/server/server';
+// Import actual implementation using specific path alias
+import { setupServer } from '@/lib/server/server'; // Try specific path
 
 // Initialize and start the server
 setupServer(); 

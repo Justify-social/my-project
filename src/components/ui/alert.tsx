@@ -1,6 +1,6 @@
 /**
  * @component Alert
- * @category ui
+ * @category atom
  * @subcategory feedback
  * @description A customizable alert component for displaying messages, warnings, and errors
  * @status stable
@@ -33,7 +33,7 @@ const alertVariants = cva(
 
 export interface AlertProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {}
+  VariantProps<typeof alertVariants> { }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant, ...props }, ref) => (

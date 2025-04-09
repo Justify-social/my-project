@@ -4,19 +4,19 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not defined');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16', // Use the latest API version
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-02-24.acacia',
   typescript: true,
 });
 
 export const getStripeCustomer = async (email: string) => {
   const customers = await stripe.customers.list({ email });
-  
+
   if (customers.data.length > 0) {
     // Return existing customer
     return customers.data[0];
   }
-  
+
   // Create new customer
   return stripe.customers.create({ email });
 };

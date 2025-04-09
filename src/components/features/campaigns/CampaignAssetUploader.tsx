@@ -10,8 +10,11 @@ import { ourFileRouter } from "@/app/api/uploadthing/core";
 import toast from 'react-hot-toast';
 import { Icon } from '@/components/ui/icon'
 // Fix Spinner import - use the correct component from loading-spinner
-import { LoadingSpinner as Spinner } from '@/components/ui/loading-spinner'
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { generateCorrelationId, sanitizeFileName, logAndShowError, enhancedFileTypeDetection, extractAssetUrl } from "@/utils/file-utils";
+import { useDropzone } from 'react-dropzone';
+import { Alert } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 
 export interface UploadedAsset {
   id: string;
@@ -135,8 +138,8 @@ export function CampaignAssetUploader({
 
         // Generate our own campaign ID since the server won't pass it anymore
         const campaignId = window.location.pathname.includes('campaigns') ?
-        window.location.pathname.split('/').pop() || 'unknown' :
-        'unknown';
+          window.location.pathname.split('/').pop() || 'unknown' :
+          'unknown';
 
         // Log the detected type for debugging
         console.log(`[${correlationId}] Detected file type for ${fileName}: ${type}/${format}`);
@@ -163,141 +166,143 @@ export function CampaignAssetUploader({
       }
     }).filter((asset): asset is UploadedAsset => !!asset && !!asset.url);
   };
-  return <div className="w-full font-work-sans">
+  return <Card>
+    <CardContent>
       <UploadDropzone<FileRouter, "campaignAssetUploader">
-      endpoint="campaignAssetUploader"
-      onBeforeUploadBegin={(files: File[]) => {
-        const correlationId = generateCorrelationId('upload');
-        console.log(`[${correlationId}] Starting upload for ${files.length} files`);
-        setIsUploading(true);
-        const validFiles = validateFiles(files);
-        if (validFiles.length === 0) {
-          toast.error("No valid files to upload");
-          setIsUploading(false);
-          throw new Error("No valid files to upload");
-        }
+        endpoint="campaignAssetUploader"
+        onBeforeUploadBegin={(files: File[]) => {
+          const correlationId = generateCorrelationId('upload');
+          console.log(`[${correlationId}] Starting upload for ${files.length} files`);
+          setIsUploading(true);
+          const validFiles = validateFiles(files);
+          if (validFiles.length === 0) {
+            toast.error("No valid files to upload");
+            setIsUploading(false);
+            throw new Error("No valid files to upload");
+          }
 
-        // Process files - sanitize file names
-        return validFiles.map((file) => {
-          try {
-            const sanitizedName = sanitizeFileName(file.name);
-            if (sanitizedName !== file.name) {
-              console.log(`[${correlationId}] Sanitized file name: ${file.name} -> ${sanitizedName}`);
-              return new File([file], sanitizedName, {
-                type: file.type
-              });
+          // Process files - sanitize file names
+          return validFiles.map((file) => {
+            try {
+              const sanitizedName = sanitizeFileName(file.name);
+              if (sanitizedName !== file.name) {
+                console.log(`[${correlationId}] Sanitized file name: ${file.name} -> ${sanitizedName}`);
+                return new File([file], sanitizedName, {
+                  type: file.type
+                });
+              }
+              return file;
+            } catch (error) {
+              logAndShowError(error, correlationId, `Failed to sanitize file: ${file.name}`);
+              return file; // Use original file as fallback
             }
-            return file;
+          });
+        }}
+        onUploadProgress={(progress) => {
+          // Progress is tracked but not displayed in this component
+          console.log('Upload progress:', progress);
+        }}
+        onClientUploadComplete={(res: unknown) => {
+          const correlationId = generateCorrelationId('complete');
+          console.log(`[${correlationId}] Upload completed`, res);
+          setIsUploading(false);
+          setSelectedFiles([]);
+          try {
+            if (!res || !Array.isArray(res) || res.length === 0) {
+              toast.error("No files were uploaded successfully");
+              return;
+            }
+            const assets = processUploadResults(res);
+            if (assets.length === 0) {
+              toast.error("Failed to process uploaded files");
+              return;
+            }
+            onUploadComplete(assets);
+            toast.success(`${assets.length} file(s) uploaded successfully`);
           } catch (error) {
-            logAndShowError(error, correlationId, `Failed to sanitize file: ${file.name}`);
-            return file; // Use original file as fallback
+            logAndShowError(error, correlationId, "Error processing upload results");
           }
-        });
-      }}
-      onUploadProgress={(progress) => {
-        // Progress is tracked but not displayed in this component
-        console.log('Upload progress:', progress);
-      }}
-      onClientUploadComplete={(res: unknown) => {
-        const correlationId = generateCorrelationId('complete');
-        console.log(`[${correlationId}] Upload completed`, res);
-        setIsUploading(false);
-        setSelectedFiles([]);
-        try {
-          if (!res || !Array.isArray(res) || res.length === 0) {
-            toast.error("No files were uploaded successfully");
-            return;
-          }
-          const assets = processUploadResults(res);
-          if (assets.length === 0) {
-            toast.error("Failed to process uploaded files");
-            return;
-          }
-          onUploadComplete(assets);
-          toast.success(`${assets.length} file(s) uploaded successfully`);
-        } catch (error) {
-          logAndShowError(error, correlationId, "Error processing upload results");
-        }
-      }}
-      onUploadError={(error: Error) => {
-        const correlationId = generateCorrelationId('error');
-        console.error(`[${correlationId}] Upload error:`, error);
-        setIsUploading(false);
-        setSelectedFiles([]);
+        }}
+        onUploadError={(error: Error) => {
+          const correlationId = generateCorrelationId('error');
+          console.error(`[${correlationId}] Upload error:`, error);
+          setIsUploading(false);
+          setSelectedFiles([]);
 
-        // Handle specific UploadThing errors
-        if (error.message && error.message.includes("Cannot read properties of undefined")) {
-          const betterMessage = "Invalid file format or data. Please check your files and try again.";
-          toast.error(betterMessage);
-          onUploadError(new Error(betterMessage));
-        } else {
-          // Pass the original error
-          onUploadError(error);
-          toast.error(`Upload error: ${error.message}`);
-        }
-      }}
-      className="w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
-      content={{
-        allowedContent: "Images and videos only",
-        label: "Choose a file or drag and drop",
-        uploadIcon: () =>
-        <div className="mb-8 p-6 rounded-full bg-blue-50 flex items-center justify-center mx-auto font-work-sans">
-              <Icon iconId="faUploadLight" className="h-16 w-16 text-blue-500 font-work-sans"  />
+          // Handle specific UploadThing errors
+          if (error.message && error.message.includes("Cannot read properties of undefined")) {
+            const betterMessage = "Invalid file format or data. Please check your files and try again.";
+            toast.error(betterMessage);
+            onUploadError(new Error(betterMessage));
+          } else {
+            // Pass the original error
+            onUploadError(error);
+            toast.error(`Upload error: ${error.message}`);
+          }
+        }}
+        className="w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
+        content={{
+          allowedContent: "Images and videos only",
+          label: "Choose a file or drag and drop",
+          uploadIcon: () =>
+            <div className="mb-8 p-6 rounded-full bg-blue-50 flex items-center justify-center mx-auto font-work-sans">
+              <Icon iconId="faUploadLight" className="h-16 w-16 text-blue-500 font-work-sans" />
             </div>,
 
-        button: ({ ready }: {ready: boolean;}) =>
-        // Only show the button when files are selected and it's ready
-        selectedFiles.length > 0 &&
-        <button
-          className="mt-4 px-6 py-2 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 font-work-sans"
-          style={{
-            backgroundColor: 'var(--accent-color)', // Using the accent color from globals.css
-            fontFamily: "'Work Sans', sans-serif" // Using the app's font
-          }}
-          disabled={!ready}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#00A8E6'; // Slightly darker on hover
-            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 191, 255, 0.25)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--accent-color)';
-            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-          }}>
+          button: ({ ready }: { ready: boolean; }) =>
+            // Only show the button when files are selected and it's ready
+            selectedFiles.length > 0 &&
+            <button
+              className="mt-4 px-6 py-2 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 font-work-sans"
+              style={{
+                backgroundColor: 'var(--accent-color)', // Using the accent color from globals.css
+                fontFamily: "'Work Sans', sans-serif" // Using the app's font
+              }}
+              disabled={!ready}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#00A8E6'; // Slightly darker on hover
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 191, 255, 0.25)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent-color)';
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+              }}>
 
-                Upload Files
-              </button>
+              Upload Files
+            </button>
 
 
-      }}
-      config={{
-        mode: "auto"
-      }} />
+        }}
+        config={{
+          mode: "auto"
+        }} />
 
-      
+
       {/* Selected files display */}
       {!isUploading && selectedFiles.length > 0 &&
-    <div className="mt-4 space-y-3 font-work-sans">
+        <div className="mt-4 space-y-3 font-work-sans">
           <p className="text-sm text-gray-500 font-medium font-work-sans">{selectedFiles.length} file(s) selected</p>
           {selectedFiles.map((file, index) =>
-      <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 font-work-sans">
+            <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 font-work-sans">
               <div className="flex items-center font-work-sans">
-                <Icon iconId="faInfoLight" className="h-6 w-6 text-gray-400 mr-3 font-work-sans"  />
+                <Icon iconId="faInfoLight" className="h-6 w-6 text-gray-400 mr-3 font-work-sans" />
                 <div className="font-work-sans">
                   <p className="text-sm font-medium font-work-sans">{file.name}</p>
                   <p className="text-xs text-gray-500 font-work-sans">{(file.size / 1024).toFixed(1)} KB</p>
                 </div>
               </div>
             </div>
-      )}
+          )}
         </div>
-    }
-      
+      }
+
       {/* Loading indicator */}
       {isUploading &&
-    <div className="mt-4 flex items-center justify-center font-work-sans">
-          <Spinner size="md" className="mr-3" center />
+        <div className="mt-4 flex items-center justify-center font-work-sans">
+          <LoadingSpinner size="md" className="mr-3" />
           <span className="text-sm font-medium text-gray-600 font-work-sans">Uploading files...</span>
         </div>
-    }
-    </div>;
+      }
+    </CardContent>
+  </Card>;
 }

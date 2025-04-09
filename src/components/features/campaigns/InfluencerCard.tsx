@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import InfluencerData from '../../../utils/form-transformers';
+import { InfluencerFormValues } from '@/utils/form-transformers';
+
 interface InfluencerData {
   totalInfluencers: number;
   averageEngagement: number;

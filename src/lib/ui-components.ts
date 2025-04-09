@@ -46,8 +46,8 @@ export {
 } from '@/components/ui/slider';
 
 export {
-  Spinner
-} from '@/components/ui/spinner';
+  LoadingSpinner as Spinner
+} from '@/components/ui/loading-spinner';
 
 export {
   Switch

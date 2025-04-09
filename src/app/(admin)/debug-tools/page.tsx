@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import CampaignData from '../../../lib/data-mapping/validation';
+import { CampaignData as ValidationCampaignData } from '@/lib/data-mapping/validation';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -31,7 +31,7 @@ export default function DebugTools() {
   const [results, setResults] = useState<CampaignData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadthingStatus, setUploadthingStatus] = useState<{loading: boolean;data: any | null;error: string | null;}>({
+  const [uploadthingStatus, setUploadthingStatus] = useState<{ loading: boolean; data: any | null; error: string | null; }>({
     loading: false,
     data: null,
     error: null
@@ -118,7 +118,7 @@ export default function DebugTools() {
   return (
     <div className="container mx-auto p-6 max-w-5xl font-work-sans">
       <h1 className="text-3xl font-bold mb-6 text-[var(--primary-color)] font-sora">Debug Tools</h1>
-      
+
       {/* Debug Tools Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 font-work-sans">
         {/* Campaign Data Verification Tool */}
@@ -140,7 +140,7 @@ export default function DebugTools() {
             </Link>
           </div>
         </div>
-        
+
         {/* API Verification Tool */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">API Verification</h2>
@@ -156,7 +156,7 @@ export default function DebugTools() {
             </Link>
           </div>
         </div>
-        
+
         {/* Font Awesome Test */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">Font Awesome Diagnostic</h2>
@@ -172,7 +172,7 @@ export default function DebugTools() {
             </Link>
           </div>
         </div>
-        
+
         {/* UI Components Debug */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">UI Components</h2>
@@ -188,7 +188,7 @@ export default function DebugTools() {
             </Link>
           </div>
         </div>
-        
+
         {/* Database Health */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">Database Health</h2>
@@ -204,7 +204,7 @@ export default function DebugTools() {
             </Link>
           </div>
         </div>
-        
+
         {/* Graphiti Monitoring */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">Graphiti Monitoring</h2>
@@ -219,7 +219,7 @@ export default function DebugTools() {
             </Link>
           </div>
         </div>
-        
+
         {/* Uploadthing Test Tool */}
         <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-2 text-[var(--primary-color)] font-sora">Uploadthing Test</h2>
@@ -241,15 +241,14 @@ export default function DebugTools() {
               File Uploader
             </Link>
           </div>
-          
+
           {uploadthingStatus.data &&
-          <div className="mt-4 p-3 bg-gray-50 rounded-md overflow-hidden font-work-sans">
+            <div className="mt-4 p-3 bg-gray-50 rounded-md overflow-hidden font-work-sans">
               <div className="flex items-center mb-2 font-work-sans">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              uploadthingStatus.data.success && uploadthingStatus.data.apiStatus === 'connected' ?
-              'bg-green-100 text-green-800 border border-green-200' :
-              'bg-red-100 text-red-800 border border-red-200'} font-work-sans`
-              }>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${uploadthingStatus.data.success && uploadthingStatus.data.apiStatus === 'connected' ?
+                    'bg-green-100 text-green-800 border border-green-200' :
+                    'bg-red-100 text-red-800 border border-red-200'} font-work-sans`
+                }>
                   {uploadthingStatus.data.success && uploadthingStatus.data.apiStatus === 'connected' ? 'Connected' : 'Error'}
                 </span>
                 <span className="text-xs text-[var(--secondary-color)] ml-2 font-work-sans">
@@ -261,15 +260,15 @@ export default function DebugTools() {
               </div>
             </div>
           }
-          
+
           {uploadthingStatus.error &&
-          <div className="mt-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-md text-sm font-work-sans">
+            <div className="mt-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-md text-sm font-work-sans">
               {uploadthingStatus.error}
             </div>
           }
         </div>
       </div>
-      
+
       {/* Campaign Verification Tool */}
       <div id="campaign-verify" className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 mb-6 shadow-sm font-work-sans">
         <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)] font-sora">Verify Campaign Data</h2>
@@ -277,7 +276,7 @@ export default function DebugTools() {
           Enter a campaign ID to verify the data stored in the database. This tool helps identify issues
           with form submissions and data persistence.
         </p>
-        
+
         <div className="flex gap-4 mb-6 font-work-sans">
           <input
             type="text"
@@ -294,30 +293,30 @@ export default function DebugTools() {
             {loading ? 'Loading...' : 'Verify Data'}
           </button>
         </div>
-        
+
         {error &&
-        <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-md font-work-sans">
+          <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-md font-work-sans">
             {error}
           </div>
         }
-        
+
         <div className="grid grid-cols-4 gap-4 mb-6 font-work-sans">
           {[1, 2, 3, 4].map((step) =>
-          <button
-            key={step}
-            onClick={() => navigateToCampaignForm(step)}
-            className="p-3 bg-gray-100 text-[var(--primary-color)] rounded-md hover:bg-white hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 font-work-sans">
+            <button
+              key={step}
+              onClick={() => navigateToCampaignForm(step)}
+              className="p-3 bg-gray-100 text-[var(--primary-color)] rounded-md hover:bg-white hover:border hover:border-[var(--accent-color)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 font-work-sans">
 
               Go to Step {step}
             </button>
           )}
         </div>
       </div>
-      
+
       {results &&
-      <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
+        <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-6 shadow-sm font-work-sans">
           <h2 className="text-xl font-semibold mb-4 text-[var(--primary-color)] font-sora">Campaign Data</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
             {/* Basic Details */}
             <div className="bg-gray-50 p-4 rounded-md font-work-sans">
@@ -355,7 +354,7 @@ export default function DebugTools() {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Financial Information */}
             <div className="bg-gray-50 p-4 rounded-md font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Financial Information</h3>
@@ -376,12 +375,12 @@ export default function DebugTools() {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Primary Contact */}
             <div className="bg-gray-50 p-4 rounded-md font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Primary Contact</h3>
               {results.primaryContact ?
-            <table className="w-full text-sm font-work-sans">
+                <table className="w-full text-sm font-work-sans">
                   <tbody>
                     <tr>
                       <td className="py-1 font-medium text-[var(--secondary-color)] font-work-sans">Name:</td>
@@ -398,15 +397,15 @@ export default function DebugTools() {
                   </tbody>
                 </table> :
 
-            <p className="text-red-500 font-work-sans">Primary contact data missing</p>
-            }
+                <p className="text-red-500 font-work-sans">Primary contact data missing</p>
+              }
             </div>
-            
+
             {/* Secondary Contact */}
             <div className="bg-gray-50 p-4 rounded-md font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Secondary Contact</h3>
               {results.secondaryContact ?
-            <table className="w-full text-sm font-work-sans">
+                <table className="w-full text-sm font-work-sans">
                   <tbody>
                     <tr>
                       <td className="py-1 font-medium text-[var(--secondary-color)] font-work-sans">Name:</td>
@@ -423,43 +422,43 @@ export default function DebugTools() {
                   </tbody>
                 </table> :
 
-            <p className="text-yellow-600 font-work-sans">No secondary contact</p>
-            }
+                <p className="text-yellow-600 font-work-sans">No secondary contact</p>
+              }
             </div>
-            
+
             {/* Additional Contacts */}
             <div className="bg-gray-50 p-4 rounded-md col-span-1 md:col-span-2 font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Additional Contacts</h3>
               {results.contacts ?
-            <div className="font-work-sans">
+                <div className="font-work-sans">
                   {(() => {
-                try {
-                  const contacts = JSON.parse(results.contacts);
-                  if (Array.isArray(contacts) && contacts.length > 0) {
-                    return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-work-sans">
+                    try {
+                      const contacts = JSON.parse(results.contacts);
+                      if (Array.isArray(contacts) && contacts.length > 0) {
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-work-sans">
                             {contacts.map((contact, index) =>
-                        <div key={index} className="border border-[var(--divider-color)] rounded p-2 font-work-sans">
+                              <div key={index} className="border border-[var(--divider-color)] rounded p-2 font-work-sans">
                                 <p className="font-medium font-work-sans">{contact.firstName} {contact.surname}</p>
                                 <p className="text-sm text-[var(--secondary-color)] font-work-sans">{contact.email}</p>
                                 <p className="text-sm text-[var(--secondary-color)] font-work-sans">{contact.position}</p>
                               </div>
-                        )}
+                            )}
                           </div>);
 
-                  } else {
-                    return <p className="text-[var(--secondary-color)] font-work-sans">No additional contacts</p>;
-                  }
-                } catch (e) {
-                  return <p className="text-red-500 font-work-sans">Error parsing additional contacts</p>;
-                }
-              })()}
+                      } else {
+                        return <p className="text-[var(--secondary-color)] font-work-sans">No additional contacts</p>;
+                      }
+                    } catch (e) {
+                      return <p className="text-red-500 font-work-sans">Error parsing additional contacts</p>;
+                    }
+                  })()}
                 </div> :
 
-            <p className="text-[var(--secondary-color)] font-work-sans">No additional contacts data</p>
-            }
+                <p className="text-[var(--secondary-color)] font-work-sans">No additional contacts data</p>
+              }
             </div>
-            
+
             {/* Platform Information */}
             <div className="bg-gray-50 p-4 rounded-md font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Platform Information</h3>
@@ -476,17 +475,17 @@ export default function DebugTools() {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Objectives */}
             <div className="bg-gray-50 p-4 rounded-md font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Objectives</h3>
               {results.objectives ?
-            <div className="font-work-sans">
+                <div className="font-work-sans">
                   {(() => {
-                try {
-                  const objectives = JSON.parse(results.objectives);
-                  return (
-                    <div className="font-work-sans">
+                    try {
+                      const objectives = JSON.parse(results.objectives);
+                      return (
+                        <div className="font-work-sans">
                           <p className="font-work-sans"><span className="font-medium font-work-sans">Main Message:</span> {objectives.mainMessage}</p>
                           <p className="font-work-sans"><span className="font-medium font-work-sans">Hashtags:</span> {objectives.hashtags}</p>
                           <p className="font-work-sans"><span className="font-medium font-work-sans">Primary KPI:</span> {objectives.primaryKPI?.name} ({objectives.primaryKPI?.target})</p>
@@ -494,16 +493,16 @@ export default function DebugTools() {
                           <p className="font-work-sans"><span className="font-medium font-work-sans">Features:</span> {objectives.features?.length || 0}</p>
                         </div>);
 
-                } catch (e) {
-                  return <p className="text-red-500 font-work-sans">Error parsing objectives data</p>;
-                }
-              })()}
+                    } catch (e) {
+                      return <p className="text-red-500 font-work-sans">Error parsing objectives data</p>;
+                    }
+                  })()}
                 </div> :
 
-            <p className="text-yellow-600 font-work-sans">No objectives data</p>
-            }
+                <p className="text-yellow-600 font-work-sans">No objectives data</p>
+              }
             </div>
-            
+
             {/* Raw JSON Data */}
             <div className="bg-gray-50 p-4 rounded-md col-span-1 md:col-span-2 font-work-sans">
               <h3 className="font-medium text-lg mb-2 text-[var(--primary-color)] font-sora">Raw Data</h3>

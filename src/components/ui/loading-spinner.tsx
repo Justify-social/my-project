@@ -1,6 +1,6 @@
 /**
  * @component LoadingSpinner
- * @category ui
+ * @category atom
  * @subcategory feedback
  * @description A customizable loading spinner component for indicating loading states
  */

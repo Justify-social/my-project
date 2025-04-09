@@ -1,6 +1,6 @@
 /**
  * @component Avatar
- * @category ui
+ * @category atom
  * @subcategory avatar
  * @description A customizable avatar component with image and fallback support
  * @status stable

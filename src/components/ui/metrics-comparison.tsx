@@ -1,6 +1,6 @@
 /**
  * @component MetricsComparison
- * @category data
+ * @category organism
  * @subcategory visualization
  * @description Displays a comparison between metrics with visualization
  */

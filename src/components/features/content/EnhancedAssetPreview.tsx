@@ -2,10 +2,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Error from '../../../middlewares/handle-db-errors';
 import { Icon } from '@/components/ui/icon'
 import { cn } from '@/utils/string/utils';
-import { getSafeAssetUrl } from '@/utils/fileUtils';
+import { getSafeAssetUrl } from '@/utils/file-utils';
 import { toast } from 'sonner';
 
 // Event to notify parent components when an asset should be removed
@@ -106,8 +105,8 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
 
     // Check if this is an UploadThing URL
     const isUploadThingUrl = url.includes('ufs.sh') ||
-    url.includes('uploadthing') ||
-    url.includes('utfs.io');
+      url.includes('uploadthing') ||
+      url.includes('utfs.io');
 
     const processAsset = async () => {
       try {
@@ -115,8 +114,8 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
         if (isUploadThingUrl) {
           // Add proxy wrapper for CORS and to get alternate file keys
           const assetProxyUrl = url.startsWith('/api/asset-proxy') ?
-          url :
-          `/api/asset-proxy?url=${encodeURIComponent(url)}${fileId ? `&fileId=${fileId}` : ''}`;
+            url :
+            `/api/asset-proxy?url=${encodeURIComponent(url)}${fileId ? `&fileId=${fileId}` : ''}`;
 
           if (isImage) {
             if (isMounted) {
@@ -361,11 +360,11 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
     if (status === 'loading') {
       return <Icon iconId="faSpinnerLight" className="w-6 h-6 animate-spin" />;
     }
-    
+
     if (status === 'error' || status === 'deleted') {
       return <Icon iconId="faTriangleExclamationLight" className="w-6 h-6 text-red-500" />;
     }
-    
+
     if (isVideo) {
       return <Icon iconId="faFileVideoLight" className="w-6 h-6" />;
     } else if (isImage) {
@@ -379,17 +378,17 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
 
   // Video player controls
   const [isPlaying, setIsPlaying] = useState(false);
-  
+
   const togglePlayPause = () => {
     const video = videoRef.current;
     if (!video) return;
-    
+
     if (isPlaying) {
       video.pause();
     } else {
       video.play();
     }
-    
+
     setIsPlaying(!isPlaying);
   };
 
@@ -398,14 +397,14 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
     <div className={`${cn("relative rounded-lg overflow-hidden bg-gray-100 min-h-[100px]", className)} font-work-sans`} {...props}>
       {/* Loading spinner */}
       {status === 'loading' &&
-      <div className="absolute inset-0 flex items-center justify-center font-work-sans">
+        <div className="absolute inset-0 flex items-center justify-center font-work-sans">
           {renderFileIcon()}
         </div>
       }
-      
+
       {/* Deleted asset state */}
       {status === 'deleted' &&
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
           {renderFileIcon()}
           <p className="text-center text-gray-700 font-medium mb-2 font-work-sans">Asset Deleted</p>
           <p className="text-center text-gray-500 text-sm mb-4 font-work-sans">
@@ -413,10 +412,10 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
           </p>
         </div>
       }
-      
+
       {/* Error state with retry option */}
       {status === 'error' && !previewUrl &&
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-100 font-work-sans">
           {renderFileIcon()}
           <p className="text-center text-gray-700 font-medium mb-2 font-work-sans">Failed to load {fileName}</p>
           <p className="text-center text-gray-500 text-sm mb-4 font-work-sans">
@@ -424,51 +423,51 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
           </p>
           <div className="flex space-x-2 font-work-sans">
             <button
-            onClick={handleRetry}
-            className="px-3 py-1 bg-blue-500 text-white text-sm rounded flex items-center font-work-sans">
+              onClick={handleRetry}
+              className="px-3 py-1 bg-blue-500 text-white text-sm rounded flex items-center font-work-sans">
 
               <Icon iconId="faRotateRightLight" className="mr-1" />
               Retry
             </button>
             <button
-            onClick={handleReportMissingAsset}
-            className="px-3 py-1 bg-red-500 text-white text-sm rounded font-work-sans">
+              onClick={handleReportMissingAsset}
+              className="px-3 py-1 bg-red-500 text-white text-sm rounded font-work-sans">
 
               Remove Asset
             </button>
           </div>
         </div>
       }
-      
+
       {/* Video preview */}
       {(status === 'ready' || status === 'loaded') && isVideo && previewUrl &&
-      <div className="relative w-full h-full aspect-square overflow-hidden font-work-sans">
+        <div className="relative w-full h-full aspect-square overflow-hidden font-work-sans">
           <video
-          ref={videoRef}
-          src={previewUrl}
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={handleVideoError}
-          onLoadedMetadata={handleVideoMetadataLoaded}
-          autoPlay
-          muted
-          playsInline
-          loop={false}
-          onTimeUpdate={(e) => {
-            const video = e.target as HTMLVideoElement;
-            // Loop after 5 seconds
-            if (video.currentTime >= 5) {
-              video.currentTime = 0;
-              video.play().catch((err) => console.error('Error replaying video:', err));
-            }
-          }} />
+            ref={videoRef}
+            src={previewUrl}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={handleVideoError}
+            onLoadedMetadata={handleVideoMetadataLoaded}
+            autoPlay
+            muted
+            playsInline
+            loop={false}
+            onTimeUpdate={(e) => {
+              const video = e.target as HTMLVideoElement;
+              // Loop after 5 seconds
+              if (video.currentTime >= 5) {
+                video.currentTime = 0;
+                video.play().catch((err) => console.error('Error replaying video:', err));
+              }
+            }} />
 
-          
+
           {/* Play/pause overlay */}
           <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 font-work-sans">
             <button
-            type="button"
-            onClick={togglePlayPause}
-            className="bg-white bg-opacity-70 rounded-full p-2 text-[var(--primary-color)] hover:text-[var(--accent-color)] transition-colors font-work-sans">
+              type="button"
+              onClick={togglePlayPause}
+              className="bg-white bg-opacity-70 rounded-full p-2 text-[var(--primary-color)] hover:text-[var(--accent-color)] transition-colors font-work-sans">
 
               {isPlaying ? (
                 <Icon iconId="faPauseLight" className="w-5 h-5 text-current" />
@@ -480,25 +479,25 @@ export function EnhancedAssetPreview({ url, fileName, type, id, className, ...pr
           </div>
         </div>
       }
-      
+
       {/* Image preview */}
       {status === 'loaded' && isImage && previewUrl &&
-      <div className="relative w-full h-full aspect-square overflow-hidden font-work-sans">
+        <div className="relative w-full h-full aspect-square overflow-hidden font-work-sans">
           <img
-          src={previewUrl}
-          alt={fileName}
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={() => {
-            setStatus('error');
-            setError(new Error(`Failed to display image: ${fileName}`));
-          }} />
+            src={previewUrl}
+            alt={fileName}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => {
+              setStatus('error');
+              setError(new Error(`Failed to display image: ${fileName}`));
+            }} />
 
         </div>
       }
-      
+
       {/* Generic file preview (for non-media files) */}
       {(status === 'ready' || status === 'loaded') && !isVideo && !isImage &&
-      <div className="flex flex-col items-center justify-center py-6 px-4 font-work-sans">
+        <div className="flex flex-col items-center justify-center py-6 px-4 font-work-sans">
           {renderFileIcon()}
 
           <p className="text-sm text-gray-600 text-center break-all font-work-sans">{fileName}</p>

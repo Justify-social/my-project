@@ -1,6 +1,6 @@
 /**
  * @component LoadingSkeleton
- * @category feedback
+ * @category atom
  * @subcategory loading
  * @description A placeholder loading component that displays animated skeleton shapes
  */

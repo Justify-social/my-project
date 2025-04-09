@@ -44,7 +44,8 @@
         "./src/components/ui/badge"
       ],
       "@/components/ui/button": [
-        "./src/components/ui/button"
+        "./src/components/ui/button",
+        "src/lib/data-mapping/_backup/schema-mapping.ts.bak"
       ],
       "@/components/ui/card": [
         "./src/components/ui/card"
@@ -78,6 +79,9 @@
       ],
       "@/components/ui/tabs": [
         "./src/components/ui/tabs"
+      ],
+      "@/components/ui/tooltip": [
+        "./src/components/ui/tooltip"
       ],
       "@/components/ui/icon": [
         "./src/components/ui/icon"

@@ -113,10 +113,10 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-red-500 text-sm p-3 bg-red-50 rounded-md"
+            className="text-red-500 text-sm p-3 bg-red-50 rounded-md flex items-start"
           >
-            <WarningIcon name="circleExclamation" size="md" className="mr-2 mt-0.5" />
-            {error}
+            <WarningIcon className="mr-2 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
           </motion.div>
         )}
 
@@ -125,16 +125,16 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-green-500 text-sm p-3 bg-green-50 rounded-md"
+            className="text-green-500 text-sm p-3 bg-green-50 rounded-md flex items-start"
           >
-            <SuccessIcon name="circleCheck" size="md" className="mr-2 mt-0.5" />
-            {success}
+            <SuccessIcon className="mr-2 mt-0.5 flex-shrink-0" />
+            <span>{success}</span>
           </motion.div>
         )}
 
         {/* Notice */}
         <div className="mt-6 p-3 bg-blue-50 text-blue-700 rounded-md flex items-start">
-          <StaticIcon name="circleInfo" size="md" className="mr-2 mt-0.5" />
+          <StaticIcon iconId="faCircleInfoLight" className="mr-2 mt-0.5 flex-shrink-0" />
           <span>
             Email notifications will be sent to your registered email address.
             You can update your email in the Personal Information section.

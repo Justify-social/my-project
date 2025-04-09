@@ -289,342 +289,341 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  return tryCatch(
-    async () => {
-      const { id } = await params;
-      const campaignId = id;
+export const PATCH = tryCatch(
+  // Core async logic for PATCH
+  async (request: NextRequest, { params }: RouteParams) => {
+    const { id } = params;
+    const campaignId = id;
 
-      // Check if the ID is a UUID (string format) or a numeric ID
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
-      const numericId = parseInt(campaignId);
+    // Check if the ID is a UUID (string format) or a numeric ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const numericId = parseInt(campaignId);
 
-      if (!isUuid && isNaN(numericId)) {
-        return NextResponse.json(
-          { error: 'Invalid campaign ID' },
-          { status: 400 }
-        );
+    if (!isUuid && isNaN(numericId)) {
+      return NextResponse.json(
+        { error: 'Invalid campaign ID' },
+        { status: 400 }
+      );
+    }
+
+    // Connect to database
+    await connectToDatabase();
+
+    // Parse and validate request body
+    const body = await request.json();
+    console.log('Received PATCH request body:', JSON.stringify(body, null, 2));
+
+    const validationResult = campaignUpdateSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: validationResult.error.format()
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = validationResult.data;
+
+    // Import the EnumTransformers utility if needed for transforms
+    const { EnumTransformers } = await import('@/utils/enum-transformers');
+
+    let updatedCampaign;
+
+    if (isUuid) {
+      // Update the campaign in CampaignWizard table if it's a UUID
+      console.log('Updating campaign with UUID:', campaignId);
+
+      // Initialize mappedData reliably here
+      const mappedData: any = {
+        updatedAt: new Date(),
+        // Initialize nested objects to prevent errors later
+        demographics: {},
+        locations: [],
+        targeting: {},
+        competitors: []
+      };
+
+      // Add name and business goal if available
+      if (data.name || data.campaignName) {
+        mappedData.name = data.name || data.campaignName;
       }
 
-      // Connect to database
-      await connectToDatabase();
-
-      // Parse and validate request body
-      const body = await request.json();
-      console.log('Received PATCH request body:', JSON.stringify(body, null, 2));
-
-      const validationResult = campaignUpdateSchema.safeParse(body);
-
-      if (!validationResult.success) {
-        return NextResponse.json(
-          {
-            error: 'Validation failed',
-            details: validationResult.error.format()
-          },
-          { status: 400 }
-        );
+      if (data.businessGoal || data.description) {
+        mappedData.businessGoal = data.businessGoal || data.description;
       }
 
-      const data = validationResult.data;
+      // Handle date fields with proper conversion to Date objects
+      if (data.startDate) {
+        mappedData.startDate = new Date(data.startDate);
+      }
 
-      // Import the EnumTransformers utility if needed for transforms
-      const { EnumTransformers } = await import('@/utils/enum-transformers');
+      if (data.endDate) {
+        mappedData.endDate = new Date(data.endDate);
+      }
 
-      let updatedCampaign;
+      if (data.timeZone) {
+        mappedData.timeZone = data.timeZone;
+      }
 
-      if (isUuid) {
-        // Update the campaign in CampaignWizard table if it's a UUID
-        console.log('Updating campaign with UUID:', campaignId);
-
-        // Map the incoming data to match the CampaignWizard schema
-        const mappedData: any = {
-          // Map direct fields that match the schema
-          updatedAt: new Date(),
+      // Handle budget as a JSON field
+      if (data.currency || data.totalBudget || data.socialMediaBudget) {
+        mappedData.budget = {
+          currency: data.currency || 'USD',
+          total: data.totalBudget || 0,
+          socialMedia: data.socialMediaBudget || 0
         };
+      }
 
-        // Add name and business goal if available
-        if (data.name || data.campaignName) {
-          mappedData.name = data.name || data.campaignName;
+      // Handle primaryContact as a JSON field
+      if (data.primaryContact) {
+        mappedData.primaryContact = data.primaryContact;
+      }
+
+      // Handle secondaryContact as a JSON field
+      if (data.secondaryContact) {
+        mappedData.secondaryContact = data.secondaryContact;
+      }
+
+      // Handle Step 2 specific fields - using type assertions to bypass TypeScript errors
+      if (data.primaryKPI) {
+        console.log('Saving primaryKPI:', data.primaryKPI);
+        mappedData.primaryKPI = data.primaryKPI;
+      }
+
+      if (data.secondaryKPIs) {
+        console.log('Saving secondaryKPIs:', JSON.stringify(data.secondaryKPIs));
+        // Make sure secondaryKPIs is an array
+        mappedData.secondaryKPIs = Array.isArray(data.secondaryKPIs)
+          ? data.secondaryKPIs
+          : [data.secondaryKPIs];
+      }
+
+      if (data.features) {
+        console.log('Saving features:', JSON.stringify(data.features));
+        // Make sure features is an array
+        mappedData.features = Array.isArray(data.features)
+          ? data.features
+          : [data.features];
+      }
+
+      // Handle messaging if present
+      if (data.messaging || data.mainMessage || data.hashtags || data.memorability ||
+        data.keyBenefits || data.expectedAchievements ||
+        data.purchaseIntent || data.brandPerception) {
+
+        console.log('Saving messaging fields:', {
+          mainMessage: data.mainMessage || data.messaging?.mainMessage,
+          hashtags: data.hashtags || data.messaging?.hashtags,
+          memorability: data.memorability || data.messaging?.memorability
+        });
+
+        // Construct messaging from either direct fields or the messaging object
+        mappedData.messaging = {
+          mainMessage: data.mainMessage || data.messaging?.mainMessage || '',
+          hashtags: data.hashtags || data.messaging?.hashtags || '',
+          memorability: data.memorability || data.messaging?.memorability || '',
+          keyBenefits: data.keyBenefits || data.messaging?.keyBenefits || '',
+          expectedAchievements: data.expectedAchievements || data.messaging?.expectedAchievements || '',
+          purchaseIntent: data.purchaseIntent || data.messaging?.purchaseIntent || '',
+          brandPerception: data.brandPerception || data.messaging?.brandPerception || ''
+        };
+      }
+
+      // Handle audience data if present and ensure data.audience is checked
+      if (data.audience) {
+        console.log('Audience data received:', JSON.stringify(data.audience, null, 2));
+
+        // demographics object is already initialized above
+        // if (!mappedData.demographics) mappedData.demographics = {}; 
+
+        // Map age distribution
+        if (data.audience.ageDistribution) {
+          mappedData.demographics.ageDistribution = data.audience.ageDistribution;
         }
 
-        if (data.businessGoal || data.description) {
-          mappedData.businessGoal = data.businessGoal || data.description;
+        // Map gender and otherGender
+        if (Array.isArray(data.audience.gender)) {
+          mappedData.demographics.gender = data.audience.gender;
+        }
+        if (data.audience.otherGender) { // Check if otherGender exists
+          mappedData.demographics.otherGender = data.audience.otherGender;
         }
 
-        // Handle date fields with proper conversion to Date objects
-        if (data.startDate) {
-          mappedData.startDate = new Date(data.startDate);
+        // Map educationLevel and incomeLevel
+        if (data.audience.educationLevel) { // Check if educationLevel exists
+          mappedData.demographics.educationLevel = data.audience.educationLevel;
+        }
+        if (data.audience.incomeLevel) { // Check if incomeLevel exists
+          mappedData.demographics.incomeLevel = data.audience.incomeLevel;
         }
 
-        if (data.endDate) {
-          mappedData.endDate = new Date(data.endDate);
+        // Map jobTitles
+        if (Array.isArray(data.audience.jobTitles)) {
+          mappedData.demographics.jobTitles = data.audience.jobTitles;
         }
 
-        if (data.timeZone) {
-          mappedData.timeZone = data.timeZone;
+        // Map location - locations array already initialized
+        if (Array.isArray(data.audience.location)) {
+          console.log('Location array:', data.audience.location);
+          mappedData.locations = data.audience.location.map(loc => ({ location: loc }));
         }
 
-        // Handle budget as a JSON field
-        if (data.currency || data.totalBudget || data.socialMediaBudget) {
-          mappedData.budget = {
-            currency: data.currency || 'USD',
-            total: data.totalBudget || 0,
-            socialMedia: data.socialMediaBudget || 0
-          };
+        // targeting object is already initialized above
+        // if (!mappedData.targeting) mappedData.targeting = {}; 
+
+        // Map screeningQuestions
+        if (Array.isArray(data.audience.screeningQuestions)) {
+          console.log('Screening questions array:', data.audience.screeningQuestions);
+          mappedData.targeting.screeningQuestions = data.audience.screeningQuestions.map(q => ({ question: q }));
         }
 
-        // Handle primaryContact as a JSON field
-        if (data.primaryContact) {
-          mappedData.primaryContact = data.primaryContact;
+        // Map languages
+        if (Array.isArray(data.audience.languages)) {
+          console.log('Languages array:', data.audience.languages);
+          mappedData.targeting.languages = data.audience.languages.map(lang => ({ language: lang }));
         }
 
-        // Handle secondaryContact as a JSON field
-        if (data.secondaryContact) {
-          mappedData.secondaryContact = data.secondaryContact;
+        // Map competitors - competitors array already initialized
+        if (Array.isArray(data.audience.competitors)) {
+          console.log('Competitors array:', data.audience.competitors);
+          mappedData.competitors = data.audience.competitors;
         }
 
-        // Handle Step 2 specific fields - using type assertions to bypass TypeScript errors
-        if (data.primaryKPI) {
-          console.log('Saving primaryKPI:', data.primaryKPI);
-          mappedData.primaryKPI = data.primaryKPI;
+        console.log('Mapped audience data:', {
+          demographics: mappedData.demographics,
+          locations: mappedData.locations,
+          targeting: mappedData.targeting,
+          competitors: mappedData.competitors
+        });
+      }
+
+      // Handle step status if present
+      if (data.step) {
+        mappedData.currentStep = data.step;
+
+        // Set step completion flag based on current step
+        switch (data.step) {
+          case 1:
+            mappedData.step1Complete = true;
+            break;
+          case 2:
+            mappedData.step2Complete = true;
+            break;
+          case 3:
+            mappedData.step3Complete = true;
+            break;
+          case 4:
+            mappedData.step4Complete = true;
+            break;
         }
+      }
 
-        if (data.secondaryKPIs) {
-          console.log('Saving secondaryKPIs:', JSON.stringify(data.secondaryKPIs));
-          // Make sure secondaryKPIs is an array
-          mappedData.secondaryKPIs = Array.isArray(data.secondaryKPIs)
-            ? data.secondaryKPIs
-            : [data.secondaryKPIs];
+      // Handle status if present
+      if (data.status) {
+        mappedData.status = data.status.toUpperCase();
+      }
+
+      console.log('Mapped data for CampaignWizard update:', JSON.stringify(mappedData, null, 2));
+
+      // Update the campaign with the properly mapped data
+      updatedCampaign = await prisma.campaignWizard.update({
+        where: { id: campaignId },
+        data: mappedData,
+        include: {
+          Influencer: true
         }
+      });
 
-        if (data.features) {
-          console.log('Saving features:', JSON.stringify(data.features));
-          // Make sure features is an array
-          mappedData.features = Array.isArray(data.features)
-            ? data.features
-            : [data.features];
-        }
+      // If there are influencers in the request, create or update them
+      if (data.influencers && Array.isArray(data.influencers) && data.influencers.length > 0) {
+        console.log('Updating influencers for campaign:', campaignId);
 
-        // Handle messaging if present
-        if (data.messaging || data.mainMessage || data.hashtags || data.memorability ||
-          data.keyBenefits || data.expectedAchievements ||
-          data.purchaseIntent || data.brandPerception) {
+        // First delete existing influencers to avoid duplicates
+        await prisma.influencer.deleteMany({
+          where: { campaignId }
+        });
 
-          console.log('Saving messaging fields:', {
-            mainMessage: data.mainMessage || data.messaging?.mainMessage,
-            hashtags: data.hashtags || data.messaging?.hashtags,
-            memorability: data.memorability || data.messaging?.memorability
+        // Then create new influencers for the campaign
+        const influencerPromises = data.influencers
+          .filter(inf => inf.handle && inf.platform) // Only include valid influencers
+          .map(inf => {
+            return prisma.influencer.create({
+              data: {
+                id: inf.id || `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
+                platform: inf.platform,
+                handle: inf.handle,
+                platformId: inf.platformId || '',
+                campaignId: campaignId,
+                updatedAt: new Date()
+              }
+            });
           });
 
-          // Construct messaging from either direct fields or the messaging object
-          mappedData.messaging = {
-            mainMessage: data.mainMessage || data.messaging?.mainMessage || '',
-            hashtags: data.hashtags || data.messaging?.hashtags || '',
-            memorability: data.memorability || data.messaging?.memorability || '',
-            keyBenefits: data.keyBenefits || data.messaging?.keyBenefits || '',
-            expectedAchievements: data.expectedAchievements || data.messaging?.expectedAchievements || '',
-            purchaseIntent: data.purchaseIntent || data.messaging?.purchaseIntent || '',
-            brandPerception: data.brandPerception || data.messaging?.brandPerception || ''
-          };
-        }
+        await Promise.all(influencerPromises);
 
-        // Handle audience data if present
-        if (data.audience) {
-          console.log('Audience data received:', JSON.stringify(data.audience, null, 2));
-
-          if (!mappedData.demographics) mappedData.demographics = {};
-
-          // Map age distribution
-          if (data.audience.ageDistribution) {
-            mappedData.demographics.ageDistribution = data.audience.ageDistribution;
-          }
-
-          // Map gender and otherGender
-          if (Array.isArray(data.audience.gender)) {
-            mappedData.demographics.gender = data.audience.gender;
-          }
-
-          if (data.audience.otherGender) {
-            mappedData.demographics.otherGender = data.audience.otherGender;
-          }
-
-          // Map educationLevel and incomeLevel
-          if (data.audience.educationLevel) {
-            mappedData.demographics.educationLevel = data.audience.educationLevel;
-          }
-
-          if (data.audience.incomeLevel) {
-            mappedData.demographics.incomeLevel = data.audience.incomeLevel;
-          }
-
-          // Map jobTitles
-          if (Array.isArray(data.audience.jobTitles)) {
-            mappedData.demographics.jobTitles = data.audience.jobTitles;
-          }
-
-          // Map location
-          if (Array.isArray(data.audience.location)) {
-            console.log('Location array:', data.audience.location);
-            mappedData.locations = data.audience.location.map(loc => ({ location: loc }));
-          }
-
-          // Initialize targeting if not present
-          if (!mappedData.targeting) mappedData.targeting = {};
-
-          // Map screeningQuestions
-          if (Array.isArray(data.audience.screeningQuestions)) {
-            console.log('Screening questions array:', data.audience.screeningQuestions);
-            mappedData.targeting.screeningQuestions = data.audience.screeningQuestions.map(q => ({ question: q }));
-          }
-
-          // Map languages
-          if (Array.isArray(data.audience.languages)) {
-            console.log('Languages array:', data.audience.languages);
-            mappedData.targeting.languages = data.audience.languages.map(lang => ({ language: lang }));
-          }
-
-          // Map competitors - Fix: Store as string array, not objects with competitor property
-          if (Array.isArray(data.audience.competitors)) {
-            console.log('Competitors array:', data.audience.competitors);
-            // Store competitors as a string array, which is what Prisma expects
-            mappedData.competitors = data.audience.competitors;
-          }
-
-          console.log('Mapped audience data:', {
-            demographics: mappedData.demographics,
-            locations: mappedData.locations,
-            targeting: mappedData.targeting,
-            competitors: mappedData.competitors
-          });
-        }
-
-        // Handle step status if present
-        if (data.step) {
-          mappedData.currentStep = data.step;
-
-          // Set step completion flag based on current step
-          switch (data.step) {
-            case 1:
-              mappedData.step1Complete = true;
-              break;
-            case 2:
-              mappedData.step2Complete = true;
-              break;
-            case 3:
-              mappedData.step3Complete = true;
-              break;
-            case 4:
-              mappedData.step4Complete = true;
-              break;
-          }
-        }
-
-        // Handle status if present
-        if (data.status) {
-          mappedData.status = data.status.toUpperCase();
-        }
-
-        console.log('Mapped data for CampaignWizard update:', JSON.stringify(mappedData, null, 2));
-
-        // Update the campaign with the properly mapped data
-        updatedCampaign = await prisma.campaignWizard.update({
+        // Refetch the campaign with updated influencers
+        updatedCampaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
-          data: mappedData,
           include: {
             Influencer: true
           }
         });
+      }
+    } else {
+      // Update the submitted campaign if it's a numeric ID
+      console.log('Updating submitted campaign with numeric ID:', numericId);
 
-        // If there are influencers in the request, create or update them
-        if (data.influencers && Array.isArray(data.influencers) && data.influencers.length > 0) {
-          console.log('Updating influencers for campaign:', campaignId);
+      // Create a properly mapped update object for CampaignWizardSubmission
+      // This would need to be adapted based on the CampaignWizardSubmission schema
+      const submissionData = {
+        ...(data.name && { campaignName: data.name }),
+        ...(data.businessGoal && { description: data.businessGoal }),
+        ...(data.startDate && { startDate: new Date(data.startDate) }),
+        ...(data.endDate && { endDate: new Date(data.endDate) }),
+        ...(data.timeZone && { timeZone: data.timeZone }),
+        updatedAt: new Date()
+      };
 
-          // First delete existing influencers to avoid duplicates
-          await prisma.influencer.deleteMany({
-            where: { campaignId }
-          });
-
-          // Then create new influencers for the campaign
-          const influencerPromises = data.influencers
-            .filter(inf => inf.handle && inf.platform) // Only include valid influencers
-            .map(inf => {
-              return prisma.influencer.create({
-                data: {
-                  id: inf.id || `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
-                  platform: inf.platform,
-                  handle: inf.handle,
-                  platformId: inf.platformId || '',
-                  campaignId: campaignId,
-                  updatedAt: new Date()
-                }
-              });
-            });
-
-          await Promise.all(influencerPromises);
-
-          // Refetch the campaign with updated influencers
-          updatedCampaign = await prisma.campaignWizard.findUnique({
-            where: { id: campaignId },
-            include: {
-              Influencer: true
-            }
-          });
+      // Ensure we use the numeric ID for the where clause
+      updatedCampaign = await prisma.campaignWizardSubmission.update({
+        where: { id: numericId },
+        data: submissionData,
+        include: {
+          primaryContact: true,
+          secondaryContact: true,
+          audience: true,
+          creativeAssets: true,
+          creativeRequirements: true
         }
-      } else {
-        // Update the submitted campaign if it's a numeric ID
-        console.log('Updating submitted campaign with numeric ID:', numericId);
-
-        // Create a properly mapped update object for CampaignWizardSubmission
-        // This would need to be adapted based on the CampaignWizardSubmission schema
-        const submissionData = {
-          ...(data.name && { campaignName: data.name }),
-          ...(data.businessGoal && { description: data.businessGoal }),
-          ...(data.startDate && { startDate: new Date(data.startDate) }),
-          ...(data.endDate && { endDate: new Date(data.endDate) }),
-          ...(data.timeZone && { timeZone: data.timeZone }),
-          updatedAt: new Date()
-        };
-
-        // Ensure we use the numeric ID for the where clause
-        updatedCampaign = await prisma.campaignWizardSubmission.update({
-          where: { id: numericId },
-          data: submissionData,
-          include: {
-            primaryContact: true,
-            secondaryContact: true,
-            audience: true,
-            creativeAssets: true,
-            creativeRequirements: true
-          }
-        });
-      }
-
-      // Process date fields before they get serialized improperly
-      if (updatedCampaign && updatedCampaign.startDate instanceof Date) {
-        (updatedCampaign as any).startDate = updatedCampaign.startDate.toISOString();
-      }
-
-      if (updatedCampaign && updatedCampaign.endDate instanceof Date) {
-        (updatedCampaign as any).endDate = updatedCampaign.endDate.toISOString();
-      }
-
-      // Transform response data for frontend
-      const transformedCampaign = EnumTransformers.transformObjectFromBackend(updatedCampaign);
-
-      return NextResponse.json({
-        success: true,
-        data: transformedCampaign
       });
-    },
-    {
-      entityName: 'Campaign',
-      operation: DbOperation.UPDATE
     }
-  );
-}
+
+    // Process date fields before they get serialized improperly
+    if (updatedCampaign && updatedCampaign.startDate instanceof Date) {
+      (updatedCampaign as any).startDate = updatedCampaign.startDate.toISOString();
+    }
+
+    if (updatedCampaign && updatedCampaign.endDate instanceof Date) {
+      (updatedCampaign as any).endDate = updatedCampaign.endDate.toISOString();
+    }
+
+    // Transform response data for frontend
+    const transformedCampaign = EnumTransformers.transformObjectFromBackend(updatedCampaign);
+
+    return NextResponse.json({
+      success: true,
+      data: transformedCampaign
+    });
+  },
+  // Options for tryCatch
+  {
+    entityName: 'Campaign',
+    operation: DbOperation.UPDATE
+  }
+);
 
 export async function DELETE(
   request: NextRequest,

@@ -3,9 +3,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 import { Suspense } from 'react';
-import LoadingSpinner from '../../../components/ui/spinner-examples';
-import ClientCampaignList from '@/src/components/features/users/profile/page';
-import { Spinner } from '@/components/ui/spinner/Spinner'
+import ClientCampaignList from './page';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function ServerCampaigns() {
   return (

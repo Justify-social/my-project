@@ -12,30 +12,40 @@ import { CampaignAssetUploader, type UploadedAsset } from "./CampaignAssetUpload
 function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const campaignId = searchParams.get('id');
-  const { data, updateData, campaignData, isEditing, loading, updateCampaignData } = useWizard();
+  const campaignId = searchParams?.get('id');
+  const { data, updateFormData, campaignData, isEditing, loading } = useWizard();
   const [assets, setAssets] = useState<UploadedAsset[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize assets from campaign data
+  // Sync assets from context
   useEffect(() => {
-    if (campaignData?.assets?.files) {
-      setAssets(campaignData.assets.files);
+    // Use optional chaining to safely access assets
+    if (campaignData?.assets && Array.isArray(campaignData.assets)) {
+      setAssets(campaignData.assets);
     }
   }, [campaignData]);
 
-  // Handle asset upload completion
-  const handleUploadComplete = (newAssets: UploadedAsset[]) => {
-    const updatedAssets = [...assets, ...newAssets];
-    setAssets(updatedAssets);
-    
-    // Update campaign data
-    updateCampaignData({
-      assets: { files: updatedAssets }
-    });
-    
-    toast.success(`${newAssets.length} assets uploaded successfully`);
+  const handleUploadComplete = (uploadedFiles: UploadedAsset[]) => {
+    console.log('Upload complete:', uploadedFiles);
+    const newAssets = [...assets, ...uploadedFiles];
+    setAssets(newAssets);
+    // Use updateFormData
+    updateFormData({ assets: newAssets });
+  };
+
+  const handleRemoveAsset = (index: number) => {
+    const newAssets = assets.filter((_, i) => i !== index);
+    setAssets(newAssets);
+    // Use updateFormData
+    updateFormData({ assets: newAssets });
+  };
+
+  const handleAssetUpdate = (index: number, updatedAsset: Partial<UploadedAsset>) => {
+    const newAssets = assets.map((asset, i) => i === index ? { ...asset, ...updatedAsset } : asset);
+    setAssets(newAssets);
+    // Use updateFormData
+    updateFormData({ assets: newAssets });
   };
 
   // Handle asset upload error
@@ -50,11 +60,11 @@ function FormContent() {
     try {
       setIsSaving(true);
       setError(null);
-      
+
       if (!campaignId) {
         throw new Error('Campaign ID is required');
       }
-      
+
       // Save assets to the campaign
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
@@ -63,13 +73,13 @@ function FormContent() {
           assets: { files: assets }
         })
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(result.error || 'Failed to update campaign');
       }
-      
+
       toast.success('Campaign assets updated successfully');
       router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
     } catch (error) {
@@ -89,7 +99,7 @@ function FormContent() {
         toast.error('Cannot save draft: No campaign ID found');
         return;
       }
-      
+
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -98,14 +108,14 @@ function FormContent() {
           submissionStatus: 'draft'
         })
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         toast.error(result.error || 'Failed to save draft');
         return;
       }
-      
+
       toast.success('Draft saved successfully');
     } catch (error) {
       toast.error('Failed to save draft: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -179,15 +189,15 @@ function FormContent() {
 
 export default function Step4Content() {
   const [mounted, setMounted] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   if (!mounted) {
     return <WizardSkeleton step={4} />;
   }
-  
+
   return (
     <Suspense fallback={<WizardSkeleton step={4} />}>
       <FormContent />

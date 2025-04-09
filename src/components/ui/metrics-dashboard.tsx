@@ -1,6 +1,6 @@
 /**
  * @component MetricsDashboard
- * @category data
+ * @category organism
  * @subcategory visualization
  * @description A responsive dashboard layout for displaying multiple KPIs and metrics in a grid
  * @since 2023-07-15
@@ -49,7 +49,7 @@ export function MetricsDashboard({
         return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
     }
   };
-  
+
   return (
     <div className={cn('space-y-6', className)}>
       {/* Header section */}
@@ -63,7 +63,7 @@ export function MetricsDashboard({
           )}
         </div>
       )}
-      
+
       {/* Metrics grid */}
       <div className={cn('grid gap-4', getGridClass())}>
         {metrics.map((metric, index) => (
@@ -73,7 +73,7 @@ export function MetricsDashboard({
           />
         ))}
       </div>
-      
+
       {/* Additional content */}
       {children && (
         <div className="mt-6">

@@ -1,6 +1,6 @@
 /**
  * @component SearchBar
- * @category input
+ * @category atom
  * @subcategory search
  * @description A search input component with icon and optional clear button
  */

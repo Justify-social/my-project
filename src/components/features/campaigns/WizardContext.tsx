@@ -1,13 +1,19 @@
 "use client"; // Make sure this file is a client component if you're using Next.js 13 with the App Router.
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import FormData from '../../../types/influencer';
-import WizardContextType from './wizard/CampaignWizardContext';
+import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer';
 import { DateService } from '@/utils/date-service';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { standardizeApiResponse } from "@/utils/api-response-formatter";
+import useCampaignWizard, {
+  WizardStep,
+  OverviewFormData,
+  ObjectivesFormData,
+  AudienceFormData,
+  AssetFormData,
+} from '@/hooks/use-campaign-wizard';
 
 // Define types for KPI and Feature
 interface KPI {
@@ -158,7 +164,7 @@ const WizardContext = createContext<WizardContextType | undefined>(undefined);
 
 export function WizardProvider({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
-  const campaignId = searchParams.get('id');
+  const campaignId = searchParams?.get('id');
   const [loading, setLoading] = useState(!!campaignId);
   const [campaignData, setCampaignData] = useState<any | null>(null);
   const [data, setData] = useState<WizardData>(defaultWizardData);
@@ -204,64 +210,31 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         console.warn("Cannot load campaign data without campaign ID");
         return null;
       }
-      
+
       setLoading(true);
-      
+
       try {
         console.log(`Fetching campaign data for ID: ${campaignId}`);
         const response = await fetch(`/api/campaigns/${campaignId}`);
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch campaign data: ${response.status}`);
         }
-        
-        const result = await response.json();
-        console.log("Fetched campaign data:", result);
-        
-        if (result.success && result.data) {
-          // Extract the campaign data from the response
-          const extractedData = result.data;
-          console.log("Extracted campaign data:", extractedData);
-          
-          // Transform and normalize the data using our standardizeApiResponse utility
-          const normalizedData = standardizeApiResponse(extractedData);
-          
-          console.log("Standardized campaign data:", normalizedData);
-          
-          // Debugging: Log key fields to verify they're being properly processed
-          console.log("Dates after normalization:", {
-            startDate: normalizedData.startDate,
-            endDate: normalizedData.endDate
-          });
-          
-          console.log("Influencers after normalization:", normalizedData.influencers);
-          
-          // Update state with normalized data
-          setCampaignData(normalizedData);
-          setHasLoadedData(true);
-          
-          // Show success toast when data is loaded
-          toast.success("Campaign data loaded");
-          
-          // Save to localStorage for offline access
-          try {
-            localStorage.setItem('campaignData', JSON.stringify(normalizedData));
-            localStorage.setItem('lastLoadedCampaignId', campaignId);
-            setLastSaved(new Date());
-          } catch (e) {
-            console.warn('Failed to save campaign data to localStorage:', e);
-          }
-          
-          return normalizedData;
+
+        const apiData = await response.json();
+        const normalizedData = standardizeApiResponse(apiData); // This might return null
+
+        // Use optional chaining for normalizedData
+        if (normalizedData?.success && normalizedData?.data) {
+          console.log("WizardContext: Initial campaign data loaded:", normalizedData.data);
+          setCampaignData(normalizedData.data);
         } else {
-          console.error("Failed to fetch campaign data:", result);
-          toast.error("Failed to load campaign data");
-          return null;
+          console.error("WizardContext: Failed to load initial data", normalizedData?.error);
+          setCampaignData(null);
         }
       } catch (error) {
-        console.error("Error fetching campaign data:", error);
-        toast.error("Error loading campaign data");
-        return null;
+        console.error("WizardContext: Error fetching initial campaign data:", error);
+        setCampaignData(null);
       } finally {
         setLoading(false);
       }
@@ -297,7 +270,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         setLastSaved(new Date());
         toast.success("Progress saved");
@@ -351,12 +324,12 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prevData => {
       const newData = { ...prevData, ...updates };
-      
+
       // Trigger autosave if enabled
       if (autosaveEnabled && campaignId) {
         debouncedSaveProgress(newData);
       }
-      
+
       return newData;
     });
   };
@@ -402,7 +375,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
         setAutosaveEnabled,
         reloadCampaignData,
         updateCampaignData,
-        campaignId,
+        campaignId: campaignId ?? null,
       }}
     >
       {children}

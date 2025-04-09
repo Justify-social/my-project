@@ -20,22 +20,25 @@ const campaignSchema = z.object({
 // POST handler - Create campaign with validation
 export const POST = withValidation(
   campaignSchema,
-  async (data, request) => {
+  // Explicitly type the validated data
+  async (data: z.infer<typeof campaignSchema>, request) => {
     // Import the EnumTransformers utility
     const { EnumTransformers } = await import('@/utils/enum-transformers');
-    
+
     // Transform any enum values from frontend to backend format
+    // Now TypeScript knows the shape of data, so transformedData should be typed correctly
     const transformedData = EnumTransformers.transformObjectToBackend(data);
     console.log('Transformed wizard data for API:', transformedData);
-    
+
     const campaign = await prisma.campaignWizard.create({
       data: {
         id: uuidv4(),
-        name: transformedData.name,
-        businessGoal: transformedData.businessGoal || '',
-        startDate: transformedData.startDate || new Date(),
-        endDate: transformedData.endDate || new Date(),
-        timeZone: transformedData.timeZone,
+        // Access properties directly on correctly typed data
+        name: data.name,
+        businessGoal: data.businessGoal || '',
+        startDate: data.startDate || new Date(),
+        endDate: data.endDate || new Date(),
+        timeZone: data.timeZone,
         primaryContact: {},
         secondaryContact: Prisma.JsonNull,
         budget: {},
@@ -52,10 +55,10 @@ export const POST = withValidation(
         requirements: []
       },
     });
-    
+
     // Transform campaign data back to frontend format before returning
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
-    
+
     return NextResponse.json({
       success: true,
       data: transformedCampaign
