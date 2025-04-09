@@ -1,10 +1,16 @@
+/**
+ * @component Carousel
+ * @category organism
+ * @subcategory navigation
+ * @description Displays items in a scrollable container with previous/next controls.
+ */
 "use client"
 
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { Icon } from "@/components/ui/icon/icon"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -216,7 +222,7 @@ const CarouselPrevious = React.forwardRef<
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft className="h-4 w-4" />
+      <Icon iconId="faChevronLeftLight" className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
     </Button>
   )
@@ -245,7 +251,7 @@ const CarouselNext = React.forwardRef<
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight className="h-4 w-4" />
+      <Icon iconId="faChevronRightLight" className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
     </Button>
   )

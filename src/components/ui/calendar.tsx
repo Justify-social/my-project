@@ -1,7 +1,13 @@
+/**
+ * @component Calendar
+ * @category organism
+ * @subcategory input
+ * @description Displays a calendar grid allowing users to view dates and select single or multiple dates.
+ */
 "use client"
 
 import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Icon } from "@/components/ui/icon/icon"
 import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -54,11 +60,11 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
+        IconLeft: ({ className: iconClassName, ...iconProps }) => (
+          <Icon iconId="faChevronLeftLight" className={cn("h-4 w-4", iconClassName)} {...iconProps} />
         ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
+        IconRight: ({ className: iconClassName, ...iconProps }) => (
+          <Icon iconId="faChevronRightLight" className={cn("h-4 w-4", iconClassName)} {...iconProps} />
         ),
       }}
       {...props}

@@ -1,3 +1,9 @@
+/**
+ * @component Card
+ * @category organism
+ * @subcategory layout
+ * @description A container for grouping related content and actions.
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

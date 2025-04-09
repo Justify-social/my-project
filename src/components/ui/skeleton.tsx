@@ -1,3 +1,9 @@
+/**
+ * @component Skeleton
+ * @category atom
+ * @subcategory feedback
+ * @description Used to represent a loading state of a component.
+ */
 import { cn } from "@/lib/utils"
 
 function Skeleton({

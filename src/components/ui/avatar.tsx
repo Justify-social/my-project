@@ -1,3 +1,9 @@
+/**
+ * @component Avatar
+ * @category molecule
+ * @subcategory display
+ * @description An image element with a fallback for representing users or entities.
+ */
 "use client"
 
 import * as React from "react"

@@ -1,3 +1,9 @@
+/**
+ * @component Separator
+ * @category atom
+ * @subcategory display
+ * @description Visually or semantically separates content.
+ */
 "use client"
 
 import * as React from "react"

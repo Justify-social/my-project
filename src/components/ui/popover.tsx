@@ -1,3 +1,9 @@
+/**
+ * @component Popover
+ * @category molecule
+ * @subcategory overlay
+ * @description Displays rich content in a portal, triggered by a click or focus on an element.
+ */
 "use client"
 
 import * as React from "react"

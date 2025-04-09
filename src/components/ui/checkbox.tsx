@@ -1,8 +1,14 @@
+/**
+ * @component Checkbox
+ * @category atom
+ * @subcategory input
+ * @description A control that allows the user to toggle between checked and unchecked states.
+ */
 "use client"
 
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
+import { Icon } from "@/components/ui/icon/icon"
 
 import { cn } from "@/lib/utils"
 
@@ -21,7 +27,7 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={cn("flex items-center justify-center text-current")}
     >
-      <Check className="h-4 w-4" />
+      <Icon iconId="faCheck" className="h-4 w-4" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))

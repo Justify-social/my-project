@@ -1,6 +1,12 @@
+/**
+ * @component Toaster
+ * @category organism
+ * @subcategory feedback
+ * @description Renders toast notifications based on the `useToast` hook.
+ */
 "use client"
 
-import { useToast } from "@/components/hooks/use-toast"
+import { useToast, type Toast as ToastProps } from "@/hooks/use-toast"
 import {
   Toast,
   ToastClose,
@@ -15,7 +21,7 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, ...props }: ToastProps) {
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">

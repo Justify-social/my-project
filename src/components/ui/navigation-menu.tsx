@@ -1,7 +1,13 @@
+/**
+ * @component NavigationMenu
+ * @category organism
+ * @subcategory navigation
+ * @description A collection of links for primary website navigation, typically used in headers.
+ */
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { cva } from "class-variance-authority"
-import { ChevronDown } from "lucide-react"
+import { Icon } from "@/components/ui/icon/icon"
 
 import { cn } from "@/lib/utils"
 
@@ -54,7 +60,8 @@ const NavigationMenuTrigger = React.forwardRef<
     {...props}
   >
     {children}{" "}
-    <ChevronDown
+    <Icon
+      iconId="faChevronDownLight"
       className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
       aria-hidden="true"
     />

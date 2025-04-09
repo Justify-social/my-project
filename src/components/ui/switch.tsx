@@ -1,3 +1,9 @@
+/**
+ * @component Switch
+ * @category atom
+ * @subcategory input
+ * @description A control that allows the user to toggle between checked and unchecked states.
+ */
 "use client"
 
 import * as React from "react"

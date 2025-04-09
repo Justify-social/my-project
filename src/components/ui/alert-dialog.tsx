@@ -1,3 +1,9 @@
+/**
+ * @component AlertDialog
+ * @category organism
+ * @subcategory feedback
+ * @description A modal dialog that interrupts the user with important content, requiring acknowledgement.
+ */
 "use client"
 
 import * as React from "react"

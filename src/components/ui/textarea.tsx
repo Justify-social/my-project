@@ -1,3 +1,9 @@
+/**
+ * @component Textarea
+ * @category atom
+ * @subcategory input
+ * @description A multi-line text input field.
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

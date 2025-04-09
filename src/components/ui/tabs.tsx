@@ -1,3 +1,9 @@
+/**
+ * @component Tabs
+ * @category organism
+ * @subcategory navigation
+ * @description A set of layered sections of content, known as tab panels, that display one panel of content at a time.
+ */
 "use client"
 
 import * as React from "react"

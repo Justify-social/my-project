@@ -1,8 +1,14 @@
+/**
+ * @component RadioGroup
+ * @category molecule
+ * @subcategory input
+ * @description A set of checkable buttons (radio buttons) where only one button can be checked at a time.
+ */
 "use client"
 
 import * as React from "react"
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
-import { Circle } from "lucide-react"
+import { Icon } from "@/components/ui/icon/icon"
 
 import { cn } from "@/lib/utils"
 
@@ -34,7 +40,7 @@ const RadioGroupItem = React.forwardRef<
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <Circle className="h-2.5 w-2.5 fill-current text-current" />
+        <Icon iconId="faCircle" className="h-2.5 w-2.5 fill-current text-current" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )

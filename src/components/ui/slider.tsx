@@ -1,3 +1,9 @@
+/**
+ * @component Slider
+ * @category atom
+ * @subcategory input
+ * @description An input where the user selects a value from within a given range.
+ */
 "use client"
 
 import * as React from "react"

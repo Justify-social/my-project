@@ -1,3 +1,9 @@
+/**
+ * @component HoverCard
+ * @category molecule
+ * @subcategory overlay
+ * @description Displays a popover card with content when hovering over a trigger element.
+ */
 "use client"
 
 import * as React from "react"

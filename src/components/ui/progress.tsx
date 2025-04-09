@@ -1,3 +1,9 @@
+/**
+ * @component Progress
+ * @category atom
+ * @subcategory feedback
+ * @description Displays an indicator showing the completion progress of a task.
+ */
 "use client"
 
 import * as React from "react"

@@ -1,3 +1,9 @@
+/**
+ * @component Form
+ * @category organism
+ * @subcategory input
+ * @description Provides form context and helper components for building forms with validation, integrating with react-hook-form.
+ */
 "use client"
 
 import * as React from "react"

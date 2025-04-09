@@ -1,3 +1,9 @@
+/**
+ * @component Table
+ * @category organism
+ * @subcategory display
+ * @description Renders data in a tabular format.
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
