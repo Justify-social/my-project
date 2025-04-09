@@ -26,13 +26,6 @@ async function isSuperAdmin() {
   }
 }
 
-// Define interface for the GET route context
-interface GetUserContext {
-  params: {
-    id: string;
-  };
-}
-
 // Define type for selected user data
 interface SelectedUserData {
   id: string;
@@ -49,7 +42,7 @@ interface SelectedUserData {
 // GET user details - Super Admin only
 export async function GET(
   request: NextRequest,
-  context: GetUserContext // Use the defined interface
+  context: { params: { id: string } } // Use the expected inline type
 ) {
   try {
     // Verify Super Admin status
