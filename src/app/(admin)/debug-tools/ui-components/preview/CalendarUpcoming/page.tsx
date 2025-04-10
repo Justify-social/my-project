@@ -2,85 +2,12 @@
 // Timestamp: 2025-04-09T22:15:17.835Z
 
 "use client" // Required for state management (e.g., view switching)
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
-import { CalendarUpcoming } from '@/components/ui/calendar-upcoming'; // Don't import CalendarEvent
+import { CalendarUpcoming, CalendarEvent } from '@/components/ui/calendar-upcoming';
 import { useToast } from "@/hooks/use-toast"; // Add toast for click feedback
-
-// Define a local type mirroring the expected structure
-interface PreviewCalendarEvent {
-  id: number | string;
-  title: string;
-  start: Date;
-  end?: Date;
-  platform?: string;
-  budget?: number;
-  kpi?: string;
-  status?: string;
-  allDay?: boolean; // Added from previous sample data
-}
-
-// More diverse Sample Data
-const now = new Date();
-const currentYear = now.getFullYear();
-const currentMonth = now.getMonth();
-const currentDateOfMonth = now.getDate();
-
-const sampleEvents: PreviewCalendarEvent[] = [
-  {
-    id: '1',
-    title: 'Meeting: Campaign Strategy',
-    start: new Date(currentYear, currentMonth, currentDateOfMonth - 2, 10, 0),
-    end: new Date(currentYear, currentMonth, currentDateOfMonth - 2, 11, 30),
-    platform: 'Internal',
-    status: 'Completed'
-  },
-  {
-    id: '2',
-    title: 'Ad Launch: Summer Sale',
-    start: new Date(currentYear, currentMonth, currentDateOfMonth, 9, 0),
-    platform: 'Facebook',
-    status: 'Live',
-    allDay: false // Explicitly false
-  },
-  {
-    id: '3',
-    title: 'Content Deadline',
-    start: new Date(currentYear, currentMonth, currentDateOfMonth + 1),
-    allDay: true,
-    platform: 'Internal',
-    status: 'Upcoming'
-  },
-  {
-    id: '4',
-    title: 'Influencer Post: Olivia',
-    start: new Date(currentYear, currentMonth, currentDateOfMonth + 3, 14, 0),
-    platform: 'Instagram',
-    status: 'Scheduled'
-  },
-  {
-    id: '5',
-    title: 'Client Check-in Call Client Check-in Call Client Check-in Call', // Long title test
-    start: new Date(currentYear, currentMonth, currentDateOfMonth + 5, 11, 0),
-    end: new Date(currentYear, currentMonth, currentDateOfMonth + 5, 11, 45),
-    platform: 'Internal',
-    status: 'Confirmed'
-  },
-  // Event next month
-  {
-    id: '6',
-    title: 'Planning: Q4 Campaigns',
-    start: new Date(currentYear, currentMonth + 1, 5, 10, 0),
-    end: new Date(currentYear, currentMonth + 1, 5, 12, 0),
-    platform: 'Internal',
-    status: 'Planning'
-  },
-];
-
-// Log sample data to console for debugging
-console.log("Sample Events for CalendarUpcoming:", sampleEvents);
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -91,19 +18,54 @@ const statusStyles: Record<string, string> = {
 
 export default function CalendarUpcomingPreviewPage() {
   const { toast } = useToast();
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleEventClick = (eventId: string | number) => {
-    const event = sampleEvents.find(e => e.id === eventId);
+  // Fetch data from the API route
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+    fetch('/api/debug/calendar-events')
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch events: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!data.events) {
+          throw new Error('API response missing events data');
+        }
+        // Dates from JSON need conversion back to Date objects
+        const fetchedEvents = data.events.map((event: any) => ({
+          ...event,
+          start: new Date(event.start),
+          end: event.end ? new Date(event.end) : undefined,
+        }));
+        setEvents(fetchedEvents);
+      })
+      .catch(err => {
+        console.error("Error fetching calendar data:", err);
+        setError(err.message || "Failed to load calendar data.");
+        setEvents([]); // Clear events on error
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleEventClick = (eventId: string | number, event: CalendarEvent) => {
     toast({
       title: "Event Clicked",
-      description: `ID: ${eventId}, Title: ${event?.title}`,
+      description: `ID: ${eventId}, Title: ${event.title}`,
     });
     console.log("Event clicked:", eventId, event);
   };
 
   const componentMeta = {
     "name": "CalendarUpcoming",
-    "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
+    "description": "Displays upcoming campaign events in a calendar grid.",
     "category": "organism",
     "subcategory": "calendar",
     "renderType": "client",
@@ -152,10 +114,14 @@ export default function CalendarUpcomingPreviewPage() {
             <h3 className="text-lg font-medium mb-4">Interactive Calendar</h3> {/* Updated title */}
             {/* Added container with explicit height and border for visibility */}
             <div className="h-[75vh] min-h-[600px] w-full border border-dashed border-muted-foreground/30 p-1 rounded-md">
-              <CalendarUpcoming
-                events={sampleEvents}
-                onEventClick={handleEventClick} // Added click handler
-              />
+              {isLoading && <p className='text-center text-muted-foreground p-4'>Loading events...</p>}
+              {error && <p className='text-center text-red-600 p-4'>Error: {error}</p>}
+              {!isLoading && !error && (
+                <CalendarUpcoming
+                  events={events}
+                  onEventClick={handleEventClick}
+                />
+              )}
             </div>
           </div>
           {/* ---- END UPDATED EXAMPLE ---- */}

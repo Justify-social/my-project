@@ -25,11 +25,6 @@ const config = {
 		},
 		extend: {
 			colors: {
-				jet: '#333333',
-				paynesgrey: '#4A5568',
-				deepskyblue: '#00BFFF',
-				frenchgrey: '#D1D5DB',
-				mediumblue: '#3182CE',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

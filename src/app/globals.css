@@ -14,18 +14,8 @@
    - Links
    - Layout containers
 
-3. KPI COMPONENTS (lines 58-112)
-   - KPI icons (base styles)
-   - KPI title, definition, example styles
-   - Individual KPI styles (brand awareness, ad recall, etc.)
-   - KPI tooltips
 
-4. ICONS & NAVIGATION (lines 113-158)
-   - App icons
-   - Navigation items
-   - Active states
-
-5. RESPONSIVE STYLES (lines 159-220)
+3. RESPONSIVE STYLES (lines 159-220)
    - Desktop & Tablet Landscape (max-width: 1024px)
    - Tablet Portrait (max-width: 768px)
    - Mobile (max-width: 640px)
@@ -59,21 +49,23 @@ svg:not(:host).svg-inline--fa {
 
 @layer base {
   :root {
-    /* Original brand variables */
-    --primary-color: #333333;
+    /* --- Brand Color Palette Reference REMOVED - See comments below --- */
+    /* --primary-color: #333333; */
     /* Jet */
-    --secondary-color: #4A5568;
+    /* --secondary-color: #4A5568; */
     /* Payne's Grey */
-    --accent-color: #00BFFF;
+    /* --accent-color: #00BFFF; */
     /* Deep Sky Blue */
-    --background-color: #FFFFFF;
+    /* --background-color: #FFFFFF; */
     /* White */
-    --divider-color: #D1D5DB;
+    /* --divider-color: #D1D5DB; */
     /* French Grey */
-    --interactive-color: #3182CE;
+    /* --interactive-color: #3182CE; */
     /* Medium Blue */
+    /* --- End Brand Color Reference --- */
 
-    /* Shadcn variables mapped to our brand colors with proper HSL values */
+    /* --- Shadcn/Tailwind Theme CSS Variables (Derived from Brand Colors) --- */
+    /* --- This section is the EFFECTIVE SSOT for component styling --- */
     --background: 0 0% 100%;
     /* White #FFFFFF */
     --foreground: 0 0% 20%;
