@@ -62,11 +62,13 @@ export const Icon: React.FC<IconProps> = memo(({
         const text = await response.text();
         if (!isCancelled) {
           // More robust sanitization:
-          // 1. Remove any internal <style> blocks to prevent overrides
-          // 2. Add fill="currentColor" to paths lacking an explicit fill attribute
+          // 1. Remove any internal <style> blocks
+          // 2. Remove existing fill attributes from paths
+          // 3. Add fill="currentColor" to paths lacking a fill attribute (should be all after step 2)
           const sanitizedText = text
-            .replace(/<style[^>]*>[\s\S]*?<\/style>/g, '') // Remove style blocks (compatible way)
-            .replace(/<path(?![^>]*fill=)([^>]*)>/g, '<path fill="currentColor"$1>'); // Add fill if missing
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/g, '') // Remove style blocks
+            .replace(/<path([^>]*)fill=\"([^\"]*)\"([^>]*)>/g, '<path$1$3>') // Remove existing fill attributes
+            .replace(/<path(?![^>]*fill=)([^>]*)>/g, '<path fill="currentColor"$1>'); // Add fill="currentColor" if missing
 
           setSvgContent(sanitizedText);
           setError(null); // Clear previous errors

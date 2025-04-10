@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
+import { IconButtonAction } from '@/components/ui/client/icon-button-action';
 
 import { Button } from '../../../../../../components/ui/button';
 
@@ -95,9 +96,39 @@ export default function ButtonPreviewPage() {
             <div className="flex flex-wrap gap-4 items-center">
               <Button><Icon iconId="faCheckLight" className="mr-2" /> Left Icon</Button>
               <Button>Right Icon <Icon iconId="faArrowRightLight" className="ml-2" /></Button>
-              <Button size="icon" aria-label="Settings"><Icon iconId="faGearLight" /></Button>
+              <Button variant="outline">
+                <Icon iconId="faFloppyDiskLight" className="mr-2" /> Save
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">Note: Icons are passed as children using the Icon component.</p>
+          </div>
+
+          {/* New Icon Buttons Section */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-3">Icon Buttons (Actions)</h3>
+            <div className="flex flex-wrap gap-4 items-center">
+              <IconButtonAction
+                iconBaseName="faEye"
+                hoverColorClass="text-accent"
+                ariaLabel="View"
+              />
+              <IconButtonAction
+                iconBaseName="faPenToSquare"
+                hoverColorClass="text-accent"
+                ariaLabel="Edit"
+              />
+              <IconButtonAction
+                iconBaseName="faCopy"
+                hoverColorClass="text-accent"
+                ariaLabel="Copy"
+              />
+              <IconButtonAction
+                iconBaseName="faTrashCan"
+                hoverColorClass="text-destructive"
+                ariaLabel="Delete"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Note: Uses custom component for Light/Solid icon state on hover.</p>
           </div>
 
           {/* Disabled State */}

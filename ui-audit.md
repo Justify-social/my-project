@@ -1,0 +1,183 @@
+# UI Audit Plan & Findings
+
+**Objective:** Ensure UI consistency across the application by aligning all components and styles with defined Single Sources of Truth (SSOT).
+
+**SSOT Definitions:**
+*   **Components:** Standard Shadcn UI components located exclusively in `src/components/ui/`.
+*   **Colors:** Brand colors defined as CSS variables in `src/app/globals.css` and referenced in `tailwind.config.js`.
+*   **Icons:** FontAwesome Pro icons rendered exclusively via the central `Icon` component (`@/components/ui/icon`).
+*   **Typography:** Font families, sizes, weights, and line heights defined in `globals.css` and/or `tailwind.config.js`.
+*   **Spacing:** Margin and padding values adhering to the spacing scale defined in `tailwind.config.js`.
+
+**Methodology:** Conduct a phased audit. Phase 1 involves manual inspection of the core `Button` component. Phase 2 utilizes automated codebase searches (e.g., using `grep` or similar tools) to efficiently identify potential deviations across the entire project, followed by manual verification of findings. All confirmed findings will be documented in this file *before* initiating code changes. Each task should result in a list of verified findings or a confirmation of compliance.
+
+---
+
+## Phase 1: Button Component Audit (`src/components/ui/button.tsx`)
+
+**Goal:** Verify the base `Button` component perfectly aligns with SSOT definitions.
+
+**Tasks:**
+
+1.  **[ ] Task 1.1: Verify Button Variant Colors**
+    *   **Action:** Analyze CSS/Tailwind classes applied to each button variant (`default`, `secondary`, `destructive`, `outline`, `ghost`, `link`) within `button.tsx`.
+    *   **Check:** Compare the applied background, text, and border colors for all states (default, hover, focus, disabled) against the CSS variables defined in `globals.css`.
+    *   **SSOT:** `globals.css` color variables.
+    *   **Output:** List any discrepancies below (e.g., "Destructive hover background uses `#FF0000` instead of `var(--destructive-hover)`").
+    *   **Findings:**
+        *   _List findings here..._
+
+2.  **[ ] Task 1.2: Verify Icon Integration**
+    *   **Action:** Review how icons are handled when passed as children to the `Button` component in `button.tsx`. Examine associated CSS/Tailwind for spacing (e.g., `gap`).
+    *   **Check:** Confirm the component correctly uses the central `Icon` component (`@/components/ui/icon`) and applies appropriate, consistent spacing between the icon and text.
+    *   **SSOT:** `Icon` component usage, standard spacing scale (from Tailwind config).
+    *   **Output:** Confirm compliance or list required adjustments (e.g., "Needs `gap-2` applied when icon is present").
+    *   **Findings:**
+        *   _List findings here..._
+
+3.  **[ ] Task 1.3: Verify Button Accessibility**
+    *   **Action:** Inspect the rendered button variants in the browser (using dev tools).
+    *   **Check:**
+        *   Ensure sufficient color contrast between text and background for all variants and states.
+        *   Confirm focus indicators are clear and visible.
+        *   Verify necessary ARIA attributes are present (though likely handled by base Shadcn).
+    *   **SSOT:** WCAG AA contrast ratios, accessible design principles.
+    *   **Output:** Note any contrast issues or missing accessibility features.
+    *   **Findings:**
+        *   _List findings here..._
+
+---
+
+## Phase 2: Full Codebase UI Audit
+
+**Goal:** Identify all deviations from UI SSOT across the entire application.
+
+**Tasks:**
+
+1.  **[ ] Task 2.1: Audit Component Sources**
+    *   **Action:** Search the codebase *outside* `src/components/ui` (e.g., `src/app`, `src/components/*` (if exists), `src/lib`, etc.) for any files defining React components (`.tsx`) that render custom UI elements (buttons, inputs, cards, modals, etc.) or replicate `src/components/ui` functionality.
+    *   **Check:** Identify any component that should be replaced by a standard component from `src/components/ui`.
+    *   **SSOT:** `src/components/ui` directory.
+    *   **Output:** List violating components and their file paths.
+    *   **Findings:**
+        *   _List findings here..._
+
+2.  **[ ] Task 2.2: Audit Tailwind Configuration**
+    *   **Action:** Review `tailwind.config.js`.
+    *   **Check:** Ensure the `theme.extend.colors` section correctly references the CSS variables defined in `globals.css` (e.g., `primary: 'var(--primary)'`). Verify the `theme.extend.spacing`, `theme.extend.fontSize`, `theme.extend.fontFamily`, etc., align with design system standards.
+    *   **SSOT:** `globals.css`, Design System specifications.
+    *   **Output:** Confirm compliance or list misconfigurations.
+    *   **Findings:**
+        *   _List findings here..._
+
+3.  **[ ] Task 2.3: Audit Color Usage**
+    *   **Action:** Search the entire codebase (`.tsx`, `.ts`, `.css`, `.scss`) for:
+        *   Hardcoded hex color values (`#...`).
+        *   `rgb(...)` / `rgba(...)` color definitions.
+        *   Tailwind color classes not defined in `tailwind.config.js` (e.g., `text-red-500` if `red-500` isn't part of the theme).
+        *   Inline `style` attributes applying colors.
+    *   **Check:** Identify any color usage that doesn't leverage the approved brand colors via CSS variables or configured Tailwind classes.
+    *   **SSOT:** `globals.css` color variables, `tailwind.config.js` color theme.
+    *   **Output:** List instances (file path, line number, violating color/class).
+    *   **Findings:**
+        *   _List findings here..._
+
+4.  **[ ] Task 2.4: Audit Icon Usage**
+    *   **Action:** Search the codebase for:
+        *   Direct usage of inline `<svg>` elements.
+        *   Usage of `<img>` elements for icons.
+        *   Imports from icon libraries other than `@fortawesome/*`.
+        *   Any rendering of icons *not* using the `@/components/ui/icon` component.
+    *   **Check:** Identify all instances where icons are implemented outside the standard `Icon` component.
+    *   **SSOT:** `Icon` component (`@/components/ui/icon`).
+    *   **Output:** List instances (file path, line number, method used).
+    *   **Findings:**
+        *   _List findings here..._
+
+5.  **[ ] Task 2.5: Audit Typography Usage**
+    *   **Action:** Search the codebase for:
+        *   Inline `style` attributes setting `font-family`, `font-size`, `font-weight`, `line-height`.
+        *   CSS/SCSS rules defining typography properties that conflict with or override `globals.css` or Tailwind defaults.
+        *   Tailwind typography classes not defined in the theme (e.g., `text-xl` if `xl` isn't configured).
+    *   **Check:** Identify typography usage inconsistent with the established theme.
+    *   **SSOT:** `globals.css`, `tailwind.config.js` typography theme.
+    *   **Output:** List instances (file path, line number, violating style/class).
+    *   **Findings:**
+        *   _List findings here..._
+
+6.  **[ ] Task 2.6: Audit Spacing Usage**
+    *   **Action:** Search the codebase for:
+        *   Inline `style` attributes setting `margin`, `padding`.
+        *   CSS/SCSS rules defining spacing properties using hardcoded pixel values (e.g., `margin-top: 15px;`) instead of relative units or theme variables.
+        *   Tailwind spacing classes using arbitrary values if disallowed (e.g., `mt-[15px]`) or classes not part of the configured spacing scale.
+    *   **Check:** Identify spacing usage inconsistent with the Tailwind theme's spacing scale.
+    *   **SSOT:** `tailwind.config.js` spacing theme.
+    *   **Output:** List instances (file path, line number, violating style/class).
+    *   **Findings:**
+        *   _List findings here..._
+
+---
+
+## Phase 3: Refactoring Plan (To be created AFTER Phase 1 & 2 Completion)
+
+**Goal:** Prioritize and plan the execution of fixes based on audit findings.
+
+**Tasks:**
+
+1.  **[ ] Task 3.1: Review Audit Findings**
+    *   **Action:** Consolidate and review all findings documented in Phase 1 and Phase 2.
+    *   **Output:** A shared understanding of the scope of required UI alignment.
+
+2.  **[ ] Task 3.2: Prioritize Refactoring Tasks**
+    *   **Action:** Rank the identified issues based on impact (e.g., core component inconsistencies > minor color deviations) and frequency.
+    *   **Output:** A prioritized list of refactoring tasks.
+
+3.  **[ ] Task 3.3: Create Refactoring Tickets/Issues**
+    *   **Action:** Break down prioritized tasks into actionable development tickets (e.g., "Refactor `src/app/dashboard/custom-button.tsx` to use `src/components/ui/button`", "Replace hardcoded color `#FF0000` in `src/styles/legacy.css` with `var(--destructive)`").
+    *   **Output:** A set of tracked issues for the refactoring work.
+
+---
+
+**Audit Status:** PENDING
+
+**(Update status as phases progress: PENDING -> IN PROGRESS -> PHASE 1 COMPLETE -> PHASE 2 COMPLETE -> COMPLETE)**
+
+
+
+My apologies! You are absolutely right. We need to solidify the *how* before jumping into the *what*. Thank you for clarifying. Let's focus on the research and planning stage, specifically how to conduct this audit efficiently and successfully.
+
+**Audit Methodology & Efficiency Plan:**
+
+The goal is a comprehensive audit without unnecessary manual effort. We can achieve this with a hybrid approach combining targeted manual inspection and automated codebase scanning.
+
+1.  **Phase 1 (Button Audit - Primarily Manual):**
+    *   **Why Manual?** This phase focuses on a single, core component (`button.tsx`). The checks involve understanding the component's logic (CVA variants), visual comparison (colors, icon spacing - potentially via the `/debug-tools/ui-components/preview/Button` page), and accessibility inspection (dev tools). These are nuanced tasks best done manually for this specific component to ensure deep understanding and perfection.
+    *   **Efficiency:** It's efficient because the scope is small and well-defined. It allows us to perfect the understanding of the SSOT application before scaling.
+
+2.  **Phase 2 (Full Codebase Audit - Automated Scanning + Manual Verification):**
+    *   **Why Automated Scanning?** Searching the entire codebase for specific patterns (rogue components, hardcoded colors/styles, incorrect icon usage) manually is extremely time-consuming and error-prone.
+    *   **How?** We can leverage:
+        *   **Code Search Tools (like `grep`):** Use precise search patterns (regex) to find potential violations across all relevant file types (`.tsx`, `.css`, `.scss`, `.ts`). This is highly efficient for finding:
+            *   Component definitions outside `src/components/ui` (Task 2.1).
+            *   Hex codes (`#...`), `rgb`/`rgba` values (Task 2.3).
+            *   Specific non-standard Tailwind classes (Task 2.3, 2.5, 2.6 - requires knowing the theme classes).
+            *   Inline style attributes (`style=`) (Task 2.3, 2.5, 2.6).
+            *   `<svg>` tags, `<img>` tags used for icons, imports from non-standard icon libraries (Task 2.4).
+        *   **(Optional) Custom Scripts:** For more complex logic (e.g., cross-referencing Tailwind classes against the actual config, basic AST parsing), a dedicated Node.js script could be written. However, `grep` likely covers 80-90% of the pattern finding efficiently.
+        *   **(Optional) Linters (ESLint):** If not already configured, ESLint rules could potentially be added to *prevent* future issues (e.g., `no-restricted-syntax` to ban hex codes), but setting this up might be beyond the scope of the *audit* itself.
+    *   **Manual Verification:** The automated scans will produce a list of *potential* violations. A manual review of these findings is crucial to confirm they are actual deviations from the SSOT and not false positives. This review step is essential for accuracy.
+    *   **Efficiency:** This approach leverages automation for the heavy lifting (searching) and reserves manual effort for verification and analysis, striking a balance between speed and accuracy.
+
+**Refining `ui-audit.md` Methodology Section:**
+
+I propose we update the "Methodology" section in `ui-audit.md` to explicitly state this hybrid approach:
+
+```markdown
+**Methodology:** Conduct a phased audit. Phase 1 involves manual inspection of the core `Button` component. Phase 2 utilizes automated codebase searches (e.g., using `grep` or similar tools) to efficiently identify potential deviations across the entire project, followed by manual verification of findings. All confirmed findings will be documented in this file *before* initiating code changes. Each task should result in a list of verified findings or a confirmation of compliance.
+```
+
+**Summary of Efficient & Successful Approach:**
+
+1.  **Clear SSOT:** Define the sources of truth upfront (Done in `ui-audit.md`
+
+Update /docs with details of the audit plan and findings.
