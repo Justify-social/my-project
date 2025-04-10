@@ -16,15 +16,15 @@ const statusStyles: Record<string, string> = {
 
 export default function AccordionPreviewPage() {
   const componentMeta = {
-  "name": "Accordion",
-  "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
-  "category": "organism",
-  "subcategory": "layout",
-  "status": "stable",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
+    "name": "Accordion",
+    "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
+    "category": "organism",
+    "subcategory": "layout",
+    "status": "stable",
+    "renderType": "client",
+    "author": "",
+    "since": ""
+  };
   const examples: string[] = [];
 
   return (
@@ -66,7 +66,7 @@ export default function AccordionPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
             {/* <Accordion /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Accordion /> here)</p>
+            <p className="text-sm text-muted-foreground">(Manually add rendering example for {'<Accordion />'} here)</p>
           </div>
           {/* Example 2: Add more placeholders or examples as needed */}
           {/* ---- END MANUAL EXAMPLES ---- */}

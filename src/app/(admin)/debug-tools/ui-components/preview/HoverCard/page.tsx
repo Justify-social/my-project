@@ -4,6 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
 
 import { HoverCard } from '../../../../../../components/ui/hover-card';
 
@@ -20,6 +21,7 @@ export default function HoverCardPreviewPage() {
     "description": "Displays a popover card with content when hovering over a trigger element.",
     "category": "molecule",
     "subcategory": "overlay",
+    "status": "",
     "renderType": "client",
     "author": "",
     "since": ""

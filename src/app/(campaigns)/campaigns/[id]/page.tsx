@@ -1760,9 +1760,7 @@ export default function CampaignDetail() {
                           platform: asset.platform || data.platform,
                           influencerHandle: asset.influencerHandle || data.influencerHandle,
                           description: asset.description || asset.whyInfluencer,
-                          budget: asset.budget,
-                          size: asset.size,
-                          duration: asset.duration
+                          budget: asset.budget
                         }}
                         currency={data.currency}
                         defaultPlatform={data.platform}

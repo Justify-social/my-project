@@ -25,6 +25,15 @@ const statusStyles: Record<string, string> = {
   development: 'bg-blue-100 text-blue-800 border-blue-200',
 };
 
+// Helper function for currency formatting
+const formatCurrency = (value: number | string, currencyCode: string = 'USD') => {
+  const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currencyCode,
+  }).format(numericValue);
+};
+
 export default function KpiCardPreviewPage() {
   const componentMeta = {
     "name": "KpiCard",
@@ -78,12 +87,9 @@ export default function KpiCardPreviewPage() {
             <KpiCard
               title="Total Revenue"
               value={45231.89}
-              change="+20.1%"
-              changeDescription="from last month"
-              trendData={sampleTrendData}
-              dataKey="value"
-              formatAsCurrency={true}
-              currency="USD"
+              change={20.1}
+              changeLabel="from last month"
+              formatter={(val) => formatCurrency(val, 'USD')}
             />
           </div>
 
@@ -92,10 +98,8 @@ export default function KpiCardPreviewPage() {
             <KpiCard
               title="Subscriptions"
               value={2350}
-              change="-12.2%"
-              changeDescription="from last month"
-              trendData={negativeTrendData}
-              dataKey="value"
+              change={-12.2}
+              changeLabel="from last month"
             />
           </div>
 
@@ -104,10 +108,8 @@ export default function KpiCardPreviewPage() {
             <KpiCard
               title="Active Users"
               value={9876}
-              change="+0%"
-              changeDescription="since last hour"
-              trendData={flatTrendData}
-              dataKey="value"
+              change={0}
+              changeLabel="since last hour"
             />
           </div>
 
@@ -116,8 +118,8 @@ export default function KpiCardPreviewPage() {
             <KpiCard
               title="Pending Orders"
               value={102}
-              change="-5"
-              changeDescription="since yesterday"
+              change={-5}
+              changeLabel="since yesterday"
             />
           </div>
 
@@ -126,12 +128,9 @@ export default function KpiCardPreviewPage() {
             <KpiCard
               title="Average Order Value"
               value={125.50}
-              change="+5.2%"
-              changeDescription="from last week"
-              formatAsCurrency={true}
-              currency="EUR"
-              trendData={sampleTrendData}
-              dataKey="value"
+              change={5.2}
+              changeLabel="from last week"
+              formatter={(val) => formatCurrency(val, 'EUR')}
             />
           </div>
 
@@ -140,9 +139,9 @@ export default function KpiCardPreviewPage() {
             <KpiCard
               title="Support Tickets"
               value={85}
-              change="+10"
-              changeDescription="today"
-              iconId="faHeadsetLight"
+              change={10}
+              changeLabel="today"
+              icon="faHeadsetLight"
             />
           </div>
 

@@ -129,13 +129,13 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
     }
   };
 
-  const handleStartDateChange = (date: Date | null) => {
-    setStartDate(date);
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date || null);
     updateFormData({ startDate: date ? date.toISOString() : undefined });
   };
 
-  const handleEndDateChange = (date: Date | null) => {
-    setEndDate(date);
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date || null);
     updateFormData({ endDate: date ? date.toISOString() : undefined });
   };
 
@@ -220,7 +220,14 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
               value={endDate}
               onChange={handleEndDateChange}
               placeholder="Select end date"
-              minDate={startDate || undefined}
+              disabled={(date) => {
+                if (!startDate) return false;
+                const comparisonDate = new Date(date);
+                comparisonDate.setHours(0, 0, 0, 0);
+                const comparisonStartDate = new Date(startDate);
+                comparisonStartDate.setHours(0, 0, 0, 0);
+                return comparisonDate <= comparisonStartDate;
+              }}
             />
             {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
           </div>

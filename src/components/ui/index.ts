@@ -63,3 +63,28 @@ export * from "./card-upcoming-campaign"; // Renamed from UpcomingCampaignsTable
 // Export types from subdirectories if needed, e.g.:
 // export * from "./navigation/mobile-menu";
 // export * from "./icon/icon";
+
+// Shared Chart Types
+export interface DataPoint {
+    [key: string]: string | number;
+}
+export interface LineData {
+    key: string;
+    color?: string;
+    name?: string;
+}
+
+// Explicit Chart Exports (avoiding duplicate type exports)
+export { AreaChart } from "./chart-area";
+export type { AreaChartProps } from "./chart-area";
+export { BarChart } from "./chart-bar";
+export type { BarChartProps } from "./chart-bar";
+export { FunnelChart } from "./chart-funnel";
+export type { FunnelChartProps } from "./chart-funnel";
+export { LineChart } from "./chart-line";
+export type { LineChartProps } from "./chart-line";
+export { PieChart } from "./chart-pie";
+export type { PieChartProps } from "./chart-pie";
+
+// Other Component Exports (ensure no conflicting names)
+export * from "./checkbox";

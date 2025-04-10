@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button as ServerButton, ButtonProps } from '@/components/ui';
-// import { getIconClasses } from '@/components/ui/utils/icon-integration';
+import React, { useState } from 'react';
+import { Button as ServerButton, ButtonProps } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Icon } from '@/components/ui/icon'; // Import Icon component
 
 /**
  * @component ButtonClient
@@ -21,19 +22,22 @@ import { Button as ServerButton, ButtonProps } from '@/components/ui';
  *   Interactive Button
  * </Button>
  */
-export function Button({
-  children,
-  leftIcon,
-  rightIcon,
-  isLoading,
-  isDisabled,
-  onClick,
-  ...props
-}: ButtonProps & {
+
+// Define specific props for the client button, extending the base ButtonProps
+// Remove leftIcon and rightIcon as they are not supported by the base Button
+interface ClientButtonProps extends ButtonProps {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isLoading?: boolean;
   isDisabled?: boolean;
-}) {
+}
+
+export function Button({
+  children,
+  isLoading,
+  isDisabled,
+  onClick,
+  ...props // props are the remaining ButtonProps from the base interface
+}: ClientButtonProps) {
   const [isClicked, setIsClicked] = useState(false);
 
   // Handle button click with visual feedback
@@ -49,14 +53,19 @@ export function Button({
 
   return (
     <ServerButton
-      {...props}
+      {...props} // Pass the base ButtonProps
       disabled={isDisabled || isLoading}
-      leftIcon={isLoading ? 'spinner' : leftIcon}
-      rightIcon={rightIcon}
       onClick={handleClick}
-      className={`${props.className || ''} ${isClicked ? 'scale-95' : ''} transition-transform duration-100`}
+      className={cn(props.className, isClicked ? 'scale-95' : '', 'transition-transform duration-100')}
     >
-      {children}
+      {isLoading ? (
+        <>
+          <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
+          Processing...
+        </>
+      ) : (
+        children
+      )}
     </ServerButton>
   );
 } 

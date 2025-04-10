@@ -33,11 +33,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Form } from '@/components/ui/form';
 import { HoverCard } from '@/components/ui/hover-card';
-import { font-awesome-adapter } from '@/components/ui/icon/adapters/font-awesome-adapter';
-import { shadcn-adapter } from '@/components/ui/icon/adapters/shadcn-adapter';
-import { shadcn } from '@/components/ui/icon/adapters/shadcn';
-import { adapter-test } from '@/components/ui/icon/adapters/tests/adapter-test';
-import { Icon } from '@/components/ui/icon/icon';
+import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
@@ -46,14 +42,12 @@ import { MetricsComparison } from '@/components/ui/metrics-comparison';
 import { MetricsDashboard } from '@/components/ui/metrics-dashboard';
 import { Header } from '@/components/ui/navigation/header';
 import { MobileMenu } from '@/components/ui/navigation/mobile-menu';
-import { Sidebar } from '@/components/ui/navigation/sidebar-ui-components';
 import { Sidebar } from '@/components/ui/navigation/sidebar';
 import { NavigationMenu } from '@/components/ui/navigation-menu';
 import { Pagination } from '@/components/ui/pagination';
 import { Popover } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup } from '@/components/ui/radio-group';
-import { Resizable } from '@/components/ui/resizable';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SearchBar } from '@/components/ui/search-bar';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -69,6 +63,8 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Toast } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
 import { Tooltip } from '@/components/ui/tooltip';
+import UISidebar from '@/components/ui/navigation/sidebar-ui-components';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const componentMap: Record<string, React.ComponentType<any>> = {
   'Accordion': Accordion as React.ComponentType<any>,
@@ -101,10 +97,6 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   'DropdownMenu': DropdownMenu as React.ComponentType<any>,
   'Form': Form as React.ComponentType<any>,
   'HoverCard': HoverCard as React.ComponentType<any>,
-  'font-awesome-adapter': font-awesome-adapter as React.ComponentType<any>,
-  'shadcn-adapter': shadcn-adapter as React.ComponentType<any>,
-  'shadcn': shadcn as React.ComponentType<any>,
-  'adapter-test': adapter-test as React.ComponentType<any>,
   'Icon': Icon as React.ComponentType<any>,
   'Input': Input as React.ComponentType<any>,
   'Label': Label as React.ComponentType<any>,
@@ -115,13 +107,11 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   'Header': Header as React.ComponentType<any>,
   'MobileMenu': MobileMenu as React.ComponentType<any>,
   'Sidebar': Sidebar as React.ComponentType<any>,
-  'Sidebar': Sidebar as React.ComponentType<any>,
   'NavigationMenu': NavigationMenu as React.ComponentType<any>,
   'Pagination': Pagination as React.ComponentType<any>,
   'Popover': Popover as React.ComponentType<any>,
   'Progress': Progress as React.ComponentType<any>,
   'RadioGroup': RadioGroup as React.ComponentType<any>,
-  'Resizable': Resizable as React.ComponentType<any>,
   'ScrollArea': ScrollArea as React.ComponentType<any>,
   'SearchBar': SearchBar as React.ComponentType<any>,
   'SectionHeader': SectionHeader as React.ComponentType<any>,
@@ -136,5 +126,7 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   'ThemeToggle': ThemeToggle as React.ComponentType<any>,
   'Toast': Toast as React.ComponentType<any>,
   'Toaster': Toaster as React.ComponentType<any>,
-  'Tooltip': Tooltip as React.ComponentType<any>
+  'Tooltip': Tooltip as React.ComponentType<any>,
+  'UISidebar': UISidebar as React.ComponentType<any>,
+  'Skeleton': Skeleton as React.ComponentType<any>
 };
