@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory data-display
  * @description Displays a table of upcoming campaigns within a card.
+ * @status stable
  * @param {UpcomingCampaignsTableProps} props - The props for the UpcomingCampaignsTable component.
  * @param {CampaignData[]} props.campaigns - An array of campaign data objects to display.
  * @param {string} [props.title="Upcoming Campaigns"] - Optional title for the card.
@@ -59,6 +60,22 @@ export interface UpcomingCampaignsTableProps {
     onRowClick?: (campaignId: string | number) => void;
 }
 
+// Helper function to determine Badge variant based on status
+const getStatusVariant = (status?: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status?.toLowerCase()) {
+        case 'live':
+        case 'active':
+        case 'completed': return 'default'; // Use primary color for active/complete
+        case 'scheduled':
+        case 'confirmed': return 'secondary'; // Use secondary for scheduled
+        case 'draft':
+        case 'planning': return 'outline'; // Use outline for planning/drafts
+        case 'paused':
+        case 'error': return 'destructive'; // Use destructive for paused/errors
+        default: return 'outline';
+    }
+};
+
 export function UpcomingCampaignsTable({
     campaigns = [],
     title = "Upcoming Campaigns",
@@ -89,14 +106,15 @@ export function UpcomingCampaignsTable({
         }
     };
 
-    // Map platform names to potential icon IDs (adjust as needed)
+    // Map platform names to correct brand icon IDs
     const platformIconMap: { [key: string]: string } = {
-        instagram: 'faInstagram', // Replace with actual FontAwesome IDs
-        tiktok: 'faTiktok',
-        youtube: 'faYoutube',
-        facebook: 'faFacebook',
-        twitter: 'faTwitter',
-        // Add other platforms
+        instagram: 'brandsInstagram',
+        tiktok: 'brandsTiktok',
+        youtube: 'brandsYoutube',
+        facebook: 'brandsFacebook',
+        twitter: 'brandsXTwitter',
+        linkedin: 'brandsLinkedin'
+        // Add other platforms if needed
     };
 
     if (!campaigns || campaigns.length === 0) {
@@ -146,10 +164,10 @@ export function UpcomingCampaignsTable({
                                             {platformIconMap[campaign.platform.toLowerCase()] && (
                                                 <Icon
                                                     iconId={platformIconMap[campaign.platform.toLowerCase()]}
-                                                    className="mr-2 h-4 w-4 text-muted-foreground"
+                                                    className="mr-1.5 h-4 w-4 text-muted-foreground"
                                                 />
                                             )}
-                                            {campaign.platform}
+                                            <span className="text-sm">{campaign.platform}</span>
                                         </span>
                                     ) : (
                                         '-'
@@ -175,7 +193,7 @@ export function UpcomingCampaignsTable({
                                 <TableCell>{formatDate(campaign.endDate)}</TableCell>
                                 <TableCell>
                                     {campaign.status ? (
-                                        <Badge variant="outline">{campaign.status}</Badge>
+                                        <Badge variant={getStatusVariant(campaign.status)} className="text-xs">{campaign.status}</Badge>
                                     ) : (
                                         '-'
                                     )}

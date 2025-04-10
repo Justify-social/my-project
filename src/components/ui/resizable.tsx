@@ -2,6 +2,7 @@
  * @component Resizable
  * @category organism
  * @subcategory layout
+ * @status stable
  * @description Provides components for creating resizable panel layouts (Group, Panel, Handle).
  */
 "use client"
@@ -41,8 +42,8 @@ const ResizableHandle = ({
     {...props}
   >
     {withHandle && (
-      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
-        <Icon iconId="faGripLinesVertical" className="h-2.5 w-2.5" />
+      <div className="z-10 flex h-5 w-5 items-center justify-center rounded-sm border bg-border">
+        <Icon iconId="faPlusSolid" className="h-3 w-3" />
       </div>
     )}
   </ResizablePrimitive.PanelResizeHandle>

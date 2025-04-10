@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory display
  * @description Renders data in a tabular format.
+ * @status stable
  */
 import * as React from "react"
 

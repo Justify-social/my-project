@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory overlay
  * @description Displays content that complements the main content, appearing from the side of the screen.
+ * @status stable
  */
 "use client"
 

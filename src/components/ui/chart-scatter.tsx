@@ -3,6 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive scatter chart component for visualizing correlations and distributions between two or three variables.
+ * @status stable
  * @since 2023-07-15
  * @param {ScatterChartProps} props - The props for the ScatterChart component.
  * @param {ScatterDataPoint[]} props.data - The dataset for the chart.
