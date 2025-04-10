@@ -5,7 +5,11 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-import { Popover } from '../../../../../../components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from "@/components/ui/badge";
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,15 +20,15 @@ const statusStyles: Record<string, string> = {
 
 export default function PopoverPreviewPage() {
   const componentMeta = {
-  "name": "Popover",
-  "description": "Displays rich content in a portal, triggered by a click or focus on an element.",
-  "category": "molecule",
-  "subcategory": "overlay",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
-  const examples: string[] = [];
+    "name": "Popover",
+    "description": "Displays rich content in a portal, triggered by a click or focus on an element.",
+    "category": "molecule",
+    "subcategory": "overlay",
+    "renderType": "client",
+    "status": "stable",
+    "author": "Shadcn UI",
+    "since": "2023-01-01"
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,32 +65,78 @@ export default function PopoverPreviewPage() {
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Popover with Form */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Popover /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Popover /> here)</p>
+            <h3 className="text-lg font-medium mb-3">Popover with Form</h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">Open popover</Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Dimensions</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Set the dimensions for the layer.
+                    </p>
+                  </div>
+                  <div className="grid gap-2">
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label htmlFor="width">Width</Label>
+                      <Input
+                        id="width"
+                        defaultValue="100%"
+                        className="col-span-2 h-8"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label htmlFor="maxWidth">Max. width</Label>
+                      <Input
+                        id="maxWidth"
+                        defaultValue="300px"
+                        className="col-span-2 h-8"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label htmlFor="height">Height</Label>
+                      <Input
+                        id="height"
+                        defaultValue="25px"
+                        className="col-span-2 h-8"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <Label htmlFor="maxHeight">Max. height</Label>
+                      <Input
+                        id="maxHeight"
+                        defaultValue="none"
+                        className="col-span-2 h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Simple Text Content with Alignment */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-3">Simple Content (Align Start)</h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="secondary">Click Me (Align Start)</Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-auto">
+                <p className="text-sm">Place content for the popover here.</p>
+                <p className="text-xs text-muted-foreground">Aligned to the start of the trigger.</p>
+              </PopoverContent>
+            </Popover>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

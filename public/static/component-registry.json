@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-04-10T10:13:14.045Z",
+  "generatedAt": "2025-04-10T10:58:09.244Z",
   "components": [
     {
       "category": "organism",
@@ -204,6 +204,9 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A standard text input field.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Input",
       "filePath": "src/components/ui/input.tsx"
     },
@@ -219,6 +222,9 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Renders an accessible label associated with controls.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Label",
       "filePath": "src/components/ui/label.tsx"
     },
@@ -233,6 +239,9 @@
       "category": "atom",
       "subcategory": "loading",
       "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
+      "status": "stable",
+      "author": "Shadcn (adapted)",
+      "since": "2023-03-01",
       "name": "LoadingSkeleton",
       "filePath": "src/components/ui/loading-skeleton.tsx"
     },
@@ -240,6 +249,9 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "A customizable loading spinner component for indicating loading states",
+      "status": "stable",
+      "author": "Justify",
+      "since": "2023-05-15",
       "name": "LoadingSpinner",
       "filePath": "src/components/ui/loading-spinner.tsx"
     },
@@ -298,6 +310,9 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "Displays an indicator showing the completion progress of a task.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Progress",
       "filePath": "src/components/ui/progress.tsx"
     },
@@ -342,12 +357,18 @@
       "category": "atom",
       "subcategory": "search",
       "description": "A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.",
+      "status": "stable",
+      "author": "Justify",
+      "since": "2023-06-01",
       "name": "SearchBar",
       "filePath": "src/components/ui/search-bar.tsx"
     },
     {
       "category": "atom",
       "description": "A section header component for displaying a title, optional description, and optional icon.",
+      "status": "stable",
+      "author": "Justify",
+      "since": "2023-07-01",
       "name": "SectionHeader",
       "filePath": "src/components/ui/section-header.tsx"
     },
@@ -362,6 +383,9 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Visually or semantically separates content.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Separator",
       "filePath": "src/components/ui/separator.tsx"
     },
@@ -376,6 +400,9 @@
       "category": "atom",
       "subcategory": "input",
       "description": "An input where the user selects a value from within a given range.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Slider",
       "filePath": "src/components/ui/slider.tsx"
     },
@@ -383,6 +410,9 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A control that allows the user to toggle between checked and unchecked states.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Switch",
       "filePath": "src/components/ui/switch.tsx"
     },
@@ -404,12 +434,18 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A multi-line text input field.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Textarea",
       "filePath": "src/components/ui/textarea.tsx"
     },
     {
       "category": "atom",
       "description": "A button that toggles between light and dark themes.",
+      "status": "stable",
+      "author": "Custom",
+      "since": "2024-01-01",
       "name": "ThemeToggle",
       "filePath": "src/components/ui/theme-toggle.tsx"
     },
@@ -810,6 +846,9 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A standard text input field.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Input",
         "filePath": "src/components/ui/input.tsx"
       },
@@ -817,6 +856,9 @@
         "category": "atom",
         "subcategory": "display",
         "description": "Renders an accessible label associated with controls.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Label",
         "filePath": "src/components/ui/label.tsx"
       },
@@ -824,6 +866,9 @@
         "category": "atom",
         "subcategory": "loading",
         "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
+        "status": "stable",
+        "author": "Shadcn (adapted)",
+        "since": "2023-03-01",
         "name": "LoadingSkeleton",
         "filePath": "src/components/ui/loading-skeleton.tsx"
       },
@@ -831,6 +876,9 @@
         "category": "atom",
         "subcategory": "feedback",
         "description": "A customizable loading spinner component for indicating loading states",
+        "status": "stable",
+        "author": "Justify",
+        "since": "2023-05-15",
         "name": "LoadingSpinner",
         "filePath": "src/components/ui/loading-spinner.tsx"
       },
@@ -838,6 +886,9 @@
         "category": "atom",
         "subcategory": "feedback",
         "description": "Displays an indicator showing the completion progress of a task.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Progress",
         "filePath": "src/components/ui/progress.tsx"
       },
@@ -845,12 +896,18 @@
         "category": "atom",
         "subcategory": "search",
         "description": "A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.",
+        "status": "stable",
+        "author": "Justify",
+        "since": "2023-06-01",
         "name": "SearchBar",
         "filePath": "src/components/ui/search-bar.tsx"
       },
       {
         "category": "atom",
         "description": "A section header component for displaying a title, optional description, and optional icon.",
+        "status": "stable",
+        "author": "Justify",
+        "since": "2023-07-01",
         "name": "SectionHeader",
         "filePath": "src/components/ui/section-header.tsx"
       },
@@ -858,6 +915,9 @@
         "category": "atom",
         "subcategory": "display",
         "description": "Visually or semantically separates content.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Separator",
         "filePath": "src/components/ui/separator.tsx"
       },
@@ -865,6 +925,9 @@
         "category": "atom",
         "subcategory": "input",
         "description": "An input where the user selects a value from within a given range.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Slider",
         "filePath": "src/components/ui/slider.tsx"
       },
@@ -872,6 +935,9 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A control that allows the user to toggle between checked and unchecked states.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Switch",
         "filePath": "src/components/ui/switch.tsx"
       },
@@ -879,12 +945,18 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A multi-line text input field.",
+        "status": "stable",
+        "author": "Shadcn",
+        "since": "2023-01-01",
         "name": "Textarea",
         "filePath": "src/components/ui/textarea.tsx"
       },
       {
         "category": "atom",
         "description": "A button that toggles between light and dark themes.",
+        "status": "stable",
+        "author": "Custom",
+        "since": "2024-01-01",
         "name": "ThemeToggle",
         "filePath": "src/components/ui/theme-toggle.tsx"
       }
@@ -1094,6 +1166,9 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A standard text input field.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Input",
       "filePath": "src/components/ui/input.tsx"
     },
@@ -1109,6 +1184,9 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Renders an accessible label associated with controls.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Label",
       "filePath": "src/components/ui/label.tsx"
     },
@@ -1123,6 +1201,9 @@
       "category": "atom",
       "subcategory": "loading",
       "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
+      "status": "stable",
+      "author": "Shadcn (adapted)",
+      "since": "2023-03-01",
       "name": "LoadingSkeleton",
       "filePath": "src/components/ui/loading-skeleton.tsx"
     },
@@ -1130,6 +1211,9 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "A customizable loading spinner component for indicating loading states",
+      "status": "stable",
+      "author": "Justify",
+      "since": "2023-05-15",
       "name": "LoadingSpinner",
       "filePath": "src/components/ui/loading-spinner.tsx"
     },
@@ -1188,6 +1272,9 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "Displays an indicator showing the completion progress of a task.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Progress",
       "filePath": "src/components/ui/progress.tsx"
     },
@@ -1232,12 +1319,18 @@
       "category": "atom",
       "subcategory": "search",
       "description": "A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.",
+      "status": "stable",
+      "author": "Justify",
+      "since": "2023-06-01",
       "name": "SearchBar",
       "filePath": "src/components/ui/search-bar.tsx"
     },
     "sectionheader": {
       "category": "atom",
       "description": "A section header component for displaying a title, optional description, and optional icon.",
+      "status": "stable",
+      "author": "Justify",
+      "since": "2023-07-01",
       "name": "SectionHeader",
       "filePath": "src/components/ui/section-header.tsx"
     },
@@ -1252,6 +1345,9 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Visually or semantically separates content.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Separator",
       "filePath": "src/components/ui/separator.tsx"
     },
@@ -1266,6 +1362,9 @@
       "category": "atom",
       "subcategory": "input",
       "description": "An input where the user selects a value from within a given range.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Slider",
       "filePath": "src/components/ui/slider.tsx"
     },
@@ -1273,6 +1372,9 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A control that allows the user to toggle between checked and unchecked states.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Switch",
       "filePath": "src/components/ui/switch.tsx"
     },
@@ -1294,12 +1396,18 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A multi-line text input field.",
+      "status": "stable",
+      "author": "Shadcn",
+      "since": "2023-01-01",
       "name": "Textarea",
       "filePath": "src/components/ui/textarea.tsx"
     },
     "themetoggle": {
       "category": "atom",
       "description": "A button that toggles between light and dark themes.",
+      "status": "stable",
+      "author": "Custom",
+      "since": "2024-01-01",
       "name": "ThemeToggle",
       "filePath": "src/components/ui/theme-toggle.tsx"
     },

@@ -5,7 +5,9 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-import { ScrollArea } from '../../../../../../components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,15 +18,19 @@ const statusStyles: Record<string, string> = {
 
 export default function ScrollAreaPreviewPage() {
   const componentMeta = {
-  "name": "ScrollArea",
-  "description": "Augments native scroll functionality for customizing the appearance of scrollbars.",
-  "category": "molecule",
-  "subcategory": "layout",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
-  const examples: string[] = [];
+    "name": "ScrollArea",
+    "description": "Augments native scroll functionality for customizing the appearance of scrollbars.",
+    "category": "molecule",
+    "subcategory": "layout",
+    "renderType": "client",
+    "status": "stable",
+    "author": "Shadcn UI",
+    "since": "2023-01-01"
+  };
+
+  const tags = Array.from({ length: 50 }).map(
+    (_, i, a) => `v1.2.0-beta.${a.length - i}`
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,32 +67,52 @@ export default function ScrollAreaPreviewPage() {
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Basic Vertical Scroll */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <ScrollArea /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <ScrollArea /> here)</p>
+            <h3 className="text-lg font-medium mb-3">Vertical Scrolling</h3>
+            <ScrollArea className="h-72 w-48 rounded-md border border-divider">
+              <div className="p-4">
+                <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4>
+                {tags.map((tag) => (
+                  <React.Fragment key={tag}>
+                    <div className="text-sm">{tag}</div>
+                    <Separator className="my-2" />
+                  </React.Fragment>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Horizontal Scroll */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-3">Horizontal Scrolling</h3>
+            <ScrollArea className="w-96 whitespace-nowrap rounded-md border border-divider">
+              <div className="flex w-max space-x-4 p-4">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="shrink-0">
+                    <div className="overflow-hidden rounded-md">
+                      <div className="h-40 w-40 bg-secondary flex items-center justify-center text-center p-2 text-secondary-foreground">
+                        ArtworkItem {i + 1}
+                      </div>
+                    </div>
+                    <div className="mt-2 w-[150px]">
+                      <h4 className="font-semibold text-sm">Artwork Name</h4>
+                      <p className="text-xs text-muted-foreground">Artist Name</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
 
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Code Snippets Section - Removed */}
+      {/* {examples && examples.length > 0 && ( ... )} */}
 
     </div>
   );

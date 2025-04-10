@@ -3,6 +3,7 @@
  * @category molecule
  * @subcategory input
  * @description A set of checkable buttons (radio buttons) where only one button can be checked at a time.
+ * @status stable
  */
 "use client"
 

@@ -3,6 +3,7 @@
  * @category molecule
  * @subcategory feedback
  * @description A succinct message that appears temporarily to provide feedback or updates.
+ * @status stable
  */
 "use client"
 

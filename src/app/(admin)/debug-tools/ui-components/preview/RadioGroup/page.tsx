@@ -5,7 +5,9 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-import { RadioGroup } from '../../../../../../components/ui/radio-group';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,15 +18,15 @@ const statusStyles: Record<string, string> = {
 
 export default function RadioGroupPreviewPage() {
   const componentMeta = {
-  "name": "RadioGroup",
-  "description": "A set of checkable buttons (radio buttons) where only one button can be checked at a time.",
-  "category": "molecule",
-  "subcategory": "input",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
-  const examples: string[] = [];
+    "name": "RadioGroup",
+    "description": "A set of checkable buttons (radio buttons) where only one button can be checked at a time.",
+    "category": "molecule",
+    "subcategory": "input",
+    "renderType": "client",
+    "status": "stable",
+    "author": "Shadcn UI",
+    "since": "2023-01-01"
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,32 +63,66 @@ export default function RadioGroupPreviewPage() {
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Basic Radio Group */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <RadioGroup /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <RadioGroup /> here)</p>
+            <RadioGroup defaultValue="comfortable">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="default" id="r1" />
+                <Label htmlFor="r1">Default</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="comfortable" id="r2" />
+                <Label htmlFor="r2">Comfortable</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="compact" id="r3" />
+                <Label htmlFor="r3">Compact</Label>
+              </div>
+            </RadioGroup>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Disabled Radio Group */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-3">Disabled State</h3>
+            <RadioGroup defaultValue="option-one" disabled>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="dr1" />
+                <Label htmlFor="dr1">Option One (disabled)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-two" id="dr2" />
+                <Label htmlFor="dr2">Option Two (disabled)</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Example 3: Horizontal Layout */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-3">Horizontal Layout</h3>
+            <RadioGroup defaultValue="card" className="flex space-x-4">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="card" id="hr1" />
+                <Label htmlFor="hr1">Card</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="paypal" id="hr2" />
+                <Label htmlFor="hr2">Paypal</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="apple" id="hr3" />
+                <Label htmlFor="hr3">Apple Pay</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
 
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Code Snippets Section - Removed */}
+      {/* {examples && examples.length > 0 && ( ... )} */}
 
     </div>
   );

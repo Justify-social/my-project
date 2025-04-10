@@ -3,6 +3,7 @@
  * @category molecule
  * @subcategory layout
  * @description Augments native scroll functionality for customizing the appearance of scrollbars.
+ * @status stable
  */
 "use client"
 
