@@ -8,8 +8,32 @@ import { useRouter } from "next/navigation";
 import { Icon } from '@/components/ui/icon/icon'
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { LoadingSkeleton, TableSkeleton } from "@/components/ui";
-import { IconButtonAction } from "@/components/ui/button-icon-action";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
@@ -697,364 +721,319 @@ const ClientCampaignList: React.FC = () => {
     const kpi = KPI_OPTIONS.find((k) => k.key === kpiKey);
     return kpi ? kpi.title : kpiKey;
   };
-  return <div className="min-h-screen bg-white px-4 md:px-6 py-6 font-work-sans">
-    {/* Header: Title and Actions */}
-    <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 font-work-sans">
-      <h1 className="text-xl md:text-2xl font-bold text-[var(--primary-color)] font-sora">Campaign List View</h1>
-      <div className="fixed bottom-4 right-4">
-        <Link href="/campaigns/wizard/step-1" className="inline-flex items-center px-5 py-2.5 bg-accent text-accent-foreground rounded text-base font-medium shadow-lg hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
-          <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
-          New Campaign
+  return <div className="min-h-screen bg-white px-4 md:px-6 py-6">
+    {/* Header: Title */}
+    <div className="mb-6">
+      <h1 className="text-xl md:text-2xl font-bold text-gray-800">Campaign List View</h1>
+    </div>
+
+    {/* Filters and Actions Row - Ensure items-center for vertical alignment */}
+    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+      {/* Filters Group - Ensure items-center */}
+      <div className="flex flex-wrap items-center gap-3 flex-grow">
+        {/* Search Bar - Use Divider color border */}
+        <div className="relative w-full md:w-auto md:min-w-[250px]">
+          <Icon iconId="faMagnifyingGlassLight" size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Search campaigns..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            aria-label="Search campaigns by name"
+            className="pl-10 w-full border-divider"
+          />
+        </div>
+
+        {/* Objective Filter - Use Divider color border */}
+        <Select value={objectiveFilter} onValueChange={(value) => { setObjectiveFilter(value); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full md:w-[150px] border-divider">
+            <SelectValue placeholder="Objective" />
+          </SelectTrigger>
+          <SelectContent>
+            {KPI_OPTIONS.map((kpi) => <SelectItem key={kpi.key} value={kpi.key}>{kpi.title}</SelectItem>)}
+          </SelectContent>
+        </Select>
+
+        {/* Status Filter - Use Divider color border */}
+        <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full md:w-[130px] border-divider">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="submitted">Submitted</SelectItem>
+            <SelectItem value="in_review">In Review</SelectItem>
+            <SelectItem value="paused">Paused</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Start Date Filter - Use Divider color border */}
+        <Select value={startDateFilter} onValueChange={(value) => { setStartDateFilter(value); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full md:w-[160px] border-divider">
+            <SelectValue placeholder="Start Date" />
+          </SelectTrigger>
+          <SelectContent>
+            {uniqueDates.startDates.map((date) => <SelectItem key={date} value={date}>{formatDate(date)}</SelectItem>)}
+          </SelectContent>
+        </Select>
+
+        {/* End Date Filter - Use Divider color border */}
+        <Select value={endDateFilter} onValueChange={(value) => { setEndDateFilter(value); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full md:w-[160px] border-divider">
+            <SelectValue placeholder="End Date" />
+          </SelectTrigger>
+          <SelectContent>
+            {uniqueDates.endDates.map((date) => <SelectItem key={date} value={date}>{formatDate(date)}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* New Campaign Button - Use Accent color, moved inline */}
+      <div className="flex-shrink-0 w-full md:w-auto md:ml-auto mt-4 md:mt-0"> {/* Adjusted for inline layout */}
+        <Link href="/campaigns/wizard/step-1">
+          <Button className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto"> {/* Use accent color */}
+            <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
+            New Campaign
+          </Button>
         </Link>
       </div>
     </div>
 
-    {/* Search and Filters */}
-    <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 font-work-sans">
-      {/* Search Bar */}
-      <div className="relative w-full md:w-auto md:flex-grow md:max-w-md font-work-sans">
-        <input type="text" placeholder="Search campaigns" value={search} onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }} aria-label="Search campaigns by name" className="border p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans" />
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none font-work-sans">
-          <Icon iconId="faMagnifyingGlassLight" size="sm" className="text-secondary font-work-sans" />
-        </div>
-      </div>
-
-      {/* Filter Selection */}
-      <div className="flex flex-wrap items-center gap-3 font-work-sans">
-        <div className="relative inline-block font-work-sans">
-          <select value={objectiveFilter} onChange={(e) => {
-            setObjectiveFilter(e.target.value);
-            setCurrentPage(1);
-          }} aria-label="Filter by objective" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
-            <option value="">Objective</option>
-            {KPI_OPTIONS.map((kpi) => <option key={kpi.key} value={kpi.key}>{kpi.title}</option>)}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-            <Icon iconId="faChevronDownLight" size="sm" className="text-[var(--secondary-color)] font-work-sans" />
-          </div>
-        </div>
-
-        <div className="relative inline-block font-work-sans">
-          <select value={statusFilter} onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setCurrentPage(1);
-          }} aria-label="Filter by status" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
-            <option value="">Status</option>
-            <option value="approved">Approved</option>
-            <option value="active">Active</option>
-            <option value="submitted">Submitted</option>
-            <option value="in_review">In Review</option>
-            <option value="paused">Paused</option>
-            <option value="draft">Draft</option>
-            <option value="completed">Completed</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-            <Icon iconId="faChevronDownLight" size="sm" className="text-[var(--secondary-color)] font-work-sans" />
-          </div>
-        </div>
-
-        <div className="relative inline-block font-work-sans">
-          <select value={startDateFilter} onChange={(e) => {
-            setStartDateFilter(e.target.value);
-            setCurrentPage(1);
-          }} aria-label="Filter by start date" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
-            <option value="">Start Date</option>
-            {uniqueDates.startDates.map((date) => <option key={date} value={date}>
-              {formatDate(date)}
-            </option>)}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-            <Icon iconId="faChevronDownLight" size="sm" className="text-[var(--secondary-color)] font-work-sans" />
-          </div>
-        </div>
-
-        <div className="relative inline-block font-work-sans">
-          <select value={endDateFilter} onChange={(e) => {
-            setEndDateFilter(e.target.value);
-            setCurrentPage(1);
-          }} aria-label="Filter by end date" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
-            <option value="">End Date</option>
-            {uniqueDates.endDates.map((date) => <option key={date} value={date}>
-              {formatDate(date)}
-            </option>)}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 font-work-sans">
-            <Icon iconId="faChevronDownLight" size="sm" className="text-[var(--secondary-color)] font-work-sans" />
-          </div>
-        </div>
-
-        <button onClick={resetFilters} className="px-3 py-2.5 bg-[var(--secondary-color)] text-white rounded text-sm font-medium hover:bg-opacity-90 transition-colors font-work-sans">
-          Reset Filters
-        </button>
-      </div>
-    </div>
-
     {/* Loading, Error, or Empty States */}
-    {userLoading ?
-      <div className="bg-white p-6 rounded-lg border border-gray-200 overflow-hidden font-work-sans">
-        <TableSkeleton
-          rows={5}
-          columns={6}
-        />
+    {userLoading || loading ?
+      <div className="bg-white p-6 rounded-lg border border-divider overflow-hidden">
+        <TableSkeleton rows={campaignsPerPage} columns={6} />
       </div> :
-      loading ?
-        <div className="bg-white p-6 rounded-lg border border-gray-200 overflow-hidden font-work-sans">
-          <TableSkeleton
-            rows={8}
-            columns={6}
-          />
-        </div> :
-        error ?
-          <div className="bg-white p-6 text-center text-red-500 font-work-sans">{error}</div> :
-          sortedCampaigns.length === 0 ?
-            <div className="bg-white p-6 text-center font-work-sans">
-              No campaigns found. Try adjusting your search criteria.
-            </div> :
+      error ?
+        <div className="bg-white p-6 text-center text-red-500">{error}</div> :
+        sortedCampaigns.length === 0 ?
+          <div className="bg-white p-6 text-center">
+            No campaigns found. Try adjusting your search criteria.
+          </div> :
 
-            <>
-              {/* Campaign Table for Larger Screens */}
-              <div className="hidden md:block overflow-hidden rounded-lg border border-[var(--divider-color)] font-work-sans">
-                <div className="overflow-x-auto font-work-sans">
-                  <div className="overflow-x-auto border rounded-lg shadow-sm font-work-sans">
-                    <table className="min-w-full divide-y divide-border font-work-sans">
-                      <thead className="bg-gray-50 font-work-sans">
-                        <tr>
-                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("campaignName")}>
-                            Campaign Name
-                          </th>
-                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("submissionStatus")}>
-                            Status
-                          </th>
-                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("primaryKPI")}>
-                            Objective
-                          </th>
-                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("startDate")}>
-                            Start Date
-                          </th>
-                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("endDate")}>
-                            End Date
-                          </th>
-                          <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider font-work-sans">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[var(--divider-color)]">
-                        {displayedCampaigns.map((campaign, index) => {
-                          const statusInfo = getStatusInfo(campaign.submissionStatus);
-                          return <tr key={campaign.id} className="hover:bg-[var(--background-color)]">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Link href={`/campaigns/${campaign.id}`}>
-                                <span className="text-[var(--accent-color)] hover:underline cursor-pointer font-medium font-work-sans">
-                                  {campaign.campaignName || 'Untitled Campaign'}
-                                </span>
-                              </Link>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class} font-work-sans`}>
-                                {statusInfo.text}
+          <>
+            {/* Campaign Table - Use border-divider */}
+            <div className="hidden md:block border rounded-lg border-divider overflow-hidden">
+              <Table>
+                <TableHeader className="bg-background">
+                  <TableRow>
+                    <TableHead className="cursor-pointer text-secondary" onClick={() => requestSort("campaignName")}>Campaign Name</TableHead>
+                    <TableHead className="cursor-pointer text-secondary" onClick={() => requestSort("submissionStatus")}>Status</TableHead>
+                    <TableHead className="cursor-pointer text-secondary" onClick={() => requestSort("primaryKPI")}>Objective</TableHead>
+                    <TableHead className="cursor-pointer text-secondary" onClick={() => requestSort("startDate")}>Start Date</TableHead>
+                    <TableHead className="cursor-pointer text-secondary" onClick={() => requestSort("endDate")}>End Date</TableHead>
+                    <TableHead className="text-center text-secondary">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayedCampaigns.map((campaign) => {
+                    const statusInfo = getStatusInfo(campaign.submissionStatus);
+                    return (
+                      <TableRow key={campaign.id} className="hover:bg-gray-50">
+                        <TableCell>
+                          <Link href={`/campaigns/${campaign.id}`}>
+                            <span className="text-accent hover:underline cursor-pointer font-medium">
+                              {campaign.campaignName || 'Untitled Campaign'}
+                            </span>
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}>
+                            {statusInfo.text}
+                          </span>
+                        </TableCell>
+                        <TableCell>{campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}</TableCell>
+                        <TableCell>{campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}</TableCell>
+                        <TableCell>{campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2 justify-center"> {/* Increased space slightly */}
+                            {/* Updated Action Icons without Button wrapper - Accent hover */}
+                            <span className="group text-secondary hover:text-accent cursor-pointer p-1" onClick={() => handleViewCampaign(campaign.id.toString())} aria-label="View campaign">
+                              <Icon iconId="faEyeLight" className="group-hover:hidden block w-4 h-4" />
+                              <Icon iconId="faEyeSolid" className="hidden group-hover:block w-4 h-4" />
+                            </span>
+                            <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} passHref legacyBehavior>
+                              <span className="group text-secondary hover:text-accent cursor-pointer p-1" aria-label="Edit campaign">
+                                <Icon iconId="faPenToSquareLight" className="group-hover:hidden block w-4 h-4" />
+                                <Icon iconId="faPenToSquareSolid" className="hidden group-hover:block w-4 h-4" />
                               </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center space-x-1 justify-center">
-                                <IconButtonAction
-                                  iconBaseName="faEye"
-                                  hoverColorClass="text-accent"
-                                  ariaLabel="View campaign"
-                                  onClick={() => handleViewCampaign(campaign.id.toString())}
-                                />
-                                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} title="Edit campaign">
-                                  <IconButtonAction
-                                    iconBaseName="faPenToSquare"
-                                    hoverColorClass="text-accent"
-                                    ariaLabel="Edit campaign"
-                                  />
-                                </Link>
-                                <IconButtonAction
-                                  iconBaseName="faCopy"
-                                  hoverColorClass="text-accent"
-                                  ariaLabel="Duplicate campaign"
-                                  onClick={() => handleDuplicateClick(campaign)}
-                                />
-                                <IconButtonAction
-                                  iconBaseName="faTrashCan"
-                                  hoverColorClass="text-destructive"
-                                  ariaLabel="Delete campaign"
-                                  onClick={() => handleDeleteClick(campaign)}
-                                />
-                              </div>
-                            </td>
-                          </tr>;
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                            </Link>
+                            <span className="group text-secondary hover:text-accent cursor-pointer p-1" onClick={() => handleDuplicateClick(campaign)} aria-label="Duplicate campaign">
+                              <Icon iconId="faCopyLight" className="group-hover:hidden block w-4 h-4" />
+                              <Icon iconId="faCopySolid" className="hidden group-hover:block w-4 h-4" />
+                            </span>
+                            <span className="group text-secondary hover:text-destructive cursor-pointer p-1" onClick={() => handleDeleteClick(campaign)} aria-label="Delete campaign">
+                              <Icon iconId="faTrashCanLight" className="group-hover:hidden block w-4 h-4" />
+                              <Icon iconId="faTrashCanSolid" className="hidden group-hover:block w-4 h-4" />
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
 
-                {/* Pagination for Desktop */}
-                <div className="px-6 py-4 flex items-center justify-between border-t border-[var(--divider-color)] font-work-sans">
-                  <div className="flex items-center font-work-sans">
-                    <span className="mr-2 text-sm text-gray-700 font-work-sans">Show</span>
-                    <select value={campaignsPerPage} onChange={(e) => {
-                      setCampaignsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }} className="border border-[var(--divider-color)] rounded p-1 text-sm font-work-sans">
-                      <option value={10}>10</option>
-                      <option value={25}>25</option>
-                      <option value={50}>50</option>
-                      <option value={100}>100</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center space-x-4 font-work-sans">
-                    <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors font-work-sans">
-                      Previous
-                    </button>
-                    <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm border border-[var(--divider-color)] rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--background-color)] transition-colors font-work-sans">
-                      Next
-                    </button>
-                  </div>
-                </div>
+            {/* Pagination (Desktop) - Use border-divider */}
+            <div className="hidden md:flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">Show</span>
+                <Select value={campaignsPerPage.toString()} onValueChange={(value) => { setCampaignsPerPage(Number(value)); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-[75px] border-divider">
+                    <SelectValue placeholder={campaignsPerPage} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-gray-700">entries</span>
               </div>
-
-              {/* Mobile View as Cards */}
-              <div className="md:hidden space-y-4 font-work-sans">
-                {displayedCampaigns.map((campaign) => {
-                  const statusInfo = getStatusInfo(campaign.submissionStatus);
-                  return <div key={campaign.id} className="bg-white border border-[var(--divider-color)] rounded-lg p-5 shadow-sm font-work-sans">
-                    <div className="flex justify-between items-start mb-3 font-work-sans">
-                      <Link href={`/campaigns/${campaign.id}`}>
-                        <h3 className="font-semibold text-[var(--primary-color)] font-sora">
-                          {campaign.campaignName || 'Untitled Campaign'}
-                        </h3>
-                      </Link>
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class} font-work-sans`}>
-                        {statusInfo.text}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-4 font-work-sans">
-                      <div className="font-work-sans">
-                        <p className="text-gray-500 mb-1 font-work-sans">Objective</p>
-                        <p className="font-medium font-work-sans">{campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}</p>
-                      </div>
-                      <div className="font-work-sans">
-                        <p className="text-gray-500 mb-1 font-work-sans">Dates</p>
-                        <p className="font-medium font-work-sans">
-                          {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'} - {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 border-t border-[var(--divider-color)] pt-4 font-work-sans">
-                      <button onClick={() => handleViewCampaign(campaign.id.toString())} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="View campaign">
-                        <Icon iconId="faEyeLight" size="md" />
-                      </button>
-                      <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group p-1.5 text-gray-500 transition-colors font-work-sans" title="Edit campaign">
-                        <IconButtonAction
-                          iconBaseName="faPenToSquare"
-                          hoverColorClass="text-accent"
-                          ariaLabel="Edit campaign"
-                        />
-                      </Link>
-                      <button onClick={() => handleDuplicateClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="Duplicate campaign">
-                        <Icon iconId="faCopyLight" size="md" />
-                      </button>
-                      <button onClick={() => handleDeleteClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="Delete campaign">
-                        <Icon iconId="faTrashCanLight" size="md" />
-                      </button>
-                    </div>
-                  </div>;
-                })}
-
-                {/* Mobile Pagination */}
-                <div className="flex justify-between items-center border-t border-[var(--divider-color)] pt-4 mt-6 font-work-sans">
-                  <span className="text-sm text-gray-600 font-work-sans">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <div className="flex space-x-3 font-work-sans">
-                    <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
-                      Previous
-                    </button>
-                    <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="px-3 py-2 text-sm bg-white border border-[var(--divider-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed font-work-sans">
-                      Next
-                    </button>
-                  </div>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="border-divider">
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="border-divider">
+                  Next
+                </Button>
               </div>
-            </>
+            </div>
+          </>
     }
 
+    {/* Modals - Update Duplicate button color */}
     {/* Delete Confirmation Modal */}
-    {showDeleteModal && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center font-work-sans">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 font-work-sans">
-        <div className="flex justify-between items-center mb-4 font-work-sans">
-          <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">Confirm Deletion</h3>
-          <button onClick={() => setShowDeleteModal(false)} className="group text-gray-500 hover:text-gray-700 font-work-sans">
-            <Icon iconId="faXmarkLight" size="sm" />
-          </button>
-        </div>
-
-        <div className="mb-6 font-work-sans">
-          <p className="mb-2 font-work-sans">Are you sure you want to delete <span className="font-medium font-work-sans">{campaignToAction?.name}</span>?</p>
-          <p className="text-red-600 text-sm font-work-sans">This action cannot be undone.</p>
-        </div>
-
-        <div className="flex justify-end space-x-3 font-work-sans">
-          <button onClick={() => setShowDeleteModal(false)} disabled={deleteInProgress} className={`px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors ${deleteInProgress ? 'opacity-50 cursor-not-allowed' : ''} font-work-sans`}>
-            Cancel
-          </button>
-          <button onClick={confirmDelete} disabled={deleteInProgress} className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center ${deleteInProgress ? 'opacity-70 cursor-not-allowed' : ''} font-work-sans`}>
-            {deleteInProgress ? <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white font-work-sans" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Deleting...
-            </> : 'Delete'}
-          </button>
-        </div>
-      </div>
-    </div>}
+    <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete <span className="font-medium">{campaignToAction?.name}</span>?
+            This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowDeleteModal(false)} disabled={deleteInProgress}>Cancel</Button>
+          <Button variant="destructive" onClick={confirmDelete} disabled={deleteInProgress}>
+            {deleteInProgress ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     {/* Duplicate Campaign Modal */}
-    {showDuplicateModal && <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center font-work-sans">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 font-work-sans">
-        <div className="flex justify-between items-center mb-4 font-work-sans">
-          <h3 className="text-lg font-semibold text-[var(--primary-color)] font-sora">Duplicate Campaign</h3>
-          <button onClick={() => setShowDuplicateModal(false)} className="group text-gray-500 hover:text-gray-700 font-work-sans">
-            <Icon iconId="faXmarkLight" size="sm" />
-          </button>
+    <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Duplicate Campaign</DialogTitle>
+          <DialogDescription>Please name the duplicate campaign:</DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <Input
+            id="duplicateName"
+            value={duplicateName}
+            onChange={(e) => setDuplicateName(e.target.value)}
+            placeholder="Enter campaign name"
+            className="border-divider"
+          />
         </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowDuplicateModal(false)}>Cancel</Button>
+          <Button onClick={duplicateCampaign} disabled={!duplicateName.trim() || loading} className="bg-interactive hover:bg-interactive/90 text-white">
+            {loading ? "Duplicating..." : "Duplicate"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
-        <div className="mb-6 font-work-sans">
-          <label htmlFor="duplicateName" className="block mb-2 text-sm font-medium text-gray-700 font-work-sans">
-            Please name the duplicate campaign:
-          </label>
-          <input type="text" id="duplicateName" value={duplicateName} onChange={(e) => setDuplicateName(e.target.value)} className="w-full p-2.5 border border-[var(--divider-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans" placeholder="Enter campaign name" />
-        </div>
+    {/* Mobile View Cards - Update Action Buttons */}
+    <div className="md:hidden space-y-4">
+      {displayedCampaigns.map((campaign) => {
+        const statusInfo = getStatusInfo(campaign.submissionStatus);
+        return (
+          <div key={campaign.id} className="bg-white border border-divider rounded-lg p-4 shadow-sm">
+            {/* ... Card Header ... */}
+            <div className="flex justify-between items-start mb-3">
+              <Link href={`/campaigns/${campaign.id}`}>
+                <h3 className="font-semibold text-accent hover:underline">
+                  {campaign.campaignName || 'Untitled Campaign'}
+                </h3>
+              </Link>
+              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}>
+                {statusInfo.text}
+              </span>
+            </div>
 
-        <div className="flex justify-end space-x-3 font-work-sans">
-          <button onClick={() => setShowDuplicateModal(false)} className="px-4 py-2 border border-[var(--divider-color)] rounded text-gray-700 hover:bg-gray-50 transition-colors font-work-sans">
-            Cancel
-          </button>
-          <button onClick={duplicateCampaign} disabled={!duplicateName.trim()} className="px-4 py-2 bg-[var(--accent-color)] text-white rounded hover:bg-opacity-90 transition-colors disabled:bg-opacity-50 disabled:cursor-not-allowed font-work-sans">
-            Duplicate
-          </button>
-        </div>
+            {/* ... Card Grid Content ... */}
+            <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+              {/* Objective */}
+              <div>
+                <p className="text-gray-500 mb-1">Objective</p>
+                <p className="font-medium text-gray-900">{campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}</p>
+              </div>
+              {/* Status - Already handled in header */}
+              {/* Start Date */}
+              <div>
+                <p className="text-gray-500 mb-1">Start Date</p>
+                <p className="font-medium text-gray-900">{campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}</p>
+              </div>
+              {/* End Date */}
+              <div>
+                <p className="text-gray-500 mb-1">End Date</p>
+                <p className="font-medium text-gray-900">{campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}</p>
+              </div>
+            </div>
+
+            {/* Use standard Button components for actions */}
+            <div className="flex justify-end space-x-2 border-t border-divider pt-3 mt-3">
+              {/* Updated Mobile Action Icons without Button wrapper - Accent hover */}
+              <span className="group text-secondary hover:text-accent cursor-pointer p-1" onClick={() => handleViewCampaign(campaign.id.toString())} aria-label="View campaign">
+                <Icon iconId="faEyeLight" className="group-hover:hidden block w-4 h-4" />
+                <Icon iconId="faEyeSolid" className="hidden group-hover:block w-4 h-4" />
+              </span>
+              <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} passHref legacyBehavior>
+                <span className="group text-secondary hover:text-accent cursor-pointer p-1" aria-label="Edit campaign">
+                  <Icon iconId="faPenToSquareLight" className="group-hover:hidden block w-4 h-4" />
+                  <Icon iconId="faPenToSquareSolid" className="hidden group-hover:block w-4 h-4" />
+                </span>
+              </Link>
+              <span className="group text-secondary hover:text-accent cursor-pointer p-1" onClick={() => handleDuplicateClick(campaign)} aria-label="Duplicate campaign">
+                <Icon iconId="faCopyLight" className="group-hover:hidden block w-4 h-4" />
+                <Icon iconId="faCopySolid" className="hidden group-hover:block w-4 h-4" />
+              </span>
+              <span className="group text-secondary hover:text-destructive cursor-pointer p-1" onClick={() => handleDeleteClick(campaign)} aria-label="Delete campaign">
+                <Icon iconId="faTrashCanLight" className="group-hover:hidden block w-4 h-4" />
+                <Icon iconId="faTrashCanSolid" className="hidden group-hover:block w-4 h-4" />
+              </span>
+            </div>
+          </div>
+        );
+      })}
+      {/* Mobile Pagination */}
+      <div className="flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
+        <Button variant="outline" size="sm" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="border-divider">
+          Previous
+        </Button>
+        <span className="text-sm text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button variant="outline" size="sm" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="border-divider">
+          Next
+        </Button>
       </div>
-    </div>}
+    </div>
   </div>;
 };
 export default ClientCampaignList;

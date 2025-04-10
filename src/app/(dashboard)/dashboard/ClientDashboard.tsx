@@ -4,23 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon/icon";
 import { CalendarUpcoming, type CalendarEvent } from "@/components/ui/calendar-upcoming";
 import { UpcomingCampaignsTable, type CampaignData } from "@/components/ui/card-upcoming-campaign";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Define the skeleton fallback using the imported SSOT component
-// (Could be moved to a shared file)
-const DashboardLoadingSkeleton = () => {
-    return <div className="animate-pulse space-y-4 p-4">
-        <LoadingSkeleton className="h-8 w-3/4" />
-        <LoadingSkeleton className="h-4 w-full" />
-        <LoadingSkeleton className="h-4 w-5/6" />
-        <LoadingSkeleton className="h-10 w-1/2" />
-    </div>;
-};
 
 // (User interface definition can likely be removed if fetched internally)
 // interface DashboardUser {
@@ -35,19 +23,19 @@ const DashboardLoadingSkeleton = () => {
 //     loading: () => <DashboardLoadingSkeleton />
 // });
 
-// --- Mock Data (Replace with actual data fetching/props) ---
-const mockEvents: CalendarEvent[] = [
-    { id: '1', title: 'Summer Sale Launch', start: new Date(2025, 6, 10), platform: 'Facebook', status: 'Scheduled' },
-    { id: '2', title: 'Influencer Collab Post', start: new Date(2025, 6, 15), end: new Date(2025, 6, 15), platform: 'Instagram', status: 'Live', allDay: true },
-    { id: '3', title: 'Q3 Strategy Meeting', start: new Date(2025, 6, 22, 9, 30), end: new Date(2025, 6, 22, 11, 0), status: 'Confirmed' },
-];
-
-const mockCampaigns: CampaignData[] = [
-    { id: 'camp1', title: 'Sustainable Futures', platform: 'Instagram', startDate: new Date(2025, 6, 10), status: 'Live', budget: 5000, influencer: { name: 'Eco Warrior', image: '/images/influencers/olivia.jpg' } },
-    { id: 'camp2', title: 'Tech Launchpad', platform: 'YouTube', startDate: new Date(2025, 6, 18), status: 'Scheduled', budget: 12000 },
-    { id: 'camp3', title: 'Artisan Market Promo', platform: 'Facebook', startDate: new Date(2025, 6, 25), endDate: new Date(2025, 7, 5), status: 'Planning' },
-];
-// --- End Mock Data ---
+// --- Removed Mock Data ---
+// const mockEvents: CalendarEvent[] = [
+//     { id: '1', title: 'Summer Sale Launch', start: new Date(2025, 6, 10), platform: 'Facebook', status: 'Scheduled' },
+//     { id: '2', title: 'Influencer Collab Post', start: new Date(2025, 6, 15), end: new Date(2025, 6, 15), platform: 'Instagram', status: 'Live', allDay: true },
+//     { id: '3', title: 'Q3 Strategy Meeting', start: new Date(2025, 6, 22, 9, 30), end: new Date(2025, 6, 22, 11, 0), status: 'Confirmed' },
+// ];
+//
+// const mockCampaigns: CampaignData[] = [
+//     { id: 'camp1', title: 'Sustainable Futures', platform: 'Instagram', startDate: new Date(2025, 6, 10), status: 'Live', budget: 5000, influencer: { name: 'Eco Warrior', image: '/images/influencers/olivia.jpg' } },
+//     { id: 'camp2', title: 'Tech Launchpad', platform: 'YouTube', startDate: new Date(2025, 6, 18), status: 'Scheduled', budget: 12000 },
+//     { id: 'camp3', title: 'Artisan Market Promo', platform: 'Facebook', startDate: new Date(2025, 6, 25), endDate: new Date(2025, 7, 5), status: 'Planning' },
+// ];
+// --- End Removed Mock Data ---
 
 // Removed unused interface ClientDashboardProps
 // interface ClientDashboardProps {
@@ -58,75 +46,64 @@ export default function ClientDashboard() {
     const router = useRouter();
     const { user, error: userError, isLoading: userLoading } = useUser();
 
-    // State for fetched data
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
-    const [eventsLoading, setEventsLoading] = useState(true);
-    const [campaignsLoading, setCampaignsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
-    // Effect to fetch data when user is loaded
     useEffect(() => {
         if (user && !userLoading) {
             const fetchData = async () => {
-                setEventsLoading(true);
-                setCampaignsLoading(true);
+                setIsLoading(true);
                 setFetchError(null);
                 try {
-                    // Use Promise.all for parallel fetching from API routes
+                    // Fetch data from actual API endpoints
                     const [eventsResponse, campaignsResponse] = await Promise.all([
-                        fetch('/api/dashboard/events'),      // TODO: Create this API route
-                        fetch('/api/dashboard/campaigns')   // TODO: Create this API route
+                        fetch('/api/dashboard/events'),      // Using actual endpoint
+                        fetch('/api/dashboard/campaigns')   // Using actual endpoint
                     ]);
 
                     if (!eventsResponse.ok) throw new Error(`Failed to fetch events: ${eventsResponse.statusText}`);
                     if (!campaignsResponse.ok) throw new Error(`Failed to fetch campaigns: ${campaignsResponse.statusText}`);
 
+                    // Parse actual JSON responses
                     const eventsData = await eventsResponse.json();
                     const campaignsData = await campaignsResponse.json();
 
-                    // Assuming API returns { success: true, data: [...] }
                     if (eventsData.success && Array.isArray(eventsData.data)) {
                         setEvents(eventsData.data);
                     } else {
                         console.error("Invalid events data format:", eventsData);
-                        setFetchError(eventsData.error || 'Invalid format for events data');
+                        setFetchError((eventsData as any).error || 'Invalid format for events data');
                     }
 
                     if (campaignsData.success && Array.isArray(campaignsData.data)) {
                         setCampaigns(campaignsData.data);
                     } else {
                         console.error("Invalid campaigns data format:", campaignsData);
-                        // Append error message if events fetch also failed
-                        setFetchError(prev => prev ? `${prev}; ${campaignsData.error || 'Invalid format for campaigns data'}` : campaignsData.error || 'Invalid format for campaigns data');
+                        setFetchError(prev => prev ? `${prev}; ${(campaignsData as any).error || 'Invalid format for campaigns data'}` : (campaignsData as any).error || 'Invalid format for campaigns data');
                     }
 
                 } catch (error) {
                     console.error("Failed to fetch dashboard data:", error);
                     setFetchError(error instanceof Error ? error.message : 'Failed to load dashboard data');
-                    setEvents([]); // Clear data on error
+                    setEvents([]);
                     setCampaigns([]);
                 } finally {
-                    setEventsLoading(false);
-                    setCampaignsLoading(false);
+                    setIsLoading(false);
                 }
             };
 
             fetchData();
         } else if (!userLoading && !user) {
-            // Handle case where user is definitely not logged in after loading
-            setEventsLoading(false);
-            setCampaignsLoading(false);
-            // Optionally redirect or show logged-out state (AuthCheck likely handles redirect)
+            setIsLoading(false);
         }
-    }, [user, userLoading]); // Dependency array
+    }, [user, userLoading]);
 
     const handleCampaignClick = (campaignId: string | number) => {
         router.push(`/campaigns/${campaignId}`);
     };
 
-    // Combine loading states
-    const isLoading = userLoading || eventsLoading || campaignsLoading;
     const hasEvents = events && events.length > 0;
     const hasCampaigns = campaigns && campaigns.length > 0;
 
@@ -162,12 +139,10 @@ export default function ClientDashboard() {
                         <CardTitle>Upcoming Schedule</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow p-0">
-                        {isLoading ? (
-                            <div className="p-4"><LoadingSkeleton className="h-48 w-full" /></div>
-                        ) : hasEvents ? (
+                        {hasEvents ? (
                             <CalendarUpcoming events={events} />
                         ) : (
-                            <p className="p-4 text-muted-foreground">No upcoming events.</p>
+                            !isLoading && <p className="p-4 text-muted-foreground">No upcoming events.</p>
                         )}
                     </CardContent>
                 </Card>
@@ -178,13 +153,13 @@ export default function ClientDashboard() {
                         <CardTitle>Upcoming Campaigns</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow p-0">
-                        {isLoading ? (
-                            <div className="p-4"><LoadingSkeleton className="h-24 w-full" /></div>
-                        ) : (
+                        {hasCampaigns ? (
                             <UpcomingCampaignsTable
                                 campaigns={campaigns}
                                 onRowClick={handleCampaignClick}
                             />
+                        ) : (
+                            !isLoading && <p className="p-4 text-muted-foreground">No upcoming campaigns.</p>
                         )}
                     </CardContent>
                 </Card>
