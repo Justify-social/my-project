@@ -81,7 +81,7 @@ export default function AlertPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Destructive Alert</h3>
             <Alert variant="destructive">
-              <Icon iconId="faCircleExclamationSolid" className="h-4 w-4" />
+              <Icon iconId="faTriangleExclamationSolid" className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>
                 Your session has expired. Please log in again.

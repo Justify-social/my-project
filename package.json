@@ -10,10 +10,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/icons/generate-registry-module.mjs && next build",
-    "registry:build": "tsx scripts/build-component-registry.ts",
     "build:registry": "tsx scripts/ui/generate-component-registry.ts",
-    "build:test": "npm run build:registry && npm run test:registry",
-    "test:registry": "tsx scripts/ui/test-production-registry.ts",
     "start": "next start",
     "lint": "next lint",
     "test": "run-p test:unit test:integration",
