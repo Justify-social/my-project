@@ -836,97 +836,76 @@ function Step1Content() {
 
   const formikRef = useRef<any>(null);
 
-  // --- Calculate initialValues FIRST, handling null context data ---
+  // --- initialValues ALWAYS starts with defaults --- 
   const initialValues = useMemo(() => {
-    // If loading or no context data yet, use defaults for a NEW campaign
-    if (!contextCampaignData) {
-      console.log("[Step1Content] No context data, using defaultFormValues for NEW campaign.");
-      return defaultFormValues;
-    }
+    console.log("[Step1Content] Setting initialValues to defaultFormValues.");
+    return defaultFormValues;
+  }, []); // Empty dependency array - only runs once
 
-    // If context data exists, assume EDITING or loading existing data
-    console.log("[Step1Content] Context data exists, formatting for EDIT campaign:", contextCampaignData);
+  // --- Use useEffect to populate form AFTER initial render if contextData exists ---
+  useEffect(() => {
+    // Only run if we have data AND the formik instance is ready
+    if (contextCampaignData && formikRef.current) {
+      console.log("[Step1Content useEffect] Populating form with context data:", contextCampaignData);
 
-    // Get primary and secondary contacts safely (using contextCampaignData)
-    let primaryContact = contextCampaignData.primaryContact || {};
-    if (typeof primaryContact === 'string') {
-      try { primaryContact = JSON.parse(primaryContact); } catch (e) { primaryContact = {}; }
-    }
-    let secondaryContact = contextCampaignData.secondaryContact || {};
-    if (typeof secondaryContact === 'string') {
-      try { secondaryContact = JSON.parse(secondaryContact); } catch (e) { secondaryContact = {}; }
-    }
+      // Safely get contacts
+      let primaryContact = contextCampaignData.primaryContact || {};
+      if (typeof primaryContact === 'string') { try { primaryContact = JSON.parse(primaryContact); } catch (e) { primaryContact = {}; } }
+      let secondaryContact = contextCampaignData.secondaryContact || {};
+      if (typeof secondaryContact === 'string') { try { secondaryContact = JSON.parse(secondaryContact); } catch (e) { secondaryContact = {}; } }
 
-    // Handle influencers data safely (using contextCampaignData)
-    let influencers = contextCampaignData.Influencer || []; // Use uppercase I
-    if (typeof influencers === 'string') {
-      try { influencers = JSON.parse(influencers); } catch (e) { influencers = []; }
-    }
-    if (!Array.isArray(influencers) || influencers.length === 0) {
-      influencers = [{ platform: '', handle: '' }];
-    }
+      // Safely get influencers
+      let influencers = contextCampaignData.Influencer || [];
+      if (typeof influencers === 'string') { try { influencers = JSON.parse(influencers); } catch (e) { influencers = []; } }
+      if (!Array.isArray(influencers)) { influencers = []; }
 
-    // Format dates (using contextCampaignData)
-    const startDate = DateService.toFormDate(contextCampaignData.startDate) || '';
-    const endDate = DateService.toFormDate(contextCampaignData.endDate) || '';
+      // Format dates
+      const startDate = DateService.toFormDate(contextCampaignData.startDate) || '';
+      const endDate = DateService.toFormDate(contextCampaignData.endDate) || '';
 
-    // Return formatted data for editing (using contextCampaignData)
-    return {
-      name: contextCampaignData.name || contextCampaignData.campaignName || '',
-      businessGoal: contextCampaignData.businessGoal || contextCampaignData.description || '',
-      startDate: startDate,
-      endDate: endDate,
-      timeZone: contextCampaignData.timeZone || '',
-      primaryContact: {
-        firstName: safeGet(primaryContact, 'firstName', ''),
-        surname: safeGet(primaryContact, 'surname', ''),
-        email: safeGet(primaryContact, 'email', ''),
-        position: safeGet(primaryContact, 'position', '')
-      },
-      secondaryContact: {
-        firstName: safeGet(secondaryContact, 'firstName', ''),
-        surname: safeGet(secondaryContact, 'surname', ''),
-        email: safeGet(secondaryContact, 'email', ''),
-        position: safeGet(secondaryContact, 'position', '')
-      },
-      additionalContacts: Array.isArray(contextCampaignData.additionalContacts) ? contextCampaignData.additionalContacts : [],
-      currency: (contextCampaignData.budget && typeof contextCampaignData.budget === 'object' && 'currency' in contextCampaignData.budget) ? contextCampaignData.budget.currency : '',
-      totalBudget: (contextCampaignData.budget && typeof contextCampaignData.budget === 'object' && 'total' in contextCampaignData.budget) ? contextCampaignData.budget.total : '',
-      socialMediaBudget: (contextCampaignData.budget && typeof contextCampaignData.budget === 'object' && 'socialMedia' in contextCampaignData.budget) ? contextCampaignData.budget.socialMedia : '',
-      influencers: Array.isArray(influencers)
-        ? influencers.map((inf: any) => ({
+      // --- Determine final influencers array BEFORE creating formattedData ---
+      let finalInfluencersForForm: Influencer[];
+      if (Array.isArray(influencers) && influencers.length > 0) {
+        finalInfluencersForForm = influencers.map((inf: any) => ({ // Keep 'any' for now
           platform: inf.platform ? EnumTransformers.platformFromBackend(inf.platform) : '',
           handle: inf.handle || '',
           id: inf.id || undefined
-        }))
-        : [{ platform: '', handle: '' }] // Default if not an array
-    };
-  }, [contextCampaignData]); // Depend only on context data
+        }));
+      } else {
+        finalInfluencersForForm = defaultFormValues.influencers;
+      }
+      // ---------------------------------------------------------------------
 
-  // --- Helper function moved up ---
-  // const safeGet = (obj: any, path: string, defaultValue: any = '') => {
-  //   ... (safeGet implementation removed from here) ...
-  // };
+      // Format data for resetForm
+      const formattedData = {
+        name: contextCampaignData.name || contextCampaignData.campaignName || defaultFormValues.name,
+        businessGoal: contextCampaignData.businessGoal || contextCampaignData.description || defaultFormValues.businessGoal,
+        startDate: startDate,
+        endDate: endDate,
+        timeZone: contextCampaignData.timeZone || defaultFormValues.timeZone,
+        primaryContact: {
+          firstName: safeGet(primaryContact, 'firstName', defaultFormValues.primaryContact.firstName),
+          surname: safeGet(primaryContact, 'surname', defaultFormValues.primaryContact.surname),
+          email: safeGet(primaryContact, 'email', defaultFormValues.primaryContact.email),
+          position: safeGet(primaryContact, 'position', defaultFormValues.primaryContact.position)
+        },
+        secondaryContact: {
+          firstName: safeGet(secondaryContact, 'firstName', defaultFormValues.secondaryContact.firstName),
+          surname: safeGet(secondaryContact, 'surname', defaultFormValues.secondaryContact.surname),
+          email: safeGet(secondaryContact, 'email', defaultFormValues.secondaryContact.email),
+          position: safeGet(secondaryContact, 'position', defaultFormValues.secondaryContact.position)
+        },
+        additionalContacts: Array.isArray(contextCampaignData.additionalContacts) ? contextCampaignData.additionalContacts : defaultFormValues.additionalContacts,
+        currency: (contextCampaignData.budget && typeof contextCampaignData.budget === 'object' && 'currency' in contextCampaignData.budget) ? contextCampaignData.budget.currency : defaultFormValues.currency,
+        totalBudget: (contextCampaignData.budget && typeof contextCampaignData.budget === 'object' && 'total' in contextCampaignData.budget) ? contextCampaignData.budget.total : defaultFormValues.totalBudget,
+        socialMediaBudget: (contextCampaignData.budget && typeof contextCampaignData.budget === 'object' && 'socialMedia' in contextCampaignData.budget) ? contextCampaignData.budget.socialMedia : defaultFormValues.socialMediaBudget,
+        influencers: finalInfluencersForForm
+      } as FormValues; // Add type assertion
 
-  // --- useEffect for form initialization REMOVED - Handled by useMemo and enableReinitialize --- 
-  // useEffect(() => {
-  //   ... (old initialization logic) ...
-  // }, [contextCampaignData]);
-
-  // --- ADDED log before loading check ---
-  console.log("[Step1Content] Before loading check:", { loading });
-
-  // --- Update loading check to ONLY check loading state --- 
-  if (loading) {
-    console.log("[Step1Content] HALTING RENDER: Still loading...");
-    return <LoadingSkeleton />;
-  }
-
-  // --- REMOVED diagnostic logs from here down, useMemo handles initialization ---
-  // console.log("[Step1Content] Rendering check:", { ... });
-  // if (contextCampaignData) { ... }
-  // console.log("[Step1Content] HALTING RENDER:", { ... });
-  // console.log("[Step1Content] Proceeding to render Formik...");
+      console.log("[Step1Content useEffect] Calling resetForm with:", formattedData);
+      formikRef.current.resetForm({ values: formattedData });
+    }
+  }, [contextCampaignData, formikRef]); // Depend on contextData and formikRef
 
   // Modify the handleSubmit function to use EnumTransformers
   const handleSubmit = async (values: FormValues) => {
@@ -1217,11 +1196,11 @@ function Step1Content() {
 
     <Formik
       innerRef={formikRef}
-      // Use the calculated initialValues directly
+      // Initial values are always defaults now
       initialValues={initialValues}
       validationSchema={ValidationSchema}
       onSubmit={handleSubmit}
-      // enableReinitialize is crucial for updating form when contextCampaignData changes
+      // enableReinitialize allows useEffect -> resetForm to work properly
       enableReinitialize={true}
     >
 
