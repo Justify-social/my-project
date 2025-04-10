@@ -21,7 +21,7 @@ import { format, getDaysInMonth as dfnsGetDaysInMonth, getDay, startOfMonth, isS
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Import Tooltip for event details
 
 // Event data structure
-interface CalendarEvent {
+export interface CalendarEvent {
     id: number | string;
     title: string;
     start: Date;
@@ -54,7 +54,9 @@ export function CalendarUpcoming({
     events = [],
     onEventClick
 }: CalendarUpcomingProps) {
-    const [currentDate, setCurrentDate] = useState(startOfMonth(new Date()));
+    // Initialize currentDate based on the first event, or fallback to current month
+    const initialDate = events.length > 0 ? startOfMonth(new Date(events[0].start)) : startOfMonth(new Date());
+    const [currentDate, setCurrentDate] = useState(initialDate);
     // Removed view state: const [view, setView] = useState<'calendar' | 'timeline'>('calendar');
 
     // Calendar navigation (keep as is)

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2025-04-10T10:58:09.244Z",
+  "generatedAt": "2025-04-10T15:06:38.534Z",
   "components": [
     {
       "category": "organism",
       "subcategory": "layout",
       "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Accordion",
       "filePath": "src/components/ui/accordion.tsx"
     },
@@ -13,7 +13,7 @@
       "category": "molecule",
       "subcategory": "notification",
       "description": "Displays a callout for user attention.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Alert",
       "filePath": "src/components/ui/alert.tsx"
     },
@@ -21,7 +21,7 @@
       "category": "molecule",
       "subcategory": "dialog",
       "description": "A modal dialog that interrupts the user with important content, requiring acknowledgment.",
-      "status": "stable",
+      "status": "10th April",
       "name": "AlertDialog",
       "filePath": "src/components/ui/alert-dialog.tsx"
     },
@@ -29,6 +29,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive area chart component for visualizing cumulative or quantitative data over time or categories.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "AreaChart",
       "filePath": "src/components/ui/chart-area.tsx"
@@ -37,7 +38,7 @@
       "category": "atom",
       "subcategory": "layout",
       "description": "Displays content within a fixed aspect ratio.",
-      "status": "stable",
+      "status": "10th April",
       "name": "AspectRatio",
       "filePath": "src/components/ui/aspect-ratio.tsx"
     },
@@ -45,6 +46,7 @@
       "category": "organism",
       "subcategory": "card",
       "description": "Card component displaying asset information with preview, title, platform, and budget using standard Card components.",
+      "status": "10th April",
       "name": "AssetCard",
       "filePath": "src/components/ui/card-asset.tsx"
     },
@@ -52,7 +54,7 @@
       "category": "atom",
       "subcategory": "image",
       "description": "Displays an image or a fallback for user profiles or entities.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Avatar",
       "filePath": "src/components/ui/avatar.tsx"
     },
@@ -60,7 +62,7 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Displays a small badge or label, often used for status indicators.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Badge",
       "filePath": "src/components/ui/badge.tsx"
     },
@@ -68,6 +70,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive bar chart component for comparing categorical data, supporting horizontal and vertical layouts.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "BarChart",
       "filePath": "src/components/ui/chart-bar.tsx"
@@ -76,7 +79,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "An interactive element triggering an action or navigation.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Button",
       "filePath": "src/components/ui/button.tsx"
     },
@@ -85,7 +88,7 @@
       "renderType": "client",
       "description": "Client-side interactive version of the Button component with enhanced functionality",
       "author": "Frontend Team",
-      "status": "stable",
+      "status": "10th April",
       "since": "2023-04-06",
       "name": "ButtonClient",
       "filePath": "src/components/ui/client/button-client.tsx"
@@ -94,7 +97,7 @@
       "category": "organism",
       "subcategory": "input",
       "description": "Displays a calendar grid allowing users to view dates and select single or multiple dates.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Calendar",
       "filePath": "src/components/ui/calendar.tsx"
     },
@@ -102,6 +105,7 @@
       "category": "organism",
       "subcategory": "calendar",
       "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
+      "status": "10th April",
       "name": "CalendarUpcoming",
       "filePath": "src/components/ui/calendar-upcoming.tsx"
     },
@@ -109,7 +113,7 @@
       "category": "organism",
       "subcategory": "layout",
       "description": "A container for grouping related content and actions.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Card",
       "filePath": "src/components/ui/card.tsx"
     },
@@ -118,7 +122,7 @@
       "renderType": "client",
       "description": "Client-side interactive Card component with hover effects and state",
       "author": "Frontend Team",
-      "status": "stable",
+      "status": "10th April",
       "since": "2023-04-06",
       "name": "CardClient",
       "filePath": "src/components/ui/client/card-client.tsx"
@@ -127,6 +131,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "Displays items in a scrollable container with previous/next controls.",
+      "status": "10th April",
       "name": "Carousel",
       "filePath": "src/components/ui/carousel.tsx"
     },
@@ -134,7 +139,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A control that allows the user to toggle between checked and unchecked states.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Checkbox",
       "filePath": "src/components/ui/checkbox.tsx"
     },
@@ -142,7 +147,7 @@
       "category": "molecule",
       "subcategory": "input",
       "description": "Fast, composable command menu for React.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Command",
       "filePath": "src/components/ui/command.tsx"
     },
@@ -150,7 +155,7 @@
       "category": "molecule",
       "subcategory": "menu",
       "description": "Displays a menu located at the pointer, triggered by a right-click or long-press.",
-      "status": "stable",
+      "status": "10th April",
       "name": "ContextMenu",
       "filePath": "src/components/ui/context-menu.tsx"
     },
@@ -158,7 +163,7 @@
       "category": "molecule",
       "subcategory": "input",
       "description": "A date picker component with calendar integration.",
-      "status": "stable",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "DatePicker",
       "filePath": "src/components/ui/date-picker.tsx"
@@ -167,7 +172,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "A window overlaid on either the primary window or another dialog window, rendering the content underneath inert.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Dialog",
       "filePath": "src/components/ui/dialog.tsx"
     },
@@ -175,6 +180,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "Displays a menu to the user —such as a set of actions or functions— triggered by a button.",
+      "status": "10th April",
       "name": "DropdownMenu",
       "filePath": "src/components/ui/dropdown-menu.tsx"
     },
@@ -182,6 +188,7 @@
       "category": "organism",
       "subcategory": "input",
       "description": "Provides form context and helper components for building forms with validation, integrating with react-hook-form.",
+      "status": "10th April",
       "name": "Form",
       "filePath": "src/components/ui/form.tsx"
     },
@@ -189,6 +196,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive funnel chart component for visualizing sequential data flows and conversion rates.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "FunnelChart",
       "filePath": "src/components/ui/chart-funnel.tsx"
@@ -197,6 +205,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "Displays a popover card with content when hovering over a trigger element.",
+      "status": "10th April",
       "name": "HoverCard",
       "filePath": "src/components/ui/hover-card.tsx"
     },
@@ -204,7 +213,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A standard text input field.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Input",
@@ -214,6 +223,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A card component for displaying key performance indicators with trend visualization using standard Card components.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "KpiCard",
       "filePath": "src/components/ui/card-kpi.tsx"
@@ -222,7 +232,7 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Renders an accessible label associated with controls.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Label",
@@ -231,7 +241,8 @@
     {
       "category": "organism",
       "subcategory": "visualization",
-      "description": "Responsive line chart component based on Recharts with support for multiple data series.\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
+      "description": "Responsive line chart component based on Recharts with support for multiple data series.",
+      "status": "10th April\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
       "name": "LineChart",
       "filePath": "src/components/ui/chart-line.tsx"
     },
@@ -239,7 +250,7 @@
       "category": "atom",
       "subcategory": "loading",
       "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn (adapted)",
       "since": "2023-03-01",
       "name": "LoadingSkeleton",
@@ -249,7 +260,7 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "A customizable loading spinner component for indicating loading states",
-      "status": "stable",
+      "status": "10th April",
       "author": "Justify",
       "since": "2023-05-15",
       "name": "LoadingSpinner",
@@ -259,6 +270,7 @@
       "category": "organism",
       "subcategory": "visualization",
       "description": "Displays a comparison between multiple metrics using tabs and line charts.",
+      "status": "10th April",
       "name": "MetricsComparison",
       "filePath": "src/components/ui/metrics-comparison.tsx"
     },
@@ -266,6 +278,7 @@
       "category": "organism",
       "subcategory": "visualization",
       "description": "A responsive dashboard layout for displaying multiple KPIs and metrics in a grid.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "MetricsDashboard",
       "filePath": "src/components/ui/metrics-dashboard.tsx"
@@ -274,6 +287,7 @@
       "category": "organism",
       "subcategory": "menu",
       "description": "Mobile navigation menu using Shadcn Sheet component.",
+      "status": "10th April",
       "name": "MobileMenu",
       "filePath": "src/components/ui/navigation/mobile-menu.tsx"
     },
@@ -281,6 +295,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "A collection of links for primary website navigation, typically used in headers.",
+      "status": "10th April",
       "name": "NavigationMenu",
       "filePath": "src/components/ui/navigation-menu.tsx"
     },
@@ -288,6 +303,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "Provides controls for navigating between pages of content.",
+      "status": "10th April",
       "name": "Pagination",
       "filePath": "src/components/ui/pagination.tsx"
     },
@@ -295,6 +311,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive pie chart component for visualizing proportional data.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "PieChart",
       "filePath": "src/components/ui/chart-pie.tsx"
@@ -303,6 +320,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "Displays rich content in a portal, triggered by a click or focus on an element.",
+      "status": "10th April",
       "name": "Popover",
       "filePath": "src/components/ui/popover.tsx"
     },
@@ -310,7 +328,7 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "Displays an indicator showing the completion progress of a task.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Progress",
@@ -320,6 +338,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive radar chart component for visualizing multivariate data across several categories.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "RadarChart",
       "filePath": "src/components/ui/chart-radar.tsx"
@@ -328,12 +347,14 @@
       "category": "molecule",
       "subcategory": "input",
       "description": "A set of checkable buttons (radio buttons) where only one button can be checked at a time.",
+      "status": "10th April",
       "name": "RadioGroup",
       "filePath": "src/components/ui/radio-group.tsx"
     },
     {
       "category": "organism",
       "subcategory": "layout",
+      "status": "10th April",
       "description": "Provides components for creating resizable panel layouts (Group, Panel, Handle).",
       "name": "Resizable",
       "filePath": "src/components/ui/resizable.tsx"
@@ -342,6 +363,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive scatter chart component for visualizing correlations and distributions between two or three variables.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "ScatterChart",
       "filePath": "src/components/ui/chart-scatter.tsx"
@@ -350,6 +372,7 @@
       "category": "molecule",
       "subcategory": "layout",
       "description": "Augments native scroll functionality for customizing the appearance of scrollbars.",
+      "status": "10th April",
       "name": "ScrollArea",
       "filePath": "src/components/ui/scroll-area.tsx"
     },
@@ -357,7 +380,7 @@
       "category": "atom",
       "subcategory": "search",
       "description": "A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Justify",
       "since": "2023-06-01",
       "name": "SearchBar",
@@ -366,7 +389,7 @@
     {
       "category": "atom",
       "description": "A section header component for displaying a title, optional description, and optional icon.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Justify",
       "since": "2023-07-01",
       "name": "SectionHeader",
@@ -376,6 +399,7 @@
       "category": "organism",
       "subcategory": "input",
       "description": "Displays a list of options for the user to pick from—triggered by a button.",
+      "status": "10th April",
       "name": "Select",
       "filePath": "src/components/ui/select.tsx"
     },
@@ -383,7 +407,7 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Visually or semantically separates content.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Separator",
@@ -393,6 +417,7 @@
       "category": "organism",
       "subcategory": "overlay",
       "description": "Displays content that complements the main content, appearing from the side of the screen.",
+      "status": "10th April",
       "name": "Sheet",
       "filePath": "src/components/ui/sheet.tsx"
     },
@@ -400,7 +425,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "An input where the user selects a value from within a given range.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Slider",
@@ -410,7 +435,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A control that allows the user to toggle between checked and unchecked states.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Switch",
@@ -420,6 +445,7 @@
       "category": "organism",
       "subcategory": "display",
       "description": "Renders data in a tabular format.",
+      "status": "10th April",
       "name": "Table",
       "filePath": "src/components/ui/table.tsx"
     },
@@ -427,6 +453,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "A set of layered sections of content, known as tab panels, that display one panel of content at a time.",
+      "status": "10th April",
       "name": "Tabs",
       "filePath": "src/components/ui/tabs.tsx"
     },
@@ -434,7 +461,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A multi-line text input field.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Textarea",
@@ -443,7 +470,7 @@
     {
       "category": "atom",
       "description": "A button that toggles between light and dark themes.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Custom",
       "since": "2024-01-01",
       "name": "ThemeToggle",
@@ -453,6 +480,7 @@
       "category": "molecule",
       "subcategory": "feedback",
       "description": "A succinct message that appears temporarily to provide feedback or updates.",
+      "status": "10th April",
       "name": "Toast",
       "filePath": "src/components/ui/toast.tsx"
     },
@@ -460,6 +488,7 @@
       "category": "organism",
       "subcategory": "feedback",
       "description": "Renders toast notifications based on the `useToast` hook.",
+      "status": "10th April",
       "name": "Toaster",
       "filePath": "src/components/ui/toaster.tsx"
     },
@@ -467,6 +496,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "A popup that displays information related to an element when focused or hovered.",
+      "status": "10th April",
       "name": "Tooltip",
       "filePath": "src/components/ui/tooltip.tsx"
     },
@@ -474,6 +504,7 @@
       "category": "organism",
       "subcategory": "data-display",
       "description": "Displays a table of upcoming campaigns within a card.",
+      "status": "10th April",
       "name": "UpcomingCampaignsTable",
       "filePath": "src/components/ui/card-upcoming-campaign.tsx"
     }
@@ -484,7 +515,7 @@
         "category": "organism",
         "subcategory": "layout",
         "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Accordion",
         "filePath": "src/components/ui/accordion.tsx"
       },
@@ -492,6 +523,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A responsive area chart component for visualizing cumulative or quantitative data over time or categories.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "AreaChart",
         "filePath": "src/components/ui/chart-area.tsx"
@@ -500,6 +532,7 @@
         "category": "organism",
         "subcategory": "card",
         "description": "Card component displaying asset information with preview, title, platform, and budget using standard Card components.",
+        "status": "10th April",
         "name": "AssetCard",
         "filePath": "src/components/ui/card-asset.tsx"
       },
@@ -507,6 +540,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A responsive bar chart component for comparing categorical data, supporting horizontal and vertical layouts.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "BarChart",
         "filePath": "src/components/ui/chart-bar.tsx"
@@ -515,7 +549,7 @@
         "category": "organism",
         "subcategory": "input",
         "description": "Displays a calendar grid allowing users to view dates and select single or multiple dates.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Calendar",
         "filePath": "src/components/ui/calendar.tsx"
       },
@@ -523,6 +557,7 @@
         "category": "organism",
         "subcategory": "calendar",
         "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
+        "status": "10th April",
         "name": "CalendarUpcoming",
         "filePath": "src/components/ui/calendar-upcoming.tsx"
       },
@@ -530,7 +565,7 @@
         "category": "organism",
         "subcategory": "layout",
         "description": "A container for grouping related content and actions.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Card",
         "filePath": "src/components/ui/card.tsx"
       },
@@ -538,6 +573,7 @@
         "category": "organism",
         "subcategory": "navigation",
         "description": "Displays items in a scrollable container with previous/next controls.",
+        "status": "10th April",
         "name": "Carousel",
         "filePath": "src/components/ui/carousel.tsx"
       },
@@ -545,6 +581,7 @@
         "category": "organism",
         "subcategory": "navigation",
         "description": "Displays a menu to the user —such as a set of actions or functions— triggered by a button.",
+        "status": "10th April",
         "name": "DropdownMenu",
         "filePath": "src/components/ui/dropdown-menu.tsx"
       },
@@ -552,6 +589,7 @@
         "category": "organism",
         "subcategory": "input",
         "description": "Provides form context and helper components for building forms with validation, integrating with react-hook-form.",
+        "status": "10th April",
         "name": "Form",
         "filePath": "src/components/ui/form.tsx"
       },
@@ -559,6 +597,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A responsive funnel chart component for visualizing sequential data flows and conversion rates.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "FunnelChart",
         "filePath": "src/components/ui/chart-funnel.tsx"
@@ -567,6 +606,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A card component for displaying key performance indicators with trend visualization using standard Card components.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "KpiCard",
         "filePath": "src/components/ui/card-kpi.tsx"
@@ -574,7 +614,8 @@
       {
         "category": "organism",
         "subcategory": "visualization",
-        "description": "Responsive line chart component based on Recharts with support for multiple data series.\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
+        "description": "Responsive line chart component based on Recharts with support for multiple data series.",
+        "status": "10th April",
         "name": "LineChart",
         "filePath": "src/components/ui/chart-line.tsx"
       },
@@ -582,6 +623,7 @@
         "category": "organism",
         "subcategory": "visualization",
         "description": "Displays a comparison between multiple metrics using tabs and line charts.",
+        "status": "10th April",
         "name": "MetricsComparison",
         "filePath": "src/components/ui/metrics-comparison.tsx"
       },
@@ -589,6 +631,7 @@
         "category": "organism",
         "subcategory": "visualization",
         "description": "A responsive dashboard layout for displaying multiple KPIs and metrics in a grid.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "MetricsDashboard",
         "filePath": "src/components/ui/metrics-dashboard.tsx"
@@ -597,6 +640,7 @@
         "category": "organism",
         "subcategory": "menu",
         "description": "Mobile navigation menu using Shadcn Sheet component.",
+        "status": "10th April",
         "name": "MobileMenu",
         "filePath": "src/components/ui/navigation/mobile-menu.tsx"
       },
@@ -604,6 +648,7 @@
         "category": "organism",
         "subcategory": "navigation",
         "description": "A collection of links for primary website navigation, typically used in headers.",
+        "status": "10th April",
         "name": "NavigationMenu",
         "filePath": "src/components/ui/navigation-menu.tsx"
       },
@@ -611,6 +656,7 @@
         "category": "organism",
         "subcategory": "navigation",
         "description": "Provides controls for navigating between pages of content.",
+        "status": "10th April",
         "name": "Pagination",
         "filePath": "src/components/ui/pagination.tsx"
       },
@@ -618,6 +664,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A responsive pie chart component for visualizing proportional data.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "PieChart",
         "filePath": "src/components/ui/chart-pie.tsx"
@@ -626,6 +673,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A responsive radar chart component for visualizing multivariate data across several categories.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "RadarChart",
         "filePath": "src/components/ui/chart-radar.tsx"
@@ -633,6 +681,7 @@
       {
         "category": "organism",
         "subcategory": "layout",
+        "status": "10th April",
         "description": "Provides components for creating resizable panel layouts (Group, Panel, Handle).",
         "name": "Resizable",
         "filePath": "src/components/ui/resizable.tsx"
@@ -641,6 +690,7 @@
         "category": "organism",
         "renderType": "server",
         "description": "A responsive scatter chart component for visualizing correlations and distributions between two or three variables.",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "ScatterChart",
         "filePath": "src/components/ui/chart-scatter.tsx"
@@ -649,6 +699,7 @@
         "category": "organism",
         "subcategory": "input",
         "description": "Displays a list of options for the user to pick from—triggered by a button.",
+        "status": "10th April",
         "name": "Select",
         "filePath": "src/components/ui/select.tsx"
       },
@@ -656,6 +707,7 @@
         "category": "organism",
         "subcategory": "overlay",
         "description": "Displays content that complements the main content, appearing from the side of the screen.",
+        "status": "10th April",
         "name": "Sheet",
         "filePath": "src/components/ui/sheet.tsx"
       },
@@ -663,6 +715,7 @@
         "category": "organism",
         "subcategory": "display",
         "description": "Renders data in a tabular format.",
+        "status": "10th April",
         "name": "Table",
         "filePath": "src/components/ui/table.tsx"
       },
@@ -670,6 +723,7 @@
         "category": "organism",
         "subcategory": "navigation",
         "description": "A set of layered sections of content, known as tab panels, that display one panel of content at a time.",
+        "status": "10th April",
         "name": "Tabs",
         "filePath": "src/components/ui/tabs.tsx"
       },
@@ -677,6 +731,7 @@
         "category": "organism",
         "subcategory": "feedback",
         "description": "Renders toast notifications based on the `useToast` hook.",
+        "status": "10th April",
         "name": "Toaster",
         "filePath": "src/components/ui/toaster.tsx"
       },
@@ -684,6 +739,7 @@
         "category": "organism",
         "subcategory": "data-display",
         "description": "Displays a table of upcoming campaigns within a card.",
+        "status": "10th April",
         "name": "UpcomingCampaignsTable",
         "filePath": "src/components/ui/card-upcoming-campaign.tsx"
       }
@@ -693,7 +749,7 @@
         "category": "molecule",
         "subcategory": "notification",
         "description": "Displays a callout for user attention.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Alert",
         "filePath": "src/components/ui/alert.tsx"
       },
@@ -701,7 +757,7 @@
         "category": "molecule",
         "subcategory": "dialog",
         "description": "A modal dialog that interrupts the user with important content, requiring acknowledgment.",
-        "status": "stable",
+        "status": "10th April",
         "name": "AlertDialog",
         "filePath": "src/components/ui/alert-dialog.tsx"
       },
@@ -710,7 +766,7 @@
         "renderType": "client",
         "description": "Client-side interactive Card component with hover effects and state",
         "author": "Frontend Team",
-        "status": "stable",
+        "status": "10th April",
         "since": "2023-04-06",
         "name": "CardClient",
         "filePath": "src/components/ui/client/card-client.tsx"
@@ -719,7 +775,7 @@
         "category": "molecule",
         "subcategory": "input",
         "description": "Fast, composable command menu for React.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Command",
         "filePath": "src/components/ui/command.tsx"
       },
@@ -727,7 +783,7 @@
         "category": "molecule",
         "subcategory": "menu",
         "description": "Displays a menu located at the pointer, triggered by a right-click or long-press.",
-        "status": "stable",
+        "status": "10th April",
         "name": "ContextMenu",
         "filePath": "src/components/ui/context-menu.tsx"
       },
@@ -735,7 +791,7 @@
         "category": "molecule",
         "subcategory": "input",
         "description": "A date picker component with calendar integration.",
-        "status": "stable",
+        "status": "10th April",
         "since": "2023-07-15",
         "name": "DatePicker",
         "filePath": "src/components/ui/date-picker.tsx"
@@ -744,7 +800,7 @@
         "category": "molecule",
         "subcategory": "overlay",
         "description": "A window overlaid on either the primary window or another dialog window, rendering the content underneath inert.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Dialog",
         "filePath": "src/components/ui/dialog.tsx"
       },
@@ -752,6 +808,7 @@
         "category": "molecule",
         "subcategory": "overlay",
         "description": "Displays a popover card with content when hovering over a trigger element.",
+        "status": "10th April",
         "name": "HoverCard",
         "filePath": "src/components/ui/hover-card.tsx"
       },
@@ -759,6 +816,7 @@
         "category": "molecule",
         "subcategory": "overlay",
         "description": "Displays rich content in a portal, triggered by a click or focus on an element.",
+        "status": "10th April",
         "name": "Popover",
         "filePath": "src/components/ui/popover.tsx"
       },
@@ -766,6 +824,7 @@
         "category": "molecule",
         "subcategory": "input",
         "description": "A set of checkable buttons (radio buttons) where only one button can be checked at a time.",
+        "status": "10th April",
         "name": "RadioGroup",
         "filePath": "src/components/ui/radio-group.tsx"
       },
@@ -773,6 +832,7 @@
         "category": "molecule",
         "subcategory": "layout",
         "description": "Augments native scroll functionality for customizing the appearance of scrollbars.",
+        "status": "10th April",
         "name": "ScrollArea",
         "filePath": "src/components/ui/scroll-area.tsx"
       },
@@ -780,6 +840,7 @@
         "category": "molecule",
         "subcategory": "feedback",
         "description": "A succinct message that appears temporarily to provide feedback or updates.",
+        "status": "10th April",
         "name": "Toast",
         "filePath": "src/components/ui/toast.tsx"
       },
@@ -787,6 +848,7 @@
         "category": "molecule",
         "subcategory": "overlay",
         "description": "A popup that displays information related to an element when focused or hovered.",
+        "status": "10th April",
         "name": "Tooltip",
         "filePath": "src/components/ui/tooltip.tsx"
       }
@@ -796,7 +858,7 @@
         "category": "atom",
         "subcategory": "layout",
         "description": "Displays content within a fixed aspect ratio.",
-        "status": "stable",
+        "status": "10th April",
         "name": "AspectRatio",
         "filePath": "src/components/ui/aspect-ratio.tsx"
       },
@@ -804,7 +866,7 @@
         "category": "atom",
         "subcategory": "image",
         "description": "Displays an image or a fallback for user profiles or entities.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Avatar",
         "filePath": "src/components/ui/avatar.tsx"
       },
@@ -812,7 +874,7 @@
         "category": "atom",
         "subcategory": "display",
         "description": "Displays a small badge or label, often used for status indicators.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Badge",
         "filePath": "src/components/ui/badge.tsx"
       },
@@ -820,7 +882,7 @@
         "category": "atom",
         "subcategory": "input",
         "description": "An interactive element triggering an action or navigation.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Button",
         "filePath": "src/components/ui/button.tsx"
       },
@@ -829,7 +891,7 @@
         "renderType": "client",
         "description": "Client-side interactive version of the Button component with enhanced functionality",
         "author": "Frontend Team",
-        "status": "stable",
+        "status": "10th April",
         "since": "2023-04-06",
         "name": "ButtonClient",
         "filePath": "src/components/ui/client/button-client.tsx"
@@ -838,7 +900,7 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A control that allows the user to toggle between checked and unchecked states.",
-        "status": "stable",
+        "status": "10th April",
         "name": "Checkbox",
         "filePath": "src/components/ui/checkbox.tsx"
       },
@@ -846,7 +908,7 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A standard text input field.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Input",
@@ -856,7 +918,7 @@
         "category": "atom",
         "subcategory": "display",
         "description": "Renders an accessible label associated with controls.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Label",
@@ -866,7 +928,7 @@
         "category": "atom",
         "subcategory": "loading",
         "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn (adapted)",
         "since": "2023-03-01",
         "name": "LoadingSkeleton",
@@ -876,7 +938,7 @@
         "category": "atom",
         "subcategory": "feedback",
         "description": "A customizable loading spinner component for indicating loading states",
-        "status": "stable",
+        "status": "10th April",
         "author": "Justify",
         "since": "2023-05-15",
         "name": "LoadingSpinner",
@@ -886,7 +948,7 @@
         "category": "atom",
         "subcategory": "feedback",
         "description": "Displays an indicator showing the completion progress of a task.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Progress",
@@ -896,7 +958,7 @@
         "category": "atom",
         "subcategory": "search",
         "description": "A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Justify",
         "since": "2023-06-01",
         "name": "SearchBar",
@@ -905,7 +967,7 @@
       {
         "category": "atom",
         "description": "A section header component for displaying a title, optional description, and optional icon.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Justify",
         "since": "2023-07-01",
         "name": "SectionHeader",
@@ -915,7 +977,7 @@
         "category": "atom",
         "subcategory": "display",
         "description": "Visually or semantically separates content.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Separator",
@@ -925,7 +987,7 @@
         "category": "atom",
         "subcategory": "input",
         "description": "An input where the user selects a value from within a given range.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Slider",
@@ -935,7 +997,7 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A control that allows the user to toggle between checked and unchecked states.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Switch",
@@ -945,7 +1007,7 @@
         "category": "atom",
         "subcategory": "input",
         "description": "A multi-line text input field.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Shadcn",
         "since": "2023-01-01",
         "name": "Textarea",
@@ -954,7 +1016,7 @@
       {
         "category": "atom",
         "description": "A button that toggles between light and dark themes.",
-        "status": "stable",
+        "status": "10th April",
         "author": "Custom",
         "since": "2024-01-01",
         "name": "ThemeToggle",
@@ -967,7 +1029,7 @@
       "category": "organism",
       "subcategory": "layout",
       "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Accordion",
       "filePath": "src/components/ui/accordion.tsx"
     },
@@ -975,7 +1037,7 @@
       "category": "molecule",
       "subcategory": "notification",
       "description": "Displays a callout for user attention.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Alert",
       "filePath": "src/components/ui/alert.tsx"
     },
@@ -983,7 +1045,7 @@
       "category": "molecule",
       "subcategory": "dialog",
       "description": "A modal dialog that interrupts the user with important content, requiring acknowledgment.",
-      "status": "stable",
+      "status": "10th April",
       "name": "AlertDialog",
       "filePath": "src/components/ui/alert-dialog.tsx"
     },
@@ -991,6 +1053,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive area chart component for visualizing cumulative or quantitative data over time or categories.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "AreaChart",
       "filePath": "src/components/ui/chart-area.tsx"
@@ -999,7 +1062,7 @@
       "category": "atom",
       "subcategory": "layout",
       "description": "Displays content within a fixed aspect ratio.",
-      "status": "stable",
+      "status": "10th April",
       "name": "AspectRatio",
       "filePath": "src/components/ui/aspect-ratio.tsx"
     },
@@ -1007,6 +1070,7 @@
       "category": "organism",
       "subcategory": "card",
       "description": "Card component displaying asset information with preview, title, platform, and budget using standard Card components.",
+      "status": "10th April",
       "name": "AssetCard",
       "filePath": "src/components/ui/card-asset.tsx"
     },
@@ -1014,7 +1078,7 @@
       "category": "atom",
       "subcategory": "image",
       "description": "Displays an image or a fallback for user profiles or entities.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Avatar",
       "filePath": "src/components/ui/avatar.tsx"
     },
@@ -1022,7 +1086,7 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Displays a small badge or label, often used for status indicators.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Badge",
       "filePath": "src/components/ui/badge.tsx"
     },
@@ -1030,6 +1094,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive bar chart component for comparing categorical data, supporting horizontal and vertical layouts.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "BarChart",
       "filePath": "src/components/ui/chart-bar.tsx"
@@ -1038,7 +1103,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "An interactive element triggering an action or navigation.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Button",
       "filePath": "src/components/ui/button.tsx"
     },
@@ -1047,7 +1112,7 @@
       "renderType": "client",
       "description": "Client-side interactive version of the Button component with enhanced functionality",
       "author": "Frontend Team",
-      "status": "stable",
+      "status": "10th April",
       "since": "2023-04-06",
       "name": "ButtonClient",
       "filePath": "src/components/ui/client/button-client.tsx"
@@ -1056,7 +1121,7 @@
       "category": "organism",
       "subcategory": "input",
       "description": "Displays a calendar grid allowing users to view dates and select single or multiple dates.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Calendar",
       "filePath": "src/components/ui/calendar.tsx"
     },
@@ -1064,6 +1129,7 @@
       "category": "organism",
       "subcategory": "calendar",
       "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
+      "status": "10th April",
       "name": "CalendarUpcoming",
       "filePath": "src/components/ui/calendar-upcoming.tsx"
     },
@@ -1071,7 +1137,7 @@
       "category": "organism",
       "subcategory": "layout",
       "description": "A container for grouping related content and actions.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Card",
       "filePath": "src/components/ui/card.tsx"
     },
@@ -1080,7 +1146,7 @@
       "renderType": "client",
       "description": "Client-side interactive Card component with hover effects and state",
       "author": "Frontend Team",
-      "status": "stable",
+      "status": "10th April",
       "since": "2023-04-06",
       "name": "CardClient",
       "filePath": "src/components/ui/client/card-client.tsx"
@@ -1089,6 +1155,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "Displays items in a scrollable container with previous/next controls.",
+      "status": "10th April",
       "name": "Carousel",
       "filePath": "src/components/ui/carousel.tsx"
     },
@@ -1096,7 +1163,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A control that allows the user to toggle between checked and unchecked states.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Checkbox",
       "filePath": "src/components/ui/checkbox.tsx"
     },
@@ -1104,7 +1171,7 @@
       "category": "molecule",
       "subcategory": "input",
       "description": "Fast, composable command menu for React.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Command",
       "filePath": "src/components/ui/command.tsx"
     },
@@ -1112,7 +1179,7 @@
       "category": "molecule",
       "subcategory": "menu",
       "description": "Displays a menu located at the pointer, triggered by a right-click or long-press.",
-      "status": "stable",
+      "status": "10th April",
       "name": "ContextMenu",
       "filePath": "src/components/ui/context-menu.tsx"
     },
@@ -1120,7 +1187,7 @@
       "category": "molecule",
       "subcategory": "input",
       "description": "A date picker component with calendar integration.",
-      "status": "stable",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "DatePicker",
       "filePath": "src/components/ui/date-picker.tsx"
@@ -1129,7 +1196,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "A window overlaid on either the primary window or another dialog window, rendering the content underneath inert.",
-      "status": "stable",
+      "status": "10th April",
       "name": "Dialog",
       "filePath": "src/components/ui/dialog.tsx"
     },
@@ -1137,6 +1204,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "Displays a menu to the user —such as a set of actions or functions— triggered by a button.",
+      "status": "10th April",
       "name": "DropdownMenu",
       "filePath": "src/components/ui/dropdown-menu.tsx"
     },
@@ -1144,6 +1212,7 @@
       "category": "organism",
       "subcategory": "input",
       "description": "Provides form context and helper components for building forms with validation, integrating with react-hook-form.",
+      "status": "10th April",
       "name": "Form",
       "filePath": "src/components/ui/form.tsx"
     },
@@ -1151,6 +1220,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive funnel chart component for visualizing sequential data flows and conversion rates.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "FunnelChart",
       "filePath": "src/components/ui/chart-funnel.tsx"
@@ -1159,6 +1229,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "Displays a popover card with content when hovering over a trigger element.",
+      "status": "10th April",
       "name": "HoverCard",
       "filePath": "src/components/ui/hover-card.tsx"
     },
@@ -1166,7 +1237,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A standard text input field.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Input",
@@ -1176,6 +1247,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A card component for displaying key performance indicators with trend visualization using standard Card components.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "KpiCard",
       "filePath": "src/components/ui/card-kpi.tsx"
@@ -1184,7 +1256,7 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Renders an accessible label associated with controls.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Label",
@@ -1193,7 +1265,8 @@
     "linechart": {
       "category": "organism",
       "subcategory": "visualization",
-      "description": "Responsive line chart component based on Recharts with support for multiple data series.\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
+      "description": "Responsive line chart component based on Recharts with support for multiple data series.",
+      "status": "10th April\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
       "name": "LineChart",
       "filePath": "src/components/ui/chart-line.tsx"
     },
@@ -1201,7 +1274,7 @@
       "category": "atom",
       "subcategory": "loading",
       "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn (adapted)",
       "since": "2023-03-01",
       "name": "LoadingSkeleton",
@@ -1211,7 +1284,7 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "A customizable loading spinner component for indicating loading states",
-      "status": "stable",
+      "status": "10th April",
       "author": "Justify",
       "since": "2023-05-15",
       "name": "LoadingSpinner",
@@ -1221,6 +1294,7 @@
       "category": "organism",
       "subcategory": "visualization",
       "description": "Displays a comparison between multiple metrics using tabs and line charts.",
+      "status": "10th April",
       "name": "MetricsComparison",
       "filePath": "src/components/ui/metrics-comparison.tsx"
     },
@@ -1228,6 +1302,7 @@
       "category": "organism",
       "subcategory": "visualization",
       "description": "A responsive dashboard layout for displaying multiple KPIs and metrics in a grid.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "MetricsDashboard",
       "filePath": "src/components/ui/metrics-dashboard.tsx"
@@ -1236,6 +1311,7 @@
       "category": "organism",
       "subcategory": "menu",
       "description": "Mobile navigation menu using Shadcn Sheet component.",
+      "status": "10th April",
       "name": "MobileMenu",
       "filePath": "src/components/ui/navigation/mobile-menu.tsx"
     },
@@ -1243,6 +1319,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "A collection of links for primary website navigation, typically used in headers.",
+      "status": "10th April",
       "name": "NavigationMenu",
       "filePath": "src/components/ui/navigation-menu.tsx"
     },
@@ -1250,6 +1327,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "Provides controls for navigating between pages of content.",
+      "status": "10th April",
       "name": "Pagination",
       "filePath": "src/components/ui/pagination.tsx"
     },
@@ -1257,6 +1335,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive pie chart component for visualizing proportional data.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "PieChart",
       "filePath": "src/components/ui/chart-pie.tsx"
@@ -1265,6 +1344,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "Displays rich content in a portal, triggered by a click or focus on an element.",
+      "status": "10th April",
       "name": "Popover",
       "filePath": "src/components/ui/popover.tsx"
     },
@@ -1272,7 +1352,7 @@
       "category": "atom",
       "subcategory": "feedback",
       "description": "Displays an indicator showing the completion progress of a task.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Progress",
@@ -1282,6 +1362,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive radar chart component for visualizing multivariate data across several categories.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "RadarChart",
       "filePath": "src/components/ui/chart-radar.tsx"
@@ -1290,12 +1371,14 @@
       "category": "molecule",
       "subcategory": "input",
       "description": "A set of checkable buttons (radio buttons) where only one button can be checked at a time.",
+      "status": "10th April",
       "name": "RadioGroup",
       "filePath": "src/components/ui/radio-group.tsx"
     },
     "resizable": {
       "category": "organism",
       "subcategory": "layout",
+      "status": "10th April",
       "description": "Provides components for creating resizable panel layouts (Group, Panel, Handle).",
       "name": "Resizable",
       "filePath": "src/components/ui/resizable.tsx"
@@ -1304,6 +1387,7 @@
       "category": "organism",
       "renderType": "server",
       "description": "A responsive scatter chart component for visualizing correlations and distributions between two or three variables.",
+      "status": "10th April",
       "since": "2023-07-15",
       "name": "ScatterChart",
       "filePath": "src/components/ui/chart-scatter.tsx"
@@ -1312,6 +1396,7 @@
       "category": "molecule",
       "subcategory": "layout",
       "description": "Augments native scroll functionality for customizing the appearance of scrollbars.",
+      "status": "10th April",
       "name": "ScrollArea",
       "filePath": "src/components/ui/scroll-area.tsx"
     },
@@ -1319,7 +1404,7 @@
       "category": "atom",
       "subcategory": "search",
       "description": "A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Justify",
       "since": "2023-06-01",
       "name": "SearchBar",
@@ -1328,7 +1413,7 @@
     "sectionheader": {
       "category": "atom",
       "description": "A section header component for displaying a title, optional description, and optional icon.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Justify",
       "since": "2023-07-01",
       "name": "SectionHeader",
@@ -1338,6 +1423,7 @@
       "category": "organism",
       "subcategory": "input",
       "description": "Displays a list of options for the user to pick from—triggered by a button.",
+      "status": "10th April",
       "name": "Select",
       "filePath": "src/components/ui/select.tsx"
     },
@@ -1345,7 +1431,7 @@
       "category": "atom",
       "subcategory": "display",
       "description": "Visually or semantically separates content.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Separator",
@@ -1355,6 +1441,7 @@
       "category": "organism",
       "subcategory": "overlay",
       "description": "Displays content that complements the main content, appearing from the side of the screen.",
+      "status": "10th April",
       "name": "Sheet",
       "filePath": "src/components/ui/sheet.tsx"
     },
@@ -1362,7 +1449,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "An input where the user selects a value from within a given range.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Slider",
@@ -1372,7 +1459,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A control that allows the user to toggle between checked and unchecked states.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Switch",
@@ -1382,6 +1469,7 @@
       "category": "organism",
       "subcategory": "display",
       "description": "Renders data in a tabular format.",
+      "status": "10th April",
       "name": "Table",
       "filePath": "src/components/ui/table.tsx"
     },
@@ -1389,6 +1477,7 @@
       "category": "organism",
       "subcategory": "navigation",
       "description": "A set of layered sections of content, known as tab panels, that display one panel of content at a time.",
+      "status": "10th April",
       "name": "Tabs",
       "filePath": "src/components/ui/tabs.tsx"
     },
@@ -1396,7 +1485,7 @@
       "category": "atom",
       "subcategory": "input",
       "description": "A multi-line text input field.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Shadcn",
       "since": "2023-01-01",
       "name": "Textarea",
@@ -1405,7 +1494,7 @@
     "themetoggle": {
       "category": "atom",
       "description": "A button that toggles between light and dark themes.",
-      "status": "stable",
+      "status": "10th April",
       "author": "Custom",
       "since": "2024-01-01",
       "name": "ThemeToggle",
@@ -1415,6 +1504,7 @@
       "category": "molecule",
       "subcategory": "feedback",
       "description": "A succinct message that appears temporarily to provide feedback or updates.",
+      "status": "10th April",
       "name": "Toast",
       "filePath": "src/components/ui/toast.tsx"
     },
@@ -1422,6 +1512,7 @@
       "category": "organism",
       "subcategory": "feedback",
       "description": "Renders toast notifications based on the `useToast` hook.",
+      "status": "10th April",
       "name": "Toaster",
       "filePath": "src/components/ui/toaster.tsx"
     },
@@ -1429,6 +1520,7 @@
       "category": "molecule",
       "subcategory": "overlay",
       "description": "A popup that displays information related to an element when focused or hovered.",
+      "status": "10th April",
       "name": "Tooltip",
       "filePath": "src/components/ui/tooltip.tsx"
     },
@@ -1436,6 +1528,7 @@
       "category": "organism",
       "subcategory": "data-display",
       "description": "Displays a table of upcoming campaigns within a card.",
+      "status": "10th April",
       "name": "UpcomingCampaignsTable",
       "filePath": "src/components/ui/card-upcoming-campaign.tsx"
     }

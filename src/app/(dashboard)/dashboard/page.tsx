@@ -15,6 +15,10 @@ import AuthCheck from '@/components/features/users/AuthCheck';
 // Import getSession for server-side auth
 import { getSession } from '@auth0/nextjs-auth0';
 import ClientDashboard from './ClientDashboard'; // Import the new client component
+// Assume these exist and import types
+import { getUpcomingEvents, getUpcomingCampaigns } from '@/lib/data/dashboard'; // Hypothetical import
+import type { CalendarEvent } from "@/components/ui/calendar-upcoming";
+import type { CampaignData } from "@/components/ui/card-upcoming-campaign";
 
 // Define the skeleton fallback using the imported SSOT component
 const DashboardLoadingSkeleton = () => {
@@ -55,12 +59,27 @@ export default async function Dashboard() {
     role: roles.includes('super_admin') ? 'SUPER_ADMIN' : roles.includes('ADMIN') ? 'ADMIN' : 'USER' // Example role derivation
   };
 
+  // Fetch dashboard data
+  let events: CalendarEvent[] = [];
+  let campaigns: CampaignData[] = [];
+  try {
+    // Use Promise.all for parallel fetching
+    [events, campaigns] = await Promise.all([
+      getUpcomingEvents(userProp.id), // Fetch events
+      getUpcomingCampaigns(userProp.id) // Fetch campaigns
+    ]);
+  } catch (error) {
+    console.error("Failed to fetch dashboard data:", error);
+    // Handle error appropriately - maybe show an error message to the user
+    // For now, we'll proceed with empty arrays
+  }
+
   return (
     <AuthCheck>
       <div className="px-4 md:px-6 py-6 font-work-sans">
         <Suspense fallback={<DashboardLoadingSkeleton />}>
-          {/* Pass the mapped user data */}
-          <ClientDashboard user={userProp} />
+          {/* Pass the mapped user data AND fetched dashboard data */}
+          <ClientDashboard user={userProp} events={events} campaigns={campaigns} />
         </Suspense>
       </div>
     </AuthCheck>

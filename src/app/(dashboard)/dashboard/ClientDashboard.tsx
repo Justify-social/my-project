@@ -1,8 +1,13 @@
 'use client';
 
 import React from 'react';
-// Removed dynamic import
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon/icon";
+import { CalendarUpcoming, type CalendarEvent } from "@/components/ui/calendar-upcoming";
+import { UpcomingCampaignsTable, type CampaignData } from "@/components/ui/card-upcoming-campaign";
 
 // Define the skeleton fallback using the imported SSOT component
 // (Could be moved to a shared file)
@@ -23,8 +28,11 @@ interface DashboardUser {
     role: string;
 }
 
+// Update props to include fetched data
 interface ClientDashboardProps {
     user: DashboardUser;
+    events: CalendarEvent[]; // Add events prop
+    campaigns: CampaignData[]; // Add campaigns prop
 }
 
 // Removed dynamic import wrapper
@@ -33,33 +41,78 @@ interface ClientDashboardProps {
 //     loading: () => <DashboardLoadingSkeleton />
 // });
 
-export default function ClientDashboard({ user }: ClientDashboardProps) {
-    // TODO: Add the actual dashboard content here 
-    // This likely involves charts, stats, etc., using the 'user' prop
+// --- Mock Data (Replace with actual data fetching/props) ---
+const mockEvents: CalendarEvent[] = [
+    { id: '1', title: 'Summer Sale Launch', start: new Date(2025, 6, 10), platform: 'Facebook', status: 'Scheduled' },
+    { id: '2', title: 'Influencer Collab Post', start: new Date(2025, 6, 15), end: new Date(2025, 6, 15), platform: 'Instagram', status: 'Live', allDay: true },
+    { id: '3', title: 'Q3 Strategy Meeting', start: new Date(2025, 6, 22, 9, 30), end: new Date(2025, 6, 22, 11, 0), status: 'Confirmed' },
+];
 
-    // Placeholder content - replace with actual dashboard UI
+const mockCampaigns: CampaignData[] = [
+    { id: 'camp1', title: 'Sustainable Futures', platform: 'Instagram', startDate: new Date(2025, 6, 10), status: 'Live', budget: 5000, influencer: { name: 'Eco Warrior', image: '/images/influencers/olivia.jpg' } },
+    { id: 'camp2', title: 'Tech Launchpad', platform: 'YouTube', startDate: new Date(2025, 6, 18), status: 'Scheduled', budget: 12000 },
+    { id: 'camp3', title: 'Artisan Market Promo', platform: 'Facebook', startDate: new Date(2025, 6, 25), endDate: new Date(2025, 7, 5), status: 'Planning' },
+];
+// --- End Mock Data ---
+
+export default function ClientDashboard({ user, events, campaigns }: ClientDashboardProps) {
+    const router = useRouter();
+
+    // Handle clicks for navigation (e.g., from the table)
+    const handleCampaignClick = (campaignId: string | number) => {
+        router.push(`/campaigns/${campaignId}`);
+    };
+
+    // TODO: Add loading/empty states based on props
+    const isLoading = false; // Replace with actual loading state if fetching is re-introduced client-side later
+    const hasEvents = events && events.length > 0;
+    const hasCampaigns = campaigns && campaigns.length > 0;
+
     return (
-        <div className="space-y-4">
-            <h1 className="text-2xl font-bold">Welcome, {user.name}!</h1>
-            <p>Your Role: {user.role}</p>
-            <p>Your ID: {user.id}</p>
-            <p className="text-muted-foreground">(Dashboard content goes here)</p>
+        <div className="space-y-6 font-work-sans">
+            {/* Header Row */}
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-primary font-sora">Dashboard</h1>
+                <Link href="/campaigns/wizard/step-1" passHref>
+                    <Button>
+                        <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
+                        New Campaign
+                    </Button>
+                </Link>
+            </div>
 
-            {/* Example of where charts/stats might go */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="border p-4 rounded-lg shadow-sm">
-                    <h3 className="font-medium mb-2">Metric 1</h3>
-                    <p className="text-3xl font-semibold">1,234</p>
+            {/* Main Content Grid (Simplified 2-column) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Column 1: Upcoming Calendar */}
+                <div>
+                    {/* Consider adding a Card wrapper for consistent styling */}
+                    {/* <Card> <CardHeader><CardTitle>Upcoming Schedule</CardTitle></CardHeader> <CardContent> ... </CardContent> </Card> */}
+                    {isLoading ? (
+                        <p>Loading Calendar...</p> // Replace with Skeleton if needed
+                    ) : hasEvents ? (
+                        <CalendarUpcoming events={events} onEventClick={handleCampaignClick} />
+                    ) : (
+                        <p className="text-muted-foreground p-4 border rounded-md">No upcoming events.</p> // Empty state
+                    )}
                 </div>
-                <div className="border p-4 rounded-lg shadow-sm">
-                    <h3 className="font-medium mb-2">Metric 2</h3>
-                    <p className="text-3xl font-semibold">56%</p>
-                </div>
-                <div className="border p-4 rounded-lg shadow-sm">
-                    <h3 className="font-medium mb-2">Metric 3</h3>
-                    <p className="text-3xl font-semibold">$7,890</p>
+
+                {/* Column 2: Upcoming Campaigns Table */}
+                <div>
+                    {isLoading ? (
+                        <p>Loading Campaigns...</p> // Replace with TableSkeleton if needed
+                    ) : hasCampaigns ? (
+                        <UpcomingCampaignsTable
+                            campaigns={campaigns}
+                            onRowClick={handleCampaignClick}
+                            title="Upcoming Campaigns"
+                        />
+                    ) : (
+                        <p className="text-muted-foreground p-4 border rounded-md">No upcoming campaigns.</p> // Empty state
+                    )}
                 </div>
             </div>
+
+            {/* // TODO: Add other dashboard sections based on Figma (Influencers, Insights, Health Snapshot) later */}
         </div>
     );
 } 
