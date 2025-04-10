@@ -73,12 +73,13 @@ export interface AreaChartProps {
   tooltipFormatter?: (value: any) => string;
 }
 
+// Use HSL theme variables for default colors
 const DEFAULT_COLORS = [
-  { stroke: '#3182CE', fill: 'rgba(49, 130, 206, 0.2)' },
-  { stroke: '#00BFFF', fill: 'rgba(0, 191, 255, 0.2)' },
-  { stroke: '#4A5568', fill: 'rgba(74, 85, 104, 0.2)' },
-  { stroke: '#333333', fill: 'rgba(51, 51, 51, 0.2)' },
-  { stroke: '#38B2AC', fill: 'rgba(56, 178, 172, 0.2)' }
+  { stroke: 'hsl(var(--interactive))', fill: 'hsl(var(--interactive) / 0.2)' }, // Medium Blue
+  { stroke: 'hsl(var(--accent))', fill: 'hsl(var(--accent) / 0.2)' },      // Deep Sky Blue
+  { stroke: 'hsl(var(--secondary))', fill: 'hsl(var(--secondary) / 0.2)' },   // Payne's Grey
+  { stroke: 'hsl(var(--primary))', fill: 'hsl(var(--primary) / 0.2)' },     // Jet
+  { stroke: 'hsl(var(--success))', fill: 'hsl(var(--success) / 0.2)' },     // Example: Assuming a success color
 ];
 
 export const AreaChart: React.FC<AreaChartProps> = ({
@@ -94,7 +95,7 @@ export const AreaChart: React.FC<AreaChartProps> = ({
   showLegend = true,
   stackId = '',
   strokeWidth = 2,
-  gridColor = '#E2E8F0',
+  gridColor = 'hsl(var(--border))', // Use theme border color
   tickFormatter,
   tooltipFormatter
 }) => {
@@ -131,10 +132,10 @@ export const AreaChart: React.FC<AreaChartProps> = ({
             formatter={tooltipFormatter}
             contentStyle={{
               fontSize: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #E2E8F0',
+              backgroundColor: 'hsl(var(--background))', // Use theme background
+              border: '1px solid hsl(var(--border))',  // Use theme border
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' // Keep shadow for now
             }}
           />
 

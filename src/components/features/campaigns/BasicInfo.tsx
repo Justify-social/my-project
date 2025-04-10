@@ -5,6 +5,7 @@ import { useCampaignWizardContext } from '@/components/features/campaigns/Campai
 import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 /**
  * BasicInfo props interface
@@ -141,13 +142,13 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
 
   return (
     <div className="space-y-6 p-4 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 font-sora text-gray-900">Campaign Basic Information</h2>
+      <h2 className="text-2xl font-bold mb-6 font-sora text-foreground">Campaign Basic Information</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Campaign Name */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
-            Campaign Name <span className="text-red-500">*</span>
+          <label htmlFor="name" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+            Campaign Name <span className="text-destructive">*</span>
           </label>
           <Input
             id="name"
@@ -155,32 +156,31 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
             onChange={handleNameChange}
             placeholder="Enter campaign name"
           />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
         </div>
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
+          <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
             Description
           </label>
-          <textarea
+          <Textarea
             id="description"
             value={description}
             onChange={handleDescriptionChange}
             rows={3}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00BFFF] focus:ring-[#00BFFF] font-work-sans"
             placeholder="Enter campaign description"
           />
         </div>
 
         {/* Budget */}
         <div>
-          <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
-            Budget <span className="text-red-500">*</span>
+          <label htmlFor="budget" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+            Budget <span className="text-destructive">*</span>
           </label>
           <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-gray-500 sm:text-sm font-work-sans">$</span>
+              <span className="text-muted-foreground sm:text-sm font-work-sans">$</span>
             </div>
             <Input
               id="budget"
@@ -193,14 +193,14 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
               placeholder="0.00"
             />
           </div>
-          {errors.budget && <p className="text-red-500 text-xs mt-1">{errors.budget}</p>}
+          {errors.budget && <p className="text-destructive text-xs mt-1">{errors.budget}</p>}
         </div>
 
         {/* Date Range */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
-              Start Date <span className="text-red-500">*</span>
+            <label htmlFor="startDate" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+              Start Date <span className="text-destructive">*</span>
             </label>
             <DatePicker
               id="startDate"
@@ -208,11 +208,11 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
               onChange={handleStartDateChange}
               placeholder="Select start date"
             />
-            {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>}
+            {errors.startDate && <p className="text-destructive text-xs mt-1">{errors.startDate}</p>}
           </div>
 
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1 font-work-sans">
+            <label htmlFor="endDate" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
               End Date
             </label>
             <DatePicker
@@ -229,7 +229,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
                 return comparisonDate <= comparisonStartDate;
               }}
             />
-            {errors.endDate && <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>}
+            {errors.endDate && <p className="text-destructive text-xs mt-1">{errors.endDate}</p>}
           </div>
         </div>
 

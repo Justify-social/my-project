@@ -96,7 +96,7 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
   nameKey,
   height = 300,
   width = '100%',
-  color = '#3182CE',
+  color = 'hsl(var(--interactive))',
   title,
   className,
   showGrid = true,
@@ -106,7 +106,7 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
   xTickFormatter,
   yTickFormatter,
   tooltipFormatter,
-  gridColor = '#E2E8F0',
+  gridColor = 'hsl(var(--border))',
   xDomain = ['auto', 'auto'],
   yDomain = ['auto', 'auto'],
   zDomain = [0, 1000]
@@ -149,8 +149,8 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
             formatter={tooltipFormatter}
             contentStyle={{
               fontSize: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #E2E8F0',
+              backgroundColor: 'hsl(var(--background))',
+              border: '1px solid hsl(var(--border))',
               borderRadius: '4px',
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
             }}

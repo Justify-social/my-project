@@ -214,7 +214,6 @@
             *   **File(s):** `src/components/features/campaigns/Step1Content.tsx`, `Step2Content.tsx`, `Step3Content.tsx`, `WizardNavigation.tsx`, `ProgressBar.tsx`
             *   **Violation:** Widespread use of arbitrary Tailwind text color classes like `text-[var(--primary-color)]`, `text-[var(--secondary-color)]`, `text-[var(--accent-color)]`. This bypasses the Tailwind theme configuration which maps semantic names (`primary`, `secondary`, `accent`, etc.) to these variables, violating the Color SSOT.
             *   **Goal:** Enforce consistent color usage by leveraging the Tailwind theme configuration.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   Search all listed files for the pattern `text-[var(--`. Identify the intended semantic color for each instance (e.g., primary text, secondary text, accent highlight).
                 *   Replace each instance with the corresponding themed Tailwind class (e.g., `text-[var(--primary-color)]` likely becomes `text-primary` or `text-foreground`; `text-[var(--secondary-color)]` likely becomes `text-secondary` or `text-muted-foreground`; `text-[var(--accent-color)]` likely becomes `text-accent`). Choose the most semantically appropriate class based on context.
@@ -227,7 +226,6 @@
             *   **File(s):** `src/components/ui/navigation/sidebar-ui-components.tsx`, `src/components/ui/navigation/sidebar.tsx`, `src/components/ui/navigation/header.tsx`
             *   **Violation:** Navigation components use hardcoded hex color values (e.g., `#f5f5f5`, `#fafafa`, `#333333`, `#00BFFF`, `#D1D5DB`) instead of themed Tailwind classes derived from `globals.css`.
             *   **Goal:** Align navigation component styling with the application's Color SSOT.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   Identify all hardcoded hex values used for background, text, or border colors in the specified files.
                 *   Replace them with the appropriate themed Tailwind utility classes (e.g., `bg-muted`, `bg-background`, `text-foreground`, `text-accent`, `border`, `hover:bg-muted/50`, etc.) based on semantic meaning.
@@ -240,7 +238,6 @@
             *   **File(s):** `ObjectivesContent.tsx`, `AutosaveIndicator.tsx`, `ProgressBar.tsx`, `Step3Content.tsx`, various `loading/layout.tsx` files, `header.tsx`, `campaigns/page.tsx` (Full list in Task 2.4 Findings).
             *   **Violation:** Inline `<svg>` elements are used for icons (checkmark, chevron) and spinners instead of leveraging the central `<Icon />` component SSOT.
             *   **Goal:** Standardize all icon and simple spinner rendering via the `Icon` component for consistency and maintainability.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   For each listed file, identify the specific icon/spinner represented by the inline `<svg>` element.
                 *   Find the corresponding Font Awesome Pro icon ID in the project's icon registry (e.g., `faCheckLight`, `faChevronDownLight`, `faSpinnerLight`).
@@ -255,7 +252,6 @@
             *   **File(s):** `src/components/features/campaigns/FilterPanel.tsx`
             *   **Violation:** Uses standard HTML `<button>` with custom styles (`bg-[var(--secondary-color)]`) instead of the standard `Button` component from `src/components/ui`.
             *   **Goal:** Ensure all buttons use the standard, themed `Button` component.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   Replace the `<button>` element with `<Button variant="secondary">Reset Filters</Button>`.
                 *   Remove the custom Tailwind classes (`bg-[var(--secondary-color)]`, etc.) previously applied directly.
@@ -266,9 +262,8 @@
             *   **Priority:** P1
             *   **Reference:** Task 2.1 Finding 3
             *   **File(s):** `src/components/features/campaigns/Step2Content.tsx`
-            *   **Violation:** Inline implementation of Light/Solid icon hover toggle for "Remove Secondary KPI" button. Should use `IconButtonAction` component.
-            *   **Goal:** Standardize icon button interactions using the `IconButtonAction` component.
-            *   **Status:** **COMPLETE**
+            *   **Description:** This form uses Formik, preventing full integration with Shadcn's Form components which rely on React Hook Form. While `StyledField` styling is fixed, full SSOT alignment requires migrating the form logic.
+            *   **Goal:** Achieve full Shadcn component integration by migrating form state management to React Hook Form.
             *   **Acceptance Criteria:**
                 *   Locate the button responsible for removing secondary KPIs.
                 *   Replace the existing icon implementation with `<IconButtonAction iconBaseName="faTrashCan" hoverColorClass="text-destructive" ariaLabel="Remove KPI" onClick={...} />`.
@@ -282,7 +277,6 @@
             *   **File(s):** `src/components/ui/loading-skeleton.tsx`
             *   **Violation:** The `DashboardSkeleton` and `WizardSkeleton` components use hardcoded gray border classes (`border-gray-200 dark:border-gray-700`, `border-input`) instead of the themed `border` class.
             *   **Goal:** Ensure skeleton components align with the application's border color SSOT.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   Search within the `DashboardSkeleton` and `WizardSkeleton` component definitions for hardcoded border classes (`border-gray-*`, `dark:border-gray-*`, `border-input`).
                 *   Replace these with the standard `border` utility class (which maps to `hsl(var(--border))`).
@@ -297,7 +291,6 @@
             *   **File(s):** `src/components/ui/chart-*.tsx` (bar, area, line, radar, scatter)
             *   **Violation:** Chart components contain hardcoded hex/rgba values for default color arrays, grid lines, borders, fills, and strokes, violating the Color SSOT. (`chart-pie` appears mostly compliant).
             *   **Goal:** Align chart visual styling with the application's theme colors.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   Review each specified chart component.
                 *   Replace hardcoded hex values for static elements (grid lines, borders - e.g., `#E2E8F0`, `#E5E7EB`) with the themed `border` class or `hsl(var(--border))` where appropriate.
@@ -309,10 +302,9 @@
             *   **Title:** Replace Hardcoded Hex Colors in Feature Components & Libs
             *   **Priority:** P2
             *   **Reference:** Task 2.3 Finding 1
-            *   **File(s):** `src/lib/db.ts`, `src/components/features/campaigns/AgeDistributionSlider.tsx`, `src/components/features/campaigns/CampaignAssetUploader.tsx`, `src/components/features/campaigns/BasicInfo.tsx`. (Removed `BrandLiftCharts.tsx` as it was deleted)
+            *   **File(s):** `src/lib/db.ts`, `src/components/features/campaigns/AgeDistributionSlider.tsx`, `src/components/features/dashboard/BrandLiftCharts.tsx`, `src/components/features/campaigns/CampaignAssetUploader.tsx`, `src/components/features/campaigns/BasicInfo.tsx`.
             *   **Violation:** These files contain various hardcoded hex colors used for specific UI elements (slider parts, focus rings, hover effects, chart elements) instead of themed Tailwind classes or CSS variables.
             *   **Goal:** Ensure all UI elements adhere to the Color SSOT.
-            *   **Status:** **COMPLETE**
             *   **Acceptance Criteria:**
                 *   Locate the hardcoded hex values in each specified file.
                 *   Replace them with the appropriate themed Tailwind classes (`focus:ring-ring`, `hover:bg-accent/90`, etc.) or direct CSS variable references (`hsl(var(--accent))`) if Tailwind classes are insufficient (e.g., for slider track color).
@@ -325,12 +317,10 @@
             *   **File(s):** `src/components/features/campaigns/Step2Content.tsx`
             *   **Violation:** The component uses custom styled `div`s with click handlers for selecting "Features", potentially duplicating standard component functionality and introducing accessibility issues.
             *   **Goal:** Utilize standard components for better consistency, maintainability, and accessibility where possible.
-            *   **Status:** **COMPLETE (Investigation Only)**
             *   **Acceptance Criteria:**
                 *   Analyze the required multi-select functionality and visual design of the feature selection section.
                 *   Determine if standard `Checkbox`/`Toggle` components from `src/components/ui` are feasible replacements.
                 *   If yes, refactor. If no, document justification.
-            *   **Justification for No Refactor:** The current card-like visual design (icon, title, background/border changes on selection) is difficult to replicate using standard `Checkbox` or `Toggle` components without significant complexity or UI compromises. The existing implementation uses themed classes and includes basic accessibility attributes, making it acceptable.
 
         *   **Ticket 11 (New): Implement Campaign Wizard Autosave**
             *   **Title:** Implement Autosave Functionality in Campaign Wizard
@@ -355,7 +345,6 @@
         *   **Ticket 16 (was 15):** (Review Button Icon Margins) - *Renumbered*
         *   **Ticket 17 (was 16):** (Review Spinner vs. Skeleton Usage) - *Renumbered*
         *   **Ticket 18 (was 17):** (Perform Visual Accessibility Checks) - *Renumbered*
-        *   **Ticket 19 ** (Tree Shake) - *Renumbered*
 
 ---
 

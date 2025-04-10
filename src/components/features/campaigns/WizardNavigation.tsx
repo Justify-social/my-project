@@ -39,9 +39,9 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
   return (
     <div className={`${cn('w-full', className)} font-work-sans`}>
       {/* Progress bar */}
-      <div className="w-full h-2 mb-4 bg-gray-200 rounded-full font-work-sans">
+      <div className="w-full h-2 mb-4 bg-muted rounded-full font-work-sans">
         <div
-          className="h-2 transition-all duration-300 ease-in-out bg-[var(--accent-color)] rounded-full font-work-sans"
+          className="h-2 transition-all duration-300 ease-in-out bg-accent rounded-full font-work-sans"
           style={{ width: `${progress}%` }} />
 
       </div>
@@ -54,14 +54,14 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
               className={`${cn(
                 'flex items-center justify-center w-8 h-8 mb-2 text-sm font-medium border-2 rounded-full',
                 step === currentStep ?
-                  'border-[var(--accent-color)] bg-[var(--accent-color)] text-white' :
+                  'border-accent bg-accent text-accent-foreground' :
                   step < currentStep ?
-                    'border-[var(--accent-color)] bg-white text-[var(--accent-color)]' :
-                    'border-gray-300 bg-white text-gray-400'
+                    'border-accent bg-background text-accent' :
+                    'border text-muted-foreground'
               )} font-work-sans`}>
 
               {step < currentStep ?
-                <Icon iconId="faCheckCircleSolid" className="w-5 h-5 text-green-500 font-work-sans" /> :
+                <Icon iconId="faCheckCircleSolid" className="w-5 h-5 text-success" /> :
 
                 step
               }
@@ -70,10 +70,10 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
               className={`${cn(
                 'text-xs font-medium',
                 step === currentStep ?
-                  'text-[var(--accent-color)]' :
+                  'text-accent' :
                   step < currentStep ?
-                    'text-[var(--primary-color)]' :
-                    'text-gray-400'
+                    'text-foreground' :
+                    'text-muted-foreground'
               )} font-work-sans`}>
 
               {stepTitles[step - 1]}
@@ -83,7 +83,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
       </div>
 
       {/* Navigation controls */}
-      <div className="flex items-center justify-between pt-4 mt-6 border-t border-gray-200 font-work-sans">
+      <div className="flex items-center justify-between pt-4 mt-6 border-t font-work-sans">
         <div className="flex items-center space-x-4 font-work-sans">
           {/* Back button */}
           <button
@@ -93,8 +93,8 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             className={`${cn(
               'px-4 py-2 text-sm font-medium border rounded-md flex items-center',
               isFirstStep ?
-                'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' :
-                'border-[var(--secondary-color)] bg-white text-[var(--secondary-color)] hover:bg-gray-50'
+                'border bg-muted text-muted-foreground cursor-not-allowed' :
+                'border-secondary bg-background text-secondary hover:bg-muted/50'
             )} font-work-sans`}>
 
             <Icon iconId="faArrowLeftLight" className="w-4 h-4 mr-2" />
@@ -106,7 +106,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             type="button"
             onClick={saveAsDraft}
             disabled={isLoading || isSaving}
-            className="px-4 py-2 text-sm font-medium text-[var(--primary-color)] bg-white border border-[var(--primary-color)] rounded-md hover:bg-gray-50 flex items-center font-work-sans">
+            className="px-4 py-2 text-sm font-medium text-primary bg-background border border-primary rounded-md hover:bg-muted/50 flex items-center font-work-sans">
 
             <Icon iconId="faFloppyDiskLight" className="w-4 h-4 mr-2" />
             Save Draft
@@ -123,10 +123,10 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             onClick={isLastStep ? submitCampaign : goToNextStep}
             disabled={isLoading || isSaving}
             className={`${cn(
-              'px-4 py-2 text-sm font-medium text-white rounded-md flex items-center',
+              'px-4 py-2 text-sm font-medium text-accent-foreground rounded-md flex items-center',
               isLoading || isSaving ?
-                'bg-[var(--accent-color)] opacity-70 cursor-not-allowed' :
-                'bg-[var(--accent-color)] hover:opacity-90'
+                'bg-accent/70 cursor-not-allowed' :
+                'bg-accent hover:opacity-90'
             )} font-work-sans`}>
 
             {isLoading || isSaving ?

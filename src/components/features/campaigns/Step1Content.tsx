@@ -167,28 +167,25 @@ const StyledField = ({
   ...props
 }: any) => {
   return <div className="mb-5 font-work-sans">
-    <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+    <label htmlFor={name} className="block text-sm font-medium text-foreground mb-2 font-work-sans">
       {label}
-      {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
+      {required && <span className="text-accent ml-1 font-work-sans">*</span>}
     </label>
     <div className="relative font-work-sans">
-      {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
+      {icon && <div className="absolute left-3 top-0 bottom-0 flex items-center justify-center text-muted-foreground form-icon-container font-work-sans">
         {icon}
       </div>}
-      {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon ${as === "select" ? "appearance-none" : ""}`} {...props}>
-
+      {as ? <Field as={as} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-input rounded-md focus:ring-2 focus:ring-ring focus:border-ring focus:outline-none transition-colors duration-200 shadow-sm bg-background font-work-sans form-input-with-icon ${as === "select" ? "appearance-none" : ""}`} {...props}>
         {children}
-      </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans form-input-with-icon`} {...props} />}
-      {/* Only add the calendar icon on the right if it's a date type AND no icon was provided */}
-      {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] form-icon-container font-work-sans">
+      </Field> : <Field type={type} id={name} name={name} className={`w-full h-10 p-2.5 ${icon ? 'pl-10' : 'pl-3'} border border-input rounded-md focus:ring-2 focus:ring-ring focus:border-ring focus:outline-none transition-colors duration-200 shadow-sm bg-background font-work-sans form-input-with-icon`} {...props} />}
+      {type === "date" && !icon && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-muted-foreground form-icon-container font-work-sans">
         <Icon iconId="faCalendarLight" className="w-5 h-5 font-work-sans" />
       </div>}
-      {/* Add chevron only for select elements */}
-      {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-[var(--secondary-color)] pointer-events-none form-icon-container font-work-sans">
+      {as === "select" && <div className="absolute right-3 top-0 bottom-0 flex items-center justify-center text-muted-foreground pointer-events-none form-icon-container font-work-sans">
         <Icon iconId="faChevronDownLight" className="w-5 h-5 font-work-sans" />
       </div>}
     </div>
-    <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
+    <ErrorMessage name={name} component="p" className="mt-1 text-sm text-destructive font-work-sans" />
   </div>;
 };
 
@@ -200,14 +197,14 @@ const DateField = ({
   ...props
 }: any) => {
   return <div className="mb-5 font-work-sans">
-    <label htmlFor={name} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
+    <label htmlFor={name} className="block text-sm font-medium text-foreground mb-2 font-work-sans">
       {label}
-      {required && <span className="text-[var(--accent-color)] ml-1 font-work-sans">*</span>}
+      {required && <span className="text-accent ml-1 font-work-sans">*</span>}
     </label>
     <div className="relative font-work-sans">
-      <Field type="date" id={name} name={name} className="w-full p-2.5 border border-[var(--divider-color)] rounded-md focus:ring-2 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] focus:outline-none transition-colors duration-200 shadow-sm bg-white font-work-sans" {...props} />
+      <Field type="date" id={name} name={name} className="w-full p-2.5 border border-input rounded-md focus:ring-2 focus:ring-ring focus:border-ring focus:outline-none transition-colors duration-200 shadow-sm bg-background font-work-sans" {...props} />
     </div>
-    <ErrorMessage name={name} component="p" className="mt-1 text-sm text-red-600 font-work-sans" />
+    <ErrorMessage name={name} component="p" className="mt-1 text-sm text-destructive font-work-sans" />
   </div>;
 };
 
@@ -339,9 +336,6 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<{
 const ExchangeRateHandler = ({
   currency,
   onRatesFetched
-
-
-
 }: { currency: string; onRatesFetched: (data: any) => void; }) => {
   useEffect(() => {
     if (!currency) return;
@@ -359,10 +353,6 @@ const DateRangePicker = ({
   startFieldName,
   endFieldName,
   label
-
-
-
-
 }: { startFieldName: string; endFieldName: string; label: string; }) => {
   const {
     values,
@@ -392,43 +382,40 @@ const DateRangePicker = ({
     return nextDay.toISOString().split('T')[0];
   })() : '';
   return <div className="mb-5 font-work-sans">
-    <label className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-      {label} <span className="text-[var(--accent-color)] font-work-sans">*</span>
+    <label className="block text-sm font-medium text-foreground mb-2 font-work-sans">
+      {label} <span className="text-accent ml-1 font-work-sans">*</span>
     </label>
 
-    <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 font-work-sans">
+    <div className="bg-background rounded-lg border p-4 font-work-sans">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
         <div className="font-work-sans">
-          <label htmlFor={startFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
+          <label htmlFor={startFieldName} className="block text-sm text-muted-foreground mb-1 font-work-sans">
             Start Date
           </label>
           <div className="relative font-work-sans">
-            <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={new Date().toISOString().split('T')[0]} // Minimum is today
-            />
+            <input type="date" id={startFieldName} name={startFieldName} value={startDate} onChange={handleStartDateChange} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring ${errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] ? 'border-destructive' : 'border-input'} font-work-sans`} min={new Date().toISOString().split('T')[0]} />
           </div>
-          {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
+          {errors[startFieldName as keyof FormValues] && touched[startFieldName as keyof FormValues] && <div className="text-destructive text-sm mt-1 font-work-sans">
             {errors[startFieldName as keyof FormValues] as string}
           </div>}
         </div>
 
         <div className="font-work-sans">
-          <label htmlFor={endFieldName} className="block text-sm text-[var(--secondary-color)] mb-1 font-work-sans">
+          <label htmlFor={endFieldName} className="block text-sm text-muted-foreground mb-1 font-work-sans">
             End Date
           </label>
           <div className="relative font-work-sans">
-            <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={(e) => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-red-500' : 'border-[var(--divider-color)]'} font-work-sans`} min={minEndDate} // End date must be at least the day after start date
-              disabled={!startDate} // Disable until start date is selected
-            />
+            <input type="date" id={endFieldName} name={endFieldName} value={endDate} onChange={(e) => setFieldValue(endFieldName, e.target.value)} className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring ${errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] ? 'border-destructive' : 'border-input'} font-work-sans`} min={minEndDate} disabled={!startDate} />
           </div>
-          {errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] && <div className="text-red-500 text-sm mt-1 font-work-sans">
+          {errors[endFieldName as keyof FormValues] && touched[endFieldName as keyof FormValues] && <div className="text-destructive text-sm mt-1 font-work-sans">
             {errors[endFieldName as keyof FormValues] as string}
           </div>}
         </div>
       </div>
 
-      {startDate && endDate && <div className="mt-3 text-sm text-[var(--primary-color)] bg-[var(--accent-color)]/10 p-2 rounded font-work-sans">
+      {startDate && endDate && <div className="mt-3 text-sm text-primary bg-accent/10 p-2 rounded font-work-sans">
         <div className="flex items-center font-work-sans">
-          <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-1 text-[var(--accent-color)] font-work-sans" />
+          <Icon iconId="faCircleInfoLight" className="w-4 h-4 mr-1 text-accent font-work-sans" />
           <span className="font-work-sans">Campaign Duration: {calculateDuration(startDate, endDate)}</span>
         </div>
       </div>}
@@ -577,10 +564,6 @@ const InfluencerEntry = ({
   index,
   remove,
   arrayHelpers
-
-
-
-
 }: { index: number; remove: () => void; arrayHelpers: any; }) => {
   const {
     values,
@@ -635,57 +618,46 @@ const InfluencerEntry = ({
     }
   }, [influencer.platform, influencer.handle, debouncedValidate]);
   const hasError = touched.influencers?.[index] && ((errors.influencers?.[index] as any)?.platform || (errors.influencers?.[index] as any)?.handle);
-  return <div className="bg-[var(--background-color)] rounded-lg border border-[var(--divider-color)] p-4 mb-4 font-work-sans">
+  return <div className="bg-background rounded-lg border p-4 mb-4 font-work-sans">
     <div className="flex justify-between items-center mb-3 font-work-sans">
-      <h4 className="text-[var(--primary-color)] font-medium font-sora">Influencer #{index + 1}</h4>
-      {index > 0 && <button type="button" onClick={remove} className="text-red-500 hover:text-red-700 transition-colors duration-200 font-work-sans">
+      <h4 className="text-foreground font-medium font-sora">Influencer #{index + 1}</h4>
+      {index > 0 && <button type="button" onClick={remove} className="text-destructive hover:text-destructive/80 transition-colors duration-200 font-work-sans">
         <Icon iconId="faCloseLight" className="h-5 w-5" />
       </button>}
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-work-sans">
       <div className="font-work-sans">
-        <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-          Platform <span className="text-[var(--accent-color)] font-work-sans">*</span>
+        <label htmlFor={`influencers[${index}].platform`} className="block text-sm font-medium text-foreground mb-2 font-work-sans">
+          Platform <span className="text-accent ml-1 font-work-sans">*</span>
         </label>
-        <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] appearance-none ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-red-500' : 'border-[var(--divider-color)]'}`}>
+        <Field name={`influencers[${index}].platform`} as="select" className={`w-full pl-3 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring appearance-none ${(errors.influencers?.[index] as any)?.platform && touched.influencers?.[index]?.platform ? 'border-destructive' : 'border-input'}`}>
           <option value="">Select platform</option>
           <option value={Platform.Instagram}>Instagram</option>
           <option value={Platform.YouTube}>YouTube</option>
           <option value={Platform.TikTok}>TikTok</option>
         </Field>
-        <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
+        <ErrorMessage name={`influencers[${index}].platform`} component="div" className="text-destructive text-sm mt-1 font-work-sans" />
       </div>
 
       <div className="font-work-sans">
-        <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-[var(--primary-color)] mb-2 font-work-sans">
-          Influencer Handle <span className="text-[var(--accent-color)] font-work-sans">*</span>
+        <label htmlFor={`influencers[${index}].handle`} className="block text-sm font-medium text-foreground mb-2 font-work-sans">
+          Influencer Handle <span className="text-accent ml-1 font-work-sans">*</span>
         </label>
         <div className="relative font-work-sans">
-          <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-red-500' : 'border-[var(--divider-color)]'}`} />
-
-          {isValidating && <div className="absolute right-2 top-2 font-work-sans">
-            <Icon iconId="faCircleNotchLight" className="h-5 w-5 text-[var(--primary-color)] animate-spin" /> {/* Replaced img with Icon */}
-          </div>}
+          <Field name={`influencers[${index}].handle`} type="text" placeholder="e.g. @username" className={`w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring ${(errors.influencers?.[index] as any)?.handle && touched.influencers?.[index]?.handle ? 'border-destructive' : 'border-input'}`} />
         </div>
-        <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-red-500 text-sm mt-1 font-work-sans" />
+        <ErrorMessage name={`influencers[${index}].handle`} component="div" className="text-destructive text-sm mt-1 font-work-sans" />
 
-        {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">Type at least 3 characters to search</div>}
+        {!isValidating && influencer.handle && influencer.handle.length < 3 && <div className="text-xs text-muted-foreground mt-1 font-work-sans">Type at least 3 characters to search</div>}
       </div>
     </div>
-
-    {isValidating && <div className="mt-3 text-[var(--primary-color)] flex items-center font-work-sans">
-      <div className="animate-spin mr-2 font-work-sans">
-        <Icon iconId="faCircleNotchLight" className="h-4 w-4" /> {/* Replaced img with Icon */}
-      </div>
-      Validating influencer...
-    </div>}
 
     {validationResult && <div className="mt-3 font-work-sans">
       <InfluencerPreview platform={influencer.platform} handle={influencer.handle} data={validationResult} />
     </div>}
 
-    {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-amber-600 text-sm font-work-sans">
+    {!validationResult && !isValidating && influencer.platform && influencer.handle && influencer.handle.length >= 3 && <div className="mt-3 text-warning-foreground text-sm font-work-sans">
       No data found for this influencer.
     </div>}
   </div>;
@@ -696,10 +668,6 @@ const InfluencerPreview = ({
   platform,
   handle,
   data
-
-
-
-
 }: { platform: string; handle: string; data?: InfluencerData; }) => {
   const [influencerData, setInfluencerData] = useState<InfluencerData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -726,21 +694,19 @@ const InfluencerPreview = ({
     fetchData();
   }, [platform, handle, data]);
   if (isLoading) {
-    return <div className="bg-gray-50 rounded-md p-3 flex items-center justify-center font-work-sans">
-      <div className="animate-spin mr-2 font-work-sans">
-        <Icon iconId="faCircleNotchLight" className="h-4 w-4 text-[var(--primary-color)]" /> {/* Replaced img with Icon */}
-      </div>
-      <p className="text-sm text-gray-600 font-work-sans">Validating influencer...</p>
+    return <div className="bg-muted/50 rounded-md p-3 flex items-center justify-center font-work-sans">
+      <Icon iconId="faCircleNotchLight" className="animate-spin mr-2 h-4 w-4 text-foreground" />
+      <p className="text-sm text-muted-foreground font-work-sans">Validating influencer...</p>
     </div>;
   }
   if (error) {
-    return <div className="bg-red-50 rounded-md p-3 font-work-sans">
-      <p className="text-sm text-red-600 font-work-sans">{error}</p>
+    return <div className="bg-destructive/10 rounded-md p-3 font-work-sans">
+      <p className="text-sm text-destructive font-work-sans">{error}</p>
     </div>;
   }
   if (!influencerData) {
-    return <div className="bg-amber-50 rounded-md p-3 font-work-sans">
-      <p className="text-sm text-amber-600 font-work-sans">
+    return <div className="bg-warning/10 rounded-md p-3 font-work-sans">
+      <p className="text-sm text-warning-foreground font-work-sans">
         No data available for this influencer.
       </p>
     </div>;
@@ -763,28 +729,27 @@ const InfluencerPreview = ({
   // Get normalized platform filename stem
   const platformFilenameStem = getPlatformFilenameStem(platform);
 
-  return <div className="bg-blue-50 rounded-md p-3 font-work-sans">
+  return <div className="bg-muted/50 rounded-md p-3 flex items-center font-work-sans">
     <div className="flex items-start font-work-sans">
       {influencerData.avatarUrl ? <img src={influencerData.avatarUrl} alt={`${handle}'s avatar`} className="w-12 h-12 rounded-full mr-3 object-cover" /> : <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center font-work-sans">
         <Icon iconId="faUserLight" className="h-6 w-6 text-gray-500 font-work-sans" />
       </div>}
       <div className="font-work-sans">
         <div className="flex items-center font-work-sans">
-          <p className="font-medium text-[var(--primary-color)] font-work-sans">
+          <p className="font-medium text-foreground font-work-sans">
             {influencerData.displayName || handle}
           </p>
-          {influencerData.verified && <span className="ml-1 text-blue-500 font-work-sans">
+          {influencerData.verified && <span className="ml-1 text-accent font-work-sans">
             <Icon iconId="faCircleCheckSolid" className="h-4 w-4" />
           </span>}
         </div>
-        <p className="text-sm text-gray-600 flex items-center font-work-sans">
-          {/* Use Image component for consistent brand icon rendering */}
+        <p className="text-sm text-muted-foreground font-work-sans">
           <Image
-            src={`/icons/brands/${platformFilenameStem}.svg`} // Dynamically set the src based on platform filename stem
-            alt={platform} // Use original platform name for alt text
-            width={16} // Set appropriate width
-            height={16} // Set appropriate height
-            className="mr-1.5 inline-block relative top-[-1px]" // Apply necessary styling
+            src={`/icons/brands/${platformFilenameStem}.svg`}
+            alt={platform}
+            width={16}
+            height={16}
+            className="mr-1.5 inline-block relative top-[-1px]"
           />
           @{handle}
         </p>
@@ -1188,10 +1153,10 @@ function Step1Content() {
     }
   };
 
-  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-[var(--background-color)] font-work-sans">
+  return <div className="w-full max-w-6xl mx-auto px-6 py-8 bg-background font-work-sans">
     <div className="mb-8 font-work-sans">
-      <h1 className="text-2xl font-semibold text-[var(--primary-color)] mb-2 font-sora">Campaign Creation</h1>
-      <p className="text-[var(--secondary-color)] font-work-sans">Complete all required fields to create your campaign</p>
+      <h1 className="text-2xl font-semibold text-foreground mb-2 font-sora">Campaign Creation</h1>
+      <p className="text-muted-foreground font-work-sans">Complete all required fields to create your campaign</p>
     </div>
 
     <Formik

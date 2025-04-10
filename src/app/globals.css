@@ -130,6 +130,9 @@ svg:not(:host).svg-inline--fa {
 
     --radius: 0.5rem;
     /* Border radius for components */
+
+    /* Added Footer Height Variable */
+    --footer-height: 65px;
   }
 
   .dark {
@@ -194,6 +197,9 @@ svg:not(:host).svg-inline--fa {
     /* Same as border */
     --ring: 215 20% 65%;
     /* Lighter ring for focus */
+
+    /* Added Footer Height Variable (can be same or different) */
+    --footer-height: 65px;
   }
 
   /* Base styles for all elements */

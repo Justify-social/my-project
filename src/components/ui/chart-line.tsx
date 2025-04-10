@@ -4,7 +4,7 @@
  * @subcategory visualization
  * @description Responsive line chart component based on Recharts with support for multiple data series.
  * @status 10th April
- * It handles date formatting on the X-axis and provides customizable tooltips and legends.
+ * @info date formatting on the X-axis and provides customizable tooltips and legends.
  * @param {LineChartProps} props - The props for the LineChart component.
  * @param {object[]} [props.data=[]] - The dataset for the chart.
  * @param {string} [props.xKey='date'] - Deprecated: Use xField instead. The key for the x-axis data (usually time).
@@ -116,21 +116,21 @@ export function LineChart({
             dataKey={xAxisKey}
             tickFormatter={dateStr => formatDate(dateStr, dateFormat)}
             tick={{ fontSize: 12 }}
-            axisLine={{ stroke: '#E5E7EB' }}
-            tickLine={{ stroke: '#E5E7EB' }}
+            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
 
           {/* Y-Axis */}
           <YAxis
             width={35}
             tick={{ fontSize: 12 }}
-            axisLine={{ stroke: '#E5E7EB' }}
-            tickLine={{ stroke: '#E5E7EB' }}
+            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
 
           {/* Grid lines */}
           {grid && (
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           )}
 
           {/* Tooltip */}
@@ -140,7 +140,8 @@ export function LineChart({
               labelFormatter={dateStr => formatDate(dateStr as string, dateFormat)}
               contentStyle={{
                 borderRadius: '6px',
-                border: '1px solid #E5E7EB',
+                backgroundColor: 'hsl(var(--background))',
+                border: '1px solid hsl(var(--border))',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               }}
             />
@@ -150,7 +151,7 @@ export function LineChart({
           {legend && <Legend wrapperStyle={{ paddingTop: '10px' }} />}
 
           {/* Zero reference line */}
-          <ReferenceLine y={0} stroke="#E5E7EB" />
+          <ReferenceLine y={0} stroke="hsl(var(--border))" />
 
           {/* Data lines */}
           {linesConfig.map((line, index) => (
@@ -176,14 +177,14 @@ export function LineChart({
  */
 function getColorByIndex(index: number): string {
   const colors = [
-    '#3B82F6', // blue-500
-    '#EF4444', // red-500
-    '#10B981', // emerald-500
-    '#F59E0B', // amber-500
-    '#8B5CF6', // violet-500
-    '#EC4899', // pink-500
-    '#6366F1', // indigo-500
-    '#14B8A6', // teal-500
+    'hsl(var(--interactive))',
+    'hsl(var(--destructive))',
+    'hsl(var(--success))',
+    'hsl(var(--warning))',
+    'hsl(var(--accent))',
+    'hsl(var(--primary))',
+    'hsl(var(--secondary))',
+    'hsl(var(--info))'
   ];
 
   return colors[index % colors.length];

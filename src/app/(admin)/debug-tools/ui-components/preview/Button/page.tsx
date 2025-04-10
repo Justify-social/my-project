@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
-import { IconButtonAction } from '@/components/ui/client/icon-button-action';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 
 import { Button } from '../../../../../../components/ui/button';
 

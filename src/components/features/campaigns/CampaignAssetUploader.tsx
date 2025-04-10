@@ -240,13 +240,13 @@ export function CampaignAssetUploader({
             toast.error(`Upload error: ${error.message}`);
           }
         }}
-        className="w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border border-gray-200 shadow-sm"
+        className="w-full py-10 flex flex-col items-center justify-center transition-all duration-300 bg-white rounded-xl border shadow-sm"
         content={{
           allowedContent: "Images and videos only",
           label: "Choose a file or drag and drop",
           uploadIcon: () =>
-            <div className="mb-8 p-6 rounded-full bg-blue-50 flex items-center justify-center mx-auto font-work-sans">
-              <Icon iconId="faUploadLight" className="h-16 w-16 text-blue-500 font-work-sans" />
+            <div className="mb-8 p-6 rounded-full bg-accent/10 flex items-center justify-center mx-auto font-work-sans">
+              <Icon iconId="faUploadLight" className="h-16 w-16 text-accent font-work-sans" />
             </div>,
 
           button: ({ ready }: { ready: boolean; }) =>
@@ -255,16 +255,16 @@ export function CampaignAssetUploader({
             <button
               className="mt-4 px-6 py-2 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 font-work-sans"
               style={{
-                backgroundColor: 'var(--accent-color)', // Using the accent color from globals.css
-                fontFamily: "'Work Sans', sans-serif" // Using the app's font
+                backgroundColor: 'hsl(var(--accent))',
+                fontFamily: "'Work Sans', sans-serif"
               }}
               disabled={!ready}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#00A8E6'; // Slightly darker on hover
-                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 191, 255, 0.25)';
+                e.currentTarget.style.backgroundColor = 'hsl(var(--accent) / 0.9)';
+                e.currentTarget.style.boxShadow = '0 4px 6px hsl(var(--accent) / 0.25)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--accent-color)';
+                e.currentTarget.style.backgroundColor = 'hsl(var(--accent))';
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
               }}>
 
@@ -281,14 +281,14 @@ export function CampaignAssetUploader({
       {/* Selected files display */}
       {!isUploading && selectedFiles.length > 0 &&
         <div className="mt-4 space-y-3 font-work-sans">
-          <p className="text-sm text-gray-500 font-medium font-work-sans">{selectedFiles.length} file(s) selected</p>
+          <p className="text-sm text-muted-foreground font-medium font-work-sans">{selectedFiles.length} file(s) selected</p>
           {selectedFiles.map((file, index) =>
-            <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 font-work-sans">
+            <div key={index} className="bg-white rounded-lg border p-4 font-work-sans">
               <div className="flex items-center font-work-sans">
-                <Icon iconId="faInfoLight" className="h-6 w-6 text-gray-400 mr-3 font-work-sans" />
+                <Icon iconId="faInfoLight" className="h-6 w-6 text-muted-foreground mr-3 font-work-sans" />
                 <div className="font-work-sans">
                   <p className="text-sm font-medium font-work-sans">{file.name}</p>
-                  <p className="text-xs text-gray-500 font-work-sans">{(file.size / 1024).toFixed(1)} KB</p>
+                  <p className="text-xs text-muted-foreground font-work-sans">{(file.size / 1024).toFixed(1)} KB</p>
                 </div>
               </div>
             </div>
@@ -300,7 +300,7 @@ export function CampaignAssetUploader({
       {isUploading &&
         <div className="mt-4 flex items-center justify-center font-work-sans">
           <LoadingSpinner size="md" className="mr-3" />
-          <span className="text-sm font-medium text-gray-600 font-work-sans">Uploading files...</span>
+          <span className="text-sm font-medium text-muted-foreground font-work-sans">Uploading files...</span>
         </div>
       }
     </CardContent>

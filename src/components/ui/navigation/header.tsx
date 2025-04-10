@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({
                   {hasCoinsIcon ? (
                     <Icon
                       iconId="faCoinsSolid" // Use Solid ID directly
-                      className="w-6 h-6 text-[var(--primary-color)]" // Set to primary color (black)
+                      className="w-6 h-6 text-foreground" // Changed to text-foreground
                       data-testid="coins-icon"
                     />
                   ) : (
@@ -126,7 +126,8 @@ const Header: React.FC<HeaderProps> = ({
                       $
                     </div>
                   )}
-                  <span className="text-[#333333] font-medium text-sm font-work-sans">{remainingCredits}</span>
+                  {/* Use text-foreground for credit count */}
+                  <span className="text-foreground font-medium text-sm font-work-sans">{remainingCredits}</span>
                 </div>
               </Link>
 
@@ -135,7 +136,7 @@ const Header: React.FC<HeaderProps> = ({
                 {hasBellIcon ? (
                   <Icon
                     iconId="faBellSolid" // Use Solid ID directly
-                    className="w-6 h-6 text-[var(--primary-color)]" // Set to primary color (black)
+                    className="w-6 h-6 text-foreground" // Changed to text-foreground
                     title="Notifications"
                     data-testid="notifications-icon"
                   />
@@ -171,20 +172,9 @@ const Header: React.FC<HeaderProps> = ({
                 className="w-6 h-6"
               />
             ) : (
-              // Fallback using SVG if Font Awesome icon is not available
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              // Fallback using Icon component if Font Awesome one isn't available 
+              // Assuming a generic menu/bars icon ID like 'faBarsLight' is in the registry
+              <Icon iconId="faBarsLight" className="w-6 h-6" />
             )}
           </button>
 
@@ -195,7 +185,7 @@ const Header: React.FC<HeaderProps> = ({
                 {hasUserIcon ? (
                   <Icon
                     iconId="faUserCircleSolid" // Use Solid ID directly
-                    className="w-8 h-8 text-[var(--primary-color)]" // Set to primary color (black)
+                    className="w-8 h-8 text-foreground" // Changed to text-foreground
                     title="Profile"
                     data-testid="user-profile-icon"
                   />

@@ -2,9 +2,12 @@
 "use client";
 
 import React from "react";
+// Restore SidebarProvider import
 import { useSidebar } from "@/providers/SidebarProvider";
-import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
+// Removed unused SettingsPositionProvider import
+// import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
 import { Icon } from '@/components/ui/icon'
+import { cn } from "@/lib/utils"; // Import cn if it wasn't already (it likely was)
 
 export interface ProgressBarProps {
   currentStep: number;
@@ -47,7 +50,6 @@ const STEPS = [
   "Creative Assets",
   "Review"];
 
-
 const ProgressBar: React.FC<ProgressBarProps> = ({
   currentStep,
   onStepClick,
@@ -60,10 +62,15 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   isSaving = false,
   lastSaved = null
 }) => {
-  const { isOpen } = useSidebar();
-  const { position } = useSettingsPosition();
+  // Restore sidebar hook
+  const { isOpen: isSidebarOpen } = useSidebar();
+  // Removed unused settings position hook
+  // const { position } = useSettingsPosition();
 
   const isNextDisabled = disableNext || !isFormValid && isDirty;
+
+  // Removed progressBarHeight calculation
+  // const progressBarHeight = ... ;
 
   console.log('ProgressBar State:', {
     currentStep,
@@ -73,37 +80,22 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     isNextDisabled
   });
 
-  const progressBarHeight = position?.topOffset
-    ? Math.max(65, position.topOffset)
-    : 65;
-
   return (
     <footer
-      className={`
-        fixed
-        bottom-0
-        left-0
-        w-full
-        border-t
-        border-gray-300
-        shadow
-        z-40
-        flex
-        justify-between
-        items-center
-        text-[10px] sm:text-xs md:text-sm
-        leading-none
-        bg-white
-        transition-all
-        duration-300
-        ease-in-out
-        ${isOpen ? 'md:w-[calc(100%-12rem)] md:left-[12rem] lg:w-[calc(100%-16rem)] lg:left-[16rem]' : ''} font-work-sans`
-      }
-      style={{
-        height: `${progressBarHeight}px`
-      }}>
-
-      <div className="absolute top-0 left-0 right-0 h-[65px] flex justify-between items-center font-work-sans">
+      className={cn(
+        'fixed bottom-0 border-t shadow z-40 flex justify-between items-center',
+        'text-[10px] sm:text-xs md:text-sm leading-none bg-background',
+        'transition-all duration-300 ease-in-out font-work-sans',
+        'h-[var(--footer-height)]',
+        // Default to full width starting at left-0
+        'left-0 w-full',
+        // On md+ screens, IF sidebar is open, adjust left and width
+        isSidebarOpen && 'md:left-64 md:w-[calc(100%-16rem)]'
+      )}
+    >
+      {/* Inner content needs relative positioning and width to work within the footer */}
+      <div className="relative w-full h-full flex justify-between items-center">
+        {/* Use h-full on step list container */}
         <ul className="flex items-center space-x-2 overflow-x-auto whitespace-nowrap px-2 h-full flex-grow min-w-0 font-work-sans">
           {STEPS.map((label, index) => {
             const stepNumber = index + 1;
@@ -127,22 +119,23 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                 }}>
 
                 {status === "completed" &&
-                  <span className="mr-1 text-green-500 font-work-sans" aria-hidden="true">
-                    <Icon iconId="faCheckCircleSolid" className="h-4 w-4" />
+                  <span className="mr-1 font-work-sans" aria-hidden="true">
+                    <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-success" />
                   </span>
                 }
                 <span
                   className={`${status === "current" ?
-                      "font-bold text-white bg-[var(--accent-color)] px-2 py-0.5 rounded-full" :
-                      status === "upcoming" ?
-                        "text-[var(--secondary-color)]" :
-                        "text-[var(--primary-color)]"} font-work-sans`
-                  }>
-
+                    "font-bold bg-accent px-2 py-0.5 rounded-full" :
+                    status === "upcoming" ?
+                      "text-muted-foreground" :
+                      "text-foreground"} font-work-sans`
+                  }
+                  style={status === "current" ? { color: 'hsl(var(--primary-foreground))' } : {}}
+                >
                   {label}
                 </span>
                 {index < STEPS.length - 1 &&
-                  <span className="mx-1 text-[var(--secondary-color)] font-work-sans">
+                  <span className="mx-1 text-muted-foreground font-work-sans">
                     <Icon iconId="faChevronRightLight" className="h-3 w-3" />
                   </span>
                 }
@@ -151,16 +144,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           })}
         </ul>
 
+        {/* Use h-full on button container */}
         <div className="flex space-x-2 px-4 h-full items-center flex-shrink-0 font-work-sans">
           {/* Last saved indicator */}
           {lastSaved &&
-            <div className="text-xs text-[var(--secondary-color)] mr-3 hidden md:flex items-center font-work-sans">
+            <div className="text-xs text-muted-foreground mr-3 hidden md:flex items-center font-work-sans">
               {isSaving ?
                 <span className="flex items-center font-work-sans">
-                  <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-[var(--accent-color)] font-work-sans" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <Icon iconId="faSpinnerLight" className="animate-spin -ml-1 mr-1 h-3 w-3 text-accent" />
                   <span className="font-work-sans">Saving...</span>
                 </span> :
 
@@ -173,7 +164,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
             <button
               type="button"
               onClick={onBack}
-              className="px-3 py-1.5 bg-white border border-[var(--secondary-color)] text-[var(--secondary-color)] rounded-md hover:bg-gray-50 transition duration-200 flex items-center font-work-sans">
+              className="px-3 py-1.5 bg-background border border-secondary text-secondary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-work-sans">
 
               <Icon iconId="faArrowLeftLight" className="h-3 w-3 mr-1" />
               Back
@@ -184,7 +175,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               type="button"
               onClick={onSaveDraft}
               disabled={isSaving}
-              className="px-3 py-1.5 bg-white border border-[var(--primary-color)] text-[var(--primary-color)] rounded-md hover:bg-gray-50 transition duration-200 flex items-center font-work-sans">
+              className="px-3 py-1.5 bg-background border border-primary text-primary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-work-sans">
 
               <Icon iconId="faFloppyDiskLight" className="h-3 w-3 mr-1" />
               {isSaving ? "Saving..." : "Save Draft"}
@@ -201,8 +192,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               transition duration-200
               flex items-center
               ${isNextDisabled ?
-                "bg-gray-300 text-gray-500 cursor-not-allowed" :
-                "bg-[var(--accent-color)] text-white hover:opacity-90"} font-work-sans`
+                "bg-muted text-muted-foreground cursor-not-allowed" :
+                "bg-accent text-accent-foreground hover:opacity-90"} font-work-sans`
 
             }>
 

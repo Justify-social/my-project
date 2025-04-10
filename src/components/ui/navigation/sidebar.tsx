@@ -52,8 +52,8 @@ function SidebarItem({
         className={cn(
           'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group', // Match sidebar-ui-components style
           (active || isHovered)
-            ? 'text-[#00BFFF] bg-[#fafafa] font-medium' // Accent color, light background
-            : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]' // Primary text, hover accent
+            ? 'text-accent bg-accent/10 font-medium' : // THEMED
+            'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
         )}
       >
         {iconPath ? (
@@ -81,7 +81,7 @@ function SidebarItem({
         )}
 
         {/* Use text-xs for child items and text-sm for parent/standalone items */}
-        <span className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-sora font-medium truncate ${(active || isHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'}`}>
+        <span className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-sora font-medium truncate ${(active || isHovered) ? 'text-accent' : 'text-foreground'}`}>
           {label}
         </span>
       </Link>
@@ -188,20 +188,20 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 h-full z-40 flex flex-col bg-[#f5f5f5] transition-all w-64 md:translate-x-0", // Match sidebar-ui-components styling and width
+        "fixed top-0 left-0 h-full z-40 flex flex-col bg-[#f5f5f5] transition-all w-64 md:translate-x-0", // Reverted bg-muted
         className
       )}
-      data-testid="sidebar" // Aid for testing
+      data-testid="sidebar"
     >
       {/* Sidebar header - simplified, no toggle */}
       <div className={cn(
-        "h-14 flex items-center px-4 border-b border-[#D1D5DB]" // Use sidebar-ui-components border color and padding
+        "h-14 flex items-center px-4 border-b border" // THEMED border
       )}>
         <div className="flex items-center">
           {logoSrc && (
             <img src={logoSrc} alt={logoAlt} className="h-6 w-auto mr-2" />
           )}
-          <span className="font-medium text-[#333333]">{title}</span>
+          <span className="font-medium text-foreground">{title}</span> {/* THEMED text */}
         </div>
       </div>
 
@@ -209,10 +209,10 @@ export function Sidebar({
         <div className="p-4 text-xs text-red-600 bg-red-100">{loadingError}</div>
       )}
 
-      {/* Navigation items */}
-      <nav className="flex-1 overflow-y-auto p-2">
+      {/* Navigation items - Make this flexible and scrollable, remove bottom padding */}
+      <nav className="flex-1 overflow-y-auto p-2 pb-[var(--footer-height)]">
         {isRegistryLoading && (
-          <div className="p-4 text-xs text-gray-500">Loading icons...</div>
+          <div className="p-4 text-xs text-muted-foreground">Loading icons...</div>
         )}
         <ul className="list-none space-y-0.5">
           {items.map((item, index) => {
@@ -235,8 +235,8 @@ export function Sidebar({
                       className={cn(
                         'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group cursor-pointer', // Added cursor-pointer
                         (isActiveParent || isHoveredParent)
-                          ? 'text-[#00BFFF] bg-[#fafafa] font-medium'
-                          : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]'
+                          ? 'text-accent bg-accent/10 font-medium' : // THEMED
+                          'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
                       )}
                     >
                       <div className="flex items-center">
@@ -262,7 +262,7 @@ export function Sidebar({
                           <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
                         )}
                         {/* Parent item label: text-sm */}
-                        <span className={`text-sm font-sora font-medium truncate ${(isActiveParent || isHoveredParent) ? 'text-[#00BFFF]' : 'text-[#333333]'}`}> {/* Ensure text-sm */}
+                        <span className={`text-sm font-sora font-medium truncate ${(isActiveParent || isHoveredParent) ? 'text-accent' : 'text-foreground'}`}> {/* Ensure text-sm */}
                           {item.label}
                         </span>
                       </div>
@@ -306,16 +306,16 @@ export function Sidebar({
         </ul>
       </nav>
 
-      {/* Container for the fixed bottom item */}
-      <div className="p-2 border-t border-[#D1D5DB]">
+      {/* Settings Footer Area - Apply ONLY border-t */}
+      <div className="p-2 border-t h-[var(--footer-height)] flex flex-col justify-center"> {/* Removed general 'border', kept 'border-t' */}
         <ul className="list-none space-y-0.5">
-          {/* Settings Item outside the scrollable nav */}
+          {/* Settings Item */}
           <SidebarItem
             href="/settings"
             label="Settings"
             icon="appSettings"
             isActive={isActive('/settings')}
-            isChild={false} // Settings uses text-sm like parents
+            isChild={false}
             onClick={onItemClick}
             iconRegistry={isRegistryLoading ? {} : iconRegistry}
             isLoadingRegistry={isRegistryLoading}

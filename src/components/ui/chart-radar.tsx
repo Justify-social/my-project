@@ -70,7 +70,14 @@ export interface RadarChartProps {
   tooltipFormatter?: (value: any) => string;
 }
 
-const DEFAULT_COLORS = ['#3182CE', '#00BFFF', '#4A5568', '#333333', '#38B2AC'];
+// Use HSL theme variables for default colors
+const DEFAULT_COLORS = [
+  'hsl(var(--interactive))', // Medium Blue
+  'hsl(var(--accent))',      // Deep Sky Blue
+  'hsl(var(--secondary))',   // Payne's Grey
+  'hsl(var(--primary))',     // Jet
+  'hsl(var(--success))',     // Example: Assuming a success color
+];
 
 export const RadarChart: React.FC<RadarChartProps> = ({
   data,
@@ -84,7 +91,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   showLegend = true,
   strokeWidth = 2,
   fillOpacity = 0.2,
-  gridColor = '#E2E8F0',
+  gridColor = 'hsl(var(--border))', // Use theme border color
   outerRadius = "80%",
   tooltipFormatter
 }) => {
@@ -120,10 +127,10 @@ export const RadarChart: React.FC<RadarChartProps> = ({
             formatter={tooltipFormatter}
             contentStyle={{
               fontSize: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #E2E8F0',
+              backgroundColor: 'hsl(var(--background))', // Use theme background
+              border: '1px solid hsl(var(--border))',  // Use theme border
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' // Keep shadow for now
             }}
           />
 

@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from '@/components/ui/icon/icon'
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { LoadingSkeleton, TableSkeleton } from "@/components/ui";
+import { IconButtonAction } from "@/components/ui/button-icon-action";
+import { Button } from "@/components/ui/button";
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
@@ -699,9 +701,12 @@ const ClientCampaignList: React.FC = () => {
     {/* Header: Title and Actions */}
     <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 font-work-sans">
       <h1 className="text-xl md:text-2xl font-bold text-[var(--primary-color)] font-sora">Campaign List View</h1>
-      <Link href="/campaigns/wizard/step-1" className="mt-4 md:mt-0 px-5 py-2.5 bg-[var(--accent-color)] text-white rounded text-base font-medium font-work-sans">
-        New Campaign
-      </Link>
+      <div className="fixed bottom-4 right-4">
+        <Link href="/campaigns/wizard/step-1" className="inline-flex items-center px-5 py-2.5 bg-accent text-accent-foreground rounded text-base font-medium shadow-lg hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
+          <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
+          New Campaign
+        </Link>
+      </div>
     </div>
 
     {/* Search and Filters */}
@@ -711,9 +716,9 @@ const ClientCampaignList: React.FC = () => {
         <input type="text" placeholder="Search campaigns" value={search} onChange={(e) => {
           setSearch(e.target.value);
           setCurrentPage(1);
-        }} aria-label="Search campaigns by name" className="border border-[var(--divider-color)] p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans" />
+        }} aria-label="Search campaigns by name" className="border p-2.5 pl-10 rounded w-full focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans" />
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none font-work-sans">
-          <Icon iconId="faMagnifyingGlassLight" size="sm" className="text-[var(--secondary-color)] font-work-sans" />
+          <Icon iconId="faMagnifyingGlassLight" size="sm" className="text-secondary font-work-sans" />
         </div>
       </div>
 
@@ -723,7 +728,7 @@ const ClientCampaignList: React.FC = () => {
           <select value={objectiveFilter} onChange={(e) => {
             setObjectiveFilter(e.target.value);
             setCurrentPage(1);
-          }} aria-label="Filter by objective" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans">
+          }} aria-label="Filter by objective" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
             <option value="">Objective</option>
             {KPI_OPTIONS.map((kpi) => <option key={kpi.key} value={kpi.key}>{kpi.title}</option>)}
           </select>
@@ -736,7 +741,7 @@ const ClientCampaignList: React.FC = () => {
           <select value={statusFilter} onChange={(e) => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
-          }} aria-label="Filter by status" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans">
+          }} aria-label="Filter by status" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
             <option value="">Status</option>
             <option value="approved">Approved</option>
             <option value="active">Active</option>
@@ -755,7 +760,7 @@ const ClientCampaignList: React.FC = () => {
           <select value={startDateFilter} onChange={(e) => {
             setStartDateFilter(e.target.value);
             setCurrentPage(1);
-          }} aria-label="Filter by start date" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans">
+          }} aria-label="Filter by start date" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
             <option value="">Start Date</option>
             {uniqueDates.startDates.map((date) => <option key={date} value={date}>
               {formatDate(date)}
@@ -770,7 +775,7 @@ const ClientCampaignList: React.FC = () => {
           <select value={endDateFilter} onChange={(e) => {
             setEndDateFilter(e.target.value);
             setCurrentPage(1);
-          }} aria-label="Filter by end date" className="appearance-none border border-[var(--divider-color)] p-2.5 pr-10 rounded bg-white focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] focus:border-[var(--accent-color)] font-work-sans">
+          }} aria-label="Filter by end date" className="appearance-none border p-2.5 pr-10 rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring font-work-sans">
             <option value="">End Date</option>
             {uniqueDates.endDates.map((date) => <option key={date} value={date}>
               {formatDate(date)}
@@ -813,74 +818,89 @@ const ClientCampaignList: React.FC = () => {
               {/* Campaign Table for Larger Screens */}
               <div className="hidden md:block overflow-hidden rounded-lg border border-[var(--divider-color)] font-work-sans">
                 <div className="overflow-x-auto font-work-sans">
-                  <table className="min-w-full border-collapse">
-                    <thead className="bg-white border-b border-[var(--divider-color)]">
-                      <tr>
-                        <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("campaignName")}>
-                          Campaign Name
-                        </th>
-                        <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("submissionStatus")}>
-                          Status
-                        </th>
-                        <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("primaryKPI")}>
-                          Objective
-                        </th>
-                        <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("startDate")}>
-                          Start Date
-                        </th>
-                        <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("endDate")}>
-                          End Date
-                        </th>
-                        <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider font-work-sans">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--divider-color)]">
-                      {displayedCampaigns.map((campaign, index) => {
-                        const statusInfo = getStatusInfo(campaign.submissionStatus);
-                        return <tr key={campaign.id} className="hover:bg-[var(--background-color)]">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Link href={`/campaigns/${campaign.id}`}>
-                              <span className="text-[var(--accent-color)] hover:underline cursor-pointer font-medium font-work-sans">
-                                {campaign.campaignName || 'Untitled Campaign'}
-                              </span>
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class} font-work-sans`}>
-                              {statusInfo.text}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center space-x-3 justify-center font-work-sans">
-                              <button onClick={() => handleViewCampaign(campaign.id.toString())} className="group text-gray-500 transition-colors font-work-sans" title="View campaign">
-                                <Icon iconId="faEyeLight" size="md" />
-                              </button>
-                              <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group text-gray-500 transition-colors font-work-sans" title="Edit campaign">
-                                <Icon iconId="faPenToSquareLight" size="md" />
+                  <div className="overflow-x-auto border rounded-lg shadow-sm font-work-sans">
+                    <table className="min-w-full divide-y divide-border font-work-sans">
+                      <thead className="bg-gray-50 font-work-sans">
+                        <tr>
+                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("campaignName")}>
+                            Campaign Name
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("submissionStatus")}>
+                            Status
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("primaryKPI")}>
+                            Objective
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("startDate")}>
+                            Start Date
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer font-work-sans" onClick={() => requestSort("endDate")}>
+                            End Date
+                          </th>
+                          <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider font-work-sans">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--divider-color)]">
+                        {displayedCampaigns.map((campaign, index) => {
+                          const statusInfo = getStatusInfo(campaign.submissionStatus);
+                          return <tr key={campaign.id} className="hover:bg-[var(--background-color)]">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <Link href={`/campaigns/${campaign.id}`}>
+                                <span className="text-[var(--accent-color)] hover:underline cursor-pointer font-medium font-work-sans">
+                                  {campaign.campaignName || 'Untitled Campaign'}
+                                </span>
                               </Link>
-                              <button onClick={() => handleDuplicateClick(campaign)} className="group text-gray-500 transition-colors cursor-pointer font-work-sans" title="Duplicate campaign">
-                                <Icon iconId="faCopyLight" size="md" />
-                              </button>
-                              <button onClick={() => handleDeleteClick(campaign)} className="group text-gray-500 transition-colors cursor-pointer font-work-sans" title="Delete campaign">
-                                <Icon iconId="faTrashCanLight" size="md" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>;
-                      })}
-                    </tbody>
-                  </table>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class} font-work-sans`}>
+                                {statusInfo.text}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center space-x-1 justify-center">
+                                <IconButtonAction
+                                  iconBaseName="faEye"
+                                  hoverColorClass="text-accent"
+                                  ariaLabel="View campaign"
+                                  onClick={() => handleViewCampaign(campaign.id.toString())}
+                                />
+                                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} title="Edit campaign">
+                                  <IconButtonAction
+                                    iconBaseName="faPenToSquare"
+                                    hoverColorClass="text-accent"
+                                    ariaLabel="Edit campaign"
+                                  />
+                                </Link>
+                                <IconButtonAction
+                                  iconBaseName="faCopy"
+                                  hoverColorClass="text-accent"
+                                  ariaLabel="Duplicate campaign"
+                                  onClick={() => handleDuplicateClick(campaign)}
+                                />
+                                <IconButtonAction
+                                  iconBaseName="faTrashCan"
+                                  hoverColorClass="text-destructive"
+                                  ariaLabel="Delete campaign"
+                                  onClick={() => handleDeleteClick(campaign)}
+                                />
+                              </div>
+                            </td>
+                          </tr>;
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
                 {/* Pagination for Desktop */}
@@ -942,7 +962,11 @@ const ClientCampaignList: React.FC = () => {
                         <Icon iconId="faEyeLight" size="md" />
                       </button>
                       <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} className="group p-1.5 text-gray-500 transition-colors font-work-sans" title="Edit campaign">
-                        <Icon iconId="faPenToSquareLight" size="md" />
+                        <IconButtonAction
+                          iconBaseName="faPenToSquare"
+                          hoverColorClass="text-accent"
+                          ariaLabel="Edit campaign"
+                        />
                       </Link>
                       <button onClick={() => handleDuplicateClick(campaign)} className="group p-1.5 text-gray-500 transition-colors cursor-pointer font-work-sans" title="Duplicate campaign">
                         <Icon iconId="faCopyLight" size="md" />

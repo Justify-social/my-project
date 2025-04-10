@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory calendar
  * @description Displays upcoming campaign events in a calendar grid.
- * @status 10th April - Rewritten for clarity
+ * @status 10th April
  */
 'use client';
 

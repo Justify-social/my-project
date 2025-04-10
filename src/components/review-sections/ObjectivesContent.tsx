@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from '@/components/ui/icon';
 
 interface ObjectivesContentProps {
   data?: {
@@ -77,16 +78,13 @@ const ObjectivesContent: React.FC<ObjectivesContentProps> = ({ data }) => {
         <h3 className="font-semibold mb-3 font-sora">Selected Features</h3>
         <div className="space-y-1 font-work-sans">
           {data.features?.length > 0 ?
-          data.features.map((feature, index) =>
-          <div key={index} className="flex items-center font-work-sans">
-                <svg className="w-4 h-4 mr-2 text-green-500 font-work-sans" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+            data.features.map((feature, index) =>
+              <div key={index} className="flex items-center font-work-sans">
+                <Icon iconId="faCheckLight" className="w-4 h-4 mr-2 text-success" />
                 {feature}
               </div>
-          ) :
-
-          <div className="text-gray-500 font-work-sans">No features selected</div>
+            ) :
+            <div className="text-muted-foreground font-work-sans">No features selected</div>
           }
         </div>
       </div>

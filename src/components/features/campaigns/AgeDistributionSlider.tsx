@@ -28,7 +28,7 @@ export default function AgeDistributionSlider({
     // If increasing one value, decrease others proportionally
     if (diff > 0) {
       const availableToDecrease = newValues.reduce((sum, val, i) =>
-      i !== index ? sum + val : sum, 0);
+        i !== index ? sum + val : sum, 0);
 
       if (availableToDecrease > 0) {
         newValues = newValues.map((val, i) => {
@@ -41,11 +41,11 @@ export default function AgeDistributionSlider({
     // If decreasing one value, increase others proportionally
     else if (diff < 0) {
       const availableToIncrease = 100 - newValues.reduce((sum, val, i) =>
-      i !== index ? sum + val : sum, 0);
+        i !== index ? sum + val : sum, 0);
 
       if (availableToIncrease > 0) {
         const totalOthers = newValues.reduce((sum, val, i) =>
-        i !== index ? sum + val : sum, 0);
+          i !== index ? sum + val : sum, 0);
 
         newValues = newValues.map((val, i) => {
           if (i === index) return newValue;
@@ -63,8 +63,8 @@ export default function AgeDistributionSlider({
       const difference = 100 - total;
       // Find largest value that's not the current index
       const maxIndex = newValues.
-      map((v, i) => i !== index ? v : -1).
-      reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+        map((v, i) => i !== index ? v : -1).
+        reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
 
       if (maxIndex >= 0) {
         newValues[maxIndex] += difference;
@@ -76,41 +76,41 @@ export default function AgeDistributionSlider({
 
   return (
     <div className="mb-6 font-work-sans">
-      <p className="text-sm text-gray-600 mb-4 font-work-sans">
+      <p className="text-sm text-muted-foreground mb-4 font-work-sans">
         Adjust the sliders to allocate percentages across age groups. The total must equal 100%.
       </p>
-      
+
       <div className="space-y-4 font-work-sans">
         {ageGroups.map((group, index) =>
-        <div key={group} className="flex items-center gap-4 font-work-sans">
+          <div key={group} className="flex items-center gap-4 font-work-sans">
             <span className="w-16 text-sm font-medium font-work-sans">{group}</span>
             <div className="flex-grow font-work-sans">
               <Slider
-              min={0}
-              max={100}
-              step={1}
-              value={values[index]}
-              onChange={(value) => handleSliderChange(index, typeof value === 'number' ? value : value[0])}
-              className="slider-blue"
-              trackStyle={{
-                backgroundColor: '#2563EB',
-                height: 4,
-                transition: 'all 0.3s ease'
-              }}
-              handleStyle={{
-                borderColor: '#2563EB',
-                backgroundColor: '#2563EB',
-                opacity: 1,
-                boxShadow: '0 0 0 5px rgba(37, 99, 235, 0.1)',
-                width: 16,
-                height: 16,
-                marginTop: -6,
-                transition: 'all 0.3s ease'
-              }}
-              railStyle={{
-                backgroundColor: '#E5E7EB',
-                height: 4
-              }} />
+                min={0}
+                max={100}
+                step={1}
+                value={values[index]}
+                onChange={(value) => handleSliderChange(index, typeof value === 'number' ? value : value[0])}
+                className="slider-blue"
+                trackStyle={{
+                  backgroundColor: 'hsl(var(--interactive))',
+                  height: 4,
+                  transition: 'all 0.3s ease'
+                }}
+                handleStyle={{
+                  borderColor: 'hsl(var(--interactive))',
+                  backgroundColor: 'hsl(var(--interactive))',
+                  opacity: 1,
+                  boxShadow: '0 0 0 5px hsl(var(--interactive) / 0.1)',
+                  width: 16,
+                  height: 16,
+                  marginTop: -6,
+                  transition: 'all 0.3s ease'
+                }}
+                railStyle={{
+                  backgroundColor: 'hsl(var(--border))',
+                  height: 4
+                }} />
 
             </div>
             <span className="w-12 text-right text-sm font-medium font-work-sans">

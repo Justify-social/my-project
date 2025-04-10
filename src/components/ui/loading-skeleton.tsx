@@ -153,7 +153,7 @@ export function DashboardSkeleton({ className }: { className?: string }) {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={`metric-${i}`}
-            className="rounded-xl p-5 border border-gray-200 dark:border-gray-700 space-y-4"
+            className="rounded-xl p-5 border space-y-4"
           >
             <div className="flex items-center gap-3">
               <Skeleton className="w-10 h-10 rounded-lg" />
@@ -170,13 +170,13 @@ export function DashboardSkeleton({ className }: { className?: string }) {
       {/* Main content - charts and tables */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main chart area */}
-        <div className="lg:col-span-2 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div className="lg:col-span-2 rounded-xl p-5 border">
           <Skeleton className="h-5 w-40 rounded mb-6" />
           <Skeleton className="h-64 rounded" />
         </div>
 
         {/* Side stats area */}
-        <div className="rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div className="rounded-xl p-5 border">
           <Skeleton className="h-5 w-32 rounded mb-6" />
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -190,7 +190,7 @@ export function DashboardSkeleton({ className }: { className?: string }) {
       </div>
 
       {/* Table section */}
-      <div className="rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+      <div className="rounded-xl p-5 border">
         <Skeleton className="h-5 w-48 rounded mb-6" />
         <TableSkeleton rows={3} columns={5} />
       </div>
@@ -240,7 +240,7 @@ export function WizardSkeleton({
       {stepContent || (
         <div className="space-y-6">
           {/* Default form fields */}
-          <div className="rounded-xl p-6 border border-gray-200 dark:border-gray-700 space-y-5">
+          <div className="rounded-xl p-6 border space-y-5">
             <div className="flex items-center gap-2">
               <Skeleton className="w-6 h-6 rounded" />
               <Skeleton className="h-6 w-40 rounded" />
@@ -250,14 +250,14 @@ export function WizardSkeleton({
             {Array.from({ length: 3 + normalizedStep }).map((_, i) => (
               <div key={`field-${i}`} className="space-y-2">
                 <Skeleton className="h-4 w-32 rounded" />
-                <Skeleton className="h-10 w-full rounded border border-input" />
+                <Skeleton className="h-10 w-full rounded border" />
               </div>
             ))}
           </div>
 
           {/* Optional second block */}
           {normalizedStep >= 2 && (
-            <div className="rounded-xl p-6 border border-gray-200 dark:border-gray-700 space-y-5">
+            <div className="rounded-xl p-6 border space-y-5">
               <div className="flex items-center gap-2">
                 <Skeleton className="w-6 h-6 rounded" />
                 <Skeleton className="h-6 w-48 rounded" />
@@ -265,7 +265,7 @@ export function WizardSkeleton({
 
               <div className="grid grid-cols-2 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={`opt-${i}`} className="h-12 rounded border border-input" />
+                  <Skeleton key={`opt-${i}`} className="h-12 rounded border" />
                 ))}
               </div>
             </div>
@@ -274,7 +274,7 @@ export function WizardSkeleton({
       )}
 
       {/* Bottom navigation */}
-      <div className="sticky bottom-0 bg-background p-4 border-t border-border flex justify-between items-center">
+      <div className="sticky bottom-0 bg-background p-4 border-t border flex justify-between items-center">
         <Skeleton className="h-10 w-24 rounded" />
         <div className="flex gap-3">
           <Skeleton className="h-10 w-28 rounded" />

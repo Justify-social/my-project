@@ -47,7 +47,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
   const currentCategory = searchParams.get('category');
 
   return (
-    <aside className="w-full h-full bg-[#f5f5f5] border-r border-gray-200 flex flex-col">
+    <aside className="w-full h-full bg-[#f5f5f5] border-r border flex flex-col">
       {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {navItems.map((item) => {
@@ -82,14 +82,14 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
               className={cn(
                 'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
                 (isActive || isHovered)
-                  ? 'text-[#00BFFF] bg-[#fafafa] font-medium'
-                  : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]'
+                  ? 'text-accent bg-accent/10 font-medium'
+                  : 'text-foreground hover:text-accent hover:bg-accent/5'
               )}
             >
               <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
               <span className={cn(
                 "text-sm font-sora font-medium truncate",
-                (isActive || isHovered) ? 'text-[#00BFFF]' : 'text-[#333333]'
+                (isActive || isHovered) ? 'text-accent' : 'text-foreground'
               )}>
                 {item.label}
               </span>
@@ -99,7 +99,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
       </nav>
 
       {/* Footer Area */}
-      <div className="p-2 mt-auto border-t border-[#D1D5DB] space-y-0.5">
+      <div className="p-2 mt-auto border-t border space-y-0.5">
         {/* View Source Link - Apply standard styling */}
         <Link
           href="https://github.com/Justify-social/my-project"
@@ -107,15 +107,14 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           rel="noopener noreferrer"
           className={cn(
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-            // Use standard hover, no active state needed typically for external link
-            'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]'
+            'text-foreground hover:text-accent hover:bg-accent/5'
           )}
         >
           {/* Use consistent icon rendering - assuming brandsGithub exists */}
-          <Icon iconId="brandsGithub" className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-[#00BFFF]" />
+          <Icon iconId="brandsGithub" className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent" />
           <span className={cn(
             "text-sm font-sora font-medium truncate",
-            'text-[#333333] group-hover:text-[#00BFFF]'
+            'text-foreground group-hover:text-accent'
           )}>
             View Source
           </span>
@@ -138,16 +137,15 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           href="/dashboard"
           className={cn(
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-            // Use standard hover, potentially check active state if needed later
-            'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]'
+            'text-foreground hover:text-accent hover:bg-accent/5'
           )}
         >
           {/* Use consistent icon rendering */}
           {/* Assume faArrowLeftLight exists, switch to Solid on hover */}
-          <Icon iconId="faArrowLeftLight" className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-[#00BFFF]" />
+          <Icon iconId="faArrowLeftLight" className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent" />
           <span className={cn(
             "text-sm font-sora font-medium truncate",
-            'text-[#333333] group-hover:text-[#00BFFF]'
+            'text-foreground group-hover:text-accent'
           )}>
             Back to App
           </span>

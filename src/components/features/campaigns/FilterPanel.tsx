@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface FilterPanelProps {
   filters: {
@@ -121,9 +122,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, uniqueDa
         </SelectContent>
       </Select>
 
-      <button onClick={resetFilters} className="px-3 py-2.5 bg-[var(--secondary-color)] text-white rounded text-sm font-medium hover:bg-opacity-90 transition-colors font-work-sans">
+      <Button variant="secondary" onClick={resetFilters} className="text-sm font-medium">
         Reset Filters
-      </button>
+      </Button>
     </div>
   );
 };
