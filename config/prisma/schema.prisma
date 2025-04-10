@@ -21,6 +21,7 @@ model CampaignWizard {
   timeZone         String
   primaryContact   Json
   secondaryContact Json?
+  additionalContacts Json?
   budget           Json
   step1Complete    Boolean         @default(false)
   primaryKPI       KPI?

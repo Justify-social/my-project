@@ -4,7 +4,8 @@ import { Prisma, Platform, Position, KPI, Currency, SubmissionStatus, CreativeAs
 import { prisma } from '@/lib/prisma'
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger'
 import { v4 as uuidv4 } from 'uuid'
-import { withValidation, tryCatch } from '@/config/middleware/api'
+import { withValidation } from '@/config/middleware/api/validate-api'
+import { tryCatch } from '@/config/middleware/api/handle-api-errors'
 
 // Define schemas for campaign creation validation
 // Note: Frontend uses 'Instagram', backend uses 'INSTAGRAM' - transformation required
@@ -199,27 +200,32 @@ const campaignFlexibleSchema = z.object({
 
 // GET handler - List campaigns
 export async function GET(request: NextRequest) {
+  // --- Add runtime logging for DATABASE_URL ---
+  // console.log("[/api/campaigns GET] Runtime DATABASE_URL:", process.env.DATABASE_URL); // Keep commented out for now
+  // -------------------------------------------
   try {
+    // --- Low-level diagnostic: Check if table exists via raw SQL (REMOVED) --- 
+    // console.log("[/api/campaigns GET] Running raw query to check for CampaignWizard table...");
+    // const tableExistsResult = await prisma.$queryRawUnsafe(
+    //   `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'CampaignWizard');`
+    // );
+    // console.log("[/api/campaigns GET] Raw query result:", tableExistsResult);
+    // // @ts-expect-error - Prisma types for raw queries can be complex
+    // const tableExists = tableExistsResult?.[0]?.exists;
+    // console.log("[/api/campaigns GET] Does 'CampaignWizard' table exist according to DB?", tableExists);
+    // --- End diagnostic ---
+
+    // --- Original code (Restored) --- 
     const campaigns = await prisma.campaignWizard.findMany({
       orderBy: {
         updatedAt: 'desc'
       },
       take: 100
     });
-
-    // Log raw data from Prisma before transformation
     console.log("Raw campaigns from DB:", JSON.stringify(campaigns, null, 2));
-
-    // Import the EnumTransformers utility
     const { EnumTransformers } = await import('@/utils/enum-transformers');
-
-    // Transform enum values from backend to frontend format
     const transformedCampaigns = campaigns.map(campaign => {
-      // First transform the campaign object
       const transformed = EnumTransformers.transformObjectFromBackend(campaign);
-
-      // Then ensure date fields are properly formatted as strings
-      // This avoids type errors since we're creating a new object
       return {
         ...transformed,
         startDate: campaign.startDate instanceof Date ? campaign.startDate.toISOString() : null,
@@ -228,13 +234,20 @@ export async function GET(request: NextRequest) {
         updatedAt: campaign.updatedAt instanceof Date ? campaign.updatedAt.toISOString() : null
       };
     });
-
     return NextResponse.json({
       success: true,
       data: transformedCampaigns
     });
+    // --- End original code ---
+
+    // --- Placeholder response (Removed) ---
+    // if (!tableExists) {
+    //   throw new Error("Diagnostic check failed: 'CampaignWizard' table not found in information_schema.");
+    // }
+    // return NextResponse.json({ success: true, data: [], message: "Diagnostic OK - Table exists." });
+
   } catch (error) {
-    console.error("Error fetching campaigns:", error);
+    console.error("Error fetching campaigns:", error); // Restored original error message context
     dbLogger.error(
       DbOperation.FETCH,
       'Error fetching campaigns',

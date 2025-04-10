@@ -102,7 +102,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    "src/app/(dashboard)/dashboard/DashboardContent.tsx.bak"
   ],
   "exclude": [
     "node_modules"

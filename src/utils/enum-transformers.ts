@@ -32,12 +32,12 @@ export const EnumTransformers = {
       'recommendationIntent': 'RECOMMENDATION_INTENT' as KPI,
       'advocacy': 'ADVOCACY' as KPI
     };
-    
+
     const result = mapping[value] || value as KPI;
     debugLog(`[EnumTransformer] kpiToBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   kpiFromBackend(value: KPI): string {
     const mapping: Record<string, string> = {
       'AD_RECALL': 'adRecall',
@@ -50,12 +50,12 @@ export const EnumTransformers = {
       'RECOMMENDATION_INTENT': 'recommendationIntent',
       'ADVOCACY': 'advocacy'
     };
-    
+
     const result = mapping[value] || value.toLowerCase();
     debugLog(`[EnumTransformer] kpiFromBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   // Platform transformers
   platformToBackend(value: string): Platform {
     const mapping: Record<string, Platform> = {
@@ -68,7 +68,7 @@ export const EnumTransformers = {
     debugLog(`[EnumTransformer] platformToBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   platformFromBackend(value: Platform): string {
     const mapping: Record<string, string> = {
       'INSTAGRAM': 'Instagram',
@@ -80,19 +80,19 @@ export const EnumTransformers = {
     debugLog(`[EnumTransformer] platformFromBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   // Currency transformers
   currencyToBackend(value: string): Currency {
     const result = value.toUpperCase() as Currency;
     debugLog(`[EnumTransformer] currencyToBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   currencyFromBackend(value: Currency): string {
     debugLog(`[EnumTransformer] currencyFromBackend: ${value} → ${value}`);
     return value;
   },
-  
+
   // Position transformers
   positionToBackend(value: string): Position {
     const mapping: Record<string, Position> = {
@@ -105,12 +105,12 @@ export const EnumTransformers = {
     debugLog(`[EnumTransformer] positionToBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   positionFromBackend(value: Position): string {
     debugLog(`[EnumTransformer] positionFromBackend: ${value} → ${value}`);
     return value; // Position format is the same in frontend and backend
   },
-  
+
   // Feature transformers
   featureToBackend(value: string): Feature {
     const mapping: Record<string, Feature> = {
@@ -124,7 +124,7 @@ export const EnumTransformers = {
     debugLog(`[EnumTransformer] featureToBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   featureFromBackend(value: Feature): string {
     const mapping: Record<string, string> = {
       'CREATIVE_ASSET_TESTING': 'CREATIVE_ASSET_TESTING',
@@ -137,58 +137,58 @@ export const EnumTransformers = {
     debugLog(`[EnumTransformer] featureFromBackend: ${value} → ${result}`);
     return result;
   },
-  
+
   // TeamRole transformers
   teamRoleToBackend(value: string): TeamRole {
     debugLog(`[EnumTransformer] teamRoleToBackend: ${value} → ${value}`);
     return value as TeamRole; // Both use UPPERCASE format
   },
-  
+
   teamRoleFromBackend(value: TeamRole): string {
     debugLog(`[EnumTransformer] teamRoleFromBackend: ${value} → ${value}`);
     return value; // Both use UPPERCASE format
   },
-  
+
   // InvitationStatus transformers
   invitationStatusToBackend(value: string): InvitationStatus {
     debugLog(`[EnumTransformer] invitationStatusToBackend: ${value} → ${value}`);
     return value as InvitationStatus; // Both use UPPERCASE format
   },
-  
+
   invitationStatusFromBackend(value: InvitationStatus): string {
     debugLog(`[EnumTransformer] invitationStatusFromBackend: ${value} → ${value}`);
     return value; // Both use UPPERCASE format, but display with first letter capitalized and rest lowercase
   },
-  
+
   // UserRole transformers
   userRoleToBackend(value: string): UserRole {
     debugLog(`[EnumTransformer] userRoleToBackend: ${value} → ${value}`);
     return value as UserRole; // Both use UPPERCASE format
   },
-  
+
   userRoleFromBackend(value: UserRole): string {
     debugLog(`[EnumTransformer] userRoleFromBackend: ${value} → ${value}`);
     return value; // Both use UPPERCASE format
   },
-  
+
   // Recursive object transformation utility
   transformObjectToBackend<T>(obj: T): T {
     if (!obj) return obj;
-    
+
     if (Array.isArray(obj)) {
       return obj.map(item => this.transformObjectToBackend(item)) as unknown as T;
     }
-    
+
     if (typeof obj !== 'object') return obj;
-    
+
     const result: Record<string, unknown> = {};
-    
+
     for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (value === null || value === undefined) {
         result[key] = value;
         continue;
       }
-      
+
       if (key === 'kpi' || key === 'primaryKPI') {
         result[key] = this.kpiToBackend(value as string);
       } else if (key === 'secondaryKPIs' && Array.isArray(value)) {
@@ -207,33 +207,35 @@ export const EnumTransformers = {
         result[key] = this.invitationStatusToBackend(value as string);
       } else if (key === 'userRole') {
         result[key] = this.userRoleToBackend(value as string);
+      } else if (value instanceof Date) { // Explicitly handle Date objects
+        result[key] = value; // Keep Date objects as they are for DB
       } else if (typeof value === 'object') {
         result[key] = this.transformObjectToBackend(value);
       } else {
         result[key] = value;
       }
     }
-    
+
     return result as unknown as T;
   },
-  
+
   transformObjectFromBackend<T>(obj: T): T {
     if (!obj) return obj;
-    
+
     if (Array.isArray(obj)) {
       return obj.map(item => this.transformObjectFromBackend(item)) as unknown as T;
     }
-    
+
     if (typeof obj !== 'object') return obj;
-    
+
     const result: Record<string, unknown> = {};
-    
+
     for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (value === null || value === undefined) {
         result[key] = value;
         continue;
       }
-      
+
       if (key === 'kpi' || key === 'primaryKPI') {
         result[key] = this.kpiFromBackend(value as KPI);
       } else if (key === 'secondaryKPIs' && Array.isArray(value)) {
@@ -252,13 +254,15 @@ export const EnumTransformers = {
         result[key] = this.invitationStatusFromBackend(value as InvitationStatus);
       } else if (key === 'userRole') {
         result[key] = this.userRoleFromBackend(value as UserRole);
+      } else if (value instanceof Date) { // Explicitly handle Date objects
+        result[key] = value.toISOString(); // Convert to ISO string for API response
       } else if (typeof value === 'object') {
         result[key] = this.transformObjectFromBackend(value);
       } else {
         result[key] = value;
       }
     }
-    
+
     return result as unknown as T;
   }
 };
@@ -269,7 +273,7 @@ export const EnumTransformers = {
  */
 export const formatEnumForDisplay = (value: string): string => {
   if (!value) return '';
-  
+
   // If it's an UPPERCASE_SNAKE_CASE value
   if (value === value.toUpperCase() && value.includes('_')) {
     // Convert to Title Case Words
@@ -279,7 +283,7 @@ export const formatEnumForDisplay = (value: string): string => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
-  
+
   // If it's already in a display format, return as is
   return value;
 }; 
