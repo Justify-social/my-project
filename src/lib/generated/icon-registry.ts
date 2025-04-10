@@ -842,6 +842,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       "category": "light",
+      "id": "faMoonLight",
+      "name": "Moon",
+      "path": "/icons/light/faMoonLight.svg",
+      "faVersion": "fal fa-moon"
+    },
+    {
+      "category": "light",
       "id": "faPaintbrushLight",
       "name": "Paintbrush",
       "faVersion": "fal fa-paintbrush",
@@ -1035,6 +1042,13 @@ export const iconRegistryData: IconRegistryData = {
       "name": "Star",
       "faVersion": "fal fa-star",
       "path": "/icons/light/faStarLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faSunBrightLight",
+      "name": "Sun Bright",
+      "path": "/icons/light/faSunBrightLight.svg",
+      "faVersion": "fal fa-sun-bright"
     },
     {
       "category": "light",
@@ -1794,6 +1808,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       "category": "solid",
+      "id": "faMoonSolid",
+      "name": "Moon",
+      "path": "/icons/solid/faMoonSolid.svg",
+      "faVersion": "fas fa-moon"
+    },
+    {
+      "category": "solid",
       "id": "faPaintbrushSolid",
       "name": "Paintbrush",
       "faVersion": "fas fa-paintbrush",
@@ -1987,6 +2008,13 @@ export const iconRegistryData: IconRegistryData = {
       "name": "Star",
       "faVersion": "fas fa-star",
       "path": "/icons/solid/faStarSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSunBrightSolid",
+      "name": "Sun Bright",
+      "path": "/icons/solid/faSunBrightSolid.svg",
+      "faVersion": "fas fa-sun-bright"
     },
     {
       "category": "solid",
