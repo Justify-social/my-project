@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory visualization
  * @description Responsive line chart component based on Recharts with support for multiple data series.
+ * @status stable
  * It handles date formatting on the X-axis and provides customizable tooltips and legends.
  * @param {LineChartProps} props - The props for the LineChart component.
  * @param {object[]} [props.data=[]] - The dataset for the chart.

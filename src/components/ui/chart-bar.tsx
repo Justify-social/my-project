@@ -3,6 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive bar chart component for comparing categorical data, supporting horizontal and vertical layouts.
+ * @status stable
  * @since 2023-07-15
  * @param {BarChartProps} props - The props for the BarChart component.
  * @param {DataPoint[]} props.data - The dataset for the chart.

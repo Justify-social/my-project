@@ -4,8 +4,62 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { AssetCard } from '@/components/ui/card-asset';
 
-import { AssetCard } from '../../../../../../components/ui/card-asset';
+// Sample Data - Updated with real paths and more examples
+const sampleAssets = [
+  {
+    id: 'vid1',
+    name: 'YouTube Creative Example',
+    url: '/videos/youtube-creative.mp4', // Path from /public
+    type: 'video',
+    platform: 'Youtube',
+    budget: 1200,
+    currency: 'USD',
+    description: 'Short video ad optimized for YouTube pre-roll and in-stream placements.',
+  },
+  {
+    id: 'vid2',
+    name: 'TikTok Trend Ad',
+    url: '/videos/tiktok-creative.mp4',
+    type: 'video',
+    platform: 'TikTok',
+    budget: 850,
+    currency: 'USD',
+  },
+  {
+    id: 'vid3',
+    name: 'Instagram Story Asset',
+    url: '/videos/instagram-creative.mp4',
+    type: 'video',
+    platform: 'Instagram',
+    budget: 1500,
+    currency: 'USD',
+    description: 'Vertical video designed for Instagram Stories and Reels engagement.',
+  },
+  {
+    id: 'img1',
+    name: 'Rachel Green - Influencer Post',
+    url: '/images/influencers/rachel.jpg', // Path from /public
+    type: 'image',
+    platform: 'Instagram',
+    influencerHandle: '@rachel_style',
+    budget: 2500,
+    currency: 'USD',
+    description: 'Lifestyle image featuring product placement for summer campaign.'
+  },
+  {
+    id: 'img2',
+    name: 'Olivia Parker - Product Showcase',
+    url: '/images/influencers/olivia.jpg',
+    type: 'image',
+    platform: 'Facebook',
+    influencerHandle: '@olivia_beauty',
+    budget: 1800,
+    currency: 'USD',
+  },
+];
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,15 +70,15 @@ const statusStyles: Record<string, string> = {
 
 export default function AssetCardPreviewPage() {
   const componentMeta = {
-  "name": "AssetCard",
-  "description": "Card component displaying asset information with preview, title, platform, and budget using standard Card components.",
-  "category": "organism",
-  "subcategory": "card",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
-  const examples: string[] = [];
+    "name": "AssetCard",
+    "description": "Card component displaying asset information with preview, title, platform, and budget.",
+    "category": "organism",
+    "subcategory": "card",
+    "renderType": "client",
+    "status": "stable",
+    "author": "Your Name/Team",
+    "since": "2024-01-01"
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -59,35 +113,19 @@ export default function AssetCardPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
-          {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <AssetCard /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <AssetCard /> here)</p>
-          </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
-          {/* ---- END MANUAL EXAMPLES ---- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"> {/* Use grid for layout */}
+          {/* ---- Render cards from sample data ---- */}
+          {sampleAssets.map((assetData) => (
+            <AssetCard
+              key={assetData.id}
+              asset={assetData} // Pass the whole object
+              currency={assetData.currency} // Pass currency separately
+            />
+          ))}
         </div>
       </div>
 
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
+      {/* Code Snippets Section - Removed */}
     </div>
   );
 }

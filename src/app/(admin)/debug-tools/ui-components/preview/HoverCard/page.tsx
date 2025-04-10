@@ -5,11 +5,7 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/ui/icon';
+import { HoverCard } from '../../../../../../components/ui/hover-card';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -25,10 +21,10 @@ export default function HoverCardPreviewPage() {
     "category": "molecule",
     "subcategory": "overlay",
     "renderType": "client",
-    "status": "stable",
-    "author": "Shadcn UI",
-    "since": "2023-01-01"
+    "author": "",
+    "since": ""
   };
+  const examples: string[] = [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -65,67 +61,32 @@ export default function HoverCardPreviewPage() {
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-
-          {/* Example 1: Basic Profile Card */}
+          {/* Example 1: Basic Usage Placeholder */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Profile Card Example</h3>
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <Button variant="link">@nextjs</Button>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-80">
-                <div className="flex justify-between space-x-4">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/vercel.png" />
-                    <AvatarFallback>VC</AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-semibold">@nextjs</h4>
-                    <p className="text-sm">
-                      The React Framework – created and maintained by @vercel.
-                    </p>
-                    <div className="flex items-center pt-2">
-                      <Icon iconId="faCalendarDaysLight" className="mr-2 h-4 w-4 opacity-70" />
-                      <span className="text-xs text-muted-foreground">
-                        Joined December 2021
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
+            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
+            {/* <HoverCard /> */}
+            <p className="text-sm text-muted-foreground">(Manually add rendering example for <HoverCard /> here)</p>
           </div>
-
-          {/* Example 2: Custom Delays */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Custom Open/Close Delays</h3>
-            <HoverCard openDelay={200} closeDelay={100}>
-              <HoverCardTrigger asChild>
-                <Button variant="outline">Hover with Delay</Button>
-              </HoverCardTrigger>
-              <HoverCardContent>
-                This card appears after 200ms and closes after 100ms.
-              </HoverCardContent>
-            </HoverCard>
-          </div>
-
-          {/* Example 3: Different Side */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Positioning (side="top")</h3>
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <Button variant="outline">Hover (Side: Top)</Button>
-              </HoverCardTrigger>
-              <HoverCardContent side="top">
-                Card positioned above the trigger.
-              </HoverCardContent>
-            </HoverCard>
-          </div>
-
-          {/* Example 4: More examples can be added here */}
+          {/* Example 2: Add more placeholders or examples as needed */}
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
+
+      {/* Code Snippets Section */}
+      {examples && examples.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
+          <div className="space-y-4">
+            {examples.map((exampleCode: string, index: number) => (
+              <div key={index} className="border border-divider rounded-lg overflow-hidden">
+                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
+                  <code>{`${exampleCode}`}</code>
+                </pre>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   );

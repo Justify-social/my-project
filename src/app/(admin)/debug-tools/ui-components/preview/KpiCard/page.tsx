@@ -4,8 +4,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { KpiCard } from '@/components/ui/card-kpi';
 
-import { KpiCard } from '../../../../../../components/ui/card-kpi';
+// Sample data for chart within KpiCard
+const sampleTrendData = [
+  { value: 10 }, { value: 20 }, { value: 15 }, { value: 25 }, { value: 30 }, { value: 28 }, { value: 40 }
+];
+const negativeTrendData = [
+  { value: 50 }, { value: 45 }, { value: 48 }, { value: 40 }, { value: 35 }, { value: 38 }, { value: 30 }
+];
+const flatTrendData = [
+  { value: 100 }, { value: 100 }, { value: 100 }, { value: 100 }, { value: 100 }, { value: 100 }, { value: 100 }
+];
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,15 +27,15 @@ const statusStyles: Record<string, string> = {
 
 export default function KpiCardPreviewPage() {
   const componentMeta = {
-  "name": "KpiCard",
-  "description": "A card component for displaying key performance indicators with trend visualization using standard Card components.",
-  "category": "organism",
-  "subcategory": null,
-  "renderType": "server",
-  "author": "",
-  "since": "2023-07-15"
-};
-  const examples: string[] = [];
+    "name": "KpiCard",
+    "description": "A card component for displaying key performance indicators with trend visualization.",
+    "category": "organism",
+    "subcategory": "card",
+    "renderType": "server",
+    "status": "stable",
+    "author": "Your Name/Team",
+    "since": "2023-07-15"
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -59,34 +70,85 @@ export default function KpiCardPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <KpiCard /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <KpiCard /> here)</p>
+
+          {/* Example 1: Positive Trend */}
+          <div className="border border-divider rounded-lg p-0">
+            <KpiCard
+              title="Total Revenue"
+              value={45231.89}
+              change="+20.1%"
+              changeDescription="from last month"
+              trendData={sampleTrendData}
+              dataKey="value"
+              formatAsCurrency={true}
+              currency="USD"
+            />
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Negative Trend */}
+          <div className="border border-divider rounded-lg p-0">
+            <KpiCard
+              title="Subscriptions"
+              value={2350}
+              change="-12.2%"
+              changeDescription="from last month"
+              trendData={negativeTrendData}
+              dataKey="value"
+            />
+          </div>
+
+          {/* Example 3: Flat Trend / No Change */}
+          <div className="border border-divider rounded-lg p-0">
+            <KpiCard
+              title="Active Users"
+              value={9876}
+              change="+0%"
+              changeDescription="since last hour"
+              trendData={flatTrendData}
+              dataKey="value"
+            />
+          </div>
+
+          {/* Example 4: Without Trend Chart */}
+          <div className="border border-divider rounded-lg p-0">
+            <KpiCard
+              title="Pending Orders"
+              value={102}
+              change="-5"
+              changeDescription="since yesterday"
+            />
+          </div>
+
+          {/* Example 5: Currency Formatting */}
+          <div className="border border-divider rounded-lg p-0">
+            <KpiCard
+              title="Average Order Value"
+              value={125.50}
+              change="+5.2%"
+              changeDescription="from last week"
+              formatAsCurrency={true}
+              currency="EUR"
+              trendData={sampleTrendData}
+              dataKey="value"
+            />
+          </div>
+
+          {/* Example 6: Custom Icon */}
+          <div className="border border-divider rounded-lg p-0">
+            <KpiCard
+              title="Support Tickets"
+              value={85}
+              change="+10"
+              changeDescription="today"
+              iconId="faHeadsetLight"
+            />
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

@@ -3,6 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive area chart component for visualizing cumulative or quantitative data over time or categories.
+ * @status stable
  * @since 2023-07-15
  * @param {AreaChartProps} props - The props for the AreaChart component.
  * @param {DataPoint[]} props.data - The dataset for the chart.

@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory card
  * @description Card component displaying asset information with preview, title, platform, and budget using standard Card components.
+ * @status stable
  */
 'use client';
 
@@ -13,7 +14,10 @@ import {
   Card,
   CardHeader,
   CardContent,
+  CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 /**
  * Formats currency values for display
@@ -29,6 +33,24 @@ const formatCurrency = (value?: number | string, currency: string = 'USD') => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(numValue);
+};
+
+/**
+ * Helper to get the correct brand icon ID based on platform name.
+ */
+const getPlatformIconId = (platform?: string): string => {
+  const platformLower = platform?.toLowerCase() || '';
+  switch (platformLower) {
+    case 'facebook': return 'brandsFacebook';
+    case 'instagram': return 'brandsInstagram';
+    case 'tiktok': return 'brandsTiktok';
+    case 'youtube': return 'brandsYoutube';
+    case 'linkedin': return 'brandsLinkedin';
+    case 'x':
+    case 'twitter': return 'brandsXTwitter';
+    case 'github': return 'brandsGithub';
+    default: return 'faHashtag'; // Fallback icon
+  }
 };
 
 /**
@@ -171,7 +193,7 @@ const AssetPreview = ({
   return (
     <div
       className={cn(
-        "relative rounded-t-lg overflow-hidden bg-muted w-full aspect-square",
+        "relative rounded-t-lg overflow-hidden bg-muted/50 w-full aspect-square",
         className
       )}
       onMouseEnter={() => setIsHovering(true)}
@@ -183,7 +205,7 @@ const AssetPreview = ({
         <img
           src={url}
           alt={fileName ?? 'Asset preview'}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
       )}
@@ -191,13 +213,13 @@ const AssetPreview = ({
       {/* Video preview with play/pause button */}
       {isVideo && (
         <div
-          className="relative w-full h-full overflow-hidden cursor-pointer"
+          className="relative w-full h-full overflow-hidden cursor-pointer group"
           onClick={togglePlayPause}
         >
           <video
             ref={videoRef}
             src={url}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             muted
             playsInline
             loop
@@ -206,16 +228,16 @@ const AssetPreview = ({
 
           {/* Play/Pause button overlay */}
           {(isHovering || !isPlaying) && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200">
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover:opacity-100">
               <button
                 type="button"
                 onClick={togglePlayPause}
-                className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors duration-200 z-10 group"
+                className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors duration-200 z-10"
                 aria-label={isPlaying ? "Pause video" : "Play video"}
               >
                 <Icon
                   iconId={isPlaying ? "faPauseSolid" : "faPlaySolid"}
-                  className="h-5 w-5 text-white"
+                  className="h-4 w-4 text-white"
                 />
               </button>
             </div>
@@ -225,10 +247,10 @@ const AssetPreview = ({
 
       {/* Fallback for unsupported file types */}
       {!isImage && !isVideo && (
-        <div className="flex items-center justify-center h-full w-full p-8">
+        <div className="flex items-center justify-center h-full w-full p-4 bg-muted">
           <Icon
-            iconId="faFileLinesLight"
-            className="h-12 w-12 text-muted-foreground"
+            iconId="faFileCircleQuestionLight"
+            className="h-10 w-10 text-muted-foreground/50"
           />
         </div>
       )}
@@ -285,11 +307,18 @@ export function AssetCard({
     budget
   } = asset;
 
+  const platformIconId = getPlatformIconId(platform);
+  const isVideoAsset = type?.includes('video');
+  const isImageAsset = type?.includes('image');
+  const mediaTypeIconId = isVideoAsset ? 'faVideoLight' : isImageAsset ? 'faCameraLight' : 'faFileLight';
+  const mediaTypeLabel = isVideoAsset ? 'Video' : isImageAsset ? 'Image' : 'File';
+
   return (
     <Card
       className={cn(
-        "flex flex-col overflow-hidden",
-        "hover:shadow-md transition-shadow duration-200",
+        "group flex flex-col overflow-hidden h-full",
+        "border border-border rounded-lg shadow-sm",
+        "hover:shadow-lg transition-shadow duration-300 ease-in-out",
         props.onClick && "cursor-pointer",
         cardClassName
       )}
@@ -302,61 +331,54 @@ export function AssetCard({
         showTypeLabel={showTypeLabel}
       />
 
-      <CardHeader className="flex-row items-start justify-between pb-2 pt-4 px-4">
-        <div className="flex items-center min-w-0 mr-2 flex-grow">
-          <p className="font-semibold text-foreground flex-shrink truncate text-base mr-2">
-            {name}
-          </p>
-          <div className="flex-shrink-0 text-muted-foreground">
-            {type?.includes('video') && <Icon iconId="faVideoLight" className="h-4 w-4" title="Video" />}
-            {type?.includes('image') && <Icon iconId="faCameraLight" className="h-4 w-4" title="Image" />}
-            {!type?.includes('video') && !type?.includes('image') && <Icon iconId="faFileLight" className="h-4 w-4" title="File" />}
-          </div>
+      <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <Icon iconId={mediaTypeIconId} className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" title={mediaTypeLabel} />
+          <CardTitle className="text-sm font-medium leading-snug truncate" title={name}>
+            {name || "Untitled Asset"}
+          </CardTitle>
         </div>
         {hasPlatform(platform, defaultPlatform) && (
-          <div className="flex-shrink-0 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-medium flex items-center whitespace-nowrap">
-            <Icon
-              iconId={platform.toLowerCase() === 'instagram' ? 'faInstagram' :
-                platform.toLowerCase() === 'tiktok' ? 'faTiktok' :
-                  platform.toLowerCase() === 'youtube' ? 'faYoutube' :
-                    'faHashtag'}
-              className="h-3 w-3 mr-1"
-            />
-            {platform}
-          </div>
+          <Badge variant="outline" className="flex-shrink-0 items-center gap-1 px-1.5 py-0.5 border-border">
+            <Icon iconId={platformIconId} className="h-3 w-3" />
+            <span className="text-xs font-medium text-muted-foreground">{platform}</span>
+          </Badge>
         )}
       </CardHeader>
 
-      <CardContent className={cn("px-4 pb-4 flex flex-col flex-grow", className)}>
+      <CardContent className={cn("px-3 pb-3 flex flex-col flex-grow", className)}>
         {influencerHandle && (
-          <div className="mt-1 flex items-center text-muted-foreground">
+          <div className="mt-1 mb-2 flex items-center text-muted-foreground">
             <Icon
               iconId="faUserLight"
-              className="h-3 w-3 mr-1.5"
+              className="h-3.5 w-3.5 mr-1.5 flex-shrink-0"
             />
-            <span className="text-muted-foreground text-sm">
+            <span className="text-muted-foreground text-xs truncate" title={influencerHandle}>
               {influencerHandle}
             </span>
           </div>
         )}
 
         {description && (
-          <p className="mt-2 text-muted-foreground line-clamp-2 text-sm flex-grow">
+          <p className="mb-2 text-muted-foreground line-clamp-2 text-xs flex-grow">
             {description}
           </p>
         )}
 
-        {budget !== undefined && budget !== null && (
-          <div className="mt-auto pt-3 flex items-center text-foreground">
-            <Icon
-              iconId="faDollarSignLight"
-              className="h-3 w-3 mr-1.5"
-            />
-            <span className="font-medium text-sm">
-              {formatCurrency(budget, currency)}
-            </span>
-          </div>
-        )}
+        <div className="mt-auto pt-2 space-y-2">
+          {(influencerHandle || description || budget !== undefined) && <Separator />}
+          {budget !== undefined && budget !== null && (
+            <div className="flex justify-end items-center text-foreground">
+              <Icon
+                iconId="faDollarSignLight"
+                className="h-3 w-3 mr-1 text-muted-foreground"
+              />
+              <span className="font-medium text-xs">
+                {formatCurrency(budget, currency)}
+              </span>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
