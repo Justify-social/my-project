@@ -16,7 +16,7 @@ import {
  * @renderType client
  * @description Client-side interactive Card component with hover effects and state
  * @author Frontend Team
- * @status stable
+ * @status 10th April
  * @since 2023-04-06
  * 
  * @example

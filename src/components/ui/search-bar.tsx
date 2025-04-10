@@ -3,7 +3,7 @@
  * @category atom
  * @subcategory search
  * @description A search input component using Shadcn Input internally, with icon, optional clear button, loading state, and debouncing.
- * @status stable
+ * @status 10th April
  * @author Justify
  * @since 2023-06-01
  */

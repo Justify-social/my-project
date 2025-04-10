@@ -3,7 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive pie chart component for visualizing proportional data.
- * @status stable
+ * @status 10th April
  * @since 2023-07-15
  * @param {PieChartProps} props - The props for the PieChart component.
  * @param {PieDataPoint[]} props.data - The dataset for the chart. Each object requires keys matching `nameKey` and `dataKey`.

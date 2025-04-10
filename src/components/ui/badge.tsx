@@ -3,7 +3,7 @@
  * @category atom
  * @subcategory display
  * @description Displays a small badge or label, often used for status indicators.
- * @status stable
+ * @status 10th April
  */
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"

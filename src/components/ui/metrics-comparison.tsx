@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory visualization
  * @description Displays a comparison between multiple metrics using tabs and line charts.
- * @status stable
+ * @status 10th April
  * @param {MetricComparisonProps} props - The props for the MetricsComparison component.
  * @param {string} [props.title] - Optional title displayed at the top of the card.
  * @param {string} [props.description] - Optional description displayed below the title.

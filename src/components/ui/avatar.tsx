@@ -3,7 +3,7 @@
  * @category atom
  * @subcategory image
  * @description Displays an image or a fallback for user profiles or entities.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

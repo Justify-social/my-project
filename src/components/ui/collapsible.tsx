@@ -3,7 +3,7 @@
  * @category layout
  * @subcategory container
  * @description An interactive component which expands/collapses its content.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

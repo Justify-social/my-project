@@ -3,7 +3,7 @@
  * @category molecule
  * @subcategory dialog
  * @description A modal dialog that interrupts the user with important content, requiring acknowledgment.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

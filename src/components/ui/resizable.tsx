@@ -2,7 +2,7 @@
  * @component Resizable
  * @category organism
  * @subcategory layout
- * @status stable
+ * @status 10th April
  * @description Provides components for creating resizable panel layouts (Group, Panel, Handle).
  */
 "use client"

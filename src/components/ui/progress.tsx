@@ -3,7 +3,7 @@
  * @category atom
  * @subcategory feedback
  * @description Displays an indicator showing the completion progress of a task.
- * @status stable
+ * @status 10th April
  * @author Shadcn
  * @since 2023-01-01
  */

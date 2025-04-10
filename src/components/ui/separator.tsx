@@ -3,7 +3,7 @@
  * @category atom
  * @subcategory display
  * @description Visually or semantically separates content.
- * @status stable
+ * @status 10th April
  * @author Shadcn
  * @since 2023-01-01
  */

@@ -10,7 +10,7 @@ import { Button as ServerButton, ButtonProps } from '@/components/ui';
  * @renderType client
  * @description Client-side interactive version of the Button component with enhanced functionality
  * @author Frontend Team
- * @status stable
+ * @status 10th April
  * @since 2023-04-06
  * 
  * @example

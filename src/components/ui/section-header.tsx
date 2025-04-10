@@ -11,7 +11,7 @@
  * @param {string} [props.descriptionClassName] - Additional CSS classes for the description (p) element.
  * @param {string} [props.iconClassName] - Additional CSS classes for the Icon component.
  * @returns {React.ReactElement} The rendered section header.
- * @status stable
+ * @status 10th April
  * @author Justify
  * @since 2023-07-01
  */

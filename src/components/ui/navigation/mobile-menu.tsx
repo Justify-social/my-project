@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory menu
  * @description Mobile navigation menu using Shadcn Sheet component.
- * @status stable
+ * @status 10th April
  */
 'use client';
 

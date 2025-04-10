@@ -3,7 +3,7 @@
  * @category molecule
  * @subcategory menu
  * @description Displays a menu located at the pointer, triggered by a right-click or long-press.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

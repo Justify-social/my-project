@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
  * @returns {React.ReactElement} The rendered theme toggle button.
  * @example
  * <ThemeToggle />
- * @status stable
+ * @status 10th April
  * @author Custom
  * @since 2024-01-01
  */

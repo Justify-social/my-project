@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory navigation
  * @description Displays items in a scrollable container with previous/next controls.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

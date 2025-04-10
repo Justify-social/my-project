@@ -3,7 +3,7 @@
  * @category organism
  * @renderType server
  * @description A card component for displaying key performance indicators with trend visualization using standard Card components.
- * @status stable
+ * @status 10th April
  * @since 2023-07-15
  * 
  * @example

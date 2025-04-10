@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory navigation
  * @description Provides controls for navigating between pages of content.
- * @status stable
+ * @status 10th April
  */
 import * as React from "react"
 import { Icon } from "@/components/ui/icon/icon"

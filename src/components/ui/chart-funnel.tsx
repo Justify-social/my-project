@@ -3,7 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive funnel chart component for visualizing sequential data flows and conversion rates.
- * @status stable
+ * @status 10th April
  * @since 2023-07-15
  * @param {FunnelChartProps} props - The props for the FunnelChart component.
  * @param {FunnelDataPoint[]} props.data - The dataset for the chart (requires 'name' and 'value' keys).

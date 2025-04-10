@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory navigation
  * @description A set of layered sections of content, known as tab panels, that display one panel of content at a time.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

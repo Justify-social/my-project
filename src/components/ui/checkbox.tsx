@@ -3,7 +3,7 @@
  * @category atom
  * @subcategory input
  * @description A control that allows the user to toggle between checked and unchecked states.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

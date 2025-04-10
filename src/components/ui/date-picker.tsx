@@ -3,7 +3,7 @@
  * @category molecule
  * @subcategory input
  * @description A date picker component with calendar integration.
- * @status stable
+ * @status 10th April
  * @since 2023-07-15
  */
 'use client'

@@ -3,7 +3,7 @@
  * @category molecule
  * @subcategory input
  * @description Fast, composable command menu for React.
- * @status stable
+ * @status 10th April
  */
 "use client"
 

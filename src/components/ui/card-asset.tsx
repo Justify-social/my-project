@@ -3,7 +3,7 @@
  * @category organism
  * @subcategory card
  * @description Card component displaying asset information with preview, title, platform, and budget using standard Card components.
- * @status stable
+ * @status 10th April
  */
 'use client';
 
