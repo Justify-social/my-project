@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface LoadingSpinnerProps {
   /**
@@ -63,19 +64,14 @@ export function LoadingSpinner({
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div
-        className={cn(
-          "animate-spin rounded-full border-solid",
-          sizeClasses[size],
-          colorClasses[color],
-          className
-        )}
-        role="status"
-        aria-label={label || "Loading"}
-      >
-        <span className="sr-only">Loading...</span>
-      </div>
-      {label && <p className="mt-2 text-sm text-muted-foreground">{label}</p>}
+      <Image
+        src="/loading-justify.gif"
+        alt="Loading animation"
+        width={64}
+        height={64}
+        className="mb-2"
+      />
+      {label && <p className="text-sm text-muted-foreground">{label}</p>}
     </div>
   );
 } 

@@ -87,7 +87,12 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // Show the auth spinner while checking authentication
   if (isLoading) {
-    return <LoadingSpinner label="Loading Justify..." />;
+    // Wrap the LoadingSpinner in a full-height, centered div
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner label="Loading Justify..." />
+      </div>
+    );
   }
 
   // Show error with login button if authentication fails
