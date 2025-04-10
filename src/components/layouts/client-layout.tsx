@@ -12,6 +12,8 @@ import Link from "next/link";
 import Image from "next/image";
 import SidebarUIComponents from "@/components/ui/navigation/sidebar-ui-components";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { MobileMenu } from "@/components/ui/navigation/mobile-menu";
+import { cn } from "@/lib/utils";
 
 // --- Define Navigation Item Types ---
 // Main Sidebar/Header Structure (allows children)
@@ -36,6 +38,9 @@ interface NavItemDef {
   label: string;
   href: string;
   iconId: string; // Use iconId for consistency with MobileMenu and UI Sidebar
+  isDisabled?: boolean; // Added to match MobileMenu definition
+  badge?: string | number; // Added to match MobileMenu definition
+  children?: NavItemDef[]; // Added to match MobileMenu definition
 }
 
 interface ClientLayoutProps {
@@ -162,20 +167,33 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     id: 'settings', label: "Settings", href: "/settings", icon: "appSettings"
   };
 
-  // Derive flat navItems for Header/MobileMenu (Main App)
-  const mainNavItemsForMenu: NavItemDef[] = sidebarItems
-    .filter(item => typeof item.href === 'string') // Only top-level linkable items
-    .map(item => ({
-      id: item.id,
-      label: item.label,
-      href: item.href as string,
-      iconId: item.icon || 'faCircleLight' // Ensure iconId format
-    }));
+  // Function to recursively flatten sidebar items for mobile menu
+  const flattenMenuItems = (items: SidebarItemDef[], depth = 0): NavItemDef[] => {
+    const flatList: NavItemDef[] = [];
+    items.forEach(item => {
+      // Filter out the settings item during flattening
+      if (item.id === 'settings') return;
 
-  // Add settings to the main menu items list
-  const allMainNavItemsForMenu = [
-    ...mainNavItemsForMenu,
-    {
+      if (item.href) { // Only include items with href directly
+        flatList.push({
+          id: item.id,
+          label: item.label,
+          href: item.href,
+          iconId: item.icon || 'faCircleLight',
+        });
+      }
+      // Recursive flattening logic (currently commented out)
+      // if (item.children) {
+      //     flatList = flatList.concat(flattenMenuItems(item.children, depth + 1));
+      // }
+    });
+    return flatList;
+  };
+
+  // Derive flat navItems for MobileMenu (Main App)
+  const allMainNavItemsForMenu: NavItemDef[] = [
+    ...flattenMenuItems(sidebarItems), // Now excludes settings
+    { // Add settings explicitly (ensures only one)
       id: settingsItemDef.id,
       label: settingsItemDef.label,
       href: settingsItemDef.href as string,
@@ -183,7 +201,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     }
   ];
 
-  // Define Debug Tool Navigation Items
+  // Define Debug Tool Navigation Items (Ensure NavItemDef compatibility)
   const debugNavItems: NavItemDef[] = [
     { id: 'debug-atom', label: 'Atom', href: '/debug-tools/ui-components?tab=components&category=atom', iconId: 'faAtomLight' },
     { id: 'debug-molecule', label: 'Molecule', href: '/debug-tools/ui-components?tab=components&category=molecule', iconId: 'faDnaLight' },
@@ -198,51 +216,57 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // Select the correct items for the Mobile Menu based on the page
   const mobileMenuItems = isUIComponentsPage ? debugNavItems : allMainNavItemsForMenu;
-  // Decide if settings item should be shown in mobile menu for debug page (optional)
-  // For now, let's assume settings are not relevant in the debug mobile menu
+  // Define settingsItem for MobileMenu based on context (only for main app)
   const mobileSettingsItem = !isUIComponentsPage ? {
     id: settingsItemDef.id,
     label: settingsItemDef.label,
     href: settingsItemDef.href as string,
     iconId: settingsItemDef.icon || 'faGearLight'
-  } : undefined; // Pass undefined if on debug page
+  } : undefined;
 
   return (
     <ThemeProvider defaultTheme="light">
-      <div className="min-h-screen bg-white font-work-sans">
+      <div className="min-h-screen flex flex-col">
         <Header
           companyName="Justify"
           remainingCredits={100}
           notificationsCount={3}
           onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
-          // Pass the conditionally selected items to Header -> MobileMenu
-          navItems={mobileMenuItems}
-          // Pass conditional settings item (or handle lack of it in MobileMenu)
-          settingsNavItem={mobileSettingsItem}
         />
 
-        {/* Conditionally render the correct sidebar */}
-        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300">
-          {isUIComponentsPage ? (
-            // Pass the defined debugNavItems to the component
-            <SidebarUIComponents navItems={debugNavItems} />
-          ) : (
-            <Sidebar
-              // Pass the original nested structure to the main sidebar
-              items={[...sidebarItems, settingsItemDef]} // Include settings in main sidebar
-              activePath={pathname}
-              onItemClick={() => setIsMobileOpen(false)}
-              title="Justify"
-            />
-          )}
+        <div className="flex flex-1 overflow-hidden">
+          <div className={cn(
+            "fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30",
+            "hidden md:block"
+          )}>
+            {isUIComponentsPage ? (
+              <SidebarUIComponents navItems={debugNavItems} />
+            ) : (
+              <Sidebar
+                items={sidebarItems}
+                activePath={pathname}
+                title="Justify"
+              />
+            )}
+          </div>
+
+          <div className={`flex-1 transition-margin duration-200 md:ml-64 pt-16 font-work-sans overflow-y-auto`}>
+            <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
+              {children}
+            </main>
+          </div>
         </div>
 
-        {/* Main content area */}
-        <div className={`transition-margin duration-200 md:ml-64 pt-16 font-work-sans`}>
-          <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
-            {children}
-          </main>
-        </div>
+        <MobileMenu
+          isOpen={isMobileOpen}
+          onOpenChange={setIsMobileOpen}
+          menuItems={mobileMenuItems}
+          settingsItem={mobileSettingsItem}
+          remainingCredits={100}
+          notificationsCount={3}
+          companyName="Justify"
+          user={user}
+        />
       </div>
     </ThemeProvider>
   );
@@ -254,3 +278,8 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
 };
 
 export default ClientLayout;
+
+// Helper Function (if needed elsewhere, move to utils)
+function safeGet<T, K extends keyof T>(obj: T | undefined | null, key: K, defaultValue: T[K]): T[K] {
+  return obj?.[key] ?? defaultValue;
+}
