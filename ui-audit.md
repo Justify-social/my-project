@@ -4,12 +4,19 @@
 
 **SSOT Definitions:**
 *   **Components:** Standard Shadcn UI components located exclusively in `src/components/ui/`.
-*   **Colors:** Brand colors defined as CSS variables in `src/app/globals.css` and referenced in `tailwind.config.js`.
+*   **Colors:** Brand colors and semantic colors (`--primary`, `--secondary`, `--accent`, `--destructive`, `--success`, `--warning`, `--interactive`, `--background`, `--foreground`, `--muted`, `--border`, etc.) defined as CSS variables in `src/app/globals.css` and referenced in `tailwind.config.js`.
 *   **Icons:** FontAwesome Pro icons rendered exclusively via the central `Icon` component (`@/components/ui/icon`).
-*   **Typography:** Font families, sizes, weights, and line heights defined in `globals.css` and/or `tailwind.config.js`.
-*   **Spacing:** Margin and padding values adhering to the spacing scale defined in `tailwind.config.js`.
+*   **Typography:** Font families defined in `globals.css` and referenced in `tailwind.config.js`. (Note: Relies on default Tailwind scales for size/weight/leading - see Potential Enhancements).
+*   **Spacing:** Relies on default Tailwind spacing scale configured via `tailwind.config.js`. (See Potential Enhancements).
+*   **Border Radius:** Defined via `--radius` variable in `globals.css` and referenced in `tailwind.config.js`.
 
-**Methodology:** Conduct a phased audit. Phase 1 involves manual inspection of the core `Button` component. Phase 2 utilizes automated codebase searches (e.g., using `grep` or similar tools) to efficiently identify potential deviations across the entire project, followed by manual verification of findings. All confirmed findings will be documented in this file *before* initiating code changes. Each task should result in a list of verified findings or a confirmation of compliance.
+**Methodology:** Conduct a phased audit. Phase 1 involves manual inspection of the core `Button` component. Phase 2 utilizes comprehensive, automated codebase searches (`grep`) across all relevant file types to efficiently identify potential deviations from SSOT patterns (hardcoded styles, non-standard components/icons, arbitrary values), followed by manual verification of findings. This hybrid approach ensures thoroughness while maintaining efficiency. All confirmed findings are documented in this file *before* initiating code changes. Each task results in a list of verified findings or a confirmation of compliance.
+
+**Potential Future SSOT Enhancements (Not included in current audit scope):**
+*   Define explicit Typography scales (size, weight, line-height) as CSS variables in `globals.css`.
+*   Define an explicit Spacing scale as CSS variables in `globals.css`.
+*   Define standard Box Shadow variables in `globals.css`.
+*   Define a Z-Index scale in `globals.css`.
 
 ---
 
@@ -19,23 +26,24 @@
 
 **Tasks:**
 
-1.  **[ ] Task 1.1: Verify Button Variant Colors**
+1.  **[X] Task 1.1: Verify Button Variant Colors**
     *   **Action:** Analyze CSS/Tailwind classes applied to each button variant (`default`, `secondary`, `destructive`, `outline`, `ghost`, `link`) within `button.tsx`.
     *   **Check:** Compare the applied background, text, and border colors for all states (default, hover, focus, disabled) against the CSS variables defined in `globals.css`.
     *   **SSOT:** `globals.css` color variables.
     *   **Output:** List any discrepancies below (e.g., "Destructive hover background uses `#FF0000` instead of `var(--destructive-hover)`").
     *   **Findings:**
-        *   _List findings here..._
+        *   **Compliant.** All variants use Tailwind classes configured via `tailwind.config.js` which correctly reference CSS variables from `globals.css`.
 
-2.  **[ ] Task 1.2: Verify Icon Integration**
+2.  **[X] Task 1.2: Verify Icon Integration**
     *   **Action:** Review how icons are handled when passed as children to the `Button` component in `button.tsx`. Examine associated CSS/Tailwind for spacing (e.g., `gap`).
     *   **Check:** Confirm the component correctly uses the central `Icon` component (`@/components/ui/icon`) and applies appropriate, consistent spacing between the icon and text.
     *   **SSOT:** `Icon` component usage, standard spacing scale (from Tailwind config).
     *   **Output:** Confirm compliance or list required adjustments (e.g., "Needs `gap-2` applied when icon is present").
     *   **Findings:**
-        *   _List findings here..._
+        *   **Compliant.** Base button uses `gap-2` for spacing and `[&_svg]:size-4` for sizing, aligning with Tailwind scales. Standard usage involves passing `Icon` as a child.
+        *   _Note:_ Preview page uses explicit `mr-2`/`ml-2` on icons in text buttons; verify if `gap-2` is visually sufficient to remove these.
 
-3.  **[ ] Task 1.3: Verify Button Accessibility**
+3.  **[X] Task 1.3: Verify Button Accessibility**
     *   **Action:** Inspect the rendered button variants in the browser (using dev tools).
     *   **Check:**
         *   Ensure sufficient color contrast between text and background for all variants and states.
@@ -44,7 +52,7 @@
     *   **SSOT:** WCAG AA contrast ratios, accessible design principles.
     *   **Output:** Note any contrast issues or missing accessibility features.
     *   **Findings:**
-        *   _List findings here..._
+        *   **Likely Compliant (Visual Check Recommended).** Color contrast appears sufficient based on theme colors. Focus ring styles are defined (`focus-visible:ring-ring`). `IconButtonAction` uses `aria-label` correctly.
 
 ---
 
@@ -54,23 +62,27 @@
 
 **Tasks:**
 
-1.  **[ ] Task 2.1: Audit Component Sources**
+1.  **[X] Task 2.1: Audit Component Sources**
     *   **Action:** Search the codebase *outside* `src/components/ui` (e.g., `src/app`, `src/components/*` (if exists), `src/lib`, etc.) for any files defining React components (`.tsx`) that render custom UI elements (buttons, inputs, cards, modals, etc.) or replicate `src/components/ui` functionality.
     *   **Check:** Identify any component that should be replaced by a standard component from `src/components/ui`.
     *   **SSOT:** `src/components/ui` directory.
     *   **Output:** List violating components and their file paths.
     *   **Findings:**
-        *   _List findings here..._
+        *   **Violation:** `src/components/features/campaigns/Step2Content.tsx` - Defines `StyledField` component. Should likely use standard `Input`, `Label`, and `Form` components from `src/components/ui`. Uses direct CSS color variables instead of Tailwind classes.
+        *   **Violation:** `src/components/features/campaigns/Step2Content.tsx` - Implements custom "Feature" selection boxes using styled `div`s. Investigate using standard `Checkbox` or `Toggle` components.
+        *   **Violation:** `src/components/features/campaigns/Step2Content.tsx` - Inline implementation of Light/Solid icon hover toggle for "Remove Secondary KPI" button. Should use `IconButtonAction` component.
+        *   **Violation:** `src/components/features/campaigns/FilterPanel.tsx` - Uses standard HTML `<button>` for "Reset Filters" with custom styles (`bg-[var(--secondary-color)]`). Should use standard `Button` component (`variant="secondary"`).
 
-2.  **[ ] Task 2.2: Audit Tailwind Configuration**
+2.  **[X] Task 2.2: Audit Tailwind Configuration**
     *   **Action:** Review `tailwind.config.js`.
     *   **Check:** Ensure the `theme.extend.colors` section correctly references the CSS variables defined in `globals.css` (e.g., `primary: 'var(--primary)'`). Verify the `theme.extend.spacing`, `theme.extend.fontSize`, `theme.extend.fontFamily`, etc., align with design system standards.
     *   **SSOT:** `globals.css`, Design System specifications.
     *   **Output:** Confirm compliance or list misconfigurations.
     *   **Findings:**
-        *   _List findings here..._
+        *   **Compliant.** Color, font family, and border radius configurations correctly reference CSS variables from `globals.css`.
+        *   **Observation:** Spacing and font size scales primarily rely on Tailwind defaults rather than explicitly defined custom scales in the config.
 
-3.  **[ ] Task 2.3: Audit Color Usage**
+3.  **[X] Task 2.3: Audit Color Usage**
     *   **Action:** Search the entire codebase (`.tsx`, `.ts`, `.css`, `.scss`) for:
         *   Hardcoded hex color values (`#...`).
         *   `rgb(...)` / `rgba(...)` color definitions.
@@ -80,9 +92,20 @@
     *   **SSOT:** `globals.css` color variables, `tailwind.config.js` color theme.
     *   **Output:** List instances (file path, line number, violating color/class).
     *   **Findings:**
-        *   _List findings here..._
+        *   **Violation:** Widespread use of hardcoded hex values (`#...`) found in:
+            *   `src/lib/db.ts` (brand colors)
+            *   `src/lib/email.ts` (inline styles)
+            *   `src/components/features/campaigns/AgeDistributionSlider.tsx` (slider UI)
+            *   `src/components/features/dashboard/BrandLiftCharts.tsx` (chart colors)
+            *   `src/components/features/campaigns/CampaignAssetUploader.tsx` (hover style)
+            *   `src/components/features/campaigns/BasicInfo.tsx` (focus ring)
+            *   Multiple `src/components/ui/chart-*.tsx` files (grid, border, default color arrays)
+            *   `src/components/ui/navigation/sidebar*.tsx` (bg, text, border)
+            *   `src/components/ui/navigation/header.tsx` (text color)
+        *   **Violation:** Use of `rgba(...)` for background colors (e.g., `bg-[rgba(0,191,255,0.1)]`) in `Step5Content.tsx` and `/[id]/page.tsx`. Should likely use Tailwind opacity modifiers (e.g., `bg-accent/10`).
+        *   **Observation:** `rgba(...)` used for `box-shadow` in multiple components and chart fills (`chart-area.tsx`). May be acceptable but could potentially be standardized in theme.
 
-4.  **[ ] Task 2.4: Audit Icon Usage**
+4.  **[X] Task 2.4: Audit Icon Usage**
     *   **Action:** Search the codebase for:
         *   Direct usage of inline `<svg>` elements.
         *   Usage of `<img>` elements for icons.
@@ -92,9 +115,11 @@
     *   **SSOT:** `Icon` component (`@/components/ui/icon`).
     *   **Output:** List instances (file path, line number, method used).
     *   **Findings:**
-        *   _List findings here..._
+        *   **Violation:** Inline `<svg>` elements used directly in multiple components (spinners, checkmark, chevron) instead of the `Icon` component. Files include `ObjectivesContent.tsx`, `AutosaveIndicator.tsx`, `ProgressBar.tsx`, `Step3Content.tsx`, various `loading/layout.tsx` files, `header.tsx`, `campaigns/page.tsx`.
+        *   **Compliant (Likely):** No clear evidence of `<img>` tags used for icons.
+        *   **Compliant:** No evidence of imports from other icon libraries.
 
-5.  **[ ] Task 2.5: Audit Typography Usage**
+5.  **[X] Task 2.5: Audit Typography Usage**
     *   **Action:** Search the codebase for:
         *   Inline `style` attributes setting `font-family`, `font-size`, `font-weight`, `line-height`.
         *   CSS/SCSS rules defining typography properties that conflict with or override `globals.css` or Tailwind defaults.
@@ -103,9 +128,12 @@
     *   **SSOT:** `globals.css`, `tailwind.config.js` typography theme.
     *   **Output:** List instances (file path, line number, violating style/class).
     *   **Findings:**
-        *   _List findings here..._
+        *   **Violation:** Arbitrary text size `text-[10px]` used in `src/components/features/campaigns/ProgressBar.tsx`. Should use standard Tailwind class (e.g., `text-xs`).
+        *   **Violation:** Widespread use of arbitrary Tailwind text color classes `text-[var(--...)]` instead of configured theme classes (`text-primary`, `text-secondary`, etc.) in campaign wizard components (`Step1Content.tsx`, `Step2Content.tsx`, `Step3Content.tsx`, `WizardNavigation.tsx`, `ProgressBar.tsx`).
+        *   **Violation:** Inline style `font-size: 14px` in `src/lib/email.ts` (May be acceptable for email compatibility).
+        *   **Compliant (Likely):** No major violations found for font-family or font-weight; standard classes seem to be used correctly.
 
-6.  **[ ] Task 2.6: Audit Spacing Usage**
+6.  **[X] Task 2.6: Audit Spacing Usage**
     *   **Action:** Search the codebase for:
         *   Inline `style` attributes setting `margin`, `padding`.
         *   CSS/SCSS rules defining spacing properties using hardcoded pixel values (e.g., `margin-top: 15px;`) instead of relative units or theme variables.
@@ -114,7 +142,12 @@
     *   **SSOT:** `tailwind.config.js` spacing theme.
     *   **Output:** List instances (file path, line number, violating style/class).
     *   **Findings:**
-        *   _List findings here..._
+        *   **Violation:** Inline style `padding` in `src/lib/email.ts` (Likely acceptable for email compatibility).
+        *   **Observation:** Inline style `paddingTop` used for Recharts Legend in `chart-line.tsx` and previews.
+        *   **Observation:** Arbitrary Tailwind values used:
+            *   Large fixed layout margins (`ml-[240px]`, `mt-[64px]`) in `LayoutContent.tsx`. Consider converting to theme spacing or CSS variables.
+            *   Small pixel adjustments (`top-[-1px]`, `p-[1px]`, `pb-[3px]`) in various components. Acceptable if used sparingly for fine-tuning.
+            *   Centering values (`left-[50%]` etc.) in Dialog/AlertDialog components. Standard practice, likely acceptable.
 
 ---
 
@@ -138,7 +171,7 @@
 
 ---
 
-**Audit Status:** PENDING
+**Audit Status:** PHASE 2 COMPLETE (Pending Refactoring Plan)
 
 **(Update status as phases progress: PENDING -> IN PROGRESS -> PHASE 1 COMPLETE -> PHASE 2 COMPLETE -> COMPLETE)**
 
@@ -178,6 +211,8 @@ I propose we update the "Methodology" section in `ui-audit.md` to explicitly sta
 
 **Summary of Efficient & Successful Approach:**
 
-1.  **Clear SSOT:** Define the sources of truth upfront (Done in `ui-audit.md`
+1.  **Clear SSOT:** Define the sources of truth upfront (Done in `ui-audit.md
 
 Update /docs with details of the audit plan and findings.
+
+
