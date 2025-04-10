@@ -3,6 +3,9 @@
  * @category atom
  * @subcategory input
  * @description A multi-line text input field.
+ * @status stable
+ * @author Shadcn
+ * @since 2023-01-01
  */
 import * as React from "react"
 

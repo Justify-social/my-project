@@ -4,6 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
 
 import { LoadingSpinner } from '../../../../../../components/ui/loading-spinner';
 
@@ -16,14 +17,15 @@ const statusStyles: Record<string, string> = {
 
 export default function LoadingSpinnerPreviewPage() {
   const componentMeta = {
-  "name": "LoadingSpinner",
-  "description": "A customizable loading spinner component for indicating loading states",
-  "category": "atom",
-  "subcategory": "feedback",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
+    "name": "LoadingSpinner",
+    "description": "A customizable loading spinner component for indicating loading states",
+    "category": "atom",
+    "subcategory": "feedback",
+    "renderType": "client",
+    "author": "Justify",
+    "since": "2023-05-15",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,34 +61,45 @@ export default function LoadingSpinnerPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Sizes */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <LoadingSpinner /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <LoadingSpinner /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Sizes</h3>
+            <div className="flex flex-wrap items-center gap-8">
+              <LoadingSpinner size="sm" />
+              <LoadingSpinner size="md" />
+              <LoadingSpinner size="lg" />
+              <LoadingSpinner size="xl" />
+            </div>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Colors */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Colors</h3>
+            <div className="flex flex-wrap items-center gap-8">
+              <LoadingSpinner color="primary" />
+              <LoadingSpinner color="secondary" />
+              <LoadingSpinner color="success" />
+              <LoadingSpinner color="danger" />
+              <LoadingSpinner color="warning" />
+              <LoadingSpinner color="info" />
+            </div>
+          </div>
+
+          {/* Example 3: With Label */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">With Label</h3>
+            <div className="flex flex-wrap items-center gap-8">
+              <LoadingSpinner label="Loading data..." />
+              <LoadingSpinner size="lg" color="success" label="Processing payment..." />
+            </div>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

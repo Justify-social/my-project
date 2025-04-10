@@ -4,7 +4,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Textarea } from '../../../../../../components/ui/textarea';
 
 const statusStyles: Record<string, string> = {
@@ -16,14 +18,15 @@ const statusStyles: Record<string, string> = {
 
 export default function TextareaPreviewPage() {
   const componentMeta = {
-  "name": "Textarea",
-  "description": "A multi-line text input field.",
-  "category": "atom",
-  "subcategory": "input",
-  "renderType": "server",
-  "author": "",
-  "since": ""
-};
+    "name": "Textarea",
+    "description": "A multi-line text input field.",
+    "category": "atom",
+    "subcategory": "input",
+    "renderType": "server",
+    "author": "Shadcn",
+    "since": "2023-01-01",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,34 +62,45 @@ export default function TextareaPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Basic Textarea */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Textarea /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Textarea /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Basic Textarea</h3>
+            <Textarea placeholder="Type your message here." />
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Textarea with Label */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Textarea with Label</h3>
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="message-2">Your Message</Label>
+              <Textarea placeholder="Type your message here." id="message-2" />
+              <p className="text-sm text-muted-foreground">
+                Your message will be copied to the support team.
+              </p>
+            </div>
+          </div>
+
+          {/* Example 3: Disabled Textarea */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Disabled Textarea</h3>
+            <Textarea placeholder="This textarea is disabled." disabled />
+          </div>
+
+          {/* Example 4: Textarea with Button (Form Simulation) */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Textarea with Button</h3>
+            <div className="grid w-full gap-2">
+              <Textarea placeholder="Type your comment here." />
+              <Button>Post Comment</Button>
+            </div>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

@@ -3,6 +3,9 @@
  * @category atom
  * @subcategory display
  * @description Visually or semantically separates content.
+ * @status stable
+ * @author Shadcn
+ * @since 2023-01-01
  */
 "use client"
 

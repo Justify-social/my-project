@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
+import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from '../../../../../../components/ui/section-header';
 
 const statusStyles: Record<string, string> = {
@@ -16,14 +16,15 @@ const statusStyles: Record<string, string> = {
 
 export default function SectionHeaderPreviewPage() {
   const componentMeta = {
-  "name": "SectionHeader",
-  "description": "A section header component for displaying a title, optional description, and optional icon.",
-  "category": "atom",
-  "subcategory": null,
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
+    "name": "SectionHeader",
+    "description": "A section header component for displaying a title, optional description, and optional icon.",
+    "category": "atom",
+    "subcategory": null,
+    "renderType": "client",
+    "author": "Justify",
+    "since": "2023-07-01",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,34 +60,51 @@ export default function SectionHeaderPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Title Only */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <SectionHeader /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <SectionHeader /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Title Only</h3>
+            <SectionHeader title="Account Settings" />
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Title and Description */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Title & Description</h3>
+            <SectionHeader
+              title="Notifications"
+              description="Manage how you receive notifications."
+            />
+          </div>
+
+          {/* Example 3: Title, Description, and Icon */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">With Icon</h3>
+            <SectionHeader
+              title="Billing Information"
+              description="Update your payment methods and view invoices."
+              iconId="faCreditCardLight"
+            />
+          </div>
+
+          {/* Example 4: Custom Styling */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Custom Styling</h3>
+            <SectionHeader
+              title="Advanced Options"
+              description="Configure expert settings."
+              iconId="faCogLight"
+              className="bg-blue-50 p-4 rounded-md"
+              titleClassName="text-blue-800 !text-2xl"
+              descriptionClassName="italic text-blue-600"
+              iconClassName="text-blue-700 !h-8 !w-8"
+            />
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

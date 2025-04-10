@@ -3,6 +3,9 @@
  * @category atom
  * @subcategory feedback
  * @description A customizable loading spinner component for indicating loading states
+ * @status stable
+ * @author Justify
+ * @since 2023-05-15
  */
 'use client';
 

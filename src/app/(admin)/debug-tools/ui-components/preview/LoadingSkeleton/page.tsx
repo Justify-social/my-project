@@ -4,8 +4,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
+import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from '../../../../../../components/ui/loading-skeleton';
+import { Card, CardContent } from "@/components/ui/card";
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,14 +17,15 @@ const statusStyles: Record<string, string> = {
 
 export default function LoadingSkeletonPreviewPage() {
   const componentMeta = {
-  "name": "LoadingSkeleton",
-  "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
-  "category": "atom",
-  "subcategory": "loading",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
+    "name": "LoadingSkeleton",
+    "description": "A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.",
+    "category": "atom",
+    "subcategory": "loading",
+    "renderType": "client",
+    "author": "Shadcn (adapted)",
+    "since": "2023-03-01",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,34 +61,79 @@ export default function LoadingSkeletonPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Variants */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <LoadingSkeleton /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <LoadingSkeleton /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Variants</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Text (Default)</p>
+                <LoadingSkeleton />
+              </div>
+              <div className="space-y-2 flex flex-col items-center">
+                <p className="text-sm font-medium text-muted-foreground">Circle</p>
+                <LoadingSkeleton variant="circle" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Rectangle</p>
+                <LoadingSkeleton variant="rect" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Card</p>
+                <LoadingSkeleton variant="card" />
+              </div>
+            </div>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Count and Gap */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Multiple Items (Count & Gap)</h3>
+            <p className="text-sm text-muted-foreground mb-3">Use `count` to render multiple skeletons vertically, spaced by `gap`.</p>
+            <LoadingSkeleton variant="text" count={3} gap="0.75rem" />
+          </div>
+
+          {/* Example 3: Custom Dimensions and Radius */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Custom Dimensions & Radius</h3>
+            <div className="flex flex-wrap gap-6 items-center">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Custom W/H</p>
+                <LoadingSkeleton width={100} height={50} />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Tailwind Width</p>
+                <LoadingSkeleton width="w-64" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Custom Radius</p>
+                <LoadingSkeleton variant="rect" radius="rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Full Width</p>
+                <LoadingSkeleton variant="text" fullWidth={true} />
+              </div>
+            </div>
+          </div>
+
+          {/* Example 4: Use Case - Profile Card Loading */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Use Case: Profile Card</h3>
+            <Card className="w-[300px]">
+              <CardContent className="p-4 flex items-center space-x-4">
+                <LoadingSkeleton variant="circle" height={48} width={48} />
+                <div className="space-y-2 flex-grow">
+                  <LoadingSkeleton variant="text" width="w-3/4" />
+                  <LoadingSkeleton variant="text" width="w-1/2" height={12} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

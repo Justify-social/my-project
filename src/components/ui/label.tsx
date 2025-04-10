@@ -3,6 +3,9 @@
  * @category atom
  * @subcategory display
  * @description Renders an accessible label associated with controls.
+ * @status stable
+ * @author Shadcn
+ * @since 2023-01-01 
  */
 "use client"
 

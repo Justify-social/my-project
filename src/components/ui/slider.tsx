@@ -3,6 +3,9 @@
  * @category atom
  * @subcategory input
  * @description An input where the user selects a value from within a given range.
+ * @status stable
+ * @author Shadcn
+ * @since 2023-01-01
  */
 "use client"
 

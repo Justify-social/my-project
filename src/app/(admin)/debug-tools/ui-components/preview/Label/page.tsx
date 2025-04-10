@@ -4,8 +4,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
+import { Badge } from "@/components/ui/badge";
 import { Label } from '../../../../../../components/ui/label';
+import { Input } from '../../../../../../components/ui/input';
+import { Checkbox } from '../../../../../../components/ui/checkbox';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,14 +18,15 @@ const statusStyles: Record<string, string> = {
 
 export default function LabelPreviewPage() {
   const componentMeta = {
-  "name": "Label",
-  "description": "Renders an accessible label associated with controls.",
-  "category": "atom",
-  "subcategory": "display",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
+    "name": "Label",
+    "description": "Renders an accessible label associated with controls.",
+    "category": "atom",
+    "subcategory": "display",
+    "renderType": "client",
+    "author": "Shadcn",
+    "since": "2023-01-01",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,15 +62,34 @@ export default function LabelPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Label with Input */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Label /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Label /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Label for Input</h3>
+            <p className="text-sm text-muted-foreground mb-3">The `htmlFor` prop associates the label with the input's `id` for accessibility.</p>
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <Label htmlFor="email-example">Email Address</Label>
+              <Input type="email" id="email-example" placeholder="Enter your email" />
+            </div>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Label with Checkbox */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Label for Checkbox</h3>
+            <p className="text-sm text-muted-foreground mb-3">Clicking the label will also toggle the associated checkbox.</p>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="terms-example" />
+              <Label
+                htmlFor="terms-example"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Accept terms and conditions
+              </Label>
+            </div>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>

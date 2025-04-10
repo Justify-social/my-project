@@ -639,6 +639,13 @@
     },
     {
       "category": "solid",
+      "id": "faMoonSolid",
+      "name": "Moon",
+      "path": "/icons/solid/faMoonSolid.svg",
+      "faVersion": "fas fa-moon"
+    },
+    {
+      "category": "solid",
       "id": "faPaintbrushSolid",
       "name": "Paintbrush",
       "faVersion": "fas fa-paintbrush",
@@ -835,6 +842,13 @@
     },
     {
       "category": "solid",
+      "id": "faSunBrightSolid",
+      "name": "Sun Bright",
+      "path": "/icons/solid/faSunBrightSolid.svg",
+      "faVersion": "fas fa-sun-bright"
+    },
+    {
+      "category": "solid",
       "id": "faTableCellsSolid",
       "name": "Table Cells",
       "faVersion": "fas fa-table-cells",
@@ -954,6 +968,6 @@
     }
   ],
   "category": "solid",
-  "iconCount": 136,
+  "iconCount": 137,
   "updatedAt": "2025-04-03T11:59:21.689Z"
 }

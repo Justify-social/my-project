@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
+import { Badge } from "@/components/ui/badge";
 import { Separator } from '../../../../../../components/ui/separator';
 
 const statusStyles: Record<string, string> = {
@@ -16,14 +16,15 @@ const statusStyles: Record<string, string> = {
 
 export default function SeparatorPreviewPage() {
   const componentMeta = {
-  "name": "Separator",
-  "description": "Visually or semantically separates content.",
-  "category": "atom",
-  "subcategory": "display",
-  "renderType": "client",
-  "author": "",
-  "since": ""
-};
+    "name": "Separator",
+    "description": "Visually or semantically separates content.",
+    "category": "atom",
+    "subcategory": "display",
+    "renderType": "client",
+    "author": "Shadcn",
+    "since": "2023-01-01",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,34 +60,41 @@ export default function SeparatorPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Horizontal (Default) */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Separator /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Separator /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Horizontal Separator</h3>
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium leading-none">Radix Primitives</h4>
+              <p className="text-sm text-muted-foreground">An open-source UI component library.</p>
+            </div>
+            <Separator className="my-4" />
+            <div className="flex h-5 items-center space-x-4 text-sm">
+              <div>Blog</div>
+              <Separator orientation="vertical" />
+              <div>Docs</div>
+              <Separator orientation="vertical" />
+              <div>Source</div>
+            </div>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Vertical */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Vertical Separator</h3>
+            <div className="flex h-10 items-center space-x-4 text-sm">
+              <div>Blog</div>
+              <Separator orientation="vertical" />
+              <div>Docs</div>
+              <Separator orientation="vertical" />
+              <div>Source</div>
+            </div>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   );

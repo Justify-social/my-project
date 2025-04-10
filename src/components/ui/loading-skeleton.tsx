@@ -3,6 +3,9 @@
  * @category atom
  * @subcategory loading
  * @description A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.
+ * @status stable
+ * @author Shadcn (adapted)
+ * @since 2023-03-01 
  */
 'use client';
 

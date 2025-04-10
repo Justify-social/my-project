@@ -10,6 +10,20 @@
       "name": "Example",
       "path": "/icons/solid/faExampleSolid.svg",
       "faVersion": "fas fa-example"
+    },
+    {
+      "category": "solid",
+      "id": "faSunBrightSolid",
+      "name": "Sun Bright",
+      "path": "/icons/solid/faSunBrightSolid.svg",
+      "faVersion": "fas fa-sun-bright"
+    },
+    {
+      "category": "solid",
+      "id": "faMoonSolid",
+      "name": "Moon",
+      "path": "/icons/solid/faMoonSolid.svg",
+      "faVersion": "fas fa-moon"
     }
   ]
-} 
+}

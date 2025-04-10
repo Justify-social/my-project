@@ -4,8 +4,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
+import { Badge } from "@/components/ui/badge";
 import { Input } from '../../../../../../components/ui/input';
+import { Label } from "@/components/ui/label";
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,14 +17,15 @@ const statusStyles: Record<string, string> = {
 
 export default function InputPreviewPage() {
   const componentMeta = {
-  "name": "Input",
-  "description": "A standard text input field.",
-  "category": "atom",
-  "subcategory": "input",
-  "renderType": "server",
-  "author": "",
-  "since": ""
-};
+    "name": "Input",
+    "description": "A standard text input field.",
+    "category": "atom",
+    "subcategory": "input",
+    "renderType": "server",
+    "author": "Shadcn",
+    "since": "2023-01-01",
+    "status": "stable"
+  };
   const examples: string[] = [];
 
   return (
@@ -59,34 +61,75 @@ export default function InputPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Different Input Types */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Input /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Input /> here)</p>
+            <h3 className="text-lg font-medium mb-4">Input Types</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="text-input">Text (Default)</Label>
+                <Input id="text-input" type="text" placeholder="Enter text..." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password-input">Password</Label>
+                <Input id="password-input" type="password" placeholder="Enter password" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-input">Email</Label>
+                <Input id="email-input" type="email" placeholder="email@example.com" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="number-input">Number</Label>
+                <Input id="number-input" type="number" placeholder="Enter a number" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tel-input">Telephone</Label>
+                <Input id="tel-input" type="tel" placeholder="123-456-7890" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="url-input">URL</Label>
+                <Input id="url-input" type="url" placeholder="https://example.com" />
+              </div>
+            </div>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Disabled State */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Disabled State</h3>
+            <div className="space-y-2">
+              <Label htmlFor="disabled-input">Disabled Input</Label>
+              <Input id="disabled-input" type="text" placeholder="Cannot type here" disabled />
+            </div>
+          </div>
+
+          {/* Example 3: With Label */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Usage with Label</h3>
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <Label htmlFor="email-labeled">Email</Label>
+              <Input type="email" id="email-labeled" placeholder="Email" />
+            </div>
+          </div>
+
+          {/* Example 4: File Input (Specific Styling) */}
+          {/* Note: Input component styles file inputs via file: pseudo-element */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">File Input</h3>
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <Label htmlFor="picture">Picture</Label>
+              <Input id="picture" type="file" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Styling applied via `file:` Tailwind modifier in component.</p>
+          </div>
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
 
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Code Snippets Section - REMOVE as examples are now inline */}
+      {/* {examples && examples.length > 0 && ( ... )} */}
 
     </div>
   );
