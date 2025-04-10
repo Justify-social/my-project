@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-04-10T15:06:38.534Z",
+  "generatedAt": "2025-04-10T18:52:31.989Z",
   "components": [
     {
       "category": "organism",
@@ -84,16 +84,6 @@
       "filePath": "src/components/ui/button.tsx"
     },
     {
-      "category": "atom",
-      "renderType": "client",
-      "description": "Client-side interactive version of the Button component with enhanced functionality",
-      "author": "Frontend Team",
-      "status": "10th April",
-      "since": "2023-04-06",
-      "name": "ButtonClient",
-      "filePath": "src/components/ui/client/button-client.tsx"
-    },
-    {
       "category": "organism",
       "subcategory": "input",
       "description": "Displays a calendar grid allowing users to view dates and select single or multiple dates.",
@@ -104,8 +94,8 @@
     {
       "category": "organism",
       "subcategory": "calendar",
-      "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
-      "status": "10th April",
+      "description": "Displays upcoming campaign events in a calendar grid.",
+      "status": "10th April - Rewritten for clarity",
       "name": "CalendarUpcoming",
       "filePath": "src/components/ui/calendar-upcoming.tsx"
     },
@@ -116,16 +106,6 @@
       "status": "10th April",
       "name": "Card",
       "filePath": "src/components/ui/card.tsx"
-    },
-    {
-      "category": "molecule",
-      "renderType": "client",
-      "description": "Client-side interactive Card component with hover effects and state",
-      "author": "Frontend Team",
-      "status": "10th April",
-      "since": "2023-04-06",
-      "name": "CardClient",
-      "filePath": "src/components/ui/client/card-client.tsx"
     },
     {
       "category": "organism",
@@ -556,8 +536,8 @@
       {
         "category": "organism",
         "subcategory": "calendar",
-        "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
-        "status": "10th April",
+        "description": "Displays upcoming campaign events in a calendar grid.",
+        "status": "10th April - Rewritten for clarity",
         "name": "CalendarUpcoming",
         "filePath": "src/components/ui/calendar-upcoming.tsx"
       },
@@ -615,7 +595,7 @@
         "category": "organism",
         "subcategory": "visualization",
         "description": "Responsive line chart component based on Recharts with support for multiple data series.",
-        "status": "10th April",
+        "status": "10th April\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
         "name": "LineChart",
         "filePath": "src/components/ui/chart-line.tsx"
       },
@@ -763,16 +743,6 @@
       },
       {
         "category": "molecule",
-        "renderType": "client",
-        "description": "Client-side interactive Card component with hover effects and state",
-        "author": "Frontend Team",
-        "status": "10th April",
-        "since": "2023-04-06",
-        "name": "CardClient",
-        "filePath": "src/components/ui/client/card-client.tsx"
-      },
-      {
-        "category": "molecule",
         "subcategory": "input",
         "description": "Fast, composable command menu for React.",
         "status": "10th April",
@@ -885,16 +855,6 @@
         "status": "10th April",
         "name": "Button",
         "filePath": "src/components/ui/button.tsx"
-      },
-      {
-        "category": "atom",
-        "renderType": "client",
-        "description": "Client-side interactive version of the Button component with enhanced functionality",
-        "author": "Frontend Team",
-        "status": "10th April",
-        "since": "2023-04-06",
-        "name": "ButtonClient",
-        "filePath": "src/components/ui/client/button-client.tsx"
       },
       {
         "category": "atom",
@@ -1107,16 +1067,6 @@
       "name": "Button",
       "filePath": "src/components/ui/button.tsx"
     },
-    "buttonclient": {
-      "category": "atom",
-      "renderType": "client",
-      "description": "Client-side interactive version of the Button component with enhanced functionality",
-      "author": "Frontend Team",
-      "status": "10th April",
-      "since": "2023-04-06",
-      "name": "ButtonClient",
-      "filePath": "src/components/ui/client/button-client.tsx"
-    },
     "calendar": {
       "category": "organism",
       "subcategory": "input",
@@ -1128,8 +1078,8 @@
     "calendarupcoming": {
       "category": "organism",
       "subcategory": "calendar",
-      "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
-      "status": "10th April",
+      "description": "Displays upcoming campaign events in a calendar grid.",
+      "status": "10th April - Rewritten for clarity",
       "name": "CalendarUpcoming",
       "filePath": "src/components/ui/calendar-upcoming.tsx"
     },
@@ -1140,16 +1090,6 @@
       "status": "10th April",
       "name": "Card",
       "filePath": "src/components/ui/card.tsx"
-    },
-    "cardclient": {
-      "category": "molecule",
-      "renderType": "client",
-      "description": "Client-side interactive Card component with hover effects and state",
-      "author": "Frontend Team",
-      "status": "10th April",
-      "since": "2023-04-06",
-      "name": "CardClient",
-      "filePath": "src/components/ui/client/card-client.tsx"
     },
     "carousel": {
       "category": "organism",
