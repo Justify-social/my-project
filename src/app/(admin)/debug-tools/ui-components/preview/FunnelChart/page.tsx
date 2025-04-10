@@ -6,15 +6,9 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
-import {
-  FunnelChart,
-  Funnel,
-  LabelList,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
+import { FunnelChart, FunnelDataPoint } from '@/components/ui/chart-funnel';
 
-const funnelData = [
+const funnelData: FunnelDataPoint[] = [
   { name: 'Impressions', value: 10000 },
   { name: 'Clicks', value: 5000 },
   { name: 'Sign-ups', value: 1000 },
@@ -30,13 +24,13 @@ const statusStyles: Record<string, string> = {
 
 export default function FunnelChartPreviewPage() {
   const componentMeta = {
-    "name": "FunnelChart (Recharts)",
-    "description": "A responsive funnel chart component using Recharts for visualizing sequential data flows and conversion rates.",
+    "name": "FunnelChart",
+    "description": "A responsive funnel chart component for visualizing sequential data flows and conversion rates.",
     "category": "organism",
     "subcategory": "chart",
     "renderType": "client",
     "status": "stable",
-    "author": "Recharts / Shadcn UI",
+    "author": "Your Name/Team",
     "since": "2023-07-15"
   };
 
@@ -74,48 +68,17 @@ export default function FunnelChartPreviewPage() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
-          {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-
-          {/* Example 1: Basic Funnel Chart */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Funnel Chart</h3>
-            <div className="h-[350px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <FunnelChart layout="vertical" data={funnelData}
-                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      borderColor: "hsl(var(--border))",
-                      color: "hsl(var(--foreground))",
-                    }}
-                  />
-                  <Funnel dataKey="value" nameKey="name" isAnimationActive={true} fill="#3182CE">
-                    <LabelList
-                      position="right"
-                      fill="hsl(var(--foreground))"
-                      stroke="none"
-                      dataKey="name"
-                      fontSize={12}
-                    />
-                    <LabelList
-                      position="center"
-                      fill="hsl(var(--primary-foreground))"
-                      stroke="none"
-                      dataKey="value"
-                      formatter={(value: number) => value.toLocaleString()}
-                      fontSize={12}
-                      fontWeight="bold"
-                    />
-                  </Funnel>
-                </FunnelChart>
-              </ResponsiveContainer>
-            </div>
+          {/* ---- Use the actual FunnelChart component ---- */}
+          <div className="border border-divider rounded-lg p-6 bg-card shadow-sm">
+            <h3 className="text-lg font-medium mb-3">Sales Conversion Funnel</h3>
+            {/* Pass data to our wrapper component */}
+            <FunnelChart
+              data={funnelData}
+              title="Website Conversion Funnel (Last 30 Days)"
+              height={400}
+            />
           </div>
-
-          {/* Add more examples if needed (e.g., different layouts, colors) */}
-
-          {/* ---- END MANUAL EXAMPLES ---- */}
+          {/* ---- END EXAMPLE ---- */}
         </div>
       </div>
 

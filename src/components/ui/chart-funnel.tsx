@@ -62,10 +62,24 @@ export interface FunnelChartProps {
   tooltipFormatter?: (value: any, name: string, props: any) => React.ReactNode;
 }
 
+// Use brand colors or a compatible palette
 const DEFAULT_COLORS = [
-  '#3182CE', '#4299E1', '#63B3ED', '#90CDF4', '#BEE3F8',
-  '#00BFFF', '#4A5568', '#333333', '#38B2AC'
+  'hsl(var(--primary))',
+  'hsl(var(--primary) / 0.8)',
+  'hsl(var(--primary) / 0.6)',
+  'hsl(var(--primary) / 0.4)',
+  'hsl(var(--primary) / 0.2)',
+  'hsl(var(--secondary))',
+  'hsl(var(--secondary) / 0.7)',
+  'hsl(var(--secondary) / 0.4)'
 ];
+
+// Default Tooltip Formatter
+const defaultTooltipFormatter = (value: number, name: string, props: any) => {
+  const percent = props.payload?.percent;
+  const percentString = percent !== undefined ? `(${(percent * 100).toFixed(0)}%)` : '';
+  return [`${value.toLocaleString()} ${percentString}`, name];
+};
 
 export const FunnelChart: React.FC<FunnelChartProps> = ({
   data,
@@ -78,35 +92,43 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   showLabels = true,
   labelPosition = 'inside',
   showPercentage = true,
-  tooltipFormatter
+  tooltipFormatter = defaultTooltipFormatter // Use default formatter
 }) => {
   const renderLabelContent = (props: any) => {
-    const { value, percent, x, y, width, height, name } = props;
+    const { value, percent, x, y, width, height, name, payload } = props;
     const percentValue = (percent * 100).toFixed(0);
+    const originalValue = payload?.value ?? value;
+
+    // Use fixed light color for text inside segments for better contrast
+    const textColor = "hsl(var(--primary-foreground))"; // Assume this is white/light
 
     return (
-      <g transform={`translate(${x + width / 2}, ${y + height / 2})`}>
+      <g transform={`translate(${x + width / 2}, ${y + height / 2 + 5})`}>
+        {/* Stage Name - slightly less prominent */}
         <text
           textAnchor="middle"
           dominantBaseline="middle"
           className="font-sora"
-          fontSize="14"
-          fontWeight="bold"
-          fill="#FFFFFF"
+          fontSize="11" // Reduced size
+          fontWeight="normal" // Reduced weight
+          fill={textColor}
+          opacity={0.9}
         >
           {name}
         </text>
+        {/* Main Value - prominent */}
         <text
           textAnchor="middle"
           dominantBaseline="middle"
           className="font-work-sans"
-          fontSize="12"
-          fontWeight="normal"
-          dy="20"
-          fill="#FFFFFF"
+          fontSize="14"
+          fontWeight="semibold" // Use semibold
+          dy="16" // Adjusted dy
+          fill={textColor}
         >
-          {value.toLocaleString()}
+          {originalValue.toLocaleString()}
         </text>
+        {/* Percentage - smaller, below value */}
         {showPercentage && (
           <text
             textAnchor="middle"
@@ -114,10 +136,11 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
             className="font-work-sans"
             fontSize="10"
             fontWeight="normal"
-            dy="35"
-            fill="#FFFFFF"
+            dy="32" // Adjusted dy
+            fill={textColor}
+            opacity={0.7}
           >
-            {`${percentValue}%`}
+            {`(${percentValue}%)`}
           </text>
         )}
       </g>
@@ -127,37 +150,41 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   return (
     <div className={cn('w-full font-work-sans', className)}>
       {title && (
-        <h3 className="text-xl font-medium mb-2 font-sora">{title}</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
       )}
-
       <ResponsiveContainer width={width} height={height}>
-        <RechartsFunnelChart width={500} height={300}>
+        <RechartsFunnelChart data={data}>
           <Tooltip
-            formatter={tooltipFormatter}
+            formatter={tooltipFormatter} // Use the (potentially default) formatter
             contentStyle={{
+              backgroundColor: "hsl(var(--popover))",
+              borderColor: "hsl(var(--border))",
+              color: "hsl(var(--popover-foreground))",
               fontSize: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #E2E8F0',
-              borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              borderRadius: 'var(--radius)',
+              boxShadow: 'hsl(var(--shadow))'
             }}
+            cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
           />
           <Funnel
             dataKey="value"
             data={data}
             isAnimationActive={isAnimationActive}
             nameKey="name"
+            lastShapeType="rectangle"
           >
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={colors[index % colors.length]}
+                stroke="hsl(var(--background))"
+                strokeWidth={1}
               />
             ))}
             {showLabels && (
               <LabelList
                 position={labelPosition}
-                content={renderLabelContent}
+                content={renderLabelContent} // Use enhanced renderer
               />
             )}
           </Funnel>

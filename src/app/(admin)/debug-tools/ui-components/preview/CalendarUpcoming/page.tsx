@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 import { CalendarUpcoming } from '@/components/ui/calendar-upcoming'; // Don't import CalendarEvent
+import { useToast } from "@/hooks/use-toast"; // Add toast for click feedback
 
 // Define a local type mirroring the expected structure
 interface PreviewCalendarEvent {
@@ -21,42 +22,65 @@ interface PreviewCalendarEvent {
   allDay?: boolean; // Added from previous sample data
 }
 
-// Sample Data
-const sampleEvents: PreviewCalendarEvent[] = [ // Use local type
+// More diverse Sample Data
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth();
+const currentDateOfMonth = now.getDate();
+
+const sampleEvents: PreviewCalendarEvent[] = [
   {
     id: '1',
-    title: 'Summer Sale Launch',
-    start: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 2, 10, 0),
-    end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 2, 12, 0),
-    platform: 'Facebook',
-    status: 'Scheduled',
+    title: 'Meeting: Campaign Strategy',
+    start: new Date(currentYear, currentMonth, currentDateOfMonth - 2, 10, 0),
+    end: new Date(currentYear, currentMonth, currentDateOfMonth - 2, 11, 30),
+    platform: 'Internal',
+    status: 'Completed'
   },
   {
     id: '2',
-    title: 'Influencer Collab Post',
-    start: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 5),
-    allDay: true,
-    platform: 'Instagram',
-    status: 'Draft',
+    title: 'Ad Launch: Summer Sale',
+    start: new Date(currentYear, currentMonth, currentDateOfMonth, 9, 0),
+    platform: 'Facebook',
+    status: 'Live',
+    allDay: false // Explicitly false
   },
   {
     id: '3',
-    title: 'Holiday Campaign Kick-off Meeting Holiday Campaign Kick-off Meeting Holiday Campaign Kick-off Meeting ',
-    start: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7, 9, 0),
-    end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7, 10, 30),
+    title: 'Content Deadline',
+    start: new Date(currentYear, currentMonth, currentDateOfMonth + 1),
+    allDay: true,
     platform: 'Internal',
-    status: 'Confirmed',
+    status: 'Upcoming'
   },
   {
     id: '4',
-    title: 'Product Photoshoot',
-    start: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 10, 13, 0),
-    end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 10, 17, 0),
-    platform: 'Internal',
-    status: 'Planning',
+    title: 'Influencer Post: Olivia',
+    start: new Date(currentYear, currentMonth, currentDateOfMonth + 3, 14, 0),
+    platform: 'Instagram',
+    status: 'Scheduled'
   },
-  // Add more events as needed
+  {
+    id: '5',
+    title: 'Client Check-in Call Client Check-in Call Client Check-in Call', // Long title test
+    start: new Date(currentYear, currentMonth, currentDateOfMonth + 5, 11, 0),
+    end: new Date(currentYear, currentMonth, currentDateOfMonth + 5, 11, 45),
+    platform: 'Internal',
+    status: 'Confirmed'
+  },
+  // Event next month
+  {
+    id: '6',
+    title: 'Planning: Q4 Campaigns',
+    start: new Date(currentYear, currentMonth + 1, 5, 10, 0),
+    end: new Date(currentYear, currentMonth + 1, 5, 12, 0),
+    platform: 'Internal',
+    status: 'Planning'
+  },
 ];
+
+// Log sample data to console for debugging
+console.log("Sample Events for CalendarUpcoming:", sampleEvents);
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -66,6 +90,17 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function CalendarUpcomingPreviewPage() {
+  const { toast } = useToast();
+
+  const handleEventClick = (eventId: string | number) => {
+    const event = sampleEvents.find(e => e.id === eventId);
+    toast({
+      title: "Event Clicked",
+      description: `ID: ${eventId}, Title: ${event?.title}`,
+    });
+    console.log("Event clicked:", eventId, event);
+  };
+
   const componentMeta = {
     "name": "CalendarUpcoming",
     "description": "Displays upcoming campaign events in a calendar grid or timeline view.",
@@ -112,28 +147,18 @@ export default function CalendarUpcomingPreviewPage() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
-          {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-
-          {/* Example 1: Default View (Month) */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Default View (Month)</h3>
-            {/* We might need a container with a fixed height for better preview */}
-            <div style={{ height: '70vh', minHeight: '600px' }}>
-              <CalendarUpcoming events={sampleEvents} />
+          {/* ---- Updated Rendering Example ---- */}
+          <div className="border border-divider rounded-lg p-4 bg-card shadow-sm"> {/* Added padding/bg/shadow */}
+            <h3 className="text-lg font-medium mb-4">Interactive Calendar</h3> {/* Updated title */}
+            {/* Added container with explicit height and border for visibility */}
+            <div className="h-[75vh] min-h-[600px] w-full border border-dashed border-muted-foreground/30 p-1 rounded-md">
+              <CalendarUpcoming
+                events={sampleEvents}
+                onEventClick={handleEventClick} // Added click handler
+              />
             </div>
           </div>
-
-          {/* Example 2: Rendered Component */}
-          {/* The component manages its own view state, so we just render it */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Rendered Calendar</h3>
-            <div style={{ height: '70vh', minHeight: '600px' }}>
-              <CalendarUpcoming events={sampleEvents} />
-              {/* Removed initialView prop */}
-            </div>
-          </div>
-
-          {/* ---- END MANUAL EXAMPLES ---- */}
+          {/* ---- END UPDATED EXAMPLE ---- */}
         </div>
       </div>
 

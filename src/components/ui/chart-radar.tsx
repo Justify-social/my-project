@@ -3,6 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive radar chart component for visualizing multivariate data across several categories.
+ * @status stable
  * @since 2023-07-15
  * @param {RadarChartProps} props - The props for the RadarChart component.
  * @param {RadarDataPoint[]} props.data - The dataset for the chart. Each object should have a key matching `angleKey` and keys matching the values in `categories`.

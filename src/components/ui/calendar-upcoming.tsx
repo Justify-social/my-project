@@ -17,18 +17,20 @@ import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button'; // Import Shadcn Button
 import { Badge } from '@/components/ui/badge'; // Import Shadcn Badge
 import { cn } from '@/lib/utils';
-import { format, getDaysInMonth as dfnsGetDaysInMonth, getDay, startOfMonth } from 'date-fns'; // Use date-fns for date logic
+import { format, getDaysInMonth as dfnsGetDaysInMonth, getDay, startOfMonth, isSameDay, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'; // Use date-fns for date logic
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Import Tooltip for event details
 
-// Event data structure (keep as is for now)
+// Event data structure
 interface CalendarEvent {
     id: number | string;
     title: string;
     start: Date;
-    end?: Date;
+    end?: Date;       // End date is crucial for multi-day events
     platform?: string;
     budget?: number;
     kpi?: string;
     status?: string;
+    allDay?: boolean;   // Indicates if the event is all-day
 }
 
 export interface CalendarUpcomingProps {
@@ -36,14 +38,26 @@ export interface CalendarUpcomingProps {
     onEventClick?: (eventId: number | string) => void;
 }
 
-export function CalendarUpcoming({ // Changed to named export
+// Helper function to get status color (example)
+const getStatusColor = (status?: string) => {
+    switch (status?.toLowerCase()) {
+        case 'live': return 'bg-green-500';
+        case 'scheduled': return 'bg-blue-500';
+        case 'draft': return 'bg-yellow-500';
+        case 'completed': return 'bg-gray-400';
+        case 'planning': return 'bg-purple-500';
+        default: return 'bg-gray-300';
+    }
+};
+
+export function CalendarUpcoming({
     events = [],
     onEventClick
 }: CalendarUpcomingProps) {
-    const [currentDate, setCurrentDate] = useState(startOfMonth(new Date())); // Start at beginning of month
-    const [view, setView] = useState<'calendar' | 'timeline'>('calendar');
+    const [currentDate, setCurrentDate] = useState(startOfMonth(new Date()));
+    // Removed view state: const [view, setView] = useState<'calendar' | 'timeline'>('calendar');
 
-    // Calendar navigation
+    // Calendar navigation (keep as is)
     const nextMonth = () => {
         setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
     };
@@ -51,69 +65,133 @@ export function CalendarUpcoming({ // Changed to named export
         setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
     };
 
-    // Calendar helpers using date-fns
+    // Calendar helpers (keep as is)
     const getDaysInMonth = (date: Date): number => {
         return dfnsGetDaysInMonth(date);
     };
     const getFirstDayOfMonth = (date: Date): number => {
-        // date-fns getDay: 0 = Sunday, 6 = Saturday
         return getDay(date);
     };
 
-    // Get events for a specific day
-    const getEventsForDay = (day: number, monthDate: Date) => {
+    // Get events relevant to a specific day (starts, ends, or spans)
+    const getEventsForDay = (day: number, monthDate: Date): CalendarEvent[] => {
+        const targetDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+        const targetDayStart = startOfDay(targetDate);
+        const targetDayEnd = endOfDay(targetDate);
+
         return events.filter((event) => {
-            const eventDate = new Date(event.start);
-            return eventDate.getDate() === day &&
-                eventDate.getMonth() === monthDate.getMonth() &&
-                eventDate.getFullYear() === monthDate.getFullYear();
+            const eventStart = startOfDay(new Date(event.start)); // Compare start of day
+            // Use end of day for event.end if it exists, otherwise use start for single-day events
+            const eventEnd = event.end ? endOfDay(new Date(event.end)) : endOfDay(new Date(event.start));
+
+            // Event starts on this day
+            if (isSameDay(eventStart, targetDayStart)) {
+                return true;
+            }
+            // Event ends on this day
+            if (event.end && isSameDay(endOfDay(new Date(event.end)), targetDayEnd)) {
+                return true;
+            }
+            // Event spans this day (started before, ends after)
+            if (isBefore(eventStart, targetDayStart) && isAfter(eventEnd, targetDayEnd)) {
+                return true;
+            }
+            // Event spans into this day (started before, ends on this day)
+            if (isBefore(eventStart, targetDayStart) && isSameDay(eventEnd, targetDayEnd)) {
+                return true;
+            }
+            // Event starts on this day and spans further
+            if (isSameDay(eventStart, targetDayStart) && isAfter(eventEnd, targetDayEnd)) {
+                return true;
+            }
+
+            return false;
         });
     };
 
     const renderCalendarView = () => {
         const daysInMonth = getDaysInMonth(currentDate);
-        const firstDay = getFirstDayOfMonth(currentDate); // 0=Sun, 1=Mon...
+        const firstDay = getFirstDayOfMonth(currentDate);
         const daysArray = [];
 
-        // Add empty cells for days before the first day of the month
+        // Add empty cells
         for (let i = 0; i < firstDay; i++) {
-            daysArray.push(<div key={`empty-${i}`} className="h-24 bg-muted/50 rounded-lg"></div>);
+            daysArray.push(<div key={`empty-${i}`} className="h-28 border border-border/50 bg-muted/30 rounded-md"></div>); // Adjusted style
         }
 
-        // Add cells for each day of the month
+        // Add day cells
         for (let day = 1; day <= daysInMonth; day++) {
+            const currentDayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
             const dayEvents = getEventsForDay(day, currentDate);
-            const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
+            const isToday = isSameDay(new Date(), currentDayDate);
 
             daysArray.push(
                 <motion.div
                     key={day}
                     className={cn(
-                        "h-24 p-2 border rounded-lg",
-                        isToday ? "bg-accent/10 border-accent/30" : "border-border",
-                        dayEvents.length > 0 ? 'bg-primary/5' : 'bg-background',
+                        "h-28 p-1.5 border rounded-md flex flex-col", // Adjusted padding, height, flex
+                        isToday ? "bg-accent border-accent/50" : "border-border bg-background",
                     )}
-                    whileHover={{ scale: 1.02, transition: { duration: 0.1 } }}
+                    whileHover={{ boxShadow: "0 0 0 1px hsl(var(--primary))", transition: { duration: 0.1 } }} // Use primary border on hover
                 >
-                    <div className="flex justify-between items-start">
-                        <span className={cn("font-medium text-xs", isToday ? "text-accent" : "text-foreground")}>{day}</span>
-                        {dayEvents.length > 0 &&
-                            <Badge variant="secondary" className="px-1.5 py-0 text-xs">{dayEvents.length}</Badge>
-                        }
+                    <div className="flex justify-between items-center mb-1">
+                        <span className={cn("font-medium text-xs", isToday ? "text-accent-foreground" : "text-muted-foreground")}>{day}</span>
+                        {/* Optional: Keep event count badge if desired */}
+                        {/* {dayEvents.length > 0 &&
+                            <Badge variant="secondary" className="px-1 py-0 text-[10px] leading-tight h-4">{dayEvents.length}</Badge>
+                        } */}
                     </div>
-                    <div className="mt-1 space-y-1 overflow-hidden">
-                        {dayEvents.slice(0, 2).map((event) => // Limit visible events
-                            <div
-                                key={event.id}
-                                className="text-xs truncate bg-background rounded px-1 py-0.5 cursor-pointer hover:bg-muted"
-                                onClick={() => onEventClick && onEventClick(event.id)}
-                                title={event.title}
-                            >
-                                {event.title}
-                            </div>
-                        )}
-                        {dayEvents.length > 2 && (
-                            <div className="text-xs text-muted-foreground">+ {dayEvents.length - 2} more</div>
+                    {/* Event List - Scrollable */}
+                    <div className="space-y-0.5 overflow-y-auto flex-grow pr-1" style={{ scrollbarWidth: 'thin' }}>
+                        <TooltipProvider delayDuration={200}>
+                            {dayEvents.slice(0, 4).map((event) => { // Show more events potentially
+                                const eventStart = new Date(event.start);
+                                const eventEnd = event.end ? new Date(event.end) : eventStart;
+                                const isStartDay = isSameDay(eventStart, currentDayDate);
+                                const isEndDay = isSameDay(eventEnd, currentDayDate);
+                                const isMultiDay = !isSameDay(startOfDay(eventStart), startOfDay(eventEnd));
+                                const continuesBefore = isBefore(startOfDay(eventStart), startOfDay(currentDayDate));
+                                const continuesAfter = isAfter(startOfDay(eventEnd), startOfDay(currentDayDate));
+
+                                return (
+                                    <Tooltip key={event.id}>
+                                        <TooltipTrigger asChild>
+                                            <div
+                                                className={cn(
+                                                    "text-[11px] leading-tight rounded px-1 py-0.5 cursor-pointer hover:opacity-80 flex items-center gap-1 relative",
+                                                    getStatusColor(event.status), // Use status color as background
+                                                    "text-white", // White text on colored background
+                                                    continuesBefore && "rounded-l-none", // Indicate continuation
+                                                    continuesAfter && "rounded-r-none"   // Indicate continuation
+                                                )}
+                                                onClick={() => onEventClick && onEventClick(event.id)}
+                                            >
+                                                {/* Optional: Add tiny arrow if continues */}
+                                                {/* {continuesBefore && <div className="absolute left-[-3px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[3px] border-r-current"></div>} */}
+                                                {/* {continuesAfter && <div className="absolute right-[-3px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[3px] border-l-current"></div>} */}
+
+                                                {(isStartDay || !isMultiDay || getDay(currentDayDate) === 1 /* Monday */) && (
+                                                    <span className="flex-grow truncate font-medium">{event.title}</span>
+                                                )}
+                                                {/* Maybe show time only on start day for non-all-day events? */}
+                                                {/* {isStartDay && !event.allDay && <span className='text-[10px] opacity-80 ml-auto'>{format(eventStart, 'p')}</span>} */}
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" align="start" className="text-xs max-w-[250px] z-10"> {/* Increased z-index */}
+                                            <p className="font-semibold mb-0.5">{event.title}</p>
+                                            <p className="text-muted-foreground">
+                                                {format(eventStart, event.allDay ? 'MMM d' : 'MMM d, p')} -
+                                                {' '}{format(eventEnd, event.allDay ? 'MMM d' : 'MMM d, p')}
+                                            </p>
+                                            {event.platform && <p className="text-muted-foreground">Platform: {event.platform}</p>}
+                                            {event.status && <p className="text-muted-foreground">Status: {event.status}</p>}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                );
+                            })}
+                        </TooltipProvider>
+                        {dayEvents.length > 4 && (
+                            <div className="text-[10px] text-muted-foreground text-center pt-0.5">+ {dayEvents.length - 4} more</div>
                         )}
                     </div>
                 </motion.div>
@@ -121,10 +199,10 @@ export function CalendarUpcoming({ // Changed to named export
         }
 
         return (
-            <div className="space-y-4">
+            <div className="space-y-3">
+                {/* Header with Navigation */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        {/* Use Shadcn Buttons */}
                         <Button
                             variant="outline"
                             size="icon"
@@ -134,7 +212,7 @@ export function CalendarUpcoming({ // Changed to named export
                         >
                             <Icon iconId="faChevronLeftLight" className="h-4 w-4" />
                         </Button>
-                        <div className="text-lg font-semibold text-foreground">
+                        <div className="text-base font-semibold text-foreground text-center min-w-[150px]">
                             {format(currentDate, 'MMMM yyyy')}
                         </div>
                         <Button
@@ -147,19 +225,12 @@ export function CalendarUpcoming({ // Changed to named export
                             <Icon iconId="faChevronRightLight" className="h-4 w-4" />
                         </Button>
                     </div>
-                    {/* Use Shadcn Button for view switch */}
-                    <Button
-                        variant="link"
-                        onClick={() => setView('timeline')}
-                        className="text-sm font-medium"
-                    >
-                        Switch to Timeline
-                    </Button>
+                    {/* Removed View Switch Button */}
                 </div>
-                <div className="grid grid-cols-7 gap-2">
-                    {/* Use semantic text color */}
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1.5"> {/* Adjusted gap */}
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) =>
-                        <div key={day} className="text-center text-sm font-medium text-muted-foreground">
+                        <div key={day} className="text-center text-xs font-medium text-muted-foreground pb-1">
                             {day}
                         </div>
                     )}
@@ -169,104 +240,24 @@ export function CalendarUpcoming({ // Changed to named export
         );
     };
 
-    const renderTimelineView = () => {
-        // Group events by month
-        const groupedEvents = events.reduce((acc, event) => {
-            const monthYear = format(event.start, 'MMMM yyyy');
-            if (!acc[monthYear]) {
-                acc[monthYear] = [];
-            }
-            acc[monthYear].push(event);
-            return acc;
-        }, {} as Record<string, CalendarEvent[]>);
-
-        return (
-            <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-foreground">Timeline View</h3>
-                    {/* Use Shadcn Button */}
-                    <Button
-                        variant="link"
-                        onClick={() => setView('calendar')}
-                        className="text-sm font-medium"
-                    >
-                        Switch to Calendar
-                    </Button>
-                </div>
-                {Object.entries(groupedEvents).map(([monthYear, monthEvents]) =>
-                    <motion.div
-                        key={monthYear}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-card rounded-lg p-4 border border-border"
-                    >
-                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                            {/* Use semantic colors */}
-                            <Icon iconId="faCalendarLight" className="w-5 h-5 mr-2 text-primary" />
-                            {monthYear}
-                        </h3>
-                        <div className="space-y-3">
-                            {monthEvents.map((event) =>
-                                <motion.div
-                                    key={event.id}
-                                    whileHover={{ scale: 1.01, transition: { duration: 0.1 } }}
-                                    className="bg-background rounded-lg p-4 border border-border cursor-pointer hover:bg-muted/50"
-                                    onClick={() => onEventClick && onEventClick(event.id)}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            {/* Use semantic colors */}
-                                            <h4 className="font-medium text-foreground">{event.title}</h4>
-                                            <p className="text-sm text-muted-foreground">
-                                                {format(event.start, 'PP')} - {event.end ? format(event.end, 'PP') : 'Ongoing'}
-                                            </p>
-                                            <div className="mt-2 flex items-center space-x-4 text-sm text-muted-foreground">
-                                                {event.platform && (
-                                                    <Badge variant="secondary">{event.platform}</Badge>
-                                                )}
-                                                {event.kpi && (
-                                                    <span className="flex items-center">
-                                                        <Icon iconId="faChatBubbleLight" className="w-4 h-4 mr-1" />
-                                                        {event.kpi}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            {event.budget !== undefined && (
-                                                <div className="flex flex-col space-y-1">
-                                                    <span className="flex items-center justify-end text-sm text-muted-foreground">
-                                                        <Icon iconId="faMoneyLight" className="w-4 h-4 mr-1" />
-                                                        ${event.budget.toLocaleString()}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </div>
-                    </motion.div>
-                )}
-            </div>
-        );
-    };
+    // Removed renderTimelineView function
 
     return (
+        // Simplified - directly return calendar view
         <AnimatePresence mode="wait">
             <motion.div
-                key={view}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                key="calendar-view" // Fixed key
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full"
             >
-                {view === 'calendar' ? renderCalendarView() : renderTimelineView()}
+                {renderCalendarView()}
             </motion.div>
         </AnimatePresence>
+
     );
 }
 
 // Removed default export
-// export default CalendarUpcoming;

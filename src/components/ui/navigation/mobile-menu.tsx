@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory menu
  * @description Mobile navigation menu using Shadcn Sheet component.
+ * @status stable
  */
 'use client';
 
@@ -17,20 +18,21 @@ import {
   SheetContent,
   SheetHeader,
   SheetFooter,
-  SheetClose, // Import SheetClose for the close button
-} from '@/components/ui/sheet'; // Use Shadcn Sheet
-import { Button } from '@/components/ui/button'; // For close button styling if needed
+  SheetClose,
+  SheetTitle,
+  SheetDescription
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 // --- Single Source of Truth for Menu Item Structure ---
 export interface MenuItem {
-  id: string;          // Unique identifier
-  label: string;       // Display text
-  href: string;        // Navigation link
-  iconId: string;      // EXACT icon ID (e.g., "faHomeSolid", "faHomeLight")
-  isDisabled?: boolean; // Optional: disable item
-  badge?: string | number; // Optional: display a badge
-  children?: MenuItem[];   // Optional: for nested menus
-  // `isActive` is handled by the parent determining the correct iconId
+  id: string;
+  label: string;
+  href: string;
+  iconId?: string;      // Keep optional for potential custom non-app icons, but prioritize internal mapping
+  isDisabled?: boolean;
+  badge?: string | number;
+  children?: MenuItem[];
 }
 
 // --- Component Props ---
@@ -47,15 +49,36 @@ export interface MobileMenuProps {
   onItemClick?: (item: MenuItem) => void; // Optional click handler
 }
 
-// --- Helper Icons ---
+// --- App Icon Mapping (Updated) ---
+const appIconMap: Record<string, string> = {
+  "dashboard": "appHome",
+  "home": "appHome",
+  "campaigns": "appCampaigns",
+  "brand lift": "appBrandLift",
+  "creative testing": "appCreativeAssetTesting",
+  "brand health": "appBrandHealth",
+  "influencers": "appInfluencers",
+  "mmm": "appMmm",
+  "reports": "appReports",
+  "settings": "appSettings",
+  "account settings": "appSettings",
+  "help": "appHelp",
+  "billing": "appBilling",
+};
+
+const getAppIconIdForLabel = (label: string): string | null => {
+  return appIconMap[label.toLowerCase()] || null;
+};
+
+// --- Helper Icons (Update to use app icons where applicable) ---
 const ICONS = {
   CLOSE: 'faXmarkLight',
   CHEVRON_DOWN: 'faChevronDownSolid',
   CHEVRON_RIGHT: 'faChevronRightLight',
-  COINS: 'faCoinsLight',
-  BELL: 'faBellLight',
-  USER_FALLBACK: '/icons/light/user.svg', // Consider moving to constants
-  LOGO_FALLBACK: '/logo.png', // Consider moving to constants
+  COINS: 'faCoinsLight', // Keep FA light or find app equivalent? 
+  BELL: 'faBellLight', // Keep FA light or find app equivalent?
+  USER_FALLBACK: '/icons/light/faUserLight.svg', // Use explicit FA path
+  LOGO_FALLBACK: '/logo.png',
 };
 
 /**
@@ -69,7 +92,12 @@ const RenderMenuItem: React.FC<{
 }> = ({ item, depth = 0, onItemClick, onClose }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const hasChildren = item.children && item.children.length > 0;
-  const iconAvailable = iconExists(item.iconId);
+
+  const mappedAppIconId = getAppIconIdForLabel(item.label);
+  const displayIconId = mappedAppIconId || item.iconId;
+  const iconAvailable = displayIconId ? iconExists(displayIconId) : false;
+  const fallbackIcon = "faCircleLight";
+  const finalIconId = iconAvailable ? displayIconId : fallbackIcon;
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (hasChildren) {
@@ -83,7 +111,6 @@ const RenderMenuItem: React.FC<{
 
   return (
     <li className="w-full" data-testid={`mobile-menu-item-${item.id}`}>
-      {/* Use SheetClose for direct navigation items */}
       {!hasChildren ? (
         <SheetClose asChild>
           <a
@@ -97,15 +124,8 @@ const RenderMenuItem: React.FC<{
               depth > 0 && 'py-2 pl-8 border-b-0'
             )}
           >
-            {/* Simplified Icon Rendering */}
             <span className="flex-shrink-0 mr-3">
-              {iconAvailable ? (
-                <Icon iconId={item.iconId} className="w-5 h-5" />
-              ) : (
-                <div className="flex items-center justify-center w-5 h-5 text-xs bg-muted text-muted-foreground rounded-full" title={`Icon '${item.iconId}' not found`}>
-                  {item.label.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <Icon iconId={finalIconId!} className="w-5 h-5" />
             </span>
             <span className="flex-grow">{item.label}</span>
             {item.badge && (
@@ -116,7 +136,6 @@ const RenderMenuItem: React.FC<{
           </a>
         </SheetClose>
       ) : (
-        // Don't wrap parent items in SheetClose
         <a
           href={item.href} // Keep href for potential right-click/open in new tab
           onClick={handleClick}
@@ -128,15 +147,8 @@ const RenderMenuItem: React.FC<{
             depth > 0 && 'py-2 pl-8 border-b-0'
           )}
         >
-          {/* Simplified Icon Rendering */}
           <span className="flex-shrink-0 mr-3">
-            {iconAvailable ? (
-              <Icon iconId={item.iconId} className="w-5 h-5" />
-            ) : (
-              <div className="flex items-center justify-center w-5 h-5 text-xs bg-muted text-muted-foreground rounded-full" title={`Icon '${item.iconId}' not found`}>
-                {item.label.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <Icon iconId={finalIconId!} className="w-5 h-5" />
           </span>
           <span className="flex-grow">{item.label}</span>
           {item.badge && (
@@ -147,7 +159,7 @@ const RenderMenuItem: React.FC<{
           {/* Chevron for parent items */}
           <Icon
             iconId={isExpanded ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT}
-            className="ml-2 w-4 h-4"
+            className="ml-auto w-4 h-4 transition-transform duration-200 group-data-[state=expanded]:rotate-180"
           />
         </a>
       )}
@@ -190,15 +202,21 @@ export function MobileMenu({
 
   const handleClose = () => onOpenChange(false); // Helper to close sheet
 
-  // Combine regular items and settings item ONLY if settingsItem exists
-  const allMenuItems = settingsItem ? [...menuItems, settingsItem] : menuItems;
+  // Update settings item icon mapping if settingsItem exists
+  const finalSettingsItem = settingsItem ? {
+    ...settingsItem,
+    iconId: getAppIconIdForLabel(settingsItem.label) || settingsItem.iconId || 'faCogLight' // Map settings label too
+  } : undefined;
+
+  const itemsToRender = finalSettingsItem ? [...menuItems, finalSettingsItem] : menuItems;
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="right" className={cn("w-full max-w-xs p-0 flex flex-col", className)} data-testid="mobile-menu-sheet-content">
 
-        {/* Header */}
+        {/* Header - Remove custom SheetClose */}
         <SheetHeader className="flex flex-row items-center justify-between h-16 px-4 border-b">
+          <SheetTitle className="sr-only">Main Menu</SheetTitle>
           <div className="flex items-center space-x-2">
             <Image
               src={ICONS.LOGO_FALLBACK}
@@ -207,29 +225,19 @@ export function MobileMenu({
               height={32}
               onError={(e) => { e.currentTarget.style.display = 'none'; console.warn("Logo image failed to load"); }}
             />
-            <span className="font-semibold text-lg">{companyName}</span> {/* Adjusted font weight */}
+            <span className="font-semibold text-lg">{companyName}</span>
           </div>
-          {/* Use SheetClose for the button */}
-          <SheetClose asChild>
-            <Button variant="ghost" size="icon" aria-label="Close menu" data-testid="mobile-menu-close">
-              {iconExists(ICONS.CLOSE) ? (
-                <Icon iconId={ICONS.CLOSE} className="w-5 h-5" />
-              ) : (
-                'X' // Simple fallback
-              )}
-            </Button>
-          </SheetClose>
         </SheetHeader>
 
         {/* Navigation List - Takes remaining space and scrolls */}
         <nav className="flex-grow overflow-y-auto">
           <ul className="py-2">
-            {allMenuItems.map(item => (
+            {itemsToRender.map(item => (
               <RenderMenuItem
                 key={item.id}
                 item={item}
                 onItemClick={onItemClick}
-                onClose={handleClose} // Pass close handler
+                onClose={handleClose}
               />
             ))}
           </ul>

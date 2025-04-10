@@ -604,6 +604,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       "category": "light",
+      "id": "faEllipsisLight",
+      "name": "Ellipsis",
+      "path": "/icons/light/faEllipsisLight.svg",
+      "faVersion": "fal fa-ellipsis"
+    },
+    {
+      "category": "light",
       "id": "faEnvelopeLight",
       "name": "Envelope",
       "faVersion": "fal fa-envelope",
@@ -1567,6 +1574,13 @@ export const iconRegistryData: IconRegistryData = {
       "name": "Drafting Compass",
       "faVersion": "fas fa-drafting-compass",
       "path": "/icons/solid/faDraftingCompassSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faEllipsisSolid",
+      "name": "Ellipsis",
+      "path": "/icons/solid/faEllipsisSolid.svg",
+      "faVersion": "fas fa-ellipsis"
     },
     {
       "category": "solid",

@@ -26,9 +26,9 @@ const formatCurrency = (value: string | number, currency = 'USD') => {
 // Sample data for KpiCards
 const kpiData = [
   { title: "Total Revenue", value: 45231.89, change: 20.1, formatter: (val: string | number) => formatCurrency(val, 'USD'), icon: 'faDollarSignLight' },
-  { title: "Subscriptions", value: 2350, change: -12.2, icon: 'faUsersLight' },
+  { title: "Subscriptions", value: 2350, change: -12.2, icon: 'faUserLight' },
   { title: "Sales", value: 12345, change: 5.5, formatter: (val: string | number) => formatCurrency(val, 'USD') },
-  { title: "Active Users", value: 987, change: 0 },
+  { title: "Active Users", value: 987, change: 0, icon: 'faUserLight' },
 ];
 
 const statusStyles: Record<string, string> = {

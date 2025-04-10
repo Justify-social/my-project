@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory navigation
  * @description A collection of links for primary website navigation, typically used in headers.
+ * @status stable
  */
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"

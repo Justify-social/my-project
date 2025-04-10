@@ -401,6 +401,13 @@
     },
     {
       "category": "solid",
+      "id": "faEllipsisSolid",
+      "name": "Ellipsis",
+      "path": "/icons/solid/faEllipsisSolid.svg",
+      "faVersion": "fas fa-ellipsis"
+    },
+    {
+      "category": "solid",
       "id": "faEnvelopeSolid",
       "name": "Envelope",
       "faVersion": "fas fa-envelope",
@@ -968,6 +975,6 @@
     }
   ],
   "category": "solid",
-  "iconCount": 137,
+  "iconCount": 138,
   "updatedAt": "2025-04-03T11:59:21.689Z"
 }

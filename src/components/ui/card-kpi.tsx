@@ -70,16 +70,17 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   formatter = (val) => String(val),
   onClick
 }) => {
-  // Determine trend direction
+  // Determine trend direction and ensure change is treated as a number for logic
+  const numericChange = typeof change === 'string' ? parseFloat(change) : change ?? 0;
   const determinedTrend = trend || (
-    change === 0 ? 'neutral' :
-      change && change > 0 ? 'up' : 'down'
+    numericChange === 0 ? 'neutral' :
+      numericChange > 0 ? 'up' : 'down'
   );
 
-  // Get appropriate trend icon ID
-  const trendIconId = determinedTrend === 'up' ? 'faArrowUp' :
-    determinedTrend === 'down' ? 'faArrowDown' :
-      'faMinus'; // Assuming FontAwesome IDs
+  // Get appropriate trend icon ID using correct IDs from registry
+  const trendIconId = determinedTrend === 'up' ? 'faArrowUpLight' :
+    determinedTrend === 'down' ? 'faArrowDownLight' :
+      'faMinusLight';
 
   // Get trend color class
   const trendColorClass = determinedTrend === 'up' ? trendColor.up :
@@ -88,6 +89,13 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 
   // Format the value
   const formattedValue = formatter(value);
+
+  // Prepare the change text, handling potential existing symbols in input string
+  let changeText = typeof change === 'undefined' ? '' : String(change).replace('%', '').replace('+', '');
+  if (numericChange > 0) {
+    changeText = `+${changeText}`;
+  }
+  changeText = `${changeText}%`;
 
   return (
     <Card
@@ -122,7 +130,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           <div className="flex items-center space-x-1 pt-1"> {/* Added pt-1 */}
             <Icon iconId={trendIconId} className={cn("h-4 w-4", trendColorClass)} />
             <span className={cn('text-sm font-medium', trendColorClass)}>
-              {change > 0 ? '+' : ''}{change}%
+              {changeText}
             </span>
             {changeLabel && (
               <span className="text-xs text-muted-foreground ml-1">

@@ -3,6 +3,7 @@
  * @category organism
  * @renderType server
  * @description A responsive pie chart component for visualizing proportional data.
+ * @status stable
  * @since 2023-07-15
  * @param {PieChartProps} props - The props for the PieChart component.
  * @param {PieDataPoint[]} props.data - The dataset for the chart. Each object requires keys matching `nameKey` and `dataKey`.
@@ -64,40 +65,17 @@ export interface PieChartProps {
   tooltipFormatter?: (value: any) => string;
 }
 
-// Interface for label render props
-interface LabelProps {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-  index: number;
-}
-
-const DEFAULT_COLORS = ['#3182CE', '#00BFFF', '#4A5568', '#333333', '#38B2AC', '#F56565', '#ED8936', '#48BB78'];
-
-const RADIAN = Math.PI / 180;
-
-// Render custom label with percentage
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: LabelProps) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor={x > cx ? 'start' : 'end'}
-      dominantBaseline="central"
-      fontSize={12}
-    >
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  );
-};
+// Refined Color Palette (Example using Brand + variations)
+const DEFAULT_COLORS = [
+  'hsl(var(--primary))', // Jet #333333
+  'hsl(var(--accent))',   // Deep Sky Blue #00BFFF 
+  'hsl(var(--secondary))', // Payne's Grey #4A5568
+  'hsl(var(--primary) / 0.7)', // Lighter Jet
+  'hsl(var(--accent) / 0.7)',   // Lighter Blue
+  'hsl(var(--secondary) / 0.7)', // Lighter Grey
+  'hsl(var(--primary) / 0.4)', // Even Lighter Jet
+  'hsl(var(--accent) / 0.4)',   // Even Lighter Blue
+];
 
 export const PieChart: React.FC<PieChartProps> = ({
   data,
@@ -108,46 +86,86 @@ export const PieChart: React.FC<PieChartProps> = ({
   colors = DEFAULT_COLORS,
   title,
   className,
-  innerRadius = 0,
+  innerRadius = 0, // Default to Pie, can be overridden for Donut
   outerRadius = "80%",
-  paddingAngle = 2,
+  paddingAngle = 1,
   showLegend = true,
   tooltipFormatter
 }) => {
-  return (
-    <div className={cn('w-full font-work-sans', className)}>
-      {title && (
-        <h3 className="text-xl font-medium mb-2 font-sora">{title}</h3>
-      )}
 
+  // Custom label renderer for outside labels (optional customization)
+  const renderOutsideLabel = (props: any) => {
+    const { cx, cy, midAngle, outerRadius, percent, index, name, value } = props;
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius * 1.15; // Position labels further out
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const percentValue = `${(percent * 100).toFixed(0)}%`;
+
+    // Basic check to avoid tiny labels
+    if (percent < 0.03) return null;
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="hsl(var(--foreground))"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        className="text-[11px] font-medium"
+      >
+        {`${name} (${percentValue})`}
+      </text>
+    );
+  };
+
+  return (
+    <div className={cn('w-full', className)}>
+      {title && (
+        <h3 className="text-lg font-semibold text-foreground mb-4 text-center">{title}</h3> // Centered title
+      )}
       <ResponsiveContainer width={width} height={height}>
-        <RechartsPieChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <RechartsPieChart margin={{ top: 10, right: 30, left: 30, bottom: 10 }}> {/* More margin for labels */}
+          <defs>
+            {/* Add a drop shadow filter definition */}
+            <filter id="pie-shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="1" dy="2" stdDeviation="2" floodColor="hsl(var(--foreground))" floodOpacity="0.1" />
+            </filter>
+          </defs>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            labelLine={false}
-            label={renderCustomizedLabel}
+            labelLine={false} // Keep label lines off for cleaner look with custom outside label
+            label={renderOutsideLabel} // Use the outside label renderer
             outerRadius={outerRadius}
             innerRadius={innerRadius}
             paddingAngle={paddingAngle}
             nameKey={nameKey}
             dataKey={dataKey}
+            stroke="hsl(var(--background))" // Background color as stroke
+            strokeWidth={2} // Slightly thicker stroke
+            style={{ filter: 'url(#pie-shadow)' }} // Apply drop shadow
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={colors[index % colors.length]}
+              />
             ))}
           </Pie>
 
           <Tooltip
             formatter={tooltipFormatter}
             contentStyle={{
+              backgroundColor: "hsl(var(--popover))",
+              borderColor: "hsl(var(--border))",
+              color: "hsl(var(--popover-foreground))",
               fontSize: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #E2E8F0',
-              borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              borderRadius: 'var(--radius)',
+              boxShadow: 'hsl(var(--shadow))'
             }}
+            cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, fill: "hsl(var(--accent) / 0.1)" }} // Enhanced cursor
           />
 
           {showLegend && (
@@ -155,7 +173,12 @@ export const PieChart: React.FC<PieChartProps> = ({
               layout="horizontal"
               verticalAlign="bottom"
               align="center"
-              wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+              iconSize={10} // Smaller legend icons
+              wrapperStyle={{
+                fontSize: '11px',
+                paddingTop: '20px', // More space for labels
+                color: 'hsl(var(--muted-foreground))'
+              }}
             />
           )}
         </RechartsPieChart>

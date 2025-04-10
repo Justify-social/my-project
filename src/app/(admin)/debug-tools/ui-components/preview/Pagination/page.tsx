@@ -4,8 +4,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
-import { Pagination } from '../../../../../../components/ui/pagination';
+import { Badge } from "@/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination"; // Import Pagination components
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -16,15 +24,16 @@ const statusStyles: Record<string, string> = {
 
 export default function PaginationPreviewPage() {
   const componentMeta = {
-  "name": "Pagination",
-  "description": "Provides controls for navigating between pages of content.",
-  "category": "organism",
-  "subcategory": "navigation",
-  "renderType": "server",
-  "author": "",
-  "since": ""
-};
-  const examples: string[] = [];
+    "name": "Pagination",
+    "description": "Provides controls for navigating between pages of content.",
+    "category": "organism",
+    "subcategory": "navigation",
+    "renderType": "server", // Can be server-rendered if hrefs are static
+    "status": "stable", // Added status
+    "author": "Shadcn UI", // Added author
+    "since": "2023-08-01" // Added since date (example)
+  };
+  // const examples: string[] = []; // Removed examples array
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,32 +70,69 @@ export default function PaginationPreviewPage() {
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          {/* Example 1: Basic Usage Placeholder */}
+
+          {/* Example 1: Basic Pagination */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Pagination /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Pagination /> here)</p>
+            <h3 className="text-lg font-medium mb-3">Basic Pagination</h3>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious href="#" />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">1</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#" isActive>
+                    2
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">3</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">10</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext href="#" />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
-          {/* Example 2: Add more placeholders or examples as needed */}
+
+          {/* Example 2: Disabled States */}
+          <div className="border border-divider rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-3">Disabled States</h3>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious href="#" aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50" />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#" isActive>
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#" aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50">2</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext href="#" aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50" />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+
+
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
 
-      {/* Code Snippets Section */}
-      {examples && examples.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Code Snippets</h2>
-          <div className="space-y-4">
-            {examples.map((exampleCode: string, index: number) => (
-              <div key={index} className="border border-divider rounded-lg overflow-hidden">
-                <pre className="text-sm p-4 bg-gray-50 text-gray-800 overflow-x-auto">
-                  <code>{`${exampleCode}`}</code>
-                </pre>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Code Snippets Section - Removed */}
+      {/* {examples && examples.length > 0 && ( ... )} */}
 
     </div>
   );

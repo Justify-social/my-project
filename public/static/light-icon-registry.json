@@ -401,6 +401,13 @@
     },
     {
       "category": "light",
+      "id": "faEllipsisLight",
+      "name": "Ellipsis",
+      "path": "/icons/light/faEllipsisLight.svg",
+      "faVersion": "fal fa-ellipsis"
+    },
+    {
+      "category": "light",
       "id": "faEnvelopeLight",
       "name": "Envelope",
       "faVersion": "fal fa-envelope",

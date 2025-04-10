@@ -3,6 +3,7 @@
  * @category organism
  * @subcategory navigation
  * @description Provides controls for navigating between pages of content.
+ * @status stable
  */
 import * as React from "react"
 import { Icon } from "@/components/ui/icon/icon"
@@ -103,10 +104,18 @@ const PaginationEllipsis = ({
 }: React.ComponentProps<"span">) => (
   <span
     aria-hidden
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
+    className={cn(
+      "flex h-9 w-9 items-end justify-center",
+      className)}
     {...props}
   >
-    <Icon iconId="faEllipsisH" className="h-4 w-4" />
+    <Icon
+      iconId="faEllipsisLight"
+      className={cn(
+        "h-4 w-4 text-muted-foreground",
+        "pb-[3px]"
+      )}
+    />
     <span className="sr-only">More pages</span>
   </span>
 )
