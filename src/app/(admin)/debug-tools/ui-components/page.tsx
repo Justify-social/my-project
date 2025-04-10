@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Card, CardHeader, CardTitle, CardContent,
   Tabs, TabsList, TabsTrigger, TabsContent,
@@ -22,12 +23,12 @@ import { type ComponentRegistry, type ExtendedComponentMetadata, type ComponentC
 import { cn } from '@/lib/utils';
 
 const CATEGORIES_DISPLAY: Record<ComponentCategory, { icon: string }> = {
-  atom: { icon: 'faAtomSolid' },
-  molecule: { icon: 'faDnaSolid' },
-  organism: { icon: 'faBacteriumSolid' },
-  template: { icon: 'faObjectGroupSolid' },
-  page: { icon: 'faFileSolid' },
-  unknown: { icon: 'faQuestionSolid' },
+  atom: { icon: 'faAtomLight' },
+  molecule: { icon: 'faDnaLight' },
+  organism: { icon: 'faBacteriumLight' },
+  template: { icon: 'faObjectGroupLight' },
+  page: { icon: 'faFileLight' },
+  unknown: { icon: 'faQuestionLight' },
 };
 
 const statusStyles: Record<string, string> = {
@@ -48,14 +49,39 @@ const getIconInfo = (id: string): { baseName: string; variant: 'light' | 'solid'
 };
 
 export default function ComponentBrowserPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const initialTab = searchParams.get('tab') || 'components';
+  const initialCategory = searchParams.get('category') as ComponentCategory | null || null;
+
   const [registry, setRegistry] = useState<ComponentRegistry | null>(null);
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(true);
   const [errorLoadingRegistry, setErrorLoadingRegistry] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(initialCategory);
   const [allIcons, setAllIcons] = useState<IconMetadata[]>([]);
   const [iconCategories, setIconCategories] = useState<string[]>([]);
   const [selectedIconCategory, setSelectedIconCategory] = useState<string>('All');
   const [hoverPairs, setHoverPairs] = useState<{ lightId: string; solidId: string; name?: string }[]>([]);
+  const [currentTab, setCurrentTab] = useState(initialTab);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'components';
+    const category = searchParams.get('category') as ComponentCategory | null;
+    setCurrentTab(tab);
+
+    if (tab === 'components') {
+      if (category && registry?.allCategories?.includes(category)) {
+        setSelectedCategory(category);
+      } else if (!selectedCategory) {
+        const defaultCategory = registry?.allCategories?.includes('atom')
+          ? 'atom'
+          : registry?.allCategories?.[0] || null;
+        setSelectedCategory(defaultCategory);
+      }
+    } else {
+      setSelectedCategory(null);
+    }
+  }, [searchParams, registry, selectedCategory]);
 
   useEffect(() => {
     const fetchRegistry = async () => {
@@ -68,10 +94,6 @@ export default function ComponentBrowserPage() {
         }
         const data: ComponentRegistry = await response.json();
         setRegistry(data);
-        if (!selectedCategory && data.allCategories && data.allCategories.length > 0) {
-          const defaultCategory = data.allCategories.includes('atom') ? 'atom' : data.allCategories[0];
-          setSelectedCategory(defaultCategory);
-        }
       } catch (err) {
         console.error("Error fetching component registry JSON:", err);
         setErrorLoadingRegistry(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -107,6 +129,10 @@ export default function ComponentBrowserPage() {
 
   const handleCategoryClick = (category: ComponentCategory) => {
     setSelectedCategory(category);
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set('tab', 'components');
+    currentParams.set('category', category);
+    router.push(`?${currentParams.toString()}`);
   };
 
   const filteredComponents = useMemo(() => {
@@ -118,6 +144,23 @@ export default function ComponentBrowserPage() {
     if (category === 'All') return allIcons.length;
     if (category === 'Hover') return hoverPairs.length;
     return allIcons.filter(icon => icon.category?.toLowerCase() === category.toLowerCase()).length;
+  };
+
+  const handleTabChange = (value: string) => {
+    setCurrentTab(value);
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set('tab', value);
+    if (value === 'components') {
+      const categoryToSet = selectedCategory || (registry?.allCategories?.includes('atom') ? 'atom' : registry?.allCategories?.[0]);
+      if (categoryToSet) {
+        currentParams.set('category', categoryToSet);
+      } else {
+        currentParams.delete('category');
+      }
+    } else {
+      currentParams.delete('category');
+    }
+    router.push(`?${currentParams.toString()}`);
   };
 
   if (isLoadingRegistry) {
@@ -154,7 +197,7 @@ export default function ComponentBrowserPage() {
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6 text-primary">UI Component Browser</h1>
 
-      <Tabs defaultValue="components">
+      <Tabs value={currentTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="components">Components</TabsTrigger>
           <TabsTrigger value="icons">Icon Library</TabsTrigger>
@@ -206,9 +249,16 @@ export default function ComponentBrowserPage() {
                     >
                       <div className="p-4">
                         <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-md font-semibold text-primary group-hover:text-Interactive truncate">
-                            {comp.name}
-                          </h3>
+                          <div className="flex items-center space-x-2 overflow-hidden">
+                            <Icon
+                              iconId={CATEGORIES_DISPLAY[comp.category]?.icon || CATEGORIES_DISPLAY.unknown.icon}
+                              className="h-4 w-4 text-muted-foreground flex-shrink-0"
+                              title={`Category: ${comp.category}`}
+                            />
+                            <h3 className="text-md font-semibold text-primary group-hover:text-Interactive truncate">
+                              {comp.name}
+                            </h3>
+                          </div>
                           {comp.status && (
                             <span
                               className={cn(

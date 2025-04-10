@@ -47,7 +47,8 @@ svg:not(:host).svg-inline--fa {
 
 .svg-inline--fa {
   display: inline-block;
-  height: 1em;
+  /* height: 1em; */
+  /* Commented out to prevent conflict with explicit sizing */
   overflow: visible;
   vertical-align: -0.125em;
 }

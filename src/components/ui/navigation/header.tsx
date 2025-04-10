@@ -32,7 +32,7 @@ interface HeaderProps {
   profileImageUrl?: string;
   onMenuClick?: () => void;
   navItems: MenuItem[];
-  settingsNavItem: MenuItem;
+  settingsNavItem?: MenuItem;
 }
 
 const Header: React.FC<HeaderProps> = ({

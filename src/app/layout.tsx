@@ -67,9 +67,7 @@ export default function RootLayout({
                   <UTSSR />
                 </Suspense>
                 <ClientLayout>
-                  <main className="min-h-screen bg-gray-100">
-                    {children}
-                  </main>
+                  {children}
                 </ClientLayout>
                 {/* Render Shadcn Toaster */}
                 <Toaster />

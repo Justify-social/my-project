@@ -2,6 +2,7 @@
 
 import { useThemeToggle } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 /**
  * @component ThemeToggle
@@ -13,21 +14,33 @@ import { Button } from "@/components/ui/button"
  */
 export function ThemeToggle() {
   const { theme, resolvedTheme, toggleTheme } = useThemeToggle()
+  const isDark = resolvedTheme === "dark"; // Check if dark mode is active
 
   return (
     <Button
       variant="ghost"
-      size="icon"
       onClick={toggleTheme}
-      aria-label={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-    >
-      {resolvedTheme === "dark" ? (
-        <SunIcon className="h-5 w-5" />
-      ) : (
-        <MoonIcon className="h-5 w-5" />
+      // Apply active styles conditionally based on isDark
+      className={cn(
+        "flex items-center group w-full justify-start px-0 py-0 rounded-md transition-all duration-150", // Base layout + transition
+        isDark
+          ? 'text-[#00BFFF] bg-[#fafafa] font-medium' // Active dark mode styles (accent text, light bg)
+          : 'text-[#333333] hover:text-[#00BFFF] hover:bg-[#fafafa]' // Default + Hover styles
       )}
-      <span className="sr-only">
-        {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+    >
+      {/* Icon: Apply active color if dark, hover color otherwise */}
+      {isDark ? (
+        <SunIcon className={cn("h-5 w-5 mr-3", isDark ? "text-[#00BFFF]" : "group-hover:text-[#00BFFF]")} />
+      ) : (
+        <MoonIcon className={cn("h-5 w-5 mr-3", isDark ? "text-[#00BFFF]" : "group-hover:text-[#00BFFF]")} />
+      )}
+      {/* Text: Apply active color if dark, hover color otherwise */}
+      <span className={cn(
+        "text-sm font-sora font-medium truncate",
+        isDark ? "text-[#00BFFF]" : "text-[#333333] group-hover:text-[#00BFFF]"
+      )}>
+        Dark Mode
       </span>
     </Button>
   )

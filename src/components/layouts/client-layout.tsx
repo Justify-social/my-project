@@ -13,11 +13,29 @@ import Image from "next/image";
 import SidebarUIComponents from "@/components/ui/navigation/sidebar-ui-components";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
-// Define NavItem interface (matching the one defined in header.tsx)
-interface NavItem {
+// --- Define Navigation Item Types ---
+// Main Sidebar/Header Structure (allows children)
+interface SidebarItemDef {
+  id: string;
+  label: string;
+  href?: string; // Optional for parent items
+  icon?: string;
+  children?: SidebarChildItemDef[];
+}
+
+interface SidebarChildItemDef {
+  id: string;
   label: string;
   href: string;
-  icon: string;
+  icon?: string;
+}
+
+// Flat structure for MobileMenu and UI Components Sidebar
+interface NavItemDef {
+  id: string;
+  label: string;
+  href: string;
+  iconId: string; // Use iconId for consistency with MobileMenu and UI Sidebar
 }
 
 interface ClientLayoutProps {
@@ -66,28 +84,16 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     return null;
   }
 
-  const sidebarItems = [
-    {
-      id: 'home',
-      label: 'Home',
-      href: '/',
-      icon: 'appHome',
-    },
+  // --- Navigation Definitions (SSOT) ---
+  const sidebarItems: SidebarItemDef[] = [
+    { id: 'home', label: 'Home', href: '/', icon: 'appHome' },
     {
       id: 'campaigns',
       label: 'Campaigns',
       icon: 'appCampaigns',
       children: [
-        {
-          id: 'campaigns-list',
-          label: 'List',
-          href: '/campaigns',
-        },
-        {
-          id: 'campaigns-wizard',
-          label: 'Wizard',
-          href: '/campaigns/wizard',
-        }
+        { id: 'campaigns-list', label: 'List', href: '/campaigns' },
+        { id: 'campaigns-wizard', label: 'Wizard', href: '/campaigns/wizard' }
       ]
     },
     {
@@ -152,24 +158,54 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     { id: 'billing', href: "/billing", label: "Billing", icon: "appBilling" },
   ];
 
-  // Create navItems for Header/MobileMenu (flat structure, top-level links)
-  const navItems: NavItem[] = sidebarItems
-    .filter(item => typeof item.href === 'string') // Filter out items without a direct top-level href
+  const settingsItemDef: SidebarItemDef = {
+    id: 'settings', label: "Settings", href: "/settings", icon: "appSettings"
+  };
+
+  // Derive flat navItems for Header/MobileMenu (Main App)
+  const mainNavItemsForMenu: NavItemDef[] = sidebarItems
+    .filter(item => typeof item.href === 'string') // Only top-level linkable items
     .map(item => ({
+      id: item.id,
       label: item.label,
-      href: item.href as string, // Assert href is string after filter
-      icon: item.icon || 'faCircleLight' // Provide default icon if missing
+      href: item.href as string,
+      iconId: item.icon || 'faCircleLight' // Ensure iconId format
     }));
 
-  // Define the settings nav item separately
-  const settingsNavItem: NavItem = {
-    label: "Settings",
-    href: "/settings",
-    icon: "appSettings" // Or the appropriate icon name
-  };
+  // Add settings to the main menu items list
+  const allMainNavItemsForMenu = [
+    ...mainNavItemsForMenu,
+    {
+      id: settingsItemDef.id,
+      label: settingsItemDef.label,
+      href: settingsItemDef.href as string,
+      iconId: settingsItemDef.icon || 'faGearLight'
+    }
+  ];
+
+  // Define Debug Tool Navigation Items
+  const debugNavItems: NavItemDef[] = [
+    { id: 'debug-atom', label: 'Atom', href: '/debug-tools/ui-components?tab=components&category=atom', iconId: 'faAtomLight' },
+    { id: 'debug-molecule', label: 'Molecule', href: '/debug-tools/ui-components?tab=components&category=molecule', iconId: 'faDnaLight' },
+    { id: 'debug-organism', label: 'Organism', href: '/debug-tools/ui-components?tab=components&category=organism', iconId: 'faBacteriumLight' },
+    { id: 'debug-icons', label: 'Icons', href: '/debug-tools/ui-components?tab=icons', iconId: 'faStarLight' },
+  ];
+
+  // --- End Navigation Definitions ---
 
   // Determine if we are on the UI components debug page
   const isUIComponentsPage = pathname.startsWith('/debug-tools/ui-components');
+
+  // Select the correct items for the Mobile Menu based on the page
+  const mobileMenuItems = isUIComponentsPage ? debugNavItems : allMainNavItemsForMenu;
+  // Decide if settings item should be shown in mobile menu for debug page (optional)
+  // For now, let's assume settings are not relevant in the debug mobile menu
+  const mobileSettingsItem = !isUIComponentsPage ? {
+    id: settingsItemDef.id,
+    label: settingsItemDef.label,
+    href: settingsItemDef.href as string,
+    iconId: settingsItemDef.icon || 'faGearLight'
+  } : undefined; // Pass undefined if on debug page
 
   return (
     <ThemeProvider defaultTheme="light">
@@ -179,17 +215,21 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           remainingCredits={100}
           notificationsCount={3}
           onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
-          navItems={navItems}
-          settingsNavItem={settingsNavItem}
+          // Pass the conditionally selected items to Header -> MobileMenu
+          navItems={mobileMenuItems}
+          // Pass conditional settings item (or handle lack of it in MobileMenu)
+          settingsNavItem={mobileSettingsItem}
         />
 
         {/* Conditionally render the correct sidebar */}
         <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300">
           {isUIComponentsPage ? (
-            <SidebarUIComponents />
+            // Pass the defined debugNavItems to the component
+            <SidebarUIComponents navItems={debugNavItems} />
           ) : (
             <Sidebar
-              items={sidebarItems}
+              // Pass the original nested structure to the main sidebar
+              items={[...sidebarItems, settingsItemDef]} // Include settings in main sidebar
               activePath={pathname}
               onItemClick={() => setIsMobileOpen(false)}
               title="Justify"

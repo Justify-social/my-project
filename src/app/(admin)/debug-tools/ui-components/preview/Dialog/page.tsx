@@ -68,12 +68,6 @@ export default function DialogPreviewPage() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
-          {/* Example 1: Basic Usage Placeholder */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
-            {/* <Dialog /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Dialog /> here)</p>
-          </div>
           {/* Example 2: Add more placeholders or examples as needed */}
           {/* Example 3: Edit Profile Dialog */}
           <div className="border border-divider rounded-lg p-6">

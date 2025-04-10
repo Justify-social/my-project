@@ -9,9 +9,8 @@
   ],
   "scripts": {
     "dev": "next dev",
-    "build": "npm run previews:build && node scripts/icons/generate-registry-module.mjs && next build",
+    "build": "node scripts/icons/generate-registry-module.mjs && next build",
     "registry:build": "tsx scripts/build-component-registry.ts",
-    "previews:build": "tsx scripts/generate-preview-pages.ts",
     "build:registry": "tsx scripts/ui/generate-component-registry.ts",
     "build:test": "npm run build:registry && npm run test:registry",
     "test:registry": "tsx scripts/ui/test-production-registry.ts",

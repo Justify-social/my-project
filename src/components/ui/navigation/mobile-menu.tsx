@@ -38,7 +38,7 @@ export interface MobileMenuProps {
   isOpen: boolean;           // Controls the Sheet's open state
   onOpenChange: (open: boolean) => void; // Callback for Sheet state changes
   menuItems: MenuItem[];       // Navigation items using the unified type
-  settingsItem: MenuItem;     // Dedicated settings item
+  settingsItem?: MenuItem;     // Dedicated settings item - NOW OPTIONAL
   remainingCredits: number;   // Data for the footer
   notificationsCount: number; // Data for the footer
   companyName: string;        // Data for the header
@@ -190,8 +190,8 @@ export function MobileMenu({
 
   const handleClose = () => onOpenChange(false); // Helper to close sheet
 
-  // Combine regular items and settings item
-  const allMenuItems = [...menuItems, settingsItem];
+  // Combine regular items and settings item ONLY if settingsItem exists
+  const allMenuItems = settingsItem ? [...menuItems, settingsItem] : menuItems;
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
