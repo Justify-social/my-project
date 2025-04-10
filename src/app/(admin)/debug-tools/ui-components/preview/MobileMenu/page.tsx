@@ -111,7 +111,6 @@ export default function MobileMenuPreviewPage() {
             isOpen={isMenuOpen}
             onOpenChange={setIsMenuOpen}
             menuItems={sampleNavItems as MenuItem[]}
-            settingsItem={settingsItem as MenuItem}
             remainingCredits={145}
             notificationsCount={3}
             companyName="Justify"

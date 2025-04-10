@@ -115,7 +115,6 @@ export default function UpcomingCampaignsTablePreviewPage() {
           <div className="border border-divider rounded-lg p-0"> { /* No padding needed, card has its own */}
             <UpcomingCampaignsTable
               campaigns={sampleCampaigns}
-              title="Upcoming Campaigns" // Optional title for the card
             // Add other props like onRowClick if available/needed
             />
           </div>

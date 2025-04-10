@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'; // Force dynamic rendering
 
 // Regular imports
 import { Suspense } from 'react';
+import { cookies } from 'next/headers'; // Explicitly import cookies
 // Import SSOT LoadingSkeleton
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 // Correct AuthCheck import path using alias

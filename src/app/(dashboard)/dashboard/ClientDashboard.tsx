@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon/icon";
 import { CalendarUpcoming, type CalendarEvent } from "@/components/ui/calendar-upcoming";
 import { UpcomingCampaignsTable, type CampaignData } from "@/components/ui/card-upcoming-campaign";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Define the skeleton fallback using the imported SSOT component
 // (Could be moved to a shared file)
@@ -83,33 +84,40 @@ export default function ClientDashboard({ user, events, campaigns }: ClientDashb
 
             {/* Main Content Grid (Simplified 2-column) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Column 1: Upcoming Calendar */}
-                <div>
-                    {/* Consider adding a Card wrapper for consistent styling */}
-                    {/* <Card> <CardHeader><CardTitle>Upcoming Schedule</CardTitle></CardHeader> <CardContent> ... </CardContent> </Card> */}
-                    {isLoading ? (
-                        <p>Loading Calendar...</p> // Replace with Skeleton if needed
-                    ) : hasEvents ? (
-                        <CalendarUpcoming events={events} onEventClick={handleCampaignClick} />
-                    ) : (
-                        <p className="text-muted-foreground p-4 border rounded-md">No upcoming events.</p> // Empty state
-                    )}
-                </div>
+                {/* Column 1: Upcoming Calendar in a Card */}
+                <Card className="h-full flex flex-col">
+                    <CardHeader>
+                        <CardTitle>Upcoming Schedule</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow p-0">
+                        {isLoading ? (
+                            <p className="p-4 text-muted-foreground">Loading Calendar...</p>
+                        ) : hasEvents ? (
+                            <CalendarUpcoming events={events} onEventClick={handleCampaignClick} />
+                        ) : (
+                            <p className="p-4 text-muted-foreground">No upcoming events.</p>
+                        )}
+                    </CardContent>
+                </Card>
 
-                {/* Column 2: Upcoming Campaigns Table */}
-                <div>
-                    {isLoading ? (
-                        <p>Loading Campaigns...</p> // Replace with TableSkeleton if needed
-                    ) : hasCampaigns ? (
-                        <UpcomingCampaignsTable
-                            campaigns={campaigns}
-                            onRowClick={handleCampaignClick}
-                            title="Upcoming Campaigns"
-                        />
-                    ) : (
-                        <p className="text-muted-foreground p-4 border rounded-md">No upcoming campaigns.</p> // Empty state
-                    )}
-                </div>
+                {/* Column 2: Upcoming Campaigns Table in a Card */}
+                <Card className="h-full flex flex-col">
+                    <CardHeader>
+                        <CardTitle>Upcoming Campaigns</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow p-0">
+                        {isLoading ? (
+                            <p className="p-4 text-muted-foreground">Loading Campaigns...</p>
+                        ) : hasCampaigns ? (
+                            <UpcomingCampaignsTable
+                                campaigns={campaigns}
+                                onRowClick={handleCampaignClick}
+                            />
+                        ) : (
+                            <p className="p-4 text-muted-foreground">No upcoming campaigns.</p>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             {/* // TODO: Add other dashboard sections based on Figma (Influencers, Insights, Health Snapshot) later */}

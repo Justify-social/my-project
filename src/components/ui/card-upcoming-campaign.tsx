@@ -6,8 +6,6 @@
  * @status 10th April
  * @param {UpcomingCampaignsTableProps} props - The props for the UpcomingCampaignsTable component.
  * @param {CampaignData[]} props.campaigns - An array of campaign data objects to display.
- * @param {string} [props.title="Upcoming Campaigns"] - Optional title for the card.
- * @param {string} [props.description] - Optional description below the title.
  * @param {string} [props.className] - Additional CSS classes for the Card container.
  * @param {(campaignId: string | number) => void} [props.onRowClick] - Optional callback when a row is clicked.
  * @returns {React.ReactElement | null} The rendered table component or null if no campaigns are provided.
@@ -17,13 +15,6 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import {
     Table,
     TableBody,
@@ -54,8 +45,6 @@ export interface CampaignData {
 // Props for the UpcomingCampaignsTable component
 export interface UpcomingCampaignsTableProps {
     campaigns?: CampaignData[];
-    title?: string;
-    description?: string;
     className?: string;
     onRowClick?: (campaignId: string | number) => void;
 }
@@ -78,8 +67,6 @@ const getStatusVariant = (status?: string): "default" | "secondary" | "destructi
 
 export function UpcomingCampaignsTable({
     campaigns = [],
-    title = "Upcoming Campaigns",
-    description,
     className,
     onRowClick,
 }: UpcomingCampaignsTableProps) {
@@ -119,90 +106,78 @@ export function UpcomingCampaignsTable({
 
     if (!campaigns || campaigns.length === 0) {
         return (
-            <Card className={className}>
-                <CardHeader>
-                    <CardTitle>{title}</CardTitle>
-                    {description && <CardDescription>{description}</CardDescription>}
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">No upcoming campaigns to display.</p>
-                </CardContent>
-            </Card>
+            <div className={cn("text-sm text-muted-foreground p-4 border rounded-md min-h-[100px] flex items-center justify-center", className)}>
+                No upcoming campaigns to display.
+            </div>
         );
     }
 
     return (
-        <Card className={cn(className)}>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                {description && <CardDescription>{description}</CardDescription>}
-            </CardHeader>
-            <CardContent className="px-0">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Campaign</TableHead>
-                            <TableHead>Platform</TableHead>
-                            <TableHead>Influencer</TableHead>
-                            <TableHead className="text-right">Budget</TableHead>
-                            <TableHead>Start Date</TableHead>
-                            <TableHead>End Date</TableHead>
-                            <TableHead>Status</TableHead>
+        <div className={cn("overflow-auto", className)}>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Campaign</TableHead>
+                        <TableHead>Platform</TableHead>
+                        <TableHead>Influencer</TableHead>
+                        <TableHead className="text-right">Budget</TableHead>
+                        <TableHead>Start Date</TableHead>
+                        <TableHead>End Date</TableHead>
+                        <TableHead>Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {campaigns.map((campaign) => (
+                        <TableRow
+                            key={campaign.id}
+                            onClick={() => handleRowClick(campaign.id)}
+                            className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
+                        >
+                            <TableCell className="font-medium">{campaign.title}</TableCell>
+                            <TableCell>
+                                {campaign.platform ? (
+                                    <span className="flex items-center">
+                                        {platformIconMap[campaign.platform.toLowerCase()] && (
+                                            <Icon
+                                                iconId={platformIconMap[campaign.platform.toLowerCase()]}
+                                                className="mr-1.5 h-4 w-4 text-muted-foreground"
+                                            />
+                                        )}
+                                        <span className="text-sm">{campaign.platform}</span>
+                                    </span>
+                                ) : (
+                                    '-'
+                                )}
+                            </TableCell>
+                            <TableCell>
+                                {campaign.influencer ? (
+                                    <div className="flex items-center space-x-2">
+                                        <Avatar className="h-6 w-6">
+                                            <AvatarImage src={campaign.influencer.image} alt={campaign.influencer.name} />
+                                            <AvatarFallback className="text-xs">
+                                                {campaign.influencer.name.charAt(0).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <span>{campaign.influencer.name}</span>
+                                    </div>
+                                ) : (
+                                    '-'
+                                )}
+                            </TableCell>
+                            <TableCell className="text-right">{formatCurrency(campaign.budget)}</TableCell>
+                            <TableCell>{formatDate(campaign.startDate)}</TableCell>
+                            <TableCell>{formatDate(campaign.endDate)}</TableCell>
+                            <TableCell>
+                                {campaign.status ? (
+                                    <Badge variant={getStatusVariant(campaign.status)} className="text-xs">{campaign.status}</Badge>
+                                ) : (
+                                    '-'
+                                )}
+                            </TableCell>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {campaigns.map((campaign) => (
-                            <TableRow
-                                key={campaign.id}
-                                onClick={() => handleRowClick(campaign.id)}
-                                className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
-                            >
-                                <TableCell className="font-medium">{campaign.title}</TableCell>
-                                <TableCell>
-                                    {campaign.platform ? (
-                                        <span className="flex items-center">
-                                            {platformIconMap[campaign.platform.toLowerCase()] && (
-                                                <Icon
-                                                    iconId={platformIconMap[campaign.platform.toLowerCase()]}
-                                                    className="mr-1.5 h-4 w-4 text-muted-foreground"
-                                                />
-                                            )}
-                                            <span className="text-sm">{campaign.platform}</span>
-                                        </span>
-                                    ) : (
-                                        '-'
-                                    )}
-                                </TableCell>
-                                <TableCell>
-                                    {campaign.influencer ? (
-                                        <div className="flex items-center space-x-2">
-                                            <Avatar className="h-6 w-6">
-                                                <AvatarImage src={campaign.influencer.image} alt={campaign.influencer.name} />
-                                                <AvatarFallback className="text-xs">
-                                                    {campaign.influencer.name.charAt(0).toUpperCase()}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <span>{campaign.influencer.name}</span>
-                                        </div>
-                                    ) : (
-                                        '-'
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-right">{formatCurrency(campaign.budget)}</TableCell>
-                                <TableCell>{formatDate(campaign.startDate)}</TableCell>
-                                <TableCell>{formatDate(campaign.endDate)}</TableCell>
-                                <TableCell>
-                                    {campaign.status ? (
-                                        <Badge variant={getStatusVariant(campaign.status)} className="text-xs">{campaign.status}</Badge>
-                                    ) : (
-                                        '-'
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
     );
 }
