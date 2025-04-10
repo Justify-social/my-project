@@ -26,6 +26,7 @@ import {
     subMonths
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Image from 'next/image';
 
 // Event data structure (matches preview page)
 export interface CalendarEvent {
@@ -38,6 +39,7 @@ export interface CalendarEvent {
     kpi?: string;
     status?: string;
     allDay?: boolean;
+    influencerHandles?: string[]; // Added from API
 }
 
 export interface CalendarUpcomingProps {
@@ -45,16 +47,35 @@ export interface CalendarUpcomingProps {
     onEventClick?: (eventId: number | string, event: CalendarEvent) => void;
 }
 
-// Helper function to get status color (using ONLY Shadcn semantic colors)
+// Re-add getStatusColor function needed for tooltip status dot
 const getStatusColor = (status?: string): string => {
+    // Using Shadcn semantic colors where possible
     switch (status?.toLowerCase()) {
-        case 'live': return 'bg-success text-success-foreground'; // Use success theme color
+        case 'live': return 'bg-success text-success-foreground';
         case 'scheduled': return 'bg-primary text-primary-foreground';
-        case 'draft': return 'bg-warning text-warning-foreground'; // Use warning theme color
+        case 'draft': return 'bg-warning text-warning-foreground';
         case 'completed': return 'bg-muted text-muted-foreground';
-        case 'planning': return 'bg-interactive text-interactive-foreground'; // Use interactive theme color
-        default: return 'bg-secondary text-secondary-foreground'; // Default to secondary
+        case 'planning': return 'bg-interactive text-interactive-foreground';
+        default: return 'bg-secondary text-secondary-foreground';
     }
+};
+
+// Helper function to map platform names to icon registry IDs/paths
+// (Based on public/static/brands-icon-registry.json)
+const platformIconMap: Record<string, string> = {
+    "facebook": "/icons/brands/brandsFacebook.svg",
+    "github": "/icons/brands/brandsGithub.svg",
+    "instagram": "/icons/brands/brandsInstagram.svg",
+    "linkedin": "/icons/brands/brandsLinkedin.svg",
+    "tiktok": "/icons/brands/brandsTiktok.svg",
+    "x": "/icons/brands/brandsXTwitter.svg",
+    "twitter": "/icons/brands/brandsXTwitter.svg", // Alias
+    "youtube": "/icons/brands/brandsYoutube.svg",
+    // Add other platforms if needed
+};
+
+const getPlatformIconPath = (platformName: string): string | undefined => {
+    return platformIconMap[platformName?.toLowerCase()];
 };
 
 export function CalendarUpcoming({
@@ -158,34 +179,82 @@ export function CalendarUpcoming({
                                             key={event.id}
                                             className={cn(
                                                 "px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80",
-                                                getStatusColor(event.status),
+                                                // --- Always use Accent color --- 
+                                                "bg-accent text-accent-foreground",
+                                                // -------------------------------
                                                 // Remove rounding if event continues
                                                 continuesBefore && "rounded-l-none",
                                                 continuesAfter && "rounded-r-none"
                                             )}
-                                            onClick={() => onEventClick && onEventClick(event.id, event)}
                                         >
                                             {event.title}
                                         </div>
                                     </TooltipTrigger>
-                                    <TooltipContent side="top" align="start" className="text-xs max-w-[250px] z-50 bg-background text-foreground border shadow-md rounded-md p-2">
+                                    <TooltipContent side="top" align="start" className="text-xs max-w-[300px] z-50 bg-background text-foreground border shadow-md rounded-md p-3">
                                         <p className="font-semibold mb-1 text-primary">{event.title}</p>
-                                        {/* Format date range */}
-                                        <p className="text-muted-foreground text-xs mb-1">
-                                            {format(eventStart, event.allDay ? 'MMM d, yyyy' : 'MMM d, p')}
+                                        {/* Format date range (Date only) */}
+                                        <p className="text-muted-foreground text-xs mb-2">
+                                            {format(eventStart, 'MMM d, yyyy')}
                                             {event.end && !isSameDay(eventStart, eventEnd) &&
-                                                ` - ${format(eventEnd, event.allDay ? 'MMM d, yyyy' : 'MMM d, p')}`}
+                                                ` - ${format(eventEnd, 'MMM d, yyyy')}`}
                                         </p>
-                                        {/* Display platform */}
-                                        {event.platform && <p className="text-muted-foreground text-xs mb-0.5">Platform: {event.platform}</p>}
-                                        {/* Display budget */}
-                                        {event.budget !== undefined && event.budget !== null && (
-                                            <p className="text-muted-foreground text-xs">
-                                                Budget: ${event.budget.toLocaleString()} {/* Basic currency formatting */}
-                                            </p>
-                                        )}
-                                        {/* Add status back for context */}
-                                        {event.status && <p className="text-muted-foreground text-xs mt-1">Status: {event.status}</p>}
+
+                                        {/* Grid Container for Details */}
+                                        <div className="grid grid-cols-[auto_1fr] gap-x-1.5 gap-y-1.5"> {/* Grid definition */}
+                                            {/* Display Platform Icons */}
+                                            {event.platform && (
+                                                <> {/* Use Fragment to place multiple items in the second column */}
+                                                    {/* Empty first column cell for alignment */}
+                                                    <div></div>
+                                                    {/* Platform icons in the second column */}
+                                                    <div className="flex items-center space-x-1.5"> {/* Keep inner flex for icons */}
+                                                        {event.platform.split(/[,\s]+/).map(p => p.trim()).filter(Boolean).map(platformName => {
+                                                            const iconPath = getPlatformIconPath(platformName);
+                                                            return iconPath ? (
+                                                                <Image
+                                                                    key={platformName}
+                                                                    src={iconPath}
+                                                                    alt={platformName}
+                                                                    width={14}
+                                                                    height={14}
+                                                                    title={platformName}
+                                                                    className='opacity-80'
+                                                                />
+                                                            ) : null;
+                                                        })}
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {/* Display Influencers */}
+                                            {event.influencerHandles && event.influencerHandles.length > 0 && (
+                                                <> {/* Use Fragment to place icon and text in separate columns */}
+                                                    <Icon iconId="faUserGroupLight" className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 self-center" /> {/* Icon in Col 1, self-center for vertical align */}
+                                                    <span className="text-muted-foreground text-xs truncate" title={event.influencerHandles.join(', ')}> {/* Text in Col 2 */}
+                                                        {event.influencerHandles.join(', ')}
+                                                    </span>
+                                                </>
+                                            )}
+
+                                            {/* Display budget */}
+                                            {event.budget !== undefined && event.budget !== null && (
+                                                <> {/* Use Fragment */}
+                                                    {/* Empty first column cell for alignment */}
+                                                    <div></div>
+                                                    <span className="text-muted-foreground text-xs"> {/* Budget text in Col 2 */}
+                                                        ${event.budget.toLocaleString()} Budget
+                                                    </span>
+                                                </>
+                                            )}
+
+                                            {/* Display status */}
+                                            {event.status && (
+                                                <> {/* Use Fragment */}
+                                                    <span className={cn("w-2 h-2 rounded-full self-center", getStatusColor(event.status).split(' ')[0])}></span> {/* Status dot in Col 1 */}
+                                                    <span className="text-muted-foreground text-xs">Status: {event.status}</span> {/* Status text in Col 2 */}
+                                                </>
+                                            )}
+                                        </div> {/* End Grid Container */}
                                     </TooltipContent>
                                 </Tooltip>
                             );
