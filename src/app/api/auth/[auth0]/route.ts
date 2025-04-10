@@ -1,25 +1,12 @@
 import { handleAuth } from '@auth0/nextjs-auth0';
-import { NextRequest } from 'next/server';
 
-// Remove the RouteParams interface
-// interface RouteParams {
-//   params: Promise<{
-//     auth0: string;
-//   }>;
+// The Auth0 library handleAuth function is designed to be exported directly.
+// It internally handles the different routes like /login, /callback, /logout, etc.,
+// based on the [auth0] dynamic segment in the route.
+export const GET = handleAuth();
+
+// POST is typically handled internally by handleAuth for callbacks, etc.
+// If specific POST handling were needed separate from Auth0's flow, it would go here.
+// export async function POST(req: NextRequest, { params }: { params: { auth0: string } }) {
+//   ...
 // }
-
-// Update the GET function signature and access params directly
-export async function GET(req: NextRequest, { params }: { params: { auth0: string } }) {
-  // Access auth0 directly from params, no await needed
-  const { auth0 } = params;
-  // Pass processed params to the Auth0 handler
-  return handleAuth()(req, { params: { auth0 } });
-}
-
-// Update the POST function signature and access params directly
-export async function POST(req: NextRequest, { params }: { params: { auth0: string } }) {
-  // Access auth0 directly from params, no await needed
-  const { auth0 } = params;
-  // Pass processed params to the Auth0 handler
-  return handleAuth()(req, { params: { auth0 } });
-}
