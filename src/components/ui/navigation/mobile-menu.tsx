@@ -40,7 +40,6 @@ export interface MobileMenuProps {
   isOpen: boolean;           // Controls the Sheet's open state
   onOpenChange: (open: boolean) => void; // Callback for Sheet state changes
   menuItems: MenuItem[];       // Navigation items using the unified type
-  settingsItem?: MenuItem;     // Dedicated settings item - NOW OPTIONAL
   remainingCredits: number;   // Data for the footer
   notificationsCount: number; // Data for the footer
   companyName: string;        // Data for the header
@@ -191,7 +190,6 @@ export function MobileMenu({
   isOpen,
   onOpenChange,
   menuItems,
-  settingsItem,
   remainingCredits,
   notificationsCount,
   companyName,
@@ -201,14 +199,6 @@ export function MobileMenu({
 }: MobileMenuProps) {
 
   const handleClose = () => onOpenChange(false); // Helper to close sheet
-
-  // Update settings item icon mapping if settingsItem exists
-  const finalSettingsItem = settingsItem ? {
-    ...settingsItem,
-    iconId: getAppIconIdForLabel(settingsItem.label) || settingsItem.iconId || 'faCogLight' // Map settings label too
-  } : undefined;
-
-  const itemsToRender = finalSettingsItem ? [...menuItems, finalSettingsItem] : menuItems;
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -232,7 +222,7 @@ export function MobileMenu({
         {/* Navigation List - Takes remaining space and scrolls */}
         <nav className="flex-grow overflow-y-auto">
           <ul className="py-2">
-            {itemsToRender.map(item => (
+            {menuItems.map(item => (
               <RenderMenuItem
                 key={item.id}
                 item={item}

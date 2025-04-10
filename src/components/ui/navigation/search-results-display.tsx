@@ -39,7 +39,7 @@ export function SearchResultsDisplay() {
                     {results.map((campaign) => (
                         <li key={campaign.objectID}>
                             <Link
-                                href={`/campaigns/${campaign.id}`}
+                                href={`/campaigns/${campaign.objectID}`}
                                 className={cn(
                                     'block px-4 py-3 hover:bg-sky-50 transition-colors duration-150',
                                     'text-sm text-gray-800 hover:text-sky-700'

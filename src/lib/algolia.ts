@@ -55,26 +55,60 @@ export async function searchCampaigns(query: string): Promise<CampaignSearchResu
   }
 }
 
-// Function to index campaign data from database
+// Function to index campaign data from database by replacing existing content
 export async function indexCampaigns(campaigns: any[]): Promise<void> {
-  if (!campaigns || campaigns.length === 0) {
-    console.warn('No campaigns to index');
-    return Promise.resolve();
+  if (!process.env.ALGOLIA_ADMIN_API_KEY) {
+    console.error('Error: ALGOLIA_ADMIN_API_KEY is not set in environment variables. Cannot clear index.');
+    throw new Error('Missing Algolia Admin API Key for indexing.');
   }
 
+  const indexClearUrl = `https://${appId}.algolia.net/1/indexes/${indexName}/clear`;
+  const indexBatchUrl = `https://${appId}.algolia.net/1/indexes/${indexName}/batch`;
+  const adminApiKey = process.env.ALGOLIA_ADMIN_API_KEY;
+
+  console.log(`Attempting to clear Algolia index: ${indexName}`);
+
   try {
-    // Transform campaigns to ensure they have objectID (required by Algolia)
+    // Step 1: Clear the index using Admin API Key
+    const clearResponse = await fetch(indexClearUrl, {
+      method: 'POST',
+      headers: {
+        'X-Algolia-API-Key': adminApiKey,
+        'X-Algolia-Application-Id': appId,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!clearResponse.ok) {
+      const errorData = await clearResponse.json();
+      console.error('Algolia clear index failed:', errorData);
+      throw new Error(`Algolia clear index failed: ${JSON.stringify(errorData)}`);
+    }
+
+    const clearResult = await clearResponse.json();
+    console.log(`Algolia index clear initiated. Task ID: ${clearResult.taskID}`);
+
+    // Optional: Add a small delay or implement task waiting if needed, 
+    // but often clear is fast enough for subsequent batch add in scripts.
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+
+    // Step 2: Add new records if there are any
+    if (!campaigns || campaigns.length === 0) {
+      console.log('No campaigns provided to index after clearing. Index is now empty.');
+      return; // Exit successfully after clearing
+    }
+
+    console.log(`Indexing ${campaigns.length} campaigns after clear...`);
+    // Transform campaigns to ensure they have objectID
     const records = campaigns.map(campaign => ({
       ...campaign,
       objectID: campaign.id || campaign.objectID || `campaign_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     }));
 
-    // Use the Algolia REST API directly for indexing
-    const url = `https://${appId}.algolia.net/1/indexes/${indexName}/batch`;
-    return fetch(url, {
+    const batchResponse = await fetch(indexBatchUrl, {
       method: 'POST',
       headers: {
-        'X-Algolia-API-Key': process.env.ALGOLIA_ADMIN_API_KEY || apiKey,
+        'X-Algolia-API-Key': adminApiKey, // Use Admin key for writing
         'X-Algolia-Application-Id': appId,
         'Content-Type': 'application/json'
       },
@@ -84,22 +118,20 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
           body: record
         }))
       })
-    })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(errorData => {
-            throw new Error(`Algolia indexing failed: ${JSON.stringify(errorData)}`);
-          });
-        }
-        console.log(`Successfully indexed ${records.length} campaigns!`);
-      })
-      .catch(error => {
-        console.error('Error indexing campaigns:', error);
-        throw error;
-      });
+    });
+
+    if (!batchResponse.ok) {
+      const errorData = await batchResponse.json();
+      console.error('Algolia batch add failed:', errorData);
+      throw new Error(`Algolia batch add failed: ${JSON.stringify(errorData)}`);
+    }
+
+    const batchResult = await batchResponse.json();
+    console.log(`Successfully indexed ${records.length} campaigns! Task IDs:`, batchResult.taskID);
+
   } catch (error) {
-    console.error('Error indexing campaigns:', error);
-    return Promise.reject(error);
+    console.error('Error during Algolia re-indexing process:', error);
+    throw error; // Re-throw the error to be caught by the script runner
   }
 }
 

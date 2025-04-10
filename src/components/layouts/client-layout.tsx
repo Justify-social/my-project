@@ -15,6 +15,28 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { MobileMenu } from "@/components/ui/navigation/mobile-menu";
 import { cn } from "@/lib/utils";
 
+// --- App Icon Mapping (Copied from MobileMenu.tsx) ---
+const appIconMap: Record<string, string> = {
+  "dashboard": "appHome",
+  "home": "appHome",
+  "campaigns": "appCampaigns",
+  "brand lift": "appBrandLift",
+  "creative testing": "appCreativeAssetTesting",
+  "brand health": "appBrandHealth",
+  "influencers": "appInfluencers",
+  "mmm": "appMmm",
+  "reports": "appReports",
+  "settings": "appSettings",
+  "account settings": "appSettings",
+  "help": "appHelp",
+  "billing": "appBilling",
+};
+
+const getAppIconIdForLabel = (label: string): string | null => {
+  return appIconMap[label.toLowerCase()] || null;
+};
+// ---------------------------------------------------
+
 // --- Define Navigation Item Types ---
 // Main Sidebar/Header Structure (allows children)
 interface SidebarItemDef {
@@ -167,32 +189,32 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     id: 'settings', label: "Settings", href: "/settings", icon: "appSettings"
   };
 
-  // Function to recursively flatten sidebar items for mobile menu
-  const flattenMenuItems = (items: SidebarItemDef[], depth = 0): NavItemDef[] => {
-    const flatList: NavItemDef[] = [];
-    items.forEach(item => {
-      // Filter out the settings item during flattening
-      if (item.id === 'settings') return;
+  // Function to recursively transform sidebar items for mobile menu
+  const transformMenuItemsForMobile = (items: SidebarItemDef[]): NavItemDef[] => {
+    return items.map(item => {
+      // Skip settings here, it's handled separately
+      if (item.id === 'settings') return null;
 
-      if (item.href) { // Only include items with href directly
-        flatList.push({
-          id: item.id,
-          label: item.label,
-          href: item.href,
-          iconId: item.icon || 'faCircleLight',
-        });
-      }
-      // Recursive flattening logic (currently commented out)
-      // if (item.children) {
-      //     flatList = flatList.concat(flattenMenuItems(item.children, depth + 1));
-      // }
-    });
-    return flatList;
+      // Try to map icon using label, fallback to item.icon, then fallback to circle
+      const mappedAppIconId = getAppIconIdForLabel(item.label);
+      const displayIconId = mappedAppIconId || item.icon || 'faCircleLight';
+
+      const navItem: NavItemDef = {
+        id: item.id,
+        label: item.label,
+        // Use item.href if available, otherwise treat as non-navigable parent
+        href: item.href || '#', // Use '#' or similar for non-link parents
+        iconId: displayIconId,
+        // Recursively transform children if they exist
+        children: item.children ? transformMenuItemsForMobile(item.children) : undefined,
+      };
+      return navItem;
+    }).filter((item): item is NavItemDef => item !== null); // Filter out null items (settings)
   };
 
-  // Derive flat navItems for MobileMenu (Main App)
+  // Derive navItems for MobileMenu (Main App)
   const allMainNavItemsForMenu: NavItemDef[] = [
-    ...flattenMenuItems(sidebarItems), // Now excludes settings
+    ...transformMenuItemsForMobile(sidebarItems), // Use the corrected transformation
     { // Add settings explicitly (ensures only one)
       id: settingsItemDef.id,
       label: settingsItemDef.label,
@@ -261,7 +283,6 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           isOpen={isMobileOpen}
           onOpenChange={setIsMobileOpen}
           menuItems={mobileMenuItems}
-          settingsItem={mobileSettingsItem}
           remainingCredits={100}
           notificationsCount={3}
           companyName="Justify"
