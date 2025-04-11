@@ -125,7 +125,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       icon: 'appCampaigns',
       children: [
         { id: 'campaigns-list', label: 'List', href: '/campaigns' },
-        { id: 'campaigns-wizard', label: 'Wizard', href: '/campaigns/wizard' }
+        { id: 'campaigns-wizard', label: 'Wizard', href: '/campaigns/wizard/step-1' }
       ]
     },
     {
