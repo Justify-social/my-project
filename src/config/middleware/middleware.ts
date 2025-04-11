@@ -5,14 +5,14 @@ import { graphitiCheckEnforcer } from './cursor-ai';
 
 // Expanded static asset detection
 function isStaticAsset(path: string): boolean {
-  return path.startsWith('/_next') || 
-         path.includes('/images/') || 
-         path.includes('/icons/') ||    // Add icons path exclusion
-         path.endsWith('.svg') ||       // All SVG files
-         path.endsWith('.ico') ||
-         path.endsWith('.png') ||
-         path.endsWith('.css') ||
-         path.endsWith('.js');
+  return path.startsWith('/_next') ||
+    path.includes('/images/') ||
+    path.includes('/icons/') ||    // Add icons path exclusion
+    path.endsWith('.svg') ||       // All SVG files
+    path.endsWith('.ico') ||
+    path.endsWith('.png') ||
+    path.endsWith('.css') ||
+    path.endsWith('.js');
 }
 
 // Public paths that bypass auth
@@ -31,12 +31,12 @@ function isPublicPath(path: string): boolean {
 // Remove withMiddlewareAuthRequired wrapper
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  
+
   // Allow public paths and static assets to bypass all middleware
   if (isPublicPath(path) || isStaticAsset(path)) {
     return NextResponse.next();
   }
-  
+
   // For CursorAI API requests, apply the Graphiti check enforcer
   if (path.startsWith('/api/cursor-ai') || req.headers.get('user-agent')?.includes('CursorAI')) {
     return graphitiCheckEnforcer(req, async () => {
@@ -44,10 +44,10 @@ export default async function middleware(req: NextRequest) {
       return handleAuthMiddleware(req);
     });
   }
-  
+
   // Only apply auth check to admin routes and API routes that require auth
-  if (path.startsWith('/admin') || 
-      (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
+  if (path.startsWith('/admin') ||
+    (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
     // Create a response object to pass to getSession
     const res = NextResponse.next();
     const session = await getSession(req, res);
@@ -63,7 +63,7 @@ export default async function middleware(req: NextRequest) {
       // For admin routes, redirect to login
       return NextResponse.redirect(new URL('/api/auth/login', req.url));
     }
-    
+
     // Role-based auth only for admin routes
     if (path.startsWith('/admin')) {
       const userRoles = session.user?.roles || [];
@@ -72,7 +72,7 @@ export default async function middleware(req: NextRequest) {
       }
     }
   }
-  
+
   // For all other paths, allow rendering without auth redirect
   return NextResponse.next();
 }
@@ -87,7 +87,7 @@ async function handleAuthMiddleware(req: NextRequest) {
   if (path.startsWith('/admin')) {
     // Get roles directly from the session
     const userRoles = session?.user?.roles || [];
-    
+
     console.log('Auth Check:', {
       email: session?.user?.email,
       path,
@@ -103,10 +103,16 @@ async function handleAuthMiddleware(req: NextRequest) {
   return res;
 }
 
+// Updated config to explicitly exclude Auth0 routes from running middleware
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/api/:path*',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (Auth0 routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
     '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
-  ],
-};
+  ]
+}
