@@ -15,27 +15,28 @@ function isStaticAsset(path: string): boolean {
     path.endsWith('.js');
 }
 
-// Public paths that bypass auth
-const PUBLIC_PATHS = [
-  '/api/auth/login',
-  '/api/auth/callback',
-  '/api/auth/logout',
-  '/_next',
-  '/favicon.ico',
-];
+// Public paths constant and function removed as they are no longer needed for the initial bypass logic
+// const PUBLIC_PATHS = [
+//   '/api/auth/login',
+//   '/api/auth/callback',
+//   '/api/auth/logout',
+//   '/_next',
+//   '/favicon.ico',
+// ];
+// function isPublicPath(path: string): boolean {
+//   return PUBLIC_PATHS.some(publicPath => path.startsWith(publicPath));
+// }
 
-function isPublicPath(path: string): boolean {
-  return PUBLIC_PATHS.some(publicPath => path.startsWith(publicPath));
-}
-
-// Remove withMiddlewareAuthRequired wrapper
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // Allow public paths and static assets to bypass all middleware
-  if (isPublicPath(path) || isStaticAsset(path)) {
+  // --- SIMPLIFIED CHECK ---
+  // Allow static assets to bypass middleware early.
+  // Public paths like /api/auth/* are already excluded by config.matcher.
+  if (isStaticAsset(path)) {
     return NextResponse.next();
   }
+  // --- END SIMPLIFIED CHECK ---
 
   // For CursorAI API requests, apply the Graphiti check enforcer
   if (path.startsWith('/api/cursor-ai') || req.headers.get('user-agent')?.includes('CursorAI')) {
@@ -46,6 +47,8 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Only apply auth check to admin routes and API routes that require auth
+  // (Note: The condition !path.startsWith('/api/auth') is also technically redundant
+  // due to the matcher, but harmless to keep for clarity)
   if (path.startsWith('/admin') ||
     (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
     // Create a response object to pass to getSession
@@ -73,7 +76,7 @@ export default async function middleware(req: NextRequest) {
     }
   }
 
-  // For all other paths, allow rendering without auth redirect
+  // For all other paths (now including non-static, non-CursorAI, non-admin, non-protected-API), allow rendering
   return NextResponse.next();
 }
 
@@ -103,7 +106,7 @@ async function handleAuthMiddleware(req: NextRequest) {
   return res;
 }
 
-// Updated config to explicitly exclude Auth0 routes from running middleware
+// Matcher config remains the same (already excludes /api/auth/*)
 export const config = {
   matcher: [
     /*
