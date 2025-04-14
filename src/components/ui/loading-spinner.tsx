@@ -69,6 +69,7 @@ export function LoadingSpinner({
         alt="Loading animation"
         width={64}
         height={64}
+        priority
         className="mb-2"
       />
       {label && <p className="text-sm text-muted-foreground">{label}</p>}
