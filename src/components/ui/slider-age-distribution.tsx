@@ -66,18 +66,18 @@ export function AgeDistributionSliderGroup<TFieldValues extends FieldValues>(
         if (Math.abs(delta) < 0.01) return; // Ignore tiny changes
 
         const otherKeys = AGE_BRACKETS.map(b => b.key).filter(k => k !== changedBracketKey);
-        let sumOthers = otherKeys.reduce((sum, k) => sum + currentValues[k], 0);
+        const sumOthers = otherKeys.reduce((sum, k) => sum + currentValues[k], 0);
 
-        let updates: Record<string, number> = {};
+        const updates: Record<string, number> = {};
 
         if (delta > 0) { // Increasing
-            let availableToDecrease = sumOthers;
+            const availableToDecrease = sumOthers;
             if (delta > availableToDecrease) {
                 newValue = currentValue + availableToDecrease; // Clamp increase
                 delta = newValue - currentValue; // Recalculate delta
             }
             updates[changedBracketKey] = newValue; // Set the target slider first
-            let remainingDelta = -delta;
+            const remainingDelta = -delta;
 
             otherKeys.forEach(key => {
                 if (currentValues[key] > 0 && sumOthers > 0) {
@@ -91,7 +91,7 @@ export function AgeDistributionSliderGroup<TFieldValues extends FieldValues>(
 
         } else { // Decreasing (delta is negative)
             updates[changedBracketKey] = newValue; // Set the target slider first
-            let remainingDelta = -delta; // Amount to distribute positively
+            const remainingDelta = -delta; // Amount to distribute positively
 
             // Distribute based on proportion of current values (simple approach)
             if (sumOthers > 0) {
@@ -124,7 +124,7 @@ export function AgeDistributionSliderGroup<TFieldValues extends FieldValues>(
         });
 
         // Adjust rounding differences - apply to the slider that was changed, or the largest if needed
-        let diff = 100 - roundedSum;
+        const diff = 100 - roundedSum;
         if (diff !== 0) {
             // Prioritize adjusting the slider that was interacted with, within bounds
             const currentSliderRounded = finalUpdates[changedBracketKey];

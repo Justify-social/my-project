@@ -6,6 +6,7 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
+import nextjs from '@next/eslint-plugin-next'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,17 +16,19 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  // Include Next.js recommended rules using FlatCompat
-  {
-    ...compat.extends('next')[0],
-    rules: {
-      ...compat.extends('next')[0].rules,
-      'react/jsx-key': 'off', // Disable jsx-key rule from Next.js if needed
-    },
-  },
   // Keep TypeScript recommended
   {
     ...compat.extends('plugin:@typescript-eslint/recommended')[0],
+  },
+  // Add Next.js configuration
+  {
+    plugins: {
+      '@next/next': nextjs,
+    },
+    rules: {
+      ...nextjs.configs.recommended.rules,
+      ...nextjs.configs['core-web-vitals'].rules,
+    },
   },
   // Add custom overrides
   {

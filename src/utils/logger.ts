@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 /**
  * Simple Logger Utility
  * Controls log output based on NEXT_PUBLIC_LOG_LEVEL environment variable.

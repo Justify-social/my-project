@@ -63,7 +63,7 @@ const results = {
 files.forEach(file => {
   const filePath = path.join(srcDir, file);
   const content = fs.readFileSync(filePath, 'utf8');
-  let fileResults = { modern: 0, legacy: 0, references: [] };
+  const fileResults = { modern: 0, legacy: 0, references: [] };
 
   // Check for icon references
   iconRegexes.forEach(regex => {

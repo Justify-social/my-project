@@ -6,7 +6,7 @@
  */
 
 // Use CommonJS for Cypress compatibility
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({

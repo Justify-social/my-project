@@ -30,11 +30,11 @@ const ICON_COMPONENTS = ['Icon', 'SolidIcon', 'LightIcon'];
 const SHOULD_FIX = process.argv.includes('--fix');
 
 // Icon registry data
-let allIconIds = new Set();
-let idToNameMap = new Map();
-let nameToIdMap = new Map();
-let faVersionToIdMap = new Map();
-let deprecatedMappings = new Set();
+const allIconIds = new Set();
+const idToNameMap = new Map();
+const nameToIdMap = new Map();
+const faVersionToIdMap = new Map();
+const deprecatedMappings = new Set();
 
 // Results tracking
 const results = {

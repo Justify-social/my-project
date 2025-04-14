@@ -12,6 +12,8 @@ import React, { useState, useEffect } from 'react';
 import { Controller, Control, FieldPath, FieldValues } from 'react-hook-form';
 import { Slider } from "@/components/ui/slider";
 import { FormLabel, FormItem, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { isEqual } from 'lodash';
+import { cn } from "@/lib/utils";
 
 interface AgeRangeSliderProps<TFieldValues extends FieldValues = FieldValues> {
     /** React Hook Form name prop */
@@ -30,6 +32,12 @@ interface AgeRangeSliderProps<TFieldValues extends FieldValues = FieldValues> {
     step?: number;
     /** Minimum steps between thumbs (default: 1) */
     minStepsBetweenThumbs?: number;
+    /** Additional class names for the form item */
+    className?: string;
+    /** Default value for the form field */
+    defaultValue?: [number, number];
+    /** Validation rules for the form field */
+    rules?: any;
 }
 
 export function AgeRangeSlider<TFieldValues extends FieldValues = FieldValues>(
@@ -41,46 +49,50 @@ export function AgeRangeSlider<TFieldValues extends FieldValues = FieldValues>(
         min = 13,
         max = 65,
         step = 1,
-        minStepsBetweenThumbs = 1
+        minStepsBetweenThumbs = 1,
+        className,
+        defaultValue,
+        rules
     }: AgeRangeSliderProps<TFieldValues>
 ) {
-    // Determine default range based on min/max props
-    const componentDefaultValue: [number, number] = [min, max > 64 ? 65 : max]; // Ensure max display logic aligns
+    const minVal = Math.max(18, min || 18);
+    const maxVal = Math.min(120, max || 120);
 
     return (
-        <Controller
-            name={name}
-            control={control}
-            defaultValue={componentDefaultValue as any} // Set RHF initial default
-            render={({ field, fieldState }) => {
-                // Local state manages slider value during interaction for smoother UX
-                const [localValue, setLocalValue] = useState<[number, number]>(field.value || componentDefaultValue);
+        <FormItem className={cn('w-full', className)}>
+            {label && <FormLabel>{label}</FormLabel>}
+            <Controller
+                name={name}
+                control={control}
+                defaultValue={defaultValue || [minVal, maxVal > 64 ? 65 : maxVal] as any}
+                rules={rules}
+                render={({ field, fieldState }) => {
+                    // Default value for the component, ensuring it respects min/max props
+                    const componentDefaultValue: [number, number] = [minVal, maxVal > 64 ? 65 : maxVal]; // Ensure max display logic aligns
 
-                // Update local state if RHF value changes externally (e.g., form reset)
-                useEffect(() => {
-                    // Prevent infinite loop by checking if values actually differ
-                    if (JSON.stringify(field.value) !== JSON.stringify(localValue)) {
-                        setLocalValue(field.value || componentDefaultValue);
-                    }
-                    // Only depend on field.value and componentDefaultValue (stable)
-                }, [field.value, componentDefaultValue]);
+                    // Local state manages slider value during interaction for smoother UX
+                    const [localValue, setLocalValue] = useState<number[]>(field.value || componentDefaultValue);
 
-                // Update local state while dragging
-                const handleValueChange = (newValue: [number, number]) => {
-                    setLocalValue(newValue);
-                };
+                    useEffect(() => {
+                        if (field.value && !isEqual(field.value, localValue)) {
+                            setLocalValue(field.value);
+                        }
+                    }, [field.value, localValue]);
 
-                // Update RHF state only when the user finishes interaction
-                const handleCommit = (committedValue: [number, number]) => {
-                    field.onChange(committedValue);
-                };
+                    // Display '+' if the max value selected is the component's max prop and > 64
+                    const maxDisplay = localValue[1] === maxVal && maxVal > 64 ? `${maxVal}+` : `${localValue[1]}`;
 
-                // Display '+' if the max value selected is the component's max prop and > 64
-                const maxDisplay = localValue[1] === max && max > 64 ? `${max}+` : `${localValue[1]}`;
+                    // Update local state while dragging
+                    const handleValueChange = (newValue: [number, number]) => {
+                        setLocalValue(newValue);
+                    };
 
-                return (
-                    <FormItem>
-                        {label && <FormLabel>{label}</FormLabel>}
+                    // Update RHF state only when the user finishes interaction
+                    const handleCommit = (committedValue: [number, number]) => {
+                        field.onChange(committedValue);
+                    };
+
+                    return (
                         <div className="space-y-4 pt-2">
                             <div className="flex justify-between text-sm text-muted-foreground px-1">
                                 <span>Age: {localValue[0]}</span>
@@ -91,8 +103,8 @@ export function AgeRangeSlider<TFieldValues extends FieldValues = FieldValues>(
                                     value={localValue} // Slider is controlled by local state
                                     onValueChange={handleValueChange} // Update local state during slide
                                     onValueCommit={handleCommit} // Update RHF on commit
-                                    min={min}
-                                    max={max}
+                                    min={minVal}
+                                    max={maxVal}
                                     step={step}
                                     minStepsBetweenThumbs={minStepsBetweenThumbs}
                                     className="py-1" // Padding helps prevent thumb clipping
@@ -102,9 +114,9 @@ export function AgeRangeSlider<TFieldValues extends FieldValues = FieldValues>(
                             {/* Display RHF validation error */}
                             {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
                         </div>
-                    </FormItem>
-                );
-            }}
-        />
+                    );
+                }}
+            />
+        </FormItem>
     );
 }

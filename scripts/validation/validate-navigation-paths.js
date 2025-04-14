@@ -78,7 +78,7 @@ const filesWithNavigationImports = findFilesWithNavigationImports();
 console.log(`Found ${filesWithNavigationImports.length} files with navigation imports`);
 
 // Check each import line for correctness
-let importPatterns = {
+const importPatterns = {
   correct: 0,
   incorrect: [],
 };
