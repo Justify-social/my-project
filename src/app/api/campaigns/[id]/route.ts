@@ -859,3 +859,103 @@ export async function DELETE(
     );
   }
 }
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    console.log('[API PUT /api/campaigns/[id]] Handler started');
+    const { id } = await params;
+    const campaignId = id;
+
+    // Check if the ID is a UUID (string format) or a numeric ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const numericId = parseInt(campaignId, 10);
+    const isNumeric = !isNaN(numericId);
+
+    // Parse the request body
+    const body = await request.json();
+    const validatedData = campaignUpdateSchema.parse(body);
+
+    // Connect to database
+    await connectToDatabase();
+
+    let updatedCampaign;
+
+    if (isUuid) {
+      // Update the campaign in CampaignWizard table for UUIDs (draft campaigns)
+      console.log('[API PUT /api/campaigns/[id]] Updating draft campaign with UUID:', campaignId);
+      updatedCampaign = await prisma.campaignWizard.update({
+        where: { id: campaignId },
+        data: {
+          name: validatedData.name || validatedData.campaignName,
+          businessGoal: validatedData.businessGoal || validatedData.description,
+          startDate: validatedData.startDate,
+          endDate: validatedData.endDate,
+          timeZone: validatedData.timeZone,
+          budget: {
+            currency: validatedData.currency || 'USD',
+            total: validatedData.totalBudget || 0,
+            socialMedia: validatedData.socialMediaBudget || 0,
+          },
+          primaryContact: validatedData.primaryContact,
+          secondaryContact: validatedData.secondaryContact,
+          primaryKPI: validatedData.primaryKPI,
+          secondaryKPIs: validatedData.secondaryKPIs,
+          messaging: validatedData.messaging,
+          features: validatedData.features,
+          demographics: validatedData.audience ? {
+            ageDistribution: validatedData.audience.ageDistribution || {},
+            gender: validatedData.audience.gender || [],
+            otherGender: validatedData.audience.otherGender || '',
+            educationLevel: validatedData.audience.educationLevel || '',
+            incomeLevel: validatedData.audience.incomeLevel || 0,
+          } : {},
+          locations: validatedData.audience && validatedData.audience.location ? validatedData.audience.location.map(loc => ({ location: loc })) : [],
+          targeting: validatedData.audience ? {
+            screeningQuestions: validatedData.audience.screeningQuestions || [],
+            languages: validatedData.audience.languages || [],
+            jobTitles: validatedData.audience.jobTitles || [],
+          } : {},
+          competitors: validatedData.audience && validatedData.audience.competitors ? validatedData.audience.competitors.map(comp => comp) : [],
+          status: validatedData.status ? validatedData.status.toUpperCase() : 'DRAFT',
+          updatedAt: new Date(),
+        },
+        include: {
+          Influencer: true,
+        },
+      });
+    } else if (isNumeric) {
+      // Update the campaign in CampaignWizardSubmission table for numeric IDs (submitted campaigns)
+      console.log('[API PUT /api/campaigns/[id]] Updating submitted campaign with numeric ID:', numericId);
+      updatedCampaign = await prisma.campaignWizardSubmission.update({
+        where: { id: numericId },
+        data: {
+          campaignName: validatedData.name || validatedData.campaignName,
+          description: validatedData.businessGoal || validatedData.description,
+          startDate: validatedData.startDate,
+          endDate: validatedData.endDate,
+          timeZone: validatedData.timeZone,
+          currency: validatedData.currency as Currency,
+          totalBudget: validatedData.totalBudget,
+          socialMediaBudget: validatedData.socialMediaBudget,
+          submissionStatus: validatedData.status as SubmissionStatus,
+          updatedAt: new Date(),
+        },
+        include: {
+          primaryContact: true,
+          secondaryContact: true,
+          audience: true,
+          creativeAssets: true,
+          creativeRequirements: true,
+        },
+      });
+    } else {
+      return NextResponse.json({ success: false, error: 'Invalid campaign ID format' }, { status: 400 });
+    }
+
+    console.log(`[API PUT /api/campaigns/[id]] Campaign updated: ${campaignId}`);
+    return NextResponse.json({ success: true, data: updatedCampaign }, { status: 200 });
+  } catch (error) {
+    console.error(`[API PUT /api/campaigns/[id]] Error:`, error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+  }
+}

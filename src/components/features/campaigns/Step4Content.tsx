@@ -1,208 +1,495 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, SubmitHandler, FieldValues, FieldPath, Control } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
-import Header from '@/components/features/campaigns/Header';
-import ProgressBar from '@/components/features/campaigns/ProgressBar';
+import {
+    Step4ValidationSchema,
+    Step4FormData,
+    DraftCampaignData,
+    // Import sub-schemas if needed
+    DraftAssetSchema,
+} from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
-import { WizardSkeleton } from '@/components/ui/loading-skeleton';
-import { CampaignAssetUploader, type UploadedAsset } from './CampaignAssetUploader';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { Icon } from '@/components/ui/icon/icon';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import ProgressBar from '@/components/features/campaigns/ProgressBar';
+import debounce from 'lodash/debounce';
+import { cn } from '@/lib/utils';
+import { Progress } from "@/components/ui/progress";
+import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
+// Use the new FileUploader from ui
+import { FileUploader, UploadThingResult } from "@/components/ui/file-uploader";
+// Import the new ProgressBarWizard
+import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
 
-function FormContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const campaignId = searchParams?.get('id');
-  const { data, updateFormData, campaignData, isEditing, loading } = useWizard();
-  const [assets, setAssets] = useState<UploadedAsset[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+// Placeholder for Asset Preview Component
+// import { AssetCard } from '@/components/ui/asset-card'; // Assuming a generic asset card
 
-  // Sync assets from context
-  useEffect(() => {
-    // Use optional chaining to safely access assets
-    if (campaignData?.assets && Array.isArray(campaignData.assets)) {
-      setAssets(campaignData.assets);
-    }
-  }, [campaignData]);
+/**
+ * =========================================================================
+ * Component: FileUploader
+ * Intended Location: /src/components/ui/file-uploader.tsx
+ * Description: Reusable file upload component integrated with RHF.
+ * NOTE: This is a simplified version. A production component would need
+ *       integration with an upload service (e.g., S3, UploadThing),
+ *       more robust error handling, and progress reporting.
+ * =========================================================================
+ */
+interface FileUploaderProps<TFieldValues extends FieldValues = FieldValues> {
+    name: FieldPath<TFieldValues>;
+    control: Control<TFieldValues>;
+    label?: string;
+    description?: string;
+    // Callback when upload (simulated) completes
+    onUploadComplete?: (assetData: z.infer<typeof DraftAssetSchema>) => void;
+}
 
-  const handleUploadComplete = (uploadedFiles: UploadedAsset[]) => {
-    console.log('Upload complete:', uploadedFiles);
-    const newAssets = [...assets, ...uploadedFiles];
-    setAssets(newAssets);
-    // Use updateFormData
-    updateFormData({ assets: newAssets });
-  };
+function RefactoredFileUploader<TFieldValues extends FieldValues = FieldValues>(
+    { name, control, label, description, onUploadComplete }: FileUploaderProps<TFieldValues>
+) {
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [fileName, setFileName] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleRemoveAsset = (index: number) => {
-    const newAssets = assets.filter((_, i) => i !== index);
-    setAssets(newAssets);
-    // Use updateFormData
-    updateFormData({ assets: newAssets });
-  };
+    // Use field array methods if the target field is an array
+    // For simplicity here, we assume direct control over a single field or manual array update via callback
+    // const { append } = useFieldArray({ control, name: name as any }); // Requires name to be array type
 
-  const handleAssetUpdate = (index: number, updatedAsset: Partial<UploadedAsset>) => {
-    const newAssets = assets.map((asset, i) =>
-      i === index ? { ...asset, ...updatedAsset } : asset
-    );
-    setAssets(newAssets);
-    // Use updateFormData
-    updateFormData({ assets: newAssets });
-  };
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
-  // Handle asset upload error
-  const handleUploadError = (error: Error) => {
-    console.error('Asset upload error:', error);
-    toast.error(`Upload failed: ${error.message}`);
-    setError(error.message);
-  };
+        setFileName(file.name);
+        setIsUploading(true);
+        setUploadProgress(0);
+        setError(null);
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    try {
-      setIsSaving(true);
-      setError(null);
+        // --- Simulate Upload --- 
+        // Replace with actual upload logic (e.g., call to upload service)
+        try {
+            // Simulate progress
+            for (let progress = 0; progress <= 100; progress += 10) {
+                await new Promise(res => setTimeout(res, 50)); // Simulate network delay
+                setUploadProgress(progress);
+            }
 
-      if (!campaignId) {
-        throw new Error('Campaign ID is required');
-      }
+            // Simulate successful upload response
+            const uploadedAssetData: z.infer<typeof DraftAssetSchema> = {
+                // id: uuidv4(), // Generate ID on backend ideally
+                name: file.name,
+                fileName: file.name,
+                fileSize: file.size,
+                type: file.type.startsWith('image') ? 'image' : file.type.startsWith('video') ? 'video' : undefined,
+                url: URL.createObjectURL(file), // Temporary local URL for preview
+                temp: false, // Mark as not temporary anymore
+            };
 
-      // Save assets to the campaign
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assets: { files: assets },
-        }),
-      });
+            // --- Update Form State --- 
+            // Option 1: Use callback to let parent manage the field array
+            if (onUploadComplete) {
+                onUploadComplete(uploadedAssetData);
+            } else {
+                console.warn("FileUploader: onUploadComplete callback not provided. Form state not updated.");
+                // Option 2: Directly update field (if `name` points to a single asset object)
+                // field.onChange(uploadedAssetData); // This would require Controller render prop access
+                // Option 3: Use append if `name` points to field array (more complex)
+                // append(uploadedAssetData);
+            }
 
-      const result = await response.json();
+            setUploadProgress(100);
+            toast.success(`Uploaded ${file.name} successfully!`);
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to update campaign');
-      }
+        } catch (simulatedError: any) {
+            console.error("Simulated upload error:", simulatedError);
+            setError("Upload failed. Please try again.");
+            toast.error(`Failed to upload ${file.name}.`);
+            setUploadProgress(null);
+        } finally {
+            setIsUploading(false);
+            // Reset file input to allow re-uploading the same file
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            // Keep fileName displayed after attempt
+            // setFileName(null); // Optional: clear file name on error/completion
+        }
+        // --- End Simulate Upload ---
+    };
 
-      toast.success('Campaign assets updated successfully');
-      router.push(`/campaigns/wizard/step-5?id=${campaignId}`);
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-      const message = error instanceof Error ? error.message : 'Failed to update campaign';
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Handle save draft
-  const handleSaveDraft = async () => {
-    try {
-      if (!campaignId) {
-        toast.error('Cannot save draft: No campaign ID found');
-        return;
-      }
-
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assets: { files: assets },
-          submissionStatus: 'draft',
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result.error || 'Failed to save draft');
-        return;
-      }
-
-      toast.success('Draft saved successfully');
-    } catch (error) {
-      toast.error(
-        'Failed to save draft: ' + (error instanceof Error ? error.message : 'Unknown error')
-      );
-    }
-  };
-
-  if (loading) {
-    return <WizardSkeleton step={4} />;
-  }
-
-  return (
-    <div className="w-full max-w-5xl mx-auto px-6 py-8 bg-white font-work-sans">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2 font-heading">Campaign Creation</h1>
-        <p className="text-gray-500">Upload your creative assets for this campaign</p>
-      </div>
-
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md mb-6">
-          <h3 className="text-red-800 font-semibold">Error</h3>
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Creative Assets</h2>
-        <p className="text-gray-600 mb-6">
-          Upload images, videos, or PDFs that will be used in your campaign.
-        </p>
-
-        <CampaignAssetUploader
-          campaignId={campaignId || ''}
-          onUploadComplete={handleUploadComplete}
-          onUploadError={handleUploadError}
+    return (
+        <Controller
+            name={name} // This controller might just be for validation triggering
+            control={control}
+            render={({ fieldState }) => ( // Field is not directly used here if using callback
+                <FormItem>
+                    {label && <FormLabel>{label}</FormLabel>}
+                    <FormControl>
+                        <div className="flex flex-col space-y-2">
+                            <Input
+                                ref={fileInputRef}
+                                type="file"
+                                onChange={handleFileChange}
+                                disabled={isUploading}
+                                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                            />
+                            {isUploading && uploadProgress !== null && (
+                                <Progress value={uploadProgress} className="w-full h-2" />
+                            )}
+                            {fileName && !isUploading && (
+                                <p className="text-sm text-muted-foreground">
+                                    Selected: {fileName} {error ? <span className='text-destructive'>({error})</span> : ' (Ready)'}
+                                </p>
+                            )}
+                        </div>
+                    </FormControl>
+                    {description && <FormDescription>{description}</FormDescription>}
+                    {/* Display RHF validation errors if applicable to the field array itself */}
+                    {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                </FormItem>
+            )}
         />
+    );
+}
 
-        {assets.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-md font-medium mb-3">Uploaded Assets</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {assets.map(asset => (
-                <div key={asset.id} className="border rounded-md p-3 flex flex-col">
-                  <div className="font-medium truncate">{asset.fileName}</div>
-                  <div className="text-sm text-gray-500">{asset.type}</div>
-                  <div className="text-xs text-gray-400">
-                    {(asset.fileSize / 1024 / 1024).toFixed(2)} MB
-                  </div>
-                </div>
-              ))}
+// --- Main Step 4 Component ---
+function Step4Content() {
+    const router = useRouter();
+    const wizard = useWizard();
+
+    const form = useForm<Step4FormData>({
+        resolver: zodResolver(Step4ValidationSchema),
+        mode: 'onChange',
+        defaultValues: {
+            assets: wizard.wizardState?.assets ?? [],
+            guidelines: wizard.wizardState?.guidelines ?? '',
+            requirements: wizard.wizardState?.requirements ?? [],
+            notes: wizard.wizardState?.notes ?? '',
+        }
+    });
+
+    const { fields: requirementFields, append: appendRequirement, remove: removeRequirement } = useFieldArray({
+        control: form.control,
+        name: "requirements",
+    });
+
+    const { fields: assetFields, append: appendAsset, remove: removeAsset } = useFieldArray({
+        control: form.control,
+        name: "assets",
+    });
+
+    // Updated callback for the new FileUploader
+    const handleAssetUploadComplete = useCallback((results: UploadThingResult[]) => {
+        // Map UploadThingResult to DraftAssetSchema format
+        const assetsToAdd: z.infer<typeof DraftAssetSchema>[] = results.map(res => ({
+            // Generate a temporary client-side ID or use res.key if unique enough
+            id: `temp-${res.key || Date.now()}`,
+            url: res.url,
+            name: res.name,
+            fileName: res.name,
+            fileSize: res.size,
+            // Basic type detection - enhance if needed
+            type: res.name.includes('.') && res.name.split('.').pop()?.toLowerCase() === 'mp4' ? 'video' : 'image',
+            temp: false,
+        }));
+        appendAsset(assetsToAdd);
+    }, [appendAsset]);
+
+    // Handle upload errors (optional, FileUploader shows toast)
+    const handleUploadError = useCallback((error: Error) => {
+        console.error("Upload failed in parent:", error);
+        // Additional parent-level error handling if needed
+    }, []);
+
+    useEffect(() => {
+        if (wizard.wizardState && !form.formState.isDirty && !wizard.isLoading) {
+            form.reset({
+                assets: wizard.wizardState.assets ?? [],
+                guidelines: wizard.wizardState.guidelines ?? '',
+                requirements: wizard.wizardState.requirements ?? [],
+                notes: wizard.wizardState.notes ?? '',
+            });
+        }
+    }, [wizard.wizardState, wizard.isLoading, form.reset, form.formState.isDirty]);
+
+    const watchedValues = form.watch();
+
+    // Autosave Logic
+    const handleAutosave = useCallback(async () => {
+        if (!wizard.campaignId || !form.formState.isDirty || !wizard.autosaveEnabled || wizard.isLoading) return;
+        const isValid = await form.trigger();
+        if (!isValid) return;
+        const currentData = form.getValues();
+
+        const payload: Partial<DraftCampaignData> = {
+            assets: currentData.assets, // Save assets managed by RHF state
+            guidelines: currentData.guidelines,
+            requirements: currentData.requirements,
+            notes: currentData.notes,
+            step4Complete: form.formState.isValid,
+            currentStep: 4,
+        };
+        try {
+            wizard.updateWizardState(payload);
+            const success = await wizard.saveProgress();
+            if (success) {
+                form.reset(currentData, { keepValues: true, keepDirty: false, keepErrors: true });
+            } else {
+                toast.error("Failed to save Step 4 draft.");
+            }
+        } catch (error) {
+            console.error("Step 4 Autosave error:", error);
+            toast.error("An error occurred saving Step 4 draft.");
+        }
+    }, [wizard, form, wizard.autosaveEnabled]);
+
+    const debouncedAutosaveRef = useRef(debounce(handleAutosave, 2000));
+    useEffect(() => {
+        if (!wizard.isLoading && form.formState.isDirty && wizard.autosaveEnabled) {
+            debouncedAutosaveRef.current();
+        }
+        return () => { debouncedAutosaveRef.current.cancel(); };
+    }, [watchedValues, wizard.isLoading, form.formState.isDirty, wizard.autosaveEnabled]);
+
+    // Navigation Handlers
+    const handleStepClick = (step: number) => {
+        if (wizard.campaignId && step < 5) { // Allow nav to completed/current
+            router.push(`/campaigns/wizard/step-${step}?id=${wizard.campaignId}`);
+        }
+    };
+    const handleBack = () => {
+        if (wizard.campaignId) router.push(`/campaigns/wizard/step-3?id=${wizard.campaignId}`);
+    };
+    // Combined Save & Next handler
+    const onSubmitAndNavigate = async () => {
+        const isValid = await form.trigger();
+        if (!isValid) {
+            toast.error("Please fix the errors before proceeding.");
+            return;
+        }
+        const data = form.getValues();
+        const payload: Partial<DraftCampaignData> = {
+            assets: data.assets,
+            guidelines: data.guidelines,
+            requirements: data.requirements,
+            notes: data.notes,
+            step4Complete: true,
+            currentStep: 5,
+        };
+        wizard.updateWizardState(payload);
+        const saved = await wizard.saveProgress();
+        if (saved) {
+            form.reset(data, { keepValues: true, keepDirty: false });
+            if (wizard.campaignId) {
+                router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
+            } else {
+                toast.error("Could not navigate: campaign ID not found.");
+            }
+        } else {
+            toast.error("Failed to save progress before navigating.");
+        }
+    };
+
+    // Render Logic
+    if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
+        return <LoadingSkeleton />;
+    }
+
+    // Determine Autosave Status from context
+    const getAutosaveStatus = () => {
+        if (wizard.isLoading) return 'saving';
+        if (wizard.lastSaved) return 'success';
+        return 'idle';
+    };
+
+    return (
+        <div className="space-y-8">
+            {/* Use ProgressBarWizard */}
+            <ProgressBarWizard
+                currentStep={4}
+                steps={wizard.stepsConfig}
+                onStepClick={handleStepClick}
+                onBack={handleBack}
+                onNext={onSubmitAndNavigate}
+                isNextDisabled={!form.formState.isValid}
+                isNextLoading={form.formState.isSubmitting || wizard.isLoading}
+            />
+            <div className="fixed top-4 right-4 z-50">
+                <AutosaveIndicator status={getAutosaveStatus()} lastSaved={wizard.lastSaved} />
             </div>
-          </div>
-        )}
-      </div>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-8 pb-[var(--footer-height)]"> {/* Add padding-bottom */}
+                    {/* --- Assets Card --- */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Creative Assets</CardTitle>
+                            <CardDescription>Upload campaign assets like images, videos, or documents.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Use the new FileUploader from /ui */}
+                            <FileUploader
+                                name="assets" // RHF field name (for validation trigger)
+                                control={form.control}
+                                endpoint="campaignAssetUploader" // Your UploadThing endpoint name
+                                label="Upload Campaign Assets"
+                                description="Max 4MB per file. Images and videos accepted."
+                                onUploadComplete={handleAssetUploadComplete}
+                                onUploadError={handleUploadError}
+                                accept={{ "image/*": [], "video/*": [] }} // Example accept prop
+                                maxFiles={5} // Example: Allow up to 5 files
+                                maxSizeMB={4}
+                            />
+                            {/* Display uploaded assets */}
+                            <div className="mt-4 space-y-3">
+                                <FormLabel className="text-sm font-medium">Uploaded Assets:</FormLabel>
+                                {assetFields.length === 0 && (
+                                    <div className="p-4 border-dashed border-2 rounded-md text-center text-muted-foreground">
+                                        No assets uploaded yet.
+                                    </div>
+                                )}
+                                {assetFields.map((asset, index) => (
+                                    <Card key={asset.id} className="p-3 flex justify-between items-center bg-muted/50">
+                                        <div className="flex items-center space-x-3 overflow-hidden">
+                                            <Icon
+                                                iconId={asset.type === 'image' ? 'faFileImageLight' : asset.type === 'video' ? 'faFileVideoLight' : 'faFileLight'}
+                                                className="h-5 w-5 text-muted-foreground flex-shrink-0"
+                                            />
+                                            <div className="truncate">
+                                                <p className="text-sm font-medium truncate">{asset.fileName || asset.name || `Asset ${index + 1}`}</p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    {asset.type || 'Unknown Type'} {asset.fileSize ? `(${(asset.fileSize / 1024 / 1024).toFixed(2)} MB)` : ''}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeAsset(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0">
+                                            <Icon iconId="faTrashCanLight" className="h-4 w-4" />
+                                        </Button>
+                                    </Card>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
 
-      <ProgressBar
-        currentStep={4}
-        onStepClick={step => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
-        onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)}
-        onNext={handleSubmit}
-        onSaveDraft={handleSaveDraft}
-        disableNext={isSaving}
-        isFormValid={true}
-        isDirty={true}
-        isSaving={isSaving}
-      />
-    </div>
-  );
+                    {/* --- Guidelines Card --- */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Brand Guidelines & Mandatories</CardTitle>
+                            <CardDescription>Provide essential guidelines and list mandatory requirements.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="guidelines"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Brand Guidelines Summary</FormLabel>
+                                        <FormControl>
+                                            <Textarea placeholder="Summarize key Do's and Don'ts, tone of voice, visual style..." {...field} rows={4} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div>
+                                <FormLabel className="text-base font-semibold">Mandatory Requirements</FormLabel>
+                                <FormDescription className="mb-4">List specific elements that MUST be included in the content.</FormDescription>
+                                <div className="space-y-3">
+                                    {requirementFields.map((item, index) => (
+                                        <Card key={item.id} className="flex items-center space-x-2 p-3 bg-muted/50">
+                                            <FormField
+                                                control={form.control}
+                                                name={`requirements.${index}.mandatory`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex items-center space-x-2 mt-1">
+                                                        <FormControl>
+                                                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name={`requirements.${index}.description`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex-1">
+                                                        <FormControl>
+                                                            <Input placeholder={`Requirement ${index + 1}...`} {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeRequirement(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                                <Icon iconId="faTrashCanLight" className="h-4 w-4" />
+                                            </Button>
+                                        </Card>
+                                    ))}
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-4"
+                                    onClick={() => appendRequirement({ description: '', mandatory: true })}
+                                >
+                                    <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Requirement
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* --- Additional Notes Card --- */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Additional Notes</CardTitle>
+                            <CardDescription>Include any other relevant information or context (optional).</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <FormField
+                                control={form.control}
+                                name="notes"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Textarea placeholder="Add any extra details here..." {...field} rows={5} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                    </Card>
+                </form>
+            </Form>
+        </div>
+    );
 }
 
-export default function Step4Content() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <WizardSkeleton step={4} />;
-  }
-
-  return (
-    <Suspense fallback={<WizardSkeleton step={4} />}>
-      <FormContent />
-    </Suspense>
-  );
-}
+export default Step4Content; 

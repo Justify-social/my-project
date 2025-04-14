@@ -1,25 +1,29 @@
 'use client';
 
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   currentStep: number;
   totalSteps: number;
+  className?: string;
 }
 
-export default function Header({ currentStep, totalSteps }: HeaderProps) {
+export default function Header({ currentStep, totalSteps, className }: HeaderProps) {
   return (
-    <header className="flex justify-between items-center mb-6 border-b border-divider-color pb-4 font-heading">
-      <div className="font-body">
-        <h2 className="text-2xl font-bold font-heading text-primary-color">Campaign Wizard</h2>
-        <p className="text-sm text-secondary-color mt-1 font-body">
+    <header className={cn(
+      "flex justify-between items-center mb-6 border-b border-divider pb-4",
+      className
+    )}>
+      <div>
+        <h2 className="text-2xl font-bold text-primary">Campaign Wizard</h2>
+        <p className="text-sm text-secondary mt-1">
           Create and configure your marketing campaign
         </p>
       </div>
-      <div className="bg-white rounded-lg border border-divider-color px-4 py-2 shadow-sm font-body">
-        <span className="font-medium font-body">
-          Step <span className="text-accent-color font-body">{currentStep}</span> of{' '}
-          <span className="font-body">{totalSteps}</span>
+      <div className="bg-background rounded-lg border border-divider px-3 py-1.5 shadow-sm">
+        <span className="text-sm font-medium text-secondary">
+          Step <span className="font-semibold text-accent">{currentStep}</span> of {totalSteps}
         </span>
       </div>
     </header>

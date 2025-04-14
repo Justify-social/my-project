@@ -1,10 +1,13 @@
-// Updated import paths via tree-shake script - 2025-04-01T17:13:32.216Z
-import React from 'react';
-import { Spinner } from '../../../lib/ui-components';
+// Updated import paths via tree-shake script - 2025-04-01T17:13:32.218Z
+import React, { useState } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { cn } from '@/lib/utils';
 import { Influencer } from '../../../types/influencer';
-import IndividualInfluencerCard from './IndividualInfluencerCard';
-import { Button } from '../../../lib/ui-components';
-import { Icon } from '../../../components/ui/icon/icon';
+import { Icon } from '@/components/ui/icon/icon';
+import { InfluencerCard } from '@/components/ui/card-influencer';
+import { PlatformSchema, PlatformEnumBackend } from './types';
+import { z } from 'zod';
 
 export interface MarketplaceListProps {
   influencers: Influencer[];
@@ -25,60 +28,58 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   emptyStateMessage = 'No influencers found matching your criteria',
   showMetrics = true,
 }) => {
+  const [hoveredInfluencer, setHoveredInfluencer] = useState<string | null>(null);
+
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <Spinner size="lg" />
-        <span className="ml-3 text-gray-600">Loading influencers...</span>
-      </div>
-    );
+    return <LoadingSpinner className="mt-10 mx-auto" />;
   }
 
   if (error) {
-    return (
-      <div className="text-center py-10">
-        <Icon iconId="faCircleExclamationLight" className="text-4xl text-red-500 mb-3" />
-        <h3 className="text-xl font-bold mb-2">Error Loading Influencers</h3>
-        <p className="text-gray-600 mb-4">{error}</p>
-        <Button>
-          <Icon iconId="faRotateLight" className="mr-2" />
-          Try Again
-        </Button>
-      </div>
-    );
+    return <Alert variant="destructive" title="Error loading influencers" description={error} className="mt-4" />;
   }
 
-  if (!influencers.length) {
-    return (
-      <div className="text-center py-10">
-        <Icon iconId="faMagnifyingGlassLight" className="text-4xl text-gray-400 mb-3" />
-        <h3 className="text-xl font-bold mb-2">No Results Found</h3>
-        <p className="text-gray-600 mb-4">{emptyStateMessage}</p>
-        <Button>
-          <Icon iconId="faFilterSlashLight" className="mr-2" />
-          Clear Filters
-        </Button>
-      </div>
-    );
+  if (influencers.length === 0) {
+    return <div className="text-center text-muted-foreground mt-10">{emptyStateMessage}</div>;
   }
 
   return (
     <div
-      className={
+      className={cn(
+        'mt-6 grid gap-4',
         viewMode === 'grid'
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-          : 'flex flex-col space-y-4'
-      }
+          ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+          : 'grid-cols-1'
+      )}
     >
-      {influencers.map(influencer => (
-        <IndividualInfluencerCard
-          key={influencer.id}
-          influencer={influencer}
-          layout={viewMode === 'grid' ? 'card' : 'row'}
-          showMetrics={showMetrics}
-          onClick={() => onInfluencerSelect(influencer)}
-        />
-      ))}
+      {influencers.map(influencer => {
+        let platformEnum: z.infer<typeof PlatformEnumBackend> | undefined;
+        try {
+          platformEnum = PlatformSchema.parse(influencer.platform);
+        } catch {
+          platformEnum = undefined;
+          console.warn(`Invalid platform string for influencer ${influencer.id}: ${influencer.platform}`);
+        }
+
+        return platformEnum ? (
+          <div key={influencer.id} onClick={() => onInfluencerSelect(influencer)}>
+            <InfluencerCard
+              platform={platformEnum}
+              handle={influencer.username}
+              displayName={influencer.name}
+              avatarUrl={influencer.avatar}
+              followerCount={influencer.followers}
+              engagementRate={influencer.audienceMetrics?.engagement?.rate}
+              className={cn(
+                viewMode === 'list' ? 'flex-row items-center' : '',
+                'transition-all duration-200 ease-in-out',
+                hoveredInfluencer === influencer.id ? 'shadow-lg scale-[1.02]' : 'shadow-sm'
+              )}
+              onMouseEnter={() => setHoveredInfluencer(influencer.id)}
+              onMouseLeave={() => setHoveredInfluencer(null)}
+            />
+          </div>
+        ) : null;
+      })}
     </div>
   );
 };

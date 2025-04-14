@@ -2,219 +2,123 @@
 'use client';
 
 import React from 'react';
-// Restore SidebarProvider import
-import { useSidebar } from '@/providers/SidebarProvider';
-// Removed unused SettingsPositionProvider import
-// import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
 import { Icon } from '@/components/ui/icon/icon';
-import { cn } from '@/lib/utils'; // Import cn if it wasn't already (it likely was)
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from '@/lib/utils';
+
+// Wizard step configuration
+const STEPS = [
+  { number: 1, label: 'Details' }, // Shortened labels for potentially smaller screens
+  { number: 2, label: 'Objectives' },
+  { number: 3, label: 'Audience' },
+  { number: 4, label: 'Assets' },
+  { number: 5, label: 'Review' },
+];
 
 export interface ProgressBarProps {
+  /** The currently active step number (1-based) */
   currentStep: number;
+  /** Callback when a step indicator is clicked */
   onStepClick: (step: number) => void;
+  /** Callback for the Back button (null if disabled/not shown) */
   onBack: (() => void) | null;
+  /** Callback for the Next/Submit button */
   onNext: () => void;
-  onSaveDraft?: () => void;
-  disableNext?: boolean;
-  isFormValid?: boolean;
-  isDirty?: boolean;
-  isSaving?: boolean;
-  lastSaved?: Date | null;
+  /** Whether the Next/Submit button should be disabled */
+  isNextDisabled?: boolean;
+  /** Whether the Next/Submit action is currently loading */
+  isNextLoading?: boolean;
+  /** Timestamp of the last successful save (passed to AutosaveIndicator, not used directly here) */
+  lastSaved?: Date | null; // Keep prop for consistency if needed elsewhere
 }
-
-// Helper function to format the date
-const formatLastSaved = (date: Date | null): string => {
-  if (!date) return 'Not saved yet';
-
-  // If saved less than a minute ago, show "Just now"
-  const now = new Date();
-  const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffSeconds < 60) {
-    return 'Just now';
-  }
-
-  if (diffSeconds < 3600) {
-    const minutes = Math.floor(diffSeconds / 60);
-    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-  }
-
-  // Format with hours and minutes
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
-
-const STEPS = [
-  'Campaign Details',
-  'Objectives & Messaging',
-  'Target Audience',
-  'Creative Assets',
-  'Review',
-];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   currentStep,
   onStepClick,
   onBack,
   onNext,
-  onSaveDraft,
-  disableNext = false,
-  isFormValid = true,
-  isDirty = true,
-  isSaving = false,
-  lastSaved = null,
+  isNextDisabled = false,
+  isNextLoading = false,
+  // lastSaved prop is received but not directly used for display here
 }) => {
-  // Restore sidebar hook
-  const { isOpen: isSidebarOpen } = useSidebar();
-  // Removed unused settings position hook
-  // const { position } = useSettingsPosition();
-
-  const isNextDisabled = disableNext || (!isFormValid && isDirty);
-
-  // Removed progressBarHeight calculation
-  // const progressBarHeight = ... ;
-
-  console.log('ProgressBar State:', {
-    currentStep,
-    disableNext,
-    isFormValid,
-    isDirty,
-    isNextDisabled,
-  });
 
   return (
     <footer
       className={cn(
-        'fixed bottom-0 border-t shadow z-40 flex justify-between items-center',
-        'text-xs sm:text-sm md:text-base leading-none bg-background',
-        'transition-all duration-300 ease-in-out font-body',
-        'h-[var(--footer-height)]',
-        // Default to full width starting at left-0
-        'left-0 w-full',
-        // On md+ screens, IF sidebar is open, adjust left and width
-        isSidebarOpen && 'md:left-64 md:w-[calc(100%-16rem)]'
+        'sticky bottom-0 border-t bg-background shadow z-40 flex justify-between items-center',
+        'h-[var(--footer-height)] w-full px-4 sm:px-6 font-body text-sm' // Use standard padding
       )}
     >
-      {/* Inner content needs relative positioning and width to work within the footer */}
-      <div className="relative w-full h-full flex justify-between items-center">
-        {/* Use h-full on step list container */}
-        <ul className="flex items-center space-x-2 overflow-x-auto whitespace-nowrap px-2 h-full flex-grow min-w-0 font-body">
-          {STEPS.map((label, index) => {
-            const stepNumber = index + 1;
-            const status =
-              stepNumber < currentStep
-                ? 'completed'
-                : stepNumber === currentStep
-                  ? 'current'
-                  : 'upcoming';
+      {/* Steps Indicator (Left Side) */}
+      <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2 flex-grow min-w-0">
+        {STEPS.map(({ number, label }) => {
+          const isCompleted = number < currentStep;
+          const isCurrent = number === currentStep;
+          const isUpcoming = number > currentStep;
+          const canClick = !isUpcoming;
 
-            return (
-              <li
-                key={index}
-                className={`
-                  flex items-center
-                  transition-colors
-                  duration-200
-                  ${status !== 'upcoming' ? 'cursor-pointer' : 'cursor-default'} font-body`}
-                onClick={() => {
-                  if (status !== 'upcoming') {
-                    onStepClick(stepNumber);
-                  }
-                }}
-              >
-                {status === 'completed' && (
-                  <span className="mr-1 font-body" aria-hidden="true">
-                    <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-success" />
-                  </span>
-                )}
-                <span
-                  className={`${status === 'current'
-                    ? 'font-bold bg-accent px-2 py-0.5 rounded-full'
-                    : status === 'upcoming'
-                      ? 'text-muted-foreground'
-                      : 'text-foreground'
-                    } font-body`}
-                  style={status === 'current' ? { color: 'hsl(var(--primary-foreground))' } : {}}
-                >
-                  {label}
-                </span>
-                {index < STEPS.length - 1 && (
-                  <span className="mx-1 text-muted-foreground font-body">
-                    <Icon iconId="faChevronRightLight" className="h-3 w-3" />
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Use h-full on button container */}
-        <div className="flex space-x-2 px-4 h-full items-center flex-shrink-0 font-body">
-          {/* Last saved indicator */}
-          {lastSaved && (
-            <div className="text-xs text-muted-foreground mr-3 hidden md:flex items-center font-body">
-              {isSaving ? (
-                <span className="flex items-center font-body">
-                  <Icon
-                    iconId="faSpinnerLight"
-                    className="animate-spin -ml-1 mr-1 h-3 w-3 text-accent"
-                  />
-                  <span className="font-body">Saving...</span>
-                </span>
-              ) : (
-                <span className="font-body">Last saved: {formatLastSaved(lastSaved)}</span>
+          return (
+            <div
+              key={number}
+              onClick={() => canClick && onStepClick(number)}
+              className={cn(
+                "flex items-center p-1 rounded-md transition-colors",
+                canClick ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default opacity-50',
               )}
+              aria-current={isCurrent ? 'step' : undefined}
+            >
+              <Badge
+                variant={isCompleted ? 'default' : isCurrent ? 'secondary' : 'outline'}
+                className={cn(
+                  "h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0",
+                  isCompleted && "bg-green-600 border-green-600 text-white",
+                  isCurrent && "border-primary text-primary"
+                )}
+              >
+                {isCompleted ? <Icon iconId="faCheckSolid" className="h-2.5 w-2.5" /> : number}
+              </Badge>
+              <span className={cn(
+                "hidden sm:inline truncate",
+                isCurrent ? 'font-semibold text-primary' : 'text-muted-foreground'
+              )}>
+                {label}
+              </span>
             </div>
-          )}
+          );
+        })}
+      </div>
 
-          {onBack && currentStep > 1 && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="px-3 py-1.5 bg-background border border-secondary text-secondary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-body"
-            >
-              <Icon iconId="faArrowLeftLight" className="h-3 w-3 mr-2" />
-              Back
-            </button>
-          )}
-          {onSaveDraft && (
-            <button
-              type="button"
-              onClick={onSaveDraft}
-              disabled={isSaving}
-              className="px-3 py-1.5 bg-background border border-primary text-primary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-body"
-            >
-              <Icon iconId="faFloppyDiskLight" className="h-3 w-3 mr-2" />
-              {isSaving ? 'Saving...' : 'Save Draft'}
-            </button>
-          )}
-          <button
+      {/* Action Buttons (Right Side) */}
+      <div className="flex items-center space-x-2 flex-shrink-0">
+        {onBack && currentStep > 1 && (
+          <Button
             type="button"
-            onClick={onNext}
-            disabled={isNextDisabled}
-            data-cy="next-button"
-            className={`
-              px-3 py-1.5 
-              rounded-md
-              transition duration-200
-              flex items-center
-              ${isNextDisabled
-                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                : 'bg-accent text-accent-foreground hover:opacity-90'
-              } font-body`}
+            variant="outline"
+            size="sm"
+            onClick={onBack}
+            disabled={isNextLoading} // Disable back if next is loading
           >
-            {currentStep < STEPS.length ? (
-              <>
-                Next
-                <Icon iconId="faArrowRightLight" className="h-3 w-3 ml-2" />
-              </>
-            ) : (
-              <>
-                Submit Campaign
-                <Icon iconId="faCheckLight" className="h-3 w-3 ml-2" />
-              </>
-            )}
-          </button>
-        </div>
+            <Icon iconId="faArrowLeftLight" className="h-4 w-4 mr-1.5" /> Back
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="default" // Use default variant for primary action
+          size="sm"
+          onClick={onNext}
+          disabled={isNextDisabled || isNextLoading}
+          data-cy="next-button"
+        >
+          {isNextLoading ? (
+            <Icon iconId="faSpinnerThirdLight" className="animate-spin mr-1.5 h-4 w-4" />
+          ) : currentStep < STEPS.length ? (
+            <Icon iconId="faArrowRightLight" className="h-4 w-4 mr-1.5" />
+          ) : (
+            <Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1.5" /> // Submit icon
+          )}
+          {currentStep < STEPS.length ? 'Next' : 'Submit'}
+        </Button>
       </div>
     </footer>
   );

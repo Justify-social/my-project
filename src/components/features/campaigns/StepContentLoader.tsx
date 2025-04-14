@@ -1,65 +1,35 @@
 'use client';
 
-import React, { Suspense, lazy, useMemo } from 'react';
-import dynamic from 'next/dynamic';
-// import { Skeleton } from "@/components/ui/skeleton"; // Remove incorrect import
-import Step1Content from './Step1Content';
-import Step2Content from './Step2Content';
-import Step3Content from './Step3Content';
-import Step4Content from './Step4Content';
-import Step5Content from './Step5Content';
-import { LoadingSkeleton } from '@/components/ui';
-import { useWizard } from './WizardContext';
+import React, { Suspense, lazy } from 'react';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton'; // Assuming a generic loading skeleton
+import { StepContentProps } from './types'; // Import shared props type
 
-// Define a simple ErrorBoundary component
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
+// Define a mapping from step number to the component path
+// Adjust paths if necessary
+const stepComponentMap: Record<number, React.LazyExoticComponent<React.ComponentType<any>>> = {
+    1: lazy(() => import('./Step1Content')),
+    2: lazy(() => import('./Step2Content')),
+    3: lazy(() => import('./Step3Content')),
+    4: lazy(() => import('./Step4Content')),
+    5: lazy(() => import('./Step5Content')),
+};
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
+/**
+ * Dynamically loads the content component for the specified wizard step.
+ */
+export const StepContentLoader: React.FC<StepContentProps> = ({ step, ...restProps }) => {
+    const StepComponent = stepComponentMap[step];
 
-  componentDidCatch(error: Error) {
-    console.error('Error in campaign wizard:', error);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <div className="p-4 text-red-600">Something went wrong. Please try again.</div>;
+    if (!StepComponent) {
+        // Handle invalid step number
+        return <div className="text-center py-10 text-destructive">Error: Invalid step number ({step}).</div>;
     }
-    return this.props.children;
-  }
-}
 
-// Define StepLoaderProps interface
-interface StepLoaderProps {
-  step: number;
-}
+    return (
+        <Suspense fallback={<LoadingSkeleton />}>
+            <StepComponent step={step} {...restProps} />
+        </Suspense>
+    );
+};
 
-export function StepLoader({ step }: StepLoaderProps) {
-  const renderContent = () => {
-    switch (step) {
-      case 1:
-        return <Step1Content />;
-      case 2:
-        return <Step2Content />;
-      case 3:
-        return <Step3Content />;
-      case 4:
-        return <Step4Content />;
-      case 5:
-        return <Step5Content />;
-      default:
-        throw new Error(`Step ${step} not implemented`);
-    }
-  };
-
-  return (
-    <ErrorBoundary>
-      <Suspense fallback={<LoadingSkeleton />}>{renderContent()}</Suspense>
-    </ErrorBoundary>
-  );
-}
+export default StepContentLoader; 
