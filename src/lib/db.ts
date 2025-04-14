@@ -36,12 +36,12 @@ export async function getBrandingSettings(companyId: string) {
         if (!global.mockBrandingSettings) {
           global.mockBrandingSettings = {};
         }
-        
+
         if (global.mockBrandingSettings[companyId]) {
           console.log('SERVER: Returning cached branding settings for', companyId);
           return global.mockBrandingSettings[companyId];
         }
-      } 
+      }
       // For client-side, we try to get from localStorage
       else if (typeof window !== 'undefined') {
         const savedSettings = localStorage.getItem(`mockBrandingSettings_${companyId}`);
@@ -61,22 +61,22 @@ export async function getBrandingSettings(companyId: string) {
     } catch (e) {
       console.error('Error accessing mock branding storage:', e);
     }
-    
+
     // Default mock data if no saved data exists
     const defaultSettings = {
       id: 'mock-branding-id',
       companyId,
-      primaryColor: "#00BFFF",
-      secondaryColor: "#40404F",
-      headerFont: "Work Sans",
-      headerFontSize: "18px",
-      bodyFont: "Work Sans",
-      bodyFontSize: "14px",
+      primaryColor: 'var(--accent-color)',
+      secondaryColor: 'var(--secondary-color)',
+      headerFont: 'var(--font-heading)',
+      headerFontSize: '18px',
+      bodyFont: 'var(--font-body)',
+      bodyFontSize: '14px',
       logoUrl: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     // Store default settings in mock storage
     try {
       if (typeof window === 'undefined') {
@@ -90,10 +90,10 @@ export async function getBrandingSettings(companyId: string) {
     } catch (e) {
       console.error('Error storing default settings:', e);
     }
-    
+
     return defaultSettings;
   }
-  
+
   try {
     // Try to get from actual database if not in development
     // Will use this once migrations are applied
@@ -107,15 +107,15 @@ export async function getBrandingSettings(companyId: string) {
     return {
       id: 'default-branding-id',
       companyId,
-      primaryColor: "#00BFFF",
-      secondaryColor: "#40404F",
-      headerFont: "Work Sans",
-      headerFontSize: "18px",
-      bodyFont: "Work Sans",
-      bodyFontSize: "14px",
+      primaryColor: 'var(--accent-color)',
+      secondaryColor: 'var(--secondary-color)',
+      headerFont: 'var(--font-heading)',
+      headerFontSize: '18px',
+      bodyFont: 'var(--font-body)',
+      bodyFontSize: '14px',
       logoUrl: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 }
@@ -124,10 +124,10 @@ export async function getBrandingSettings(companyId: string) {
 export async function saveBrandingSettings(companyId: string, settings: any) {
   if (process.env.NODE_ENV === 'development') {
     console.log('Saving branding settings (mock):', settings);
-    
+
     // First, try to get existing data to preserve logo if not explicitly changed
     let existingData: any = null;
-    
+
     try {
       if (typeof window === 'undefined') {
         if (global.mockBrandingSettings && global.mockBrandingSettings[companyId]) {
@@ -142,29 +142,29 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
     } catch (e) {
       console.error('Error getting existing mock data:', e);
     }
-    
+
     // If we have existing data with a logo and the new settings don't specify a logo change
     if (existingData && existingData.logoUrl && !settings.logoUrl) {
       console.log('Preserving existing logo URL:', existingData.logoUrl);
       settings.logoUrl = existingData.logoUrl;
     }
-    
+
     // Special case: handle explicit logo removal
     if (settings.logoUrl === null && existingData && existingData.logoUrl) {
       console.log('Logo explicitly removed');
     }
-    
+
     // Create the mock data with timestamps
     const mockData = {
       id: 'mock-branding-id',
       companyId,
       ...settings,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     console.log('Final data to save with logo handling:', mockData);
-    
+
     // Save to global store for server-side
     try {
       if (typeof window === 'undefined') {
@@ -173,7 +173,7 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
         }
         global.mockBrandingSettings[companyId] = mockData;
         console.log('SERVER: Saved mock branding settings to global store');
-      } 
+      }
       // Save to localStorage for client-side persistence
       else if (typeof window !== 'undefined') {
         localStorage.setItem(`mockBrandingSettings_${companyId}`, JSON.stringify(mockData));
@@ -182,10 +182,10 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
     } catch (e) {
       console.error('Error saving to mock branding storage:', e);
     }
-    
+
     return mockData;
   }
-  
+
   try {
     // Try to save to actual database if not in development
     return await (prisma as any).brandingSettings.upsert({
@@ -193,8 +193,8 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
       update: settings,
       create: {
         companyId,
-        ...settings
-      }
+        ...settings,
+      },
     });
   } catch (error) {
     console.error('Error saving branding settings:', error);
@@ -202,4 +202,4 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
   }
 }
 
-export default prisma; 
+export default prisma;

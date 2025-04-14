@@ -129,14 +129,14 @@ API responses follow a consistent format:
 
 Common error codes returned by the API:
 
-| Code | Description |
-|------|-------------|
-| `VALIDATION_ERROR` | Request validation failed |
-| `AUTHENTICATION_ERROR` | Authentication failed |
-| `AUTHORIZATION_ERROR` | User not authorized for this action |
-| `RESOURCE_NOT_FOUND` | Requested resource not found |
-| `RESOURCE_CONFLICT` | Resource already exists |
-| `INTERNAL_ERROR` | Internal server error |
+| Code                   | Description                         |
+| ---------------------- | ----------------------------------- |
+| `VALIDATION_ERROR`     | Request validation failed           |
+| `AUTHENTICATION_ERROR` | Authentication failed               |
+| `AUTHORIZATION_ERROR`  | User not authorized for this action |
+| `RESOURCE_NOT_FOUND`   | Requested resource not found        |
+| `RESOURCE_CONFLICT`    | Resource already exists             |
+| `INTERNAL_ERROR`       | Internal server error               |
 
 ## Rate Limiting
 
@@ -188,6 +188,7 @@ List endpoints support filtering and sorting:
 - `sort=-field`: Sort by field (descending)
 
 Example:
+
 ```
 GET /api/campaigns?filter[status]=DRAFT&sort=-createdAt
 ```
@@ -212,4 +213,4 @@ Detailed API documentation is available in the following formats:
 
 - [API Endpoints](./endpoints.md)
 - [Cint API Reference](./cint-api-reference.md)
-- [Authentication System](../authentication/overview.md) 
+- [Authentication System](../authentication/overview.md)

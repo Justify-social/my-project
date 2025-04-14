@@ -44,4 +44,4 @@ When adding new tests:
 3. Add shared commands to `support/commands.js`
 4. Add plugins to `support/plugins.js`
 
-All tests should follow the project's testing guidelines and naming conventions. 
+All tests should follow the project's testing guidelines and naming conventions.

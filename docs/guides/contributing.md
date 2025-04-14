@@ -74,4 +74,4 @@ If you have questions or need assistance:
 - Ask for help in the PR comments
 - Reach out to the development team
 
-Thank you for contributing to our project! 
+Thank you for contributing to our project!

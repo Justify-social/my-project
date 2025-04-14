@@ -1,8 +1,8 @@
-import { Suspense } from "react";
-import ClientPage from "./ClientPage";
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
+import { Suspense } from 'react';
+import ClientPage from './ClientPage';
+import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return (

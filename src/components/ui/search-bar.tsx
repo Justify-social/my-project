@@ -14,7 +14,9 @@ import { cn } from '@/lib/utils';
 import { Icon } from './icon/icon';
 import { Input } from '@/components/ui/input'; // Import Shadcn Input
 
-export interface SearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange' | 'value'> { // Omit value as well for controlled component pattern
+export interface SearchBarProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange' | 'value'> {
+  // Omit value as well for controlled component pattern
   /** Current search value (controlled) */
   value: string; // Make value controlled
   /** Callback when search value changes */
@@ -171,20 +173,24 @@ export function SearchBar({
   // height is controlled by h-* classes. We'll apply height classes if needed.
   const getInputHeightClass = () => {
     switch (size) {
-      case 'sm': return 'h-8';
-      case 'lg': return 'h-12';
-      default: return 'h-10'; // Default Shadcn input height
+      case 'sm':
+        return 'h-8';
+      case 'lg':
+        return 'h-12';
+      default:
+        return 'h-10'; // Default Shadcn input height
     }
-  }
-
+  };
 
   return (
     <div className={cn('relative w-full', className)}>
       {/* Search Icon */}
-      <div className={cn(
-        'absolute top-1/2 -translate-y-1/2 pointer-events-none', // Added pointer-events-none
-        getIconPosition()
-      )}>
+      <div
+        className={cn(
+          'absolute top-1/2 -translate-y-1/2 pointer-events-none', // Added pointer-events-none
+          getIconPosition()
+        )}
+      >
         <Icon
           iconId="faSearchLight" // Consider making icon prop configurable?
           className={cn('text-muted-foreground', getIconSize())} // Use muted-foreground
@@ -213,23 +219,21 @@ export function SearchBar({
 
       {/* Loading Spinner or Clear Button */}
       {(isLoading || (showClear && value && value.length > 0)) && (
-        <div className={cn(
-          'absolute top-1/2 -translate-y-1/2',
-          getClearPosition()
-        )}>
+        <div className={cn('absolute top-1/2 -translate-y-1/2', getClearPosition())}>
           {isLoading ? (
-            <div className={cn(
-              'animate-spin rounded-full border-2 border-border border-t-primary', // Use theme colors
-              getIconSize()
-            )}
+            <div
+              className={cn(
+                'animate-spin rounded-full border-2 border-border border-t-primary', // Use theme colors
+                getIconSize()
+              )}
             />
           ) : (
             <button
               type="button"
               onClick={handleClear}
               className={cn(
-                "text-muted-foreground hover:text-foreground focus:outline-none rounded-full", // Use theme colors
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" // Add focus ring
+                'text-muted-foreground hover:text-foreground focus:outline-none rounded-full', // Use theme colors
+                'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2' // Add focus ring
               )}
               aria-label="Clear search"
             >
@@ -242,4 +246,4 @@ export function SearchBar({
   );
 }
 
-export default SearchBar; 
+export default SearchBar;

@@ -9,11 +9,11 @@ This guide covers deployment processes for Justify.social, focusing on Vercel de
 
 ## Deployment Environments
 
-| Environment | URL | Branch | Auto-Deploy |
-|-------------|-----|--------|------------|
-| Production | https://justify.social | main | Yes |
-| Staging | https://staging.justify.social | staging | Yes |
-| Development | https://dev.justify.social | develop | Yes |
+| Environment | URL                            | Branch  | Auto-Deploy |
+| ----------- | ------------------------------ | ------- | ----------- |
+| Production  | https://justify.social         | main    | Yes         |
+| Staging     | https://staging.justify.social | staging | Yes         |
+| Development | https://dev.justify.social     | develop | Yes         |
 
 ## Deployment Process
 
@@ -32,9 +32,9 @@ module.exports = {
   output: 'standalone',
   experimental: {
     appDir: true,
-    excludeDefaultMomentLocales: true
-  }
-}
+    excludeDefaultMomentLocales: true,
+  },
+};
 ```
 
 ## Server vs Client Components
@@ -54,6 +54,7 @@ When deploying to Vercel, proper separation of server and client components is c
 **Solution**:
 
 1. Move `dynamic` and `revalidate` directives to layout components:
+
    ```tsx
    // campaigns/layout.tsx
    export const dynamic = 'force-dynamic';
@@ -61,6 +62,7 @@ When deploying to Vercel, proper separation of server and client components is c
    ```
 
 2. Create proper component separation:
+
    ```
    /campaigns
      ├── layout.tsx        (server component with directives)
@@ -70,7 +72,7 @@ When deploying to Vercel, proper separation of server and client components is c
 
 3. Ensure Next.js config has proper output settings:
    ```js
-   output: 'standalone'
+   output: 'standalone';
    ```
 
 ## Environment Variables
@@ -94,4 +96,4 @@ Ensure these environment variables are configured in Vercel:
 
 - **Build fails**: Check server/client component separation
 - **Runtime errors**: Verify environment variables
-- **API errors**: Confirm API routes use proper error handling 
+- **API errors**: Confirm API routes use proper error handling

@@ -22,4 +22,4 @@ We primarily use:
 ## Related Documentation
 
 - [Icon System](../../reference/icons/icon-system.md) - Documentation about our icon system
-- [Adding Icons](../../reference/icons/adding-icons.md) - Guide for adding new icons to the system 
+- [Adding Icons](../../reference/icons/adding-icons.md) - Guide for adding new icons to the system

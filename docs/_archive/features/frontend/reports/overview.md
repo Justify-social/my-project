@@ -66,12 +66,12 @@ The Reports feature is designed for marketing managers, analysts, and executives
 
 ## Configuration Options
 
-| Option | Description | Default | Allowed Values |
-|--------|-------------|---------|---------------|
-| Default Time Range | Time period shown initially | Last 30 days | Last 7/14/30/90 days, Custom |
-| Data Refresh Rate | How often report data updates | 24 hours | Real-time, 1 hour, 6 hours, 24 hours |
-| Visualization Type | Default chart type | Line chart | Line, Bar, Pie, Table, Custom |
-| Report Sharing | Default sharing permissions | Team only | Public, Team, Private |
+| Option             | Description                   | Default      | Allowed Values                       |
+| ------------------ | ----------------------------- | ------------ | ------------------------------------ |
+| Default Time Range | Time period shown initially   | Last 30 days | Last 7/14/30/90 days, Custom         |
+| Data Refresh Rate  | How often report data updates | 24 hours     | Real-time, 1 hour, 6 hours, 24 hours |
+| Visualization Type | Default chart type            | Line chart   | Line, Bar, Pie, Table, Custom        |
+| Report Sharing     | Default sharing permissions   | Team only    | Public, Team, Private                |
 
 ## Troubleshooting
 
@@ -92,4 +92,4 @@ The Reports feature is designed for marketing managers, analysts, and executives
 - [Reports Usage Guide](./usage.md)
 - [Campaign Wizard Overview](../campaign-wizard/overview.md)
 - [Dashboard Integration](../dashboard/overview.md)
-- [Data Integration APIs](../../features-backend/apis/overview.md) 
+- [Data Integration APIs](../../features-backend/apis/overview.md)

@@ -7,11 +7,7 @@ import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LightIcon } from '@/components/ui/icon';
 
-export default function ComponentBrowserLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ComponentBrowserLayout({ children }: { children: React.ReactNode }) {
   // const pathname = usePathname() || ''; // No longer needed for nav links
 
   /* // Remove complex nav links
@@ -38,10 +34,8 @@ export default function ComponentBrowserLayout({
         </div>
       </header> */}
 
-      <main className="flex-1 pb-12">
-        {children}
-      </main>
+      <main className="flex-1 pb-12">{children}</main>
     </div>
     // </ThemeProvider>
   );
-} 
+}

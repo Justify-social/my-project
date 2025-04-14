@@ -4,17 +4,14 @@ import { NextRequest, NextResponse } from 'next/server';
  * Improved route handler for auth0 flow
  * Uses proper async/await pattern for params
  */
-export async function GET(
-  req: NextRequest, 
-  { params }: { params: Promise<{ auth0: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ auth0: string }> }) {
   try {
     // Correctly await the params
     const { auth0 } = await params;
-    
+
     // Now use auth0 as a string safely
     console.log(`Processing auth request for action: ${auth0}`);
-    
+
     // Example conditional logic based on auth0 param
     switch (auth0) {
       case 'login':
@@ -33,4 +30,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

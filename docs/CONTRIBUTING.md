@@ -5,6 +5,7 @@ Thank you for your interest in contributing to our project. This guide explains 
 ## Getting Started
 
 1. **Set up your environment**
+
    - Follow the instructions in the main [Getting Started Guide](getting-started/README.md)
    - Ensure all dependencies are installed (`npm install`)
    - Verify that you can run the application locally (`npm run dev`)
@@ -16,11 +17,13 @@ Thank you for your interest in contributing to our project. This guide explains 
 ## Development Workflow
 
 1. **Create a branch**
+
    - Branch from `main` for most changes
    - Use the format: `<type>/<description>` (e.g., `feature/add-campaign-filter`)
    - Types: `feature`, `fix`, `refactor`, `docs`, `test`, `chore`
 
 2. **Make your changes**
+
    - Follow our [Coding Standards](standards/code-standards.md)
    - Include relevant tests for new features or fixes
    - Keep commits small and focused with meaningful messages (see below)
@@ -55,6 +58,7 @@ Write clear, concise commit messages using conventional commit format:
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -94,4 +98,4 @@ If you need assistance:
 - Ask questions in the appropriate Slack channel
 - Contact the core development team or feature owners
 
-Thank you for helping improve our project! 
+Thank you for helping improve our project!

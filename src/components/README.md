@@ -22,15 +22,11 @@ React components used throughout the application.
 - `common/`
 - `asset-preview/`
 
-
 ### Files
 
 - 4 .tsx files
 
-
 ## Usage
-
-
 
 ## Best Practices
 
@@ -40,7 +36,6 @@ React components used throughout the application.
 - Keep components small and focused on a single responsibility
 - Use TypeScript Props interfaces for component props
 - Consider component composition over complex props
-
 
 ## Related
 

@@ -134,7 +134,8 @@ Before you begin, make sure you have:
 
 **Problem:** Unable to reach target sample size in specific segments
 
-**Solution:** 
+**Solution:**
+
 - Broaden targeting criteria
 - Extend fielding window
 - Increase incentives for hard-to-reach segments
@@ -145,6 +146,7 @@ Before you begin, make sure you have:
 **Problem:** No statistically significant lift in key metrics
 
 **Solution:**
+
 - Check if campaign had sufficient reach and frequency
 - Verify control group wasn't exposed to campaign
 - Increase sample size in future studies
@@ -163,4 +165,4 @@ After completing your Brand Lift study, you might want to:
 
 - [Brand Lift Overview](./overview.md)
 - [Campaign Wizard](../campaign-wizard/overview.md)
-- [Reports Integration](../reports/types.md) 
+- [Reports Integration](../reports/types.md)

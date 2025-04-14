@@ -52,15 +52,15 @@ src/
 
 ## Key Principles & Conventions
 
-*   **Modularity:** Group code by feature (`components/features`) or technical concern (`lib`, `hooks`, `utils`).
-*   **Clear Separation:** Distinguish between UI components (`components/ui`), feature logic (`components/features`, `services`), and core utilities (`lib`, `utils`).
-*   **Naming:** Use `kebab-case` for directories and non-component files. Use `PascalCase` for React component files (e.g., `Button.tsx`).
-*   **Imports:** Use absolute path aliases (`@/`) configured in `tsconfig.json`.
-*   **SSOT:** Configuration is centralised in `/config`, type definitions leverage Prisma where possible, core logic resides in `/lib` and `/services`.
+- **Modularity:** Group code by feature (`components/features`) or technical concern (`lib`, `hooks`, `utils`).
+- **Clear Separation:** Distinguish between UI components (`components/ui`), feature logic (`components/features`, `services`), and core utilities (`lib`, `utils`).
+- **Naming:** Use `kebab-case` for directories and non-component files. Use `PascalCase` for React component files (e.g., `Button.tsx`).
+- **Imports:** Use absolute path aliases (`@/`) configured in `tsconfig.json`.
+- **SSOT:** Configuration is centralised in `/config`, type definitions leverage Prisma where possible, core logic resides in `/lib` and `/services`.
 
-*For detailed UI component structure, see `docs/components/ui/README.md`.*
-*For configuration details, see `docs/configuration/README.md`.*
-*For script organisation, see `docs/scripts/README.md`.*
+_For detailed UI component structure, see `docs/components/ui/README.md`._
+_For configuration details, see `docs/configuration/README.md`._
+_For script organisation, see `docs/scripts/README.md`._
 
 ## Final Structure (Post-Unification)
 
@@ -135,26 +135,29 @@ src/components/
 To maintain consistency in imports, follow these conventions:
 
 1. Use absolute imports with the `@/` prefix:
+
    ```typescript
    import { Button } from '@/components/ui/button';
    import { useAuth } from '@/hooks/auth/useAuth';
    ```
 
 2. Import from barrel files when available:
+
    ```typescript
    // Good
    import { Button, Card } from '@/components/ui';
-   
+
    // Avoid multiple import lines when a barrel is available
    import { Button } from '@/components/ui/button';
    import { Card } from '@/components/ui/card';
    ```
 
 3. Avoid deep imports from other feature components:
+
    ```typescript
    // Good - import from the feature boundary
    import { CampaignHeader } from '@/components/features/campaigns';
-   
+
    // Avoid - too deeply coupled to internal structure
    import { HeaderTitle } from '@/components/features/campaigns/brand-lift/header/title';
    ```
@@ -164,6 +167,7 @@ To maintain consistency in imports, follow these conventions:
 ### UI Components
 
 UI components should be:
+
 - Organized following atomic design principles (see detailed documentation in [docs/reference/ui/atomic-design-structure.md](/docs/reference/ui/atomic-design-structure.md))
 - Reusable across the application
 - Stateless or with minimal internal state
@@ -173,6 +177,7 @@ UI components should be:
 ### Feature Components
 
 Feature components should:
+
 - Implement specific business functionality
 - Be organized by feature domain
 - Located in `src/components/features/`
@@ -181,6 +186,7 @@ Feature components should:
 ### Hooks
 
 Custom hooks should:
+
 - Follow the naming convention `use[Name]`
 - Be categorized by their purpose (api, auth, form, ui, etc.)
 - Located in `src/hooks/`
@@ -188,15 +194,18 @@ Custom hooks should:
 ## Best Practices
 
 1. **Component Structure**:
+
    - Each component should be in its own directory if it has multiple files
    - Include an `index.ts` file for exporting
    - Keep component files smaller than 300 lines when possible
 
 2. **Documentation**:
+
    - Each component directory should include a README.md
    - Document component props and usage examples
 
 3. **Testing**:
+
    - Place tests in a `__tests__` directory next to the component
    - Include test utilities in a `test` directory if needed
 
@@ -209,11 +218,13 @@ Custom hooks should:
 The legacy directories are now implemented with re-export files for backward compatibility:
 
 1. **Phase 1** (Completed):
+
    - Create re-export files in legacy directories
    - Document legacy directories in `docs/legacy-directories.md`
    - Create import path updater script
 
 2. **Phase 2** (Completed):
+
    - Run automated import path updates for known patterns
    - Fix missing imports where possible with `missing-imports-resolver.js`
    - Document remaining unresolved imports for manual intervention
@@ -229,11 +240,13 @@ The legacy directories are now implemented with re-export files for backward com
 Despite automated efforts, some imports require manual resolution:
 
 1. **Unresolved Standard Library Imports**:
+
    - Most unresolved imports are for standard libraries like `react`, `next/navigation`, etc.
    - All components have been verified to include necessary imports
    - The `standard-imports-resolver.js` script can be run again if new files are created
 
 2. **Deprecation Warnings**:
+
    - All legacy directories now include console warnings in development mode
    - Warnings provide clear guidance for migration to new paths
    - Developers should migrate imports upon encountering warnings
@@ -248,6 +261,7 @@ Despite automated efforts, some imports require manual resolution:
 Regular verification is essential to maintain the directory structure:
 
 1. Automated Verification:
+
    - Run `scripts/directory-structure/phase7/final-verification.js` regularly to check for:
      - Import path consistency
      - Directory structure compliance
@@ -263,20 +277,20 @@ Regular verification is essential to maintain the directory structure:
 
 ### UI Components Migration Status:
 
-| Component    | Types | Styles | Component | Tests | Status      |
-|--------------|:-----:|:------:|:---------:|:-----:|-------------|
-| Alert        |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Button       |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Checkbox     |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Input        |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Select       |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Toast        |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Modal        |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Tabs         |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Card         |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Table        |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| Pagination   |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
-| DatePicker   |   ✅  |   ✅   |    ✅     |   🔄  | Completed   |
+| Component  | Types | Styles | Component | Tests | Status    |
+| ---------- | :---: | :----: | :-------: | :---: | --------- |
+| Alert      |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Button     |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Checkbox   |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Input      |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Select     |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Toast      |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Modal      |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Tabs       |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Card       |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Table      |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| Pagination |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
+| DatePicker |  ✅   |   ✅   |    ✅     |  🔄   | Completed |
 
 ### UI Components Structure
 

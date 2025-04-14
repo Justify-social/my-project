@@ -15,10 +15,10 @@ If you're new to the project, follow these steps:
 ## Development Setup
 
 1.  **Prerequisites:**
-    *   Node.js (Check `.nvmrc` or `package.json` engines field for the required version - currently `20.x`).
-    *   `npm` (usually included with Node.js).
-    *   Git.
-    *   Access to the project repository on GitHub.
+    - Node.js (Check `.nvmrc` or `package.json` engines field for the required version - currently `20.x`).
+    - `npm` (usually included with Node.js).
+    - Git.
+    - Access to the project repository on GitHub.
 2.  **Clone the Repository:**
     ```bash
     git clone <repository-url>
@@ -29,23 +29,23 @@ If you're new to the project, follow these steps:
     npm install
     ```
 4.  **Environment Variables:**
-    *   Copy the example environment file: `cp .env.example .env.local`
-    *   Fill in the necessary values in `.env.local` (e.g., database connection string, Auth0 credentials, API keys). Obtain sensitive values from project leads or password management system.
+    - Copy the example environment file: `cp .env.example .env.local`
+    - Fill in the necessary values in `.env.local` (e.g., database connection string, Auth0 credentials, API keys). Obtain sensitive values from project leads or password management system.
 5.  **Database Setup (if applicable):**
-    *   Ensure your database (e.g., PostgreSQL) is running.
-    *   Run Prisma migrations: `npx prisma migrate dev` (Check `package.json` scripts for exact command).
+    - Ensure your database (e.g., PostgreSQL) is running.
+    - Run Prisma migrations: `npx prisma migrate dev` (Check `package.json` scripts for exact command).
 6.  **Run the Development Server:**
     ```bash
     npm run dev
     ```
-    *   The application should now be running, typically at `http://localhost:3000`.
+    - The application should now be running, typically at `http://localhost:3000`.
 
 ## What You'll Find Here
 
 This directory contains essential introductory information:
 
-| Document | Description |
-|----------|-------------|
+| Document                                  | Description                                       |
+| ----------------------------------------- | ------------------------------------------------- |
 | [Project Overview](./project-overview.md) | High-level explanation of Justify and its purpose |
 
 ## Next Steps
@@ -62,4 +62,4 @@ If you get stuck during setup or have questions:
 
 1. Ask in the relevant Slack channel.
 2. Consult the **[Troubleshooting Guide](../troubleshooting/README.md)** (Verify path).
-3. Contact the onboarding team or project leads. 
+3. Contact the onboarding team or project leads.

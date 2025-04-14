@@ -20,7 +20,7 @@ import {
   SheetFooter,
   SheetClose,
   SheetTitle,
-  SheetDescription
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
@@ -29,7 +29,7 @@ export interface MenuItem {
   id: string;
   label: string;
   href: string;
-  iconId?: string;      // Keep optional for potential custom non-app icons, but prioritize internal mapping
+  iconId?: string; // Keep optional for potential custom non-app icons, but prioritize internal mapping
   isDisabled?: boolean;
   badge?: string | number;
   children?: MenuItem[];
@@ -37,32 +37,32 @@ export interface MenuItem {
 
 // --- Component Props ---
 export interface MobileMenuProps {
-  isOpen: boolean;           // Controls the Sheet's open state
+  isOpen: boolean; // Controls the Sheet's open state
   onOpenChange: (open: boolean) => void; // Callback for Sheet state changes
-  menuItems: MenuItem[];       // Navigation items using the unified type
-  remainingCredits: number;   // Data for the footer
+  menuItems: MenuItem[]; // Navigation items using the unified type
+  remainingCredits: number; // Data for the footer
   notificationsCount: number; // Data for the footer
-  companyName: string;        // Data for the header
-  user?: UserProfile;        // Optional user data for the footer
-  className?: string;        // Optional additional class names for SheetContent
+  companyName: string; // Data for the header
+  user?: UserProfile; // Optional user data for the footer
+  className?: string; // Optional additional class names for SheetContent
   onItemClick?: (item: MenuItem) => void; // Optional click handler
 }
 
 // --- App Icon Mapping (Updated) ---
 const appIconMap: Record<string, string> = {
-  "dashboard": "appHome",
-  "home": "appHome",
-  "campaigns": "appCampaigns",
-  "brand lift": "appBrandLift",
-  "creative testing": "appCreativeAssetTesting",
-  "brand health": "appBrandHealth",
-  "influencers": "appInfluencers",
-  "mmm": "appMmm",
-  "reports": "appReports",
-  "settings": "appSettings",
-  "account settings": "appSettings",
-  "help": "appHelp",
-  "billing": "appBilling",
+  dashboard: 'appHome',
+  home: 'appHome',
+  campaigns: 'appCampaigns',
+  'brand lift': 'appBrandLift',
+  'creative testing': 'appCreativeAssetTesting',
+  'brand health': 'appBrandHealth',
+  influencers: 'appInfluencers',
+  mmm: 'appMmm',
+  reports: 'appReports',
+  settings: 'appSettings',
+  'account settings': 'appSettings',
+  help: 'appHelp',
+  billing: 'appBilling',
 };
 
 const getAppIconIdForLabel = (label: string): string | null => {
@@ -74,7 +74,7 @@ const ICONS = {
   CLOSE: 'faXmarkLight',
   CHEVRON_DOWN: 'faChevronDownSolid',
   CHEVRON_RIGHT: 'faChevronRightLight',
-  COINS: 'faCoinsLight', // Keep FA light or find app equivalent? 
+  COINS: 'faCoinsLight', // Keep FA light or find app equivalent?
   BELL: 'faBellLight', // Keep FA light or find app equivalent?
   USER_FALLBACK: '/icons/light/faUserLight.svg', // Use explicit FA path
   LOGO_FALLBACK: '/logo.png',
@@ -95,7 +95,7 @@ const RenderMenuItem: React.FC<{
   const mappedAppIconId = getAppIconIdForLabel(item.label);
   const displayIconId = mappedAppIconId || item.iconId;
   const iconAvailable = displayIconId ? iconExists(displayIconId) : false;
-  const fallbackIcon = "faCircleLight";
+  const fallbackIcon = 'faCircleLight';
   const finalIconId = iconAvailable ? displayIconId : fallbackIcon;
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -181,7 +181,6 @@ const RenderMenuItem: React.FC<{
   );
 };
 
-
 /**
  * MobileMenu component implemented using Shadcn's Sheet.
  * Provides responsive navigation for mobile devices.
@@ -197,13 +196,15 @@ export function MobileMenu({
   className,
   onItemClick,
 }: MobileMenuProps) {
-
   const handleClose = () => onOpenChange(false); // Helper to close sheet
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className={cn("w-full max-w-xs p-0 flex flex-col", className)} data-testid="mobile-menu-sheet-content">
-
+      <SheetContent
+        side="right"
+        className={cn('w-full max-w-xs p-0 flex flex-col', className)}
+        data-testid="mobile-menu-sheet-content"
+      >
         {/* Header - Remove custom SheetClose */}
         <SheetHeader className="flex flex-row items-center justify-between h-16 px-4 border-b">
           <SheetTitle className="sr-only">Main Menu</SheetTitle>
@@ -213,7 +214,10 @@ export function MobileMenu({
               alt={companyName}
               width={32}
               height={32}
-              onError={(e) => { e.currentTarget.style.display = 'none'; console.warn("Logo image failed to load"); }}
+              onError={e => {
+                e.currentTarget.style.display = 'none';
+                console.warn('Logo image failed to load');
+              }}
             />
             <span className="font-semibold text-lg">{companyName}</span>
           </div>
@@ -234,8 +238,12 @@ export function MobileMenu({
         </nav>
 
         {/* Footer */}
-        <SheetFooter className="border-t p-4 mt-auto"> {/* Added mt-auto */}
-          <div className="w-full space-y-4"> {/* Ensure full width */}
+        <SheetFooter className="border-t p-4 mt-auto">
+          {' '}
+          {/* Added mt-auto */}
+          <div className="w-full space-y-4">
+            {' '}
+            {/* Ensure full width */}
             {/* Credits & Notifications */}
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2 text-sm">
@@ -262,17 +270,20 @@ export function MobileMenu({
                 <span>Notifications</span>
               </div>
             </div>
-
             {/* User Info */}
             {user && (
-              <div className="flex items-center space-x-3 pt-4 border-t"> {/* Added pt-4 */}
+              <div className="flex items-center space-x-3 pt-4 border-t">
+                {' '}
+                {/* Added pt-4 */}
                 <Image
                   src={user.picture || ICONS.USER_FALLBACK}
                   alt="Profile"
                   width={32}
                   height={32}
                   className="rounded-full"
-                  onError={(e) => { e.currentTarget.src = ICONS.USER_FALLBACK; }}
+                  onError={e => {
+                    e.currentTarget.src = ICONS.USER_FALLBACK;
+                  }}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate text-sm">{user.name}</p>

@@ -1,6 +1,6 @@
 /**
  * Transaction Manager Utility
- * 
+ *
  * This utility provides a robust wrapper for Prisma transactions with:
  * - Configurable isolation levels
  * - Automatic retry for transient failures
@@ -18,7 +18,7 @@ export enum IsolationLevel {
   ReadUncommitted = 'READ UNCOMMITTED',
   ReadCommitted = 'READ COMMITTED',
   RepeatableRead = 'REPEATABLE READ',
-  Serializable = 'SERIALIZABLE'
+  Serializable = 'SERIALIZABLE',
 }
 
 // Transaction operation types for logging and monitoring
@@ -27,7 +27,7 @@ export enum TransactionOperation {
   UPDATE = 'UPDATE',
   DELETE = 'DELETE',
   BATCH = 'BATCH',
-  CUSTOM = 'CUSTOM'
+  CUSTOM = 'CUSTOM',
 }
 
 // Transaction metadata for logging
@@ -60,7 +60,7 @@ export enum TransactionErrorType {
   TIMEOUT = 'TRANSACTION_TIMEOUT',
   DEADLOCK = 'DEADLOCK_DETECTED',
   SERIALIZATION = 'SERIALIZATION_FAILURE',
-  UNKNOWN = 'UNKNOWN_ERROR'
+  UNKNOWN = 'UNKNOWN_ERROR',
 }
 
 // Enhanced transaction error
@@ -73,14 +73,18 @@ export class TransactionError extends Error {
   query?: string;
   params?: unknown;
 
-  constructor(message: string, type: TransactionErrorType, options?: {
-    cause?: Error;
-    transactionId?: string;
-    metadata?: TransactionMetadata;
-    attemptCount?: number;
-    query?: string;
-    params?: unknown;
-  }) {
+  constructor(
+    message: string,
+    type: TransactionErrorType,
+    options?: {
+      cause?: Error;
+      transactionId?: string;
+      metadata?: TransactionMetadata;
+      attemptCount?: number;
+      query?: string;
+      params?: unknown;
+    }
+  ) {
     super(message);
     this.name = 'TransactionError';
     this.type = type;
@@ -112,8 +116,8 @@ const DEFAULT_TRANSACTION_OPTIONS: TransactionOptions = {
   logging: true,
   metadata: {
     operation: TransactionOperation.CUSTOM,
-    modelName: 'unknown'
-  }
+    modelName: 'unknown',
+  },
 };
 
 /**
@@ -144,8 +148,8 @@ export class TransactionManager {
       ...options,
       metadata: {
         ...DEFAULT_TRANSACTION_OPTIONS.metadata!,
-        ...options.metadata
-      }
+        ...options.metadata,
+      },
     };
 
     const transactionId = `tx_${Date.now()}_${++this.transactionCount}`;
@@ -160,7 +164,7 @@ export class TransactionManager {
         isolation: txOptions.isolation,
         operation: txOptions.metadata?.operation,
         model: txOptions.metadata?.modelName,
-        userContext: txOptions.metadata?.userId ? { userId: txOptions.metadata.userId } : undefined
+        userContext: txOptions.metadata?.userId ? { userId: txOptions.metadata.userId } : undefined,
       });
     }
 
@@ -172,33 +176,37 @@ export class TransactionManager {
         // Set up a timeout if specified
         const timeoutPromise = txOptions.timeout
           ? new Promise<never>((_, reject) => {
-            setTimeout(() => {
-              reject(new TransactionError(
-                `Transaction timed out after ${txOptions.timeout}ms`,
-                TransactionErrorType.TIMEOUT,
-                { transactionId, metadata: txOptions.metadata, attemptCount }
-              ));
-            }, txOptions.timeout);
-          })
+              setTimeout(() => {
+                reject(
+                  new TransactionError(
+                    `Transaction timed out after ${txOptions.timeout}ms`,
+                    TransactionErrorType.TIMEOUT,
+                    { transactionId, metadata: txOptions.metadata, attemptCount }
+                  )
+                );
+              }, txOptions.timeout);
+            })
           : null;
 
         // Execute the transaction with the specified isolation level
         const txResult = await Promise.race([
           this.prisma.$transaction(
-            async (tx) => {
+            async tx => {
               // Set the isolation level if provided
               if (txOptions.isolation) {
-                await tx.$executeRawUnsafe(`SET TRANSACTION ISOLATION LEVEL ${txOptions.isolation}`);
+                await tx.$executeRawUnsafe(
+                  `SET TRANSACTION ISOLATION LEVEL ${txOptions.isolation}`
+                );
               }
 
               return await fn(tx);
             },
             {
               maxWait: txOptions.timeout, // Maximum time to acquire a connection
-              timeout: txOptions.timeout   // Maximum time for the transaction
+              timeout: txOptions.timeout, // Maximum time for the transaction
             }
           ),
-          ...(timeoutPromise ? [timeoutPromise] : [])
+          ...(timeoutPromise ? [timeoutPromise] : []),
         ]);
 
         const endTime = new Date();
@@ -212,7 +220,7 @@ export class TransactionManager {
             durationMs,
             attempts: attemptCount,
             operation: txOptions.metadata?.operation,
-            model: txOptions.metadata?.modelName
+            model: txOptions.metadata?.modelName,
           });
         }
 
@@ -221,19 +229,19 @@ export class TransactionManager {
           timing: {
             startTime,
             endTime,
-            durationMs
+            durationMs,
           },
           metadata: txOptions.metadata || {
             operation: TransactionOperation.CUSTOM,
-            modelName: 'unknown'
-          }
+            modelName: 'unknown',
+          },
         };
       } catch (error) {
         const errorInfo = this.parseError(error);
 
         // Determine if this error is retryable
-        const isRetryable = this.isRetryableError(errorInfo.type) &&
-          attemptCount < (txOptions.maxRetries || 3);
+        const isRetryable =
+          this.isRetryableError(errorInfo.type) && attemptCount < (txOptions.maxRetries || 3);
 
         // Log the error
         if (txOptions.logging) {
@@ -245,7 +253,7 @@ export class TransactionManager {
             willRetry: isRetryable,
             operation: txOptions.metadata?.operation,
             model: txOptions.metadata?.modelName,
-            error: error instanceof Error ? error.stack : String(error)
+            error: error instanceof Error ? error.stack : String(error),
           });
         }
 
@@ -259,7 +267,7 @@ export class TransactionManager {
               transactionId,
               attempt: attemptCount,
               nextAttempt: attemptCount + 1,
-              delayMs
+              delayMs,
             });
           }
 
@@ -268,16 +276,12 @@ export class TransactionManager {
         }
 
         // Throw a standardized transaction error
-        throw new TransactionError(
-          errorInfo.message,
-          errorInfo.type,
-          {
-            cause: error instanceof Error ? error : undefined,
-            transactionId,
-            metadata: txOptions.metadata,
-            attemptCount
-          }
-        );
+        throw new TransactionError(errorInfo.message, errorInfo.type, {
+          cause: error instanceof Error ? error : undefined,
+          transactionId,
+          metadata: txOptions.metadata,
+          attemptCount,
+        });
       }
     }
   }
@@ -292,43 +296,43 @@ export class TransactionManager {
         case 'P2002':
           return {
             type: TransactionErrorType.UNIQUE_CONSTRAINT,
-            message: `Unique constraint violation: ${error.meta?.target as string || 'unknown field'}`
+            message: `Unique constraint violation: ${(error.meta?.target as string) || 'unknown field'}`,
           };
         case 'P2003':
           return {
             type: TransactionErrorType.FOREIGN_KEY,
-            message: `Foreign key constraint violation: ${error.meta?.field_name as string || 'unknown field'}`
+            message: `Foreign key constraint violation: ${(error.meta?.field_name as string) || 'unknown field'}`,
           };
         case 'P2025':
           return {
             type: TransactionErrorType.VALIDATION,
-            message: 'Record not found'
+            message: 'Record not found',
           };
         default:
           return {
             type: TransactionErrorType.UNKNOWN,
-            message: `Prisma error: ${error.message}`
+            message: `Prisma error: ${error.message}`,
           };
       }
     } else if (error instanceof Prisma.PrismaClientValidationError) {
       return {
         type: TransactionErrorType.VALIDATION,
-        message: `Validation error: ${error.message}`
+        message: `Validation error: ${error.message}`,
       };
     } else if (error instanceof Prisma.PrismaClientRustPanicError) {
       return {
         type: TransactionErrorType.CONNECTION,
-        message: 'Database client panic error'
+        message: 'Database client panic error',
       };
     } else if (error instanceof Prisma.PrismaClientInitializationError) {
       return {
         type: TransactionErrorType.CONNECTION,
-        message: `Connection initialization error: ${error.message}`
+        message: `Connection initialization error: ${error.message}`,
       };
     } else if (error instanceof TransactionError) {
       return {
         type: error.type,
-        message: error.message
+        message: error.message,
       };
     }
 
@@ -339,23 +343,23 @@ export class TransactionManager {
     if (errorMessage.includes('deadlock detected')) {
       return {
         type: TransactionErrorType.DEADLOCK,
-        message: 'Deadlock detected in transaction'
+        message: 'Deadlock detected in transaction',
       };
     } else if (errorMessage.includes('serialization failure')) {
       return {
         type: TransactionErrorType.SERIALIZATION,
-        message: 'Serialization failure in transaction'
+        message: 'Serialization failure in transaction',
       };
     } else if (errorMessage.includes('timeout')) {
       return {
         type: TransactionErrorType.TIMEOUT,
-        message: 'Transaction timeout'
+        message: 'Transaction timeout',
       };
     }
 
     return {
       type: TransactionErrorType.UNKNOWN,
-      message: `Unknown error: ${errorMessage}`
+      message: `Unknown error: ${errorMessage}`,
     };
   }
 
@@ -367,7 +371,7 @@ export class TransactionManager {
       TransactionErrorType.CONNECTION,
       TransactionErrorType.TIMEOUT,
       TransactionErrorType.DEADLOCK,
-      TransactionErrorType.SERIALIZATION
+      TransactionErrorType.SERIALIZATION,
     ].includes(errorType);
   }
 
@@ -393,7 +397,7 @@ export class TransactionManager {
     }
   ): Promise<T> {
     return this.executeTransaction<T>(
-      async (tx) => {
+      async tx => {
         // @ts-expect-error - Dynamic access to Prisma model
         return await tx[model].create({ data });
       },
@@ -403,8 +407,8 @@ export class TransactionManager {
           operation: TransactionOperation.CREATE,
           modelName: model,
           userId: options?.userId,
-          description: options?.description
-        }
+          description: options?.description,
+        },
       }
     ).then(result => result.data);
   }
@@ -422,12 +426,12 @@ export class TransactionManager {
     }
   ): Promise<T> {
     return this.executeTransaction<T>(
-      async (tx) => {
+      async tx => {
         // Dynamically access the Prisma model and handle both string and number IDs
         // @ts-expect-error - Dynamic access to Prisma model
         return await tx[model].update({
           where: { id },
-          data
+          data,
         });
       },
       {
@@ -437,8 +441,8 @@ export class TransactionManager {
           modelName: model,
           recordIds: [String(id)],
           userId: options?.userId,
-          description: options?.description
-        }
+          description: options?.description,
+        },
       }
     ).then(result => result.data);
   }
@@ -455,11 +459,11 @@ export class TransactionManager {
     }
   ): Promise<T> {
     return this.executeTransaction<T>(
-      async (tx) => {
+      async tx => {
         // Dynamically access the Prisma model and handle both string and number IDs
         // @ts-expect-error - Dynamic access to Prisma model
         return await tx[model].delete({
-          where: { id }
+          where: { id },
         });
       },
       {
@@ -469,8 +473,8 @@ export class TransactionManager {
           modelName: model,
           recordIds: [String(id)],
           userId: options?.userId,
-          description: options?.description
-        }
+          description: options?.description,
+        },
       }
     ).then(result => result.data);
   }
@@ -483,7 +487,7 @@ export class TransactionManager {
     options?: TransactionOptions
   ): Promise<T> {
     return this.executeTransaction<T>(
-      async (tx) => {
+      async tx => {
         const results = [];
         for (const operation of operations) {
           results.push(await operation(tx));
@@ -495,8 +499,8 @@ export class TransactionManager {
         metadata: {
           operation: TransactionOperation.BATCH,
           modelName: options?.metadata?.modelName || 'multiple',
-          ...options?.metadata
-        }
+          ...options?.metadata,
+        },
       }
     ).then(result => result.data);
   }
@@ -553,4 +557,4 @@ const batchResult = await transactionManager.batch([
   tx => tx.user.update({ where: { id: 1 }, data: { name: 'Updated Name' } }),
   tx => tx.notification.create({ data: { userId: 1, message: 'Profile updated' } })
 ]);
-*/ 
+*/

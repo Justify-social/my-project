@@ -1,47 +1,63 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-import { Prisma, Platform, Position, KPI, Currency, SubmissionStatus, CreativeAssetType, Feature, Status } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
-import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger'
-import { v4 as uuidv4 } from 'uuid'
-import { withValidation } from '@/config/middleware/api/validate-api'
-import { tryCatch } from '@/config/middleware/api/handle-api-errors'
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import {
+  Prisma,
+  Platform,
+  Position,
+  KPI,
+  Currency,
+  SubmissionStatus,
+  CreativeAssetType,
+  Feature,
+  Status,
+} from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
+import { v4 as uuidv4 } from 'uuid';
+import { withValidation } from '@/config/middleware/api/validate-api';
+import { tryCatch } from '@/config/middleware/api/handle-api-errors';
 
 // Define schemas for campaign creation validation
 // Note: Frontend uses 'Instagram', backend uses 'INSTAGRAM' - transformation required
-const influencerSchema = z.object({
-  name: z.string().optional().default(''),
-  handle: z.string().min(1, "Handle is required"),
-  // Accept any platform format - transformation will handle it
-  platform: z.string(),
-  id: z.string().optional(),
-  url: z.string().optional().default(''),
-  posts: z.number().optional().default(0),
-  videos: z.number().optional().default(0),
-  reels: z.number().optional().default(0),
-  stories: z.number().optional().default(0)
-}).optional();
+const influencerSchema = z
+  .object({
+    name: z.string().optional().default(''),
+    handle: z.string().min(1, 'Handle is required'),
+    // Accept any platform format - transformation will handle it
+    platform: z.string(),
+    id: z.string().optional(),
+    url: z.string().optional().default(''),
+    posts: z.number().optional().default(0),
+    videos: z.number().optional().default(0),
+    reels: z.number().optional().default(0),
+    stories: z.number().optional().default(0),
+  })
+  .optional();
 
 // Define a more flexible influencer schema specifically for drafts
-const draftInfluencerSchema = z.object({
-  name: z.string().optional().default(''),
-  handle: z.string().optional().default(''),  // Make handle optional for drafts
-  platform: z.string().optional().default(''), // Make platform optional for drafts
-  id: z.string().optional(),
-  url: z.string().optional().default(''),
-  posts: z.number().optional().default(0),
-  videos: z.number().optional().default(0),
-  reels: z.number().optional().default(0),
-  stories: z.number().optional().default(0)
-}).optional();
+const draftInfluencerSchema = z
+  .object({
+    name: z.string().optional().default(''),
+    handle: z.string().optional().default(''), // Make handle optional for drafts
+    platform: z.string().optional().default(''), // Make platform optional for drafts
+    id: z.string().optional(),
+    url: z.string().optional().default(''),
+    posts: z.number().optional().default(0),
+    videos: z.number().optional().default(0),
+    reels: z.number().optional().default(0),
+    stories: z.number().optional().default(0),
+  })
+  .optional();
 
 // Position has the same format in frontend and backend
-const contactSchema = z.object({
-  firstName: z.string().min(1, "First name is required").optional(),
-  surname: z.string().min(1, "Surname is required").optional(),
-  email: z.string().email("Valid email is required").optional(),
-  position: z.string().optional()
-}).optional();
+const contactSchema = z
+  .object({
+    firstName: z.string().min(1, 'First name is required').optional(),
+    surname: z.string().min(1, 'Surname is required').optional(),
+    email: z.string().email('Valid email is required').optional(),
+    position: z.string().optional(),
+  })
+  .optional();
 
 const audienceSchema = z.object({
   description: z.string().optional().default(''),
@@ -51,48 +67,58 @@ const audienceSchema = z.object({
   age3544: z.number().optional().default(0),
   age4554: z.number().optional().default(0),
   age5564: z.number().optional().default(0),
-  age65plus: z.number().optional().default(0)
+  age65plus: z.number().optional().default(0),
 });
 
 const creativeAssetSchema = z.object({
   type: z.enum(['IMAGE', 'VIDEO', 'DOCUMENT']).default('IMAGE'),
   url: z.string().optional().default(''),
-  description: z.string().optional().default('')
+  description: z.string().optional().default(''),
 });
 
 const creativeRequirementSchema = z.object({
-  description: z.string().min(1, "Description is required"),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM')
+  description: z.string().min(1, 'Description is required'),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
 });
 
-const submissionSchema = z.object({
-  primaryContact: contactSchema.optional(),
-  secondaryContact: contactSchema.optional(),
-  contacts: z.string().optional().default(''),
-  // Backend expects UPPERCASE platform values
-  platform: z.enum(['INSTAGRAM', 'YOUTUBE', 'TIKTOK']).default('INSTAGRAM'),
-  mainMessage: z.string().optional().default(''),
-  hashtags: z.string().optional().default(''),
-  memorability: z.string().optional().default(''),
-  keyBenefits: z.string().optional().default(''),
-  expectedAchievements: z.string().optional().default(''),
-  purchaseIntent: z.string().optional().default(''),
-  brandPerception: z.string().optional().default(''),
-  // Backend expects UPPERCASE_SNAKE_CASE KPI values
-  primaryKPI: z.enum([
-    'AD_RECALL', 'BRAND_AWARENESS', 'CONSIDERATION', 'MESSAGE_ASSOCIATION',
-    'BRAND_PREFERENCE', 'PURCHASE_INTENT', 'ACTION_INTENT',
-    'RECOMMENDATION_INTENT', 'ADVOCACY'
-  ]).default('BRAND_AWARENESS'),
-  secondaryKPIs: z.string().optional().default(''),
-  features: z.string().optional().default(''),
-  audiences: z.array(audienceSchema).optional().default([]),
-  creativeAssets: z.array(creativeAssetSchema).optional().default([]),
-  creativeRequirements: z.array(creativeRequirementSchema).optional().default([])
-}).optional();
+const submissionSchema = z
+  .object({
+    primaryContact: contactSchema.optional(),
+    secondaryContact: contactSchema.optional(),
+    contacts: z.string().optional().default(''),
+    // Backend expects UPPERCASE platform values
+    platform: z.enum(['INSTAGRAM', 'YOUTUBE', 'TIKTOK']).default('INSTAGRAM'),
+    mainMessage: z.string().optional().default(''),
+    hashtags: z.string().optional().default(''),
+    memorability: z.string().optional().default(''),
+    keyBenefits: z.string().optional().default(''),
+    expectedAchievements: z.string().optional().default(''),
+    purchaseIntent: z.string().optional().default(''),
+    brandPerception: z.string().optional().default(''),
+    // Backend expects UPPERCASE_SNAKE_CASE KPI values
+    primaryKPI: z
+      .enum([
+        'AD_RECALL',
+        'BRAND_AWARENESS',
+        'CONSIDERATION',
+        'MESSAGE_ASSOCIATION',
+        'BRAND_PREFERENCE',
+        'PURCHASE_INTENT',
+        'ACTION_INTENT',
+        'RECOMMENDATION_INTENT',
+        'ADVOCACY',
+      ])
+      .default('BRAND_AWARENESS'),
+    secondaryKPIs: z.string().optional().default(''),
+    features: z.string().optional().default(''),
+    audiences: z.array(audienceSchema).optional().default([]),
+    creativeAssets: z.array(creativeAssetSchema).optional().default([]),
+    creativeRequirements: z.array(creativeRequirementSchema).optional().default([]),
+  })
+  .optional();
 
 const campaignCreateSchema = z.object({
-  name: z.string().min(1, "Campaign name is required"),
+  name: z.string().min(1, 'Campaign name is required'),
   businessGoal: z.string().optional(),
   startDate: z.string().optional(), // Changed from datetime() to string() to be more flexible
   endDate: z.string().optional(), // Changed from datetime() to string() to be more flexible
@@ -113,16 +139,16 @@ const campaignCreateSchema = z.object({
   audience: audienceSchema.optional(),
   creativeAssets: z.array(creativeAssetSchema).optional(),
   creativeRequirements: z.array(creativeRequirementSchema).optional(),
-  budget: z.any().optional() // Make budget an "any" type to be more flexible
+  budget: z.any().optional(), // Make budget an "any" type to be more flexible
 });
 
 const campaignUpdateSchema = z.object({
-  id: z.string().uuid("Invalid campaign ID format"),
+  id: z.string().uuid('Invalid campaign ID format'),
   campaignName: z.string().min(1).optional(),
   description: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  step: z.number().optional()
+  step: z.number().optional(),
 });
 
 // Define a more flexible schema for campaign drafts
@@ -157,13 +183,13 @@ const campaignDraftSchema = z.object({
   platform: z.string().optional(),
   primaryKPI: z.string().optional(),
   secondaryKPIs: z.array(z.string()).optional(),
-  features: z.array(z.string()).optional()
+  features: z.array(z.string()).optional(),
 });
 
 // Create a more flexible campaign schema that works for both drafts and complete submissions
 const campaignFlexibleSchema = z.object({
   // Always required, even for drafts
-  name: z.string().min(1, "Campaign name is required"),
+  name: z.string().min(1, 'Campaign name is required'),
 
   // Optional fields for drafts, but may be required for complete submissions
   businessGoal: z.string().optional(),
@@ -195,7 +221,7 @@ const campaignFlexibleSchema = z.object({
 
   // Other fields
   exchangeRateData: z.any().optional(),
-  budget: z.any().optional()
+  budget: z.any().optional(),
 });
 
 // GET handler - List campaigns
@@ -204,7 +230,7 @@ export async function GET(request: NextRequest) {
   // console.log("[/api/campaigns GET] Runtime DATABASE_URL:", process.env.DATABASE_URL); // Keep commented out for now
   // -------------------------------------------
   try {
-    // --- Low-level diagnostic: Check if table exists via raw SQL (REMOVED) --- 
+    // --- Low-level diagnostic: Check if table exists via raw SQL (REMOVED) ---
     // console.log("[/api/campaigns GET] Running raw query to check for CampaignWizard table...");
     // const tableExistsResult = await prisma.$queryRawUnsafe(
     //   `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'CampaignWizard');`
@@ -215,14 +241,14 @@ export async function GET(request: NextRequest) {
     // console.log("[/api/campaigns GET] Does 'CampaignWizard' table exist according to DB?", tableExists);
     // --- End diagnostic ---
 
-    // --- Original code (Restored) --- 
+    // --- Original code (Restored) ---
     const campaigns = await prisma.campaignWizard.findMany({
       orderBy: {
-        updatedAt: 'desc'
+        updatedAt: 'desc',
       },
-      take: 100
+      take: 100,
     });
-    console.log("Raw campaigns from DB:", JSON.stringify(campaigns, null, 2));
+    console.log('Raw campaigns from DB:', JSON.stringify(campaigns, null, 2));
     const { EnumTransformers } = await import('@/utils/enum-transformers');
     const transformedCampaigns = campaigns.map(campaign => {
       const transformed = EnumTransformers.transformObjectFromBackend(campaign);
@@ -231,12 +257,12 @@ export async function GET(request: NextRequest) {
         startDate: campaign.startDate instanceof Date ? campaign.startDate.toISOString() : null,
         endDate: campaign.endDate instanceof Date ? campaign.endDate.toISOString() : null,
         createdAt: campaign.createdAt instanceof Date ? campaign.createdAt.toISOString() : null,
-        updatedAt: campaign.updatedAt instanceof Date ? campaign.updatedAt.toISOString() : null
+        updatedAt: campaign.updatedAt instanceof Date ? campaign.updatedAt.toISOString() : null,
       };
     });
     return NextResponse.json({
       success: true,
-      data: transformedCampaigns
+      data: transformedCampaigns,
     });
     // --- End original code ---
 
@@ -245,9 +271,8 @@ export async function GET(request: NextRequest) {
     //   throw new Error("Diagnostic check failed: 'CampaignWizard' table not found in information_schema.");
     // }
     // return NextResponse.json({ success: true, data: [], message: "Diagnostic OK - Table exists." });
-
   } catch (error) {
-    console.error("Error fetching campaigns:", error); // Restored original error message context
+    console.error('Error fetching campaigns:', error); // Restored original error message context
     dbLogger.error(
       DbOperation.FETCH,
       'Error fetching campaigns',
@@ -282,16 +307,25 @@ export const POST = withValidation(
 
       // Apply stricter validation for non-drafts inside the handler
       if (!isDraft) {
-        const requiredFields = ['businessGoal', 'startDate', 'endDate', 'timeZone', 'currency'] as const;
+        const requiredFields = [
+          'businessGoal',
+          'startDate',
+          'endDate',
+          'timeZone',
+          'currency',
+        ] as const;
         const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
 
         if (missingFields.length > 0) {
           console.error(`Missing required fields: ${missingFields.join(', ')}`);
-          return NextResponse.json({
-            success: false,
-            error: `Missing required fields for complete submission: ${missingFields.join(', ')}`,
-            details: { missingFields }
-          }, { status: 400 });
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Missing required fields for complete submission: ${missingFields.join(', ')}`,
+              details: { missingFields },
+            },
+            { status: 400 }
+          );
         }
 
         // Validate influencers for non-draft submissions
@@ -303,11 +337,14 @@ export const POST = withValidation(
 
           if (invalidInfluencers.length > 0) {
             console.error('Invalid influencers data:', invalidInfluencers);
-            return NextResponse.json({
-              success: false,
-              error: 'Influencer data incomplete',
-              details: { invalidInfluencers }
-            }, { status: 400 });
+            return NextResponse.json(
+              {
+                success: false,
+                error: 'Influencer data incomplete',
+                details: { invalidInfluencers },
+              },
+              { status: 400 }
+            );
           }
         }
       } else {
@@ -328,34 +365,46 @@ export const POST = withValidation(
       const budgetData = transformedData.budget || {
         total: transformedData.totalBudget || 0,
         currency: transformedData.currency || 'USD',
-        socialMedia: transformedData.socialMediaBudget || 0
+        socialMedia: transformedData.socialMediaBudget || 0,
       };
 
       console.log('Budget data:', JSON.stringify(budgetData, null, 2));
 
       // For drafts, be more lenient with contact data handling
       // Initialize with empty objects for drafts
-      const primaryContactData = transformedData.primaryContact &&
-        (transformedData.primaryContact.firstName ||
-          transformedData.primaryContact.email) ? {
-        firstName: transformedData.primaryContact.firstName || '',
-        surname: transformedData.primaryContact.surname || '',
-        email: transformedData.primaryContact.email || '',
-        position: transformedData.primaryContact.position || 'Manager'
-      } : (isDraft ? {} : null);
+      const primaryContactData =
+        transformedData.primaryContact &&
+        (transformedData.primaryContact.firstName || transformedData.primaryContact.email)
+          ? {
+              firstName: transformedData.primaryContact.firstName || '',
+              surname: transformedData.primaryContact.surname || '',
+              email: transformedData.primaryContact.email || '',
+              position: transformedData.primaryContact.position || 'Manager',
+            }
+          : isDraft
+            ? {}
+            : null;
 
-      const secondaryContactData = transformedData.secondaryContact &&
-        (transformedData.secondaryContact.firstName ||
-          transformedData.secondaryContact.email) ? {
-        firstName: transformedData.secondaryContact.firstName || '',
-        surname: transformedData.secondaryContact.surname || '',
-        email: transformedData.secondaryContact.email || '',
-        position: transformedData.secondaryContact.position || 'Manager'
-      } : (isDraft ? {} : null);
+      const secondaryContactData =
+        transformedData.secondaryContact &&
+        (transformedData.secondaryContact.firstName || transformedData.secondaryContact.email)
+          ? {
+              firstName: transformedData.secondaryContact.firstName || '',
+              surname: transformedData.secondaryContact.surname || '',
+              email: transformedData.secondaryContact.email || '',
+              position: transformedData.secondaryContact.position || 'Manager',
+            }
+          : isDraft
+            ? {}
+            : null;
 
       // Convert to JSON strings for database storage
-      const primaryContactJson = primaryContactData ? JSON.stringify(primaryContactData) : Prisma.JsonNull;
-      const secondaryContactJson = secondaryContactData ? JSON.stringify(secondaryContactData) : Prisma.JsonNull;
+      const primaryContactJson = primaryContactData
+        ? JSON.stringify(primaryContactData)
+        : Prisma.JsonNull;
+      const secondaryContactJson = secondaryContactData
+        ? JSON.stringify(secondaryContactData)
+        : Prisma.JsonNull;
 
       console.log('Primary contact:', primaryContactJson);
       console.log('Secondary contact:', secondaryContactJson);
@@ -366,12 +415,14 @@ export const POST = withValidation(
         name: transformedData.name,
         businessGoal: transformedData.businessGoal || '',
         // Ensure we always have valid dates
-        startDate: transformedData.startDate && transformedData.startDate !== ''
-          ? new Date(transformedData.startDate)
-          : new Date(), // Default to current date if not provided
-        endDate: transformedData.endDate && transformedData.endDate !== ''
-          ? new Date(transformedData.endDate)
-          : new Date(), // Default to current date if not provided
+        startDate:
+          transformedData.startDate && transformedData.startDate !== ''
+            ? new Date(transformedData.startDate)
+            : new Date(), // Default to current date if not provided
+        endDate:
+          transformedData.endDate && transformedData.endDate !== ''
+            ? new Date(transformedData.endDate)
+            : new Date(), // Default to current date if not provided
         timeZone: transformedData.timeZone || 'UTC',
         primaryContact: primaryContactJson,
         secondaryContact: secondaryContactJson,
@@ -388,27 +439,34 @@ export const POST = withValidation(
         locations: [],
         competitors: [],
         assets: [],
-        requirements: []
+        requirements: [],
       };
 
       console.log('Database creation data:', JSON.stringify(dbData, null, 2));
 
       try {
         // Create campaign and handle influencers in the same transaction
-        const campaign = await prisma.$transaction(async (tx) => {
+        const campaign = await prisma.$transaction(async tx => {
           // First create the campaign
           const newCampaign = await tx.campaignWizard.create({
-            data: dbData
+            data: dbData,
           });
 
           // If there are influencers in the request, create them
-          if (transformedData.influencers && Array.isArray(transformedData.influencers) && transformedData.influencers.length > 0) {
+          if (
+            transformedData.influencers &&
+            Array.isArray(transformedData.influencers) &&
+            transformedData.influencers.length > 0
+          ) {
             // Filter out any incomplete influencer data
             const validInfluencers = transformedData.influencers.filter(
               (inf): inf is NonNullable<typeof inf> =>
-                !!inf && typeof inf === 'object' &&
-                typeof inf.platform === 'string' && !!inf.platform &&
-                typeof inf.handle === 'string' && !!inf.handle
+                !!inf &&
+                typeof inf === 'object' &&
+                typeof inf.platform === 'string' &&
+                !!inf.platform &&
+                typeof inf.handle === 'string' &&
+                !!inf.handle
             );
 
             console.log('Creating influencers:', JSON.stringify(validInfluencers, null, 2));
@@ -423,8 +481,8 @@ export const POST = withValidation(
                   handle: influencer.handle,
                   // We don't have platformId in our schema, so don't try to use it
                   campaignId: newCampaign.id,
-                  updatedAt: new Date()
-                }
+                  updatedAt: new Date(),
+                },
               });
             }
           }
@@ -432,27 +490,26 @@ export const POST = withValidation(
           return newCampaign;
         });
 
-        dbLogger.info(
-          DbOperation.CREATE,
-          'Campaign created successfully',
-          { campaignId: campaign.id }
-        );
+        dbLogger.info(DbOperation.CREATE, 'Campaign created successfully', {
+          campaignId: campaign.id,
+        });
 
         // Fetch the complete campaign with influencers for the response
         const campaignWithInfluencers = await prisma.campaignWizard.findUnique({
           where: { id: campaign.id },
           include: {
-            Influencer: true
-          }
+            Influencer: true,
+          },
         });
 
         // Transform campaign data back to frontend format before returning
-        const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
+        const transformedCampaign =
+          EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
 
         return NextResponse.json({
           success: true,
           data: transformedCampaign,
-          message: 'Campaign created successfully'
+          message: 'Campaign created successfully',
         });
       } catch (dbError) {
         console.error('Database error during campaign creation:', dbError);
@@ -467,29 +524,37 @@ export const POST = withValidation(
           }
         }
 
-        return NextResponse.json({
-          success: false,
-          error: 'Database error during campaign creation',
-          details: dbError instanceof Error ? dbError.message : String(dbError),
-          code: dbError instanceof Prisma.PrismaClientKnownRequestError ? dbError.code : undefined,
-          meta: dbError instanceof Prisma.PrismaClientKnownRequestError ? dbError.meta : undefined
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Database error during campaign creation',
+            details: dbError instanceof Error ? dbError.message : String(dbError),
+            code:
+              dbError instanceof Prisma.PrismaClientKnownRequestError ? dbError.code : undefined,
+            meta:
+              dbError instanceof Prisma.PrismaClientKnownRequestError ? dbError.meta : undefined,
+          },
+          { status: 500 }
+        );
       }
     } catch (error) {
       console.error('Campaign creation error:', error);
 
       // Provide detailed error information for debugging
-      return NextResponse.json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          details: error,
+        },
+        { status: 500 }
+      );
     }
   },
   {
     entityName: 'Campaign',
     logValidationErrors: true,
-    logRequestBody: true
+    logRequestBody: true,
   }
 );
 
@@ -518,9 +583,9 @@ export const PATCH = withValidation(
           wizardId: campaign.id,
           step: updateData.step ?? 1,
           timestamp: new Date(),
-          action: "UPDATE",
+          action: 'UPDATE',
           changes: {},
-          performedBy: "system",
+          performedBy: 'system',
         },
       });
     } catch (error) {
@@ -531,7 +596,7 @@ export const PATCH = withValidation(
     return NextResponse.json({
       success: true,
       data: campaign,
-      message: 'Campaign updated successfully'
+      message: 'Campaign updated successfully',
     });
   },
   { entityName: 'Campaign', logValidationErrors: true }

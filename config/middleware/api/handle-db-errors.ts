@@ -5,7 +5,7 @@ import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 /**
  * Standardized error handling for database operations
  * This middleware can wrap database operations to provide consistent error handling
- * 
+ *
  * @param error The error that occurred during the database operation
  * @param entityName The name of the entity being operated on (e.g., 'Campaign', 'User')
  * @param operation The type of operation that was being performed
@@ -28,13 +28,13 @@ export function handleDbError(
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     // Unique constraint violation
     if (error.code === 'P2002') {
-      const field = error.meta?.target as string[] || ['unknown field'];
+      const field = (error.meta?.target as string[]) || ['unknown field'];
       return NextResponse.json(
         {
           success: false,
           error: `A ${entityName.toLowerCase()} with this ${field.join(', ')} already exists`,
           code: error.code,
-          fields: field
+          fields: field,
         },
         { status: 409 }
       );
@@ -47,7 +47,7 @@ export function handleDbError(
           success: false,
           error: 'Foreign key constraint failed',
           details: error.message,
-          code: error.code
+          code: error.code,
         },
         { status: 400 }
       );
@@ -60,7 +60,7 @@ export function handleDbError(
           success: false,
           error: `${entityName} not found`,
           details: error.message,
-          code: error.code
+          code: error.code,
         },
         { status: 404 }
       );
@@ -73,7 +73,7 @@ export function handleDbError(
           success: false,
           error: 'Missing required fields',
           details: error.message,
-          code: error.code
+          code: error.code,
         },
         { status: 400 }
       );
@@ -86,7 +86,7 @@ export function handleDbError(
       {
         success: false,
         error: 'Validation error in database operation',
-        details: error.message
+        details: error.message,
       },
       { status: 400 }
     );
@@ -98,7 +98,7 @@ export function handleDbError(
       {
         success: false,
         error: 'Database connection error',
-        details: 'Unable to connect to the database. Please try again later.'
+        details: 'Unable to connect to the database. Please try again later.',
       },
       { status: 503 }
     );
@@ -109,7 +109,7 @@ export function handleDbError(
     {
       success: false,
       error: `Failed to ${operation.toLowerCase()} ${entityName.toLowerCase()}`,
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     },
     { status: 500 }
   );
@@ -117,7 +117,7 @@ export function handleDbError(
 
 /**
  * Higher-order function to create a database operation with error handling
- * 
+ *
  * @param operation The database operation to perform
  * @param entityName The name of the entity being operated on
  * @returns A function that performs the operation and handles errors
@@ -130,4 +130,4 @@ export function withDbErrorHandling<T>(
   return operation()
     .then(result => result)
     .catch(error => handleDbError(error, entityName, operationType));
-} 
+}

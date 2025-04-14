@@ -13,7 +13,7 @@
  * @param {1 | 2 | 3 | 4} [props.columns=3] - The number of columns for the grid layout (responsive).
  * @param {React.ReactNode} [props.children] - Optional additional content to render below the grid.
  * @returns {React.ReactElement} The rendered metrics dashboard layout.
- * 
+ *
  * @example
  * <MetricsDashboard
  *   title="Sales Overview"
@@ -43,11 +43,11 @@ export interface MetricsDashboardProps {
   children?: React.ReactNode;
 }
 
-
 /**
  * Component for displaying multiple KPI metrics in a responsive dashboard layout
  */
-export function MetricsDashboard({ // Changed export default to export
+export function MetricsDashboard({
+  // Changed export default to export
   title,
   description,
   metrics = [],
@@ -90,25 +90,17 @@ export function MetricsDashboard({ // Changed export default to export
       {Array.isArray(metrics) && metrics.length > 0 ? (
         <div className={cn('grid gap-4', getGridClass())}>
           {metrics.map((metric, index) => (
-            <KpiCard
-              key={index}
-              {...metric}
-            />
+            <KpiCard key={index} {...metric} />
           ))}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No metrics to display.</p> // Handle empty state
       )}
 
-
       {/* Additional content */}
-      {children && (
-        <div className="mt-6">
-          {children}
-        </div>
-      )}
+      {children && <div className="mt-6">{children}</div>}
     </div>
   );
 }
 
-// Removed export default MetricsDashboard; 
+// Removed export default MetricsDashboard;

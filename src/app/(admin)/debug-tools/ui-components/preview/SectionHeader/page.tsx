@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '../../../../../../components/ui/section-header';
 
 const statusStyles: Record<string, string> = {
@@ -16,14 +16,15 @@ const statusStyles: Record<string, string> = {
 
 export default function SectionHeaderPreviewPage() {
   const componentMeta = {
-    "name": "SectionHeader",
-    "description": "A section header component for displaying a title, optional description, and optional icon.",
-    "category": "atom",
-    "subcategory": null,
-    "renderType": "client",
-    "author": "Justify",
-    "since": "2023-07-01",
-    "status": "stable"
+    name: 'SectionHeader',
+    description:
+      'A section header component for displaying a title, optional description, and optional icon.',
+    category: 'atom',
+    subcategory: null,
+    renderType: 'client',
+    author: 'Justify',
+    since: '2023-07-01',
+    status: 'stable',
   };
   const examples: string[] = [];
 
@@ -32,10 +33,25 @@ export default function SectionHeaderPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -45,12 +61,22 @@ export default function SectionHeaderPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -105,7 +131,6 @@ export default function SectionHeaderPreviewPage() {
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
-
     </div>
   );
 }

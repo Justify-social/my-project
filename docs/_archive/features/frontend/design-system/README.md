@@ -18,4 +18,4 @@ The Justify.social design system ensures consistent and cohesive user experience
 
 ## For Developers
 
-Reference the design system when building new features to maintain brand consistency. 
+Reference the design system when building new features to maintain brand consistency.

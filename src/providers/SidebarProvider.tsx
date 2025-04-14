@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { createContext, useContext, useState } from 'react';
 
@@ -14,11 +14,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 
   const toggle = () => setIsOpen(!isOpen);
 
-  return (
-    <SidebarContext.Provider value={{ isOpen, toggle }}>
-      {children}
-    </SidebarContext.Provider>
-  );
+  return <SidebarContext.Provider value={{ isOpen, toggle }}>{children}</SidebarContext.Provider>;
 }
 
 export function useSidebar() {
@@ -27,4 +23,4 @@ export function useSidebar() {
     throw new Error('useSidebar must be used within a SidebarProvider');
   }
   return context;
-} 
+}

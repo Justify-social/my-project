@@ -1,11 +1,13 @@
 # Directory Naming Standardization Report
 
 ## Summary
+
 - Total directories processed: 24
 - Successfully renamed: 24
 - Failed: 0
 
 ## Successfully Renamed Directories
+
 - ✅ `src/components/features/users/profile/__tests__` -> `src/components/features/users/profile/--tests--`
 - ✅ `src/components/features/users/authentication/__tests__` -> `src/components/features/users/authentication/--tests--`
 - ✅ `src/components/features/settings/team/__tests__` -> `src/components/features/settings/team/--tests--`
@@ -32,4 +34,3 @@
 - ✅ `src/__tests__` -> `src/--tests--`
 
 ## Failed Directories
-

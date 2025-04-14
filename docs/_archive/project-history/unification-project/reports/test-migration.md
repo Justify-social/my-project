@@ -1,6 +1,7 @@
 # Test Migration Report
 
 ## Summary
+
 - Total tests: 2
 - Successfully migrated: 2
 - Failed migrations: 0

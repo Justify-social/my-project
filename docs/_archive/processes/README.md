@@ -9,22 +9,26 @@ Our development processes are designed to maintain high code quality, ensure con
 ## Development Workflow
 
 1. **Issue Creation**
+
    - All work starts with an issue in our issue tracker
    - Issues should include clear acceptance criteria
    - Issues are prioritized in weekly planning meetings
 
 2. **Branching Strategy**
+
    - Use feature branches for all changes
    - Branch naming convention: `feature/issue-number-short-description`
    - For bugfixes: `fix/issue-number-short-description`
 
 3. **Development Process**
+
    - Make small, focused commits
    - Follow coding standards and conventions
    - Ensure tests pass locally before pushing
    - Update documentation as needed
 
 4. **Code Review**
+
    - Create pull requests for all changes
    - Assign at least one reviewer
    - Address all comments and feedback
@@ -38,11 +42,13 @@ Our development processes are designed to maintain high code quality, ensure con
 ## Release Process
 
 1. **Release Planning**
+
    - Determine features for next release
    - Set release date
    - Create release milestone
 
 2. **Release Preparation**
+
    - Verify all features are complete
    - Run full test suite
    - Update version numbers
@@ -57,11 +63,13 @@ Our development processes are designed to maintain high code quality, ensure con
 ## Quality Assurance
 
 - **Automated Testing**
+
   - Unit tests for all new code
   - Integration tests for feature flows
   - End-to-end tests for critical paths
 
 - **Code Quality**
+
   - Linting on all code changes
   - Type checking for TypeScript code
   - Performance benchmarks for critical features
@@ -69,4 +77,4 @@ Our development processes are designed to maintain high code quality, ensure con
 - **Documentation**
   - Update relevant documentation with code changes
   - Document all new features
-  - Keep API documentation up to date 
+  - Keep API documentation up to date

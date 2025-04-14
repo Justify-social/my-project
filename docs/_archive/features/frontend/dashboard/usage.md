@@ -186,4 +186,4 @@ After familiarizing yourself with the Dashboard, you might want to:
 
 - [Dashboard Overview](./overview.md)
 - [Dashboard Components](./components.md)
-- [Video Tutorial: Dashboard Basics](https://example.com/tutorials/dashboard) 
+- [Video Tutorial: Dashboard Basics](https://example.com/tutorials/dashboard)

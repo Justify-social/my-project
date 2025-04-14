@@ -1,5 +1,5 @@
 # ESLint Error Priority Report
-  
+
 ## Overview
 
 - **Generated**: 3/27/2025, 1:52:03 PM
@@ -85,14 +85,14 @@ These errors must be fixed before commits can be made successfully:
 ### @typescript-eslint/no-unsafe-function-type
 
 - **Description**: The `Function` type accepts any function-like value.
-Prefer explicitly defining any function parameters and return type.
+  Prefer explicitly defining any function parameters and return type.
 - **Occurrences**: 1 across 1 files
 - **Fixable by Tool**: No
 
 **Examples**:
 
 - `src/components/features/campaigns/wizard/steps/Step1Content.tsx` (line 564): The `Function` type accepts any function-like value.
-Prefer explicitly defining any function parameters and return type.
+  Prefer explicitly defining any function parameters and return type.
 
 ## Major Errors (High Priority)
 
@@ -114,7 +114,7 @@ These errors should be fixed soon as they could cause bugs or maintainability is
 
 These errors should be fixed in regular development:
 
-*4 rule violations found*
+_4 rule violations found_
 
 - **@typescript-eslint/ban-ts-comment**: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free. (3 occurrences)
 - **@next/next/no-html-link-for-pages**: Do not use an `<a>` element to navigate to `/api/auth/login/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages (2 occurrences)
@@ -125,9 +125,9 @@ These errors should be fixed in regular development:
 
 These warnings should be addressed during regular development:
 
-*7 warning types found*
+_7 warning types found_
 
-- **@typescript-eslint/no-unused-vars**: 'AnimatePresence' is defined but never used. Allowed unused vars must match /^_/u. (747 occurrences)
+- **@typescript-eslint/no-unused-vars**: 'AnimatePresence' is defined but never used. Allowed unused vars must match /^\_/u. (747 occurrences)
 - **@typescript-eslint/no-explicit-any**: Unexpected any. Specify a different type. (314 occurrences)
 - **@next/next/no-img-element**: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element (62 occurrences)
 - **react-hooks/exhaustive-deps**: React Hook useEffect contains a call to 'setDebugInfo'. Without a list of dependencies, this can lead to an infinite chain of updates. To fix this, pass [] as a second argument to the useEffect Hook. (30 occurrences)

@@ -7,6 +7,7 @@ This project supports both Webpack and Turbopack as build tools. By default, Web
 ### Option 1: Using Environment Variable (Recommended)
 
 1. Edit `.env.local` file (create it if it doesn't exist):
+
    ```
    USE_TURBOPACK=true
    ```
@@ -29,6 +30,7 @@ USE_TURBOPACK=true npm run dev
 The project is set up to automatically handle Turbopack vs Webpack conflicts:
 
 1. In `next.config.js`, Turbopack is enabled conditionally:
+
    ```javascript
    experimental: {
      turbo: process.env.USE_TURBOPACK === "true" ? {} : undefined,
@@ -45,6 +47,7 @@ The project is set up to automatically handle Turbopack vs Webpack conflicts:
 If you encounter issues with Turbopack:
 
 1. Try clearing the cache manually:
+
    ```bash
    rm -rf .next
    ```
@@ -58,4 +61,4 @@ If you encounter issues with Turbopack:
 - **Turbopack**: Faster initial builds and faster refresh times, but may have compatibility issues with some packages.
 - **Webpack**: More stable with broader compatibility, but slower builds and refresh times.
 
-Choose the tool that fits your development workflow. 
+Choose the tool that fits your development workflow.

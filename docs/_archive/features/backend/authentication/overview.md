@@ -65,10 +65,10 @@ Our JWT tokens include the following claims:
 
 The application defines the following roles:
 
-| Role | Description | Permissions |
-|------|-------------|------------|
-| `USER` | Standard user | Limited access to own campaigns |
-| `ADMIN` | Administrator | Full access to all campaigns, user management |
+| Role          | Description         | Permissions                                       |
+| ------------- | ------------------- | ------------------------------------------------- |
+| `USER`        | Standard user       | Limited access to own campaigns                   |
+| `ADMIN`       | Administrator       | Full access to all campaigns, user management     |
 | `SUPER_ADMIN` | Super administrator | Full access to all features, system configuration |
 
 ## Security Considerations
@@ -104,23 +104,23 @@ export const withAuth = (handler: NextApiHandler): NextApiHandler => {
     try {
       // Extract token from Authorization header or cookie
       const token = extractToken(req);
-      
+
       if (!token) {
         return res.status(401).json({
           success: false,
           error: {
             code: 'AUTHENTICATION_ERROR',
-            message: 'Authentication required'
-          }
+            message: 'Authentication required',
+          },
         });
       }
-      
+
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
+
       // Attach user to request
       req.user = decoded;
-      
+
       // Call the original handler
       return handler(req, res);
     } catch (error) {
@@ -129,17 +129,17 @@ export const withAuth = (handler: NextApiHandler): NextApiHandler => {
           success: false,
           error: {
             code: 'AUTHENTICATION_ERROR',
-            message: 'Invalid token'
-          }
+            message: 'Invalid token',
+          },
         });
       }
-      
+
       return res.status(500).json({
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: 'Internal server error'
-        }
+          message: 'Internal server error',
+        },
       });
     }
   };
@@ -161,22 +161,22 @@ export const withPermission = (permission: string) => {
           success: false,
           error: {
             code: 'AUTHENTICATION_ERROR',
-            message: 'Authentication required'
-          }
+            message: 'Authentication required',
+          },
         });
       }
-      
+
       // Check if user has the required permission
       if (!req.user.permissions.includes(permission)) {
         return res.status(403).json({
           success: false,
           error: {
             code: 'AUTHORIZATION_ERROR',
-            message: 'Permission denied'
-          }
+            message: 'Permission denied',
+          },
         });
       }
-      
+
       // Call the original handler
       return handler(req, res);
     };
@@ -191,6 +191,7 @@ export const withPermission = (permission: string) => {
 **Endpoint:** `POST /api/auth/login`
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -199,6 +200,7 @@ export const withPermission = (permission: string) => {
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -219,6 +221,7 @@ export const withPermission = (permission: string) => {
 **Endpoint:** `POST /api/auth/logout`
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -231,6 +234,7 @@ export const withPermission = (permission: string) => {
 **Endpoint:** `GET /api/users/me`
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -250,4 +254,4 @@ export const withPermission = (permission: string) => {
 
 - [API Overview](../apis/overview.md)
 - [API Endpoints](../apis/endpoints.md)
-- [Implementation Details](./implementation.md) 
+- [Implementation Details](./implementation.md)

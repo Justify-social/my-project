@@ -2,7 +2,7 @@
 
 /**
  * Adapter Test Component
- * 
+ *
  * This component is used to test and verify the different icon adapters.
  * It showcases each adapter in various configurations to ensure they work as expected.
  */
@@ -74,7 +74,7 @@ export const AdapterTest: React.FC = () => {
             <p className="text-sm mt-1">Explicit Solid</p>
           </div>
           <div className="flex flex-col items-center">
-            <IconAdapter iconId="faGear" solid={true} />
+            <IconAdapter iconId="faGearSolid" />
             <p className="text-sm mt-1">Legacy Solid</p>
           </div>
           <div className="flex flex-col items-center">
@@ -104,11 +104,17 @@ export const AdapterTest: React.FC = () => {
 
       <div className="mt-8 p-4 bg-gray-100 rounded">
         <h3 className="font-medium">SSOT Validation Results:</h3>
-        <p>All adapters ultimately render through the core Icon component, maintaining SSOT principles.</p>
-        <p>The different adapters provide compatibility layers while preserving the single source of truth.</p>
+        <p>
+          All adapters ultimately render through the core Icon component, maintaining SSOT
+          principles.
+        </p>
+        <p>
+          The different adapters provide compatibility layers while preserving the single source of
+          truth.
+        </p>
       </div>
     </div>
   );
 };
 
-export default AdapterTest; 
+export default AdapterTest;

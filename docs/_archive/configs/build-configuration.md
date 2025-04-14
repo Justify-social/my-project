@@ -56,12 +56,12 @@ if (!dev) {
 
 Build processes are managed through npm scripts in `package.json`:
 
-| Script | Description |
-|--------|-------------|
-| `build` | Production build |
-| `build:analyze` | Build with bundle analysis |
-| `prebuild` | Runs validation before building |
-| `postbuild` | Runs optimizations after building |
+| Script          | Description                       |
+| --------------- | --------------------------------- |
+| `build`         | Production build                  |
+| `build:analyze` | Build with bundle analysis        |
+| `prebuild`      | Runs validation before building   |
+| `postbuild`     | Runs optimizations after building |
 
 ## Environment-specific Builds
 
@@ -131,4 +131,4 @@ To extend or modify the build configuration:
 
 1. Determine which module is responsible for the setting
 2. Create or modify the appropriate file in `/config/platform/next/module/`
-3. Update the module exports in `/config/platform/next/index.js` 
+3. Update the module exports in `/config/platform/next/index.js`

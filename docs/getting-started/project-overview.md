@@ -76,4 +76,4 @@ export function CampaignCard({ campaign, onView }) {
 
 - [Architecture Overview](../architecture/README.md) - How the system is built
 - [UI Components](../reference/ui/README.md) - Our component library
-- [API Reference](../reference/api/README.md) - Backend service APIs 
+- [API Reference](../reference/api/README.md) - Backend service APIs

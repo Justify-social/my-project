@@ -193,10 +193,12 @@ enum UserRole {
 The database schema includes several important relationships:
 
 1. **One-to-Many**:
+
    - User → CampaignWizard (one user can have many campaigns)
    - CampaignWizard → Influencer (one campaign can have many influencers)
 
 2. **One-to-One**:
+
    - User → NotificationPrefs (one user has one notification preferences record)
 
 3. **Many-to-Many** (using junction tables):
@@ -241,4 +243,4 @@ Several model fields use JSON type for storing flexible structured data:
 - `primaryContact` and `secondaryContact` in CampaignWizard
 - `budget`, `messaging`, `expectedOutcomes`, `demographics`, `targeting`, etc.
 
-These provide flexibility for storing complex data structures without requiring additional tables. 
+These provide flexibility for storing complex data structures without requiring additional tables.

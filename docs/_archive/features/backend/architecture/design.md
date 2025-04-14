@@ -44,6 +44,7 @@ We implemented a layered middleware system to handle validation, error handling,
 ```
 
 **Rationale**:
+
 - Separation of concerns for better maintainability
 - Consistent error handling across all API routes
 - Centralized validation using schema definitions
@@ -56,6 +57,7 @@ We implemented a layered middleware system to handle validation, error handling,
 We chose to use Prisma ORM with a custom extended client that provides additional functionality.
 
 **Rationale**:
+
 - Type safety with generated types
 - Query optimization and connection pooling
 - Custom extensions for specific business needs
@@ -74,9 +76,9 @@ const prismaClientSingleton = () => {
       campaignWizard: {
         async findWithHistoryById(id: string) {
           // Custom implementation
-        }
-      }
-    }
+        },
+      },
+    },
   });
 };
 
@@ -90,6 +92,7 @@ export const prisma = globalThis.prisma ?? prismaClientSingleton();
 We implemented client-side data transformation utilities to convert between UI form state and API-compatible formats.
 
 **Rationale**:
+
 - Reduce backend processing load
 - Immediate feedback for users
 - Consistent data format for API
@@ -106,16 +109,16 @@ export function transformCampaignFormData(formValues: CampaignFormValues): Campa
     startDate: new Date(formValues.startDate).toISOString(),
     endDate: new Date(formValues.endDate).toISOString(),
     // Transform nested data
-    primaryContact: formValues.primaryContact 
+    primaryContact: formValues.primaryContact
       ? {
           name: formValues.primaryContact.name,
           email: formValues.primaryContact.email,
           phone: formValues.primaryContact.phone,
-          position: formValues.primaryContact.position
+          position: formValues.primaryContact.position,
         }
       : undefined,
     // Convert budget values to proper format
-    budget: transformBudgetData(formValues.budget)
+    budget: transformBudgetData(formValues.budget),
   };
 }
 ```
@@ -139,6 +142,7 @@ interface ApiResponse<T> {
 ```
 
 **Rationale**:
+
 - Consistent error handling client-side
 - Clear indication of success/failure
 - Structured error information
@@ -151,6 +155,7 @@ interface ApiResponse<T> {
 We chose JWT (JSON Web Token) for authentication with server-side session validation.
 
 **Rationale**:
+
 - Stateless authentication
 - Scalability across multiple servers
 - Efficient token verification
@@ -163,6 +168,7 @@ We chose JWT (JSON Web Token) for authentication with server-side session valida
 We implemented dedicated health check endpoints for different system components.
 
 **Rationale**:
+
 - Early detection of issues
 - Support for automated monitoring
 - System status visibility
@@ -172,4 +178,4 @@ We implemented dedicated health check endpoints for different system components.
 
 - [Implementation Plan](./implementation-plan.md)
 - [API Documentation](../apis/overview.md)
-- [Database Architecture](../database/overview.md) 
+- [Database Architecture](../database/overview.md)

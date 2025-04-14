@@ -7,6 +7,7 @@ This document provides detailed guidance on addressing and fixing the remaining 
 ## Current Status
 
 Based on the latest tracking report (March 27, 2025), the codebase has:
+
 - **Error Count**: 340 (down from 633, a 46% reduction)
 - **Warning Count**: 1160 (down from 1183)
 - **Files with Issues**: 381 of 815 (47%)
@@ -19,25 +20,29 @@ Based on the latest tracking report (March 27, 2025), the codebase has:
 These must be converted to ES module imports to comply with `@typescript-eslint/no-require-imports`.
 
 **Fix Strategy**:
+
 1. Continue running the `lint-fixer.js` script on remaining files:
+
    ```bash
    node scripts/consolidated/linting/lint-fixer.js --file path/to/file.js
    ```
 
 2. For more complex scenarios, manually convert:
+
    ```javascript
    // From
    const module = require('module');
-   
+
    // To
    import module from 'module';
    ```
 
 3. For destructured imports:
+
    ```javascript
    // From
    const { method1, method2 } = require('module');
-   
+
    // To
    import { method1, method2 } from 'module';
    ```
@@ -47,6 +52,7 @@ These must be converted to ES module imports to comply with `@typescript-eslint/
 These are critical parsing errors that must be fixed manually.
 
 **Fix Strategy**:
+
 1. Identify the specific syntax issue in each file
 2. Look for:
    - Missing parentheses
@@ -58,9 +64,10 @@ These are critical parsing errors that must be fixed manually.
 Replace generic `Function` type with explicit function signatures.
 
 **Fix Strategy**:
+
 ```typescript
 // From
-const handler: Function = (event) => {};
+const handler: Function = event => {};
 
 // To
 const handler = (event: Event): void => {};
@@ -71,6 +78,7 @@ const handler = (event: Event): void => {};
 Expression statements that don't have side effects.
 
 **Fix Strategy**:
+
 ```typescript
 // From
 someValue;
@@ -88,11 +96,13 @@ let _ = someValue;
 ### Phase 1: Critical Error Elimination
 
 1. **Run bulk-fix script**:
+
    ```bash
    bash scripts/consolidated/linting/bulk-fix.sh
    ```
 
 2. **Check progress with tracking summary**:
+
    ```bash
    node scripts/consolidated/cleanup/tracking-summary.js
    ```
@@ -105,6 +115,7 @@ let _ = someValue;
 ### Phase 2: Remaining Errors
 
 1. **Address undefined component errors**:
+
    - Add proper imports for components used in JSX
    - Use the `lint-fixer.js` script with `--file` option
 
@@ -124,11 +135,13 @@ Once all errors are eliminated, focus on warnings:
 After implementing fixes, verify with:
 
 1. **Full ESLint check**:
+
    ```bash
    npx eslint --config eslint.config.mjs .
    ```
 
 2. **Test pre-commit hooks**:
+
    ```bash
    git add .
    git commit -m "Test commit with lint fixes"
@@ -163,17 +176,12 @@ For Next.js image optimization:
 
 ```tsx
 // From
-<img src="/image.jpg" alt="Description" />
+<img src="/image.jpg" alt="Description" />;
 
 // To
 import Image from 'next/image';
 
-<Image 
-  src="/image.jpg" 
-  alt="Description" 
-  width={500} 
-  height={300} 
-/>
+<Image src="/image.jpg" alt="Description" width={500} height={300} />;
 ```
 
 ## Recommended Tools
@@ -185,4 +193,4 @@ import Image from 'next/image';
 
 ## Conclusion
 
-By systematically addressing these issues in the priority order listed, we can achieve a lint-free codebase that passes all pre-commit checks, ensuring clean uploads to Git. The tools in `scripts/consolidated/linting/` provide powerful automation to facilitate this process. 
+By systematically addressing these issues in the priority order listed, we can achieve a lint-free codebase that passes all pre-commit checks, ensuring clean uploads to Git. The tools in `scripts/consolidated/linting/` provide powerful automation to facilitate this process.

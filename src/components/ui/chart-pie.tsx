@@ -20,16 +20,16 @@
  * @param {boolean} [props.showLegend=true] - Whether to display the legend.
  * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
  * @returns {React.ReactElement} The rendered pie chart.
- * 
+ *
  * @example
- * <PieChart 
+ * <PieChart
  *   data={[
  *     { name: 'Group A', value: 400 },
  *     { name: 'Group B', value: 300 },
  *     { name: 'Group C', value: 300 },
  *     { name: 'Group D', value: 200 }
- *   ]} 
- *   nameKey="name" 
+ *   ]}
+ *   nameKey="name"
  *   dataKey="value"
  * />
  */
@@ -41,7 +41,7 @@ import {
   Cell,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -68,13 +68,13 @@ export interface PieChartProps {
 // Refined Color Palette (Example using Brand + variations)
 const DEFAULT_COLORS = [
   'hsl(var(--primary))', // Jet #333333
-  'hsl(var(--accent))',   // Deep Sky Blue #00BFFF 
+  'hsl(var(--accent))', // Deep Sky Blue #00BFFF
   'hsl(var(--secondary))', // Payne's Grey #4A5568
   'hsl(var(--primary) / 0.7)', // Lighter Jet
-  'hsl(var(--accent) / 0.7)',   // Lighter Blue
+  'hsl(var(--accent) / 0.7)', // Lighter Blue
   'hsl(var(--secondary) / 0.7)', // Lighter Grey
   'hsl(var(--primary) / 0.4)', // Even Lighter Jet
-  'hsl(var(--accent) / 0.4)',   // Even Lighter Blue
+  'hsl(var(--accent) / 0.4)', // Even Lighter Blue
 ];
 
 export const PieChart: React.FC<PieChartProps> = ({
@@ -87,12 +87,11 @@ export const PieChart: React.FC<PieChartProps> = ({
   title,
   className,
   innerRadius = 0, // Default to Pie, can be overridden for Donut
-  outerRadius = "80%",
+  outerRadius = '80%',
   paddingAngle = 1,
   showLegend = true,
-  tooltipFormatter
+  tooltipFormatter,
 }) => {
-
   // Custom label renderer for outside labels (optional customization)
   const renderOutsideLabel = (props: any) => {
     const { cx, cy, midAngle, outerRadius, percent, index, name, value } = props;
@@ -125,11 +124,19 @@ export const PieChart: React.FC<PieChartProps> = ({
         <h3 className="text-lg font-semibold text-foreground mb-4 text-center">{title}</h3> // Centered title
       )}
       <ResponsiveContainer width={width} height={height}>
-        <RechartsPieChart margin={{ top: 10, right: 30, left: 30, bottom: 10 }}> {/* More margin for labels */}
+        <RechartsPieChart margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
+          {' '}
+          {/* More margin for labels */}
           <defs>
             {/* Add a drop shadow filter definition */}
             <filter id="pie-shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="1" dy="2" stdDeviation="2" floodColor="hsl(var(--foreground))" floodOpacity="0.1" />
+              <feDropShadow
+                dx="1"
+                dy="2"
+                stdDeviation="2"
+                floodColor="hsl(var(--foreground))"
+                floodOpacity="0.1"
+              />
             </filter>
           </defs>
           <Pie
@@ -148,26 +155,25 @@ export const PieChart: React.FC<PieChartProps> = ({
             style={{ filter: 'url(#pie-shadow)' }} // Apply drop shadow
           >
             {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={colors[index % colors.length]}
-              />
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Pie>
-
           <Tooltip
             formatter={tooltipFormatter}
             contentStyle={{
-              backgroundColor: "hsl(var(--popover))",
-              borderColor: "hsl(var(--border))",
-              color: "hsl(var(--popover-foreground))",
+              backgroundColor: 'hsl(var(--popover))',
+              borderColor: 'hsl(var(--border))',
+              color: 'hsl(var(--popover-foreground))',
               fontSize: '12px',
               borderRadius: 'var(--radius)',
-              boxShadow: 'hsl(var(--shadow))'
+              boxShadow: 'hsl(var(--shadow))',
             }}
-            cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, fill: "hsl(var(--accent) / 0.1)" }} // Enhanced cursor
+            cursor={{
+              stroke: 'hsl(var(--border))',
+              strokeWidth: 1,
+              fill: 'hsl(var(--accent) / 0.1)',
+            }} // Enhanced cursor
           />
-
           {showLegend && (
             <Legend
               layout="horizontal"
@@ -177,7 +183,7 @@ export const PieChart: React.FC<PieChartProps> = ({
               wrapperStyle={{
                 fontSize: '11px',
                 paddingTop: '20px', // More space for labels
-                color: 'hsl(var(--muted-foreground))'
+                color: 'hsl(var(--muted-foreground))',
               }}
             />
           )}
@@ -185,4 +191,4 @@ export const PieChart: React.FC<PieChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-}; 
+};

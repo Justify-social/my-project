@@ -6,10 +6,10 @@
  */
 'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import React, { useState } from "react";
-import { useUser } from "@auth0/nextjs-auth0/client";
+import Link from 'next/link';
+import Image from 'next/image';
+import React, { useState } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { MobileMenu, type MenuItem } from '@/components/ui/navigation/mobile-menu';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
@@ -39,34 +39,34 @@ const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits,
   notificationsCount,
-  profileImageUrl = "/icons/solid/user-circle.svg",
+  profileImageUrl = '/icons/solid/user-circle.svg',
   onMenuClick,
   navItems,
-  settingsNavItem
+  settingsNavItem,
 }) => {
   const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const { handleSearch, isSearching } = useSearch();
 
   // Define icon IDs directly
-  const coinsIconId = "faCoinsLight";
+  const coinsIconId = 'faCoinsLight';
   const hasCoinsIcon = iconExists(coinsIconId);
 
-  const bellIconId = "faBellLight";
+  const bellIconId = 'faBellLight';
   const hasBellIcon = iconExists(bellIconId);
 
-  const userIconId = "faUserCircleLight";
+  const userIconId = 'faUserCircleLight';
   const hasUserIcon = iconExists(userIconId);
 
-  const menuIconId = "faBarsLight"; // Use Light variant from map
+  const menuIconId = 'faBarsLight'; // Use Light variant from map
   const hasMenuIcon = iconExists(menuIconId);
 
   return (
     <header
-      className="fixed top-0 left-0 w-full z-50 bg-white border-b font-sora"
+      className="fixed top-0 left-0 w-full z-50 bg-background border-b font-heading"
       data-testid="header" // Aid for testing
     >
-      <div className="flex items-center justify-between px-4 py-3 font-work-sans">
+      <div className="flex items-center justify-between px-4 py-3 font-body">
         {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
         <Link href="/dashboard" className="flex items-center space-x-2">
           <Image
@@ -74,17 +74,17 @@ const Header: React.FC<HeaderProps> = ({
             alt="Justify Logo"
             width={40}
             height={40}
-            onError={(e) => {
+            onError={e => {
               // Fallback for logo if image fails to load
               e.currentTarget.style.display = 'none';
-              console.warn("Logo image failed to load");
+              console.warn('Logo image failed to load');
             }}
           />
-          <span className="font-bold text-black text-xl font-work-sans">{companyName}</span>
+          <span className="font-bold text-foreground text-xl font-body">{companyName}</span>
         </Link>
 
         {/* Center: Search Bar Container (hidden on mobile) */}
-        <div className="hidden md:flex flex-grow justify-center px-4 font-work-sans">
+        <div className="hidden md:flex flex-grow justify-center px-4 font-body">
           {/* Wrapper for SearchBar + Results - THIS is now relative */}
           <div className="relative w-full max-w-lg">
             <SearchBar
@@ -103,14 +103,14 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right: Icon Group */}
-        <div className="flex items-center space-x-1 font-work-sans">
+        <div className="flex items-center space-x-1 font-body">
           {/* Desktop Icons */}
-          <div className="hidden md:flex items-center font-work-sans ml-auto mr-3">
+          <div className="hidden md:flex items-center font-body ml-auto mr-3">
             {/* Combined Credits and Notifications container */}
             <div className="relative flex items-center">
               {/* Credits */}
               <Link href="/billing">
-                <div className="flex items-center space-x-1 cursor-pointer font-work-sans">
+                <div className="flex items-center space-x-1 cursor-pointer font-body">
                   {hasCoinsIcon ? (
                     <Icon
                       iconId="faCoinsSolid" // Use Solid ID directly
@@ -120,19 +120,21 @@ const Header: React.FC<HeaderProps> = ({
                   ) : (
                     // Fallback if icon doesn't exist
                     <div
-                      className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs"
+                      className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
                       title="Coins icon not found"
                     >
                       $
                     </div>
                   )}
                   {/* Use text-foreground for credit count */}
-                  <span className="text-foreground font-medium text-sm font-work-sans">{remainingCredits}</span>
+                  <span className="text-foreground font-medium text-sm font-body">
+                    {remainingCredits}
+                  </span>
                 </div>
               </Link>
 
               {/* Notifications - positioned directly adjacent to coins */}
-              <div className="relative font-work-sans ml-1">
+              <div className="relative font-body ml-1">
                 {hasBellIcon ? (
                   <Icon
                     iconId="faBellSolid" // Use Solid ID directly
@@ -143,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({
                 ) : (
                   // Fallback if icon doesn't exist
                   <div
-                    className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs"
+                    className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
                     title="Notifications icon not found"
                   >
                     N
@@ -151,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({
                 )}
 
                 {notificationsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center font-work-sans">
+                  <span className="absolute -top-1 -right-1 bg-destructive text-background rounded-full text-xs w-4 h-4 flex items-center justify-center font-body">
                     {notificationsCount}
                   </span>
                 )}
@@ -162,7 +164,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Mobile Menu Button */}
           <button
             onClick={onMenuClick}
-            className="md:hidden p-2 font-work-sans"
+            className="md:hidden p-2 font-body"
             aria-label="Toggle mobile menu"
             data-testid="mobile-menu-toggle"
           >
@@ -172,14 +174,14 @@ const Header: React.FC<HeaderProps> = ({
                 className="w-6 h-6"
               />
             ) : (
-              // Fallback using Icon component if Font Awesome one isn't available 
+              // Fallback using Icon component if Font Awesome one isn't available
               // Assuming a generic menu/bars icon ID like 'faBarsLight' is in the registry
               <Icon iconId="faBarsLight" className="w-6 h-6" />
             )}
           </button>
 
           {/* User Button (visible on desktop) */}
-          <div className="hidden md:block font-work-sans">
+          <div className="hidden md:block font-body">
             {user && (
               <Link href="/settings">
                 {hasUserIcon ? (
@@ -201,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({
                 ) : (
                   // Ultimate fallback
                   <div
-                    className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs"
+                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-xs"
                     title="User profile icon not found"
                   >
                     {user.name?.charAt(0) || 'U'}

@@ -23,6 +23,7 @@ This directory contains scripts for managing UI Components with the Single Sourc
 ## Cleanup Scripts
 
 - **cleanup-old-directories.sh**: Removes old UI component directories
+
   - Usage: `bash scripts/ui/cleanup-old-directories.sh`
   - Safely removes deprecated component directories
 
@@ -49,4 +50,4 @@ chmod +x scripts/ui/[script-name].sh
 2. **Export Once**: All components are exported from index.ts
 3. **Import Once**: All imports use the central index.ts
 
-See full documentation in `docs/ui-components-usage.md` 
+See full documentation in `docs/ui-components-usage.md`

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 /**
@@ -26,15 +26,11 @@ export async function POST(
     return NextResponse.json({
       success: true,
       data: simulatedResult,
-      message: 'Campaign submitted successfully'
+      message: 'Campaign submitted successfully',
     });
-
   } catch (error) {
     console.error(`Error in POST /api/campaigns/${campaignId}/submit:`, error);
-    return NextResponse.json(
-      { success: false, error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -61,12 +57,8 @@ export async function GET(
     // Simulated response for now
     const simulatedStatus = { campaignId, status: 'APPROVED' }; // Example status
     return NextResponse.json({ success: true, data: simulatedStatus });
-
   } catch (error) {
     console.error(`Error in GET /api/campaigns/${campaignId}/submit:`, error);
-    return NextResponse.json(
-      { success: false, error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
-} 
+}

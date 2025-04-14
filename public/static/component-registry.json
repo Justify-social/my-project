@@ -1473,9 +1473,5 @@
       "filePath": "src/components/ui/card-upcoming-campaign.tsx"
     }
   },
-  "allCategories": [
-    "atom",
-    "molecule",
-    "organism"
-  ]
+  "allCategories": ["atom", "molecule", "organism"]
 }

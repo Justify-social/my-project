@@ -2,7 +2,7 @@
 
 /**
  * Configuration Validation Script
- * 
+ *
  * This script validates the entire configuration system ensuring:
  * 1. All required fields are present
  * 2. Types are correct
@@ -37,9 +37,12 @@ if (!config) {
 
 // Function to validate a configuration path exists
 function validatePathExists(configPath, value) {
-  if (typeof value === 'string' && (value.startsWith('./') || value.startsWith('../') || value.startsWith('/'))) {
+  if (
+    typeof value === 'string' &&
+    (value.startsWith('./') || value.startsWith('../') || value.startsWith('/'))
+  ) {
     const fullPath = path.isAbsolute(value) ? value : path.resolve(rootDir, value);
-    
+
     if (!fs.existsSync(fullPath)) {
       console.error(`❌ ERROR: Path referenced in ${configPath} does not exist: ${value}`);
       errorCount++;
@@ -53,7 +56,7 @@ function validatePathExists(configPath, value) {
 function validateEnvironmentVariables() {
   const envExample = path.resolve(rootDir, '.env.example');
   let envVars = [];
-  
+
   // Check if .env.example exists
   if (fs.existsSync(envExample)) {
     const content = fs.readFileSync(envExample, 'utf8');
@@ -67,14 +70,14 @@ function validateEnvironmentVariables() {
     warningCount++;
     return;
   }
-  
+
   // Find all potential environment variable references in the config
   function findEnvVarsInObject(obj, path = '') {
     if (!obj || typeof obj !== 'object') return;
-    
+
     Object.entries(obj).forEach(([key, value]) => {
       const currentPath = path ? `${path}.${key}` : key;
-      
+
       if (typeof value === 'string') {
         // Check for process.env.VARIABLE pattern
         const matches = value.match(/process\.env\.([A-Z_][A-Z0-9_]*)/g);
@@ -82,7 +85,9 @@ function validateEnvironmentVariables() {
           matches.forEach(match => {
             const envVar = match.replace('process.env.', '');
             if (!envVars.includes(envVar)) {
-              console.error(`❌ ERROR: Environment variable ${envVar} used in ${currentPath} but not defined in .env.example`);
+              console.error(
+                `❌ ERROR: Environment variable ${envVar} used in ${currentPath} but not defined in .env.example`
+              );
               errorCount++;
             }
           });
@@ -92,31 +97,31 @@ function validateEnvironmentVariables() {
       }
     });
   }
-  
+
   findEnvVarsInObject(config);
 }
 
 // Function to recursively validate an object's structure
 function validateObject(obj, path = '') {
   if (!obj || typeof obj !== 'object') return;
-  
+
   Object.entries(obj).forEach(([key, value]) => {
     const currentPath = path ? `${path}.${key}` : key;
-    
+
     // Check if value is undefined
     if (value === undefined) {
       console.error(`❌ ERROR: Undefined value at ${currentPath}`);
       errorCount++;
     }
-    
+
     // Validate paths
     validatePathExists(currentPath, value);
-    
+
     // Recursively check objects
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       validateObject(value, currentPath);
     }
-    
+
     // Check arrays for consistency if they contain objects
     if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
       const keys = Object.keys(value[0]);
@@ -124,7 +129,9 @@ function validateObject(obj, path = '') {
         const itemKeys = Object.keys(value[i]);
         const missingKeys = keys.filter(k => !itemKeys.includes(k));
         if (missingKeys.length > 0) {
-          console.warn(`⚠️ WARNING: Inconsistent array item at ${currentPath}[${i}]. Missing keys: ${missingKeys.join(', ')}`);
+          console.warn(
+            `⚠️ WARNING: Inconsistent array item at ${currentPath}[${i}]. Missing keys: ${missingKeys.join(', ')}`
+          );
           warningCount++;
         }
       }
@@ -166,4 +173,4 @@ if (errorCount > 0) {
 } else {
   console.log('✅ Configuration is valid! All checks passed.');
   process.exit(0);
-} 
+}

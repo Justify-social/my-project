@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
 import { z } from 'zod'; // For input validation
 import { Currency, Platform, SubmissionStatus } from '@prisma/client';
 import { getSession } from '@auth0/nextjs-auth0';
@@ -8,7 +7,7 @@ import { connectToDatabase } from '@/lib/db';
 import { tryCatch } from '@/config/middleware/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 
-type RouteParams = { params: { id: string } }
+type RouteParams = { params: { id: string } };
 
 // More comprehensive schema matching Prisma model
 const campaignSchema = z.object({
@@ -35,25 +34,37 @@ const campaignSchema = z.object({
   submissionStatus: z.enum(['draft', 'submitted']),
   contacts: z.string(),
   // Relationship validations
-  primaryContact: z.object({
-    firstName: z.string(),
-    surname: z.string(),
-    email: z.string().email(),
-    position: z.string()
-  }).optional(),
-  secondaryContact: z.object({
-    firstName: z.string(),
-    surname: z.string(),
-    email: z.string().email(),
-    position: z.string()
-  }).optional(),
+  primaryContact: z
+    .object({
+      firstName: z.string(),
+      surname: z.string(),
+      email: z.string().email(),
+      position: z.string(),
+    })
+    .optional(),
+  secondaryContact: z
+    .object({
+      firstName: z.string(),
+      surname: z.string(),
+      email: z.string().email(),
+      position: z.string(),
+    })
+    .optional(),
   // Optional arrays for related data
-  creativeRequirements: z.array(z.object({
-    requirement: z.string()
-  })).optional(),
-  brandGuidelines: z.array(z.object({
-    guideline: z.string()
-  })).optional()
+  creativeRequirements: z
+    .array(
+      z.object({
+        requirement: z.string(),
+      })
+    )
+    .optional(),
+  brandGuidelines: z
+    .array(
+      z.object({
+        guideline: z.string(),
+      })
+    )
+    .optional(),
 });
 
 // More comprehensive schema matching Prisma model
@@ -61,8 +72,14 @@ const campaignUpdateSchema = z.object({
   campaignName: z.string().min(1).max(255).optional(),
   businessGoal: z.string().optional(),
   description: z.string().optional(),
-  startDate: z.string().optional().transform(str => str ? new Date(str) : undefined),
-  endDate: z.string().optional().transform(str => str ? new Date(str) : undefined),
+  startDate: z
+    .string()
+    .optional()
+    .transform(str => (str ? new Date(str) : undefined)),
+  endDate: z
+    .string()
+    .optional()
+    .transform(str => (str ? new Date(str) : undefined)),
   timeZone: z.string().optional(),
   currency: z.enum(['USD', 'GBP', 'EUR']).optional(),
   totalBudget: z.number().min(0).optional(),
@@ -76,50 +93,58 @@ const campaignUpdateSchema = z.object({
   expectedAchievements: z.string().optional(),
   purchaseIntent: z.string().optional(),
   brandPerception: z.string().optional(),
-  primaryKPI: z.enum([
-    'AD_RECALL',
-    'BRAND_AWARENESS',
-    'CONSIDERATION',
-    'MESSAGE_ASSOCIATION',
-    'BRAND_PREFERENCE',
-    'PURCHASE_INTENT',
-    'ACTION_INTENT',
-    'RECOMMENDATION_INTENT',
-    'ADVOCACY'
-  ]).optional(),
+  primaryKPI: z
+    .enum([
+      'AD_RECALL',
+      'BRAND_AWARENESS',
+      'CONSIDERATION',
+      'MESSAGE_ASSOCIATION',
+      'BRAND_PREFERENCE',
+      'PURCHASE_INTENT',
+      'ACTION_INTENT',
+      'RECOMMENDATION_INTENT',
+      'ADVOCACY',
+    ])
+    .optional(),
   // Step 2 specific fields
   secondaryKPIs: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
   // Allow messaging as a nested object
-  messaging: z.object({
-    mainMessage: z.string().optional(),
-    hashtags: z.string().optional(),
-    memorability: z.string().optional(),
-    keyBenefits: z.string().optional(),
-    expectedAchievements: z.string().optional(),
-    purchaseIntent: z.string().optional(),
-    brandPerception: z.string().optional()
-  }).optional(),
+  messaging: z
+    .object({
+      mainMessage: z.string().optional(),
+      hashtags: z.string().optional(),
+      memorability: z.string().optional(),
+      keyBenefits: z.string().optional(),
+      expectedAchievements: z.string().optional(),
+      purchaseIntent: z.string().optional(),
+      brandPerception: z.string().optional(),
+    })
+    .optional(),
   // Step 3 audience data - add comprehensive schema
-  audience: z.object({
-    location: z.array(z.string()).optional(),
-    ageDistribution: z.object({
-      age1824: z.number().optional(),
-      age2534: z.number().optional(),
-      age3544: z.number().optional(),
-      age4554: z.number().optional(),
-      age5564: z.number().optional(),
-      age65plus: z.number().optional(),
-    }).optional(),
-    gender: z.array(z.string()).optional(),
-    otherGender: z.string().optional(),
-    screeningQuestions: z.array(z.string()).optional(),
-    languages: z.array(z.string()).optional(),
-    educationLevel: z.string().optional(),
-    jobTitles: z.array(z.string()).optional(),
-    incomeLevel: z.number().optional(),
-    competitors: z.array(z.string()).optional(),
-  }).optional(),
+  audience: z
+    .object({
+      location: z.array(z.string()).optional(),
+      ageDistribution: z
+        .object({
+          age1824: z.number().optional(),
+          age2534: z.number().optional(),
+          age3544: z.number().optional(),
+          age4554: z.number().optional(),
+          age5564: z.number().optional(),
+          age65plus: z.number().optional(),
+        })
+        .optional(),
+      gender: z.array(z.string()).optional(),
+      otherGender: z.string().optional(),
+      screeningQuestions: z.array(z.string()).optional(),
+      languages: z.array(z.string()).optional(),
+      educationLevel: z.string().optional(),
+      jobTitles: z.array(z.string()).optional(),
+      incomeLevel: z.number().optional(),
+      competitors: z.array(z.string()).optional(),
+    })
+    .optional(),
   // Step metadata
   step: z.number().optional(),
   status: z.enum(['draft', 'submitted']).optional(),
@@ -127,46 +152,57 @@ const campaignUpdateSchema = z.object({
   // Other fields
   contacts: z.string().optional(),
   additionalContacts: z.array(z.record(z.string(), z.any())).optional(),
-  primaryContact: z.object({
-    firstName: z.string(),
-    surname: z.string(),
-    email: z.string().email(),
-    position: z.string()
-  }).optional(),
-  secondaryContact: z.object({
-    firstName: z.string(),
-    surname: z.string(),
-    email: z.string().email(),
-    position: z.string()
-  }).optional(),
-  creativeRequirements: z.array(z.object({
-    requirement: z.string()
-  })).optional(),
-  brandGuidelines: z.array(z.object({
-    guideline: z.string()
-  })).optional(),
+  primaryContact: z
+    .object({
+      firstName: z.string(),
+      surname: z.string(),
+      email: z.string().email(),
+      position: z.string(),
+    })
+    .optional(),
+  secondaryContact: z
+    .object({
+      firstName: z.string(),
+      surname: z.string(),
+      email: z.string().email(),
+      position: z.string(),
+    })
+    .optional(),
+  creativeRequirements: z
+    .array(
+      z.object({
+        requirement: z.string(),
+      })
+    )
+    .optional(),
+  brandGuidelines: z
+    .array(
+      z.object({
+        guideline: z.string(),
+      })
+    )
+    .optional(),
   // For backward compatibility
   submissionStatus: z.enum(['draft', 'submitted']).optional(),
   influencers: z.array(z.any()).optional(),
 });
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   // Rely solely on the inner try...catch for robust error handling
   try {
-    console.log("[API GET /api/campaigns/[id]] Handler started"); // Log start
+    console.log('[API GET /api/campaigns/[id]] Handler started'); // Log start
     // Get campaign ID from params - properly awaiting
     const { id } = await params;
     const campaignId = id;
 
     // Check if the ID is a UUID (string format) or a numeric ID
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      campaignId
+    );
 
     // Connect to database
     await connectToDatabase();
-    console.log("[API GET /api/campaigns/[id]] Database connected"); // Log DB connection
+    console.log('[API GET /api/campaigns/[id]] Database connected'); // Log DB connection
 
     let campaign = null;
     let isSubmittedCampaign = false;
@@ -175,43 +211,46 @@ export async function GET(
     if (isUuid) {
       console.log('Using UUID format for campaign ID:', campaignId);
       // Look for draft in CampaignWizard table with string ID
-      console.log("[API GET /api/campaigns/[id]] Querying CampaignWizard..."); // Log before query
+      console.log('[API GET /api/campaigns/[id]] Querying CampaignWizard...'); // Log before query
       try {
         campaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
           include: {
-            Influencer: true // Include the Influencer relation
-          }
+            Influencer: true, // Include the Influencer relation
+          },
         });
-        console.log("[API GET /api/campaigns/[id]] Prisma query successful."); // Log success
+        console.log('[API GET /api/campaigns/[id]] Prisma query successful.'); // Log success
       } catch (prismaError) {
-        console.error("[API GET /api/campaigns/[id]] Prisma query failed:", prismaError);
+        console.error('[API GET /api/campaigns/[id]] Prisma query failed:', prismaError);
         throw prismaError; // Re-throw to be caught by the outer handler
       }
-      console.log("[API GET /api/campaigns/[id]] CampaignWizard query complete.", campaign ? "Found." : "Not found."); // Log after query
+      console.log(
+        '[API GET /api/campaigns/[id]] CampaignWizard query complete.',
+        campaign ? 'Found.' : 'Not found.'
+      ); // Log after query
     } else {
       // Handle legacy numeric IDs
       const numericId = parseInt(campaignId);
       if (isNaN(numericId)) {
-        return NextResponse.json(
-          { error: 'Invalid campaign ID format' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid campaign ID format' }, { status: 400 });
       }
       console.log('Using numeric format for campaign ID:', numericId);
       // Look for submitted campaign in CampaignWizardSubmission table with numeric ID
-      console.log("[API GET /api/campaigns/[id]] Querying CampaignWizardSubmission..."); // Log before query
+      console.log('[API GET /api/campaigns/[id]] Querying CampaignWizardSubmission...'); // Log before query
       campaign = await prisma.campaignWizardSubmission.findUnique({
         where: { id: numericId },
         include: {
           primaryContact: true,
           secondaryContact: true,
-          audience: true,  // Simplified include to avoid type errors
+          audience: true, // Simplified include to avoid type errors
           creativeAssets: true,
-          creativeRequirements: true
-        }
+          creativeRequirements: true,
+        },
       });
-      console.log("[API GET /api/campaigns/[id]] CampaignWizardSubmission query complete.", campaign ? "Found." : "Not found."); // Log after query
+      console.log(
+        '[API GET /api/campaigns/[id]] CampaignWizardSubmission query complete.',
+        campaign ? 'Found.' : 'Not found.'
+      ); // Log after query
       isSubmittedCampaign = true;
     }
 
@@ -220,14 +259,17 @@ export async function GET(
       return NextResponse.json(
         {
           error: 'Campaign not found',
-          message: `No campaign found with ID ${campaignId}`
+          message: `No campaign found with ID ${campaignId}`,
         },
         { status: 404 }
       );
     }
 
     // Log the raw campaign data fetched from DB *before* transformation
-    console.log("[API GET /api/campaigns/[id]] Raw campaign data from DB:", JSON.stringify(campaign, null, 2));
+    console.log(
+      '[API GET /api/campaigns/[id]] Raw campaign data from DB:',
+      JSON.stringify(campaign, null, 2)
+    );
 
     // Debug logging for assets
     if (campaign && 'assets' in campaign && Array.isArray(campaign.assets)) {
@@ -240,23 +282,26 @@ export async function GET(
     const { EnumTransformers } = await import('@/utils/enum-transformers');
 
     // Transform the campaign data for frontend consumption
-    console.log("[API GET /api/campaigns/[id]] Transforming enums..."); // Log before enum transform
+    console.log('[API GET /api/campaigns/[id]] Transforming enums...'); // Log before enum transform
     let transformedCampaign;
     try {
       transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
-      console.log("[API GET /api/campaigns/[id]] Enum transformation successful."); // Log success
+      console.log('[API GET /api/campaigns/[id]] Enum transformation successful.'); // Log success
     } catch (transformError) {
-      console.error("[API GET /api/campaigns/[id]] Enum transformation failed:", transformError);
+      console.error('[API GET /api/campaigns/[id]] Enum transformation failed:', transformError);
       // Log the data that caused the failure
-      console.error("[API GET /api/campaigns/[id]] Data causing transform failure:", JSON.stringify(campaign, null, 2));
+      console.error(
+        '[API GET /api/campaigns/[id]] Data causing transform failure:',
+        JSON.stringify(campaign, null, 2)
+      );
       throw transformError; // Re-throw to be caught by outer handler
     }
-    console.log("[API GET /api/campaigns/[id]] Enum transformation complete."); // Log after enum transform
+    console.log('[API GET /api/campaigns/[id]] Enum transformation complete.'); // Log after enum transform
 
     // Add draft status to the response
     const formattedCampaign = {
       ...transformedCampaign,
-      isDraft: !isSubmittedCampaign
+      isDraft: !isSubmittedCampaign,
     };
 
     // Log what we're returning to help with debugging
@@ -265,24 +310,25 @@ export async function GET(
     // For debugging date formats
     console.log('Date fields in response:', {
       startDate: formattedCampaign.startDate,
-      endDate: formattedCampaign.endDate
+      endDate: formattedCampaign.endDate,
     });
 
     // Return the campaign data
-    console.log("[API GET /api/campaigns/[id]] Preparing final response..."); // Log before final response
+    console.log('[API GET /api/campaigns/[id]] Preparing final response...'); // Log before final response
     return NextResponse.json({
       success: true,
-      data: formattedCampaign
+      data: formattedCampaign,
     });
   } catch (internalError) {
     // Catch any errors within the main logic block
-    console.error("[API GET /api/campaigns/[id]] Internal error caught:", internalError);
+    console.error('[API GET /api/campaigns/[id]] Internal error caught:', internalError);
     // Return a generic 500 error response
     return NextResponse.json(
       {
         success: false,
         error: 'Internal Server Error',
-        message: internalError instanceof Error ? internalError.message : 'An unexpected error occurred'
+        message:
+          internalError instanceof Error ? internalError.message : 'An unexpected error occurred',
       },
       { status: 500 }
     );
@@ -296,14 +342,13 @@ export const PATCH = tryCatch(
     const campaignId = id;
 
     // Check if the ID is a UUID (string format) or a numeric ID
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      campaignId
+    );
     const numericId = parseInt(campaignId);
 
     if (!isUuid && isNaN(numericId)) {
-      return NextResponse.json(
-        { error: 'Invalid campaign ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 });
     }
 
     // Connect to database
@@ -319,7 +364,7 @@ export const PATCH = tryCatch(
       return NextResponse.json(
         {
           error: 'Validation failed',
-          details: validationResult.error.format()
+          details: validationResult.error.format(),
         },
         { status: 400 }
       );
@@ -343,7 +388,7 @@ export const PATCH = tryCatch(
         demographics: {},
         locations: [],
         targeting: {},
-        competitors: []
+        competitors: [],
       };
 
       // Add name and business goal if available
@@ -373,7 +418,7 @@ export const PATCH = tryCatch(
         mappedData.budget = {
           currency: data.currency || 'USD',
           total: data.totalBudget || 0,
-          socialMedia: data.socialMediaBudget || 0
+          socialMedia: data.socialMediaBudget || 0,
         };
       }
 
@@ -404,20 +449,24 @@ export const PATCH = tryCatch(
       if (data.features) {
         console.log('Saving features:', JSON.stringify(data.features));
         // Make sure features is an array
-        mappedData.features = Array.isArray(data.features)
-          ? data.features
-          : [data.features];
+        mappedData.features = Array.isArray(data.features) ? data.features : [data.features];
       }
 
       // Handle messaging if present
-      if (data.messaging || data.mainMessage || data.hashtags || data.memorability ||
-        data.keyBenefits || data.expectedAchievements ||
-        data.purchaseIntent || data.brandPerception) {
-
+      if (
+        data.messaging ||
+        data.mainMessage ||
+        data.hashtags ||
+        data.memorability ||
+        data.keyBenefits ||
+        data.expectedAchievements ||
+        data.purchaseIntent ||
+        data.brandPerception
+      ) {
         console.log('Saving messaging fields:', {
           mainMessage: data.mainMessage || data.messaging?.mainMessage,
           hashtags: data.hashtags || data.messaging?.hashtags,
-          memorability: data.memorability || data.messaging?.memorability
+          memorability: data.memorability || data.messaging?.memorability,
         });
 
         // Construct messaging from either direct fields or the messaging object
@@ -426,9 +475,10 @@ export const PATCH = tryCatch(
           hashtags: data.hashtags || data.messaging?.hashtags || '',
           memorability: data.memorability || data.messaging?.memorability || '',
           keyBenefits: data.keyBenefits || data.messaging?.keyBenefits || '',
-          expectedAchievements: data.expectedAchievements || data.messaging?.expectedAchievements || '',
+          expectedAchievements:
+            data.expectedAchievements || data.messaging?.expectedAchievements || '',
           purchaseIntent: data.purchaseIntent || data.messaging?.purchaseIntent || '',
-          brandPerception: data.brandPerception || data.messaging?.brandPerception || ''
+          brandPerception: data.brandPerception || data.messaging?.brandPerception || '',
         };
       }
 
@@ -437,7 +487,7 @@ export const PATCH = tryCatch(
         console.log('Audience data received:', JSON.stringify(data.audience, null, 2));
 
         // demographics object is already initialized above
-        // if (!mappedData.demographics) mappedData.demographics = {}; 
+        // if (!mappedData.demographics) mappedData.demographics = {};
 
         // Map age distribution
         if (data.audience.ageDistribution) {
@@ -448,15 +498,18 @@ export const PATCH = tryCatch(
         if (Array.isArray(data.audience.gender)) {
           mappedData.demographics.gender = data.audience.gender;
         }
-        if (data.audience.otherGender) { // Check if otherGender exists
+        if (data.audience.otherGender) {
+          // Check if otherGender exists
           mappedData.demographics.otherGender = data.audience.otherGender;
         }
 
         // Map educationLevel and incomeLevel
-        if (data.audience.educationLevel) { // Check if educationLevel exists
+        if (data.audience.educationLevel) {
+          // Check if educationLevel exists
           mappedData.demographics.educationLevel = data.audience.educationLevel;
         }
-        if (data.audience.incomeLevel) { // Check if incomeLevel exists
+        if (data.audience.incomeLevel) {
+          // Check if incomeLevel exists
           mappedData.demographics.incomeLevel = data.audience.incomeLevel;
         }
 
@@ -472,18 +525,22 @@ export const PATCH = tryCatch(
         }
 
         // targeting object is already initialized above
-        // if (!mappedData.targeting) mappedData.targeting = {}; 
+        // if (!mappedData.targeting) mappedData.targeting = {};
 
         // Map screeningQuestions
         if (Array.isArray(data.audience.screeningQuestions)) {
           console.log('Screening questions array:', data.audience.screeningQuestions);
-          mappedData.targeting.screeningQuestions = data.audience.screeningQuestions.map(q => ({ question: q }));
+          mappedData.targeting.screeningQuestions = data.audience.screeningQuestions.map(q => ({
+            question: q,
+          }));
         }
 
         // Map languages
         if (Array.isArray(data.audience.languages)) {
           console.log('Languages array:', data.audience.languages);
-          mappedData.targeting.languages = data.audience.languages.map(lang => ({ language: lang }));
+          mappedData.targeting.languages = data.audience.languages.map(lang => ({
+            language: lang,
+          }));
         }
 
         // Map competitors - competitors array already initialized
@@ -496,7 +553,7 @@ export const PATCH = tryCatch(
           demographics: mappedData.demographics,
           locations: mappedData.locations,
           targeting: mappedData.targeting,
-          competitors: mappedData.competitors
+          competitors: mappedData.competitors,
         });
       }
 
@@ -533,8 +590,8 @@ export const PATCH = tryCatch(
         where: { id: campaignId },
         data: mappedData,
         include: {
-          Influencer: true
-        }
+          Influencer: true,
+        },
       });
 
       // If there are influencers in the request, create or update them
@@ -543,7 +600,7 @@ export const PATCH = tryCatch(
 
         // First delete existing influencers to avoid duplicates
         await prisma.influencer.deleteMany({
-          where: { campaignId }
+          where: { campaignId },
         });
 
         // Then create new influencers for the campaign
@@ -557,8 +614,8 @@ export const PATCH = tryCatch(
                 handle: inf.handle,
                 platformId: inf.platformId || '',
                 campaignId: campaignId,
-                updatedAt: new Date()
-              }
+                updatedAt: new Date(),
+              },
             });
           });
 
@@ -568,8 +625,8 @@ export const PATCH = tryCatch(
         updatedCampaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
           include: {
-            Influencer: true
-          }
+            Influencer: true,
+          },
         });
       }
     } else {
@@ -584,7 +641,7 @@ export const PATCH = tryCatch(
         ...(data.startDate && { startDate: new Date(data.startDate) }),
         ...(data.endDate && { endDate: new Date(data.endDate) }),
         ...(data.timeZone && { timeZone: data.timeZone }),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       // Ensure we use the numeric ID for the where clause
@@ -596,8 +653,8 @@ export const PATCH = tryCatch(
           secondaryContact: true,
           audience: true,
           creativeAssets: true,
-          creativeRequirements: true
-        }
+          creativeRequirements: true,
+        },
       });
     }
 
@@ -615,13 +672,13 @@ export const PATCH = tryCatch(
 
     return NextResponse.json({
       success: true,
-      data: transformedCampaign
+      data: transformedCampaign,
     });
   },
   // Options for tryCatch
   {
     entityName: 'Campaign',
-    operation: DbOperation.UPDATE
+    operation: DbOperation.UPDATE,
   }
 );
 
@@ -641,16 +698,15 @@ export async function DELETE(
 
     if (!session?.user) {
       console.error('Delete failed: No authenticated user session');
-      return NextResponse.json(
-        { error: 'Unauthorized - No session' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized - No session' }, { status: 401 });
     }
 
     // Get the campaign ID
     const campaignId = id;
 
-    console.log(`Authenticated user: ${session.user.email}, attempting to delete campaign with ID: ${campaignId}`);
+    console.log(
+      `Authenticated user: ${session.user.email}, attempting to delete campaign with ID: ${campaignId}`
+    );
 
     // The ID differences:
     // - CampaignWizard uses String UUIDs as IDs
@@ -662,22 +718,22 @@ export async function DELETE(
     try {
       // Check if it exists first
       const campaignWizard = await prisma.campaignWizard.findUnique({
-        where: { id: campaignId }
+        where: { id: campaignId },
       });
 
       if (campaignWizard) {
         console.log(`Found campaign in CampaignWizard: ${campaignWizard.name}`);
 
         // Use a transaction to delete related records
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async tx => {
           // Delete related influencers
           await tx.influencer.deleteMany({
-            where: { campaignId: campaignId }
+            where: { campaignId: campaignId },
           });
 
           // Delete the campaign
           await tx.campaignWizard.delete({
-            where: { id: campaignId }
+            where: { id: campaignId },
           });
         });
 
@@ -701,14 +757,14 @@ export async function DELETE(
         if (!isNaN(numericId)) {
           // Check if it exists
           const submission = await prisma.campaignWizardSubmission.findUnique({
-            where: { id: numericId }
+            where: { id: numericId },
           });
 
           if (submission) {
             console.log(`Found campaign in CampaignWizardSubmission: ${submission.campaignName}`);
 
             // Use a transaction to delete related records
-            await prisma.$transaction(async (tx) => {
+            await prisma.$transaction(async tx => {
               // Find related audiences
               const relatedAudiences = await tx.audience.findMany({
                 where: { campaignId: numericId },
@@ -760,13 +816,17 @@ export async function DELETE(
               });
             });
 
-            console.log(`Successfully deleted campaign from CampaignWizardSubmission table: ${numericId}`);
+            console.log(
+              `Successfully deleted campaign from CampaignWizardSubmission table: ${numericId}`
+            );
             submissionDeleted = true;
           } else {
             console.log(`No campaign found in CampaignWizardSubmission with ID: ${numericId}`);
           }
         } else {
-          console.log(`Campaign ID ${campaignId} is not a numeric ID, can't delete from CampaignWizardSubmission`);
+          console.log(
+            `Campaign ID ${campaignId} is not a numeric ID, can't delete from CampaignWizardSubmission`
+          );
         }
       } catch (submissionError) {
         console.error(`Error deleting from CampaignWizardSubmission:`, submissionError);
@@ -778,7 +838,7 @@ export async function DELETE(
       return NextResponse.json({
         success: true,
         message: `Campaign with ID ${campaignId} has been deleted`,
-        source: campaignWizardDeleted ? 'CampaignWizard' : 'CampaignWizardSubmission'
+        source: campaignWizardDeleted ? 'CampaignWizard' : 'CampaignWizardSubmission',
       });
     } else {
       // We couldn't find or delete the campaign
@@ -793,7 +853,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         error: 'Server error',
-        details: error instanceof Error ? error.message : 'Unknown server error'
+        details: error instanceof Error ? error.message : 'Unknown server error',
       },
       { status: 500 }
     );

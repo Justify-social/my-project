@@ -1,6 +1,6 @@
 /**
  * Next.js Webpack Configuration Module
- * 
+ *
  * This module contains the webpack-specific configuration for Next.js.
  */
 
@@ -35,4 +35,4 @@ function configureWebpack(config, options) {
  */
 module.exports = {
   webpack: configureWebpack,
-}; 
+};

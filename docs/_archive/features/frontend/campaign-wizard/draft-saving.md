@@ -25,14 +25,14 @@ The draft saving system uses specialized validation schemas that are more permis
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Draft not saving | Check that at least the campaign name is entered |
-| Missing fields after reload | Some fields like dates require special formatting - contact support |
-| "Failed to save draft" error | Try again or save with minimal information first |
+| Issue                        | Solution                                                            |
+| ---------------------------- | ------------------------------------------------------------------- |
+| Draft not saving             | Check that at least the campaign name is entered                    |
+| Missing fields after reload  | Some fields like dates require special formatting - contact support |
+| "Failed to save draft" error | Try again or save with minimal information first                    |
 
 ## Best Practices
 
 - Save drafts regularly during complex campaign creation
 - Complete each section fully before moving to the next when possible
-- Use meaningful campaign names for easy identification of drafts 
+- Use meaningful campaign names for easy identification of drafts

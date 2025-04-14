@@ -215,24 +215,24 @@ svg:not(:host).svg-inline--fa {
 }
 
 /* Global form input styling for consistent branding */
-input[type="checkbox"],
-input[type="radio"] {
+input[type='checkbox'],
+input[type='radio'] {
   accent-color: var(--secondary-color);
   color: var(--secondary-color);
 }
 
-input[type="checkbox"]:focus,
-input[type="radio"]:focus {
-  outline-color: var(--secondary-color);
-  box-shadow: 0 0 0 1px var(--secondary-color);
+input[type='checkbox']:focus,
+input[type='radio']:focus {
+  outline-color: hsl(var(--secondary));
+  box-shadow: 0 0 0 1px hsl(var(--secondary));
 }
 
 /* Force app to use class-based dark mode instead of system preference */
 @media (prefers-color-scheme: dark) {
   :root:not(.dark) {
-    --background-color: #FFFFFF;
+    --background-color: #ffffff;
     /* Keep background white even in dark mode by default */
-    --primary-color: #333333;
+    --primary-color: var(--primary-color);
     /* Keep text dark for readability on white */
   }
 }
@@ -341,7 +341,7 @@ main {
 
   .survey-content-column {
     width: 100%;
-    padding: 1rem;
+    padding: 1rem p-4;
   }
 }
 

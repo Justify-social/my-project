@@ -8,19 +8,13 @@ Feature Components provide feature components functionality for the application.
 
 ## Components
 
-
-
 ## Usage
 
 ```tsx
-import {  } from '@/components/features';
+import {} from '@/components/features';
 
 // Example usage
 function ExampleComponent() {
-  return (
-    <div>
-      {/* Add usage examples here */}
-    </div>
-  );
+  return <div>{/* Add usage examples here */}</div>;
 }
 ```

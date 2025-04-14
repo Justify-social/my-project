@@ -1,16 +1,16 @@
 /**
  * Production Environment Configuration
- * 
+ *
  * Configuration overrides specific to the production environment.
  * Security sensitive values should be loaded from environment variables.
  */
 
-import { 
-  DATABASE_DEFAULTS, 
-  LOGGING_DEFAULTS, 
+import {
+  DATABASE_DEFAULTS,
+  LOGGING_DEFAULTS,
   ERROR_HANDLING_DEFAULTS,
   FEATURE_DEFAULTS,
-  CACHE_DEFAULTS
+  CACHE_DEFAULTS,
 } from '../core/defaults.js';
 
 /**
@@ -113,4 +113,4 @@ export default {
   API,
   SERVER,
   SECURITY,
-}; 
+};

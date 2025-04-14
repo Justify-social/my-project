@@ -1,6 +1,6 @@
 /**
  * Default Configuration Values
- * 
+ *
  * This file contains default configuration values that can be overridden by
  * environment-specific configurations. These defaults represent the base state
  * of the application.
@@ -106,4 +106,4 @@ export {
   UI_DEFAULTS,
   FEATURE_DEFAULTS,
   ERROR_HANDLING_DEFAULTS,
-}; 
+};

@@ -1,6 +1,6 @@
 /**
  * Brand-lift Components
- * 
+ *
  * Brand lift measurement components
  */
 

@@ -69,12 +69,12 @@ Due to the powerful nature of this feature, access is strictly limited to author
 
 ## Configuration Options
 
-| Option | Description | Default | Allowed Values |
-|--------|-------------|---------|---------------|
-| User Session Timeout | Maximum inactive time before admin logout | 15 minutes | 5, 15, 30, 60 minutes |
-| Audit Log Retention | How long to keep detailed admin action logs | 90 days | 30, 60, 90, 180, 365 days |
-| Maintenance Mode | System availability during maintenance | Partial | Full, Partial, None |
-| Access IP Restriction | Limit admin access to specific IP ranges | Disabled | Enabled, Disabled |
+| Option                | Description                                 | Default    | Allowed Values            |
+| --------------------- | ------------------------------------------- | ---------- | ------------------------- |
+| User Session Timeout  | Maximum inactive time before admin logout   | 15 minutes | 5, 15, 30, 60 minutes     |
+| Audit Log Retention   | How long to keep detailed admin action logs | 90 days    | 30, 60, 90, 180, 365 days |
+| Maintenance Mode      | System availability during maintenance      | Partial    | Full, Partial, None       |
+| Access IP Restriction | Limit admin access to specific IP ranges    | Disabled   | Enabled, Disabled         |
 
 ## Troubleshooting
 
@@ -95,4 +95,4 @@ Due to the powerful nature of this feature, access is strictly limited to author
 - [Admin Usage Guide](./usage.md)
 - [Security Configuration](../../features-backend/authentication/overview.md)
 - [User Role Management](../settings/team-management.md)
-- [System Architecture](../../features-backend/architecture/overview.md) 
+- [System Architecture](../../features-backend/architecture/overview.md)

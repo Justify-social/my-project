@@ -186,4 +186,4 @@ To add context and insights to your reports:
 
 - [Reports Overview](./overview.md)
 - [Data Integration Guide](../../features-backend/apis/overview.md)
-- [Campaign Performance Metrics Glossary](../campaign-wizard/overview.md) 
+- [Campaign Performance Metrics Glossary](../campaign-wizard/overview.md)

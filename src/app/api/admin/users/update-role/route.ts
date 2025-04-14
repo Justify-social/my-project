@@ -15,7 +15,7 @@ async function isSuperAdmin() {
   try {
     const session = await getSession();
     if (!session || !session.user) return false;
-    
+
     // Cast user to Auth0User type to access custom claims
     const user = session.user as Auth0User;
     const roles = user['https://justify.social/roles'] || [];
@@ -35,10 +35,13 @@ export async function POST(request: Request) {
     // Verify Super Admin status
     const superAdminCheck = await isSuperAdmin();
     if (!superAdminCheck) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Unauthorized access' 
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized access',
+        },
+        { status: 403 }
+      );
     }
 
     // Get request data
@@ -47,30 +50,39 @@ export async function POST(request: Request) {
 
     // Validate input
     if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'User ID is required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'User ID is required',
+        },
+        { status: 400 }
+      );
     }
 
     if (!role || !VALID_ROLES.includes(role)) {
-      return NextResponse.json({ 
-        success: false, 
-        error: `Role must be one of: ${VALID_ROLES.join(', ')}` 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Role must be one of: ${VALID_ROLES.join(', ')}`,
+        },
+        { status: 400 }
+      );
     }
 
     // Check if the user exists
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true }
+      select: { id: true, email: true },
     });
 
     if (!user) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'User not found' 
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'User not found',
+        },
+        { status: 404 }
+      );
     }
 
     // Try to update the team member role if table exists
@@ -84,11 +96,12 @@ export async function POST(request: Request) {
           AND table_name = 'TeamMember'
         );
       `;
-      
-      const exists = Array.isArray(tableExists) && 
-                    tableExists.length > 0 && 
-                    (tableExists[0] as any).exists === true;
-      
+
+      const exists =
+        Array.isArray(tableExists) &&
+        tableExists.length > 0 &&
+        (tableExists[0] as any).exists === true;
+
       if (exists) {
         // Update the user's role in the TeamMember table
         await prisma.$executeRaw`
@@ -114,29 +127,35 @@ export async function POST(request: Request) {
         `;
       } catch (error) {
         console.error('Error updating user role:', error);
-        return NextResponse.json({ 
-          success: false, 
-          error: 'Failed to update user role',
-          details: process.env.NODE_ENV === 'development' ? String(error) : undefined
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Failed to update user role',
+            details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+          },
+          { status: 500 }
+        );
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'User role updated successfully',
       user: {
         id: user.id,
         email: user.email,
-        role: role
-      }
+        role: role,
+      },
     });
   } catch (error) {
     console.error('Error updating user role:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Failed to update user role',
-      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to update user role',
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+      },
+      { status: 500 }
+    );
   }
-} 
+}

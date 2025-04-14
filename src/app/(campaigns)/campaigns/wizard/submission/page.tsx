@@ -1,8 +1,8 @@
-import { Suspense } from "react";
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import SubmissionContent from "./SubmissionContent";
+import { Suspense } from 'react';
+import { WizardSkeleton } from '@/components/ui/loading-skeleton';
+import SubmissionContent from './SubmissionContent';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return (
@@ -10,4 +10,4 @@ export default function Page() {
       <SubmissionContent />
     </Suspense>
   );
-} 
+}

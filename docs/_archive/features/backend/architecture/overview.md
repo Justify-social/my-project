@@ -66,4 +66,4 @@ The application consists of these core components:
 ## Related Documentation
 
 - [Database Architecture](../database/overview.md)
-- [API Documentation](../apis/overview.md) 
+- [API Documentation](../apis/overview.md)

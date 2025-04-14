@@ -22,13 +22,17 @@ export async function POST(req: Request) {
     // Index campaigns to Algolia
     await indexCampaigns(campaigns);
 
-    return NextResponse.json(
-      { success: true, message: `Successfully indexed ${campaigns.length} campaigns.` }
-    );
+    return NextResponse.json({
+      success: true,
+      message: `Successfully indexed ${campaigns.length} campaigns.`,
+    });
   } catch (error) {
     console.error('Error indexing campaigns:', error);
     return NextResponse.json(
-      { error: 'Failed to index campaigns.', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: 'Failed to index campaigns.',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -46,18 +50,15 @@ export async function GET() {
       console.log('Fetching campaigns from database...');
       const campaigns = await prisma.campaignWizard.findMany({
         orderBy: {
-          updatedAt: 'desc'
+          updatedAt: 'desc',
         },
-        take: 100  // Limit to 100 campaigns for performance
+        take: 100, // Limit to 100 campaigns for performance
       });
 
       console.log(`Found ${campaigns.length} campaigns in the database.`);
 
       if (!campaigns.length) {
-        return NextResponse.json(
-          { warning: 'No campaigns found to index.' },
-          { status: 200 }
-        );
+        return NextResponse.json({ warning: 'No campaigns found to index.' }, { status: 200 });
       }
 
       // Transform campaigns for Algolia
@@ -81,20 +82,26 @@ export async function GET() {
       console.log('Indexing complete!');
       return NextResponse.json({
         success: true,
-        message: `Successfully indexed ${algoliaRecords.length} campaigns.`
+        message: `Successfully indexed ${algoliaRecords.length} campaigns.`,
       });
     } catch (dbError) {
       console.error('Database error:', dbError);
       return NextResponse.json(
-        { error: 'Database error', details: dbError instanceof Error ? dbError.message : String(dbError) },
+        {
+          error: 'Database error',
+          details: dbError instanceof Error ? dbError.message : String(dbError),
+        },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error('Error reindexing campaigns:', error);
     return NextResponse.json(
-      { error: 'Failed to reindex campaigns.', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: 'Failed to reindex campaigns.',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
-} 
+}

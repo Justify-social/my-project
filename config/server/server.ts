@@ -1,9 +1,9 @@
 /**
  * This file is now located at src/lib/server/server.ts
  * This is a redirect file for backward compatibility
- * 
+ *
  * Custom Next.js Server with WebSocket Support
- * 
+ *
  * This file creates a custom server to enable WebSocket connections
  * for real-time component updates during development.
  */
@@ -16,4 +16,4 @@ import next from 'next';
 import { setupServer } from '@/lib/server/server'; // Try specific path
 
 // Initialize and start the server
-setupServer(); 
+setupServer();

@@ -15,6 +15,7 @@ This document details the loading component system in Justify.social, tracking t
 Located in `/src/components/ui/loading-skeleton/`:
 
 - **Base Skeleton (`skeleton.tsx`)**: Foundation component with variants:
+
   - Rectangular: For content blocks
   - Circular: For avatars and icons
   - Text: For text content with variable width
@@ -60,7 +61,7 @@ The skeleton system follows these design principles:
 <WizardSkeleton step={3} />
 
 // With custom configurations
-<WizardSkeleton 
+<WizardSkeleton
   step={3}
   hasProgressBar={true}
   hasHeader={true}
@@ -73,10 +74,10 @@ The skeleton system follows these design principles:
   stepContent={
     <div className="space-y-6">
       <SkeletonSection title={true} lines={4} />
-      <FormSkeleton 
-        fields={3} 
-        layout="grid" 
-        fieldTypes={['text', 'select', 'textarea']} 
+      <FormSkeleton
+        fields={3}
+        layout="grid"
+        fieldTypes={['text', 'select', 'textarea']}
       />
     </div>
   }
@@ -88,18 +89,21 @@ The skeleton system follows these design principles:
 ### Completed Areas
 
 #### Campaign Details Pages
+
 - Campaign Details (`/campaigns/[id]`) using global skeleton components:
   - Enhanced with dedicated `loading.tsx` file for Next.js App Router SSR loading state
   - Improved inline loading state with composition of `SkeletonSection` components
   - Removed specialized components in favor of global skeleton components
 
 #### Campaign List Pages
+
 - Campaign List (`/campaigns`) using global skeleton components:
   - Dedicated `loading.tsx` file for Next.js App Router SSR loading state
   - Enhanced client-side inline loading with `TableSkeleton`
   - Consistent loading UI with proper heading and table structure placeholders
 
 #### Campaign Wizard Pages
+
 - All steps (1-5) using `WizardSkeleton` with step-specific layouts
 - Dynamic imports with proper skeleton loading patterns
 - Context-specific content in each step's skeleton
@@ -121,10 +125,12 @@ The skeleton system follows these design principles:
 All loading-related components have been consolidated into two directories:
 
 ### 1. Loading Skeletons (`src/components/ui/loading-skeleton/`)
+
 - `skeleton.tsx` - Base skeleton component with variants
 - `index.tsx` - Specialized skeleton implementations
 
 ### 2. Loading Spinners (`src/components/ui/spinner/`)
+
 - `index.tsx` - Various spinner implementations
 
 ## Design Guidelines
@@ -141,4 +147,4 @@ When implementing loading states:
 ## Related Documentation
 
 - [Brand Guide](./brand-guide.md)
-- [Campaign Wizard Workflow](../campaign-wizard/workflow.md) 
+- [Campaign Wizard Workflow](../campaign-wizard/workflow.md)

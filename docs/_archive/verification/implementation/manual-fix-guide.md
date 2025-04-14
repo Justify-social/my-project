@@ -10,12 +10,12 @@ This guide provides detailed examples and solutions for common ESLint errors tha
 // ❌ INCORRECT
 function Component() {
   const [isLoading, setIsLoading] = useState(false);
-  
+
   if (someCondition) {
     // Error: React Hook "useState" cannot be called conditionally
     const [data, setData] = useState([]);
   }
-  
+
   return <div>{/* ... */}</div>;
 }
 
@@ -23,7 +23,7 @@ function Component() {
 function Component() {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(someCondition ? [] : null);
-  
+
   return <div>{/* ... */}</div>;
 }
 ```
@@ -37,18 +37,18 @@ function Component() {
     // Error: React Hook "useState" cannot be called inside a callback
     const [count, setCount] = useState(0);
   };
-  
+
   return <button onClick={handleClick}>Click me</button>;
 }
 
 // ✅ CORRECT
 function Component() {
   const [count, setCount] = useState(0);
-  
+
   const handleClick = () => {
     setCount(count + 1);
   };
-  
+
   return <button onClick={handleClick}>Click me</button>;
 }
 ```
@@ -134,7 +134,7 @@ function Component() {
   useEffect(() => {
     isValid && doSomething(); // Error: Expected an assignment or function call
   }, [isValid]);
-  
+
   return <div>{/* ... */}</div>;
 }
 
@@ -145,7 +145,7 @@ function Component() {
       doSomething();
     }
   }, [isValid]);
-  
+
   return <div>{/* ... */}</div>;
 }
 
@@ -154,7 +154,7 @@ function Component() {
   useEffect(() => {
     void (isValid && doSomething());
   }, [isValid]);
-  
+
   return <div>{/* ... */}</div>;
 }
 ```
@@ -175,13 +175,10 @@ const value = "This has \"straight quotes\" that work correctly";
 
 ```tsx
 // ❌ INCORRECT
-const Component = props => 
-  <div>{props.value}</div>
+const Component = props => <div>{props.value}</div>;
 
 // ✅ CORRECT
-const Component = (props) => (
-  <div>{props.value}</div>
-);
+const Component = props => <div>{props.value}</div>;
 ```
 
 ## TS Ignore Comments
@@ -270,4 +267,4 @@ function Navigation() {
 1. Identify the source of the circular dependency
 2. Consider restructuring your component hierarchy
 3. Extract shared logic to utility functions
-4. Use React Context for deeply nested prop sharing 
+4. Use React Context for deeply nested prop sharing

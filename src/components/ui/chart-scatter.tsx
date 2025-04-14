@@ -28,16 +28,16 @@
  * @param {[number | string, number | string]} [props.yDomain=['auto', 'auto']] - Domain (min, max) for the y-axis.
  * @param {[number | string, number | string]} [props.zDomain=[0, 1000]] - Domain (min, max) for the z-axis (point size).
  * @returns {React.ReactElement} The rendered scatter chart.
- * 
+ *
  * @example
- * <ScatterChart 
+ * <ScatterChart
  *   data={[
  *     { x: 100, y: 200, z: 200, name: 'Point A' },
  *     { x: 120, y: 100, z: 260, name: 'Point B' },
  *     { x: 170, y: 300, z: 400, name: 'Point C' },
  *     { x: 140, y: 250, z: 280, name: 'Point D' },
  *     { x: 150, y: 400, z: 500, name: 'Point E' }
- *   ]} 
+ *   ]}
  *   xKey="x"
  *   yKey="y"
  *   zKey="z"
@@ -56,7 +56,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Label
+  Label,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -109,18 +109,14 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
   gridColor = 'hsl(var(--border))',
   xDomain = ['auto', 'auto'],
   yDomain = ['auto', 'auto'],
-  zDomain = [0, 1000]
+  zDomain = [0, 1000],
 }) => {
   return (
-    <div className={cn('w-full font-work-sans', className)}>
-      {title && (
-        <h3 className="text-xl font-medium mb-2 font-sora">{title}</h3>
-      )}
+    <div className={cn('w-full font-body', className)}>
+      {title && <h3 className="text-xl font-medium mb-2 font-heading">{title}</h3>}
 
       <ResponsiveContainer width={width} height={height}>
-        <RechartsScatterChart
-          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-        >
+        <RechartsScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />}
           <XAxis
             dataKey={xKey}
@@ -152,7 +148,7 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
               backgroundColor: 'hsl(var(--background))',
               border: '1px solid hsl(var(--border))',
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: 'var(--shadow-sm)',
             }}
           />
 
@@ -166,7 +162,7 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
           )}
 
           <Scatter
-            name={nameKey || "Data Points"}
+            name={nameKey || 'Data Points'}
             data={data}
             fill={color}
             line={{ stroke: color, strokeWidth: 1 }}
@@ -175,4 +171,4 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-}; 
+};

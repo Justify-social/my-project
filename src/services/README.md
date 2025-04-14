@@ -10,11 +10,9 @@ Service modules for API interactions and business logic.
 
 - `influencer/`
 
-
 ### Files
 
 - 3 .ts files
-
 
 ## Usage
 
@@ -26,8 +24,6 @@ Use these services to interact with external systems and APIs.
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

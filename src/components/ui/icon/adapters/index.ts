@@ -1,6 +1,6 @@
 /**
  * Icon Adapters Index
- * 
+ *
  * This file exports all icon adapters to simplify imports.
  * CANONICAL adapters are indicated below.
  */
@@ -21,4 +21,4 @@ export * from './shadcn';
 /**
  * @deprecated Use IconAdapter or ShadcnIcon directly
  */
-export { IconAdapter as FontAwesomeIcon } from './font-awesome-adapter'; 
+export { IconAdapter as FontAwesomeIcon } from './font-awesome-adapter';

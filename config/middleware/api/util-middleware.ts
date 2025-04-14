@@ -4,7 +4,7 @@ import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 
 /**
  * A middleware factory that validates requests against a Zod schema
- * 
+ *
  * @param schema The Zod schema to validate against
  * @param handler The handler function to call if validation passes
  * @returns A function that validates the request and calls the handler
@@ -33,11 +33,9 @@ export function withValidation<T extends z.ZodType>(
       const validationResult = schema.safeParse(body);
 
       if (!validationResult.success) {
-        dbLogger.warn(
-          DbOperation.VALIDATION,
-          'Validation failed',
-          { errors: validationResult.error.format() }
-        );
+        dbLogger.warn(DbOperation.VALIDATION, 'Validation failed', {
+          errors: validationResult.error.format(),
+        });
 
         return NextResponse.json(
           {
@@ -74,7 +72,7 @@ export function withValidation<T extends z.ZodType>(
 /**
  * A utility function that wraps an async operation in a try-catch block
  * and returns standardized responses
- * 
+ *
  * @param operation The async operation to perform
  * @param errorHandler Optional custom error handler
  * @returns The result of the operation or an error response
@@ -106,4 +104,4 @@ export async function tryCatch<T>(
       { status: 500 }
     );
   }
-} 
+}

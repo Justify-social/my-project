@@ -1,6 +1,6 @@
 /**
  * Component Discovery Utility
- * 
+ *
  * This utility provides functions for discovering UI components,
  * extracting metadata, and organizing components by category.
  */
@@ -15,7 +15,7 @@ import {
   type ComponentRenderType,
   type ComponentStatus,
   type ComponentRegistry,
-  CATEGORIES
+  CATEGORIES,
 } from '../types'; // Adjust path if needed
 
 // Constants
@@ -31,7 +31,9 @@ const extractTagValue = (jsdoc: string, tagName: string): string | null => {
 
 /** Extracts code examples from @example blocks. */
 const extractExamples = (jsdoc: string): string[] => {
-  const exampleMatches = [...jsdoc.matchAll(/@example(?:\s+\[[^\]]*\])?\s*```(?:tsx|jsx)?\s*([\s\S]*?)```/g)];
+  const exampleMatches = [
+    ...jsdoc.matchAll(/@example(?:\s+\[[^\]]*\])?\s*```(?:tsx|jsx)?\s*([\s\S]*?)```/g),
+  ];
   return exampleMatches.map(match => match[1].trim());
 };
 
@@ -126,11 +128,22 @@ export const findComponentFiles = (dir: string, results: string[] = []): string[
 
       if (entry.isDirectory()) {
         // Exclude specific directories more reliably
-        if (entry.name === 'utils' || entry.name === 'types' || entry.name === 'client' || entry.name === 'node_modules' || entry.name.startsWith('.')) {
+        if (
+          entry.name === 'utils' ||
+          entry.name === 'types' ||
+          entry.name === 'client' ||
+          entry.name === 'node_modules' ||
+          entry.name.startsWith('.')
+        ) {
           continue;
         }
         findComponentFiles(fullPath, results);
-      } else if (entry.isFile() && entry.name.endsWith('.tsx') && !entry.name.includes('.stories.') && !entry.name.startsWith('index.')) {
+      } else if (
+        entry.isFile() &&
+        entry.name.endsWith('.tsx') &&
+        !entry.name.includes('.stories.') &&
+        !entry.name.startsWith('index.')
+      ) {
         results.push(fullPath);
       }
     }
@@ -162,17 +175,22 @@ export const discoverComponents = async (): Promise<ExtendedComponentMetadata[]>
 export function groupComponentsByCategory(
   components: ExtendedComponentMetadata[]
 ): Record<ComponentCategory, ExtendedComponentMetadata[]> {
-  const grouped = CATEGORIES.reduce((acc, category) => {
-    acc[category] = [];
-    return acc;
-  }, {} as Record<ComponentCategory, ExtendedComponentMetadata[]>);
+  const grouped = CATEGORIES.reduce(
+    (acc, category) => {
+      acc[category] = [];
+      return acc;
+    },
+    {} as Record<ComponentCategory, ExtendedComponentMetadata[]>
+  );
 
   components.forEach(component => {
     const category = component.category;
     if (CATEGORIES.includes(category)) {
       grouped[category].push(component);
     } else {
-      console.warn(`Component ${component.name} has unknown or invalid category: ${category}. Placing in 'unknown'.`);
+      console.warn(
+        `Component ${component.name} has unknown or invalid category: ${category}. Placing in 'unknown'.`
+      );
       if (!grouped.unknown) grouped.unknown = [];
       grouped.unknown.push(component);
     }
@@ -192,17 +210,22 @@ export async function buildComponentRegistry(): Promise<ComponentRegistry> {
   const filteredComponents = components.filter((component: ExtendedComponentMetadata) =>
     allowedCategories.includes(component.category)
   );
-  console.log(`[Discovery] Filtered ${components.length} total components down to ${filteredComponents.length} (atom, molecule, organism).`);
+  console.log(
+    `[Discovery] Filtered ${components.length} total components down to ${filteredComponents.length} (atom, molecule, organism).`
+  );
   // -------------------------------------
 
   // Build maps using the FILTERED components
   const byCategory = groupComponentsByCategory(filteredComponents);
-  const byName = filteredComponents.reduce((acc: Record<string, ExtendedComponentMetadata>, component: ExtendedComponentMetadata) => {
-    if (component.name) {
-      acc[component.name.toLowerCase()] = component;
-    }
-    return acc;
-  }, {} as Record<string, ExtendedComponentMetadata>);
+  const byName = filteredComponents.reduce(
+    (acc: Record<string, ExtendedComponentMetadata>, component: ExtendedComponentMetadata) => {
+      if (component.name) {
+        acc[component.name.toLowerCase()] = component;
+      }
+      return acc;
+    },
+    {} as Record<string, ExtendedComponentMetadata>
+  );
 
   return {
     components: filteredComponents, // Return filtered list
@@ -224,7 +247,10 @@ export async function getComponentRegistry(forceRefresh = false): Promise<Compon
   // Production check for static registry remains the same
   if (process.env.NODE_ENV === 'production') {
     try {
-      const staticRegistryPath = path.join(process.cwd(), 'src/components/ui/utils/component-registry.json');
+      const staticRegistryPath = path.join(
+        process.cwd(),
+        'src/components/ui/utils/component-registry.json'
+      );
       const staticRegistryData = fs.readFileSync(staticRegistryPath, 'utf-8');
       const staticRegistry: ComponentRegistry = JSON.parse(staticRegistryData);
       console.log('Using static component registry for production');
@@ -269,4 +295,4 @@ export async function getComponentsByCategory(
 ): Promise<ExtendedComponentMetadata[]> {
   // Removed duplicated code block
   return registry.byCategory[category] || [];
-} 
+}

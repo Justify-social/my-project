@@ -13,6 +13,7 @@ This document details the routes in the (dashboard) group.
 **Description:** creative-testing page
 
 **Implementation Details:**
+
 - Data Fetching: No
 - Revalidation: No
 - Caching: No
@@ -26,6 +27,7 @@ This document details the routes in the (dashboard) group.
 **Description:** dashboard page
 
 **Implementation Details:**
+
 - Data Fetching: No
 - Revalidation: Yes
 - Caching: Yes
@@ -39,6 +41,7 @@ This document details the routes in the (dashboard) group.
 **Description:** help page
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: No
 - Caching: No
@@ -52,7 +55,7 @@ This document details the routes in the (dashboard) group.
 **Description:** description: 'Based on current performance and diminishing returns analysis, increasing social media budget by 10% could yield significant ROI improvements.'
 
 **Implementation Details:**
+
 - Data Fetching: No
 - Revalidation: No
 - Caching: No
-

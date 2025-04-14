@@ -9,7 +9,7 @@ src/
 ├── components/
 │   └── ui/
 │       ├── icon.tsx                // Main Icon component
-│       ├── icon-wrapper.tsx        // Icon wrapper components 
+│       ├── icon-wrapper.tsx        // Icon wrapper components
 │       ├── safe-icon.tsx           // Safe icon component
 │       └── IconTester.tsx          // Testing component
 │
@@ -72,6 +72,7 @@ src/
 ### Phase 2: Consolidate Functionality (2-3 hours)
 
 1. Move and merge icon-related functionality from `/lib` to `/ui/icons`:
+
    - Combine `icon-helpers.tsx`, `icon-diagnostic.ts` into `IconUtils.ts`
    - Move `icon-mappings.ts` to `IconMapping.ts`
    - Move `icon-registry.tsx` to `IconRegistry.ts`
@@ -133,4 +134,4 @@ src/
 ## Timeline
 
 Total estimated time: 6-8 hours for full implementation
-Recommended approach: Implement in phases with testing between each phase 
+Recommended approach: Implement in phases with testing between each phase

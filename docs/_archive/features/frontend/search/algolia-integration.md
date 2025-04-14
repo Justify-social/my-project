@@ -117,4 +117,4 @@ npm run test-algolia-search
 
 1. Implement automatic reindexing through webhooks
 2. Add faceted search for filtering by platform, status, etc.
-3. Implement analytics to track popular searches 
+3. Implement analytics to track popular searches

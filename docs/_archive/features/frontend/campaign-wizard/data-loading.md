@@ -22,14 +22,14 @@ The Campaign Wizard loads saved campaign data efficiently across all steps, ensu
 
 ## Common Scenarios
 
-| Scenario | Behavior |
-|----------|----------|
-| Editing a draft | All available data loads with default values for missing fields |
-| Editing a submitted campaign | Complete data loads with all fields populated |
-| Network issues | Graceful error handling with retry options |
+| Scenario                     | Behavior                                                        |
+| ---------------------------- | --------------------------------------------------------------- |
+| Editing a draft              | All available data loads with default values for missing fields |
+| Editing a submitted campaign | Complete data loads with all fields populated                   |
+| Network issues               | Graceful error handling with retry options                      |
 
 ## Troubleshooting
 
 - **Empty fields**: Refresh the page to reload data
 - **Infinite loading**: Check your network connection
-- **Field format issues**: Some special characters may require escaping in text fields 
+- **Field format issues**: Some special characters may require escaping in text fields

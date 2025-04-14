@@ -2,7 +2,5 @@
 import ServerCampaigns from './ServerCampaigns';
 
 export default function CampaignsPage() {
-  return (
-    <ServerCampaigns />
-  );
-} 
+  return <ServerCampaigns />;
+}

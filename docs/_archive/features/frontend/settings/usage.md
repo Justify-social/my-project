@@ -181,4 +181,4 @@ To review account activity:
 - [Settings Overview](./overview.md)
 - [Team Management Best Practices](./team-management.md)
 - [API Documentation](../../features-backend/apis/overview.md)
-- [Security Guidelines](../../guides/developer/security.md) 
+- [Security Guidelines](../../guides/developer/security.md)

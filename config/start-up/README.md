@@ -44,10 +44,10 @@ When adding new startup scripts:
 3. Configure the script execution in package.json
 4. Document any environment variables or configuration needed
 
-Each script should include proper error handling and informative console output to diagnose issues during startup. 
+Each script should include proper error handling and informative console output to diagnose issues during startup.
 
 2. Component registry validation (`config/start-up/validate-component-registry.mjs`)
    - Validates that all components in the registry exist in the file system
    - Ensures all components in the file system are in the registry
    - Works with nested directories and compound components
-   - Provides clear error messages for missing components 
+   - Provides clear error messages for missing components

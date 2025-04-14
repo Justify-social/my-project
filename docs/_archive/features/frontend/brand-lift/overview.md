@@ -74,4 +74,4 @@ Brand Lift studies are typically structured as:
 
 - [Brand Lift Usage Guide](./usage.md)
 - [Campaign Wizard](../campaign-wizard/overview.md)
-- [Reports](../reports/overview.md) 
+- [Reports](../reports/overview.md)

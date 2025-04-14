@@ -52,4 +52,4 @@ Each release will continue to enhance the overall platform experience with:
 - Faster loading times
 - Simplified workflows
 - Improved data visualization
-- Enhanced mobile experience 
+- Enhanced mobile experience

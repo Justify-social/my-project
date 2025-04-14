@@ -55,6 +55,7 @@ The project follows these naming conventions:
 ## Component Structure
 
 Components follow a consistent structure:
+
 1. Imports
 2. Types
 3. Helper functions
@@ -64,6 +65,7 @@ Components follow a consistent structure:
 ## Single Source of Truth
 
 The project follows a Single Source of Truth principle for:
+
 - UI Component configuration
 - Icon registries
 - Configuration files
@@ -74,21 +76,25 @@ The project follows a Single Source of Truth principle for:
 UI components follow the atomic design methodology:
 
 1. **Atoms**: Basic building blocks (buttons, inputs, icons)
+
    - Located in `src/components/ui/atoms/`
    - Self-contained with minimal dependencies
    - Highly reusable across the application
 
 2. **Molecules**: Groups of atoms functioning together
+
    - Located in `src/components/ui/molecules/`
    - Composed of multiple atoms
    - Examples: form groups, search bars, notification items
 
 3. **Organisms**: Complex UI sections composed of molecules and atoms
+
    - Located in `src/components/ui/organisms/`
    - Examples: navigation bars, dashboards, complex forms
    - Often feature-specific but reusable
 
 4. **Templates**: Page layouts without specific content
+
    - Located in `src/components/layouts/`
    - Define content structure and component positioning
 
@@ -105,6 +111,7 @@ node scripts/master/master-toolkit.mjs [category] [command] [--options]
 ```
 
 Categories include:
+
 - `icons`: Icon management scripts
 - `ui`: UI component scripts
 - `config`: Configuration scripts
@@ -118,6 +125,7 @@ Categories include:
 The project uses FontAwesome Pro for icons, with:
 
 1. **Directory Organization**:
+
    - `/public/static/icon-registry.json`: Single source of truth for all icons
    - `/icons/brands/`: Social media platform icons
    - `/icons/light/`: UI icons in light style (default state)
@@ -125,6 +133,7 @@ The project uses FontAwesome Pro for icons, with:
    - `/icons/app/`: Application-specific custom icons
 
 2. **Icon Management**:
+
    - Centralized registry with consistent naming
    - Utility functions for icon path generation
    - Automatic downloading and optimization
@@ -143,4 +152,4 @@ The project includes a comprehensive tree shake process for managing deprecated 
 - **Reference checking**: Ensure files aren't referenced elsewhere
 - **Automatic backups**: Create archives before removal
 - **Detailed reporting**: Document all changes
-- **Command**: `node scripts/master/master-toolkit.mjs cleanup tree-shake` 
+- **Command**: `node scripts/master/master-toolkit.mjs cleanup tree-shake`

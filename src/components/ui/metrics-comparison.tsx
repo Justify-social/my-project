@@ -58,19 +58,18 @@ export function MetricsComparison({
   className,
 }: MetricComparisonProps) {
   // Ensure metrics is an array before accessing index 0
-  const initialTab = defaultTab || (Array.isArray(metrics) && metrics.length > 0 ? metrics[0].id : '');
+  const initialTab =
+    defaultTab || (Array.isArray(metrics) && metrics.length > 0 ? metrics[0].id : '');
   const [activeTab, setActiveTab] = React.useState(initialTab);
 
   // Ensure metrics is always an array to prevent runtime errors on map
   const validMetrics = Array.isArray(metrics) ? metrics : [];
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn('overflow-hidden', className)}>
       <div className="p-4 sm:p-6">
         {title && <h3 className="text-lg font-semibold text-foreground">{title}</h3>}
-        {description && (
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
 
         {validMetrics.length > 0 ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 mt-4">
@@ -110,4 +109,4 @@ export function MetricsComparison({
       </div>
     </Card>
   );
-} 
+}

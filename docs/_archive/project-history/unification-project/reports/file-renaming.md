@@ -1,6 +1,7 @@
 # File Renaming Report
 
 ## Summary
+
 - Total files processed: 102
 - Successfully renamed: 84
 - Skipped: 17
@@ -9,6 +10,7 @@
 ## Details
 
 ### Successfully Renamed
+
 - `PROJECT_OVERVIEW.md` -> `project-overview.md`
 - `scripts/templates/README-template.md` -> `scripts/templates/readme-template.md`
 - `scripts/testing/ui/testCampaign.js` -> `scripts/testing/ui/test-campaign.js`
@@ -95,6 +97,7 @@
 - `docs/BUILD/influencer/IInfluencer Profile - Influencer Perspective.png` -> `docs/BUILD/influencer/iinfluencer-profile---influencer-perspective.png`
 
 ### Skipped
+
 - `src/components/Wizard` (already kebab-case or React component)
 - `src/components/Search` (already kebab-case or React component)
 - `src/components/ReviewSections` (already kebab-case or React component)
@@ -114,6 +117,7 @@
 - `docs/BUILD` (already kebab-case or React component)
 
 ### Failed
+
 - `scripts/icons/ui-migration-backup/backup-2025-03-26T20-31-05/test/IconTester.backup.tsx` (Error: File does not exist)
 
 ## Next Steps

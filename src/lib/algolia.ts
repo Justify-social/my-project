@@ -34,11 +34,11 @@ export async function searchCampaigns(query: string): Promise<CampaignSearchResu
       headers: {
         'X-Algolia-API-Key': apiKey,
         'X-Algolia-Application-Id': appId,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        params: `query=${encodeURIComponent(query)}`
-      })
+        params: `query=${encodeURIComponent(query)}`,
+      }),
     });
 
     if (!response.ok) {
@@ -58,7 +58,9 @@ export async function searchCampaigns(query: string): Promise<CampaignSearchResu
 // Function to index campaign data from database by replacing existing content
 export async function indexCampaigns(campaigns: any[]): Promise<void> {
   if (!process.env.ALGOLIA_ADMIN_API_KEY) {
-    console.error('Error: ALGOLIA_ADMIN_API_KEY is not set in environment variables. Cannot clear index.');
+    console.error(
+      'Error: ALGOLIA_ADMIN_API_KEY is not set in environment variables. Cannot clear index.'
+    );
     throw new Error('Missing Algolia Admin API Key for indexing.');
   }
 
@@ -75,8 +77,8 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
       headers: {
         'X-Algolia-API-Key': adminApiKey,
         'X-Algolia-Application-Id': appId,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!clearResponse.ok) {
@@ -88,7 +90,7 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
     const clearResult = await clearResponse.json();
     console.log(`Algolia index clear initiated. Task ID: ${clearResult.taskID}`);
 
-    // Optional: Add a small delay or implement task waiting if needed, 
+    // Optional: Add a small delay or implement task waiting if needed,
     // but often clear is fast enough for subsequent batch add in scripts.
     await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
 
@@ -102,7 +104,10 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
     // Transform campaigns to ensure they have objectID
     const records = campaigns.map(campaign => ({
       ...campaign,
-      objectID: campaign.id || campaign.objectID || `campaign_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      objectID:
+        campaign.id ||
+        campaign.objectID ||
+        `campaign_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
     }));
 
     const batchResponse = await fetch(indexBatchUrl, {
@@ -110,14 +115,14 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
       headers: {
         'X-Algolia-API-Key': adminApiKey, // Use Admin key for writing
         'X-Algolia-Application-Id': appId,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         requests: records.map(record => ({
           action: 'addObject',
-          body: record
-        }))
-      })
+          body: record,
+        })),
+      }),
     });
 
     if (!batchResponse.ok) {
@@ -128,7 +133,6 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
 
     const batchResult = await batchResponse.json();
     console.log(`Successfully indexed ${records.length} campaigns! Task IDs:`, batchResult.taskID);
-
   } catch (error) {
     console.error('Error during Algolia re-indexing process:', error);
     throw error; // Re-throw the error to be caught by the script runner
@@ -139,5 +143,5 @@ export async function indexCampaigns(campaigns: any[]): Promise<void> {
 export const algoliaConfig = {
   appId,
   apiKey,
-  indexName
-}; 
+  indexName,
+};

@@ -44,13 +44,13 @@ export function LoadingSpinner({
   size = 'md',
   color = 'primary',
   label,
-  className
+  className,
 }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'w-4 h-4 border-2',
     md: 'w-8 h-8 border-3',
     lg: 'w-12 h-12 border-4',
-    xl: 'w-16 h-16 border-4'
+    xl: 'w-16 h-16 border-4',
   };
 
   const colorClasses = {
@@ -59,7 +59,7 @@ export function LoadingSpinner({
     success: 'border-success border-b-transparent',
     danger: 'border-destructive border-b-transparent',
     warning: 'border-warning border-b-transparent',
-    info: 'border-accent border-b-transparent'
+    info: 'border-accent border-b-transparent',
   };
 
   return (
@@ -74,4 +74,4 @@ export function LoadingSpinner({
       {label && <p className="text-sm text-muted-foreground">{label}</p>}
     </div>
   );
-} 
+}

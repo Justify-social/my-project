@@ -87,4 +87,4 @@ This allows for even more convenient usage:
 ```bash
 npm run toolkit icons audit
 npm run icons audit
-``` 
+```

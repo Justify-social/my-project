@@ -27,12 +27,14 @@ Retrieves a paginated list of campaigns.
 **Authentication:** Required
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 20, max: 100)
 - `filter[status]` (optional): Filter by status (DRAFT, IN_REVIEW, APPROVED, ACTIVE, COMPLETED)
 - `sort` (optional): Sort field (default: -createdAt)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -46,7 +48,7 @@ Retrieves a paginated list of campaigns.
         "endDate": "2023-08-31T00:00:00.000Z",
         "status": "DRAFT",
         "updatedAt": "2023-05-15T14:30:00.000Z"
-      },
+      }
       // More campaigns...
     ],
     "pagination": {
@@ -60,6 +62,7 @@ Retrieves a paginated list of campaigns.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to list campaigns
 
@@ -72,9 +75,11 @@ Retrieves a specific campaign by ID.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -115,6 +120,7 @@ Retrieves a specific campaign by ID.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to view this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -128,6 +134,7 @@ Creates a new campaign.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "name": "Summer Campaign 2023",
@@ -162,6 +169,7 @@ Creates a new campaign.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -180,6 +188,7 @@ Creates a new campaign.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to create campaigns
 - `VALIDATION_ERROR`: Request validation failed
@@ -194,9 +203,11 @@ Updates an existing campaign.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 
 **Request Body:**
+
 ```json
 {
   "name": "Summer Campaign 2023 - Updated",
@@ -205,6 +216,7 @@ Updates an existing campaign.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -223,6 +235,7 @@ Updates an existing campaign.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to update this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -237,9 +250,11 @@ Deletes a campaign.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -248,6 +263,7 @@ Deletes a campaign.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to delete this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -263,10 +279,12 @@ Retrieves data for a specific step in the campaign wizard.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 - `step`: Step number (1-4)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -305,6 +323,7 @@ Retrieves data for a specific step in the campaign wizard.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to view this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -319,10 +338,12 @@ Saves data for a specific step in the campaign wizard.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 - `step`: Step number (1-4)
 
 **Request Body:**
+
 ```json
 {
   "fields": {
@@ -357,6 +378,7 @@ Saves data for a specific step in the campaign wizard.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -370,6 +392,7 @@ Saves data for a specific step in the campaign wizard.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to update this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -384,9 +407,11 @@ Retrieves the completion status of all steps in the campaign wizard.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -420,6 +445,7 @@ Retrieves the completion status of all steps in the campaign wizard.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to view this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -433,9 +459,11 @@ Submits a completed campaign for review.
 **Authentication:** Required
 
 **Path Parameters:**
+
 - `id`: Campaign ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -449,6 +477,7 @@ Submits a completed campaign for review.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to submit this campaign
 - `RESOURCE_NOT_FOUND`: Campaign not found
@@ -465,6 +494,7 @@ Checks the health of the database connection.
 **Authentication:** Required (Admin only)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -489,6 +519,7 @@ Checks the health of the database connection.
 ```
 
 **Error Codes:**
+
 - `AUTHENTICATION_ERROR`: User is not authenticated
 - `AUTHORIZATION_ERROR`: User is not authorized to access health checks
 
@@ -496,4 +527,4 @@ Checks the health of the database connection.
 
 - [API Overview](./overview.md)
 - [Cint API Reference](./cint-api-reference.md)
-- [Authentication System](../authentication/overview.md) 
+- [Authentication System](../authentication/overview.md)

@@ -8,7 +8,7 @@ import { IconProps } from './icon-types';
  * If the name already ends with Light, it returns it as is
  * If the name ends with Solid, it replaces Solid with Light
  * Otherwise, it appends Light to the name
- * 
+ *
  * @example
  * getLightVariant('faCheck') // returns 'faCheckLight'
  * getLightVariant('faCheckLight') // returns 'faCheckLight'
@@ -25,7 +25,7 @@ export function getLightVariant(iconName: string): string {
  * If the name already ends with Solid, it returns it as is
  * If the name ends with Light, it replaces Light with Solid
  * Otherwise, it appends Solid to the name
- * 
+ *
  * @example
  * getSolidVariant('faCheck') // returns 'faCheckSolid'
  * getSolidVariant('faCheckSolid') // returns 'faCheckSolid'
@@ -39,7 +39,7 @@ export function getSolidVariant(iconName: string): string {
 
 /**
  * Ensure an icon name has the correct suffix based on desired variant
- * 
+ *
  * @example
  * ensureIconVariant('faCheck', 'light') // returns 'faCheckLight'
  * ensureIconVariant('faCheck', 'solid') // returns 'faCheckSolid'
@@ -50,25 +50,8 @@ export function ensureIconVariant(iconName: string, variant: 'light' | 'solid'):
 }
 
 /**
- * Create a type-safe icon factory for a specific icon
- * 
- * @example
- * const CheckIcon = createIcon('faCheck');
- * // Later in a component:
- * <CheckIcon size="lg" />
- * 
- * @deprecated Use createIconWithId instead for better type safety
- */
-export function createIcon(iconName: string) {
-  return (props: Omit<IconProps, 'name'>) => ({
-    name: iconName,
-    ...props
-  });
-}
-
-/**
  * Create a type-safe icon factory using the new iconId approach
- * 
+ *
  * @example
  * const CheckIcon = createIconWithId('faCheckLight');
  * // Later in a component:
@@ -77,13 +60,13 @@ export function createIcon(iconName: string) {
 export function createIconWithId(iconId: string) {
   return (props: Omit<IconProps, 'iconId'>) => ({
     iconId: iconId,
-    ...props
+    ...props,
   });
 }
 
 /**
  * Get the base name of an icon (without Light/Solid suffix)
- * 
+ *
  * @example
  * getBaseIconName('faCheckLight') // returns 'faCheck'
  * getBaseIconName('faCheckSolid') // returns 'faCheck'
@@ -105,4 +88,4 @@ export function isLightVariant(iconName: string): boolean {
  */
 export function isSolidVariant(iconName: string): boolean {
   return iconName.endsWith('Solid');
-} 
+}

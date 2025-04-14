@@ -1,15 +1,15 @@
 /**
  * Icon Component Barrel File - CANONICAL VERSION
  * SSOT for all icon-related component exports
- * 
- * ⚠️ IMPORTANT: For app icons to work correctly, always import the Icon component 
+ *
+ * ⚠️ IMPORTANT: For app icons to work correctly, always import the Icon component
  * directly from '@/components/ui/icon/icon' rather than from this barrel file.
  * This ensures proper handling of app-specific icons and variant suffixes.
- * 
+ *
  * @example
  * // ✅ Correct way to import
  * import { Icon } from '@/components/ui/icon/icon';
- * 
+ *
  * // ❌ Avoid this import pattern
  * // import { Icon } from '@/components/ui/icon';
  */
@@ -18,11 +18,7 @@
 // --------------------
 // While these components are exported here, it's recommended to import them
 // directly from their source files to avoid any potential barrel file issues
-export {
-  Icon,
-  SolidIcon,
-  LightIcon
-} from './icon';
+export { Icon, SolidIcon, LightIcon } from './icon';
 /* // Removed export for deleted file
 export {
   HoverIcon
@@ -65,7 +61,7 @@ export {
   createIconWithId,
   getBaseIconName,
   isLightVariant,
-  isSolidVariant
+  isSolidVariant,
 } from './icon-utils';
 
 // Types & Constants
@@ -92,18 +88,14 @@ export {
   // Registry data interfaces
   type IconMetadata,
   type IconRegistryData,
-  type IconUrlMapData
+  type IconUrlMapData,
 } from './icon-types';
 
 // Official Adapters
 // ----------------
 // Import these adapters for specific UI libraries
-export {
-  ShadcnIcon
-} from './adapters/shadcn-adapter';
-export {
-  IconAdapter
-} from './adapters/font-awesome-adapter';
+export { ShadcnIcon } from './adapters/shadcn-adapter';
+export { IconAdapter } from './adapters/font-awesome-adapter';
 
 // Legacy/Deprecated Exports (for backward compatibility)
 // ---------------------------------------------------

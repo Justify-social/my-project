@@ -23,12 +23,10 @@ Main source code directory containing all application code.
 - `app/`
 - `--tests--/`
 
-
 ### Files
 
 - 2 .ts files
 - 1 .js file
-
 
 ## Usage
 
@@ -40,8 +38,6 @@ This directory contains all the source code for the application including compon
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

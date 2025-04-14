@@ -29,4 +29,4 @@ Each subdirectory contains documentation focused on a specific technical area. S
 
 - [Guides](../guides/) - Step-by-step instructions for common tasks
 - [Architecture](../architecture/) - High-level architecture documentation
-- [Standards](../standards/) - Coding standards and conventions 
+- [Standards](../standards/) - Coding standards and conventions

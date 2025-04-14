@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon/icon';
 
 interface ObjectivesContentProps {
   data?: {
@@ -22,7 +22,7 @@ const ObjectivesContent: React.FC<ObjectivesContentProps> = ({ data }) => {
     <div className="space-y-6 font-work-sans">
       {/* KPIs */}
       <div className="mb-6 font-work-sans">
-        <h3 className="font-semibold mb-3 font-sora">Key Performance Indicators (KPIs)</h3>
+        <h3 className="font-semibold mb-3 font-heading">Key Performance Indicators (KPIs)</h3>
         <div className="space-y-2 font-work-sans">
           <div className="font-work-sans">
             <span className="font-medium font-work-sans">Primary KPI: </span>
@@ -37,7 +37,7 @@ const ObjectivesContent: React.FC<ObjectivesContentProps> = ({ data }) => {
 
       {/* Messaging */}
       <div className="mb-6 font-work-sans">
-        <h3 className="font-semibold mb-3 font-sora">Messaging</h3>
+        <h3 className="font-semibold mb-3 font-heading">Messaging</h3>
         <div className="space-y-3 font-work-sans">
           <div className="font-work-sans">
             <span className="font-medium font-work-sans">Main Message: </span>
@@ -60,7 +60,7 @@ const ObjectivesContent: React.FC<ObjectivesContentProps> = ({ data }) => {
 
       {/* Hypotheses */}
       <div className="mb-6 font-work-sans">
-        <h3 className="font-semibold mb-3 font-sora">Hypotheses</h3>
+        <h3 className="font-semibold mb-3 font-heading">Hypotheses</h3>
         <div className="space-y-3 font-work-sans">
           <div className="font-work-sans">
             <span className="font-medium font-work-sans">Expected Achievements: </span>
@@ -75,21 +75,22 @@ const ObjectivesContent: React.FC<ObjectivesContentProps> = ({ data }) => {
 
       {/* Features */}
       <div className="font-work-sans">
-        <h3 className="font-semibold mb-3 font-sora">Selected Features</h3>
+        <h3 className="font-semibold mb-3 font-heading">Selected Features</h3>
         <div className="space-y-1 font-work-sans">
-          {data.features?.length > 0 ?
-            data.features.map((feature, index) =>
+          {data.features?.length > 0 ? (
+            data.features.map((feature, index) => (
               <div key={index} className="flex items-center font-work-sans">
                 <Icon iconId="faCheckLight" className="w-4 h-4 mr-2 text-success" />
                 {feature}
               </div>
-            ) :
+            ))
+          ) : (
             <div className="text-muted-foreground font-work-sans">No features selected</div>
-          }
+          )}
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default ObjectivesContent;

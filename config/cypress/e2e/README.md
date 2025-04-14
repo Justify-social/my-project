@@ -5,17 +5,21 @@ This directory contains end-to-end tests organized by feature area.
 ## Directory Structure
 
 - **auth/** - Authentication related tests
+
   - `flow.cy.js` - Full authentication flow tests
   - `signin.cy.js` - Sign-in page tests
 
 - **billing/** - Billing functionality tests
+
   - `index.cy.js` - Main billing page tests
 
 - **brand-health/** - Brand health feature tests
+
   - `card.cy.js` - Brand health card component tests
   - `index.cy.js` - Main brand health page tests
 
 - **brand-lift/** - Brand lift feature tests
+
   - `index.cy.js` - Main brand lift page tests
   - `progress.cy.js` - Progress tracking tests
   - `report.cy.js` - Report generation tests
@@ -25,6 +29,7 @@ This directory contains end-to-end tests organized by feature area.
   - `survey-preview.cy.js` - Survey preview tests
 
 - **campaigns/** - Campaign management tests
+
   - `api.cy.js` - Campaign API tests
   - `crud.cy.js` - Campaign CRUD operation tests
   - `details.cy.js` - Campaign details page tests
@@ -38,6 +43,7 @@ This directory contains end-to-end tests organized by feature area.
     - `submission.cy.js` - Submission confirmation page
 
 - **layout/** - Layout and navigation tests
+
   - `branding.cy.js` - Branding elements tests
   - `dashboard.cy.js` - Dashboard layout tests
   - `header.cy.js` - Header component tests
@@ -54,6 +60,7 @@ This directory contains end-to-end tests organized by feature area.
 ## Best Practices
 
 When creating new tests:
+
 1. Place them in the appropriate feature directory
 2. Follow the naming convention of the existing tests
 3. If creating tests for a new feature, create a new directory
@@ -62,26 +69,31 @@ When creating new tests:
 ### Lessons from Campaign Test Updates
 
 1. **Authentication Handling**:
+
    - Use `cy.setCookie()` to bypass authentication
    - Handle uncaught exceptions with `cy.on('uncaught:exception', () => false)`
    - Mock API responses for auth-dependent endpoints
 
 2. **Page Structure Testing**:
+
    - Test basic page load and UI elements first
    - Verify headers, sections, and critical UI components
    - Test responsive behavior for mobile views
 
 3. **Form Testing**:
+
    - Test validation of required fields
    - Test validation of field formats and relationships
    - Test form submission and error handling
 
 4. **API Mocking**:
+
    - Use `cy.intercept()` to mock API responses
    - Create fixtures for reusable API response data
    - Test both success and error API scenarios
 
 5. **Navigation Testing**:
+
    - Test navigation between wizard steps
    - Verify URL changes during navigation
    - Test browser back/forward behavior
@@ -94,4 +106,7 @@ When creating new tests:
 ## Running Tests
 
 To run all tests:
+
+```
+
 ```

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const session = await getSession();
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ isSuperAdmin: false }, { status: 401 });
     }
@@ -18,4 +18,4 @@ export async function GET() {
     console.error('Error checking super admin status:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

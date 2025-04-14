@@ -206,4 +206,4 @@ To manage multiple users or organizations efficiently:
 - [Admin Panel Overview](./overview.md)
 - [System Architecture](../../features-backend/architecture/overview.md)
 - [Security Guidelines](../../guides/developer/security.md)
-- [Data Management Policies](../../features-backend/database/overview.md) 
+- [Data Management Policies](../../features-backend/database/overview.md)

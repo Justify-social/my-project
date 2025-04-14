@@ -8,19 +8,13 @@ Dashboard Components provide dashboard components functionality for the applicat
 
 ## Components
 
-
-
 ## Usage
 
 ```tsx
-import {  } from '@/components/features/dashboard';
+import {} from '@/components/features/dashboard';
 
 // Example usage
 function ExampleComponent() {
-  return (
-    <div>
-      {/* Add usage examples here */}
-    </div>
-  );
+  return <div>{/* Add usage examples here */}</div>;
 }
 ```

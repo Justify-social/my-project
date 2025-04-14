@@ -1,6 +1,7 @@
 # Import Verification Report
 
 ## Summary
+
 - Total files scanned: 1
 - Files with potential import issues: 1
 - Total potential issues found: 1
@@ -8,11 +9,11 @@
 ## Details
 
 ### docs/import-verification-report.md
+
 - Found reference to `PROJECT_OVERVIEW.md`, should be `project-overview.md`
   ```
   [project-overview.md](./project-overview.md)
   ```
-
 
 ## Next Steps
 

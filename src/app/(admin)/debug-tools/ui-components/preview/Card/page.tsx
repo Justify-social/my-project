@@ -6,7 +6,14 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 // Import Card and its sub-components
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from '../../../../../../components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '../../../../../../components/ui/card';
 // Also import Button for the footer example
 import { Button } from '../../../../../../components/ui/button';
 
@@ -19,18 +26,23 @@ const statusStyles: Record<string, string> = {
 
 export default function CardPreviewPage() {
   const componentMeta: {
-    name: string; description: string; category: string;
-    subcategory: string | null; renderType: string;
-    author: string; since: string; status?: string | null;
+    name: string;
+    description: string;
+    category: string;
+    subcategory: string | null;
+    renderType: string;
+    author: string;
+    since: string;
+    status?: string | null;
   } = {
-    "name": "Card",
-    "description": "A container for grouping related content and actions.",
-    "category": "organism",
-    "subcategory": null,
-    "renderType": "server",
-    "author": "",
-    "since": "",
-    "status": null
+    name: 'Card',
+    description: 'A container for grouping related content and actions.',
+    category: 'organism',
+    subcategory: null,
+    renderType: 'server',
+    author: '',
+    since: '',
+    status: null,
   };
   const examples: string[] = [];
 
@@ -39,9 +51,19 @@ export default function CardPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -51,12 +73,22 @@ export default function CardPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -92,8 +124,14 @@ export default function CardPreviewPage() {
                 <form>
                   <div className="grid w-full items-center gap-4">
                     <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="name" className="text-sm font-medium">Name</label>
-                      <input id="name" placeholder="Name of your feature" className="border p-2 rounded-md" />
+                      <label htmlFor="name" className="text-sm font-medium">
+                        Name
+                      </label>
+                      <input
+                        id="name"
+                        placeholder="Name of your feature"
+                        className="border p-2 rounded-md"
+                      />
                     </div>
                   </div>
                 </form>
@@ -122,7 +160,6 @@ export default function CardPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

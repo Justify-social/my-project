@@ -35,21 +35,20 @@ Dashboard
 The header component that appears at the top of the Dashboard.
 
 **Props:**
+
 - `title`: String - The page title
 - `user`: Object - Current user information
 - `notifications`: Array - Notification items
 
 **State:**
+
 - `isUserMenuOpen`: Boolean - Whether the user menu is open
 - `isNotificationsOpen`: Boolean - Whether the notifications panel is open
 
 **Example:**
+
 ```jsx
-<DashboardHeader 
-  title="Dashboard" 
-  user={currentUser} 
-  notifications={userNotifications} 
-/>
+<DashboardHeader title="Dashboard" user={currentUser} notifications={userNotifications} />
 ```
 
 ### DashboardGrid
@@ -57,21 +56,20 @@ The header component that appears at the top of the Dashboard.
 The main container for dashboard widgets, supporting drag-and-drop rearrangement.
 
 **Props:**
+
 - `layout`: Object - Widget layout configuration
 - `widgets`: Array - List of widget components to display
 - `isEditing`: Boolean - Whether the dashboard is in edit mode
 
 **State:**
+
 - `currentLayout`: Object - Current widget positions
 - `isDragging`: Boolean - Whether a widget is being dragged
 
 **Example:**
+
 ```jsx
-<DashboardGrid
-  layout={userLayout}
-  widgets={activeWidgets}
-  isEditing={isCustomizing}
-/>
+<DashboardGrid layout={userLayout} widgets={activeWidgets} isEditing={isCustomizing} />
 ```
 
 ## Widget Components
@@ -81,15 +79,18 @@ The main container for dashboard widgets, supporting drag-and-drop rearrangement
 Displays a summary of campaigns by status.
 
 **Props:**
+
 - `campaigns`: Array - List of campaign objects
 - `onCampaignClick`: Function - Handler for campaign click
 - `filter`: String - Current filter value
 
 **State:**
+
 - `activeTab`: String - Currently selected status tab
 - `visibleCampaigns`: Array - Filtered campaigns to display
 
 **Example:**
+
 ```jsx
 <CampaignSummaryWidget
   campaigns={userCampaigns}
@@ -103,21 +104,20 @@ Displays a summary of campaigns by status.
 Displays performance metrics with charts and graphs.
 
 **Props:**
+
 - `metrics`: Object - Performance data
 - `timeRange`: String - Selected time period
 - `chartType`: String - Type of chart to display
 
 **State:**
+
 - `selectedMetrics`: Array - Metrics selected for display
 - `isExporting`: Boolean - Whether export is in progress
 
 **Example:**
+
 ```jsx
-<PerformanceMetricsWidget
-  metrics={performanceData}
-  timeRange="30days"
-  chartType="bar"
-/>
+<PerformanceMetricsWidget metrics={performanceData} timeRange="30days" chartType="bar" />
 ```
 
 ### QuickActionsWidget
@@ -125,15 +125,14 @@ Displays performance metrics with charts and graphs.
 Provides shortcut buttons for common actions.
 
 **Props:**
+
 - `actions`: Array - List of action objects
 - `onActionClick`: Function - Handler for action click
 
 **Example:**
+
 ```jsx
-<QuickActionsWidget
-  actions={availableActions}
-  onActionClick={handleActionSelect}
-/>
+<QuickActionsWidget actions={availableActions} onActionClick={handleActionSelect} />
 ```
 
 ### RecentActivityWidget
@@ -141,15 +140,18 @@ Provides shortcut buttons for common actions.
 Displays a feed of recent activities and notifications.
 
 **Props:**
+
 - `activities`: Array - List of activity objects
 - `onActivityClick`: Function - Handler for activity click
 - `maxItems`: Number - Maximum number of items to display
 
 **State:**
+
 - `filter`: String - Current activity type filter
 - `hasUnread`: Boolean - Whether there are unread activities
 
 **Example:**
+
 ```jsx
 <RecentActivityWidget
   activities={recentActivities}
@@ -163,21 +165,20 @@ Displays a feed of recent activities and notifications.
 Displays a calendar with upcoming events and deadlines.
 
 **Props:**
+
 - `events`: Array - List of event objects
 - `view`: String - Calendar view mode (month/week/day)
 - `onEventClick`: Function - Handler for event click
 
 **State:**
+
 - `currentDate`: Date - Currently displayed date
 - `selectedEvent`: Object - Currently selected event
 
 **Example:**
+
 ```jsx
-<CalendarWidget
-  events={calendarEvents}
-  view="month"
-  onEventClick={handleEventSelect}
-/>
+<CalendarWidget events={calendarEvents} view="month" onEventClick={handleEventSelect} />
 ```
 
 ## Utility Components
@@ -187,6 +188,7 @@ Displays a calendar with upcoming events and deadlines.
 Displays a single metric with value and trend.
 
 **Props:**
+
 - `title`: String - Metric name
 - `value`: Number - Current value
 - `previousValue`: Number - Previous value for comparison
@@ -194,6 +196,7 @@ Displays a single metric with value and trend.
 - `icon`: Element - Icon component
 
 **Example:**
+
 ```jsx
 <MetricCard
   title="Brand Awareness"
@@ -209,17 +212,15 @@ Displays a single metric with value and trend.
 Displays a summary of a single campaign.
 
 **Props:**
+
 - `campaign`: Object - Campaign data
 - `onClick`: Function - Click handler
 - `actions`: Array - Available actions
 
 **Example:**
+
 ```jsx
-<CampaignCard
-  campaign={campaignData}
-  onClick={handleClick}
-  actions={cardActions}
-/>
+<CampaignCard campaign={campaignData} onClick={handleClick} actions={cardActions} />
 ```
 
 ### ActivityItem
@@ -227,17 +228,15 @@ Displays a summary of a single campaign.
 Displays a single activity or notification.
 
 **Props:**
+
 - `activity`: Object - Activity data
 - `onClick`: Function - Click handler
 - `isUnread`: Boolean - Whether the activity is unread
 
 **Example:**
+
 ```jsx
-<ActivityItem
-  activity={activityData}
-  onClick={handleClick}
-  isUnread={true}
-/>
+<ActivityItem activity={activityData} onClick={handleClick} isUnread={true} />
 ```
 
 ## Customization Components
@@ -247,6 +246,7 @@ Displays a single activity or notification.
 Interface for customizing the dashboard layout.
 
 **Props:**
+
 - `layout`: Object - Current layout configuration
 - `availableWidgets`: Array - All possible widgets
 - `activeWidgets`: Array - Currently active widgets
@@ -254,10 +254,12 @@ Interface for customizing the dashboard layout.
 - `onCancel`: Function - Cancel handler
 
 **State:**
+
 - `draftLayout`: Object - Draft layout being edited
 - `draftWidgets`: Array - Draft widget selection
 
 **Example:**
+
 ```jsx
 <DashboardCustomizer
   layout={currentLayout}
@@ -284,12 +286,12 @@ export function DashboardProvider({ children }) {
   const [layout, setLayout] = useState(defaultLayout);
   const [widgets, setWidgets] = useState(defaultWidgets);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Load user preferences
   useEffect(() => {
     // Load saved layout and widgets
   }, []);
-  
+
   // Save changes
   const saveLayout = (newLayout, newWidgets) => {
     setLayout(newLayout);
@@ -297,15 +299,17 @@ export function DashboardProvider({ children }) {
     setIsEditing(false);
     // Persist to backend
   };
-  
+
   return (
-    <DashboardContext.Provider value={{
-      layout,
-      widgets,
-      isEditing,
-      setIsEditing,
-      saveLayout
-    }}>
+    <DashboardContext.Provider
+      value={{
+        layout,
+        widgets,
+        isEditing,
+        setIsEditing,
+        saveLayout,
+      }}
+    >
       {children}
     </DashboardContext.Provider>
   );
@@ -327,30 +331,32 @@ import { fetchCampaigns, fetchMetrics, fetchActivities, fetchEvents } from '../a
 
 export function useDashboardData() {
   const campaignsQuery = useQuery('campaigns', fetchCampaigns, {
-    refetchInterval: 5 * 60 * 1000 // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
   });
-  
+
   const metricsQuery = useQuery('metrics', fetchMetrics, {
-    refetchInterval: 5 * 60 * 1000
+    refetchInterval: 5 * 60 * 1000,
   });
-  
+
   const activitiesQuery = useQuery('activities', fetchActivities, {
-    refetchInterval: 60 * 1000 // 1 minute
+    refetchInterval: 60 * 1000, // 1 minute
   });
-  
+
   const eventsQuery = useQuery('events', fetchEvents, {
-    refetchInterval: 5 * 60 * 1000
+    refetchInterval: 5 * 60 * 1000,
   });
-  
+
   return {
     campaigns: campaignsQuery.data || [],
     metrics: metricsQuery.data || {},
     activities: activitiesQuery.data || [],
     events: eventsQuery.data || [],
-    isLoading: campaignsQuery.isLoading || metricsQuery.isLoading || 
-               activitiesQuery.isLoading || eventsQuery.isLoading,
-    error: campaignsQuery.error || metricsQuery.error || 
-           activitiesQuery.error || eventsQuery.error
+    isLoading:
+      campaignsQuery.isLoading ||
+      metricsQuery.isLoading ||
+      activitiesQuery.isLoading ||
+      eventsQuery.isLoading,
+    error: campaignsQuery.error || metricsQuery.error || activitiesQuery.error || eventsQuery.error,
   };
 }
 ```
@@ -359,4 +365,4 @@ export function useDashboardData() {
 
 - [Dashboard Overview](./overview.md)
 - [Dashboard Usage Guide](./usage.md)
-- [React Component Library](../../development/component-library.md) 
+- [React Component Library](../../development/component-library.md)

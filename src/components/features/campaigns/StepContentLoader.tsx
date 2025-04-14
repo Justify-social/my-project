@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { Suspense, lazy, useMemo } from 'react';
 import dynamic from 'next/dynamic';
@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error) {
-    console.error("Error in campaign wizard:", error);
+    console.error('Error in campaign wizard:', error);
   }
 
   render() {
@@ -59,9 +59,7 @@ export function StepLoader({ step }: StepLoaderProps) {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingSkeleton />}>
-        {renderContent()}
-      </Suspense>
+      <Suspense fallback={<LoadingSkeleton />}>{renderContent()}</Suspense>
     </ErrorBoundary>
   );
-} 
+}

@@ -5,9 +5,9 @@
  * @description A card component for displaying key performance indicators with trend visualization using standard Card components.
  * @status 10th April
  * @since 2023-07-15
- * 
+ *
  * @example
- * <KpiCard 
+ * <KpiCard
  *   title="Total Revenue"
  *   value="$12,345"
  *   change={15}
@@ -25,9 +25,9 @@ import {
   CardTitle,
   CardContent,
   // CardFooter // Not used in this layout yet
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 // Use standard Icon component
-import { Icon } from "@/components/ui/icon/icon";
+import { Icon } from '@/components/ui/icon/icon';
 
 export interface KpiCardProps {
   title: string;
@@ -65,33 +65,38 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   trendColor = {
     up: 'text-green-500',
     down: 'text-red-500',
-    neutral: 'text-gray-500'
+    neutral: 'text-gray-500',
   },
-  formatter = (val) => String(val),
-  onClick
+  formatter = val => String(val),
+  onClick,
 }) => {
   // Determine trend direction and ensure change is treated as a number for logic
-  const numericChange = typeof change === 'string' ? parseFloat(change) : change ?? 0;
-  const determinedTrend = trend || (
-    numericChange === 0 ? 'neutral' :
-      numericChange > 0 ? 'up' : 'down'
-  );
+  const numericChange = typeof change === 'string' ? parseFloat(change) : (change ?? 0);
+  const determinedTrend =
+    trend || (numericChange === 0 ? 'neutral' : numericChange > 0 ? 'up' : 'down');
 
   // Get appropriate trend icon ID using correct IDs from registry
-  const trendIconId = determinedTrend === 'up' ? 'faArrowUpLight' :
-    determinedTrend === 'down' ? 'faArrowDownLight' :
-      'faMinusLight';
+  const trendIconId =
+    determinedTrend === 'up'
+      ? 'faArrowUpLight'
+      : determinedTrend === 'down'
+        ? 'faArrowDownLight'
+        : 'faMinusLight';
 
   // Get trend color class
-  const trendColorClass = determinedTrend === 'up' ? trendColor.up :
-    determinedTrend === 'down' ? trendColor.down :
-      trendColor.neutral;
+  const trendColorClass =
+    determinedTrend === 'up'
+      ? trendColor.up
+      : determinedTrend === 'down'
+        ? trendColor.down
+        : trendColor.neutral;
 
   // Format the value
   const formattedValue = formatter(value);
 
   // Prepare the change text, handling potential existing symbols in input string
-  let changeText = typeof change === 'undefined' ? '' : String(change).replace('%', '').replace('+', '');
+  let changeText =
+    typeof change === 'undefined' ? '' : String(change).replace('%', '').replace('+', '');
   if (numericChange > 0) {
     changeText = `+${changeText}`;
   }
@@ -107,9 +112,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
       onClick={onClick}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className={cn('text-sm font-medium', titleClassName)}>
-          {title}
-        </CardTitle>
+        <CardTitle className={cn('text-sm font-medium', titleClassName)}>{title}</CardTitle>
         {icon && (
           // Optional: Consider consistent styling for icon container if reused
           // <div className="p-2 bg-primary/10 rounded-full">
@@ -117,25 +120,19 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           // </div>
         )}
       </CardHeader>
-      <CardContent className={cn("space-y-1", className)}> {/* Apply general className here */}
-        <div className={cn("text-2xl font-bold", valueClassName)}>
-          {formattedValue}
-        </div>
-        {subtitle && (
-          <p className="text-xs text-muted-foreground">
-            {subtitle}
-          </p>
-        )}
+      <CardContent className={cn('space-y-1', className)}>
+        {' '}
+        {/* Apply general className here */}
+        <div className={cn('text-2xl font-bold', valueClassName)}>{formattedValue}</div>
+        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
         {typeof change !== 'undefined' && (
-          <div className="flex items-center space-x-1 pt-1"> {/* Added pt-1 */}
-            <Icon iconId={trendIconId} className={cn("h-4 w-4", trendColorClass)} />
-            <span className={cn('text-sm font-medium', trendColorClass)}>
-              {changeText}
-            </span>
+          <div className="flex items-center space-x-1 pt-1">
+            {' '}
+            {/* Added pt-1 */}
+            <Icon iconId={trendIconId} className={cn('h-4 w-4', trendColorClass)} />
+            <span className={cn('text-sm font-medium', trendColorClass)}>{changeText}</span>
             {changeLabel && (
-              <span className="text-xs text-muted-foreground ml-1">
-                {changeLabel}
-              </span>
+              <span className="text-xs text-muted-foreground ml-1">{changeLabel}</span>
             )}
           </div>
         )}
@@ -145,4 +142,4 @@ export const KpiCard: React.FC<KpiCardProps> = ({
       </CardFooter> */}
     </Card>
   );
-}; 
+};

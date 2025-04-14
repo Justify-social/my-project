@@ -1,34 +1,37 @@
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "react-hot-toast";
-import { useState } from "react";
-import { ThemeProvider } from "next-themes";
-import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { useState } from 'react';
+import { ThemeProvider } from 'next-themes';
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 
-export default function Providers({ 
+export default function Providers({
   children,
-  session 
-}: { 
+  session,
+}: {
   children: React.ReactNode;
   session: any;
 }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 minute
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // 1 minute
+          },
+        },
+      })
+  );
 
   return (
-    <SessionProvider session={session}>
+    <UserProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster position="top-right" />
         </ThemeProvider>
       </QueryClientProvider>
-    </SessionProvider>
+    </UserProvider>
   );
-} 
+}

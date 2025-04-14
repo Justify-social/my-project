@@ -1,4 +1,3 @@
-
 // Component API
 export const componentApi = {
   getComponents: async () => {
@@ -12,5 +11,5 @@ export const componentApi = {
   getComponentChanges: async (componentPath: string) => {
     // Mock implementation
     return [];
-  }
+  },
 };

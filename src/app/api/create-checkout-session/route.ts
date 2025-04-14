@@ -10,10 +10,7 @@ export async function POST(request: Request) {
     const { priceId, mode } = await request.json();
 
     if (!priceId) {
-      return NextResponse.json(
-        { error: 'Price ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Price ID is required' }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -32,9 +29,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Stripe checkout error:', error);
-    return NextResponse.json(
-      { error: 'Error creating checkout session' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error creating checkout session' }, { status: 500 });
   }
-} 
+}

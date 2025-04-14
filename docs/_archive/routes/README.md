@@ -54,4 +54,3 @@ Routes are implemented using React Router with the following pattern:
 ```
 
 For code-level details about route implementation, see the router setup in `src/router/index.tsx`.
-

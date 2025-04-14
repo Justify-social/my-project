@@ -26,7 +26,7 @@ export async function sendTeamInvitationEmail({
   companyName,
   role,
   invitationLink,
-  expiresAt
+  expiresAt,
 }: TeamInvitationEmailProps): Promise<boolean> {
   try {
     if (!process.env.SENDGRID_API_KEY) {
@@ -38,7 +38,7 @@ export async function sendTeamInvitationEmail({
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
 
     // Format the role for display
@@ -50,15 +50,15 @@ export async function sendTeamInvitationEmail({
       subject: `You've been invited to join ${companyName}`,
       text: `${inviterName} has invited you to join ${companyName} as a ${formattedRole}. Click the link below to accept the invitation:\n\n${invitationLink}\n\nThis invitation expires on ${formattedExpiryDate}.`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #4F46E5;">You've been invited to join ${companyName}</h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; p-4;">
+          <h2 style="color: var(--interactive-color);">You've been invited to join ${companyName}</h2>
           <p>${inviterName} has invited you to join ${companyName} as a <strong>${formattedRole}</strong>.</p>
-          <div style="margin: 30px 0;">
-            <a href="${invitationLink}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+          <div style="m-4 0;">
+            <a href="${invitationLink}" style="background-color: var(--interactive-color); color: white; p-4 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
               Accept Invitation
             </a>
           </div>
-          <p style="color: #6B7280; font-size: 14px;">This invitation expires on ${formattedExpiryDate}.</p>
+          <p style="color: var(--secondary-color); text-base;">This invitation expires on ${formattedExpiryDate}.</p>
         </div>
       `,
     };
@@ -81,4 +81,4 @@ export function generateInvitationToken(): string {
     .fill(null)
     .map(() => Math.round(Math.random() * 16).toString(16))
     .join('');
-} 
+}

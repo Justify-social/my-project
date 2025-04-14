@@ -1,6 +1,6 @@
 /**
  * Caching Utilities
- * 
+ *
  * This file contains utility functions for implementing client-side caching
  * to optimize performance and reduce server load.
  */
@@ -13,11 +13,7 @@ import { useState, useEffect } from 'react';
  * @param fetcher The function to fetch the data
  * @param ttl Time to live in seconds (default: 5 minutes)
  */
-export function useClientCache<T>(
-  key: string,
-  fetcher: () => Promise<T>,
-  ttl: number = 300
-) {
+export function useClientCache<T>(key: string, fetcher: () => Promise<T>, ttl: number = 300) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -30,7 +26,7 @@ export function useClientCache<T>(
         const ttlKey = `ttl_${key}`;
         const cachedData = localStorage.getItem(cacheKey);
         const cachedTtl = localStorage.getItem(ttlKey);
-        
+
         // If we have cached data and it's not expired, use it
         if (cachedData && cachedTtl) {
           const expirationTime = parseInt(cachedTtl, 10);
@@ -40,14 +36,14 @@ export function useClientCache<T>(
             return;
           }
         }
-        
+
         // Otherwise fetch new data
         const freshData = await fetcher();
-        
+
         // Cache the new data
         localStorage.setItem(cacheKey, JSON.stringify(freshData));
         localStorage.setItem(ttlKey, (Date.now() + ttl * 1000).toString());
-        
+
         setData(freshData);
         setLoading(false);
       } catch (err: any) {

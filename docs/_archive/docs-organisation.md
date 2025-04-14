@@ -59,7 +59,7 @@ docs/
 │   ├── README.md             # Reference documentation overview
 │   ├── api/                  # API documentation
 │   ├── configs/              # Configuration reference
-│   ├── scripts/              # Scripts reference 
+│   ├── scripts/              # Scripts reference
 │   ├── ui/                   # UI reference (design tokens, style guides)
 │   ├── routes/               # Application routes documentation
 │   └── ...
@@ -79,26 +79,31 @@ docs/
 ## Documentation Types
 
 ### 1. Overviews (`README.md`)
+
 - Purpose: Provide high-level introduction to a topic or section
 - Structure: Introduction, key concepts, navigation links
 - Example: `getting-started/README.md`
 
 ### 2. Guides (How-To)
+
 - Purpose: Provide step-by-step instructions in plain British English
 - Structure: Prerequisites, steps, expected outcomes, troubleshooting
 - Example: `guides/developer/setup.md`
 
 ### 3. Reference
+
 - Purpose: Detailed technical information
 - Structure: Complete, exhaustive descriptions of APIs, configurations, etc.
 - Example: `reference/api/endpoints.md`
 
 ### 4. Concepts
+
 - Purpose: Explain fundamental ideas and patterns in simple language
 - Structure: Definition, context, examples, best practices
 - Example: `architecture/state-management.md`
 
 ### 5. Standards
+
 - Purpose: Define project-wide conventions and rules
 - Structure: Rules, rationale, examples, enforcement
 - Example: `standards/linting/eslint-config.md`
@@ -109,12 +114,12 @@ To achieve a 9/10 documentation standard, we must eliminate all duplicates and i
 
 ### 1. Content Audit and Consolidation
 
-| Issue | Action Required | Target Location | Files to Remove |
-|-------|----------------|-----------------|-----------------|
-| UI Component Documentation | Merge atomic design and shadcn information | `reference/ui/components/component-system.md` | `reference/ui/components/atomic-design.md` |
-| Linting Guides | Move all linting content to standards directory | `standards/linting/` | `reference/configs/linting-guide.md` |
-| Verification Docs | Complete migration of all verification files | `standards/verification/` | All files in `verification/` after migration |
-| Routes Documentation | Consolidate all route information | `reference/routes/` | Any duplicate route docs in other locations |
+| Issue                      | Action Required                                 | Target Location                               | Files to Remove                              |
+| -------------------------- | ----------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
+| UI Component Documentation | Merge atomic design and shadcn information      | `reference/ui/components/component-system.md` | `reference/ui/components/atomic-design.md`   |
+| Linting Guides             | Move all linting content to standards directory | `standards/linting/`                          | `reference/configs/linting-guide.md`         |
+| Verification Docs          | Complete migration of all verification files    | `standards/verification/`                     | All files in `verification/` after migration |
+| Routes Documentation       | Consolidate all route information               | `reference/routes/`                           | Any duplicate route docs in other locations  |
 
 ### 2. Navigation Improvements for New Developers
 
@@ -137,12 +142,14 @@ Every directory README must include:
 To maintain 9+/10 documentation quality:
 
 1. **Documentation Review Checklist**:
+
    - Confirms no duplication exists
    - Verifies consistent British English usage
    - Ensures newcomer-friendly language
    - Checks proper cross-references
 
 2. **Quarterly Documentation Audit**:
+
    - Review for emerging duplicates
    - Test navigation paths with new developers
    - Update based on developer feedback

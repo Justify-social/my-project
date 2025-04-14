@@ -9,30 +9,27 @@ const orphanedAssets: { url: string; assetId: string; timestamp: number }[] = []
 export async function POST(request: Request) {
   try {
     const { url, assetId } = await request.json();
-    
+
     if (!url || !assetId) {
       return NextResponse.json(
         { error: 'Missing required fields: url and assetId' },
         { status: 400 }
       );
     }
-    
+
     // Store orphaned asset info
     orphanedAssets.push({
       url,
       assetId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-    
+
     console.log(`Logged orphaned asset: ${assetId} at ${url}`);
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error logging orphaned asset:', error);
-    return NextResponse.json(
-      { error: 'Failed to log orphaned asset' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to log orphaned asset' }, { status: 500 });
   }
 }
 
@@ -44,13 +41,10 @@ export async function GET() {
     // In a production environment, this would be access-controlled
     return NextResponse.json({
       orphanedAssets,
-      count: orphanedAssets.length
+      count: orphanedAssets.length,
     });
   } catch (error) {
     console.error('Error retrieving orphaned assets:', error);
-    return NextResponse.json(
-      { error: 'Failed to retrieve orphaned assets' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to retrieve orphaned assets' }, { status: 500 });
   }
-} 
+}

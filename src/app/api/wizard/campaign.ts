@@ -1,7 +1,7 @@
 // /src/app/api/wizard/campaign.ts
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 import { withValidation } from '@/config/middleware/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,10 +9,16 @@ import { Prisma } from '@prisma/client';
 
 // Define schema for campaign creation
 const campaignSchema = z.object({
-  name: z.string().min(1, "Campaign name is required"),
+  name: z.string().min(1, 'Campaign name is required'),
   businessGoal: z.string().optional(),
-  startDate: z.string().optional().transform(val => val ? new Date(val) : undefined),
-  endDate: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  startDate: z
+    .string()
+    .optional()
+    .transform(val => (val ? new Date(val) : undefined)),
+  endDate: z
+    .string()
+    .optional()
+    .transform(val => (val ? new Date(val) : undefined)),
   timeZone: z.string().optional().default('UTC'),
   // Add other fields as needed
 });
@@ -52,17 +58,20 @@ export const POST = withValidation(
         locations: [],
         competitors: [],
         assets: [],
-        requirements: []
+        requirements: [],
       },
     });
 
     // Transform campaign data back to frontend format before returning
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
-    return NextResponse.json({
-      success: true,
-      data: transformedCampaign
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: transformedCampaign,
+      },
+      { status: 201 }
+    );
   },
   { entityName: 'Campaign', logValidationErrors: true }
 );

@@ -18,8 +18,8 @@ export async function GET() {
             firstName: true,
             surname: true,
             email: true,
-            position: true
-          }
+            position: true,
+          },
         },
         audience: {
           select: {
@@ -28,20 +28,20 @@ export async function GET() {
             age3544: true,
             age4554: true,
             age5564: true,
-            age65plus: true
-          }
+            age65plus: true,
+          },
         },
         creativeAssets: {
           select: {
             assetName: true,
             type: true,
-            url: true
-          }
-        }
+            url: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     console.log('Found campaigns:', JSON.stringify(campaigns, null, 2));
@@ -51,15 +51,18 @@ export async function GET() {
       count: campaigns.length,
       campaigns: campaigns,
       message: 'Available campaigns listed',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Error listing campaigns:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to list campaigns',
-      details: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to list campaigns',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 }
+    );
   }
-} 
+}

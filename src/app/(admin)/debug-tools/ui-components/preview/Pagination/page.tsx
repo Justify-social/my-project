@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import {
   Pagination,
   PaginationContent,
@@ -12,8 +12,8 @@ import {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/pagination"; // Import Pagination components
+  PaginationPrevious,
+} from '@/components/ui/pagination'; // Import Pagination components
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -24,14 +24,14 @@ const statusStyles: Record<string, string> = {
 
 export default function PaginationPreviewPage() {
   const componentMeta = {
-    "name": "Pagination",
-    "description": "Provides controls for navigating between pages of content.",
-    "category": "organism",
-    "subcategory": "navigation",
-    "renderType": "server", // Can be server-rendered if hrefs are static
-    "status": "stable", // Added status
-    "author": "Shadcn UI", // Added author
-    "since": "2023-08-01" // Added since date (example)
+    name: 'Pagination',
+    description: 'Provides controls for navigating between pages of content.',
+    category: 'organism',
+    subcategory: 'navigation',
+    renderType: 'server', // Can be server-rendered if hrefs are static
+    status: 'stable', // Added status
+    author: 'Shadcn UI', // Added author
+    since: '2023-08-01', // Added since date (example)
   };
   // const examples: string[] = []; // Removed examples array
 
@@ -40,10 +40,25 @@ export default function PaginationPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -53,12 +68,22 @@ export default function PaginationPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -109,7 +134,12 @@ export default function PaginationPreviewPage() {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious href="#" aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50" />
+                  <PaginationPrevious
+                    href="#"
+                    aria-disabled="true"
+                    tabIndex={-1}
+                    className="pointer-events-none opacity-50"
+                  />
                 </PaginationItem>
                 <PaginationItem>
                   <PaginationLink href="#" isActive>
@@ -117,15 +147,26 @@ export default function PaginationPreviewPage() {
                   </PaginationLink>
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationLink href="#" aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50">2</PaginationLink>
+                  <PaginationLink
+                    href="#"
+                    aria-disabled="true"
+                    tabIndex={-1}
+                    className="pointer-events-none opacity-50"
+                  >
+                    2
+                  </PaginationLink>
                 </PaginationItem>
                 <PaginationItem>
-                  <PaginationNext href="#" aria-disabled="true" tabIndex={-1} className="pointer-events-none opacity-50" />
+                  <PaginationNext
+                    href="#"
+                    aria-disabled="true"
+                    tabIndex={-1}
+                    className="pointer-events-none opacity-50"
+                  />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
-
 
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
@@ -133,7 +174,6 @@ export default function PaginationPreviewPage() {
 
       {/* Code Snippets Section - Removed */}
       {/* {examples && examples.length > 0 && ( ... )} */}
-
     </div>
   );
 }

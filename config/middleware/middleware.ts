@@ -5,14 +5,16 @@ import { getSession } from '@auth0/nextjs-auth0/edge';
 
 // Expanded static asset detection
 function isStaticAsset(path: string): boolean {
-  return path.startsWith('/_next') ||
+  return (
+    path.startsWith('/_next') ||
     path.includes('/images/') ||
-    path.includes('/icons/') ||    // Add icons path exclusion
-    path.endsWith('.svg') ||       // All SVG files
+    path.includes('/icons/') || // Add icons path exclusion
+    path.endsWith('.svg') || // All SVG files
     path.endsWith('.ico') ||
     path.endsWith('.png') ||
     path.endsWith('.css') ||
-    path.endsWith('.js');
+    path.endsWith('.js')
+  );
 }
 
 // Public paths that bypass auth
@@ -49,9 +51,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Only apply auth check to admin routes and API routes that require auth
-  if (path.startsWith('/admin') ||
-    (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
-
+  if (path.startsWith('/admin') || (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
     // Log the path being checked by middleware
     console.log(`[Middleware] Checking auth for API path: ${path}`);
 
@@ -69,10 +69,10 @@ export default async function middleware(req: NextRequest) {
       // respond with a 401 status for API routes
       if (path.startsWith('/api')) {
         console.error(`[Middleware] Unauthorized API access attempt: ${path}. Session not found.`); // Log before returning 401
-        return new NextResponse(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'content-type': 'application/json' } }
-        );
+        return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        });
       }
       // For admin routes, redirect to login
       return NextResponse.redirect(new URL('/api/auth/login', req.url));
@@ -106,7 +106,7 @@ async function handleAuthMiddleware(req: NextRequest) {
       email: session?.user?.email,
       path,
       roles: userRoles,
-      hasRole: userRoles.includes('super_admin')
+      hasRole: userRoles.includes('super_admin'),
     });
 
     if (!userRoles.includes('super_admin')) {

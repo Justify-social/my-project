@@ -5,7 +5,7 @@ import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 
 /**
  * Middleware factory for validating request bodies against a Zod schema
- * 
+ *
  * @param schema The Zod schema to validate against
  * @param options Configuration options for the validation
  * @returns A middleware function that validates the request body
@@ -18,11 +18,7 @@ export function validateRequest<T extends z.ZodType>(
     entityName?: string;
   } = {}
 ) {
-  const {
-    logValidationErrors = true,
-    logRequestBody = false,
-    entityName = 'Entity'
-  } = options;
+  const { logValidationErrors = true, logRequestBody = false, entityName = 'Entity' } = options;
 
   return async (request: NextRequest, next: () => Promise<Response>) => {
     try {
@@ -42,11 +38,9 @@ export function validateRequest<T extends z.ZodType>(
 
       // Optional logging of the request body
       if (logRequestBody) {
-        dbLogger.info(
-          DbOperation.VALIDATION,
-          `Validating ${entityName} request`,
-          { requestBody: body }
-        );
+        dbLogger.info(DbOperation.VALIDATION, `Validating ${entityName} request`, {
+          requestBody: body,
+        });
       }
 
       // Validate the request body
@@ -55,11 +49,9 @@ export function validateRequest<T extends z.ZodType>(
       if (!validationResult.success) {
         // Log validation errors if enabled
         if (logValidationErrors) {
-          dbLogger.warn(
-            DbOperation.VALIDATION,
-            `${entityName} validation failed`,
-            { errors: validationResult.error.format() }
-          );
+          dbLogger.warn(DbOperation.VALIDATION, `${entityName} validation failed`, {
+            errors: validationResult.error.format(),
+          });
         }
 
         return NextResponse.json(
@@ -107,7 +99,7 @@ export function validateRequest<T extends z.ZodType>(
 
 /**
  * Helper function to access validated data from the request
- * 
+ *
  * @param request The request object
  * @returns The validated data or null if not available
  */
@@ -122,4 +114,4 @@ export function getValidatedData<T>(request: NextRequest): T | null {
     console.error('Error getting validated data:', error);
     return null;
   }
-} 
+}

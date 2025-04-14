@@ -57,7 +57,7 @@ mcp_Graphiti_search_facts(
 mcp_Graphiti_add_episode(
   name: "Button Hover Effect Preference",
   episode_body: "Buttons should use fa-light by default and fa-solid on hover states.",
-  source: "text", 
+  source: "text",
   source_description: "UI preference"
 )
 ```

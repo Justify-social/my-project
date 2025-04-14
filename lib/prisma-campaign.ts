@@ -2,4 +2,4 @@
 import { prisma } from '@/lib/prisma';
 
 // Export the main prisma client to ensure consistency
-export { prisma }; 
+export { prisma };

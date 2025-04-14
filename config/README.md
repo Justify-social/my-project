@@ -31,3 +31,15 @@ For comprehensive documentation on the configuration system, see:
 ## Usage
 
 The root project files (e.g., `next.config.js`, `.eslintrc.js`, `jest.config.js`) now reference these canonical configuration files.
+
+## Project Structure
+
+This project has been organized with a clean directory structure:
+
+- `config/` - Configuration files organized by tool/framework
+- `docs/` - Project documentation
+- `scripts/` - Utility scripts organized by function
+- `src/` - Application source code
+- `public/` - Static assets
+
+See `docs/PROJECT_STRUCTURE.md` for more details on the project organization.

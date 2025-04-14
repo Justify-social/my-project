@@ -12,13 +12,13 @@ This guide documents the official brand guidelines and design system for Justify
 
 Justify.social uses a modern, clean color palette centered around these key colors:
 
-| Color Name | Hex Code | CSS Variable | Usage |
-|------------|----------|--------------|-------|
-| Jet | #333333 | `--primary-color` | Primary text, headings, icons |
-| Payne's Grey | #4A5568 | `--secondary-color` | Secondary text, supporting elements |
-| Deep Sky Blue | #00BFFF | `--accent-color` | Buttons, active states, links, key actions |
-| White | #FFFFFF | `--background-color` | Background, containers, cards |
-| French Grey | #D1D5DB | `--divider-color` | Dividers, borders, separators |
+| Color Name    | Hex Code | CSS Variable         | Usage                                      |
+| ------------- | -------- | -------------------- | ------------------------------------------ |
+| Jet           | #333333  | `--primary-color`    | Primary text, headings, icons              |
+| Payne's Grey  | #4A5568  | `--secondary-color`  | Secondary text, supporting elements        |
+| Deep Sky Blue | #00BFFF  | `--accent-color`     | Buttons, active states, links, key actions |
+| White         | #FFFFFF  | `--background-color` | Background, containers, cards              |
+| French Grey   | #D1D5DB  | `--divider-color`    | Dividers, borders, separators              |
 
 ### Color Application Guidelines
 
@@ -34,10 +34,10 @@ Justify.social employs a carefully chosen typography system that balances readab
 
 ### Font Families
 
-| Font Purpose | Font Family | Weight | Usage |
-|--------------|-------------|--------|-------|
-| Headings | Sora | 400, 700 | All headings (H1-H6) |
-| Body | Work Sans | 400, 500, 600 | Body text, UI elements, buttons |
+| Font Purpose | Font Family | Weight        | Usage                           |
+| ------------ | ----------- | ------------- | ------------------------------- |
+| Headings     | Sora        | 400, 700      | All headings (H1-H6)            |
+| Body         | Work Sans   | 400, 500, 600 | Body text, UI elements, buttons |
 
 ### Typography Guidelines
 
@@ -53,17 +53,17 @@ Justify.social uses a sophisticated system of KPI (Key Performance Indicator) ic
 
 ### KPI Icon Set
 
-| KPI Name | Description | Icon Path | Color | Funnel Location |
-|----------|-------------|-----------|-------|-----------------|
-| Brand Awareness | The increase in recognition of your brand | `/KPIs/Brand_Awareness.svg` | `--accent-color` | Top Funnel |
-| Ad Recall | The percentage of people who remember seeing your advertisement | `/KPIs/Ad_Recall.svg` | `--accent-color` | Top Funnel |
-| Consideration | The percentage of people considering purchasing from your brand | `/KPIs/Consideration.svg` | `--accent-color` | Mid Funnel |
-| Message Association | How well people link your key messages to your brand | `/KPIs/Message_Association.svg` | `--accent-color` | Mid Funnel |
-| Brand Preference | Preference for your brand over competitors | `/KPIs/Brand_Preference.svg` | `--accent-color` | Mid Funnel |
-| Purchase Intent | Likelihood of purchasing your product or service | `/KPIs/Purchase_Intent.svg` | `--accent-color` | Mid Funnel |
-| Action Intent | Likelihood of taking a specific action related to your brand | `/KPIs/Action_Intent.svg` | `--accent-color` | Bottom Funnel |
-| Recommendation Intent | Likelihood of recommending your brand to others | `/KPIs/Brand_Preference.svg` | `--accent-color` | Bottom Funnel |
-| Advocacy | Willingness to actively promote your brand | `/KPIs/Advocacy.svg` | `--accent-color` | Bottom Funnel |
+| KPI Name              | Description                                                     | Icon Path                       | Color            | Funnel Location |
+| --------------------- | --------------------------------------------------------------- | ------------------------------- | ---------------- | --------------- |
+| Brand Awareness       | The increase in recognition of your brand                       | `/KPIs/Brand_Awareness.svg`     | `--accent-color` | Top Funnel      |
+| Ad Recall             | The percentage of people who remember seeing your advertisement | `/KPIs/Ad_Recall.svg`           | `--accent-color` | Top Funnel      |
+| Consideration         | The percentage of people considering purchasing from your brand | `/KPIs/Consideration.svg`       | `--accent-color` | Mid Funnel      |
+| Message Association   | How well people link your key messages to your brand            | `/KPIs/Message_Association.svg` | `--accent-color` | Mid Funnel      |
+| Brand Preference      | Preference for your brand over competitors                      | `/KPIs/Brand_Preference.svg`    | `--accent-color` | Mid Funnel      |
+| Purchase Intent       | Likelihood of purchasing your product or service                | `/KPIs/Purchase_Intent.svg`     | `--accent-color` | Mid Funnel      |
+| Action Intent         | Likelihood of taking a specific action related to your brand    | `/KPIs/Action_Intent.svg`       | `--accent-color` | Bottom Funnel   |
+| Recommendation Intent | Likelihood of recommending your brand to others                 | `/KPIs/Brand_Preference.svg`    | `--accent-color` | Bottom Funnel   |
+| Advocacy              | Willingness to actively promote your brand                      | `/KPIs/Advocacy.svg`            | `--accent-color` | Bottom Funnel   |
 
 ### KPI Styling Guidelines
 
@@ -79,19 +79,19 @@ The application employs a consistent set of navigation icons throughout the inte
 
 ### Navigation Icon Set
 
-| Icon Name | Purpose | SVG Path | Active State |
-|-----------|---------|----------|-------------|
-| Home | Main dashboard navigation | `/Home.svg` | Blue accent filter |
-| Campaigns | Campaign management | `/Campaigns.svg` | Blue accent filter |
-| Brand Lift | Brand lift studies | `/Brand_Lift.svg` | Blue accent filter |
-| Brand Health | Brand health monitoring | `/Brand_Health.svg` | Blue accent filter |
-| Creative Testing | Asset testing | `/Creative_Asset_Testing.svg` | Blue accent filter |
-| MMM | Marketing mix modeling | `/MMM.svg` | Blue accent filter |
-| Influencers | Influencer management | `/Influencers.svg` | Blue accent filter |
-| Reports | Analytics and reporting | `/Reports.svg` | Blue accent filter |
-| Billing | Subscription management | `/Billing.svg` | Blue accent filter |
-| Settings | Application settings | `/Settings.svg` | Blue accent filter |
-| Help | Help resources | `/Help.svg` | Blue accent filter |
+| Icon Name        | Purpose                   | SVG Path                      | Active State       |
+| ---------------- | ------------------------- | ----------------------------- | ------------------ |
+| Home             | Main dashboard navigation | `/Home.svg`                   | Blue accent filter |
+| Campaigns        | Campaign management       | `/Campaigns.svg`              | Blue accent filter |
+| Brand Lift       | Brand lift studies        | `/Brand_Lift.svg`             | Blue accent filter |
+| Brand Health     | Brand health monitoring   | `/Brand_Health.svg`           | Blue accent filter |
+| Creative Testing | Asset testing             | `/Creative_Asset_Testing.svg` | Blue accent filter |
+| MMM              | Marketing mix modeling    | `/MMM.svg`                    | Blue accent filter |
+| Influencers      | Influencer management     | `/Influencers.svg`            | Blue accent filter |
+| Reports          | Analytics and reporting   | `/Reports.svg`                | Blue accent filter |
+| Billing          | Subscription management   | `/Billing.svg`                | Blue accent filter |
+| Settings         | Application settings      | `/Settings.svg`               | Blue accent filter |
+| Help             | Help resources            | `/Help.svg`                   | Blue accent filter |
 
 ### Navigation Item Styling
 
@@ -121,12 +121,12 @@ Justify.social is designed to work seamlessly across desktop, tablet, and mobile
 
 ### Breakpoints
 
-| Breakpoint Name | Screen Width | CSS Media Query | Usage |
-|-----------------|--------------|----------------|-------|
-| Desktop | > 1024px | Default | Full-featured experience |
-| Tablet Landscape | ≤ 1024px | `@media (max-width: 1024px)` | Adjusted spacing, streamlined layouts |
-| Tablet Portrait | ≤ 768px | `@media (max-width: 768px)` | Simplified navigation, stacked layouts |
-| Mobile | ≤ 640px | `@media (max-width: 640px)` | Single-column layouts, optimized for touch |
+| Breakpoint Name  | Screen Width | CSS Media Query              | Usage                                      |
+| ---------------- | ------------ | ---------------------------- | ------------------------------------------ |
+| Desktop          | > 1024px     | Default                      | Full-featured experience                   |
+| Tablet Landscape | ≤ 1024px     | `@media (max-width: 1024px)` | Adjusted spacing, streamlined layouts      |
+| Tablet Portrait  | ≤ 768px      | `@media (max-width: 768px)`  | Simplified navigation, stacked layouts     |
+| Mobile           | ≤ 640px      | `@media (max-width: 640px)`  | Single-column layouts, optimized for touch |
 
 ### Responsive Design Principles
 
@@ -215,11 +215,11 @@ Justify.social is committed to maintaining WCAG 2.1 AA compliance:
 
 ```css
 :root {
-  --primary-color: #333333;      /* Jet */
-  --secondary-color: #4A5568;    /* Payne's Grey */
-  --accent-color: #00BFFF;       /* Deep Sky Blue */
-  --background-color: #FFFFFF;   /* White */
-  --divider-color: #D1D5DB;      /* French Grey */
+  --primary-color: #333333; /* Jet */
+  --secondary-color: #4a5568; /* Payne's Grey */
+  --accent-color: #00bfff; /* Deep Sky Blue */
+  --background-color: #ffffff; /* White */
+  --divider-color: #d1d5db; /* French Grey */
 }
 ```
 
@@ -231,8 +231,8 @@ While Justify.social currently maintains a light theme even when dark mode is de
 @media (prefers-color-scheme: dark) {
   :root {
     /* Currently unchanged but reserved for future dark theme */
-    --background-color: #FFFFFF; /* Keep background white even in dark mode */
-    --primary-color: #333333;    /* Keep text dark for readability on white */
+    --background-color: #ffffff; /* Keep background white even in dark mode */
+    --primary-color: #333333; /* Keep text dark for readability on white */
   }
 }
 ```
@@ -245,4 +245,4 @@ This guide is implemented in the codebase via:
 - **component-specific styles**: Individual component styles that extend the global foundations
 - **Tailwind configuration**: Extensions to the Tailwind theme to align with the brand guidelines
 
-Developers should always reference the CSS variables defined in `global.css` rather than hardcoding color values or styles. 
+Developers should always reference the CSS variables defined in `global.css` rather than hardcoding color values or styles.

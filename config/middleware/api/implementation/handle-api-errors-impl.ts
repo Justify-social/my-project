@@ -1,6 +1,6 @@
 /**
  * API Error Handling Middleware Implementation for App Router
- * 
+ *
  * This module provides the actual implementation for handling database errors
  * in the App Router API routes, providing consistent error responses.
  */
@@ -11,7 +11,7 @@ import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 
 /**
  * Handle database errors and return a standardized response
- * 
+ *
  * @param error The error to handle
  * @param entityName The name of the entity being operated on
  * @param operation The database operation being performed
@@ -34,13 +34,13 @@ export function handleDbErrorImpl(
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     // Unique constraint violation
     if (error.code === 'P2002') {
-      const field = error.meta?.target as string[] || ['unknown field'];
+      const field = (error.meta?.target as string[]) || ['unknown field'];
       return NextResponse.json(
         {
           success: false,
           error: `A ${entityName.toLowerCase()} with this ${field.join(', ')} already exists`,
           code: error.code,
-          fields: field
+          fields: field,
         },
         { status: 409 }
       );
@@ -53,7 +53,7 @@ export function handleDbErrorImpl(
           success: false,
           error: 'Foreign key constraint failed',
           details: error.message,
-          code: error.code
+          code: error.code,
         },
         { status: 400 }
       );
@@ -66,7 +66,7 @@ export function handleDbErrorImpl(
           success: false,
           error: `${entityName} not found`,
           details: error.message,
-          code: error.code
+          code: error.code,
         },
         { status: 404 }
       );
@@ -79,7 +79,7 @@ export function handleDbErrorImpl(
           success: false,
           error: 'Missing required fields',
           details: error.message,
-          code: error.code
+          code: error.code,
         },
         { status: 400 }
       );
@@ -92,7 +92,7 @@ export function handleDbErrorImpl(
       {
         success: false,
         error: 'Validation error in database operation',
-        details: error.message
+        details: error.message,
       },
       { status: 400 }
     );
@@ -104,7 +104,7 @@ export function handleDbErrorImpl(
       {
         success: false,
         error: 'Database connection error',
-        details: 'Unable to connect to the database. Please try again later.'
+        details: 'Unable to connect to the database. Please try again later.',
       },
       { status: 503 }
     );
@@ -115,7 +115,7 @@ export function handleDbErrorImpl(
     {
       success: false,
       error: `Failed to ${operation.toLowerCase()} ${entityName.toLowerCase()}`,
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     },
     { status: 500 }
   );
@@ -123,7 +123,7 @@ export function handleDbErrorImpl(
 
 /**
  * Combine validation and database error handling for a request handler
- * 
+ *
  * @param fn The handler function to wrap
  * @param options Configuration options
  * @returns A function that handles validation and database errors
@@ -136,11 +136,7 @@ export function tryCatchImpl<T>(
     logError?: boolean;
   } = {}
 ): Promise<T | NextResponse> {
-  const {
-    entityName = 'Entity',
-    operation = DbOperation.VALIDATION,
-    logError = true
-  } = options;
+  const { entityName = 'Entity', operation = DbOperation.VALIDATION, logError = true } = options;
 
   return fn().catch(error => {
     if (logError) {
@@ -154,4 +150,4 @@ export function tryCatchImpl<T>(
 
     return handleDbErrorImpl(error, entityName, operation);
   });
-} 
+}

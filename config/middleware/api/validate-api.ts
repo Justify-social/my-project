@@ -1,6 +1,6 @@
 /**
  * API Validation Middleware for App Router
- * 
+ *
  * This module provides middleware functions for validating API requests
  * in the App Router API routes, using Zod schemas for validation.
  */
@@ -17,7 +17,7 @@ export type ValidationOptions = {
 
 /**
  * Validate the request body against a Zod schema
- * 
+ *
  * @param request The Next.js request object
  * @param schema The Zod schema to validate against
  * @param options Configuration options
@@ -33,7 +33,7 @@ export async function validateRequest<T extends z.ZodType>(
 
 /**
  * Higher-order function to create a handler with request validation
- * 
+ *
  * @param schema The Zod schema to validate against
  * @param handler The handler function to call with validated data
  * @param options Configuration options
@@ -45,4 +45,4 @@ export function withValidation<T extends z.ZodType>(
   options: ValidationOptions = {}
 ): (request: NextRequest) => Promise<NextResponse> {
   return withValidationImpl(schema, handler, options);
-} 
+}

@@ -13,6 +13,7 @@ This document details the routes in the (auth) group.
 **Description:** accept-invitation page
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: No
 - Caching: No
@@ -26,7 +27,7 @@ This document details the routes in the (auth) group.
 **Description:** subscribe page
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: Yes
 - Caching: Yes
-

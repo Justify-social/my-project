@@ -46,4 +46,4 @@ export interface SurveyPreviewData {
   adMusic: string;
   questions: SurveyQuestion[];
   submissionStatus: string;
-} 
+}

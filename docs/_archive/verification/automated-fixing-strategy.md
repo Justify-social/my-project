@@ -17,12 +17,12 @@ Rather than attempting to fix all issues at once, a batched approach prioritizes
 
 ### Core Tools
 
-| Tool | Purpose | Command |
-|------|---------|---------|
-| `lint-fixer.js` | Fix common patterns in individual files | `node scripts/consolidated/linting/lint-fixer.js --file path/to/file.js` |
-| `bulk-fix.sh` | Run batch fixes on multiple issues | `bash scripts/consolidated/linting/bulk-fix.sh` |
-| ESLint autofix | Fix simple issues automatically | `npx eslint --config eslint.config.mjs --fix path/to/file.js` |
-| `tracking-summary.js` | Monitor progress | `node scripts/consolidated/cleanup/tracking-summary.js` |
+| Tool                  | Purpose                                 | Command                                                                  |
+| --------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| `lint-fixer.js`       | Fix common patterns in individual files | `node scripts/consolidated/linting/lint-fixer.js --file path/to/file.js` |
+| `bulk-fix.sh`         | Run batch fixes on multiple issues      | `bash scripts/consolidated/linting/bulk-fix.sh`                          |
+| ESLint autofix        | Fix simple issues automatically         | `npx eslint --config eslint.config.mjs --fix path/to/file.js`            |
+| `tracking-summary.js` | Monitor progress                        | `node scripts/consolidated/cleanup/tracking-summary.js`                  |
 
 ## Strategy by Error Type
 
@@ -35,8 +35,8 @@ Rather than attempting to fix all issues at once, a batched approach prioritizes
 bash scripts/consolidated/linting/bulk-fix.sh
 
 # Option 2: Generate a list of files with require() imports
-FILES=$(npx eslint --config eslint.config.mjs --format json . | 
-  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); 
+FILES=$(npx eslint --config eslint.config.mjs --format json . |
+  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
   const files = data.filter(f => f.messages.some(m => m.ruleId === '@typescript-eslint/no-require-imports'))
   .map(f => f.filePath); console.log(files.join('\n'))");
 
@@ -45,11 +45,12 @@ echo "$FILES" | xargs -I{} node scripts/consolidated/linting/lint-fixer.js --fil
 ```
 
 **Verification**:
+
 ```bash
 # Count remaining require() errors after fixes
-npx eslint --config eslint.config.mjs --format json . | 
-  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); 
-  const count = data.reduce((acc, f) => acc + f.messages.filter(m => m.ruleId === '@typescript-eslint/no-require-imports').length, 0); 
+npx eslint --config eslint.config.mjs --format json . |
+  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+  const count = data.reduce((acc, f) => acc + f.messages.filter(m => m.ruleId === '@typescript-eslint/no-require-imports').length, 0);
   console.log('Remaining require() errors:', count);"
 ```
 
@@ -59,8 +60,8 @@ npx eslint --config eslint.config.mjs --format json . |
 
 ```bash
 # Generate files with unused variables
-FILES=$(npx eslint --config eslint.config.mjs --format json . | 
-  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); 
+FILES=$(npx eslint --config eslint.config.mjs --format json . |
+  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
   const files = data.filter(f => f.messages.some(m => m.ruleId === '@typescript-eslint/no-unused-vars'))
   .map(f => f.filePath); console.log(files.join('\n'))");
 
@@ -74,8 +75,8 @@ This requires more manual attention but can be semi-automated:
 
 ```bash
 # Generate list of files with img elements
-FILES=$(npx eslint --config eslint.config.mjs --format json . | 
-  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); 
+FILES=$(npx eslint --config eslint.config.mjs --format json . |
+  node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
   const files = data.filter(f => f.messages.some(m => m.ruleId === '@next/next/no-img-element'))
   .map(f => f.filePath); console.log(files.join('\n'))");
 
@@ -88,10 +89,10 @@ const files = process.argv.slice(2);
 
 files.forEach(file => {
   const content = fs.readFileSync(file, 'utf8');
-  
+
   // Check if file already imports Image
   const hasImageImport = /import\s+Image\s+from\s+['"]next\/image['"]/g.test(content);
-  
+
   // Add import if needed
   let newContent = content;
   if (!hasImageImport && content.includes('<img')) {
@@ -100,20 +101,20 @@ files.forEach(file => {
       const lastImportIndex = content.lastIndexOf('import ');
       const endOfImportLine = content.indexOf('\n', lastImportIndex);
       if (endOfImportLine !== -1) {
-        newContent = content.slice(0, endOfImportLine + 1) + 
-          "import Image from 'next/image';\n" + 
+        newContent = content.slice(0, endOfImportLine + 1) +
+          "import Image from 'next/image';\n" +
           content.slice(endOfImportIndex + 1);
       }
     } else {
       newContent = "import Image from 'next/image';\n\n" + content;
     }
-    
+
     console.log(`Added Image import to ${file}`);
   }
-  
+
   // Write back to file
   fs.writeFileSync(file, newContent, 'utf8');
-  
+
   console.log(`Processed ${file}`);
 });
 EOL
@@ -180,17 +181,20 @@ echo "$FILES" | xargs -P 4 -I{} node scripts/consolidated/linting/lint-fixer.js 
 ## Safety Measures
 
 1. **Always work in a dedicated branch**:
+
    ```bash
    git checkout -b lint-fixes
    ```
 
 2. **Commit after each successful batch**:
+
    ```bash
    git add .
    git commit -m "Fix: CommonJS require imports (batch 1/3)"
    ```
 
 3. **Periodic testing**:
+
    ```bash
    npm test
    ```
@@ -203,11 +207,13 @@ echo "$FILES" | xargs -P 4 -I{} node scripts/consolidated/linting/lint-fixer.js 
 ## Monitoring & Reporting
 
 1. **Regular progress tracking**:
+
    ```bash
    node scripts/consolidated/cleanup/tracking-summary.js
    ```
 
 2. **Save baselines after major milestones**:
+
    ```bash
    node scripts/consolidated/cleanup/tracking-summary.js --save
    ```
@@ -215,8 +221,8 @@ echo "$FILES" | xargs -P 4 -I{} node scripts/consolidated/linting/lint-fixer.js 
 3. **Create a progress report**:
    ```bash
    # Generate a simple progress report
-   npx eslint --config eslint.config.mjs --format json . | 
-     node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); 
+   npx eslint --config eslint.config.mjs --format json . |
+     node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8'));
      const errorCount = data.reduce((acc, f) => acc + f.errorCount, 0);
      const warningCount = data.reduce((acc, f) => acc + f.warningCount, 0);
      console.log('Current Status:');
@@ -227,4 +233,4 @@ echo "$FILES" | xargs -P 4 -I{} node scripts/consolidated/linting/lint-fixer.js 
 
 ## Conclusion
 
-This automated approach allows us to efficiently address the vast majority of ESLint issues in the codebase. By applying fixes in batches and utilizing automated scripts, we can achieve a clean codebase with minimal manual intervention. Regular verification and tracking ensure that progress is measurable and sustainable. 
+This automated approach allows us to efficiently address the vast majority of ESLint issues in the codebase. By applying fixes in batches and utilizing automated scripts, we can achieve a clean codebase with minimal manual intervention. Regular verification and tracking ensure that progress is measurable and sustainable.

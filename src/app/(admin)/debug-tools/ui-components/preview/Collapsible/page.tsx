@@ -6,15 +6,15 @@
 import React, { useState } from 'react'; // Import useState
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 // Import Collapsible and its sub-components
 import {
   Collapsible,
   CollapsibleTrigger,
-  CollapsibleContent
+  CollapsibleContent,
 } from '../../../../../../components/ui/collapsible';
 // Import Button and Icon for the trigger example
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 
 const statusStyles: Record<string, string> = {
@@ -27,18 +27,23 @@ const statusStyles: Record<string, string> = {
 export default function CollapsiblePreviewPage() {
   // Add optional status type, correct category/subcategory
   const componentMeta: {
-    name: string; description: string; category: string;
-    subcategory: string | null; renderType: string;
-    author: string; since: string; status?: string | null;
+    name: string;
+    description: string;
+    category: string;
+    subcategory: string | null;
+    renderType: string;
+    author: string;
+    since: string;
+    status?: string | null;
   } = {
-    "name": "Collapsible",
-    "description": "An interactive component which expands/collapses its content.",
-    "category": "layout", // Corrected category
-    "subcategory": "container", // Corrected subcategory
-    "renderType": "client",
-    "author": "",
-    "since": "",
-    "status": null // Build script will populate this if JSDoc exists
+    name: 'Collapsible',
+    description: 'An interactive component which expands/collapses its content.',
+    category: 'layout', // Corrected category
+    subcategory: 'container', // Corrected subcategory
+    renderType: 'client',
+    author: '',
+    since: '',
+    status: null, // Build script will populate this if JSDoc exists
   };
   const examples: string[] = [];
 
@@ -50,10 +55,25 @@ export default function CollapsiblePreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -63,12 +83,22 @@ export default function CollapsiblePreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -83,18 +113,15 @@ export default function CollapsiblePreviewPage() {
           {/* --- ADDED RENDER EXAMPLE --- */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Interactive Example</h3>
-            <Collapsible
-              open={isOpen}
-              onOpenChange={setIsOpen}
-              className="w-[350px] space-y-2"
-            >
+            <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-[350px] space-y-2">
               <div className="flex items-center justify-between space-x-4 px-4">
-                <h4 className="text-sm font-semibold">
-                  @peduarte starred 3 repositories
-                </h4>
+                <h4 className="text-sm font-semibold">@peduarte starred 3 repositories</h4>
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="sm" className="w-9 p-0">
-                    <Icon iconId={isOpen ? 'faChevronUpLight' : 'faChevronDownLight'} className="h-4 w-4" />
+                    <Icon
+                      iconId={isOpen ? 'faChevronUpLight' : 'faChevronDownLight'}
+                      className="h-4 w-4"
+                    />
                     <span className="sr-only">Toggle</span>
                   </Button>
                 </CollapsibleTrigger>
@@ -106,9 +133,7 @@ export default function CollapsiblePreviewPage() {
                 <div className="rounded-md border px-4 py-3 font-mono text-sm">
                   @radix-ui/colors
                 </div>
-                <div className="rounded-md border px-4 py-3 font-mono text-sm">
-                  @stitches/react
-                </div>
+                <div className="rounded-md border px-4 py-3 font-mono text-sm">@stitches/react</div>
               </CollapsibleContent>
             </Collapsible>
           </div>
@@ -131,7 +156,6 @@ export default function CollapsiblePreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

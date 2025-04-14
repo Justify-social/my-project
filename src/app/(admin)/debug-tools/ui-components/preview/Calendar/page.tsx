@@ -6,7 +6,7 @@
 import React, { useState } from 'react'; // Import useState
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import { Calendar } from '../../../../../../components/ui/calendar';
 
 const statusStyles: Record<string, string> = {
@@ -18,18 +18,24 @@ const statusStyles: Record<string, string> = {
 
 export default function CalendarPreviewPage() {
   const componentMeta: {
-    name: string; description: string; category: string;
-    subcategory: string | null; renderType: string;
-    author: string; since: string; status?: string | null;
+    name: string;
+    description: string;
+    category: string;
+    subcategory: string | null;
+    renderType: string;
+    author: string;
+    since: string;
+    status?: string | null;
   } = {
-    "name": "Calendar",
-    "description": "Displays a calendar grid allowing users to view dates and select single or multiple dates.",
-    "category": "organism",
-    "subcategory": "input",
-    "renderType": "client",
-    "author": "",
-    "since": "",
-    "status": null // Build script will populate this if JSDoc exists
+    name: 'Calendar',
+    description:
+      'Displays a calendar grid allowing users to view dates and select single or multiple dates.',
+    category: 'organism',
+    subcategory: 'input',
+    renderType: 'client',
+    author: '',
+    since: '',
+    status: null, // Build script will populate this if JSDoc exists
   };
   const examples: string[] = [];
 
@@ -41,10 +47,25 @@ export default function CalendarPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -54,12 +75,22 @@ export default function CalendarPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -74,7 +105,9 @@ export default function CalendarPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
             {/* <Calendar /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <Calendar /> here)</p>
+            <p className="text-sm text-muted-foreground">
+              (Manually add rendering example for <Calendar /> here)
+            </p>
           </div>
           {/* Example 2: Add more placeholders or examples as needed */}
           {/* --- ADDED RENDER EXAMPLE --- */}
@@ -109,7 +142,6 @@ export default function CalendarPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -6,12 +6,9 @@ Request handlers and controllers for API endpoints.
 
 ## Contents
 
-
-
 ### Files
 
 - 1 .ts file
-
 
 ## Usage
 
@@ -23,8 +20,6 @@ Implement the application's API logic in these handler functions.
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

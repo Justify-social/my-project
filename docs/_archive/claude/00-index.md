@@ -5,6 +5,7 @@ Welcome to the project documentation! This collection of documents is designed t
 ## Available Documentation
 
 1. **[Project Overview](./01-project-overview.md)**
+
    - Purpose of the project
    - Core features
    - Technical architecture
@@ -13,6 +14,7 @@ Welcome to the project documentation! This collection of documents is designed t
    - Deployment information
 
 2. **[Code Organization](./02-code-organization.md)**
+
    - Project structure
    - Naming conventions
    - Component structure
@@ -23,6 +25,7 @@ Welcome to the project documentation! This collection of documents is designed t
    - Tree shake process
 
 3. **[UI Component Library](./03-ui-component-library.md)**
+
    - Overview of the component library
    - Shadcn UI integration
    - Available components
@@ -34,6 +37,7 @@ Welcome to the project documentation! This collection of documents is designed t
    - Implementation guidelines
 
 4. **[Database Models](./04-database-models.md)**
+
    - Overview of the database
    - Key models (CampaignWizard, Influencer, User, etc.)
    - Key enums
@@ -44,6 +48,7 @@ Welcome to the project documentation! This collection of documents is designed t
    - JSON fields
 
 5. **[API and Authentication](./05-api-and-authentication.md)**
+
    - API structure
    - Authentication flow
    - Auth implementation
@@ -76,6 +81,7 @@ This documentation is designed to be a comprehensive reference for understanding
 ## Important Guidelines
 
 ### Brand Colors
+
 - **Primary**: Jet `#333333`
 - **Secondary**: Payne's Grey `#4A5568`
 - **Accent**: Deep Sky Blue `#00BFFF`
@@ -84,14 +90,16 @@ This documentation is designed to be a comprehensive reference for understanding
 - **Interactive**: Medium Blue `#3182CE`
 
 ### Icons
+
 - **Icon Library**: FontAwesome Pro
 - **Default state**: Light icons (`fa-light`)
 - **Hover state**: Solid icons (`fa-solid`)
 
 ### Coding Standards
+
 - Follow atomic design principles
 - Use TypeScript for type safety
 - Maintain single source of truth
 - Follow established naming conventions
 - Keep components small and focused
-- Write tests for all components 
+- Write tests for all components

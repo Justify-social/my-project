@@ -1,7 +1,3 @@
-export default function Template({ children }: {children: React.ReactNode;}) {
-  return (
-    <div className="bg-white font-work-sans">
-      {children}
-    </div>);
-
+export default function Template({ children }: { children: React.ReactNode }) {
+  return <div className="bg-white font-body">{children}</div>;
 }

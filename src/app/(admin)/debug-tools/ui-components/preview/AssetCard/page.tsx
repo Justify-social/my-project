@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import { AssetCard } from '@/components/ui/card-asset';
 
 // Sample Data - Updated with real paths and more examples
@@ -47,7 +47,7 @@ const sampleAssets = [
     influencerHandle: '@rachel_style',
     budget: 2500,
     currency: 'USD',
-    description: 'Lifestyle image featuring product placement for summer campaign.'
+    description: 'Lifestyle image featuring product placement for summer campaign.',
   },
   {
     id: 'img2',
@@ -70,14 +70,15 @@ const statusStyles: Record<string, string> = {
 
 export default function AssetCardPreviewPage() {
   const componentMeta = {
-    "name": "AssetCard",
-    "description": "Card component displaying asset information with preview, title, platform, and budget.",
-    "category": "organism",
-    "subcategory": "card",
-    "renderType": "client",
-    "status": "stable",
-    "author": "Your Name/Team",
-    "since": "2024-01-01"
+    name: 'AssetCard',
+    description:
+      'Card component displaying asset information with preview, title, platform, and budget.',
+    category: 'organism',
+    subcategory: 'card',
+    renderType: 'client',
+    status: 'stable',
+    author: 'Your Name/Team',
+    since: '2024-01-01',
   };
 
   return (
@@ -85,10 +86,25 @@ export default function AssetCardPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -98,12 +114,22 @@ export default function AssetCardPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -113,9 +139,11 @@ export default function AssetCardPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"> {/* Use grid for layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {' '}
+          {/* Use grid for layout */}
           {/* ---- Render cards from sample data ---- */}
-          {sampleAssets.map((assetData) => (
+          {sampleAssets.map(assetData => (
             <AssetCard
               key={assetData.id}
               asset={assetData} // Pass the whole object

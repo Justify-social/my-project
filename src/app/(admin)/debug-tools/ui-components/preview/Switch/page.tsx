@@ -6,8 +6,8 @@
 import React, { useState } from 'react'; // Import useState
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label"; // Import Label
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label'; // Import Label
 import { Switch } from '../../../../../../components/ui/switch';
 
 const statusStyles: Record<string, string> = {
@@ -19,14 +19,14 @@ const statusStyles: Record<string, string> = {
 
 export default function SwitchPreviewPage() {
   const componentMeta = {
-    "name": "Switch",
-    "description": "A control that allows the user to toggle between checked and unchecked states.",
-    "category": "atom",
-    "subcategory": "input",
-    "renderType": "client",
-    "author": "Shadcn", // Update author
-    "since": "2023-01-01", // Update since
-    "status": "stable"    // Add status
+    name: 'Switch',
+    description: 'A control that allows the user to toggle between checked and unchecked states.',
+    category: 'atom',
+    subcategory: 'input',
+    renderType: 'client',
+    author: 'Shadcn', // Update author
+    since: '2023-01-01', // Update since
+    status: 'stable', // Add status
   };
   const examples: string[] = [];
 
@@ -38,10 +38,25 @@ export default function SwitchPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -51,12 +66,22 @@ export default function SwitchPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -66,9 +91,10 @@ export default function SwitchPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-8"> {/* Increased spacing */}
+        <div className="space-y-8">
+          {' '}
+          {/* Increased spacing */}
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-
           {/* Example 1: Basic Switch */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Basic Switch</h3>
@@ -77,22 +103,18 @@ export default function SwitchPreviewPage() {
               <Label htmlFor="basic-switch">Toggle me</Label>
             </div>
           </div>
-
           {/* Example 2: Controlled Switch */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Controlled Switch</h3>
-            <p className="text-sm text-muted-foreground mb-3">Switch state controlled by component state.</p>
+            <p className="text-sm text-muted-foreground mb-3">
+              Switch state controlled by component state.
+            </p>
             <div className="flex items-center space-x-2">
-              <Switch
-                id="controlled-switch"
-                checked={isChecked}
-                onCheckedChange={setIsChecked}
-              />
+              <Switch id="controlled-switch" checked={isChecked} onCheckedChange={setIsChecked} />
               <Label htmlFor="controlled-switch">Airplane Mode</Label>
             </div>
             <p className="text-sm mt-2">Current state: {isChecked ? 'On' : 'Off'}</p>
           </div>
-
           {/* Example 3: Disabled Switch */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Disabled Switch</h3>
@@ -105,8 +127,6 @@ export default function SwitchPreviewPage() {
               <Label htmlFor="disabled-checked-switch">Cannot toggle (disabled & checked)</Label>
             </div>
           </div>
-
-
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>
@@ -126,7 +146,6 @@ export default function SwitchPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

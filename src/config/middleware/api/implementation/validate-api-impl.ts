@@ -1,6 +1,6 @@
 /**
  * API Validation Middleware Implementation for App Router
- * 
+ *
  * This module provides the actual implementation of the validation middleware.
  */
 
@@ -10,7 +10,7 @@ import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 
 /**
  * Validate the request body against a Zod schema
- * 
+ *
  * @param request The Next.js request object
  * @param schema The Zod schema to validate against
  * @param options Configuration options
@@ -25,11 +25,7 @@ export async function validateRequestImpl<T extends z.ZodType>(
     entityName?: string;
   } = {}
 ): Promise<[boolean, z.infer<T> | null, NextResponse | null]> {
-  const {
-    logValidationErrors = true,
-    logRequestBody = false,
-    entityName = 'Entity'
-  } = options;
+  const { logValidationErrors = true, logRequestBody = false, entityName = 'Entity' } = options;
 
   try {
     // Try to parse the request body
@@ -37,46 +33,50 @@ export async function validateRequestImpl<T extends z.ZodType>(
     try {
       body = await request.json();
     } catch (error) {
-      return [false, null, NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid JSON in request body'
-        },
-        { status: 400 }
-      )];
+      return [
+        false,
+        null,
+        NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid JSON in request body',
+          },
+          { status: 400 }
+        ),
+      ];
     }
 
     // Log the request body if enabled
     if (logRequestBody) {
-      dbLogger.info(
-        DbOperation.VALIDATION,
-        `Validating ${entityName} request`,
-        { requestBody: body }
-      );
+      dbLogger.info(DbOperation.VALIDATION, `Validating ${entityName} request`, {
+        requestBody: body,
+      });
     }
 
     // Validate against the schema
     const validationResult = schema.safeParse(body);
-    
+
     if (!validationResult.success) {
       // Log validation errors if enabled
       if (logValidationErrors) {
-        dbLogger.warn(
-          DbOperation.VALIDATION,
-          `${entityName} validation failed`,
-          { errors: validationResult.error.format() }
-        );
+        dbLogger.warn(DbOperation.VALIDATION, `${entityName} validation failed`, {
+          errors: validationResult.error.format(),
+        });
       }
 
       // Return validation error
-      return [false, null, NextResponse.json(
-        {
-          success: false,
-          error: 'Validation failed',
-          details: validationResult.error.format()
-        },
-        { status: 400 }
-      )];
+      return [
+        false,
+        null,
+        NextResponse.json(
+          {
+            success: false,
+            error: 'Validation failed',
+            details: validationResult.error.format(),
+          },
+          { status: 400 }
+        ),
+      ];
     }
 
     // Return the validated data
@@ -90,20 +90,24 @@ export async function validateRequestImpl<T extends z.ZodType>(
       error instanceof Error ? error : new Error(String(error))
     );
 
-    return [false, null, NextResponse.json(
-      {
-        success: false,
-        error: 'An error occurred during request validation',
-        details: error instanceof Error ? error.message : String(error)
-      },
-      { status: 500 }
-    )];
+    return [
+      false,
+      null,
+      NextResponse.json(
+        {
+          success: false,
+          error: 'An error occurred during request validation',
+          details: error instanceof Error ? error.message : String(error),
+        },
+        { status: 500 }
+      ),
+    ];
   }
 }
 
 /**
  * Higher-order function to create a handler with request validation
- * 
+ *
  * @param schema The Zod schema to validate against
  * @param handler The handler function to call with validated data
  * @param options Configuration options
@@ -120,11 +124,11 @@ export function withValidationImpl<T extends z.ZodType>(
 ): (request: NextRequest) => Promise<NextResponse> {
   return async (request: NextRequest) => {
     const [isValid, data, errorResponse] = await validateRequestImpl(request, schema, options);
-    
+
     if (!isValid || !data) {
       return errorResponse as NextResponse;
     }
-    
+
     return handler(data, request);
   };
-} 
+}

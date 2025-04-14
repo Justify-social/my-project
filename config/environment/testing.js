@@ -1,14 +1,14 @@
 /**
  * Testing Environment Configuration
- * 
+ *
  * Configuration overrides specific to the testing environment.
  */
 
-import { 
-  DATABASE_DEFAULTS, 
-  LOGGING_DEFAULTS, 
+import {
+  DATABASE_DEFAULTS,
+  LOGGING_DEFAULTS,
   ERROR_HANDLING_DEFAULTS,
-  FEATURE_DEFAULTS
+  FEATURE_DEFAULTS,
 } from '../core/defaults.js';
 
 /**
@@ -89,4 +89,4 @@ export default {
   API,
   SERVER,
   TIMEOUTS,
-}; 
+};

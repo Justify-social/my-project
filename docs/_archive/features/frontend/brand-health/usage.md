@@ -153,7 +153,8 @@ The main dashboard displays:
 
 **Problem:** Unexpected fluctuations in brand metrics between waves
 
-**Solution:** 
+**Solution:**
+
 - Check for seasonal effects or market events
 - Verify consistent sample composition
 - Look at longer-term trends rather than point-to-point
@@ -164,6 +165,7 @@ The main dashboard displays:
 **Problem:** Incomplete data for certain competitors
 
 **Solution:**
+
 - Adjust survey to improve competitor identification
 - Focus on major competitors only
 - Use secondary data sources to supplement
@@ -182,4 +184,4 @@ After setting up your Brand Health tracking, you might want to:
 
 - [Brand Health Overview](./overview.md)
 - [Brand Lift Studies](../brand-lift/overview.md)
-- [Campaign Planning Guide](../campaign-wizard/workflow.md) 
+- [Campaign Planning Guide](../campaign-wizard/workflow.md)

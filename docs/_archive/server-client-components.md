@@ -5,13 +5,15 @@ This guide outlines our approach to React Server Components and Client Component
 ## Overview
 
 In Next.js 13+, components are **Server Components** by default. They:
+
 - Render on the server
 - Don't include client-side JavaScript
 - Can't use React hooks (`useState`, `useEffect`, etc.)
 - Can access server-side resources directly
 
 **Client Components** are explicitly marked with `'use client'` and:
-- Render on both server and client 
+
+- Render on both server and client
 - Hydrate on the client with JavaScript
 - Can use React hooks and browser APIs
 - Can't access server-side resources directly
@@ -28,6 +30,7 @@ src/components/ui/
 ## When to Use Server Components
 
 Use Server Components (default) when your component:
+
 - Primarily renders UI without interactivity
 - Doesn't use React hooks
 - Doesn't need browser APIs
@@ -38,6 +41,7 @@ Use Server Components (default) when your component:
 ## When to Use Client Components
 
 Use Client Components when your component:
+
 - Uses React hooks (`useState`, `useEffect`, etc.)
 - Adds interactivity (event listeners, state changes)
 - Needs access to browser APIs
@@ -74,18 +78,15 @@ export function Button({ children }: { children: React.ReactNode }) {
  */
 export function Button({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   const [isPressed, setIsPressed] = useState(false);
-  
+
   const handleClick = () => {
     setIsPressed(true);
     onClick?.();
     setTimeout(() => setIsPressed(false), 200);
   };
-  
+
   return (
-    <button 
-      onClick={handleClick} 
-      className={isPressed ? 'scale-95' : ''}
-    >
+    <button onClick={handleClick} className={isPressed ? 'scale-95' : ''}>
       {children}
     </button>
   );
@@ -128,6 +129,7 @@ Always include the `@renderType` tag in your JSDoc comments:
 ## Component Browser Integration
 
 The Component Browser displays render type with an icon badge:
+
 - 🖥️ Server - Components that render on the server
 - 💻 Client - Components that include client-side JavaScript
 
@@ -142,6 +144,7 @@ The Component Browser displays render type with an icon badge:
 ## Testing Considerations
 
 When testing components:
+
 - Server Components can be tested with simple rendering tests
 - Client Components require more complex tests with events and state changes
 
@@ -152,4 +155,4 @@ When testing components:
 3. Using browser APIs in Server Components
 4. Importing Client Components into Server Components without wrapping
 
-By following these guidelines, we ensure our components are optimized for performance while maintaining the interactivity needed for a great user experience. 
+By following these guidelines, we ensure our components are optimized for performance while maintaining the interactivity needed for a great user experience.

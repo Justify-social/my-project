@@ -4,8 +4,8 @@ This section contains practical, step-by-step guides for common development task
 
 ## Key Guides
 
-*   **[Developer Guide](./developer/developer-guide.md):** Essential standards, practices, and workflows for all developers contributing to the project.
-*   **(Add links to other guides as they are created, e.g., Deployment Guide, Troubleshooting Guide)**
+- **[Developer Guide](./developer/developer-guide.md):** Essential standards, practices, and workflows for all developers contributing to the project.
+- **(Add links to other guides as they are created, e.g., Deployment Guide, Troubleshooting Guide)**
 
 ## Purpose
 

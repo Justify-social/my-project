@@ -28,10 +28,18 @@ export default function Dashboard() {
   // Removed session fetching and data fetching logic
 
   return (
-    <AuthCheck> { /* AuthCheck likely handles redirect if not authenticated */}
-      <div className="px-4 md:px-6 py-6 font-work-sans">
+    <AuthCheck>
+      {' '}
+      {/* AuthCheck likely handles redirect if not authenticated */}
+      <div className="px-4 md:px-6 py-6 font-body">
         {/* Use LoadingSpinner as the fallback */}
-        <Suspense fallback={<div className="min-h-[calc(100vh-200px)] flex items-center justify-center"><LoadingSpinner label="Loading Dashboard..." /></div>}>
+        <Suspense
+          fallback={
+            <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+              <LoadingSpinner label="Loading Dashboard..." />
+            </div>
+          }
+        >
           {/* Render ClientDashboard without passing user/events/campaigns props */}
           <ClientDashboard />
         </Suspense>

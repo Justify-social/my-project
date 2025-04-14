@@ -3,6 +3,7 @@
 ## 1. Overview & Goals
 
 This implementation plan focuses on ensuring the Justify.social platform has:
+
 - Robust database integration with proper schema alignment
 - Reliable autosave functionality
 - Consistent UI styling and component usage
@@ -13,11 +14,13 @@ The plan is based on a thorough audit of the existing codebase, with special att
 ## 2. Current State & Audit Results
 
 ### Database Architecture
+
 - **Schema**: PostgreSQL database with Prisma ORM
 - **Core Models**: CampaignWizard, Influencer, WizardHistory, etc.
 - **Data Format**: Mix of structured fields and JSON objects for complex data
 
 ### Resolved Issues
+
 1. ✅ **Prisma Schema Consistency**: Fixed schema-database mismatch
 2. ✅ **Model Availability**: Added missing models (TeamMember, TeamInvitation, etc.)
 3. ✅ **Type System Enhancement**: Created custom type extensions for Prisma client
@@ -27,6 +30,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
 7. ✅ **Health Checks**: Created database health monitoring endpoints
 
 ### Current Challenges
+
 1. **API Route Consistency**: Need to apply validation middleware to all routes
 2. **Form Data Transformation**: Need consistent handling between UI and API
 3. **Testing Coverage**: Lack of comprehensive tests for database operations
@@ -34,6 +38,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
 ## 3. Tasks & Phases
 
 ### Phase 1: Prisma Configuration Cleanup ✅ COMPLETED
+
 - [x] Consolidated schema files
 - [x] Standardized client initialization
 - [x] Synchronized schema with database
@@ -42,6 +47,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
 - [x] Created test data
 
 ### Phase 2: Database Model Consolidation ✅ COMPLETED
+
 - [x] Identified missing models
 - [x] Added team management models
 - [x] Added user preference models
@@ -51,12 +57,14 @@ The plan is based on a thorough audit of the existing codebase, with special att
 - [x] Validated model access
 
 ### Phase 3: Type System Enhancement ✅ COMPLETED
+
 - [x] Extended Prisma client types
 - [x] Fixed TypeScript errors
 - [x] Standardized model access
 - [x] Improved error handling
 
 ### Phase 4: API Route Updates ✅ COMPLETED
+
 - [x] Update campaign creation route
 - [x] Fix model casing issues
 - [x] Implement robust error handling
@@ -70,6 +78,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
   - ✓ Applied middleware consistently across all API routes
 
 ### Phase 5: UI Component Updates ✅ COMPLETED
+
 - [x] Upgrade form submission logic
   - [x] Update form components to directly match the new API schema expectations
   - [x] Implement form data transformation utilities at the component level
@@ -88,6 +97,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
   - [x] Improve autosave indicators and success/failure notifications
 
 ### Phase 6: Testing and Documentation ✅ COMPLETED
+
 - [x] Create end-to-end tests
   - [x] Develop automated API route tests
   - [x] Create UI component test fixtures
@@ -112,6 +122,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
 ### Database Architecture Enhancement Plan
 
 #### Immediate Next Steps
+
 1. [x] Complete API validation middleware for all routes
 2. [x] Implement centralized error logging system
 3. [x] Set up database performance monitoring
@@ -131,6 +142,7 @@ The plan is based on a thorough audit of the existing codebase, with special att
    - ✓ Added CI/CD integration for automated testing
 
 #### Future Enhancements (Post-MVP)
+
 1. Transaction Management System Enhancement
 2. Query Optimization Layer
 3. Database Migration Strategy
@@ -144,25 +156,27 @@ The plan is based on a thorough audit of the existing codebase, with special att
 
 ## 4. Implementation Timeline
 
-| Week | Focus | Key Deliverables |
-|------|-------|------------------|
-| 1-2 | Database Foundation | Working API endpoints, Clean Prisma configuration |
-| 3-4 | Middleware & Validation | Validation middleware, Error handling, Database monitoring |
-| 5-6 | Front-End Integration | Form component updates, Data transformation utilities |
-| 7 | Testing | Comprehensive test coverage |
-| 8 | Finalization | Production-ready application |
+| Week | Focus                   | Key Deliverables                                           |
+| ---- | ----------------------- | ---------------------------------------------------------- |
+| 1-2  | Database Foundation     | Working API endpoints, Clean Prisma configuration          |
+| 3-4  | Middleware & Validation | Validation middleware, Error handling, Database monitoring |
+| 5-6  | Front-End Integration   | Form component updates, Data transformation utilities      |
+| 7    | Testing                 | Comprehensive test coverage                                |
+| 8    | Finalization            | Production-ready application                               |
 
 ## 5. Front-End Integration Strategy
 
 To ensure successful integration between the updated API routes and the front-end components, we're following a progressive implementation approach:
 
 ### Implementation Phases
+
 1. **API Compatibility Layer**: Adapters for backward compatibility
 2. **Component Update Prioritization**: Focus on critical components first
 3. **Component Refactoring**: Update high-priority components with new utilities
 4. **Complete Implementation**: Update all remaining components
 
 ### Key Implementation Components
+
 - **Data Transformation Utilities**: Convert form data to API-compatible formats
 - **Enhanced Error Handling**: Provide meaningful feedback to users
 - **Form Submission Patterns**: Standardize how data is sent to API endpoints
@@ -170,20 +184,23 @@ To ensure successful integration between the updated API routes and the front-en
 ## 6. Implementation Coordination Plan
 
 ### Team Structure and Responsibilities
-| Team | Responsibilities |
-|------|------------------|
-| **API Team** | Middleware, API routes, database operations |
-| **UI Team** | Form components, data transformation, error handling |
-| **QA Team** | Test plan, test execution, regression testing |
-| **DevOps Team** | Test environment, monitoring implementation |
+
+| Team            | Responsibilities                                     |
+| --------------- | ---------------------------------------------------- |
+| **API Team**    | Middleware, API routes, database operations          |
+| **UI Team**     | Form components, data transformation, error handling |
+| **QA Team**     | Test plan, test execution, regression testing        |
+| **DevOps Team** | Test environment, monitoring implementation          |
 
 ### Coordination Workflow
+
 1. Weekly planning sessions to review progress
 2. Daily standup meetings for updates
 3. Twice-weekly API-UI integration touchpoints
 4. Weekly joint testing sessions
 
 ### Rollout Strategy
+
 1. **Developer Preview**: Initial implementation in development environment
 2. **Controlled Testing**: QA and limited user testing
 3. **Staged Rollout**: Release to a percentage of users
@@ -192,6 +209,7 @@ To ensure successful integration between the updated API routes and the front-en
 ## Appendix A: Database Schema Details
 
 ### Core Entity Relationships
+
 Our database architecture follows industry best practices with a well-structured relational model:
 
 1. **User Management Subsystem**: User, TeamMember, TeamInvitation, NotificationPrefs
@@ -202,6 +220,7 @@ Our database architecture follows industry best practices with a well-structured
 6. **Brand Management Subsystem**: BrandingSettings
 
 ### Database Design Principles
+
 1. **Normalization**: Minimize redundancy while maintaining practical access patterns
 2. **Referential Integrity**: Foreign key constraints ensure data consistency
 3. **Type Safety**: Enums and strict typing ensure data validity
@@ -212,7 +231,9 @@ Our database architecture follows industry best practices with a well-structured
 ## Appendix B: Technical Implementation Details
 
 ### Middleware Architecture
+
 The middleware system consists of several components that work together:
+
 ```
 ┌─────────────────────────────────────┐
 │             API Route               │
@@ -243,13 +264,16 @@ The middleware system consists of several components that work together:
 ```
 
 ### Validation Implementation Guidelines
+
 1. **Schema Definition**: Define schemas in dedicated files
 2. **Middleware Application**: Apply validation first, error handling last
 3. **Response Format**: Use consistent structure `{ success, data?, error? }`
 4. **Documentation**: Document schemas, include examples
 
 ### Database Monitoring
+
 Our monitoring system tracks:
+
 1. Query performance metrics by model and operation
 2. Slow query detection with configurable thresholds
 3. Connection pool statistics
@@ -266,16 +290,16 @@ export function transformCampaignFormData(formValues: CampaignFormValues): Campa
     startDate: new Date(formValues.startDate).toISOString(),
     endDate: new Date(formValues.endDate).toISOString(),
     // Transform nested data
-    primaryContact: formValues.primaryContact 
+    primaryContact: formValues.primaryContact
       ? {
           name: formValues.primaryContact.name,
           email: formValues.primaryContact.email,
           phone: formValues.primaryContact.phone,
-          position: formValues.primaryContact.position
+          position: formValues.primaryContact.position,
         }
       : undefined,
     // Convert budget values to proper format
-    budget: transformBudgetData(formValues.budget)
+    budget: transformBudgetData(formValues.budget),
   };
 }
 ```
@@ -285,26 +309,31 @@ export function transformCampaignFormData(formValues: CampaignFormValues): Campa
 The Database Health page at `/debug-tools/database` includes:
 
 1. **Database Connectivity Status**
+
    - Connection health indicator
    - Response time metrics
    - Last check timestamp
 
 2. **Query Performance Metrics**
+
    - Total slow queries count
    - Categorized by severity
    - Query performance statistics
 
 3. **Transaction Monitoring**
+
    - Transaction success/failure ratio
    - Average transaction duration
    - Breakdown by operation type
 
 4. **Connection Pool Monitoring**
+
    - Pool size configuration
    - Active connection count
    - Idle connection count
 
 5. **Table Statistics**
+
    - Row counts by table
    - Storage size by table
    - Growth trends over time
@@ -312,7 +341,7 @@ The Database Health page at `/debug-tools/database` includes:
 6. **Database Operations Test Panel**
    - Test transaction execution
    - Query performance testing
-   - Error simulation 
+   - Error simulation
 
 ## Appendix E: API Documentation
 
@@ -323,6 +352,7 @@ The Campaign Wizard API provides a set of RESTful endpoints that allow clients t
 ### Base URL
 
 All API endpoints are relative to the base URL of the application:
+
 ```
 https://[your-domain]/api
 ```
@@ -330,10 +360,12 @@ https://[your-domain]/api
 ### Authentication
 
 API endpoints require authentication using either:
+
 - Bearer token authentication (JWT)
 - Session-based authentication (for browser clients)
 
 #### Bearer Token Authentication
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -343,6 +375,7 @@ Authorization: Bearer <jwt_token>
 All API responses follow a consistent format:
 
 #### Success Response
+
 ```json
 {
   "success": true,
@@ -354,6 +387,7 @@ All API responses follow a consistent format:
 ```
 
 #### Error Response
+
 ```json
 {
   "success": false,
@@ -369,46 +403,49 @@ All API responses follow a consistent format:
 
 The API uses standard HTTP status codes:
 
-| Code | Description |
-|------|-------------|
-| 200 | Success - GET, PUT, PATCH operations |
-| 201 | Created - POST operations |
-| 204 | No Content - DELETE operations |
-| 400 | Bad Request - Invalid input data |
-| 401 | Unauthorized - Authentication failure |
-| 403 | Forbidden - Insufficient permissions |
-| 404 | Not Found - Resource not found |
-| 409 | Conflict - Resource conflict |
-| 422 | Unprocessable Entity - Validation error |
-| 500 | Internal Server Error - Server-side error |
+| Code | Description                               |
+| ---- | ----------------------------------------- |
+| 200  | Success - GET, PUT, PATCH operations      |
+| 201  | Created - POST operations                 |
+| 204  | No Content - DELETE operations            |
+| 400  | Bad Request - Invalid input data          |
+| 401  | Unauthorized - Authentication failure     |
+| 403  | Forbidden - Insufficient permissions      |
+| 404  | Not Found - Resource not found            |
+| 409  | Conflict - Resource conflict              |
+| 422  | Unprocessable Entity - Validation error   |
+| 500  | Internal Server Error - Server-side error |
 
 ### Error Codes
 
 Common error codes returned by the API:
 
-| Code | Description |
-|------|-------------|
-| `VALIDATION_ERROR` | Input data failed validation |
+| Code                 | Description                      |
+| -------------------- | -------------------------------- |
+| `VALIDATION_ERROR`   | Input data failed validation     |
 | `RESOURCE_NOT_FOUND` | Requested resource doesn't exist |
-| `DUPLICATE_RESOURCE` | Resource already exists |
-| `UNAUTHORIZED` | Authentication required |
-| `FORBIDDEN` | Insufficient permissions |
-| `DATABASE_ERROR` | Database operation error |
-| `INTERNAL_ERROR` | Unexpected server error |
+| `DUPLICATE_RESOURCE` | Resource already exists          |
+| `UNAUTHORIZED`       | Authentication required          |
+| `FORBIDDEN`          | Insufficient permissions         |
+| `DATABASE_ERROR`     | Database operation error         |
+| `INTERNAL_ERROR`     | Unexpected server error          |
 
 ### Endpoints
 
 #### Campaign Management
 
 ##### GET /api/campaigns
+
 List all campaigns with pagination.
 
 **Query Parameters:**
+
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 20)
 - `status`: Filter by status (optional)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -422,7 +459,7 @@ List all campaigns with pagination.
         "endDate": "2023-08-31T00:00:00.000Z",
         "status": "DRAFT",
         "updatedAt": "2023-05-15T14:30:00.000Z"
-      },
+      }
       // More campaigns...
     ],
     "pagination": {
@@ -436,9 +473,11 @@ List all campaigns with pagination.
 ```
 
 ##### GET /api/campaigns/{id}
+
 Get a specific campaign by ID.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -479,9 +518,11 @@ Get a specific campaign by ID.
 ```
 
 ##### POST /api/campaigns
+
 Create a new campaign.
 
 **Request Body:**
+
 ```json
 {
   "name": "Summer Campaign 2023",
@@ -516,6 +557,7 @@ Create a new campaign.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -534,9 +576,11 @@ Create a new campaign.
 ```
 
 ##### PATCH /api/campaigns/{id}
+
 Update an existing campaign.
 
 **Request Body:**
+
 ```json
 {
   "name": "Summer Campaign 2023 - Updated",
@@ -545,6 +589,7 @@ Update an existing campaign.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -563,9 +608,11 @@ Update an existing campaign.
 ```
 
 ##### DELETE /api/campaigns/{id}
+
 Delete a campaign.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -576,14 +623,17 @@ Delete a campaign.
 #### Influencer Management
 
 ##### GET /api/influencers
+
 List influencers with pagination.
 
 **Query Parameters:**
+
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 20)
 - `platform`: Filter by platform (optional)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -596,7 +646,7 @@ List influencers with pagination.
         "platform": "INSTAGRAM",
         "followerCount": 250000,
         "engagementRate": 3.2
-      },
+      }
       // More influencers...
     ],
     "pagination": {
@@ -610,9 +660,11 @@ List influencers with pagination.
 ```
 
 ##### GET /api/influencers/{id}
+
 Get a specific influencer.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -635,9 +687,11 @@ Get a specific influencer.
 #### Health Check
 
 ##### GET /api/health/db
+
 Check database health.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -664,6 +718,7 @@ Check database health.
 ### Error Examples
 
 #### Validation Error
+
 ```json
 {
   "success": false,
@@ -678,6 +733,7 @@ Check database health.
 ```
 
 #### Resource Not Found
+
 ```json
 {
   "success": false,
@@ -687,6 +743,7 @@ Check database health.
 ```
 
 #### Database Error
+
 ```json
 {
   "success": false,
@@ -710,11 +767,13 @@ The Justify.social platform provides a comprehensive platform for managing marke
 #### 2. Getting Started
 
 ##### System Requirements
+
 - Modern web browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)
 - Minimum screen resolution: 1280 x 720
 - Stable internet connection
 
 ##### Accessing the Admin Dashboard
+
 1. Navigate to `https://[your-domain]/admin`
 2. Log in with your administrator credentials
 3. Upon successful login, you will be directed to the admin dashboard
@@ -722,6 +781,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
 #### 3. User Management
 
 ##### Creating New Users
+
 1. Navigate to the "Users" section from the admin sidebar
 2. Click the "New User" button in the top-right corner
 3. Complete the user form with the following information:
@@ -733,6 +793,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
 4. Click "Create User" to send an invitation to the user's email
 
 ##### Managing User Roles and Permissions
+
 1. Navigate to the "Users" section
 2. Click on a user's name to view their profile
 3. Use the "Edit" button to modify user details and roles
@@ -741,6 +802,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
 #### 4. System Configuration
 
 ##### Global Settings
+
 1. Navigate to "Settings" > "Global Settings"
 2. Adjust system-wide parameters:
    - Default currency
@@ -750,6 +812,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
    - API rate limits
 
 ##### Brand Settings
+
 1. Navigate to "Settings" > "Brand Settings"
 2. Customize the application appearance:
    - Upload company logo
@@ -760,6 +823,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
 #### 5. Monitoring and Maintenance
 
 ##### Database Health Monitoring
+
 1. Navigate to "Maintenance" > "Database Health"
 2. View real-time statistics:
    - Connection status
@@ -768,6 +832,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
    - Table statistics
 
 ##### Performance Monitoring
+
 1. Navigate to "Maintenance" > "Performance"
 2. Monitor system metrics:
    - Response times
@@ -776,6 +841,7 @@ The Justify.social platform provides a comprehensive platform for managing marke
    - API usage
 
 ##### Generating Reports
+
 1. Navigate to "Reports"
 2. Select report type:
    - User activity
@@ -791,21 +857,25 @@ The Justify.social platform provides a comprehensive platform for managing marke
 ##### Common Issues and Solutions
 
 **Issue**: Users unable to log in
+
 - Verify user account is active
 - Reset user password
 - Check for IP restrictions
 
 **Issue**: Slow system performance
+
 - Check database health
 - Review recent system changes
 - Verify resource allocation
 
 **Issue**: File upload failures
+
 - Check storage limits
 - Verify file types and sizes
 - Ensure proper permissions
 
 ##### Support Resources
+
 - Documentation: `https://[your-domain]/docs`
 - Support email: support@example.com
 - Emergency contact: +1 (555) 123-4567
@@ -819,6 +889,7 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 #### 2. Creating Your First Campaign
 
 ##### Step 1: Campaign Details
+
 1. From the dashboard, click "Create New Campaign"
 2. Enter the campaign name and business goal
 3. Set the campaign timeline (start and end dates)
@@ -827,6 +898,7 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 6. Click "Next" to continue
 
 ##### Step 2: Audience Targeting
+
 1. Define your target audience demographics
 2. Select geographic locations
 3. Choose languages
@@ -834,18 +906,21 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 5. Click "Next" to continue
 
 ##### Step 3: Influencer Selection
+
 1. Choose the social media platform
 2. Enter influencer handles
 3. Review influencer metrics
 4. Click "Next" to continue
 
 ##### Step 4: Creative Requirements
+
 1. Upload reference creative assets
 2. Define creative guidelines
 3. Set content requirements
 4. Click "Next" to continue
 
 ##### Step 5: Review & Submit
+
 1. Review all campaign details
 2. Make any necessary adjustments
 3. Click "Submit Campaign" to finalize
@@ -853,17 +928,20 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 #### 3. Managing Active Campaigns
 
 ##### Campaign Dashboard
+
 1. View all campaigns from the main dashboard
 2. Use filters to sort by status, date, or platform
 3. Click on a campaign to view details
 
 ##### Editing Campaigns
+
 1. Open a campaign from the dashboard
 2. Click "Edit" in the top-right corner
 3. Make changes as needed
 4. Click "Save" to update the campaign
 
 ##### Tracking Campaign Progress
+
 1. Open a campaign from the dashboard
 2. View the "Progress" tab
 3. Monitor key metrics and milestones
@@ -872,6 +950,7 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 #### 4. Working with Reports
 
 ##### Generating Campaign Reports
+
 1. From the campaign details page, click "Reports"
 2. Select the report type:
    - Performance overview
@@ -882,6 +961,7 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 4. Click "Generate Report"
 
 ##### Sharing Reports
+
 1. Generate a report following the steps above
 2. Click "Share" in the report viewer
 3. Choose sharing method:
@@ -892,18 +972,21 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 #### 5. Best Practices
 
 ##### Campaign Creation
+
 - Start with clear, measurable goals
 - Define your target audience precisely
 - Choose influencers aligned with your brand
 - Provide detailed creative guidelines
 
 ##### Budget Management
+
 - Allocate budget across different activities
 - Monitor spending throughout the campaign
 - Adjust allocation based on performance
 - Document all budget changes
 
 ##### Content Review
+
 - Establish a consistent review process
 - Provide timely feedback to creators
 - Track content versions and approvals
@@ -912,11 +995,13 @@ Campaign Wizard is a powerful tool designed to streamline the creation and manag
 #### 6. Getting Help
 
 ##### In-App Support
+
 - Click the "?" icon in the top-right corner
 - Use the search function to find topics
 - View guided tutorials for key features
 
 ##### Contact Support
+
 - Email: support@example.com
 - Phone: +1 (555) 123-4567
-- Support hours: Monday-Friday, 9AM-5PM EST 
+- Support hours: Monday-Friday, 9AM-5PM EST

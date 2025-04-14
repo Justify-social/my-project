@@ -41,10 +41,10 @@ export function createPrismaWithMetrics() {
         const startTime = performance.now();
         try {
           const result = await query(args);
-          
+
           // Calculate query duration
           const duration = performance.now() - startTime;
-          
+
           // Record metrics for slow queries
           if (duration > SLOW_QUERY_THRESHOLD) {
             const metrics: QueryMetrics = {
@@ -52,15 +52,15 @@ export function createPrismaWithMetrics() {
               model: model || 'unknown',
               duration,
               timestamp: new Date(),
-              query: JSON.stringify(args)
+              query: JSON.stringify(args),
             };
-            
+
             // Add to slow query buffer
             slowQueries.push(metrics);
             if (slowQueries.length > SLOW_QUERY_BUFFER_SIZE) {
               slowQueries.shift();
             }
-            
+
             // Log slow queries based on severity
             if (duration > CRITICAL_QUERY_THRESHOLD) {
               dbLogger.warn(
@@ -82,7 +82,7 @@ export function createPrismaWithMetrics() {
               );
             }
           }
-          
+
           return result;
         } catch (error) {
           // Log failed queries
@@ -93,11 +93,11 @@ export function createPrismaWithMetrics() {
             { args },
             error instanceof Error ? error : new Error(String(error))
           );
-          
+
           throw error;
         }
-      }
-    }
+      },
+    },
   });
 }
 
@@ -120,48 +120,58 @@ export function clearSlowQueries(): void {
  */
 export function getDbPerformanceStats() {
   // Group by model and operation
-  const statsByModelAndOperation = slowQueries.reduce((acc, query) => {
-    const key = `${query.model}.${query.operation}`;
-    if (!acc[key]) {
-      acc[key] = {
-        model: query.model,
-        operation: query.operation,
-        count: 0,
-        totalDuration: 0,
-        avgDuration: 0,
-        maxDuration: 0,
-        minDuration: Infinity
-      };
-    }
-    
-    acc[key].count++;
-    acc[key].totalDuration += query.duration;
-    acc[key].avgDuration = acc[key].totalDuration / acc[key].count;
-    acc[key].maxDuration = Math.max(acc[key].maxDuration, query.duration);
-    acc[key].minDuration = Math.min(acc[key].minDuration, query.duration);
-    
-    return acc;
-  }, {} as Record<string, QueryStats>);
-  
+  const statsByModelAndOperation = slowQueries.reduce(
+    (acc, query) => {
+      const key = `${query.model}.${query.operation}`;
+      if (!acc[key]) {
+        acc[key] = {
+          model: query.model,
+          operation: query.operation,
+          count: 0,
+          totalDuration: 0,
+          avgDuration: 0,
+          maxDuration: 0,
+          minDuration: Infinity,
+        };
+      }
+
+      acc[key].count++;
+      acc[key].totalDuration += query.duration;
+      acc[key].avgDuration = acc[key].totalDuration / acc[key].count;
+      acc[key].maxDuration = Math.max(acc[key].maxDuration, query.duration);
+      acc[key].minDuration = Math.min(acc[key].minDuration, query.duration);
+
+      return acc;
+    },
+    {} as Record<string, QueryStats>
+  );
+
   return {
     totalSlowQueries: slowQueries.length,
     criticalSlowQueries: slowQueries.filter(q => q.duration > CRITICAL_QUERY_THRESHOLD).length,
-    verySlowQueries: slowQueries.filter(q => q.duration > VERY_SLOW_QUERY_THRESHOLD && q.duration <= CRITICAL_QUERY_THRESHOLD).length,
-    slowQueries: slowQueries.filter(q => q.duration > SLOW_QUERY_THRESHOLD && q.duration <= VERY_SLOW_QUERY_THRESHOLD).length,
-    statsByModelAndOperation: Object.values(statsByModelAndOperation)
+    verySlowQueries: slowQueries.filter(
+      q => q.duration > VERY_SLOW_QUERY_THRESHOLD && q.duration <= CRITICAL_QUERY_THRESHOLD
+    ).length,
+    slowQueries: slowQueries.filter(
+      q => q.duration > SLOW_QUERY_THRESHOLD && q.duration <= VERY_SLOW_QUERY_THRESHOLD
+    ).length,
+    statsByModelAndOperation: Object.values(statsByModelAndOperation),
   };
 }
 
 /**
  * Create optimized select clauses for Prisma queries
  * This helps reduce the amount of data transferred from the database
- * 
+ *
  * @param fields Array of field names to include in the select
  * @returns A select object for use in Prisma queries
  */
 export function createSelectClause(fields: string[]): Record<string, boolean> {
-  return fields.reduce((select, field) => {
-    select[field] = true;
-    return select;
-  }, {} as Record<string, boolean>);
-} 
+  return fields.reduce(
+    (select, field) => {
+      select[field] = true;
+      return select;
+    },
+    {} as Record<string, boolean>
+  );
+}

@@ -19,18 +19,23 @@ const statusStyles: Record<string, string> = {
 
 export default function ButtonPreviewPage() {
   const componentMeta: {
-    name: string; description: string; category: string;
-    subcategory: string | null; renderType: string;
-    author: string; since: string; status?: string | null;
+    name: string;
+    description: string;
+    category: string;
+    subcategory: string | null;
+    renderType: string;
+    author: string;
+    since: string;
+    status?: string | null;
   } = {
-    "name": "Button",
-    "description": "An interactive element triggering an action or navigation.",
-    "category": "atom",
-    "subcategory": null,
-    "renderType": "server",
-    "author": "",
-    "since": "",
-    "status": null
+    name: 'Button',
+    description: 'An interactive element triggering an action or navigation.',
+    category: 'atom',
+    subcategory: null,
+    renderType: 'server',
+    author: '',
+    since: '',
+    status: null,
   };
   const examples: string[] = [];
 
@@ -39,9 +44,19 @@ export default function ButtonPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -51,12 +66,22 @@ export default function ButtonPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -94,13 +119,19 @@ export default function ButtonPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">With Icons (As Children)</h3>
             <div className="flex flex-wrap gap-4 items-center">
-              <Button><Icon iconId="faCheckLight" className="mr-2" /> Left Icon</Button>
-              <Button>Right Icon <Icon iconId="faArrowRightLight" className="ml-2" /></Button>
+              <Button>
+                <Icon iconId="faCheckLight" className="mr-2" /> Left Icon
+              </Button>
+              <Button>
+                Right Icon <Icon iconId="faArrowRightLight" className="ml-2" />
+              </Button>
               <Button variant="outline">
                 <Icon iconId="faFloppyDiskLight" className="mr-2" /> Save
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Note: Icons are passed as children using the Icon component.</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Note: Icons are passed as children using the Icon component.
+            </p>
           </div>
 
           {/* New Icon Buttons Section */}
@@ -128,7 +159,9 @@ export default function ButtonPreviewPage() {
                 ariaLabel="Delete"
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Note: Uses custom component for Light/Solid icon state on hover.</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Note: Uses custom component for Light/Solid icon state on hover.
+            </p>
           </div>
 
           {/* Disabled State */}
@@ -136,7 +169,9 @@ export default function ButtonPreviewPage() {
             <h3 className="text-lg font-medium mb-3">Disabled State</h3>
             <div className="flex flex-wrap gap-4 items-center">
               <Button disabled>Disabled</Button>
-              <Button variant="secondary" disabled>Disabled</Button>
+              <Button variant="secondary" disabled>
+                Disabled
+              </Button>
             </div>
           </div>
         </div>
@@ -157,7 +192,6 @@ export default function ButtonPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

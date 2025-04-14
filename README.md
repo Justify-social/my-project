@@ -3,6 +3,7 @@
 A comprehensive platform that helps brands measure the impact of their social media campaigns and identify high-performing influencers through structured data collection and intuitive dashboards.
 
 ## Table of Contents
+
 - [Purpose](#purpose)
 - [Core Features](#core-features)
 - [Technical Architecture](#technical-architecture)
@@ -42,18 +43,21 @@ Our application is a marketing intelligence platform that helps brands measure t
 ## Technical Architecture
 
 ### Frontend
+
 - **Framework**: Next.js with React and TypeScript
 - **UI Components**: Custom component library with Shadcn UI and Tailwind CSS
 - **State Management**: React Context API with SWR for data fetching
 - **Testing**: Jest and React Testing Library
 
 ### Backend
+
 - **API**: Next.js API Routes with strong typing
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: JWT-based authentication
 - **Storage**: Cloud storage for assets and reports
 
 ### Key Development Principles
+
 - **Atomic Design**: Structured component hierarchy (atoms, molecules, organisms)
 - **Type Safety**: Comprehensive TypeScript throughout
 - **Component Reusability**: Modular architecture for maintainability
@@ -110,17 +114,20 @@ Our application is a marketing intelligence platform that helps brands measure t
 ### Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone [repository-url]
    cd [project-directory]
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment setup**
+
    ```bash
    cp config/env/.env.example config/env/.env.local
    # Edit .env.local with your configuration
@@ -191,21 +198,25 @@ Our comprehensive UI component library is designed with accessibility, customiza
 Our component library follows atomic design principles, organizing components into:
 
 1. **Atoms**: Basic building blocks (buttons, inputs, icons)
+
    - Located in `src/components/ui/atoms/`
    - Self-contained with minimal dependencies
    - Highly reusable across the application
 
 2. **Molecules**: Groups of atoms functioning together
+
    - Located in `src/components/ui/molecules/`
    - Composed of multiple atoms
    - Examples: form groups, search bars, notification items
 
 3. **Organisms**: Complex UI sections composed of molecules and atoms
+
    - Located in `src/components/ui/organisms/`
    - Examples: navigation bars, dashboards, complex forms
    - Often feature-specific but reusable
 
 4. **Templates**: Page layouts without specific content
+
    - Located in `src/components/layouts/`
    - Define content structure and component positioning
 
@@ -236,6 +247,7 @@ All Shadcn components are integrated into our atomic design system, with consist
 ### Component Registry System
 
 The project implements a Single Source of Truth (SSOT) approach for UI components:
+
 - Configuration files in `/config/ui/`
 - Runtime registries in `/public/static/component-registry.json`
 - Component discovery tools in development
@@ -254,7 +266,7 @@ A comprehensive UI component browser is available at `/debug-tools/ui-components
 
 ## Icon System
 
-The application uses a combination of FontAwesome Pro icons and custom app icons. 
+The application uses a combination of FontAwesome Pro icons and custom app icons.
 
 ### Icon Single Source of Truth (SSOT)
 
@@ -277,6 +289,7 @@ node scripts/master/master-toolkit.mjs [category] [command] [--options]
 ```
 
 Categories include:
+
 - `icons`: Icon management scripts
 - `ui`: UI component scripts
 - `config`: Configuration scripts
@@ -286,6 +299,7 @@ Categories include:
 - `db`: Database utilities
 
 Examples:
+
 ```bash
 # Generate icon registry
 node scripts/master/master-toolkit.mjs icons generate
@@ -303,6 +317,7 @@ node scripts/master/master-toolkit.mjs cleanup tree-shake
 ## Code Organization
 
 ### Naming Conventions
+
 - **Files/Directories**: kebab-case (`user-profile.tsx`)
 - **React Components**: PascalCase (`UserProfile.tsx`)
 - **Variables/Functions**: camelCase (`userName`, `fetchUserData()`)
@@ -310,7 +325,9 @@ node scripts/master/master-toolkit.mjs cleanup tree-shake
 - **Types/Interfaces**: PascalCase (`UserProfile`, `ApiResponse`)
 
 ### Component Structure
+
 Components follow a consistent structure:
+
 1. Imports
 2. Types
 3. Helper functions
@@ -320,6 +337,7 @@ Components follow a consistent structure:
 ### Single Source of Truth
 
 The project follows a Single Source of Truth principle for:
+
 - UI Component configuration
 - Icon registries
 - Configuration files
@@ -338,6 +356,7 @@ The project includes a comprehensive tree shake process for managing deprecated 
 ## Brand Guidelines
 
 ### Brand Colors
+
 - **Primary**: Jet `#333333`
 - **Secondary**: Payne's Grey `#4A5568`
 - **Accent**: Deep Sky Blue `#00BFFF`
@@ -346,11 +365,13 @@ The project includes a comprehensive tree shake process for managing deprecated 
 - **Interactive**: Medium Blue `#3182CE`
 
 ### Icons
+
 - **Icon Library**: FontAwesome Pro
 - **Default state**: Light icons (`fa-light`)
 - **Hover state**: Solid icons (`fa-solid`)
 
 ### Typography
+
 - **Headings**: Inter (sans-serif)
 - **Body**: Inter (sans-serif)
 - **Code**: JetBrains Mono (monospace)
@@ -358,6 +379,7 @@ The project includes a comprehensive tree shake process for managing deprecated 
 ## Deployment
 
 ### Production Deployment
+
 - **Platform**: Vercel
 - **Configuration**: `config/vercel/`
 - **Branch Strategy**:
@@ -366,6 +388,7 @@ The project includes a comprehensive tree shake process for managing deprecated 
   - Feature branches: Preview deployments
 
 ### CI/CD Pipeline
+
 - **Testing**: Automated tests run on pull requests
 - **Linting**: Code quality checks
 - **Build**: Production build validation
@@ -392,6 +415,7 @@ The project includes a comprehensive tree shake process for managing deprecated 
 ## Browser Compatibility
 
 This application is compatible with all modern browsers:
+
 - Chrome (latest)
 - Firefox (latest)
 - Safari (latest)
@@ -399,4 +423,4 @@ This application is compatible with all modern browsers:
 
 ## License
 
-MIT 
+MIT

@@ -13,6 +13,7 @@ This document details the routes in the (admin) group.
 **Description:** admin page
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: Yes
 - Caching: No
@@ -26,7 +27,7 @@ This document details the routes in the (admin) group.
 **Description:** debug-tools page
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: No
 - Caching: No
-

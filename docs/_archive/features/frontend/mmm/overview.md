@@ -68,12 +68,12 @@ The MMM feature is designed for marketing analysts and decision-makers who need 
 
 ## Configuration Options
 
-| Option | Description | Default | Allowed Values |
-|--------|-------------|---------|---------------|
-| Time Period | Analysis timeframe | Last 90 days | Last 30/60/90/180/365 days, Custom |
-| Attribution Window | Lookback window for attribution | 30 days | 7/14/30/60/90 days |
-| Confidence Level | Statistical confidence threshold | 95% | 80%/90%/95%/99% |
-| Channel Grouping | How channels are grouped for analysis | Standard | Standard, Custom, Granular |
+| Option             | Description                           | Default      | Allowed Values                     |
+| ------------------ | ------------------------------------- | ------------ | ---------------------------------- |
+| Time Period        | Analysis timeframe                    | Last 90 days | Last 30/60/90/180/365 days, Custom |
+| Attribution Window | Lookback window for attribution       | 30 days      | 7/14/30/60/90 days                 |
+| Confidence Level   | Statistical confidence threshold      | 95%          | 80%/90%/95%/99%                    |
+| Channel Grouping   | How channels are grouped for analysis | Standard     | Standard, Custom, Granular         |
 
 ## Troubleshooting
 
@@ -94,4 +94,4 @@ The MMM feature is designed for marketing analysts and decision-makers who need 
 - [MMM Usage Guide](./usage.md)
 - [Data Integration Guide](../../features-backend/apis/overview.md)
 - [Analytics Dashboard Overview](../dashboard/overview.md)
-- [Campaign Performance Metrics](../campaign-wizard/overview.md) 
+- [Campaign Performance Metrics](../campaign-wizard/overview.md)

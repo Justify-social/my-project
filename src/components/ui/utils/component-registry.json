@@ -8,9 +8,7 @@
       "filePath": "/src/components/ui/theme-toggle.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* <ThemeToggle />"
-      ],
+      "examples": ["* <ThemeToggle />"],
       "relatedComponents": []
     },
     {
@@ -65,9 +63,7 @@
       "filePath": "/src/components/ui/card.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "author": "Frontend Team",
       "relatedComponents": []
     },
@@ -79,10 +75,7 @@
       "filePath": "/src/components/ui/button.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx",
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx", "* ```tsx"],
       "author": "Frontend Team",
       "relatedComponents": []
     },
@@ -94,9 +87,7 @@
       "filePath": "/src/components/ui/badge.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "relatedComponents": []
     },
     {
@@ -107,9 +98,7 @@
       "filePath": "/src/components/ui/avatar.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "relatedComponents": []
     },
     {
@@ -120,9 +109,7 @@
       "filePath": "/src/components/ui/alert.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "relatedComponents": []
     },
     {
@@ -133,9 +120,7 @@
       "filePath": "/src/components/ui/client/card-client.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* <Card>"
-      ],
+      "examples": ["* <Card>"],
       "author": "Frontend Team",
       "relatedComponents": []
     },
@@ -164,9 +149,7 @@
       "filePath": "/src/components/ui/theme-toggle.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* <ThemeToggle />"
-      ],
+      "examples": ["* <ThemeToggle />"],
       "relatedComponents": []
     },
     "tabs": {
@@ -221,9 +204,7 @@
       "filePath": "/src/components/ui/card.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "author": "Frontend Team",
       "relatedComponents": []
     },
@@ -235,10 +216,7 @@
       "filePath": "/src/components/ui/button.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx",
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx", "* ```tsx"],
       "author": "Frontend Team",
       "relatedComponents": []
     },
@@ -250,9 +228,7 @@
       "filePath": "/src/components/ui/badge.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "relatedComponents": []
     },
     "avatar": {
@@ -263,9 +239,7 @@
       "filePath": "/src/components/ui/avatar.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "relatedComponents": []
     },
     "alert": {
@@ -276,9 +250,7 @@
       "filePath": "/src/components/ui/alert.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* ```tsx"
-      ],
+      "examples": ["* ```tsx"],
       "relatedComponents": []
     },
     "cardclient": {
@@ -289,9 +261,7 @@
       "filePath": "/src/components/ui/client/card-client.tsx",
       "status": "stable",
       "props": [],
-      "examples": [
-        "* <Card>"
-      ],
+      "examples": ["* <Card>"],
       "author": "Frontend Team",
       "relatedComponents": []
     },
@@ -321,9 +291,7 @@
         "filePath": "/src/components/ui/avatar.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* ```tsx"
-        ],
+        "examples": ["* ```tsx"],
         "relatedComponents": []
       },
       {
@@ -334,9 +302,7 @@
         "filePath": "/src/components/ui/badge.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* ```tsx"
-        ],
+        "examples": ["* ```tsx"],
         "relatedComponents": []
       },
       {
@@ -347,10 +313,7 @@
         "filePath": "/src/components/ui/button.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* ```tsx",
-          "* ```tsx"
-        ],
+        "examples": ["* ```tsx", "* ```tsx"],
         "author": "Frontend Team",
         "relatedComponents": []
       },
@@ -399,9 +362,7 @@
         "filePath": "/src/components/ui/theme-toggle.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* <ThemeToggle />"
-        ],
+        "examples": ["* <ThemeToggle />"],
         "relatedComponents": []
       }
     ],
@@ -414,9 +375,7 @@
         "filePath": "/src/components/ui/alert.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* ```tsx"
-        ],
+        "examples": ["* ```tsx"],
         "relatedComponents": []
       },
       {
@@ -427,9 +386,7 @@
         "filePath": "/src/components/ui/card.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* ```tsx"
-        ],
+        "examples": ["* ```tsx"],
         "author": "Frontend Team",
         "relatedComponents": []
       },
@@ -441,9 +398,7 @@
         "filePath": "/src/components/ui/client/card-client.tsx",
         "status": "stable",
         "props": [],
-        "examples": [
-          "* <Card>"
-        ],
+        "examples": ["* <Card>"],
         "author": "Frontend Team",
         "relatedComponents": []
       },
@@ -475,13 +430,7 @@
     "page": [],
     "unknown": []
   },
-  "allCategories": [
-    "atom",
-    "molecule",
-    "organism",
-    "template",
-    "page"
-  ],
+  "allCategories": ["atom", "molecule", "organism", "template", "page"],
   "generatedAt": "2025-04-06T14:23:20.149Z",
   "totalComponents": 12
 }

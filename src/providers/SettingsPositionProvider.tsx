@@ -20,7 +20,7 @@ const SettingsPositionContext = createContext<SettingsPositionContextType>({
   closeSettings: () => {},
   openSettings: () => {},
   position: {
-    topOffset: undefined
+    topOffset: undefined,
   },
 });
 
@@ -32,7 +32,7 @@ export const SettingsPositionProvider = ({ children }: { children: ReactNode }) 
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ topOffset: 65 });
 
-  const toggleSettings = () => setIsOpen((prev) => !prev);
+  const toggleSettings = () => setIsOpen(prev => !prev);
   const closeSettings = () => setIsOpen(false);
   const openSettings = () => setIsOpen(true);
 
@@ -49,4 +49,4 @@ export const SettingsPositionProvider = ({ children }: { children: ReactNode }) 
       {children}
     </SettingsPositionContext.Provider>
   );
-}; 
+};

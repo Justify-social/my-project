@@ -7,4 +7,4 @@ import { Step2Props } from './types';
 export const FormContent = memo(function FormContent(props: Step2Props) {
   // TODO: Add actual form content here using props
   return <div>Step 2 Form Content</div>;
-}); 
+});

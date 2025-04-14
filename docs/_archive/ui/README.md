@@ -30,4 +30,4 @@ For detailed information about working with icons, see the [Icon System](../icon
 ## Related Documentation
 
 - [Icon Reference](../icons/) - Documentation about our icon system
-- [Component Guides](../../guides/developer/components/) - Guides for working with components 
+- [Component Guides](../../guides/developer/components/) - Guides for working with components

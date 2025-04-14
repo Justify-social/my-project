@@ -47,10 +47,10 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
   const currentCategory = searchParams.get('category');
 
   return (
-    <aside className="w-full h-full bg-[#f5f5f5] border-r border flex flex-col">
+    <aside className="w-full h-full bg-[var(--muted-background)] border-r border flex flex-col">
       {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
-        {navItems.map((item) => {
+        {navItems.map(item => {
           const itemKey = item.id;
           const isHovered = hoverStates[itemKey] || false;
 
@@ -70,8 +70,11 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           }
 
           // Determine icon variant
-          const baseIconName = item.iconId.endsWith('Light') ? item.iconId.slice(0, -5) : item.iconId;
-          const iconIdToRender = (isActive || isHovered) ? `${baseIconName}Solid` : `${baseIconName}Light`;
+          const baseIconName = item.iconId.endsWith('Light')
+            ? item.iconId.slice(0, -5)
+            : item.iconId;
+          const iconIdToRender =
+            isActive || isHovered ? `${baseIconName}Solid` : `${baseIconName}Light`;
 
           return (
             <Link
@@ -81,16 +84,18 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
               onMouseLeave={() => setHoverStates(prev => ({ ...prev, [itemKey]: false }))}
               className={cn(
                 'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-                (isActive || isHovered)
+                isActive || isHovered
                   ? 'text-accent bg-accent/10 font-medium'
                   : 'text-foreground hover:text-accent hover:bg-accent/5'
               )}
             >
               <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
-              <span className={cn(
-                "text-sm font-sora font-medium truncate",
-                (isActive || isHovered) ? 'text-accent' : 'text-foreground'
-              )}>
+              <span
+                className={cn(
+                  'text-sm font-heading font-medium truncate',
+                  isActive || isHovered ? 'text-accent' : 'text-foreground'
+                )}
+              >
                 {item.label}
               </span>
             </Link>
@@ -111,11 +116,16 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           )}
         >
           {/* Use consistent icon rendering - assuming brandsGithub exists */}
-          <Icon iconId="brandsGithub" className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent" />
-          <span className={cn(
-            "text-sm font-sora font-medium truncate",
-            'text-foreground group-hover:text-accent'
-          )}>
+          <Icon
+            iconId="brandsGithub"
+            className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent"
+          />
+          <span
+            className={cn(
+              'text-sm font-heading font-medium truncate',
+              'text-foreground group-hover:text-accent'
+            )}
+          >
             View Source
           </span>
         </Link>
@@ -142,11 +152,16 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
         >
           {/* Use consistent icon rendering */}
           {/* Assume faArrowLeftLight exists, switch to Solid on hover */}
-          <Icon iconId="faArrowLeftLight" className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent" />
-          <span className={cn(
-            "text-sm font-sora font-medium truncate",
-            'text-foreground group-hover:text-accent'
-          )}>
+          <Icon
+            iconId="faArrowLeftLight"
+            className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent"
+          />
+          <span
+            className={cn(
+              'text-sm font-heading font-medium truncate',
+              'text-foreground group-hover:text-accent'
+            )}
+          >
             Back to App
           </span>
         </Link>

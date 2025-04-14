@@ -13,11 +13,13 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 ### 1. Login & Access
 
 1. **Authentication**:
+
    - User enters email and password or uses SSO
    - System validates credentials
    - User is redirected to the dashboard
 
 2. **Dashboard Overview**:
+
    - Campaign summary cards display active campaigns
    - Performance metrics show across all campaigns
    - "Create Campaign" button is prominently displayed
@@ -31,6 +33,7 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 #### Step 1: Campaign Overview
 
 1. Enter basic campaign information:
+
    - Campaign name
    - Business goal (awareness, consideration, conversion)
    - Start/end dates
@@ -46,6 +49,7 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 #### Step 2: Campaign Objectives
 
 1. Define marketing objectives:
+
    - Primary KPI selection
    - Target metrics
    - Main message
@@ -61,6 +65,7 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 #### Step 3: Audience Targeting
 
 1. Define target audience:
+
    - Demographics (age range, gender)
    - Geographic targeting (locations)
    - Advanced targeting options
@@ -76,6 +81,7 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 #### Step 4: Creative Assets
 
 1. Upload and manage creative assets:
+
    - Upload images or videos using UploadThing integration
    - Support for multiple file formats (JPEG, PNG, GIF, MP4)
    - Auto-detection of file type for proper preview rendering
@@ -83,6 +89,7 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
    - Asset details customization (name, description, budget, influencer)
 
 2. Asset preview functionality:
+
    - Square, centered thumbnails for consistent UI appearance
    - Videos autoplay for 5 seconds then loop for preview
    - Interactive play/pause controls with hover effects
@@ -103,6 +110,7 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 #### Step 5: Review & Submit
 
 1. Final review process:
+
    - Campaign summary page with all details
    - Edit buttons for each section
    - Submit campaign button
@@ -117,11 +125,13 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 ### 3. Post-Submission Flow
 
 1. **Confirmation Screen**:
+
    - Success message with campaign ID
    - Next steps guidance
    - Options to view campaign or create another
 
 2. **Campaign List View**:
+
    - Updated list showing the new campaign
    - Status indicator showing "Submitted" or "In Review"
    - Options to duplicate or edit (if still permitted)
@@ -137,17 +147,20 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 ### Data Management
 
 1. **Global State & Context**:
+
    - The wizard uses React Context (`WizardContext`) to maintain state across steps
    - All form data is centralized through this context
    - Steps communicate through this shared state layer
 
 2. **Data Loading**:
+
    - Campaign data loads once at initialization
    - Data is transformed from backend to frontend format
    - The app uses a single data fetch to minimize API calls
    - Each step references the same data source
 
 3. **Draft Saving System**:
+
    - Drafts can be saved at any point in the workflow
    - The system uses flexible validation for drafts
    - Incomplete data is preserved without validation errors
@@ -162,12 +175,14 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 ### Technical Implementation Patterns
 
 1. **Server/Client Component Pattern**:
+
    - Layout files handle server-side directives
    - Client components use the "use client" directive
    - Server components handle data fetching
    - Clear separation ensures proper rendering
 
 2. **Validation Strategy**:
+
    - Step-specific validation for immediate feedback
    - Cross-step validation for related fields
    - Backend validation as final safeguard
@@ -183,15 +198,15 @@ This document outlines the complete end-to-end workflow for the Campaign Wizard 
 
 The Campaign Wizard maintains state throughout the workflow:
 
-| State | Description | Allowed Transitions |
-|-------|-------------|---------------------|
-| Draft | Initial creation state | In Review, Deleted |
-| In Review | Submitted for review | Approved, Rejected, Draft |
-| Approved | Ready for activation | Active, Draft |
-| Active | Currently running | Completed, Paused |
-| Paused | Temporarily suspended | Active, Completed |
-| Completed | Campaign ended | Archived |
-| Archived | Stored for reference | None |
+| State     | Description            | Allowed Transitions       |
+| --------- | ---------------------- | ------------------------- |
+| Draft     | Initial creation state | In Review, Deleted        |
+| In Review | Submitted for review   | Approved, Rejected, Draft |
+| Approved  | Ready for activation   | Active, Draft             |
+| Active    | Currently running      | Completed, Paused         |
+| Paused    | Temporarily suspended  | Active, Completed         |
+| Completed | Campaign ended         | Archived                  |
+| Archived  | Stored for reference   | None                      |
 
 ## Data Persistence
 
@@ -235,4 +250,4 @@ After campaign creation, users typically proceed to:
 
 - [Campaign Wizard Usage](./usage.md)
 - [Form Validation](./form-validation.md)
-- [Dashboard Overview](../dashboard/overview.md) 
+- [Dashboard Overview](../dashboard/overview.md)

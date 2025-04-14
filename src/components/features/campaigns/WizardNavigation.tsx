@@ -5,7 +5,7 @@ import React from 'react';
 import { useCampaignWizardContext } from '@/components/features/campaigns/CampaignWizardContext';
 import { AutosaveIndicator } from '@/components/features/campaigns/AutosaveIndicator';
 import { cn } from '@/utils/string/utils';
-import { Icon } from '@/components/ui/icon'
+import { Icon } from '@/components/ui/icon/icon';
 
 interface WizardNavigationProps {
   className?: string;
@@ -25,7 +25,7 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
     goToPreviousStep,
     saveAsDraft,
     submitCampaign,
-    progress
+    progress,
   } = useCampaignWizardContext();
 
   // Step titles
@@ -33,58 +33,58 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
     'Campaign Overview',
     'Campaign Objectives',
     'Target Audience',
-    'Creative Assets'];
-
+    'Creative Assets',
+  ];
 
   return (
-    <div className={`${cn('w-full', className)} font-work-sans`}>
+    <div className={`${cn('w-full', className)} font-body`}>
       {/* Progress bar */}
-      <div className="w-full h-2 mb-4 bg-muted rounded-full font-work-sans">
+      <div className="w-full h-2 mb-4 bg-muted rounded-full font-body">
         <div
-          className="h-2 transition-all duration-300 ease-in-out bg-accent rounded-full font-work-sans"
-          style={{ width: `${progress}%` }} />
-
+          className="h-2 transition-all duration-300 ease-in-out bg-accent rounded-full font-body"
+          style={{ width: `${progress}%` }}
+        />
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center justify-between mb-6 font-work-sans">
-        {[1, 2, 3, 4].map((step) =>
-          <div key={step} className="flex flex-col items-center font-work-sans">
+      <div className="flex items-center justify-between mb-6 font-body">
+        {[1, 2, 3, 4].map(step => (
+          <div key={step} className="flex flex-col items-center font-body">
             <div
               className={`${cn(
                 'flex items-center justify-center w-8 h-8 mb-2 text-sm font-medium border-2 rounded-full',
-                step === currentStep ?
-                  'border-accent bg-accent text-accent-foreground' :
-                  step < currentStep ?
-                    'border-accent bg-background text-accent' :
-                    'border text-muted-foreground'
-              )} font-work-sans`}>
-
-              {step < currentStep ?
-                <Icon iconId="faCheckCircleSolid" className="w-5 h-5 text-success" /> :
-
+                step === currentStep
+                  ? 'border-accent bg-accent text-accent-foreground'
+                  : step < currentStep
+                    ? 'border-accent bg-background text-accent'
+                    : 'border text-muted-foreground'
+              )} font-body`}
+            >
+              {step < currentStep ? (
+                <Icon iconId="faCheckCircleSolid" className="w-5 h-5 text-success" />
+              ) : (
                 step
-              }
+              )}
             </div>
             <span
               className={`${cn(
                 'text-xs font-medium',
-                step === currentStep ?
-                  'text-accent' :
-                  step < currentStep ?
-                    'text-foreground' :
-                    'text-muted-foreground'
-              )} font-work-sans`}>
-
+                step === currentStep
+                  ? 'text-accent'
+                  : step < currentStep
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
+              )} font-body`}
+            >
               {stepTitles[step - 1]}
             </span>
           </div>
-        )}
+        ))}
       </div>
 
       {/* Navigation controls */}
-      <div className="flex items-center justify-between pt-4 mt-6 border-t font-work-sans">
-        <div className="flex items-center space-x-4 font-work-sans">
+      <div className="flex items-center justify-between pt-4 mt-6 border-t font-body">
+        <div className="flex items-center space-x-4 font-body">
           {/* Back button */}
           <button
             type="button"
@@ -92,11 +92,11 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             disabled={isFirstStep || isLoading || isSaving}
             className={`${cn(
               'px-4 py-2 text-sm font-medium border rounded-md flex items-center',
-              isFirstStep ?
-                'border bg-muted text-muted-foreground cursor-not-allowed' :
-                'border-secondary bg-background text-secondary hover:bg-muted/50'
-            )} font-work-sans`}>
-
+              isFirstStep
+                ? 'border bg-muted text-muted-foreground cursor-not-allowed'
+                : 'border-secondary bg-background text-secondary hover:bg-muted/50'
+            )} font-body`}
+          >
             <Icon iconId="faArrowLeftLight" className="w-4 h-4 mr-2" />
             Previous
           </button>
@@ -106,14 +106,14 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             type="button"
             onClick={saveAsDraft}
             disabled={isLoading || isSaving}
-            className="px-4 py-2 text-sm font-medium text-primary bg-background border border-primary rounded-md hover:bg-muted/50 flex items-center font-work-sans">
-
+            className="px-4 py-2 text-sm font-medium text-primary bg-background border border-primary rounded-md hover:bg-muted/50 flex items-center font-body"
+          >
             <Icon iconId="faFloppyDiskLight" className="w-4 h-4 mr-2" />
             Save Draft
           </button>
         </div>
 
-        <div className="flex items-center space-x-4 font-work-sans">
+        <div className="flex items-center space-x-4 font-body">
           {/* Autosave indicator */}
           <AutosaveIndicator />
 
@@ -124,32 +124,32 @@ export function WizardNavigation({ className }: WizardNavigationProps) {
             disabled={isLoading || isSaving}
             className={`${cn(
               'px-4 py-2 text-sm font-medium text-accent-foreground rounded-md flex items-center',
-              isLoading || isSaving ?
-                'bg-accent/70 cursor-not-allowed' :
-                'bg-accent hover:opacity-90'
-            )} font-work-sans`}>
-
-            {isLoading || isSaving ?
-              <span className="flex items-center font-work-sans">
+              isLoading || isSaving
+                ? 'bg-accent/70 cursor-not-allowed'
+                : 'bg-accent hover:opacity-90'
+            )} font-body`}
+          >
+            {isLoading || isSaving ? (
+              <span className="flex items-center font-body">
                 <Icon iconId="faCircleNotchLight" className="w-4 h-4 mr-2 animate-spin" />
                 {isLastStep ? 'Submitting...' : 'Saving...'}
-              </span> :
-              isLastStep ?
-                <>
-                  Submit Campaign
-                  <Icon iconId="faCheckLight" className="w-4 h-4 ml-2" />
-                </> :
-
-                <>
-                  Next Step
-                  <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-2" />
-                </>
-            }
+              </span>
+            ) : isLastStep ? (
+              <>
+                Submit Campaign
+                <Icon iconId="faCheckLight" className="w-4 h-4 ml-2" />
+              </>
+            ) : (
+              <>
+                Next Step
+                <Icon iconId="faArrowRightLight" className="w-4 h-4 ml-2" />
+              </>
+            )}
           </button>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 export default WizardNavigation;

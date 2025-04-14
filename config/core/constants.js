@@ -1,6 +1,6 @@
 /**
  * Core Application Constants
- * 
+ *
  * This file defines application-wide constants that are used throughout the system.
  * These values are considered static and shouldn't change between environments.
  */
@@ -76,11 +76,4 @@ const SECURITY = {
   CSRF_PROTECTION: true,
 };
 
-export {
-  APP_METADATA,
-  FORMAT_CONSTANTS,
-  LIMITS,
-  PATHS,
-  FEATURES,
-  SECURITY,
-}; 
+export { APP_METADATA, FORMAT_CONSTANTS, LIMITS, PATHS, FEATURES, SECURITY };

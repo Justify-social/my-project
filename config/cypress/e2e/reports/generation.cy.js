@@ -6,19 +6,15 @@ describe('Report Generation Interface', () => {
 
   it('should update the report preview based on user input', () => {
     // Select the report format (PDF by default, so let’s change it to Excel)
-    cy.get('select')
-      .should('have.attr', 'name', 'reportFormat')
-      .select('Excel');
+    cy.get('select').should('have.attr', 'name', 'reportFormat').select('Excel');
 
     // Check that the dropdown value is updated
     cy.get('select[name="reportFormat"]').should('have.value', 'Excel');
 
     // Select multiple metrics
     const metrics = ['Sales', 'Campaign Reach'];
-    metrics.forEach((metric) => {
-      cy.contains('label', metric)
-        .find('input[type="checkbox"]')
-        .check();
+    metrics.forEach(metric => {
+      cy.contains('label', metric).find('input[type="checkbox"]').check();
     });
 
     // Enter dates in the date fields

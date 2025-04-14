@@ -36,14 +36,16 @@ function SidebarItem({
   isChild = false, // Default to false (parent/standalone size)
   onClick,
   iconRegistry,
-  isLoadingRegistry
+  isLoadingRegistry,
 }: SidebarItemProps) {
   const [isHovered, setIsHovered] = useState(false); // Add hover state
   const active = isActive || false; // Provide default for isActive
   const iconPath = icon && !isLoadingRegistry ? iconRegistry[icon] : undefined; // Get path from registry, prevent lookup while loading
 
   return (
-    <li className="w-full"> {/* Use w-full for consistency */}
+    <li className="w-full">
+      {' '}
+      {/* Use w-full for consistency */}
       <Link
         href={href}
         onClick={onClick}
@@ -51,26 +53,34 @@ function SidebarItem({
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
           'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group', // Match sidebar-ui-components style
-          (active || isHovered)
-            ? 'text-accent bg-accent/10 font-medium' : // THEMED
-            'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
+          active || isHovered
+            ? 'text-accent bg-accent/10 font-medium' // THEMED
+            : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
         )}
       >
         {iconPath ? (
-          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"> {/* Icon container */}
+          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
+            {' '}
+            {/* Icon container */}
             <img
               src={iconPath}
               alt={`${label} icon`}
               className="w-5 h-5" // Standard icon size
               style={{
-                filter: (active || isHovered) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none', // Accent color filter on hover/active
-                transition: 'filter 0.15s ease-in-out'
+                filter:
+                  active || isHovered
+                    ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
+                    : 'none', // Accent color filter on hover/active
+                transition: 'filter 0.15s ease-in-out',
               }}
             />
           </div>
         ) : icon ? (
           // Fallback if icon name provided but not in registry
-          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0" title={`Icon '${icon}' not found in registry`}>
+          <div
+            className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
+            title={`Icon '${icon}' not found in registry`}
+          >
             <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
               {icon.charAt(0).toUpperCase()}
             </span>
@@ -81,7 +91,9 @@ function SidebarItem({
         )}
 
         {/* Use text-xs for child items and text-sm for parent/standalone items */}
-        <span className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-sora font-medium truncate ${(active || isHovered) ? 'text-accent' : 'text-foreground'}`}>
+        <span
+          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || isHovered ? 'text-accent' : 'text-foreground'}`}
+        >
           {label}
         </span>
       </Link>
@@ -119,7 +131,7 @@ export function Sidebar({
   logoSrc,
   logoAlt = 'Logo',
   title = 'Dashboard',
-  onItemClick
+  onItemClick,
 }: SidebarProps) {
   // --- Icon Registry Loading ---
   const [iconRegistry, setIconRegistry] = useState<AppIconRegistry>({});
@@ -136,7 +148,8 @@ export function Sidebar({
         }
         return response.json();
       })
-      .then((data: { icons: { id: string; path: string }[] }) => { // Adjust type to match JSON structure
+      .then((data: { icons: { id: string; path: string }[] }) => {
+        // Adjust type to match JSON structure
         // Map the icons array to the expected Record<string, string> format
         const registry = data.icons.reduce((acc, icon) => {
           acc[icon.id] = icon.path; // Map id to path
@@ -146,8 +159,8 @@ export function Sidebar({
         setLoadingError(null);
       })
       .catch(error => {
-        console.error("Error loading icon registry:", error);
-        setLoadingError("Could not load icon registry. Icons may not display.");
+        console.error('Error loading icon registry:', error);
+        setLoadingError('Could not load icon registry. Icons may not display.');
         setIconRegistry({}); // Set empty registry on error
       })
       .finally(() => {
@@ -163,7 +176,7 @@ export function Sidebar({
   const toggleSection = (itemKey: string) => {
     setExpandedSections(prev => ({
       ...prev,
-      [itemKey]: !prev[itemKey]
+      [itemKey]: !prev[itemKey],
     }));
   };
   // --- End Collapsible Section State ---
@@ -175,39 +188,45 @@ export function Sidebar({
   };
   // --- End Hover State ---
 
-  const isActive = useCallback((path: string) => {
-    if (!path) return false; // Handle cases where href might be missing
-    // Exact match or parent path match for active state
-    return activePath === path || (path !== '/' && activePath.startsWith(path) && path.length > 1);
-  }, [activePath]);
+  const isActive = useCallback(
+    (path: string) => {
+      if (!path) return false; // Handle cases where href might be missing
+      // Exact match or parent path match for active state
+      return (
+        activePath === path || (path !== '/' && activePath.startsWith(path) && path.length > 1)
+      );
+    },
+    [activePath]
+  );
 
-  const hasActiveChild = useCallback((item: { children?: any[] }) => {
-    return item.children?.some(child => isActive(child.href));
-  }, [isActive]);
+  const hasActiveChild = useCallback(
+    (item: { children?: any[] }) => {
+      return item.children?.some(child => isActive(child.href));
+    },
+    [isActive]
+  );
 
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 h-full z-40 flex flex-col bg-[#f5f5f5] transition-all w-64 md:translate-x-0", // Reverted bg-muted
+        'fixed top-0 left-0 h-full z-40 flex flex-col bg-[#f5f5f5] transition-all w-64 md:translate-x-0', // Reverted bg-muted
         className
       )}
       data-testid="sidebar"
     >
       {/* Sidebar header - simplified, no toggle */}
-      <div className={cn(
-        "h-14 flex items-center px-4 border-b border" // THEMED border
-      )}>
+      <div
+        className={cn(
+          'h-14 flex items-center px-4 border-b border' // THEMED border
+        )}
+      >
         <div className="flex items-center">
-          {logoSrc && (
-            <img src={logoSrc} alt={logoAlt} className="h-6 w-auto mr-2" />
-          )}
+          {logoSrc && <img src={logoSrc} alt={logoAlt} className="h-6 w-auto mr-2" />}
           <span className="font-medium text-foreground">{title}</span> {/* THEMED text */}
         </div>
       </div>
 
-      {loadingError && (
-        <div className="p-4 text-xs text-red-600 bg-red-100">{loadingError}</div>
-      )}
+      {loadingError && <div className="p-4 text-xs text-red-600 bg-red-100">{loadingError}</div>}
 
       {/* Navigation items - Make this flexible and scrollable, remove bottom padding */}
       <nav className="flex-1 overflow-y-auto p-2 pb-[var(--footer-height)]">
@@ -234,9 +253,9 @@ export function Sidebar({
                       onMouseLeave={() => setHover(itemKey, false)}
                       className={cn(
                         'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group cursor-pointer', // Added cursor-pointer
-                        (isActiveParent || isHoveredParent)
-                          ? 'text-accent bg-accent/10 font-medium' : // THEMED
-                          'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
+                        isActiveParent || isHoveredParent
+                          ? 'text-accent bg-accent/10 font-medium' // THEMED
+                          : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
                       )}
                     >
                       <div className="flex items-center">
@@ -247,13 +266,19 @@ export function Sidebar({
                               alt={`${item.label} icon`}
                               className="w-5 h-5"
                               style={{
-                                filter: (isActiveParent || isHoveredParent) ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)' : 'none',
-                                transition: 'filter 0.15s ease-in-out'
+                                filter:
+                                  isActiveParent || isHoveredParent
+                                    ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
+                                    : 'none',
+                                transition: 'filter 0.15s ease-in-out',
                               }}
                             />
                           </div>
                         ) : parentIconName ? (
-                          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0" title={`Icon '${parentIconName}' not found in registry`}>
+                          <div
+                            className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
+                            title={`Icon '${parentIconName}' not found in registry`}
+                          >
                             <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 rounded-full">
                               {parentIconName.charAt(0).toUpperCase()}
                             </span>
@@ -262,15 +287,25 @@ export function Sidebar({
                           <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
                         )}
                         {/* Parent item label: text-sm */}
-                        <span className={`text-sm font-sora font-medium truncate ${(isActiveParent || isHoveredParent) ? 'text-accent' : 'text-foreground'}`}> {/* Ensure text-sm */}
+                        <span
+                          className={`text-sm font-heading font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                        >
+                          {' '}
+                          {/* Ensure text-sm */}
                           {item.label}
                         </span>
                       </div>
                     </div>
 
                     {/* Render children conditionally based on isExpanded */}
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}> {/* Conditional expansion & opacity */}
-                      <ul className="pl-6 mt-0.5 space-y-0"> {/* Ensure indent is pl-6 */}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                    >
+                      {' '}
+                      {/* Conditional expansion & opacity */}
+                      <ul className="pl-6 mt-0.5 space-y-0">
+                        {' '}
+                        {/* Ensure indent is pl-6 */}
                         {item.children.map((child, childIndex) => (
                           <SidebarItem
                             key={`${itemKey}-${childIndex}`}
@@ -301,13 +336,15 @@ export function Sidebar({
                   />
                 )}
               </React.Fragment>
-            )
+            );
           })}
         </ul>
       </nav>
 
       {/* Settings Footer Area - Apply ONLY border-t */}
-      <div className="p-2 border-t h-[var(--footer-height)] flex flex-col justify-center"> {/* Removed general 'border', kept 'border-t' */}
+      <div className="p-2 border-t h-[var(--footer-height)] flex flex-col justify-center">
+        {' '}
+        {/* Removed general 'border', kept 'border-t' */}
         <ul className="list-none space-y-0.5">
           {/* Settings Item */}
           <SidebarItem

@@ -34,6 +34,7 @@ import { Button, type ButtonProps } from '@/components/ui';
 The UI component library includes the following components, primarily exported from `@/components/ui`:
 
 ### Core Components
+
 - `Button` (and `ButtonProps`)
 - `Card` (and `CardHeader`, `CardFooter`, `CardTitle`, `CardDescription`, `CardContent`)
 - `Input`
@@ -47,6 +48,7 @@ The UI component library includes the following components, primarily exported f
 - `Icon` (Note: Import directly from `@/components/ui/icon/icon` recommended)
 
 ### Visualization Components
+
 - `ChartLine`
 - `ChartBar`
 - `ChartPie`
@@ -56,34 +58,42 @@ The UI component library includes the following components, primarily exported f
 - `ChartFunnel`
 
 ### KPI & Metrics Components
+
 - `CardKpi`
 - `MetricsDashboard`
 - `MetricsComparison`
 
 ### Domain-Specific Cards
+
 - `CardAsset`
 - `CardAssetPreview`
 
 ### Typography Components
+
 - `TypographyText`
 - `TypographyHeading`
 
 ### Navigation Components
+
 - `Sidebar`
 - `Header`
 - `MenuMobile`
 
 ### Form Components
+
 - `SearchBar`
 
 ### Notification Components
+
 - `NotificationSonner`
 
 ### Loading Components
+
 - `LoadingSpinner`
 - `LoadingSkeleton` (and variants like `DashboardSkeleton`, `TableSkeleton`)
 
 ### Client Component Variants
+
 - `Button` (client - import from `@/components/ui/client/button-client`)
 - `Card` (client - import from `@/components/ui/client/card-client`)
 
@@ -105,6 +115,7 @@ bash scripts/ui/validate-ssot.sh
 ```
 
 This script will check for:
+
 - Direct imports from component files (violation of SSOT)
 - Components not exported from the main index.ts
 - Duplicate component definitions
@@ -117,4 +128,4 @@ If you need to fix non-compliant imports, you can run:
 bash scripts/ui/fix-imports.sh
 ```
 
-This script will automatically update direct imports to use the central index.ts file. 
+This script will automatically update direct imports to use the central index.ts file.

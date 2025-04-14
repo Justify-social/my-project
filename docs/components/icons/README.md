@@ -6,11 +6,11 @@ This guide explains how icons are managed and used in our project, focusing on o
 
 Our application uses a set of JSON files located in `/public/static/` to manage all icons. These files are the **Single Source of Truth (SSOT)** for icons:
 
-*   `app-icon-registry.json`
-*   `brands-icon-registry.json`
-*   `kpis-icon-registry.json`
-*   `light-icon-registry.json` (FontAwesome Light style)
-*   `solid-icon-registry.json` (FontAwesome Solid style)
+- `app-icon-registry.json`
+- `brands-icon-registry.json`
+- `kpis-icon-registry.json`
+- `light-icon-registry.json` (FontAwesome Light style)
+- `solid-icon-registry.json` (FontAwesome Solid style)
 
 Each file organises icons by category.
 
@@ -37,11 +37,11 @@ Inside each `*-icon-registry.json` file, you'll find this structure:
 
 **Key Fields Explained:**
 
-*   `id`: The **unique ID** for the icon (e.g., `appHome`, `faCheckLight`, `brandsFacebook`). **This ID is the only thing you need to use an icon in the code.**
-*   `path`: The location of the icon's SVG file (e.g., `/icons/light/faCheckLight.svg`). The system finds this using the `id`.
-*   `category`: The icon's category (e.g., "app", "light").
-*   `name`: A descriptive name (e.g., "Home", "Check").
-*   `faVersion`: The FontAwesome class name, if it exists (e.g., `fal fa-check`). This is just for reference; the system uses the `id` and `path`. It might be `null` for custom icons.
+- `id`: The **unique ID** for the icon (e.g., `appHome`, `faCheckLight`, `brandsFacebook`). **This ID is the only thing you need to use an icon in the code.**
+- `path`: The location of the icon's SVG file (e.g., `/icons/light/faCheckLight.svg`). The system finds this using the `id`.
+- `category`: The icon's category (e.g., "app", "light").
+- `name`: A descriptive name (e.g., "Home", "Check").
+- `faVersion`: The FontAwesome class name, if it exists (e.g., `fal fa-check`). This is just for reference; the system uses the `id` and `path`. It might be `null` for custom icons.
 
 ## How to Use Icons (The `<Icon>` Component)
 
@@ -77,8 +77,8 @@ Follow these steps to add or change an icon:
 
 1.  **Add/Replace SVG:** Put the SVG file in the correct folder within `/public/icons/` (e.g., `/public/icons/app/`).
 2.  **Edit Registry:** Open the relevant JSON file in `/public/static/` (e.g., `app-icon-registry.json`).
-    *   **New Icon:** Add a new entry to the `icons` list.
-    *   **Update Icon:** Change the existing entry.
+    - **New Icon:** Add a new entry to the `icons` list.
+    - **Update Icon:** Change the existing entry.
 3.  **Check Fields:** Make sure the `id`, `path`, `category`, and `name` are correct. The `id` must be unique.
 4.  **Update Count:** Adjust the `iconCount` number at the bottom of the JSON file if you added or removed an icon.
 5.  **Test:** Use the icon `id` in the `<Icon>` component somewhere (like the debug page `/debug-tools/ui-components`) to check it displays correctly.

@@ -1,6 +1,6 @@
 /**
  * UI Component Browser
- * 
+ *
  * This page displays key UI components from @/components/ui for visual reference.
  */
 
@@ -10,16 +10,28 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-  Card, CardHeader, CardTitle, CardContent,
-  Tabs, TabsList, TabsTrigger, TabsContent,
-  Alert, AlertTitle, AlertDescription,
-} from "@/components/ui";
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from '@/components/ui';
 import { Icon } from '@/components/ui/icon';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { iconRegistryData } from '@/lib/generated/icon-registry';
 import { IconMetadata } from '@/components/ui/icon/icon-types';
 import { Button as UiButton } from '@/components/ui/button';
-import { type ComponentRegistry, type ExtendedComponentMetadata, type ComponentCategory } from './types';
+import {
+  type ComponentRegistry,
+  type ExtendedComponentMetadata,
+  type ComponentCategory,
+} from './types';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES_DISPLAY: Record<ComponentCategory, { icon: string }> = {
@@ -40,7 +52,9 @@ const statusStyles: Record<string, string> = {
 
 const FIXED_ICON_CATEGORIES = ['All', 'App', 'Brands', 'Hover', 'KPIs', 'Light', 'Solid'];
 
-const getIconInfo = (id: string): { baseName: string; variant: 'light' | 'solid' | 'brand' | 'other' } | null => {
+const getIconInfo = (
+  id: string
+): { baseName: string; variant: 'light' | 'solid' | 'brand' | 'other' } | null => {
   if (id.endsWith('Light')) return { baseName: id.slice(0, -5), variant: 'light' };
   if (id.endsWith('Solid')) return { baseName: id.slice(0, -5), variant: 'solid' };
   if (id.startsWith('faBrands')) return { baseName: id, variant: 'brand' };
@@ -52,16 +66,20 @@ export default function ComponentBrowserPage() {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const initialTab = searchParams.get('tab') || 'components';
-  const initialCategory = searchParams.get('category') as ComponentCategory | null || null;
+  const initialCategory = (searchParams.get('category') as ComponentCategory | null) || null;
 
   const [registry, setRegistry] = useState<ComponentRegistry | null>(null);
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(true);
   const [errorLoadingRegistry, setErrorLoadingRegistry] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(initialCategory);
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(
+    initialCategory
+  );
   const [allIcons, setAllIcons] = useState<IconMetadata[]>([]);
   const [iconCategories, setIconCategories] = useState<string[]>([]);
   const [selectedIconCategory, setSelectedIconCategory] = useState<string>('All');
-  const [hoverPairs, setHoverPairs] = useState<{ lightId: string; solidId: string; name?: string }[]>([]);
+  const [hoverPairs, setHoverPairs] = useState<
+    { lightId: string; solidId: string; name?: string }[]
+  >([]);
   const [currentTab, setCurrentTab] = useState(initialTab);
 
   useEffect(() => {
@@ -95,7 +113,7 @@ export default function ComponentBrowserPage() {
         const data: ComponentRegistry = await response.json();
         setRegistry(data);
       } catch (err) {
-        console.error("Error fetching component registry JSON:", err);
+        console.error('Error fetching component registry JSON:', err);
         setErrorLoadingRegistry(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
         setIsLoadingRegistry(false);
@@ -110,20 +128,24 @@ export default function ComponentBrowserPage() {
       const icons = iconRegistryData.icons;
       setAllIcons(icons);
       const lightIcons = icons.filter(icon => icon.id.endsWith('Light'));
-      const solidIconsMap = new Map(icons.filter(icon => icon.id.endsWith('Solid')).map(icon => [icon.id, icon]));
-      const pairs = lightIcons.map(lightIcon => {
-        const lightInfo = getIconInfo(lightIcon.id);
-        if (!lightInfo || lightInfo.variant !== 'light') return null;
-        const solidId = lightInfo.baseName + 'Solid';
-        if (solidIconsMap.has(solidId)) {
-          return { lightId: lightIcon.id, solidId, name: lightIcon.name };
-        }
-        return null;
-      }).filter(Boolean) as { lightId: string; solidId: string; name?: string }[];
+      const solidIconsMap = new Map(
+        icons.filter(icon => icon.id.endsWith('Solid')).map(icon => [icon.id, icon])
+      );
+      const pairs = lightIcons
+        .map(lightIcon => {
+          const lightInfo = getIconInfo(lightIcon.id);
+          if (!lightInfo || lightInfo.variant !== 'light') return null;
+          const solidId = lightInfo.baseName + 'Solid';
+          if (solidIconsMap.has(solidId)) {
+            return { lightId: lightIcon.id, solidId, name: lightIcon.name };
+          }
+          return null;
+        })
+        .filter(Boolean) as { lightId: string; solidId: string; name?: string }[];
       setHoverPairs(pairs);
       setIconCategories(FIXED_ICON_CATEGORIES);
     } catch (error) {
-      console.error("Failed to load icon registry:", error);
+      console.error('Failed to load icon registry:', error);
     }
   }, []);
 
@@ -151,7 +173,9 @@ export default function ComponentBrowserPage() {
     const currentParams = new URLSearchParams(window.location.search);
     currentParams.set('tab', value);
     if (value === 'components') {
-      const categoryToSet = selectedCategory || (registry?.allCategories?.includes('atom') ? 'atom' : registry?.allCategories?.[0]);
+      const categoryToSet =
+        selectedCategory ||
+        (registry?.allCategories?.includes('atom') ? 'atom' : registry?.allCategories?.[0]);
       if (categoryToSet) {
         currentParams.set('category', categoryToSet);
       } else {
@@ -187,7 +211,9 @@ export default function ComponentBrowserPage() {
       <div className="container mx-auto py-8 px-4">
         <Alert>
           <AlertTitle>No Components Found</AlertTitle>
-          <AlertDescription>Could not load the component registry from /static/component-registry.json.</AlertDescription>
+          <AlertDescription>
+            Could not load the component registry from /static/component-registry.json.
+          </AlertDescription>
         </Alert>
       </div>
     );
@@ -205,32 +231,39 @@ export default function ComponentBrowserPage() {
 
         <TabsContent value="components">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {(registry.allCategories || []).map((category: ComponentCategory) => {
-              const catDisplay = CATEGORIES_DISPLAY[category];
-              const count = registry.byCategory[category]?.length || 0;
-              if (count === 0 || category === 'unknown') return null;
+            {(registry.allCategories || [])
+              .map((category: ComponentCategory) => {
+                const catDisplay = CATEGORIES_DISPLAY[category];
+                const count = registry.byCategory[category]?.length || 0;
+                if (count === 0 || category === 'unknown') return null;
 
-              return (
-                <Card
-                  key={category}
-                  className={cn(
-                    'cursor-pointer hover:shadow-lg transition-shadow',
-                    selectedCategory === category ? 'border-accent ring-2 ring-accent' : 'border-divider'
-                  )}
-                  onClick={() => handleCategoryClick(category)}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium capitalize">{category}</CardTitle>
-                    <Icon iconId={catDisplay?.icon || 'faQuestionSolid'} className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xs text-secondary">
-                      {count} component{count !== 1 ? 's' : ''}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }).filter(Boolean)}
+                return (
+                  <Card
+                    key={category}
+                    className={cn(
+                      'cursor-pointer hover:shadow-lg transition-shadow',
+                      selectedCategory === category
+                        ? 'border-accent ring-2 ring-accent'
+                        : 'border-divider'
+                    )}
+                    onClick={() => handleCategoryClick(category)}
+                  >
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium capitalize">{category}</CardTitle>
+                      <Icon
+                        iconId={catDisplay?.icon || 'faQuestionSolid'}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-xs text-secondary">
+                        {count} component{count !== 1 ? 's' : ''}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+              .filter(Boolean)}
           </div>
 
           {selectedCategory && (
@@ -251,7 +284,10 @@ export default function ComponentBrowserPage() {
                         <div className="flex justify-between items-center mb-2">
                           <div className="flex items-center space-x-2 overflow-hidden">
                             <Icon
-                              iconId={CATEGORIES_DISPLAY[comp.category]?.icon || CATEGORIES_DISPLAY.unknown.icon}
+                              iconId={
+                                CATEGORIES_DISPLAY[comp.category]?.icon ||
+                                CATEGORIES_DISPLAY.unknown.icon
+                              }
                               className="h-4 w-4 text-muted-foreground flex-shrink-0"
                               title={`Category: ${comp.category}`}
                             />
@@ -277,7 +313,9 @@ export default function ComponentBrowserPage() {
                     </Link>
                   ))
                 ) : (
-                  <p className="text-secondary col-span-full">No components found in the '{selectedCategory}' category.</p>
+                  <p className="text-secondary col-span-full">
+                    No components found in the '{selectedCategory}' category.
+                  </p>
                 )}
               </div>
             </div>
@@ -304,53 +342,54 @@ export default function ComponentBrowserPage() {
           </div>
           {allIcons.length > 0 ? (
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
-              {selectedIconCategory === 'Hover' ? (
-                hoverPairs.map(pair => (
-                  <Card
-                    key={pair.lightId}
-                    className="group flex flex-col items-center text-center hover:bg-gray-100 aspect-square pt-2 cursor-pointer border-divider"
-                  >
-                    <Icon
-                      iconId={pair.lightId}
-                      className="w-[55%] h-[55%] fill-primary group-hover:hidden"
-                    />
-                    <Icon
-                      iconId={pair.solidId}
-                      className="w-[55%] h-[55%] hidden group-hover:block"
-                      style={{ fill: 'var(--color-accent)' }}
-                    />
-                    <p className="text-xs text-secondary break-all pt-1 mt-auto">
-                      {pair.name || getIconInfo(pair.lightId)?.baseName || pair.lightId}
-                    </p>
-                  </Card>
-                ))
-              ) : (
-                allIcons
-                  .filter(iconMeta => {
-                    const isAll = selectedIconCategory === 'All';
-                    const categoryToCompare = selectedIconCategory.toLowerCase();
-                    const iconCategory = iconMeta.category?.toLowerCase();
-                    const categoryMatch = iconCategory === categoryToCompare;
-                    if (selectedIconCategory === 'Light' && iconMeta.id.endsWith('Light')) return true;
-                    if (selectedIconCategory === 'Solid' && iconMeta.id.endsWith('Solid')) return true;
-                    if (selectedIconCategory === 'Brands' && iconMeta.id.startsWith('faBrands')) return true;
-                    return isAll || categoryMatch;
-                  })
-                  .map(iconMeta => (
+              {selectedIconCategory === 'Hover'
+                ? hoverPairs.map(pair => (
                     <Card
-                      key={iconMeta.id}
+                      key={pair.lightId}
                       className="group flex flex-col items-center text-center hover:bg-gray-100 aspect-square pt-2 cursor-pointer border-divider"
                     >
                       <Icon
-                        iconId={iconMeta.id}
-                        className="w-[55%] h-[55%] fill-primary group-hover:fill-[var(--color-accent)]"
+                        iconId={pair.lightId}
+                        className="w-[55%] h-[55%] fill-primary group-hover:hidden"
+                      />
+                      <Icon
+                        iconId={pair.solidId}
+                        className="w-[55%] h-[55%] hidden group-hover:block"
+                        style={{ fill: 'var(--color-accent)' }}
                       />
                       <p className="text-xs text-secondary break-all pt-1 mt-auto">
-                        {iconMeta.name || getIconInfo(iconMeta.id)?.baseName || iconMeta.id}
+                        {pair.name || getIconInfo(pair.lightId)?.baseName || pair.lightId}
                       </p>
                     </Card>
                   ))
-              )}
+                : allIcons
+                    .filter(iconMeta => {
+                      const isAll = selectedIconCategory === 'All';
+                      const categoryToCompare = selectedIconCategory.toLowerCase();
+                      const iconCategory = iconMeta.category?.toLowerCase();
+                      const categoryMatch = iconCategory === categoryToCompare;
+                      if (selectedIconCategory === 'Light' && iconMeta.id.endsWith('Light'))
+                        return true;
+                      if (selectedIconCategory === 'Solid' && iconMeta.id.endsWith('Solid'))
+                        return true;
+                      if (selectedIconCategory === 'Brands' && iconMeta.id.startsWith('faBrands'))
+                        return true;
+                      return isAll || categoryMatch;
+                    })
+                    .map(iconMeta => (
+                      <Card
+                        key={iconMeta.id}
+                        className="group flex flex-col items-center text-center hover:bg-gray-100 aspect-square pt-2 cursor-pointer border-divider"
+                      >
+                        <Icon
+                          iconId={iconMeta.id}
+                          className="w-[55%] h-[55%] fill-primary group-hover:fill-[var(--color-accent)]"
+                        />
+                        <p className="text-xs text-secondary break-all pt-1 mt-auto">
+                          {iconMeta.name || getIconInfo(iconMeta.id)?.baseName || iconMeta.id}
+                        </p>
+                      </Card>
+                    ))}
             </div>
           ) : (
             <p className="text-muted-foreground">Icon registry could not be loaded.</p>
@@ -359,4 +398,4 @@ export default function ComponentBrowserPage() {
       </Tabs>
     </div>
   );
-} 
+}

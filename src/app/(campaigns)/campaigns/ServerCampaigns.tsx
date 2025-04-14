@@ -8,13 +8,15 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function ServerCampaigns() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center py-12 font-work-sans">
-        <LoadingSpinner className="w-12 h-12 text-[#0ea5e9] font-work-sans" />
-        <p className="mt-4 text-gray-500 font-work-sans">Loading campaigns...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-12 font-body">
+          <LoadingSpinner className="w-12 h-12 text-[var(--accent-color)] font-body" />
+          <p className="mt-4 text-gray-500 font-body">Loading campaigns...</p>
+        </div>
+      }
+    >
       <ClientCampaignList />
-    </Suspense>);
-
+    </Suspense>
+  );
 }

@@ -15,6 +15,7 @@ The Justify.social platform uses a comprehensive linting setup to ensure code qu
 ESLint is our primary tool for static code analysis. It helps identify problematic patterns in JavaScript and TypeScript code.
 
 **Key Features**:
+
 - TypeScript integration
 - React-specific rules
 - Accessibility (a11y) checks
@@ -26,6 +27,7 @@ ESLint is our primary tool for static code analysis. It helps identify problemat
 TypeScript's type checking serves as an additional layer of linting, ensuring type safety throughout the codebase.
 
 **Key Features**:
+
 - Strict type checking
 - Interface enforcement
 - Type inference
@@ -36,6 +38,7 @@ TypeScript's type checking serves as an additional layer of linting, ensuring ty
 Prettier handles code formatting, ensuring consistent style across the codebase.
 
 **Key Features**:
+
 - Automatic formatting
 - Integration with ESLint
 - Configurable style rules
@@ -55,25 +58,22 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
-    'prettier'
+    'prettier',
   ],
-  plugins: [
-    '@typescript-eslint',
-    'react',
-    'react-hooks',
-    'jsx-a11y',
-    'import'
-  ],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jsx-a11y', 'import'],
   rules: {
     // Custom rules
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
-    'import/order': ['error', { 
-      'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      'newlines-between': 'always',
-      'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
-    }]
-  }
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
+  },
 };
 ```
 
@@ -136,10 +136,7 @@ We use Husky and lint-staged to run linting checks before commits:
 // package.json
 {
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"]
   },
   "husky": {
     "hooks": {
@@ -159,9 +156,9 @@ name: Lint
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   lint:
@@ -200,4 +197,4 @@ We have an ongoing [Linting Improvement Plan](./improvement-plan.md) to address 
 
 - [Linting Improvement Plan](./improvement-plan.md)
 - [Development Workflow](../../guides/developer/workflow.md)
-- [Code Quality Standards](../../guides/developer/code-quality.md) 
+- [Code Quality Standards](../../guides/developer/code-quality.md)

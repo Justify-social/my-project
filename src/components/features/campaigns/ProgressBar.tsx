@@ -1,13 +1,13 @@
 // Updated import paths via tree-shake script - 2025-04-01T17:13:32.218Z
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 // Restore SidebarProvider import
-import { useSidebar } from "@/providers/SidebarProvider";
+import { useSidebar } from '@/providers/SidebarProvider';
 // Removed unused SettingsPositionProvider import
 // import { useSettingsPosition } from "@/providers/SettingsPositionProvider";
-import { Icon } from '@/components/ui/icon'
-import { cn } from "@/lib/utils"; // Import cn if it wasn't already (it likely was)
+import { Icon } from '@/components/ui/icon/icon';
+import { cn } from '@/lib/utils'; // Import cn if it wasn't already (it likely was)
 
 export interface ProgressBarProps {
   currentStep: number;
@@ -44,11 +44,12 @@ const formatLastSaved = (date: Date | null): string => {
 };
 
 const STEPS = [
-  "Campaign Details",
-  "Objectives & Messaging",
-  "Target Audience",
-  "Creative Assets",
-  "Review"];
+  'Campaign Details',
+  'Objectives & Messaging',
+  'Target Audience',
+  'Creative Assets',
+  'Review',
+];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   currentStep,
@@ -60,14 +61,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   isFormValid = true,
   isDirty = true,
   isSaving = false,
-  lastSaved = null
+  lastSaved = null,
 }) => {
   // Restore sidebar hook
   const { isOpen: isSidebarOpen } = useSidebar();
   // Removed unused settings position hook
   // const { position } = useSettingsPosition();
 
-  const isNextDisabled = disableNext || !isFormValid && isDirty;
+  const isNextDisabled = disableNext || (!isFormValid && isDirty);
 
   // Removed progressBarHeight calculation
   // const progressBarHeight = ... ;
@@ -77,15 +78,15 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     disableNext,
     isFormValid,
     isDirty,
-    isNextDisabled
+    isNextDisabled,
   });
 
   return (
     <footer
       className={cn(
         'fixed bottom-0 border-t shadow z-40 flex justify-between items-center',
-        'text-[10px] sm:text-xs md:text-sm leading-none bg-background',
-        'transition-all duration-300 ease-in-out font-work-sans',
+        'text-xs sm:text-sm md:text-base leading-none bg-background',
+        'transition-all duration-300 ease-in-out font-body',
         'h-[var(--footer-height)]',
         // Default to full width starting at left-0
         'left-0 w-full',
@@ -96,12 +97,15 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       {/* Inner content needs relative positioning and width to work within the footer */}
       <div className="relative w-full h-full flex justify-between items-center">
         {/* Use h-full on step list container */}
-        <ul className="flex items-center space-x-2 overflow-x-auto whitespace-nowrap px-2 h-full flex-grow min-w-0 font-work-sans">
+        <ul className="flex items-center space-x-2 overflow-x-auto whitespace-nowrap px-2 h-full flex-grow min-w-0 font-body">
           {STEPS.map((label, index) => {
             const stepNumber = index + 1;
             const status =
-              stepNumber < currentStep ? "completed" :
-                stepNumber === currentStep ? "current" : "upcoming";
+              stepNumber < currentStep
+                ? 'completed'
+                : stepNumber === currentStep
+                  ? 'current'
+                  : 'upcoming';
 
             return (
               <li
@@ -110,77 +114,79 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                   flex items-center
                   transition-colors
                   duration-200
-                  ${status !== "upcoming" ? "cursor-pointer" : "cursor-default"} font-work-sans`
-                }
+                  ${status !== 'upcoming' ? 'cursor-pointer' : 'cursor-default'} font-body`}
                 onClick={() => {
-                  if (status !== "upcoming") {
+                  if (status !== 'upcoming') {
                     onStepClick(stepNumber);
                   }
-                }}>
-
-                {status === "completed" &&
-                  <span className="mr-1 font-work-sans" aria-hidden="true">
+                }}
+              >
+                {status === 'completed' && (
+                  <span className="mr-1 font-body" aria-hidden="true">
                     <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-success" />
                   </span>
-                }
+                )}
                 <span
-                  className={`${status === "current" ?
-                    "font-bold bg-accent px-2 py-0.5 rounded-full" :
-                    status === "upcoming" ?
-                      "text-muted-foreground" :
-                      "text-foreground"} font-work-sans`
-                  }
-                  style={status === "current" ? { color: 'hsl(var(--primary-foreground))' } : {}}
+                  className={`${status === 'current'
+                    ? 'font-bold bg-accent px-2 py-0.5 rounded-full'
+                    : status === 'upcoming'
+                      ? 'text-muted-foreground'
+                      : 'text-foreground'
+                    } font-body`}
+                  style={status === 'current' ? { color: 'hsl(var(--primary-foreground))' } : {}}
                 >
                   {label}
                 </span>
-                {index < STEPS.length - 1 &&
-                  <span className="mx-1 text-muted-foreground font-work-sans">
+                {index < STEPS.length - 1 && (
+                  <span className="mx-1 text-muted-foreground font-body">
                     <Icon iconId="faChevronRightLight" className="h-3 w-3" />
                   </span>
-                }
-              </li>);
-
+                )}
+              </li>
+            );
           })}
         </ul>
 
         {/* Use h-full on button container */}
-        <div className="flex space-x-2 px-4 h-full items-center flex-shrink-0 font-work-sans">
+        <div className="flex space-x-2 px-4 h-full items-center flex-shrink-0 font-body">
           {/* Last saved indicator */}
-          {lastSaved &&
-            <div className="text-xs text-muted-foreground mr-3 hidden md:flex items-center font-work-sans">
-              {isSaving ?
-                <span className="flex items-center font-work-sans">
-                  <Icon iconId="faSpinnerLight" className="animate-spin -ml-1 mr-1 h-3 w-3 text-accent" />
-                  <span className="font-work-sans">Saving...</span>
-                </span> :
-
-                <span className="font-work-sans">Last saved: {formatLastSaved(lastSaved)}</span>
-              }
+          {lastSaved && (
+            <div className="text-xs text-muted-foreground mr-3 hidden md:flex items-center font-body">
+              {isSaving ? (
+                <span className="flex items-center font-body">
+                  <Icon
+                    iconId="faSpinnerLight"
+                    className="animate-spin -ml-1 mr-1 h-3 w-3 text-accent"
+                  />
+                  <span className="font-body">Saving...</span>
+                </span>
+              ) : (
+                <span className="font-body">Last saved: {formatLastSaved(lastSaved)}</span>
+              )}
             </div>
-          }
+          )}
 
-          {onBack && currentStep > 1 &&
+          {onBack && currentStep > 1 && (
             <button
               type="button"
               onClick={onBack}
-              className="px-3 py-1.5 bg-background border border-secondary text-secondary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-work-sans">
-
-              <Icon iconId="faArrowLeftLight" className="h-3 w-3 mr-1" />
+              className="px-3 py-1.5 bg-background border border-secondary text-secondary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-body"
+            >
+              <Icon iconId="faArrowLeftLight" className="h-3 w-3 mr-2" />
               Back
             </button>
-          }
-          {onSaveDraft &&
+          )}
+          {onSaveDraft && (
             <button
               type="button"
               onClick={onSaveDraft}
               disabled={isSaving}
-              className="px-3 py-1.5 bg-background border border-primary text-primary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-work-sans">
-
-              <Icon iconId="faFloppyDiskLight" className="h-3 w-3 mr-1" />
-              {isSaving ? "Saving..." : "Save Draft"}
+              className="px-3 py-1.5 bg-background border border-primary text-primary rounded-md hover:bg-muted/50 transition duration-200 flex items-center font-body"
+            >
+              <Icon iconId="faFloppyDiskLight" className="h-3 w-3 mr-2" />
+              {isSaving ? 'Saving...' : 'Save Draft'}
             </button>
-          }
+          )}
           <button
             type="button"
             onClick={onNext}
@@ -191,28 +197,27 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               rounded-md
               transition duration-200
               flex items-center
-              ${isNextDisabled ?
-                "bg-muted text-muted-foreground cursor-not-allowed" :
-                "bg-accent text-accent-foreground hover:opacity-90"} font-work-sans`
-
-            }>
-
-            {currentStep < STEPS.length ?
+              ${isNextDisabled
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : 'bg-accent text-accent-foreground hover:opacity-90'
+              } font-body`}
+          >
+            {currentStep < STEPS.length ? (
               <>
                 Next
-                <Icon iconId="faArrowRightLight" className="h-3 w-3 ml-1" />
-              </> :
-
+                <Icon iconId="faArrowRightLight" className="h-3 w-3 ml-2" />
+              </>
+            ) : (
               <>
                 Submit Campaign
-                <Icon iconId="faCheckLight" className="h-3 w-3 ml-1" />
+                <Icon iconId="faCheckLight" className="h-3 w-3 ml-2" />
               </>
-            }
+            )}
           </button>
         </div>
       </div>
-    </footer>);
-
+    </footer>
+  );
 };
 
 export default ProgressBar;

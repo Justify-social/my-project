@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { CampaignWizardSubmission, CreativeAsset, CreativeRequirement, Audience } from '@prisma/client';
+import {
+  CampaignWizardSubmission,
+  CreativeAsset,
+  CreativeRequirement,
+  Audience,
+} from '@prisma/client';
 
 type CampaignWithRelations = CampaignWizardSubmission & {
   creativeAssets: CreativeAsset[];
@@ -9,13 +14,11 @@ type CampaignWithRelations = CampaignWizardSubmission & {
 };
 
 // Explicit type for Audience including the optional competitors relation
-// type AudienceWithCompetitors = Audience & { 
-//   competitors?: { id: number; name: string; audienceId: number }[] | null 
+// type AudienceWithCompetitors = Audience & {
+//   competitors?: { id: number; name: string; audienceId: number }[] | null
 // }; // Removed explicit type, rely on Prisma type inference
 
-export async function GET(
-  request: NextRequest
-) {
+export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const campaignId = searchParams.get('id');
 
@@ -32,10 +35,10 @@ export async function GET(
         creativeRequirements: true,
         audience: {
           include: {
-            competitors: true
-          }
-        }
-      }
+            competitors: true,
+          },
+        },
+      },
     });
 
     if (!campaign) {
@@ -57,7 +60,7 @@ export async function GET(
       hashtags: campaign.hashtags,
       primaryKPI: campaign.primaryKPI,
       secondaryKPIs: campaign.secondaryKPIs,
-      features: campaign.features
+      features: campaign.features,
     };
 
     // Structure the validation response
@@ -115,32 +118,49 @@ export async function GET(
         },
       },
       step3: {
-        status: (Array.isArray(campaign.audience) ? campaign.audience.length > 0 : !!campaign.audience) ? 'complete' : 'incomplete',
+        status: (
+          Array.isArray(campaign.audience) ? campaign.audience.length > 0 : !!campaign.audience
+        )
+          ? 'complete'
+          : 'incomplete',
         fields: {
           audience: {
             value: campaign.audience,
-            status: (Array.isArray(campaign.audience) ? campaign.audience.length > 0 : !!campaign.audience) ? 'present' : 'missing',
-          },
-          competitors: {
-            value: (Array.isArray(campaign.audience) && campaign.audience.length > 0)
-              ? campaign.audience[0].competitors
-              : null,
-            status: (Array.isArray(campaign.audience) && campaign.audience.length > 0 && campaign.audience[0].competitors?.length)
+            status: (
+              Array.isArray(campaign.audience) ? campaign.audience.length > 0 : !!campaign.audience
+            )
               ? 'present'
               : 'missing',
+          },
+          competitors: {
+            value:
+              Array.isArray(campaign.audience) && campaign.audience.length > 0
+                ? campaign.audience[0].competitors
+                : null,
+            status:
+              Array.isArray(campaign.audience) &&
+              campaign.audience.length > 0 &&
+              campaign.audience[0].competitors?.length
+                ? 'present'
+                : 'missing',
           },
         },
       },
       step4: {
-        status: campaign.creativeAssets && campaign.creativeAssets.length > 0 ? 'complete' : 'incomplete',
+        status:
+          campaign.creativeAssets && campaign.creativeAssets.length > 0 ? 'complete' : 'incomplete',
         fields: {
           assets: {
             value: campaign.creativeAssets,
-            status: (campaign.creativeAssets && campaign.creativeAssets.length > 0) ? 'present' : 'missing',
+            status:
+              campaign.creativeAssets && campaign.creativeAssets.length > 0 ? 'present' : 'missing',
           },
           requirements: {
             value: campaign.creativeRequirements,
-            status: (campaign.creativeRequirements && campaign.creativeRequirements.length > 0) ? 'present' : 'missing',
+            status:
+              campaign.creativeRequirements && campaign.creativeRequirements.length > 0
+                ? 'present'
+                : 'missing',
           },
         },
       },
@@ -149,9 +169,6 @@ export async function GET(
     return NextResponse.json(validationResult);
   } catch (error) {
     console.error('Error validating campaign:', error);
-    return NextResponse.json(
-      { error: 'Failed to validate campaign data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to validate campaign data' }, { status: 500 });
   }
-} 
+}

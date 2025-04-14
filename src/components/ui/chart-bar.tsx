@@ -23,15 +23,15 @@
  * @param {Function} [props.tickFormatter] - Custom formatter function for axis tick labels.
  * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
  * @returns {React.ReactElement} The rendered bar chart.
- * 
+ *
  * @example
- * <BarChart 
+ * <BarChart
  *   data={[
  *     { category: 'A', value: 100 },
  *     { category: 'B', value: 200 },
  *     { category: 'C', value: 150 }
- *   ]} 
- *   xKey="category" 
+ *   ]}
+ *   xKey="category"
  *   yKey="value"
  * />
  */
@@ -45,7 +45,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -74,11 +74,11 @@ export interface BarChartProps {
 
 // Use HSL theme variables for default colors
 const DEFAULT_COLORS = [
-  'hsl(var(--accent))',          // Deep Sky Blue
-  'hsl(var(--interactive))',     // Medium Blue
-  'hsl(var(--primary))',         // Jet
-  'hsl(var(--secondary))',       // Payne's Grey
-  'hsl(var(--success))',         // Example: Assuming a success color variable exists
+  'hsl(var(--accent))', // Deep Sky Blue
+  'hsl(var(--interactive))', // Medium Blue
+  'hsl(var(--primary))', // Jet
+  'hsl(var(--secondary))', // Payne's Grey
+  'hsl(var(--success))', // Example: Assuming a success color variable exists
 ];
 
 export const BarChart: React.FC<BarChartProps> = ({
@@ -97,16 +97,14 @@ export const BarChart: React.FC<BarChartProps> = ({
   barGap = 4,
   gridColor = 'hsl(var(--border))', // Use theme border color
   tickFormatter,
-  tooltipFormatter
+  tooltipFormatter,
 }) => {
   // Handle multiple y-keys
   const yKeys = Array.isArray(yKey) ? yKey : [yKey];
 
   return (
-    <div className={cn('w-full font-work-sans', className)}>
-      {title && (
-        <h3 className="text-xl font-medium mb-2 font-sora">{title}</h3>
-      )}
+    <div className={cn('w-full font-body', className)}>
+      {title && <h3 className="text-xl font-medium mb-2 font-heading">{title}</h3>}
 
       <ResponsiveContainer width={width} height={height}>
         <RechartsBarChart
@@ -116,9 +114,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           barGap={barGap}
           barSize={barSize}
         >
-          {showGrid && (
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-          )}
+          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />}
 
           <XAxis
             dataKey={layout === 'horizontal' ? xKey : undefined}
@@ -139,9 +135,9 @@ export const BarChart: React.FC<BarChartProps> = ({
             contentStyle={{
               fontSize: '12px',
               backgroundColor: 'hsl(var(--background))', // Use theme background
-              border: '1px solid hsl(var(--border))',  // Use theme border
+              border: '1px solid hsl(var(--border))', // Use theme border
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' // Keep shadow for now
+              boxShadow: 'var(--shadow-sm)', // Use CSS variable for shadow consistent with Tailwind's shadow-sm
             }}
           />
 
@@ -167,4 +163,4 @@ export const BarChart: React.FC<BarChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-}; 
+};

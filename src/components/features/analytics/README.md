@@ -8,19 +8,13 @@ Analytics Components provide analytics components functionality for the applicat
 
 ## Components
 
-
-
 ## Usage
 
 ```tsx
-import {  } from '@/components/features/analytics';
+import {} from '@/components/features/analytics';
 
 // Example usage
 function ExampleComponent() {
-  return (
-    <div>
-      {/* Add usage examples here */}
-    </div>
-  );
+  return <div>{/* Add usage examples here */}</div>;
 }
 ```

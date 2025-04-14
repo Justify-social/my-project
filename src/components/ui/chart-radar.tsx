@@ -21,16 +21,16 @@
  * @param {number | string} [props.outerRadius='80%'] - The outer radius of the radar chart (percentage or pixel value).
  * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
  * @returns {React.ReactElement} The rendered radar chart.
- * 
+ *
  * @example
- * <RadarChart 
+ * <RadarChart
  *   data={[
  *     { subject: 'Math', A: 120, B: 110, fullMark: 150 },
  *     { subject: 'English', A: 98, B: 130, fullMark: 150 },
  *     { subject: 'Science', A: 86, B: 130, fullMark: 150 },
  *     { subject: 'History', A: 99, B: 100, fullMark: 150 },
  *     { subject: 'Geography', A: 85, B: 90, fullMark: 150 }
- *   ]} 
+ *   ]}
  *   categories={['A', 'B']}
  *   angleKey="subject"
  * />
@@ -45,7 +45,7 @@ import {
   PolarRadiusAxis,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -73,10 +73,10 @@ export interface RadarChartProps {
 // Use HSL theme variables for default colors
 const DEFAULT_COLORS = [
   'hsl(var(--interactive))', // Medium Blue
-  'hsl(var(--accent))',      // Deep Sky Blue
-  'hsl(var(--secondary))',   // Payne's Grey
-  'hsl(var(--primary))',     // Jet
-  'hsl(var(--success))',     // Example: Assuming a success color
+  'hsl(var(--accent))', // Deep Sky Blue
+  'hsl(var(--secondary))', // Payne's Grey
+  'hsl(var(--primary))', // Jet
+  'hsl(var(--success))', // Example: Assuming a success color
 ];
 
 export const RadarChart: React.FC<RadarChartProps> = ({
@@ -92,14 +92,12 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   strokeWidth = 2,
   fillOpacity = 0.2,
   gridColor = 'hsl(var(--border))', // Use theme border color
-  outerRadius = "80%",
-  tooltipFormatter
+  outerRadius = '80%',
+  tooltipFormatter,
 }) => {
   return (
-    <div className={cn('w-full font-work-sans', className)}>
-      {title && (
-        <h3 className="text-xl font-medium mb-2 font-sora">{title}</h3>
-      )}
+    <div className={cn('w-full font-body', className)}>
+      {title && <h3 className="text-xl font-medium mb-2 font-heading">{title}</h3>}
 
       <ResponsiveContainer width={width} height={height}>
         <RechartsRadarChart
@@ -128,9 +126,9 @@ export const RadarChart: React.FC<RadarChartProps> = ({
             contentStyle={{
               fontSize: '12px',
               backgroundColor: 'hsl(var(--background))', // Use theme background
-              border: '1px solid hsl(var(--border))',  // Use theme border
+              border: '1px solid hsl(var(--border))', // Use theme border
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' // Keep shadow for now
+              boxShadow: 'var(--shadow-sm)', // Use CSS variable for shadow consistent with Tailwind's shadow-sm
             }}
           />
 
@@ -147,4 +145,4 @@ export const RadarChart: React.FC<RadarChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-}; 
+};

@@ -7,9 +7,7 @@
  * @info date formatting on the X-axis and provides customizable tooltips and legends.
  * @param {LineChartProps} props - The props for the LineChart component.
  * @param {object[]} [props.data=[]] - The dataset for the chart.
- * @param {string} [props.xKey='date'] - Deprecated: Use xField instead. The key for the x-axis data (usually time).
  * @param {string} [props.xField] - The key for the x-axis data (usually time). Overrides xKey.
- * @param {string | string[]} [props.yKey] - Deprecated: Use lines instead. The key(s) for the y-axis data.
  * @param {LineData[]} [props.lines=[]] - Configuration array for data lines (dataKey, name, stroke).
  * @param {number} [props.height=300] - The height of the chart container.
  * @param {boolean} [props.grid=true] - Whether to display the Cartesian grid.
@@ -31,7 +29,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ReferenceLine
+  ReferenceLine,
 } from 'recharts';
 import { format, parseISO, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -45,9 +43,7 @@ export interface LineData {
 
 export interface LineChartProps {
   data?: object[];
-  xKey?: string; // Deprecated: Use xField
   xField?: string;
-  yKey?: string | string[]; // Deprecated: Use lines
   lines?: LineData[];
   height?: number | string;
   grid?: boolean;
@@ -77,9 +73,7 @@ const formatDate = (dateStr: string, dateFormat = 'MMM d'): string => {
  */
 export function LineChart({
   data = [],
-  xKey = 'date',
   xField, // Support both naming conventions
-  yKey,
   lines = [],
   height = 300,
   grid = true,
@@ -92,25 +86,16 @@ export function LineChart({
     return null;
   }
 
-  // Use xField if provided, otherwise fall back to xKey for backward compatibility
-  const xAxisKey = xField || xKey;
+  // Define the key for the x-axis
+  const xAxisKey = xField || 'date'; // Default to 'date' if xField is not provided
 
-  // Convert yKey to lines array format, ensuring objects match LineData structure
-  const linesConfig: LineData[] = lines.length > 0 // Add explicit type annotation
-    ? lines
-    : Array.isArray(yKey)
-      ? yKey.map(key => ({ dataKey: key, name: undefined, stroke: undefined })) // Add optional props
-      : yKey
-        ? [{ dataKey: yKey, name: undefined, stroke: undefined }] // Add optional props
-        : [];
+  // Use the lines prop directly
+  const linesConfig: LineData[] = lines;
 
   return (
-    <div className={cn("w-full", className)} style={{ height }}>
+    <div className={cn('w-full', className)} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsLineChart
-          data={data}
-          margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
-        >
+        <RechartsLineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
           {/* X-Axis with date formatting */}
           <XAxis
             dataKey={xAxisKey}
@@ -129,9 +114,7 @@ export function LineChart({
           />
 
           {/* Grid lines */}
-          {grid && (
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-          )}
+          {grid && <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />}
 
           {/* Tooltip */}
           {tooltip && (
@@ -142,7 +125,7 @@ export function LineChart({
                 borderRadius: '6px',
                 backgroundColor: 'hsl(var(--background))',
                 border: '1px solid hsl(var(--border))',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                boxShadow: 'var(--shadow-sm)',
               }}
             />
           )}
@@ -184,8 +167,8 @@ function getColorByIndex(index: number): string {
     'hsl(var(--accent))',
     'hsl(var(--primary))',
     'hsl(var(--secondary))',
-    'hsl(var(--info))'
+    'hsl(var(--info))',
   ];
 
   return colors[index % colors.length];
-} 
+}

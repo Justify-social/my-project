@@ -128,4 +128,4 @@ To measure the effectiveness of your influencer partnerships:
 
 - [Influencer Management Overview](./overview.md)
 - [Campaign Creation Guide](../campaign-wizard/usage.md)
-- [Analytics Dashboard Guide](../dashboard/usage.md) 
+- [Analytics Dashboard Guide](../dashboard/usage.md)

@@ -19,7 +19,7 @@ import { ClientLayout } from '@/components/layouts';
 
 ## Note
 
-For reusable UI layout components (Card, Grid, Container, etc.), 
+For reusable UI layout components (Card, Grid, Container, etc.),
 use components from the UI layout directory:
 
 ```tsx

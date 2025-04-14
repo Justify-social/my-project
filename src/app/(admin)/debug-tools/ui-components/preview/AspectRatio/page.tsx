@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 
 import { AspectRatio } from '../../../../../../components/ui/aspect-ratio';
 
@@ -17,18 +17,23 @@ const statusStyles: Record<string, string> = {
 
 export default function AspectRatioPreviewPage() {
   const componentMeta: {
-    name: string; description: string; category: string;
-    subcategory: string | null; renderType: string;
-    author: string; since: string; status?: string | null;
+    name: string;
+    description: string;
+    category: string;
+    subcategory: string | null;
+    renderType: string;
+    author: string;
+    since: string;
+    status?: string | null;
   } = {
-    "name": "AspectRatio",
-    "description": "Displays content within a fixed aspect ratio.",
-    "category": "atom",
-    "subcategory": "layout",
-    "renderType": "client",
-    "author": "",
-    "since": "",
-    "status": null
+    name: 'AspectRatio',
+    description: 'Displays content within a fixed aspect ratio.',
+    category: 'atom',
+    subcategory: 'layout',
+    renderType: 'client',
+    author: '',
+    since: '',
+    status: null,
   };
   const examples: string[] = [];
 
@@ -37,10 +42,25 @@ export default function AspectRatioPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -50,12 +70,22 @@ export default function AspectRatioPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -72,7 +102,9 @@ export default function AspectRatioPreviewPage() {
             <h3 className="text-lg font-medium mb-3">16:9 Ratio</h3>
             <div className="w-full max-w-[500px]">
               <AspectRatio ratio={16 / 9} className="bg-muted">
-                <div className="flex h-full w-full items-center justify-center"><span className="text-sm text-muted-foreground">16:9 Content</span></div>
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-sm text-muted-foreground">16:9 Content</span>
+                </div>
               </AspectRatio>
             </div>
           </div>
@@ -80,7 +112,9 @@ export default function AspectRatioPreviewPage() {
             <h3 className="text-lg font-medium mb-3">4:3 Ratio</h3>
             <div className="w-full max-w-[400px]">
               <AspectRatio ratio={4 / 3} className="bg-muted">
-                <div className="flex h-full w-full items-center justify-center"><span className="text-sm text-muted-foreground">4:3 Content</span></div>
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-sm text-muted-foreground">4:3 Content</span>
+                </div>
               </AspectRatio>
             </div>
           </div>
@@ -88,7 +122,9 @@ export default function AspectRatioPreviewPage() {
             <h3 className="text-lg font-medium mb-3">1:1 Ratio (Square)</h3>
             <div className="w-full max-w-[300px]">
               <AspectRatio ratio={1 / 1} className="bg-muted">
-                <div className="flex h-full w-full items-center justify-center"><span className="text-sm text-muted-foreground">Square</span></div>
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-sm text-muted-foreground">Square</span>
+                </div>
               </AspectRatio>
             </div>
           </div>
@@ -110,7 +146,6 @@ export default function AspectRatioPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

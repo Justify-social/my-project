@@ -24,7 +24,7 @@ type PrismaDelegate = {
   count: (args?: PrismaParams) => PrismaReturn<number>;
   aggregate: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T>;
   groupBy: <_T = unknown>(args: PrismaParams) => PrismaReturn<_T[]>;
-}
+};
 
 /**
  * Extended PrismaClient type with explicit model definitions
@@ -34,7 +34,7 @@ export type ExtendedPrismaClient = PrismaClient & {
   campaignWizard: PrismaDelegate;
   influencer: PrismaDelegate;
   wizardHistory: PrismaDelegate;
-  
+
   // CampaignWizardSubmission related models
   campaignWizardSubmission: PrismaDelegate;
   primaryContact: PrismaDelegate;
@@ -47,7 +47,7 @@ export type ExtendedPrismaClient = PrismaClient & {
   audienceCompetitor: PrismaDelegate;
   creativeAsset: PrismaDelegate;
   creativeRequirement: PrismaDelegate;
-  
+
   // User model
   user: PrismaDelegate;
 };
@@ -57,4 +57,4 @@ export type ExtendedPrismaClient = PrismaClient & {
  */
 export const extendPrismaClient = (prisma: PrismaClient): ExtendedPrismaClient => {
   return prisma as unknown as ExtendedPrismaClient;
-}; 
+};

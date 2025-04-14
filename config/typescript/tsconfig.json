@@ -1,13 +1,8 @@
 // This file is now located at config/typescript/tsconfig.json
-// This is a redirect file for backward compatibility
 {
   "compilerOptions": {
     "target": "es2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -25,87 +20,14 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/lib/types/*": [
-        "./src/lib/types/*"
-      ],
-      "@/lib/server/*": [
-        "./src/lib/server/*"
-      ],
-      "@/components/ui/accordion": [
-        "./src/components/ui/accordion"
-      ],
-      "@/components/ui/alert": [
-        "./src/components/ui/alert"
-      ],
-      "@/components/ui/badge": [
-        "./src/components/ui/badge"
-      ],
-      "@/components/ui/button": [
-        "./src/components/ui/button",
-        "src/lib/data-mapping/_backup/schema-mapping.ts.bak"
-      ],
-      "@/components/ui/card": [
-        "./src/components/ui/card"
-      ],
-      "@/components/ui/input": [
-        "./src/components/ui/input"
-      ],
-      "@/components/ui/label": [
-        "./src/components/ui/label"
-      ],
-      "@/components/ui/scroll-area": [
-        "./src/components/ui/scroll-area"
-      ],
-      "@/components/ui/select": [
-        "./src/components/ui/select"
-      ],
-      "@/components/ui/skeleton": [
-        "./src/components/ui/skeleton"
-      ],
-      "@/components/ui/loading-skeleton": [
-        "./src/components/ui/loading-skeleton"
-      ],
-      "@/components/ui/slider": [
-        "./src/components/ui/slider"
-      ],
-      "@/components/ui/spinner": [
-        "./src/components/ui/spinner"
-      ],
-      "@/components/ui/switch": [
-        "./src/components/ui/switch"
-      ],
-      "@/components/ui/tabs": [
-        "./src/components/ui/tabs"
-      ],
-      "@/components/ui/tooltip": [
-        "./src/components/ui/tooltip"
-      ],
-      "@/components/ui/icon": [
-        "./src/components/ui/icon"
-      ],
-      "@/components/ui/icon/*": [
-        "./src/components/ui/icon/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/lib/types/*": ["./src/lib/types/*"],
+      "@/lib/server/*": ["./src/lib/server/*"],
+      "@/components/ui/*": ["./src/components/ui/*"]
     },
     "baseUrl": "./",
-    "types": [
-      "jest",
-      "node",
-      "@testing-library/jest-dom"
-    ]
+    "types": ["jest", "node", "@testing-library/jest-dom"]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/types/**/*.d.ts",
-    "src/app/(dashboard)/dashboard/DashboardContent.tsx.bak"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.d.ts"],
+  "exclude": ["node_modules"]
 }

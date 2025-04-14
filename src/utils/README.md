@@ -22,11 +22,9 @@ Helper functions and utilities used throughout the application.
 - `array/`
 - `--tests--/`
 
-
 ### Files
 
 - 17 .ts files
-
 
 ## Usage
 
@@ -38,8 +36,6 @@ Import these functions to perform common operations without duplicating code.
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

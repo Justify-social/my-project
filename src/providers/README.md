@@ -6,12 +6,9 @@ Provider components for dependency injection and state management.
 
 ## Contents
 
-
-
 ### Files
 
 - 3 .tsx files
-
 
 ## Usage
 
@@ -23,8 +20,6 @@ Wrap your components with these providers to provide them with necessary context
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

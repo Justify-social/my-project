@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useWizard } from "@/components/features/campaigns/WizardContext";
-import Header from "@/components/features/campaigns/Header";
-import ProgressBar from "@/components/features/campaigns/ProgressBar";
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useWizard } from '@/components/features/campaigns/WizardContext';
+import Header from '@/components/features/campaigns/Header';
+import ProgressBar from '@/components/features/campaigns/ProgressBar';
 import { toast } from 'react-hot-toast';
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { CampaignAssetUploader, type UploadedAsset } from "./CampaignAssetUploader";
+import { WizardSkeleton } from '@/components/ui/loading-skeleton';
+import { CampaignAssetUploader, type UploadedAsset } from './CampaignAssetUploader';
 
 function FormContent() {
   const router = useRouter();
@@ -42,7 +42,9 @@ function FormContent() {
   };
 
   const handleAssetUpdate = (index: number, updatedAsset: Partial<UploadedAsset>) => {
-    const newAssets = assets.map((asset, i) => i === index ? { ...asset, ...updatedAsset } : asset);
+    const newAssets = assets.map((asset, i) =>
+      i === index ? { ...asset, ...updatedAsset } : asset
+    );
     setAssets(newAssets);
     // Use updateFormData
     updateFormData({ assets: newAssets });
@@ -50,7 +52,7 @@ function FormContent() {
 
   // Handle asset upload error
   const handleUploadError = (error: Error) => {
-    console.error("Asset upload error:", error);
+    console.error('Asset upload error:', error);
     toast.error(`Upload failed: ${error.message}`);
     setError(error.message);
   };
@@ -70,8 +72,8 @@ function FormContent() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          assets: { files: assets }
-        })
+          assets: { files: assets },
+        }),
       });
 
       const result = await response.json();
@@ -105,8 +107,8 @@ function FormContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           assets: { files: assets },
-          submissionStatus: 'draft'
-        })
+          submissionStatus: 'draft',
+        }),
       });
 
       const result = await response.json();
@@ -118,7 +120,9 @@ function FormContent() {
 
       toast.success('Draft saved successfully');
     } catch (error) {
-      toast.error('Failed to save draft: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error(
+        'Failed to save draft: ' + (error instanceof Error ? error.message : 'Unknown error')
+      );
     }
   };
 
@@ -129,7 +133,7 @@ function FormContent() {
   return (
     <div className="w-full max-w-5xl mx-auto px-6 py-8 bg-white font-work-sans">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2 font-sora">Campaign Creation</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2 font-heading">Campaign Creation</h1>
         <p className="text-gray-500">Upload your creative assets for this campaign</p>
       </div>
 
@@ -141,9 +145,7 @@ function FormContent() {
       )}
 
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Upload Creative Assets
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Creative Assets</h2>
         <p className="text-gray-600 mb-6">
           Upload images, videos, or PDFs that will be used in your campaign.
         </p>
@@ -158,7 +160,7 @@ function FormContent() {
           <div className="mt-8">
             <h3 className="text-md font-medium mb-3">Uploaded Assets</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {assets.map((asset) => (
+              {assets.map(asset => (
                 <div key={asset.id} className="border rounded-md p-3 flex flex-col">
                   <div className="font-medium truncate">{asset.fileName}</div>
                   <div className="text-sm text-gray-500">{asset.type}</div>
@@ -174,7 +176,7 @@ function FormContent() {
 
       <ProgressBar
         currentStep={4}
-        onStepClick={(step) => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
+        onStepClick={step => router.push(`/campaigns/wizard/step-${step}?id=${campaignId}`)}
         onBack={() => router.push(`/campaigns/wizard/step-3?id=${campaignId}`)}
         onNext={handleSubmit}
         onSaveDraft={handleSaveDraft}
@@ -203,4 +205,4 @@ export default function Step4Content() {
       <FormContent />
     </Suspense>
   );
-} 
+}

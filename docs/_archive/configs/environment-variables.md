@@ -14,31 +14,31 @@ Environment variables are managed through the centralized configuration system i
 
 ## Core Environment Variables
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `NODE_ENV` | Application environment | `development` | Yes |
-| `PORT` | Server port | `3000` | No |
-| `DATABASE_URL` | Database connection string | - | Yes |
-| `API_KEY` | API authentication key | - | Yes |
-| `SECRET_KEY` | Encryption secret key | - | Yes |
+| Variable       | Description                | Default       | Required |
+| -------------- | -------------------------- | ------------- | -------- |
+| `NODE_ENV`     | Application environment    | `development` | Yes      |
+| `PORT`         | Server port                | `3000`        | No       |
+| `DATABASE_URL` | Database connection string | -             | Yes      |
+| `API_KEY`      | API authentication key     | -             | Yes      |
+| `SECRET_KEY`   | Encryption secret key      | -             | Yes      |
 
 ## Feature Flags
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `FEATURE_ANALYTICS` | Enable analytics | `false` |
-| `FEATURE_DARK_MODE` | Enable dark mode | `true` |
+| Variable                  | Description            | Default |
+| ------------------------- | ---------------------- | ------- |
+| `FEATURE_ANALYTICS`       | Enable analytics       | `false` |
+| `FEATURE_DARK_MODE`       | Enable dark mode       | `true`  |
 | `FEATURE_PREMIUM_CONTENT` | Enable premium content | `false` |
 
 ## Service Integration
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `AWS_REGION` | AWS region | `us-east-1` | When using AWS |
-| `AWS_ACCESS_KEY_ID` | AWS access key | - | When using AWS |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | - | When using AWS |
-| `STRIPE_API_KEY` | Stripe API key | - | When using Stripe |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | - | When using Google Auth |
+| Variable                | Description            | Default     | Required               |
+| ----------------------- | ---------------------- | ----------- | ---------------------- |
+| `AWS_REGION`            | AWS region             | `us-east-1` | When using AWS         |
+| `AWS_ACCESS_KEY_ID`     | AWS access key         | -           | When using AWS         |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key         | -           | When using AWS         |
+| `STRIPE_API_KEY`        | Stripe API key         | -           | When using Stripe      |
+| `GOOGLE_CLIENT_ID`      | Google OAuth client ID | -           | When using Google Auth |
 
 ## Usage in Code
 
@@ -62,4 +62,4 @@ const apiKey = config.api.key; // Reads from environment variables
 
 - Never commit `.env` files to the repository
 - Always use `.env.example` as a template
-- Ensure secrets are properly secured in production environments 
+- Ensure secrets are properly secured in production environments

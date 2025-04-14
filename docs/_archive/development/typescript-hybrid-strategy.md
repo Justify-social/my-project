@@ -17,12 +17,14 @@ This document outlines our approach to integrating TypeScript in a hybrid Node.j
 ### Phase 1: Development Environment Setup
 
 1. **Install essential dependencies:**
+
    ```bash
    npm install --save-dev typescript ts-node @types/node
    ```
 
 2. **Configure TypeScript:**
    Create a base `tsconfig.json`:
+
    ```json
    {
      "compilerOptions": {
@@ -56,6 +58,7 @@ This document outlines our approach to integrating TypeScript in a hybrid Node.j
 
 3. **Create a server-specific config:**
    Create `tsconfig.server.json`:
+
    ```json
    {
      "extends": "./tsconfig.json",
@@ -83,6 +86,7 @@ This document outlines our approach to integrating TypeScript in a hybrid Node.j
 1. **Rename `server.js` to `server.ts`**
 
 2. **Add type definitions:**
+
    ```typescript
    // server.ts
    import { createServer } from 'http';
@@ -115,6 +119,7 @@ This document outlines our approach to integrating TypeScript in a hybrid Node.j
 ### Phase 3: API Layer Improvements
 
 1. **Create consistent type definitions for WebSockets:**
+
    ```typescript
    // src/types/websocket.ts
    export interface WebSocketMessage {
@@ -130,7 +135,7 @@ This document outlines our approach to integrating TypeScript in a hybrid Node.j
        name: string;
        category: string;
        lastUpdated: Date;
-       props?: Array<{name: string, type: string}>;
+       props?: Array<{ name: string; type: string }>;
      };
    }
    ```
@@ -143,7 +148,7 @@ This document outlines our approach to integrating TypeScript in a hybrid Node.j
      name: string;
      category: 'atom' | 'molecule' | 'organism';
      lastUpdated: Date;
-     props?: Array<{name: string, type: string}>;
+     props?: Array<{ name: string; type: string }>;
      dependencies?: string[];
    }
    ```
@@ -154,12 +159,14 @@ To handle the TypeScript/JavaScript extension confusion:
 
 1. **For internal modules:**
    Use extension-less imports within TypeScript files:
+
    ```typescript
    import { ComponentMetadata } from '../types/component';
    ```
 
 2. **For compiled modules:**
    In `server.ts` and other files that interact with compiled code:
+
    ```typescript
    // Dynamic import helper function
    async function importModule(path: string) {
@@ -173,15 +180,17 @@ To handle the TypeScript/JavaScript extension confusion:
    }
 
    // Usage
-   importModule('./src/app/(admin)/debug-tools/ui-components/api/websocket-server')
-     .then(({ initWebSocketServer }) => {
+   importModule('./src/app/(admin)/debug-tools/ui-components/api/websocket-server').then(
+     ({ initWebSocketServer }) => {
        initWebSocketServer(server);
-     });
+     }
+   );
    ```
 
 ## Development Workflow
 
 1. **During development:**
+
    - Run `npm run dev` to start the server with ts-node
    - Changes to TypeScript files are immediately available without compilation
    - WebSocket server and other components work in TypeScript directly
@@ -194,17 +203,20 @@ To handle the TypeScript/JavaScript extension confusion:
 
 1. **Hot Reloading:**
    Add nodemon for automatic server restarts:
+
    ```bash
    npm install --save-dev nodemon
    ```
-   
+
    Update scripts:
+
    ```json
    "dev": "nodemon --exec ts-node --transpile-only server.ts"
    ```
 
 2. **Type Checking Pipeline:**
    Add pre-commit hooks for type checking:
+
    ```bash
    npm install --save-dev husky lint-staged
    ```
@@ -235,6 +247,7 @@ This ensures compatibility with existing tooling while maintaining our TypeScrip
 We found type mismatches between our shared types and the implementations:
 
 **Before:**
+
 ```typescript
 // In websocket-server.ts
 category: component.category as string,
@@ -244,7 +257,9 @@ category: typedMessage.payload.category as any,
 ```
 
 **Fixed by:**
+
 1. Updating imports in websocket.ts to properly use ComponentCategory:
+
 ```typescript
 import { ComponentCategory, ComponentProp } from './component';
 
@@ -259,6 +274,7 @@ export interface ComponentUpdateMessage extends WebSocketMessage {
 ```
 
 2. Removing unnecessary type assertions:
+
 ```typescript
 // In websocket-server.ts
 category: component.category, // No assertion needed
@@ -284,6 +300,7 @@ This change allows the project to run on Node.js 18.x, which is our current envi
 To verify the implementation:
 
 1. Run the development server with TypeScript support:
+
 ```bash
 npm run dev
 ```
@@ -291,11 +308,13 @@ npm run dev
 2. Check for WebSocket connectivity in browser console
 
 3. Verify build process successfully compiles TypeScript:
+
 ```bash
 npm run build
 ```
 
 4. Start the production server with compiled JavaScript:
+
 ```bash
 npm start
 ```

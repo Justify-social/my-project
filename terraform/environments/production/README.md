@@ -20,26 +20,31 @@ The production environment is designed with the following key features:
 The infrastructure is composed of the following components:
 
 1. **VPC and Networking**:
+
    - Multi-AZ deployment across 3 availability zones
    - Public, private, database, and cache subnets
    - NAT gateways for outbound connectivity
 
 2. **Database Layer**:
+
    - Sharded Aurora PostgreSQL clusters
    - DynamoDB shard mapping table
    - Read replicas for scaling read operations
 
 3. **Caching Layer**:
+
    - Multi-region ElastiCache Redis clusters
    - Latency-based routing with Route 53
    - Optimized for CAP theorem trade-offs
 
 4. **Application Layer**:
+
    - ECS Fargate for containerized applications
    - Auto-scaling based on CPU and memory metrics
    - Health monitoring and automatic recovery
 
 5. **CI/CD Pipeline**:
+
    - CodeCommit, CodeBuild, CodeDeploy, and CodePipeline
    - Blue/Green deployment strategy
    - Automated testing and quality gates
@@ -166,4 +171,4 @@ Common issues and their solutions:
 - **Deployment failures**: Check CodePipeline execution details
 - **Application health issues**: Review ECS service events and logs
 - **Database connectivity**: Verify security group rules and credentials
-- **Cache performance**: Monitor ElastiCache metrics 
+- **Cache performance**: Monitor ElastiCache metrics

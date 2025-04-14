@@ -41,6 +41,7 @@ scripts/consolidated/
 ```
 
 Each directory contains:
+
 - An `index.js` file for easier imports
 - A `README.md` file documenting available scripts and usage patterns
 
@@ -81,4 +82,4 @@ While the script consolidation phase is complete, a few future enhancements coul
 
 The script consolidation work has significantly improved the organization, reliability, and maintainability of our script ecosystem. By eliminating duplicates, properly categorizing scripts, and providing comprehensive documentation, we've established a solid foundation for efficient script management going forward.
 
-The automated tools developed during this process will continue to be valuable for maintaining this organization as the codebase evolves. 
+The automated tools developed during this process will continue to be valuable for maintaining this organization as the codebase evolves.

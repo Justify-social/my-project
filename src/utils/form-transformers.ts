@@ -1,13 +1,13 @@
 /**
  * Form Data Transformation & Mapping Utilities
- * 
- * This module provides interfaces and utilities for transforming form data 
+ *
+ * This module provides interfaces and utilities for transforming form data
  * between UI Form Values and API Payloads.
  */
 
 import { Platform, Position, KPI, Feature, Currency, Prisma } from '@prisma/client';
 
-// --- Modern Form Value & API Payload Types --- 
+// --- Modern Form Value & API Payload Types ---
 
 // Types for form values
 export interface ContactFormValues {
@@ -186,9 +186,15 @@ export function transformCampaignFormData(formValues: CampaignFormValues): Campa
     secondaryKPIs: formValues.secondaryKPIs || [],
     features: formValues.features || [],
     audience: formValues.audience ? transformAudienceData(formValues.audience) : undefined,
-    influencers: formValues.influencers ? formValues.influencers.map(transformInfluencerData) : undefined,
-    creativeAssets: formValues.creativeAssets ? formValues.creativeAssets.map(transformCreativeAssetData) : undefined,
-    creativeRequirements: formValues.creativeRequirements ? formValues.creativeRequirements.map(transformCreativeRequirementData) : undefined
+    influencers: formValues.influencers
+      ? formValues.influencers.map(transformInfluencerData)
+      : undefined,
+    creativeAssets: formValues.creativeAssets
+      ? formValues.creativeAssets.map(transformCreativeAssetData)
+      : undefined,
+    creativeRequirements: formValues.creativeRequirements
+      ? formValues.creativeRequirements.map(transformCreativeRequirementData)
+      : undefined,
   };
 }
 
@@ -197,14 +203,16 @@ export function transformCampaignFormData(formValues: CampaignFormValues): Campa
  * @param contactData Contact form values
  * @returns API-compatible contact payload
  */
-export function transformContactData(contactData?: ContactFormValues): ContactApiPayload | undefined {
+export function transformContactData(
+  contactData?: ContactFormValues
+): ContactApiPayload | undefined {
   if (!contactData) return undefined;
 
   return {
     name: contactData.name,
     email: contactData.email,
     phone: contactData.phone,
-    position: contactData.position
+    position: contactData.position,
   };
 }
 
@@ -221,8 +229,8 @@ export function transformBudgetData(budgetData?: BudgetFormValues): BudgetApiPay
     currency: budgetData.currency,
     allocation: budgetData.allocation?.map(item => ({
       category: item.category,
-      percentage: Number(item.percentage)
-    }))
+      percentage: Number(item.percentage),
+    })),
   };
 }
 
@@ -243,7 +251,7 @@ export function transformAudienceData(audienceData: AudienceFormValues): Audienc
     languages: audienceData.languages || [],
     genders: audienceData.genders,
     screeningQuestions: audienceData.screeningQuestions,
-    competitors: audienceData.competitors
+    competitors: audienceData.competitors,
   };
 }
 
@@ -252,7 +260,9 @@ export function transformAudienceData(audienceData: AudienceFormValues): Audienc
  * @param influencerData Influencer form values
  * @returns API-compatible influencer payload
  */
-export function transformInfluencerData(influencerData: InfluencerFormValues): InfluencerApiPayload {
+export function transformInfluencerData(
+  influencerData: InfluencerFormValues
+): InfluencerApiPayload {
   return {
     name: influencerData.name || '',
     handle: influencerData.handle,
@@ -261,7 +271,7 @@ export function transformInfluencerData(influencerData: InfluencerFormValues): I
     posts: Number(influencerData.posts || 0),
     videos: Number(influencerData.videos || 0),
     reels: Number(influencerData.reels || 0),
-    stories: Number(influencerData.stories || 0)
+    stories: Number(influencerData.stories || 0),
   };
 }
 
@@ -270,11 +280,13 @@ export function transformInfluencerData(influencerData: InfluencerFormValues): I
  * @param assetData Creative asset form values
  * @returns API-compatible creative asset payload
  */
-export function transformCreativeAssetData(assetData: CreativeAssetFormValues): CreativeAssetApiPayload {
+export function transformCreativeAssetData(
+  assetData: CreativeAssetFormValues
+): CreativeAssetApiPayload {
   return {
     type: assetData.type,
     url: assetData.url || '',
-    description: assetData.description || ''
+    description: assetData.description || '',
   };
 }
 
@@ -283,10 +295,12 @@ export function transformCreativeAssetData(assetData: CreativeAssetFormValues): 
  * @param requirementData Creative requirement form values
  * @returns API-compatible creative requirement payload
  */
-export function transformCreativeRequirementData(requirementData: CreativeRequirementFormValues): CreativeRequirementApiPayload {
+export function transformCreativeRequirementData(
+  requirementData: CreativeRequirementFormValues
+): CreativeRequirementApiPayload {
   return {
     description: requirementData.description,
-    priority: requirementData.priority
+    priority: requirementData.priority,
   };
 }
 
@@ -327,8 +341,8 @@ export const EnumUtils = {
     options: () => [
       { value: 'INSTAGRAM' as Platform, label: 'Instagram' },
       { value: 'YOUTUBE' as Platform, label: 'YouTube' },
-      { value: 'TIKTOK' as Platform, label: 'TikTok' }
-    ]
+      { value: 'TIKTOK' as Platform, label: 'TikTok' },
+    ],
   },
 
   // Position enum utilities
@@ -363,8 +377,8 @@ export const EnumUtils = {
     options: () => [
       { value: 'Manager' as Position, label: 'Manager' },
       { value: 'Director' as Position, label: 'Director' },
-      { value: 'VP' as Position, label: 'VP' }
-    ]
+      { value: 'VP' as Position, label: 'VP' },
+    ],
   },
 
   // KPI enum utilities
@@ -435,8 +449,8 @@ export const EnumUtils = {
       { value: 'PURCHASE_INTENT' as KPI, label: 'Purchase Intent' },
       { value: 'ACTION_INTENT' as KPI, label: 'Action Intent' },
       { value: 'RECOMMENDATION_INTENT' as KPI, label: 'Recommendation Intent' },
-      { value: 'ADVOCACY' as KPI, label: 'Advocacy' }
-    ]
+      { value: 'ADVOCACY' as KPI, label: 'Advocacy' },
+    ],
   },
 
   // Currency enum utilities
@@ -470,8 +484,8 @@ export const EnumUtils = {
     options: () => [
       { value: 'USD' as Currency, label: 'USD' },
       { value: 'GBP' as Currency, label: 'GBP' },
-      { value: 'EUR' as Currency, label: 'EUR' }
-    ]
-  }
+      { value: 'EUR' as Currency, label: 'EUR' },
+    ],
+  },
   // TODO: Add Feature enum helpers here if needed by transformers
-}; 
+};

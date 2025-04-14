@@ -59,12 +59,7 @@ The project includes VS Code settings for optimal linting integration:
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ]
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
 }
 ```
 
@@ -84,10 +79,7 @@ Husky is configured to run linting checks before commits:
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"]
   }
 }
 ```
@@ -127,4 +119,4 @@ To add new custom rules:
 1. Update the appropriate config file in `/config/eslint/`
 2. Document the rule in this guide
 3. Add examples of correct/incorrect usage
-4. Run linting on the entire codebase to check impact 
+4. Run linting on the entire codebase to check impact

@@ -81,6 +81,7 @@ Click **Save and Continue** to proceed.
 Manage campaign creative assets:
 
 1. **Upload Assets**:
+
    - Click **Upload** to add files through the UploadThing interface
    - Drag and drop files directly onto the upload area
    - Supported formats: JPEG, PNG, GIF, MP4
@@ -88,6 +89,7 @@ Manage campaign creative assets:
    - Upload progress indicator shows real-time status
 
 2. **Asset Preview**:
+
    - Images display as square, centered thumbnails for consistency
    - Videos automatically play for 5 seconds then loop for preview
    - Click on video previews to play/pause manually
@@ -95,6 +97,7 @@ Manage campaign creative assets:
    - Error states provide retry options if uploads fail
 
 3. **Asset Details**:
+
    - Edit asset names by clicking the edit icon
    - Add descriptions for each asset to provide context
    - Set budget allocation for individual assets
@@ -145,7 +148,7 @@ The Campaign Wizard automatically saves your progress as you work:
 
 If you want to quickly draft a campaign:
 
-1. Fill in only the required fields (marked with *)
+1. Fill in only the required fields (marked with \*)
 2. Skip optional sections
 3. Save as draft to complete later
 
@@ -162,12 +165,12 @@ To create a similar campaign to an existing one:
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| Campaign won't save | Check your internet connection and ensure all required fields are completed |
-| File upload fails | Ensure file is within size limits and in an accepted format |
-| Can't find draft campaign | Check filters and search for the campaign by name |
-| Validation errors | Review highlighted fields for specific error messages |
+| Problem                   | Solution                                                                    |
+| ------------------------- | --------------------------------------------------------------------------- |
+| Campaign won't save       | Check your internet connection and ensure all required fields are completed |
+| File upload fails         | Ensure file is within size limits and in an accepted format                 |
+| Can't find draft campaign | Check filters and search for the campaign by name                           |
+| Validation errors         | Review highlighted fields for specific error messages                       |
 
 ## Next Steps
 
@@ -180,4 +183,4 @@ After creating your campaign:
 ## Additional Resources
 
 - [Campaign Best Practices](../../guides/user/campaign-best-practices.md)
-- [FAQ](../../guides/user/campaign-faq.md) 
+- [FAQ](../../guides/user/campaign-faq.md)

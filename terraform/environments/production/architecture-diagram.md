@@ -39,26 +39,26 @@
 │ Redis           │◄──►│ Redis           │◄─┤ Redis           │◄────────────┤ Redis           │
 │ Cache Primary   │    │ Cache Replica   │  │ Cache Regional  │             │ Cache Regional  │
 └─────────────────┘    └─────────────────┘  └─────────────────┘             └─────────────────┘
-                                                                                       
-┌─────────────────┐    ┌─────────────────┐                                             
-│ DB Shard 1      │    │ DB Shard 1      │                                             
-│ Primary         │◄──►│ Replica         │                                             
-└─────────────────┘    └─────────────────┘                                             
-                                                                                       
-┌─────────────────┐    ┌─────────────────┐                                             
-│ DB Shard 2      │    │ DB Shard 2      │                                             
-│ Primary         │◄──►│ Replica         │                                             
-└─────────────────┘    └─────────────────┘                                             
-                                                                                       
-┌─────────────────┐    ┌─────────────────┐                                             
-│ DB Shard 3      │    │ DB Shard 3      │                                             
-│ Primary         │◄──►│ Replica         │                                             
-└─────────────────┘    └─────────────────┘                                             
-                                                                                       
-┌─────────────────┐    ┌─────────────────┐                                             
-│ DB Shard 4      │    │ DB Shard 4      │                                             
-│ Primary         │◄──►│ Replica         │                                             
-└─────────────────┘    └─────────────────┘                                             
+
+┌─────────────────┐    ┌─────────────────┐
+│ DB Shard 1      │    │ DB Shard 1      │
+│ Primary         │◄──►│ Replica         │
+└─────────────────┘    └─────────────────┘
+
+┌─────────────────┐    ┌─────────────────┐
+│ DB Shard 2      │    │ DB Shard 2      │
+│ Primary         │◄──►│ Replica         │
+└─────────────────┘    └─────────────────┘
+
+┌─────────────────┐    ┌─────────────────┐
+│ DB Shard 3      │    │ DB Shard 3      │
+│ Primary         │◄──►│ Replica         │
+└─────────────────┘    └─────────────────┘
+
+┌─────────────────┐    ┌─────────────────┐
+│ DB Shard 4      │    │ DB Shard 4      │
+│ Primary         │◄──►│ Replica         │
+└─────────────────┘    └─────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                      │
@@ -80,15 +80,18 @@
 This architecture diagram illustrates the multi-region deployment of the UI Component Library with the following key components:
 
 1. **Global Layer**
+
    - Route 53 for latency-based routing to the nearest region
    - Multi-region deployment across 3 AWS regions
 
 2. **Regional Layer (Per Region)**
+
    - Application Load Balancer for traffic distribution
    - ECS Fargate Cluster with auto-scaling for containerized applications
    - Redis Cache clusters with cross-region replication
 
 3. **Database Layer**
+
    - Sharded PostgreSQL databases (8 shards shown as 4 for simplicity)
    - Read replicas for each shard for high availability
    - Primary region hosts the writable database instances
@@ -102,4 +105,4 @@ This architecture diagram illustrates the multi-region deployment of the UI Comp
    - ECR for container image registry
    - KMS for encryption
 
-The infrastructure is designed for high availability, disaster recovery, and global performance optimization. Latency-based routing ensures users are directed to the nearest region, while the multi-region caching architecture provides fast read performance globally. Database sharding allows horizontal scaling as the component registry grows. 
+The infrastructure is designed for high availability, disaster recovery, and global performance optimization. Latency-based routing ensures users are directed to the nearest region, while the multi-region caching architecture provides fast read performance globally. Database sharding allows horizontal scaling as the component registry grows.

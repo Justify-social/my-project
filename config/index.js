@@ -1,6 +1,6 @@
 /**
  * Configuration System
- * 
+ *
  * This is the main entry point for the application configuration.
  * It loads the appropriate environment configuration and applies defaults.
  */
@@ -17,9 +17,9 @@ import * as constants from './core/constants.js';
 
 /**
  * Determine the current environment
- * Priority: 
- * 1. Environment variable 
- * 2. NODE_ENV 
+ * Priority:
+ * 1. Environment variable
+ * 2. NODE_ENV
  * 3. Default to development
  */
 const ENV = process.env.APP_ENV || process.env.NODE_ENV || 'development';
@@ -53,19 +53,19 @@ const environmentConfig = getEnvironmentConfig(ENV);
 const config = {
   // Include environment name for reference
   ENV,
-  
+
   // Include core constants
   ...constants,
-  
+
   // Include environment-specific configuration
   ...environmentConfig,
-  
+
   // Add configuration system metadata
   _meta: {
     generatedAt: new Date().toISOString(),
     environment: ENV,
     version: '1.0.0',
-  }
+  },
 };
 
 /**
@@ -83,14 +83,14 @@ const configSchema = {
       properties: {
         NAME: { type: 'string' },
         VERSION: { type: 'string' },
-      }
+      },
     },
     FEATURES: { type: 'object' },
     DATABASE: { type: 'object' },
     LOGGING: { type: 'object' },
     API: { type: 'object' },
     SERVER: { type: 'object' },
-  }
+  },
 };
 
 /**
@@ -101,7 +101,7 @@ const validationResult = validateConfiguration(config, configSchema);
 if (!validationResult.isValid) {
   console.error('Configuration validation failed:');
   validationResult.errors.forEach(error => console.error(`- ${error}`));
-  
+
   if (ENV === 'production') {
     throw new Error('Invalid configuration in production environment');
   }
@@ -126,5 +126,5 @@ export const {
   LOGGING,
   ERROR_HANDLING,
   API,
-  SERVER
-} = config; 
+  SERVER,
+} = config;

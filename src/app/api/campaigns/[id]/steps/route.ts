@@ -1,6 +1,6 @@
-import { prisma } from '@/lib/prisma'
-import { NextResponse, NextRequest } from 'next/server'
-import { updateCampaignWithTransactions } from '@/services/campaign-service'
+import { prisma } from '@/lib/prisma';
+import { NextResponse, NextRequest } from 'next/server';
+import { updateCampaignWithTransactions } from '@/services/campaign-service';
 import { rateLimit } from '@/utils/rate-limit';
 
 // Define rate limit constants
@@ -17,7 +17,7 @@ const limiter = rateLimit({
 // Convert ID to the appropriate type for CampaignWizardSubmission (always a number)
 const prepareCampaignSubmissionId = (id: string | number): number => {
   return typeof id === 'string' ? parseInt(id, 10) : id;
-}
+};
 
 /**
  * PATCH campaign step status/data by campaign ID
@@ -28,7 +28,7 @@ export async function PATCH(
 ) {
   // Safely access id
   const campaignId = contextOrParams?.params?.id || contextOrParams?.id;
-  const correlationId = `api-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const correlationId = `api-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
   // Ensure campaignId was actually extracted before proceeding
   if (!campaignId) {
@@ -41,7 +41,7 @@ export async function PATCH(
     const stepNumber = body?.step; // Assuming step number is in the body
 
     if (!stepNumber) {
-      return NextResponse.json({ error: "Missing step number in request body" }, { status: 400 });
+      return NextResponse.json({ error: 'Missing step number in request body' }, { status: 400 });
     }
 
     // TODO: Add rate limiting, validation, and actual update logic here, referencing backup file
@@ -53,12 +53,8 @@ export async function PATCH(
     // Simulated response for now
     const simulatedUpdate = { campaignId, step: stepNumber, updated: true, ...body };
     return NextResponse.json({ success: true, data: simulatedUpdate });
-
   } catch (error) {
     console.error(`Error in PATCH /api/campaigns/${campaignId}/steps:`, error);
-    return NextResponse.json(
-      { success: false, error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
-} 
+}

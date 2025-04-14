@@ -35,11 +35,7 @@ export function formatDate(
  * @param locale The locale
  * @returns A formatted currency string
  */
-export function formatCurrency(
-  value: number,
-  currency = 'USD',
-  locale = 'en-US'
-): string {
+export function formatCurrency(value: number, currency = 'USD', locale = 'en-US'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
@@ -79,8 +75,8 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   delay: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout;
-  
-  return function(...args: Parameters<T>): void {
+
+  return function (...args: Parameters<T>): void {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };
@@ -97,8 +93,8 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean = false;
-  
-  return function(...args: Parameters<T>): void {
+
+  return function (...args: Parameters<T>): void {
     if (!inThrottle) {
       fn(...args);
       inThrottle = true;
@@ -139,7 +135,7 @@ export function capitalize(str: string): string {
  */
 export function toCamelCase(str: string): string {
   return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => 
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) =>
       index === 0 ? letter.toLowerCase() : letter.toUpperCase()
     )
     .replace(/\s+/g, '');
@@ -173,19 +169,19 @@ export const isRetryableError = (error: unknown): boolean => {
   if (error instanceof Error) {
     // Network errors are retryable
     if (error.name === 'NetworkError') return true;
-    
+
     // Check for specific error types that should be retried
     if (error.message.includes('timeout')) return true;
     if (error.message.includes('network')) return true;
   }
-  
+
   // If it's a response error, check the status code
   if (typeof error === 'object' && error !== null && 'status' in error) {
     const status = (error as { status: number }).status;
     // 5xx errors are server errors and can be retried
     return status >= 500 && status < 600;
   }
-  
+
   return false;
 };
 
@@ -210,4 +206,4 @@ export function formatFollowerCount(count: number): string {
     return `${(count / 1000).toFixed(1)}K`;
   }
   return count.toString();
-} 
+}

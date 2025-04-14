@@ -1,6 +1,6 @@
 /**
  * API Middleware Exports
- * 
+ *
  * This file exports middleware functions for API routes.
  */
 
@@ -22,7 +22,7 @@ export const withValidation = <T>(
 ) => {
   return async (req: NextRequest, params?: any) => {
     const data = await req.json();
-    
+
     try {
       // Validate the request data against the schema
       await schema.validate(data);

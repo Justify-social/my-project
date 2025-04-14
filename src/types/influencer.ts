@@ -13,7 +13,7 @@ export type Influencer = {
   platform: string;
   followers: number;
   tier: 'Gold' | 'Silver' | 'Bronze';
-  
+
   justifyMetrics: {
     justifyScore: number;
     scoreComponents: {
@@ -28,7 +28,7 @@ export type Influencer = {
       score: number;
     }>;
   };
-  
+
   audienceMetrics: {
     demographics: {
       ageRanges: {
@@ -48,7 +48,7 @@ export type Influencer = {
       averageShares: number;
     };
   };
-  
+
   safetyMetrics: {
     riskScore: number;
     lastAssessmentDate: string;

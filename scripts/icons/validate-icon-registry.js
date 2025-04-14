@@ -2,13 +2,13 @@
 
 /**
  * Icon Registry Validator
- * 
+ *
  * This script validates all icon registry files to ensure they have the required
  * fields and structure. It's part of the icon registry update process.
- * 
+ *
  * Usage:
  *   node scripts/validate-icon-registry.js [registry-file-path]
- * 
+ *
  * If no registry file path is provided, it will validate all canonical registry files.
  */
 
@@ -48,7 +48,7 @@ let invalidIcons = 0;
 function validateIcon(icon, source) {
   // Check required fields
   const missingFields = REQUIRED_FIELDS.filter(field => !icon[field]);
-  
+
   if (missingFields.length > 0) {
     console.error(
       chalk.red(`Invalid icon in ${source}:`),
@@ -57,14 +57,14 @@ function validateIcon(icon, source) {
     );
     return false;
   }
-  
+
   // Check for duplicate IDs (would need to track IDs across all registries)
-  
+
   // Additional validations could be added here:
   // - Check for valid paths
   // - Validate SVG content if available
   // - Check for recommended fields (name, tags, etc.)
-  
+
   return true;
 }
 
@@ -74,28 +74,28 @@ function validateIcon(icon, source) {
  */
 function validateRegistry(registryPath) {
   console.log(chalk.blue(`Validating registry: ${registryPath}`));
-  
+
   try {
     const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-    
+
     // Check that registry has an icons array
     if (!registry.icons || !Array.isArray(registry.icons)) {
       console.error(chalk.red(`Invalid registry format: ${registryPath}`));
       console.error(chalk.red('Registry must have an "icons" array'));
       return;
     }
-    
+
     // Get registry filename for reporting
     const registryName = path.basename(registryPath);
     console.log(chalk.blue(`Registry contains ${registry.icons.length} icons`));
-    
+
     // Validate each icon
     let registryValidIcons = 0;
     let registryInvalidIcons = 0;
-    
+
     registry.icons.forEach(icon => {
       totalIcons++;
-      
+
       if (validateIcon(icon, registryName)) {
         validIcons++;
         registryValidIcons++;
@@ -104,13 +104,12 @@ function validateRegistry(registryPath) {
         registryInvalidIcons++;
       }
     });
-    
+
     // Registry summary
     console.log(
       chalk.blue(`Registry summary: ${registryValidIcons} valid, ${registryInvalidIcons} invalid`)
     );
     console.log(chalk.blue('-'.repeat(50)));
-    
   } catch (error) {
     console.error(chalk.red(`Error processing ${registryPath}:`), error.message);
   }
@@ -119,7 +118,7 @@ function validateRegistry(registryPath) {
 // Main execution
 function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length > 0) {
     // Validate specific registry file
     const registryPath = path.resolve(args[0]);
@@ -127,18 +126,18 @@ function main() {
   } else {
     // Validate all canonical registry files
     console.log(chalk.green('Validating all canonical registry files...'));
-    
+
     CANONICAL_REGISTRIES.forEach(registry => {
       const registryPath = path.join(REGISTRY_DIR, registry);
       validateRegistry(registryPath);
     });
   }
-  
+
   // Final summary
   console.log(chalk.green('Validation complete!'));
   console.log(chalk.green(`Total icons: ${totalIcons}`));
   console.log(chalk.green(`Valid icons: ${validIcons}`));
-  
+
   if (invalidIcons > 0) {
     console.log(chalk.red(`Invalid icons: ${invalidIcons}`));
     process.exit(1); // Exit with error code
@@ -147,4 +146,4 @@ function main() {
   }
 }
 
-main(); 
+main();

@@ -1,4 +1,4 @@
-import { initAuth0 } from '@auth0/nextjs-auth0'
+import { initAuth0 } from '@auth0/nextjs-auth0';
 
 // Add debug logging for Auth0 configuration
 console.log('🔐 Auth0 Configuration:', {
@@ -8,7 +8,7 @@ console.log('🔐 Auth0 Configuration:', {
   clientSecretConfigured: !!process.env.AUTH0_CLIENT_SECRET,
   secretConfigured: !!process.env.AUTH0_SECRET,
   audienceConfigured: !!process.env.AUTH0_AUDIENCE,
-})
+});
 
 export const auth0 = initAuth0({
   baseURL: process.env.AUTH0_BASE_URL,
@@ -20,6 +20,6 @@ export const auth0 = initAuth0({
   httpTimeout: 5000,
   authorizationParams: {
     scope: 'openid profile email',
-    audience: process.env.AUTH0_AUDIENCE
+    audience: process.env.AUTH0_AUDIENCE,
   },
-}) 
+});

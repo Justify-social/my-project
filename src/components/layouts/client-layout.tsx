@@ -1,35 +1,35 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/ui/navigation/header';
 import { Sidebar } from '@/components/ui/navigation/sidebar';
-import { useSidebar } from "@/providers/SidebarProvider";
+import { useSidebar } from '@/providers/SidebarProvider';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Icon } from '@/components/ui/icon/icon';
-import Link from "next/link";
-import Image from "next/image";
-import SidebarUIComponents from "@/components/ui/navigation/sidebar-ui-components";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { MobileMenu } from "@/components/ui/navigation/mobile-menu";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import Image from 'next/image';
+import SidebarUIComponents from '@/components/ui/navigation/sidebar-ui-components';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { MobileMenu } from '@/components/ui/navigation/mobile-menu';
+import { cn } from '@/lib/utils';
 
 // --- App Icon Mapping (Copied from MobileMenu.tsx) ---
 const appIconMap: Record<string, string> = {
-  "dashboard": "appHome",
-  "home": "appHome",
-  "campaigns": "appCampaigns",
-  "brand lift": "appBrandLift",
-  "creative testing": "appCreativeAssetTesting",
-  "brand health": "appBrandHealth",
-  "influencers": "appInfluencers",
-  "mmm": "appMmm",
-  "reports": "appReports",
-  "settings": "appSettings",
-  "account settings": "appSettings",
-  "help": "appHelp",
-  "billing": "appBilling",
+  dashboard: 'appHome',
+  home: 'appHome',
+  campaigns: 'appCampaigns',
+  'brand lift': 'appBrandLift',
+  'creative testing': 'appCreativeAssetTesting',
+  'brand health': 'appBrandHealth',
+  influencers: 'appInfluencers',
+  mmm: 'appMmm',
+  reports: 'appReports',
+  settings: 'appSettings',
+  'account settings': 'appSettings',
+  help: 'appHelp',
+  billing: 'appBilling',
 };
 
 const getAppIconIdForLabel = (label: string): string | null => {
@@ -98,12 +98,13 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   // Show error with login button if authentication fails
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-work-sans">
-        <div className="text-center text-red-600 font-work-sans">
-          <p className="font-work-sans">Authentication error. Please try again.</p>
+      <div className="min-h-screen flex items-center justify-center font-body">
+        <div className="text-center text-red-600 font-body">
+          <p className="font-body">Authentication error. Please try again.</p>
           <button
             onClick={() => router.push('/api/auth/login')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-work-sans">
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-body"
+          >
             Back to Login
           </button>
         </div>
@@ -125,13 +126,13 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       icon: 'appCampaigns',
       children: [
         { id: 'campaigns-list', label: 'List', href: '/campaigns' },
-        { id: 'campaigns-wizard', label: 'Wizard', href: '/campaigns/wizard/step-1' }
-      ]
+        { id: 'campaigns-wizard', label: 'Wizard', href: '/campaigns/wizard/step-1' },
+      ],
     },
     {
       id: 'brand-lift',
-      label: "Brand Lift",
-      icon: "appBrandLift",
+      label: 'Brand Lift',
+      icon: 'appBrandLift',
       children: [
         {
           id: 'brand-lift-list',
@@ -142,8 +143,8 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           id: 'brand-lift-reports',
           label: 'Reports',
           href: '/brand-lift/reports',
-        }
-      ]
+        },
+      ],
     },
     {
       id: 'creative-testing',
@@ -159,8 +160,8 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           id: 'creative-testing-reports',
           label: 'Reports',
           href: '/creative-testing/reports',
-        }
-      ]
+        },
+      ],
     },
     {
       id: 'brand-health',
@@ -182,58 +183,84 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           id: 'influencers-list',
           label: 'List',
           href: '/influencers',
-        }
-      ]
+        },
+      ],
     },
-    { id: 'mmm', href: "/mmm", label: "MMM", icon: "appMmm" },
-    { id: 'help', href: "/help", label: "Help", icon: "appHelp" },
-    { id: 'billing', href: "/billing", label: "Billing", icon: "appBilling" },
+    { id: 'mmm', href: '/mmm', label: 'MMM', icon: 'appMmm' },
+    { id: 'help', href: '/help', label: 'Help', icon: 'appHelp' },
+    { id: 'billing', href: '/billing', label: 'Billing', icon: 'appBilling' },
   ];
 
   const settingsItemDef: SidebarItemDef = {
-    id: 'settings', label: "Settings", href: "/settings", icon: "appSettings"
+    id: 'settings',
+    label: 'Settings',
+    href: '/settings',
+    icon: 'appSettings',
   };
 
   // Function to recursively transform sidebar items for mobile menu
   const transformMenuItemsForMobile = (items: SidebarItemDef[]): NavItemDef[] => {
-    return items.map(item => {
-      // Skip settings here, it's handled separately
-      if (item.id === 'settings') return null;
+    return items
+      .map(item => {
+        // Skip settings here, it's handled separately
+        if (item.id === 'settings') return null;
 
-      // Try to map icon using label, fallback to item.icon, then fallback to circle
-      const mappedAppIconId = getAppIconIdForLabel(item.label);
-      const displayIconId = mappedAppIconId || item.icon || 'faCircleLight';
+        // Try to map icon using label, fallback to item.icon, then fallback to circle
+        const mappedAppIconId = getAppIconIdForLabel(item.label);
+        const displayIconId = mappedAppIconId || item.icon || 'faCircleLight';
 
-      const navItem: NavItemDef = {
-        id: item.id,
-        label: item.label,
-        // Use item.href if available, otherwise treat as non-navigable parent
-        href: item.href || '#', // Use '#' or similar for non-link parents
-        iconId: displayIconId,
-        // Recursively transform children if they exist
-        children: item.children ? transformMenuItemsForMobile(item.children) : undefined,
-      };
-      return navItem;
-    }).filter((item): item is NavItemDef => item !== null); // Filter out null items (settings)
+        const navItem: NavItemDef = {
+          id: item.id,
+          label: item.label,
+          // Use item.href if available, otherwise treat as non-navigable parent
+          href: item.href || '#', // Use '#' or similar for non-link parents
+          iconId: displayIconId,
+          // Recursively transform children if they exist
+          children: item.children ? transformMenuItemsForMobile(item.children) : undefined,
+        };
+        return navItem;
+      })
+      .filter((item): item is NavItemDef => item !== null); // Filter out null items (settings)
   };
 
   // Derive navItems for MobileMenu (Main App)
   const allMainNavItemsForMenu: NavItemDef[] = [
     ...transformMenuItemsForMobile(sidebarItems), // Use the corrected transformation
-    { // Add settings explicitly (ensures only one)
+    {
+      // Add settings explicitly (ensures only one)
       id: settingsItemDef.id,
       label: settingsItemDef.label,
       href: settingsItemDef.href as string,
-      iconId: settingsItemDef.icon || 'faGearLight'
-    }
+      iconId: settingsItemDef.icon || 'faGearLight',
+    },
   ];
 
   // Define Debug Tool Navigation Items (Ensure NavItemDef compatibility)
   const debugNavItems: NavItemDef[] = [
-    { id: 'debug-atom', label: 'Atom', href: '/debug-tools/ui-components?tab=components&category=atom', iconId: 'faAtomLight' },
-    { id: 'debug-molecule', label: 'Molecule', href: '/debug-tools/ui-components?tab=components&category=molecule', iconId: 'faDnaLight' },
-    { id: 'debug-organism', label: 'Organism', href: '/debug-tools/ui-components?tab=components&category=organism', iconId: 'faBacteriumLight' },
-    { id: 'debug-icons', label: 'Icons', href: '/debug-tools/ui-components?tab=icons', iconId: 'faStarLight' },
+    {
+      id: 'debug-atom',
+      label: 'Atom',
+      href: '/debug-tools/ui-components?tab=components&category=atom',
+      iconId: 'faAtomLight',
+    },
+    {
+      id: 'debug-molecule',
+      label: 'Molecule',
+      href: '/debug-tools/ui-components?tab=components&category=molecule',
+      iconId: 'faDnaLight',
+    },
+    {
+      id: 'debug-organism',
+      label: 'Organism',
+      href: '/debug-tools/ui-components?tab=components&category=organism',
+      iconId: 'faBacteriumLight',
+    },
+    {
+      id: 'debug-icons',
+      label: 'Icons',
+      href: '/debug-tools/ui-components?tab=icons',
+      iconId: 'faStarLight',
+    },
   ];
 
   // --- End Navigation Definitions ---
@@ -244,12 +271,14 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   // Select the correct items for the Mobile Menu based on the page
   const mobileMenuItems = isUIComponentsPage ? debugNavItems : allMainNavItemsForMenu;
   // Define settingsItem for MobileMenu based on context (only for main app)
-  const mobileSettingsItem = !isUIComponentsPage ? {
-    id: settingsItemDef.id,
-    label: settingsItemDef.label,
-    href: settingsItemDef.href as string,
-    iconId: settingsItemDef.icon || 'faGearLight'
-  } : undefined;
+  const mobileSettingsItem = !isUIComponentsPage
+    ? {
+        id: settingsItemDef.id,
+        label: settingsItemDef.label,
+        href: settingsItemDef.href as string,
+        iconId: settingsItemDef.icon || 'faGearLight',
+      }
+    : undefined;
 
   return (
     <ThemeProvider defaultTheme="light">
@@ -262,25 +291,23 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
         />
 
         <div className="flex flex-1 overflow-hidden">
-          <div className={cn(
-            "fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30",
-            "hidden md:block"
-          )}>
+          <div
+            className={cn(
+              'fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30',
+              'hidden md:block'
+            )}
+          >
             {isUIComponentsPage ? (
               <SidebarUIComponents navItems={debugNavItems} />
             ) : (
-              <Sidebar
-                items={sidebarItems}
-                activePath={pathname}
-                title="Justify"
-              />
+              <Sidebar items={sidebarItems} activePath={pathname} title="Justify" />
             )}
           </div>
 
-          <div className={`flex-1 transition-margin duration-200 md:ml-64 pt-16 font-work-sans overflow-y-auto`}>
-            <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">
-              {children}
-            </main>
+          <div
+            className={`flex-1 transition-margin duration-200 md:ml-64 pt-16 font-body overflow-y-auto`}
+          >
+            <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">{children}</main>
           </div>
         </div>
 
@@ -306,6 +333,10 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
 export default ClientLayout;
 
 // Helper Function (if needed elsewhere, move to utils)
-function safeGet<T, K extends keyof T>(obj: T | undefined | null, key: K, defaultValue: T[K]): T[K] {
+function safeGet<T, K extends keyof T>(
+  obj: T | undefined | null,
+  key: K,
+  defaultValue: T[K]
+): T[K] {
   return obj?.[key] ?? defaultValue;
 }

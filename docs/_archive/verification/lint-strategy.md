@@ -84,6 +84,7 @@ Our ESLint configuration:
 - Has customized rules based on project needs
 
 Key extensions:
+
 - `@typescript-eslint` for TypeScript-specific rules
 - `eslint-plugin-react` for React best practices
 - `eslint-plugin-react-hooks` for React Hooks rules
@@ -116,4 +117,4 @@ This comprehensive linting strategy provides both automated enforcement and spec
 - Streamlined development with automated fixes
 - Better onboarding through enforced standards
 
-The combination of preventative measures, targeted fixing tools, and ongoing verification creates a sustainable approach to code quality that scales with the project. 
+The combination of preventative measures, targeted fixing tools, and ongoing verification creates a sustainable approach to code quality that scales with the project.

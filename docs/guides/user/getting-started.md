@@ -61,7 +61,7 @@ The main navigation menu is located on the left side of the screen and includes:
 ### Quick Start Campaign
 
 1. From the Dashboard, click the "Create Campaign" button
-2. Select "Quick Start Campaign" 
+2. Select "Quick Start Campaign"
 3. Follow the 5-step wizard:
    - **Step 1**: Enter campaign name and basic details
    - **Step 2**: Define campaign objectives and KPIs
@@ -128,4 +128,4 @@ After getting familiar with the basics, we recommend:
 3. [Exploring the brand lift capabilities](./brand-lift-studies.md)
 4. [Learning about influencer discovery tools](./influencer-discovery.md)
 
-Welcome aboard! We're excited to help you measure the impact of your social campaigns with authentic audience insights. 
+Welcome aboard! We're excited to help you measure the impact of your social campaigns with authentic audience insights.

@@ -14,14 +14,14 @@ If you're new to Justify, these resources will help you get up to speed quickly:
 
 Our documentation is organised into these main sections:
 
-| Section | Purpose | Key Content |
-|---------|---------|-------------|
-| [Getting Started](./getting-started/) | Onboarding for new developers | Project overview, setup guide, first contribution |
-| [Architecture](./architecture/) | System design and structure | Directory structure, data flow, design patterns |
-| [Guides](./guides/) | Step-by-step instructions | Development workflows, common tasks, troubleshooting |
-| [Reference](./reference/) | Technical specifications | API endpoints, configuration options, UI components |
-| [Standards](./standards/) | Coding requirements | Linting rules, verification processes, testing standards |
-| [Project History](./project-history/) | Historical context | Major decisions, project evolution, milestone archives |
+| Section                               | Purpose                       | Key Content                                              |
+| ------------------------------------- | ----------------------------- | -------------------------------------------------------- |
+| [Getting Started](./getting-started/) | Onboarding for new developers | Project overview, setup guide, first contribution        |
+| [Architecture](./architecture/)       | System design and structure   | Directory structure, data flow, design patterns          |
+| [Guides](./guides/)                   | Step-by-step instructions     | Development workflows, common tasks, troubleshooting     |
+| [Reference](./reference/)             | Technical specifications      | API endpoints, configuration options, UI components      |
+| [Standards](./standards/)             | Coding requirements           | Linting rules, verification processes, testing standards |
+| [Project History](./project-history/) | Historical context            | Major decisions, project evolution, milestone archives   |
 
 ## Core Documentation Principles
 

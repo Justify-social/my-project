@@ -5,13 +5,13 @@
  * @description A placeholder loading component that displays animated skeleton shapes using the base Skeleton primitive.
  * @status 10th April
  * @author Shadcn (adapted)
- * @since 2023-03-01 
+ * @since 2023-03-01
  */
 'use client';
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Define props locally if needed, or import from a shared types file if preferred
 interface LoadingSkeletonProps {
@@ -80,24 +80,13 @@ export function LoadingSkeleton({
 
   return (
     <div
-      className={cn(
-        "flex",
-        count > 1 ? "flex-col" : "",
-        className
-      )}
+      className={cn('flex', count > 1 ? 'flex-col' : '', className)}
       style={{ gap: count > 1 ? gap : undefined }}
       role="status"
       aria-label="Loading"
     >
-      {items.map((i) => (
-        <Skeleton
-          key={i}
-          className={cn(
-            widthClass,
-            heightClass,
-            finalRadiusClass,
-          )}
-        />
+      {items.map(i => (
+        <Skeleton key={i} className={cn(widthClass, heightClass, finalRadiusClass)} />
       ))}
     </div>
   );
@@ -112,14 +101,14 @@ export function LoadingSkeleton({
 export function TableSkeleton({
   rows = 5,
   columns = 4,
-  className
+  className,
 }: {
   rows?: number;
   columns?: number;
   className?: string;
 }) {
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn('w-full', className)}>
       {/* Header row */}
       <div className="flex mb-4 gap-4">
         {Array.from({ length: columns }).map((_, i) => (
@@ -147,14 +136,11 @@ export function TableSkeleton({
  */
 export function DashboardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Header area with metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={`metric-${i}`}
-            className="rounded-xl p-5 border space-y-4"
-          >
+          <div key={`metric-${i}`} className="rounded-xl p-5 border space-y-4">
             <div className="flex items-center gap-3">
               <Skeleton className="w-10 h-10 rounded-lg" />
               <div className="space-y-2">
@@ -207,7 +193,7 @@ export function DashboardSkeleton({ className }: { className?: string }) {
 export function WizardSkeleton({
   step = 1,
   stepContent,
-  className
+  className,
 }: {
   step?: number;
   stepContent?: React.ReactNode;
@@ -217,7 +203,7 @@ export function WizardSkeleton({
   const normalizedStep = Math.max(1, Math.min(step, 5));
 
   return (
-    <div className={cn("max-w-6xl mx-auto px-6 py-8 space-y-6", className)}>
+    <div className={cn('max-w-6xl mx-auto px-6 py-8 space-y-6', className)}>
       {/* Wizard header */}
       <div className="flex justify-between items-center">
         <div className="space-y-2">
@@ -285,4 +271,4 @@ export function WizardSkeleton({
   );
 }
 
-export default LoadingSkeleton; 
+export default LoadingSkeleton;

@@ -7,6 +7,7 @@
 **Issue**: Parsing error at line 1858: "Declaration or statement expected."
 
 **Analysis**:
+
 - A thorough investigation showed that the file had a malformed component structure.
 - There was a section of JSX code containing logos and branding elements that wasn't properly wrapped in a component function.
 - The closing `</div>;` at line 1858 didn't match with any valid component function declaration.
@@ -16,12 +17,14 @@
 
 ```jsx
 export function BrandingExamples() {
-  return <div className="space-y-8 font-work-sans" id="branding">
-    <h3 className="text-md font-medium mb-4 font-sora">Logos</h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
-      {/* Existing logo content */}
+  return (
+    <div className="space-y-8 font-work-sans" id="branding">
+      <h3 className="text-md font-medium mb-4 font-sora">Logos</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-work-sans">
+        {/* Existing logo content */}
+      </div>
     </div>
-  </div>;
+  );
 }
 ```
 
@@ -31,7 +34,8 @@ export function BrandingExamples() {
 
 **Issue**: Malformed import statements.
 
-**Detailed Analysis**: 
+**Detailed Analysis**:
+
 - Multiple import statements were concatenated incorrectly.
 - Import statements missing proper syntax or termination.
 
@@ -45,10 +49,12 @@ export function BrandingExamples() {
 **Issue**: Unused expressions affecting code reliability.
 
 **Resolution**:
+
 - Fixed the logical expression `onChange && onChange(index)` by converting it to a proper if statement: `if (onChange) onChange(index)`
 - Added void operator to unused expression in onClick handler: `onClick: () => void setActiveTab(index)`
 
-**Verification**: 
+**Verification**:
+
 - ESLint now passes on this file
 - Confirmed the component still functions properly
 
@@ -58,12 +64,14 @@ export function BrandingExamples() {
 
 **Issue**: Parsing error: '(' expected in function declaration.
 
-**Analysis**: 
+**Analysis**:
+
 - The function name contained hyphens which are not allowed in JavaScript/TypeScript function names.
 - In Next.js, the `not-found.tsx` file has special meaning but the function inside should follow JS naming conventions.
 
 **Resolution**:
 ✅ Fixed by renaming the function to use PascalCase, for example:
+
 ```tsx
 // not-found.tsx for (admin)
 export default function NotFound() {
@@ -78,10 +86,12 @@ export default function NotFound() {
 **Issue**: Parsing error: '{' expected in interface declaration.
 
 **Analysis**:
+
 - Interface names contained hyphens which are not allowed in TypeScript interface declarations.
 
 **Resolution**:
 ✅ Fixed by renaming the interfaces to use PascalCase, for example:
+
 ```tsx
 // Auto-generated types file for step-1
 export interface Step1Props {
@@ -94,12 +104,14 @@ export interface Step1Props {
 ### 6. Script Files Syntax Errors
 
 **Issues**:
+
 1. `scripts/consolidated/cleanup/deprecation-warnings.js` - Invalid character in template string
 2. `scripts/consolidated/cleanup/stray-utilities-consolidation.js` - Misplaced import statement
 3. `scripts/consolidated/db/feature-component-migration.js` - Misplaced import statements in string content
 
 **Resolution**:
 ✅ Fixed by:
+
 1. Properly escaping template literals in string generation
 2. Moving the misplaced import statements to the top of the file
 3. Reformatting the script generation code to properly include imports as strings
@@ -114,7 +126,7 @@ export interface Step1Props {
 
 ## Next Steps
 
-1. Now that syntax errors are resolved, proceed with fixing other ESLint error types 
+1. Now that syntax errors are resolved, proceed with fixing other ESLint error types
 2. Focus next on:
    - `@typescript-eslint/no-require-imports` (282 errors)
    - `@typescript-eslint/no-unused-expressions` (8 errors)
@@ -123,6 +135,7 @@ export interface Step1Props {
 ## Root Cause Analysis
 
 The syntax errors were primarily caused by:
+
 1. Incorrect naming patterns (hyphens in function/interface names)
 2. Incorrect template string handling in script generation
 3. Misplaced import statements
@@ -134,4 +147,4 @@ The syntax errors were primarily caused by:
 1. Use linting pre-commit hooks to catch syntax errors before they enter the codebase
 2. Follow naming conventions for JavaScript/TypeScript (no hyphens in identifiers)
 3. Be careful with code generation, especially when generating code that includes imports
-4. Always validate refactoring work with linters before committing changes 
+4. Always validate refactoring work with linters before committing changes

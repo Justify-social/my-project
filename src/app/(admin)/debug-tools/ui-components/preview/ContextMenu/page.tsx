@@ -6,7 +6,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 
 // Import ContextMenu and its sub-components
 import {
@@ -25,7 +25,7 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from "../../../../../../components/ui/context-menu";
+} from '../../../../../../components/ui/context-menu';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -36,18 +36,24 @@ const statusStyles: Record<string, string> = {
 
 export default function ContextMenuPreviewPage() {
   const componentMeta: {
-    name: string; description: string; category: string;
-    subcategory: string | null; renderType: string;
-    author: string; since: string; status?: string | null;
+    name: string;
+    description: string;
+    category: string;
+    subcategory: string | null;
+    renderType: string;
+    author: string;
+    since: string;
+    status?: string | null;
   } = {
-    "name": "ContextMenu",
-    "description": "Displays a menu located at the pointer, triggered by a right-click or long-press.",
-    "category": "molecule",
-    "subcategory": "menu",
-    "renderType": "client",
-    "author": "",
-    "since": "",
-    "status": null // Build script will populate this if JSDoc exists
+    name: 'ContextMenu',
+    description:
+      'Displays a menu located at the pointer, triggered by a right-click or long-press.',
+    category: 'molecule',
+    subcategory: 'menu',
+    renderType: 'client',
+    author: '',
+    since: '',
+    status: null, // Build script will populate this if JSDoc exists
   };
   const examples: string[] = [];
 
@@ -56,10 +62,25 @@ export default function ContextMenuPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -69,12 +90,22 @@ export default function ContextMenuPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -89,7 +120,9 @@ export default function ContextMenuPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
             {/* <ContextMenu /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for <ContextMenu /> here)</p>
+            <p className="text-sm text-muted-foreground">
+              (Manually add rendering example for <ContextMenu /> here)
+            </p>
           </div>
           {/* Example 2: Add more placeholders or examples as needed */}
           {/* Example 3: Add a comprehensive example */}
@@ -134,9 +167,7 @@ export default function ContextMenuPreviewPage() {
                 <ContextMenuRadioGroup value="pedro">
                   <ContextMenuLabel inset>People</ContextMenuLabel>
                   <ContextMenuSeparator />
-                  <ContextMenuRadioItem value="pedro">
-                    Pedro Duarte
-                  </ContextMenuRadioItem>
+                  <ContextMenuRadioItem value="pedro">Pedro Duarte</ContextMenuRadioItem>
                   <ContextMenuRadioItem value="colm">Colm Tuite</ContextMenuRadioItem>
                 </ContextMenuRadioGroup>
               </ContextMenuContent>
@@ -160,7 +191,6 @@ export default function ContextMenuPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

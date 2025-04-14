@@ -20,11 +20,7 @@ This document lists all configuration files that have been centralized into the 
 
 ## Skipped Files (Not Found)
 
-
-
 ## Failed Migrations
-
-
 
 ## Package.json Updates
 
@@ -33,21 +29,25 @@ The script has updated references in package.json to point to the new configurat
 ## Usage Instructions
 
 ### ESLint
+
 ```
 npx eslint --config config/eslint/eslintrc.js
 ```
 
 ### Prettier
+
 ```
 npx prettier --config config/prettier/prettierrc.json
 ```
 
 ### Jest
+
 ```
 npx jest --config=config/jest/jest.config.js
 ```
 
 ### TypeScript
+
 ```
 tsc --project config/typescript/tsconfig.json
 ```

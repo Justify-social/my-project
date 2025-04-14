@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import { Accordion } from '../../../../../../components/ui/accordion';
 
 const statusStyles: Record<string, string> = {
@@ -16,14 +16,15 @@ const statusStyles: Record<string, string> = {
 
 export default function AccordionPreviewPage() {
   const componentMeta = {
-    "name": "Accordion",
-    "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
-    "category": "organism",
-    "subcategory": "layout",
-    "status": "stable",
-    "renderType": "client",
-    "author": "",
-    "since": ""
+    name: 'Accordion',
+    description:
+      'A vertically stacked set of interactive headings that each reveal a section of content.',
+    category: 'organism',
+    subcategory: 'layout',
+    status: 'stable',
+    renderType: 'client',
+    author: '',
+    since: '',
   };
   const examples: string[] = [];
 
@@ -32,10 +33,25 @@ export default function AccordionPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -45,12 +61,22 @@ export default function AccordionPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -66,7 +92,9 @@ export default function AccordionPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-3">Basic Usage</h3>
             {/* <Accordion /> */}
-            <p className="text-sm text-muted-foreground">(Manually add rendering example for {'<Accordion />'} here)</p>
+            <p className="text-sm text-muted-foreground">
+              (Manually add rendering example for {'<Accordion />'} here)
+            </p>
           </div>
           {/* Example 2: Add more placeholders or examples as needed */}
           {/* ---- END MANUAL EXAMPLES ---- */}
@@ -88,7 +116,6 @@ export default function AccordionPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

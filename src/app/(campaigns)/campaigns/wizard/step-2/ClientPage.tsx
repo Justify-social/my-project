@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense } from "react";
-import { WizardSkeleton } from "@/components/ui/loading-skeleton";
-import { StepLoader } from "@/components/features/campaigns/StepContentLoader";
+import { Suspense } from 'react';
+import { WizardSkeleton } from '@/components/ui/loading-skeleton';
+import { StepLoader } from '@/components/features/campaigns/StepContentLoader';
 
 export default function ClientPage() {
   return (
@@ -10,4 +10,4 @@ export default function ClientPage() {
       <StepLoader step={2} />
     </Suspense>
   );
-} 
+}

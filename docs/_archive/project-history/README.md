@@ -24,4 +24,4 @@ When referencing historical documentation:
 3. Recognise that current best practices may have evolved since
 4. Use it to understand "why" something was done rather than "how" to do something now
 
-For current development guidelines, please refer to the [Guides](../guides/) section. 
+For current development guidelines, please refer to the [Guides](../guides/) section.

@@ -35,4 +35,4 @@ The configuration scripts follow these principles:
 
 ## Integration with Package.json
 
-These scripts are integrated with package.json scripts for easy execution, and are part of the application's configuration management strategy. 
+These scripts are integrated with package.json scripts for easy execution, and are part of the application's configuration management strategy.

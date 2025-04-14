@@ -1,14 +1,23 @@
 /**
  * Enum Transformation Utilities
- * 
+ *
  * This module provides centralized utilities for transforming enum values between:
  * - Frontend format (typically camelCase for KPIs, Title Case for Platforms)
  * - Backend format (UPPERCASE_SNAKE_CASE as stored in database)
- * 
+ *
  * It ensures consistent handling of enum values across the application.
  */
 
-import { KPI, Platform, Currency, Position, Feature, TeamRole, InvitationStatus, UserRole } from '@prisma/client';
+import {
+  KPI,
+  Platform,
+  Currency,
+  Position,
+  Feature,
+  TeamRole,
+  InvitationStatus,
+  UserRole,
+} from '@prisma/client';
 
 // Enable debug logging in development
 const isDev = process.env.NODE_ENV === 'development';
@@ -22,33 +31,33 @@ export const EnumTransformers = {
   // KPI transformers
   kpiToBackend(value: string): KPI {
     const mapping: Record<string, KPI> = {
-      'adRecall': 'AD_RECALL' as KPI,
-      'brandAwareness': 'BRAND_AWARENESS' as KPI,
-      'consideration': 'CONSIDERATION' as KPI,
-      'messageAssociation': 'MESSAGE_ASSOCIATION' as KPI,
-      'brandPreference': 'BRAND_PREFERENCE' as KPI,
-      'purchaseIntent': 'PURCHASE_INTENT' as KPI,
-      'actionIntent': 'ACTION_INTENT' as KPI,
-      'recommendationIntent': 'RECOMMENDATION_INTENT' as KPI,
-      'advocacy': 'ADVOCACY' as KPI
+      adRecall: 'AD_RECALL' as KPI,
+      brandAwareness: 'BRAND_AWARENESS' as KPI,
+      consideration: 'CONSIDERATION' as KPI,
+      messageAssociation: 'MESSAGE_ASSOCIATION' as KPI,
+      brandPreference: 'BRAND_PREFERENCE' as KPI,
+      purchaseIntent: 'PURCHASE_INTENT' as KPI,
+      actionIntent: 'ACTION_INTENT' as KPI,
+      recommendationIntent: 'RECOMMENDATION_INTENT' as KPI,
+      advocacy: 'ADVOCACY' as KPI,
     };
 
-    const result = mapping[value] || value as KPI;
+    const result = mapping[value] || (value as KPI);
     debugLog(`[EnumTransformer] kpiToBackend: ${value} → ${result}`);
     return result;
   },
 
   kpiFromBackend(value: KPI): string {
     const mapping: Record<string, string> = {
-      'AD_RECALL': 'adRecall',
-      'BRAND_AWARENESS': 'brandAwareness',
-      'CONSIDERATION': 'consideration',
-      'MESSAGE_ASSOCIATION': 'messageAssociation',
-      'BRAND_PREFERENCE': 'brandPreference',
-      'PURCHASE_INTENT': 'purchaseIntent',
-      'ACTION_INTENT': 'actionIntent',
-      'RECOMMENDATION_INTENT': 'recommendationIntent',
-      'ADVOCACY': 'advocacy'
+      AD_RECALL: 'adRecall',
+      BRAND_AWARENESS: 'brandAwareness',
+      CONSIDERATION: 'consideration',
+      MESSAGE_ASSOCIATION: 'messageAssociation',
+      BRAND_PREFERENCE: 'brandPreference',
+      PURCHASE_INTENT: 'purchaseIntent',
+      ACTION_INTENT: 'actionIntent',
+      RECOMMENDATION_INTENT: 'recommendationIntent',
+      ADVOCACY: 'advocacy',
     };
 
     const result = mapping[value] || value.toLowerCase();
@@ -59,21 +68,21 @@ export const EnumTransformers = {
   // Platform transformers
   platformToBackend(value: string): Platform {
     const mapping: Record<string, Platform> = {
-      'Instagram': 'INSTAGRAM' as Platform,
-      'YouTube': 'YOUTUBE' as Platform,
-      'TikTok': 'TIKTOK' as Platform
+      Instagram: 'INSTAGRAM' as Platform,
+      YouTube: 'YOUTUBE' as Platform,
+      TikTok: 'TIKTOK' as Platform,
     };
 
-    const result = mapping[value] || value as Platform;
+    const result = mapping[value] || (value as Platform);
     debugLog(`[EnumTransformer] platformToBackend: ${value} → ${result}`);
     return result;
   },
 
   platformFromBackend(value: Platform): string {
     const mapping: Record<string, string> = {
-      'INSTAGRAM': 'Instagram',
-      'YOUTUBE': 'YouTube',
-      'TIKTOK': 'TikTok'
+      INSTAGRAM: 'Instagram',
+      YOUTUBE: 'YouTube',
+      TIKTOK: 'TikTok',
     };
 
     const result = mapping[value] || value;
@@ -96,12 +105,12 @@ export const EnumTransformers = {
   // Position transformers
   positionToBackend(value: string): Position {
     const mapping: Record<string, Position> = {
-      'Manager': 'Manager' as Position,
-      'Director': 'Director' as Position,
-      'VP': 'VP' as Position
+      Manager: 'Manager' as Position,
+      Director: 'Director' as Position,
+      VP: 'VP' as Position,
     };
 
-    const result = mapping[value] || value as Position;
+    const result = mapping[value] || (value as Position);
     debugLog(`[EnumTransformer] positionToBackend: ${value} → ${result}`);
     return result;
   },
@@ -114,23 +123,23 @@ export const EnumTransformers = {
   // Feature transformers
   featureToBackend(value: string): Feature {
     const mapping: Record<string, Feature> = {
-      'CREATIVE_ASSET_TESTING': 'CREATIVE_ASSET_TESTING' as Feature,
-      'BRAND_LIFT': 'BRAND_LIFT' as Feature,
-      'BRAND_HEALTH': 'BRAND_HEALTH' as Feature,
-      'MIXED_MEDIA_MODELLING': 'MIXED_MEDIA_MODELING' as Feature
+      CREATIVE_ASSET_TESTING: 'CREATIVE_ASSET_TESTING' as Feature,
+      BRAND_LIFT: 'BRAND_LIFT' as Feature,
+      BRAND_HEALTH: 'BRAND_HEALTH' as Feature,
+      MIXED_MEDIA_MODELLING: 'MIXED_MEDIA_MODELING' as Feature,
     };
 
-    const result = mapping[value] || value as Feature;
+    const result = mapping[value] || (value as Feature);
     debugLog(`[EnumTransformer] featureToBackend: ${value} → ${result}`);
     return result;
   },
 
   featureFromBackend(value: Feature): string {
     const mapping: Record<string, string> = {
-      'CREATIVE_ASSET_TESTING': 'CREATIVE_ASSET_TESTING',
-      'BRAND_LIFT': 'BRAND_LIFT',
-      'BRAND_HEALTH': 'BRAND_HEALTH',
-      'MIXED_MEDIA_MODELING': 'MIXED_MEDIA_MODELLING'
+      CREATIVE_ASSET_TESTING: 'CREATIVE_ASSET_TESTING',
+      BRAND_LIFT: 'BRAND_LIFT',
+      BRAND_HEALTH: 'BRAND_HEALTH',
+      MIXED_MEDIA_MODELING: 'MIXED_MEDIA_MODELLING',
     };
 
     const result = mapping[value] || value;
@@ -207,7 +216,8 @@ export const EnumTransformers = {
         result[key] = this.invitationStatusToBackend(value as string);
       } else if (key === 'userRole') {
         result[key] = this.userRoleToBackend(value as string);
-      } else if (value instanceof Date) { // Explicitly handle Date objects
+      } else if (value instanceof Date) {
+        // Explicitly handle Date objects
         result[key] = value; // Keep Date objects as they are for DB
       } else if (typeof value === 'object') {
         result[key] = this.transformObjectToBackend(value);
@@ -254,7 +264,8 @@ export const EnumTransformers = {
         result[key] = this.invitationStatusFromBackend(value as InvitationStatus);
       } else if (key === 'userRole') {
         result[key] = this.userRoleFromBackend(value as UserRole);
-      } else if (value instanceof Date) { // Explicitly handle Date objects
+      } else if (value instanceof Date) {
+        // Explicitly handle Date objects
         result[key] = value.toISOString(); // Convert to ISO string for API response
       } else if (typeof value === 'object') {
         result[key] = this.transformObjectFromBackend(value);
@@ -264,7 +275,7 @@ export const EnumTransformers = {
     }
 
     return result as unknown as T;
-  }
+  },
 };
 
 /**
@@ -286,4 +297,4 @@ export const formatEnumForDisplay = (value: string): string => {
 
   // If it's already in a display format, return as is
   return value;
-}; 
+};

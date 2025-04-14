@@ -40,7 +40,7 @@ Cypress.Commands.add('login', (email = 'admin@example.com', role = 'admin') => {
 });
 
 // Custom command for navigating to settings page sections
-Cypress.Commands.add('navigateToSettings', (section) => {
+Cypress.Commands.add('navigateToSettings', section => {
   cy.visit('/settings');
   if (section) {
     cy.contains(section).click();

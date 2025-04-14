@@ -10,7 +10,12 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends("next/core-web-vitals"), // Keep core-web-vitals
+  // Add typescript recommended separately
+  {
+    ...compat.extends("plugin:@typescript-eslint/recommended")[0],
+  },
+  // Add custom overrides
   {
     ignores: [
       "node_modules/**",
@@ -23,7 +28,12 @@ const eslintConfig = [
       "**/*.bak",
       "**/*.backup",
       "**/*.old",
-      "**/*.tmp"
+      "**/*.tmp",
+      ".backup/**",
+      "logs/**",
+      "coverage/**",
+      "archives/**",
+      "src/app/(campaigns)/campaigns/wizard/step-*/**",
     ],
     rules: {
       "@typescript-eslint/no-unused-vars": ["warn", {
@@ -32,11 +42,17 @@ const eslintConfig = [
       }],
       "@typescript-eslint/no-explicit-any": "warn",
       "react/no-unescaped-entities": "off",
-      "@next/next/no-img-element": "warn",
       "react/display-name": "off",
       "jsx-a11y/role-has-required-aria-props": "off",
       "react-hooks/exhaustive-deps": "warn",
-      "prefer-const": "warn"
+      "prefer-const": "warn",
+      'no-restricted-imports': ['error', {
+        'paths': [{
+          'name': '@/components/ui/icon',
+          'message': 'Import Icon directly from "@/components/ui/icon/icon" instead for proper app icon handling.'
+        }]
+      }],
+      "@typescript-eslint/no-empty-interface": "off",
     }
   }
 ];

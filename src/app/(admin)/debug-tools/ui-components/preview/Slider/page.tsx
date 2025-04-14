@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import { Slider } from '../../../../../../components/ui/slider';
 
 const statusStyles: Record<string, string> = {
@@ -18,14 +18,14 @@ const statusStyles: Record<string, string> = {
 
 export default function SliderPreviewPage() {
   const componentMeta = {
-    "name": "Slider",
-    "description": "An input where the user selects a value from within a given range.",
-    "category": "atom",
-    "subcategory": "input",
-    "renderType": "client",
-    "author": "Shadcn",
-    "since": "2023-01-01",
-    "status": "stable"
+    name: 'Slider',
+    description: 'An input where the user selects a value from within a given range.',
+    category: 'atom',
+    subcategory: 'input',
+    renderType: 'client',
+    author: 'Shadcn',
+    since: '2023-01-01',
+    status: 'stable',
   };
   const examples: string[] = [];
 
@@ -37,10 +37,25 @@ export default function SliderPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -50,12 +65,22 @@ export default function SliderPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -72,24 +97,21 @@ export default function SliderPreviewPage() {
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Basic Slider</h3>
             <p className="text-sm text-muted-foreground mb-3">Default range is 0-100, step is 1.</p>
-            <Slider
-              defaultValue={[33]}
-              max={100}
-              step={1}
-              className={cn("w-[60%]")}
-            />
+            <Slider defaultValue={[33]} max={100} step={1} className={cn('w-[60%]')} />
           </div>
 
           {/* Example 2: Controlled Slider */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Controlled Slider with Value Display</h3>
-            <p className="text-sm text-muted-foreground mb-3">The slider value is controlled by component state.</p>
+            <p className="text-sm text-muted-foreground mb-3">
+              The slider value is controlled by component state.
+            </p>
             <Slider
               value={sliderValue} // Controlled value
               onValueChange={setSliderValue} // Update state on change
               max={100}
               step={1}
-              className={cn("w-[60%]")}
+              className={cn('w-[60%]')}
             />
             <div className="mt-4 text-center text-sm">
               Current Value: <span className="font-semibold">{sliderValue[0]}</span>
@@ -99,7 +121,7 @@ export default function SliderPreviewPage() {
           {/* Example 3: Disabled Slider */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Disabled Slider</h3>
-            <Slider defaultValue={[75]} max={100} step={1} disabled className={cn("w-[60%]")} />
+            <Slider defaultValue={[75]} max={100} step={1} disabled className={cn('w-[60%]')} />
           </div>
 
           {/* ---- END MANUAL EXAMPLES ---- */}
@@ -121,7 +143,6 @@ export default function SliderPreviewPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

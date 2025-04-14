@@ -17,15 +17,15 @@ This document outlines the database schema update approach for Justify.social, f
 
 ## Key Schema Components
 
-| Component | Purpose | Key Relationships |
-|-----------|---------|-------------------|
-| Campaigns | Core campaign information | Influencers, CreativeAssets, BrandLiftStudies |
-| Influencers | Influencer profiles and metrics | Campaigns, CreativeAssets |
-| Audiences | Target demographic definitions | Campaigns |
-| CreativeAssets | Campaign visual materials | Campaigns, Influencers |
-| BrandLiftStudies | Measurement studies | Campaigns |
-| Users | Platform users and permissions | Teams, Campaigns |
-| Teams | Organizational groupings | Users, Campaigns |
+| Component        | Purpose                         | Key Relationships                             |
+| ---------------- | ------------------------------- | --------------------------------------------- |
+| Campaigns        | Core campaign information       | Influencers, CreativeAssets, BrandLiftStudies |
+| Influencers      | Influencer profiles and metrics | Campaigns, CreativeAssets                     |
+| Audiences        | Target demographic definitions  | Campaigns                                     |
+| CreativeAssets   | Campaign visual materials       | Campaigns, Influencers                        |
+| BrandLiftStudies | Measurement studies             | Campaigns                                     |
+| Users            | Platform users and permissions  | Teams, Campaigns                              |
+| Teams            | Organizational groupings        | Users, Campaigns                              |
 
 ## Data Format Standardization
 
@@ -39,11 +39,13 @@ Frontend (TypeScript): camelCase
 ```
 
 **Why This Approach?**
+
 - Database conventions favor UPPERCASE for enum values
 - Frontend JavaScript conventions favor camelCase
 - Consistent transformation prevents data format errors
 
 **Implementation Pattern:**
+
 ```typescript
 // Backend to Frontend transformation
 function transformFromBackend(data) {
@@ -81,6 +83,7 @@ enum Status {
 ```
 
 **Benefits:**
+
 - Clear campaign lifecycle visibility
 - Consistent status transitions
 - Improved filtering and reporting
@@ -106,6 +109,7 @@ model Influencer {
 ```
 
 **Benefits:**
+
 - Many-to-many relationship support
 - Improved performance for influencer queries
 - Better data integrity with proper foreign keys
@@ -124,6 +128,7 @@ model Campaign {
 ```
 
 **Benefits:**
+
 - Schema flexibility for evolving requirements
 - Reduced migration frequency for minor changes
 - Better support for deeply nested structures
@@ -191,4 +196,4 @@ We monitor schema health through:
 
 - [Database Schema](./schema.md)
 - [Database Operations](./operations.md)
-- [API Endpoints](../apis/endpoints.md) 
+- [API Endpoints](../apis/endpoints.md)

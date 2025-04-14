@@ -1,10 +1,10 @@
-import { Inter } from 'next/font/google'
-import { UserProvider } from '@auth0/nextjs-auth0/client'
-import ClientLayout from '@/components/layouts/client-layout'
-import './globals.css'
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
-import { extractRouterConfig } from "uploadthing/server";
-import { ourFileRouter } from "@/app/api/uploadthing/core";
+import { Inter } from 'next/font/google';
+import { UserProvider } from '@auth0/nextjs-auth0/client';
+import ClientLayout from '@/components/layouts/client-layout';
+import './globals.css';
+import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
+import { extractRouterConfig } from 'uploadthing/server';
+import { ourFileRouter } from '@/app/api/uploadthing/core';
 import { Suspense } from 'react';
 import { connection } from 'next/server';
 // Import IconContextProvider for consistent icon behavior
@@ -14,12 +14,12 @@ import { SearchProvider } from '@/providers/SearchProvider';
 // Import the new auth state provider
 import { AuthStateProvider } from '@/lib/auth/authCoordinator';
 // Import Shadcn Toaster
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from '@/components/ui/toaster';
 
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'Justify',
@@ -27,10 +27,10 @@ export const metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.png', type: 'image/png' }
+      { url: '/favicon.png', type: 'image/png' },
     ],
   },
-}
+};
 
 // SSR component for UploadThing
 async function UTSSR() {
@@ -38,16 +38,10 @@ async function UTSSR() {
   return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        {/* Using local SVG icons - no external scripts needed */}
-      </head>
+      <head>{/* Using local SVG icons - no external scripts needed */}</head>
       <body className={`${inter.className} bg-white`}>
         <UserProvider>
           {/* Add AuthStateProvider as the SSOT for auth state */}
@@ -66,9 +60,7 @@ export default function RootLayout({
                 <Suspense>
                   <UTSSR />
                 </Suspense>
-                <ClientLayout>
-                  {children}
-                </ClientLayout>
+                <ClientLayout>{children}</ClientLayout>
                 {/* Render Shadcn Toaster */}
                 <Toaster />
               </SearchProvider>
@@ -78,5 +70,5 @@ export default function RootLayout({
         </UserProvider>
       </body>
     </html>
-  )
+  );
 }

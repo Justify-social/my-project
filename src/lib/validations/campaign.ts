@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const campaignSchema = z.object({
   campaignName: z.string().min(1, 'Campaign name is required'),
@@ -11,36 +11,40 @@ export const campaignSchema = z.object({
   socialMediaBudget: z.number().min(0, 'Social media budget must be positive'),
   platform: z.enum(['Instagram', 'YouTube', 'TikTok']),
   influencerHandle: z.string().optional(),
-  
+
   primaryContact: z.object({
     firstName: z.string().min(1, 'First name is required'),
     surname: z.string().min(1, 'Surname is required'),
     email: z.string().email('Invalid email address'),
-    position: z.string().min(1, 'Position is required')
+    position: z.string().min(1, 'Position is required'),
   }),
-  
+
   secondaryContact: z.object({
     firstName: z.string().min(1, 'First name is required'),
     surname: z.string().min(1, 'Surname is required'),
     email: z.string().email('Invalid email address'),
-    position: z.string().min(1, 'Position is required')
+    position: z.string().min(1, 'Position is required'),
   }),
 
-  creativeAssets: z.array(z.object({
-    id: z.number(),
-    type: z.string().min(1, 'Asset type is required'),
-    url: z.string().url('Invalid URL'),
-    title: z.string().min(1, 'Title is required'),
-    description: z.string(),
-    influencerAssigned: z.string(),
-    influencerHandle: z.string(),
-    influencerBudget: z.number().min(0)
-  })),
+  creativeAssets: z.array(
+    z.object({
+      id: z.number(),
+      type: z.string().min(1, 'Asset type is required'),
+      url: z.string().url('Invalid URL'),
+      title: z.string().min(1, 'Title is required'),
+      description: z.string(),
+      influencerAssigned: z.string(),
+      influencerHandle: z.string(),
+      influencerBudget: z.number().min(0),
+    })
+  ),
 
-  creativeRequirements: z.array(z.object({
-    id: z.number(),
-    requirement: z.string().min(1, 'Requirement is required')
-  }))
-})
+  creativeRequirements: z.array(
+    z.object({
+      id: z.number(),
+      requirement: z.string().min(1, 'Requirement is required'),
+    })
+  ),
+});
 
-export type CampaignFormData = z.infer<typeof campaignSchema> 
+export type CampaignFormData = z.infer<typeof campaignSchema>;

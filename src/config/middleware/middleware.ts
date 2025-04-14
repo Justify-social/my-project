@@ -5,14 +5,16 @@ import { graphitiCheckEnforcer } from './cursor-ai';
 
 // Expanded static asset detection
 function isStaticAsset(path: string): boolean {
-  return path.startsWith('/_next') ||
+  return (
+    path.startsWith('/_next') ||
     path.includes('/images/') ||
-    path.includes('/icons/') ||    // Add icons path exclusion
-    path.endsWith('.svg') ||       // All SVG files
+    path.includes('/icons/') || // Add icons path exclusion
+    path.endsWith('.svg') || // All SVG files
     path.endsWith('.ico') ||
     path.endsWith('.png') ||
     path.endsWith('.css') ||
-    path.endsWith('.js');
+    path.endsWith('.js')
+  );
 }
 
 // Public paths constant and function removed as they are no longer needed for the initial bypass logic
@@ -49,8 +51,7 @@ export default async function middleware(req: NextRequest) {
   // Only apply auth check to admin routes and API routes that require auth
   // (Note: The condition !path.startsWith('/api/auth') is also technically redundant
   // due to the matcher, but harmless to keep for clarity)
-  if (path.startsWith('/admin') ||
-    (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
+  if (path.startsWith('/admin') || (path.startsWith('/api') && !path.startsWith('/api/auth'))) {
     // Create a response object to pass to getSession
     const res = NextResponse.next();
     const session = await getSession(req, res);
@@ -58,10 +59,10 @@ export default async function middleware(req: NextRequest) {
       // Instead of redirecting, which interrupts rendering,
       // respond with a 401 status for API routes
       if (path.startsWith('/api')) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'content-type': 'application/json' } }
-        );
+        return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        });
       }
       // For admin routes, redirect to login
       return NextResponse.redirect(new URL('/api/auth/login', req.url));
@@ -95,7 +96,7 @@ async function handleAuthMiddleware(req: NextRequest) {
       email: session?.user?.email,
       path,
       roles: userRoles,
-      hasRole: userRoles.includes('super_admin')
+      hasRole: userRoles.includes('super_admin'),
     });
 
     if (!userRoles.includes('super_admin')) {
@@ -117,5 +118,5 @@ export const config = {
      * - favicon.ico (favicon file)
      */
     '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
-  ]
-}
+  ],
+};

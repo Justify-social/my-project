@@ -4,13 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import {
-  Card,
-  Button,
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from '@/components/ui';
+import { Card, Button, Alert, AlertTitle, AlertDescription } from '@/components/ui';
 import { format } from 'date-fns';
 
 // Types for telemetry data
@@ -54,7 +48,7 @@ interface TelemetryResponse {
  * GraphitiDashboard - Admin component for monitoring Graphiti integration
  */
 export default function GraphitiDashboard() {
-  const [activeTab, setActiveTab] = useState<string>("sessions");
+  const [activeTab, setActiveTab] = useState<string>('sessions');
   const [refreshInterval, setRefreshInterval] = useState<number>(30000); // 30 seconds
 
   // Fetch telemetry data
@@ -69,7 +63,7 @@ export default function GraphitiDashboard() {
 
   // Auto refresh control
   const toggleAutoRefresh = () => {
-    setRefreshInterval(prev => prev ? 0 : 30000);
+    setRefreshInterval(prev => (prev ? 0 : 30000));
   };
 
   return (
@@ -77,11 +71,7 @@ export default function GraphitiDashboard() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Graphiti Integration Dashboard</h1>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            aria-label="Refresh data"
-          >
+          <Button variant="outline" onClick={() => refetch()} aria-label="Refresh data">
             Refresh
           </Button>
           <Button
@@ -120,16 +110,18 @@ export default function GraphitiDashboard() {
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              title="Active Sessions"
-              value={data.stats.activeSessions}
-              icon="users"
-            />
+            <StatCard title="Active Sessions" value={data.stats.activeSessions} icon="users" />
             <StatCard
               title="Success Rate"
               value={`${data.stats.successRate}%`}
               icon="chart-line"
-              color={data.stats.successRate > 90 ? 'green' : data.stats.successRate > 75 ? 'yellow' : 'red'}
+              color={
+                data.stats.successRate > 90
+                  ? 'green'
+                  : data.stats.successRate > 75
+                    ? 'yellow'
+                    : 'red'
+              }
             />
             <StatCard
               title="Blocked Requests"
@@ -143,30 +135,30 @@ export default function GraphitiDashboard() {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-6">
               <button
-                onClick={() => setActiveTab("sessions")}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "sessions"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                onClick={() => setActiveTab('sessions')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'sessions'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 Active Sessions ({data.telemetry.activeSessions.length})
               </button>
 
               <button
-                onClick={() => setActiveTab("activity")}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "activity"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                onClick={() => setActiveTab('activity')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'activity'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 Recent Activity ({data.telemetry.telemetry.length})
               </button>
 
               <button
-                onClick={() => setActiveTab("analytics")}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "analytics"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                onClick={() => setActiveTab('analytics')}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'analytics'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 Analytics
@@ -176,9 +168,11 @@ export default function GraphitiDashboard() {
 
           {/* Tab Content */}
           <div>
-            {activeTab === "sessions" && <SessionsTable sessions={data.telemetry.activeSessions} />}
-            {activeTab === "activity" && <ActivityTable records={data.telemetry.telemetry} />}
-            {activeTab === "analytics" && <AnalyticsView stats={data.stats} telemetry={data.telemetry.telemetry} />}
+            {activeTab === 'sessions' && <SessionsTable sessions={data.telemetry.activeSessions} />}
+            {activeTab === 'activity' && <ActivityTable records={data.telemetry.telemetry} />}
+            {activeTab === 'analytics' && (
+              <AnalyticsView stats={data.stats} telemetry={data.telemetry.telemetry} />
+            )}
           </div>
         </div>
       )}
@@ -187,18 +181,23 @@ export default function GraphitiDashboard() {
 }
 
 // Helper components
-function StatCard({ title, value, icon, color = 'blue' }: {
+function StatCard({
+  title,
+  value,
+  icon,
+  color = 'blue',
+}: {
   title: string;
   value: string | number;
   icon: string;
   color?: 'green' | 'yellow' | 'red' | 'blue' | 'gray';
 }) {
   const colorClasses = {
-    green: 'bg-green-50 text-green-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    red: 'bg-red-50 text-red-600',
-    blue: 'bg-blue-50 text-blue-600',
-    gray: 'bg-gray-50 text-gray-600',
+    green: 'bg-[var(--background-success)] text-[var(--foreground-success)]',
+    yellow: 'bg-[var(--background-warning)] text-[var(--foreground-warning)]',
+    red: 'bg-[var(--background-error)] text-[var(--foreground-error)]',
+    blue: 'bg-[var(--background-info)] text-[var(--foreground-info)]',
+    gray: 'bg-[var(--background-muted)] text-[var(--foreground-muted)]',
   };
 
   return (
@@ -234,15 +233,19 @@ function SessionsTable({ sessions }: { sessions: SessionState[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {sessions.map((session) => (
+          {sessions.map(session => (
             <tr key={session.sessionId} className="hover:bg-gray-50">
               <td className="px-4 py-3 font-mono text-xs">{session.sessionId}</td>
               <td className="px-4 py-3">{format(new Date(session.lastUpdated), 'Pp')}</td>
               <td className="px-4 py-3">{session.taskType || 'unknown'}</td>
               <td className="px-4 py-3">{session.queryCount}</td>
               <td className="px-4 py-3">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${session.hasCheckedGraphiti ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${session.hasCheckedGraphiti
+                    ? 'bg-[var(--background-success)] text-[var(--foreground-success)]'
+                    : 'bg-[var(--background-error)] text-[var(--foreground-error)]'
+                    }`}
+                >
                   {session.hasCheckedGraphiti ? 'Compliant' : 'Pending Check'}
                 </span>
               </td>
@@ -282,8 +285,10 @@ function ActivityTable({ records }: { records: TelemetryRecord[] }) {
               <td className="px-4 py-3 capitalize">{record.action}</td>
               <td className="px-4 py-3">{record.taskType || 'unknown'}</td>
               <td className="px-4 py-3">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.success ? 'bg-[var(--background-success)] text-[var(--foreground-success)]' : 'bg-[var(--background-error)] text-[var(--foreground-error)]'
+                    }`}
+                >
                   {record.success ? 'Success' : 'Failed'}
                 </span>
               </td>
@@ -295,7 +300,13 @@ function ActivityTable({ records }: { records: TelemetryRecord[] }) {
   );
 }
 
-function AnalyticsView({ stats, telemetry }: { stats: TelemetryStats, telemetry: TelemetryRecord[] }) {
+function AnalyticsView({
+  stats,
+  telemetry,
+}: {
+  stats: TelemetryStats;
+  telemetry: TelemetryRecord[];
+}) {
   // Calculate action distribution
   const actionCounts = {
     check: stats.checkCount,
@@ -305,7 +316,7 @@ function AnalyticsView({ stats, telemetry }: { stats: TelemetryStats, telemetry:
   };
 
   // Calculate success rate over time (simplified)
-  const successByDay: Record<string, { success: number, total: number }> = {};
+  const successByDay: Record<string, { success: number; total: number }> = {};
 
   telemetry.forEach(record => {
     const day = format(new Date(record.timestamp), 'yyyy-MM-dd');
@@ -321,7 +332,7 @@ function AnalyticsView({ stats, telemetry }: { stats: TelemetryStats, telemetry:
 
   const successRateByDay = Object.entries(successByDay).map(([day, counts]) => ({
     day,
-    rate: Math.round((counts.success / counts.total) * 100)
+    rate: Math.round((counts.success / counts.total) * 100),
   }));
 
   return (
@@ -350,7 +361,7 @@ function AnalyticsView({ stats, telemetry }: { stats: TelemetryStats, telemetry:
               <div key={day} className="flex flex-col items-center">
                 <div className="text-xs mb-1">{rate}%</div>
                 <div
-                  className={`w-12 ${rate > 90 ? 'bg-green-500' : rate > 75 ? 'bg-yellow-500' : 'bg-red-500'
+                  className={`w-12 ${rate > 90 ? 'bg-[var(--background-success)]' : rate > 75 ? 'bg-[var(--background-warning)]' : 'bg-[var(--background-error)]'
                     }`}
                   style={{ height: `${rate}%` }}
                 ></div>
@@ -362,4 +373,4 @@ function AnalyticsView({ stats, telemetry }: { stats: TelemetryStats, telemetry:
       </Card>
     </div>
   );
-} 
+}

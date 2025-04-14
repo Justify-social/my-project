@@ -1,7 +1,9 @@
 # 'any' Type Usage Report
+
 Generated on: 2025-03-27T11:48:53.702Z
 
 ## Summary
+
 - Files with `any` type usage: 121
 - Total occurrences: 386
 
@@ -759,6 +761,7 @@ Generated on: 2025-03-27T11:48:53.702Z
 ## Recommendations
 
 1. Replace `any` with more specific types:
+
    - Use `unknown` for values of unknown type
    - Use `Record<string, unknown>` for objects with unknown properties
    - Use proper interfaces or type aliases for structured data

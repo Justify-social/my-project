@@ -22,7 +22,7 @@ module.exports = {
   images: {
     domains: ['lh3.googleusercontent.com'],
   },
-  webpack: (config) => {
+  webpack: config => {
     // Provide fallbacks for Node.js modules when running in browser
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -57,14 +57,14 @@ export const componentApi = {
   async getComponents(): Promise<ComponentMetadata[]> {
     // Implementation using fetch or mock data
   },
-  
+
   // Get metadata for a specific component
   async getComponentMetadata(componentPath: string): Promise<ComponentMetadata | null> {
     // Implementation using fetch or mock data
   },
-  
+
   // More methods...
-}
+};
 ```
 
 #### Component Structure
@@ -100,4 +100,4 @@ For local development:
 ## Current Limitations
 
 1. **Node.js Version**: The application requires Node.js >=20.11.0 but is currently running on v18.20.6
-2. **Security Vulnerabilities**: There are 2 vulnerabilities (1 moderate, 1 high) that should be addressed 
+2. **Security Vulnerabilities**: There are 2 vulnerabilities (1 moderate, 1 high) that should be addressed

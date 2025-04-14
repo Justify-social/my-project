@@ -43,9 +43,15 @@ export async function updateCampaignWithTransactions(
     const formattedAssets = data.creativeAssets.map(asset => {
       // Ensure type matches the CreativeAssetType enum
       let assetType: CreativeAssetType;
-      switch (asset.type?.toUpperCase()) { // Convert to uppercase for case-insensitive matching
-        case 'IMAGE': assetType = CreativeAssetType.image; break;
-        case 'VIDEO': assetType = CreativeAssetType.video; break;
+      switch (
+        asset.type?.toUpperCase() // Convert to uppercase for case-insensitive matching
+      ) {
+        case 'IMAGE':
+          assetType = CreativeAssetType.image;
+          break;
+        case 'VIDEO':
+          assetType = CreativeAssetType.video;
+          break;
         default:
           console.warn(`Invalid asset type: ${asset.type}, defaulting to image.`);
           assetType = CreativeAssetType.image; // Default to image if type is unknown/invalid
@@ -59,36 +65,39 @@ export async function updateCampaignWithTransactions(
         fileSize: asset.fileSize || 0,
         format: asset.format || '', // Use empty string as fallback for non-nullable field
         influencerHandle: asset.influencerHandle || null,
-        budget: asset.influencerBudget || 0
-      }
+        budget: asset.influencerBudget || 0,
+      };
     });
 
     // Execute transaction with maximum integrity
-    const result = await prisma.$transaction(async (tx) => {
-      // Update campaign status with appropriate properties
-      const campaign = await tx.campaignWizardSubmission.update({
-        where: { id: numericCampaignId }, // Use the validated number ID
-        data: {
-          // Use the correct status field from the schema
-          submissionStatus: 'submitted' // Set status to submitted
-        }
-      });
+    const result = await prisma.$transaction(
+      async tx => {
+        // Update campaign status with appropriate properties
+        const campaign = await tx.campaignWizardSubmission.update({
+          where: { id: numericCampaignId }, // Use the validated number ID
+          data: {
+            // Use the correct status field from the schema
+            submissionStatus: 'submitted', // Set status to submitted
+          },
+        });
 
-      // Delete existing assets - prevents orphaned records
-      await tx.creativeAsset.deleteMany({
-        where: { submissionId: numericCampaignId } // Use the validated number ID
-      });
+        // Delete existing assets - prevents orphaned records
+        await tx.creativeAsset.deleteMany({
+          where: { submissionId: numericCampaignId }, // Use the validated number ID
+        });
 
-      // Create new assets in a batch
-      await tx.creativeAsset.createMany({
-        data: formattedAssets
-      });
+        // Create new assets in a batch
+        await tx.creativeAsset.createMany({
+          data: formattedAssets,
+        });
 
-      return campaign;
-    }, {
-      maxWait: 5000, // Maximum wait time for transaction
-      timeout: 10000  // Transaction timeout
-    });
+        return campaign;
+      },
+      {
+        maxWait: 5000, // Maximum wait time for transaction
+        timeout: 10000, // Transaction timeout
+      }
+    );
 
     console.log(`[${correlationId}] Transaction completed successfully`);
 
@@ -98,9 +107,8 @@ export async function updateCampaignWithTransactions(
     // Return success with transaction result
     return {
       success: true,
-      data: result
+      data: result,
     };
-
   } catch (error) {
     console.error(`[${correlationId}] Transaction failed:`, error);
 
@@ -116,7 +124,7 @@ export async function updateCampaignWithTransactions(
 
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown database error'
+      error: error instanceof Error ? error.message : 'Unknown database error',
     };
   }
-} 
+}

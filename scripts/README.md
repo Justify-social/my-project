@@ -16,18 +16,18 @@ See `scripts/master/README.md` for detailed usage.
 
 Scripts are organised into the following subdirectories:
 
-*   `cleanup/`: Scripts for codebase cleanup and maintenance (e.g., `cleanup-codebase.sh`).
-*   `components/`: Scripts related to component generation or management.
-*   `config/`: Scripts for validating or managing the configuration in `/config` (e.g., `validate-config.js`).
-*   `icons/`: Icon management (downloading, auditing, registry generation).
-*   `linting/`: Code style and linting related utilities.
-*   `master/`: The Master Toolkit script and its documentation.
-*   `migration/`: Scripts used for codebase migrations or specific refactoring tasks (e.g., `fix-legacy-ui-paths.js`).
-*   `testing/`: Scripts related to test setup or standardisation (e.g., `standardize-tests.sh`).
-*   `tree-shake/`: Scripts for analysing or managing unused code.
-*   `ui/`: UI component specific scripts (e.g., validation, analysis, backups).
-*   `utils/`: General utility scripts supporting other categories.
-*   `validation/`: General validation scripts (e.g., `validate-navigation-paths.js`).
+- `cleanup/`: Scripts for codebase cleanup and maintenance (e.g., `cleanup-codebase.sh`).
+- `components/`: Scripts related to component generation or management.
+- `config/`: Scripts for validating or managing the configuration in `/config` (e.g., `validate-config.js`).
+- `icons/`: Icon management (downloading, auditing, registry generation).
+- `linting/`: Code style and linting related utilities.
+- `master/`: The Master Toolkit script and its documentation.
+- `migration/`: Scripts used for codebase migrations or specific refactoring tasks (e.g., `fix-legacy-ui-paths.js`).
+- `testing/`: Scripts related to test setup or standardisation (e.g., `standardize-tests.sh`).
+- `tree-shake/`: Scripts for analysing or managing unused code.
+- `ui/`: UI component specific scripts (e.g., validation, analysis, backups).
+- `utils/`: General utility scripts supporting other categories.
+- `validation/`: General validation scripts (e.g., `validate-navigation-paths.js`).
 
 Refer to the `README.md` within each subdirectory (if present) for details on its specific scripts and usage.
 

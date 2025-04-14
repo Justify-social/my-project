@@ -1,6 +1,6 @@
 /**
  * Custom Next.js Server with WebSocket Support
- * 
+ *
  * This file creates a custom server to enable WebSocket connections
  * for real-time component updates during development.
  */
@@ -39,15 +39,17 @@ export async function setupServer() {
     });
 
     // Log server errors
-    httpServer.on('error', (err: Error) => { // Add type to err
+    httpServer.on('error', (err: Error) => {
+      // Add type to err
       console.error('HTTP Server Error:', err);
     });
 
     // Start server
-    httpServer.listen(port, () => { // Callback takes no args on success
+    httpServer.listen(port, () => {
+      // Callback takes no args on success
       console.log(`> Ready on http://${hostname}:${port}`);
 
-      // --- TEMP: Comment out WebSocket initialization --- 
+      // --- TEMP: Comment out WebSocket initialization ---
       /*
       console.log('Attempting to initialize WebSocket server...');
       if (dev) { 
@@ -68,4 +70,4 @@ export async function setupServer() {
     // Exit if server prep fails?
     process.exit(1);
   }
-} 
+}

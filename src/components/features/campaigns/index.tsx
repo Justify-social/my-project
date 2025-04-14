@@ -1,12 +1,10 @@
 // Updated import paths via tree-shake script - 2025-04-01T17:13:32.216Z
 import React from 'react';
-import MarketplaceListProps from './influencers/index';
-import LoadingSpinner from '../../ui/spinner-examples';
-import { Influencer } from '@/types/influencer';
-import InfluencerCard from '@/src/components/features/campaigns/influencers/InfluencerCard';
-import { Button } from '@/components/ui/button/Button'
-import { Icon } from '@/components/ui/icon'
-import { Spinner } from '@/components/ui/spinner/Spinner'
+import { Spinner } from '../../../lib/ui-components';
+import { Influencer } from '../../../types/influencer';
+import IndividualInfluencerCard from './IndividualInfluencerCard';
+import { Button } from '../../../lib/ui-components';
+import { Icon } from '../../../components/ui/icon/icon';
 
 export interface MarketplaceListProps {
   influencers: Influencer[];
@@ -30,7 +28,7 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <LoadingSpinner size="lg" />
+        <Spinner size="lg" />
         <span className="ml-3 text-gray-600">Loading influencers...</span>
       </div>
     );
@@ -65,12 +63,15 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   }
 
   return (
-    <div className={viewMode === 'grid'
-      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-      : "flex flex-col space-y-4"
-    }>
-      {influencers.map((influencer) => (
-        <InfluencerCard
+    <div
+      className={
+        viewMode === 'grid'
+          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+          : 'flex flex-col space-y-4'
+      }
+    >
+      {influencers.map(influencer => (
+        <IndividualInfluencerCard
           key={influencer.id}
           influencer={influencer}
           layout={viewMode === 'grid' ? 'card' : 'row'}
@@ -82,4 +83,4 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   );
 };
 
-export default MarketplaceList; 
+export default MarketplaceList;

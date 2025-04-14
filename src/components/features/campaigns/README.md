@@ -8,19 +8,13 @@ Campaigns Components provide campaigns components functionality for the applicat
 
 ## Components
 
-
-
 ## Usage
 
 ```tsx
-import {  } from '@/components/features/campaigns';
+import {} from '@/components/features/campaigns';
 
 // Example usage
 function ExampleComponent() {
-  return (
-    <div>
-      {/* Add usage examples here */}
-    </div>
-  );
+  return <div>{/* Add usage examples here */}</div>;
 }
 ```

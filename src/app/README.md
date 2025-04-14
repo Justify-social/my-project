@@ -15,12 +15,10 @@ Next.js app directory containing route components and layouts.
 - `(auth)/`
 - `(admin)/`
 
-
 ### Files
 
 - 5 .tsx files
 - 1 .css file
-
 
 ## Usage
 
@@ -32,8 +30,6 @@ Define your application routes and page components in this directory.
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

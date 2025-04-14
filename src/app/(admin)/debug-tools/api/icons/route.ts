@@ -14,14 +14,16 @@ const lightIcons: string[] = [];
 const solidIcons: string[] = [];
 
 // After the special debug for x-circle.svg section
-    
+
 // Special mapping for menu icon to bars (FontAwesome uses bars for menu icon)
 const menuToBarsFixes = () => {
   // If menu.svg files exist but are not being used properly
-  if (fs.existsSync(path.join(lightIconsPath, 'menu.svg')) && 
-      fs.existsSync(path.join(solidIconsPath, 'menu.svg'))) {
+  if (
+    fs.existsSync(path.join(lightIconsPath, 'menu.svg')) &&
+    fs.existsSync(path.join(solidIconsPath, 'menu.svg'))
+  ) {
     console.log('Found menu.svg icons - creating bars aliases');
-    
+
     // Create copy of menu.svg as bars.svg if it doesn't exist
     if (!fs.existsSync(path.join(lightIconsPath, 'bars.svg'))) {
       try {
@@ -35,7 +37,7 @@ const menuToBarsFixes = () => {
         console.error('Error creating bars.svg light icon:', err);
       }
     }
-    
+
     if (!fs.existsSync(path.join(solidIconsPath, 'bars.svg'))) {
       try {
         fs.copyFileSync(
@@ -61,7 +63,7 @@ export async function GET() {
     message: 'Icon mapping completed',
     icons: {
       light: lightIcons,
-      solid: solidIcons
-    }
+      solid: solidIcons,
+    },
   });
-} 
+}

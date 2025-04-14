@@ -31,7 +31,7 @@ config/
 │   └── jest.setup.js
 ├── middleware/       # Middleware configuration
 │   └── middleware.ts
-├── next/             # Alternate Next.js configuration directory 
+├── next/             # Alternate Next.js configuration directory
 ├── nextjs/           # Next.js configuration
 │   ├── next.config.js
 │   └── next-env.d.ts
@@ -113,4 +113,4 @@ node scripts/master/master-toolkit.mjs config migrate
 # Directly using the scripts
 node scripts/config/config-organizer.mjs
 node scripts/config/migrate-config.mjs
-``` 
+```

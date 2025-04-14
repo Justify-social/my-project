@@ -73,12 +73,12 @@ The Settings feature is designed for:
 
 ## Configuration Options
 
-| Option | Description | Default | Allowed Values |
-|--------|-------------|---------|---------------|
-| Role Assignment | Access level for new team members | Member | Owner, Admin, Member, Viewer |
-| MFA Requirement | Multi-factor authentication setting | Optional | Required, Optional, Disabled |
-| Session Timeout | Automatic logout after inactivity | 1 hour | 15 min, 30 min, 1 hour, 4 hours, 8 hours |
-| Notification Delivery | How notifications are delivered | Email & In-app | Email, In-app, Both, None |
+| Option                | Description                         | Default        | Allowed Values                           |
+| --------------------- | ----------------------------------- | -------------- | ---------------------------------------- |
+| Role Assignment       | Access level for new team members   | Member         | Owner, Admin, Member, Viewer             |
+| MFA Requirement       | Multi-factor authentication setting | Optional       | Required, Optional, Disabled             |
+| Session Timeout       | Automatic logout after inactivity   | 1 hour         | 15 min, 30 min, 1 hour, 4 hours, 8 hours |
+| Notification Delivery | How notifications are delivered     | Email & In-app | Email, In-app, Both, None                |
 
 ## Troubleshooting
 
@@ -99,4 +99,4 @@ The Settings feature is designed for:
 - [Settings Usage Guide](./usage.md)
 - [Team Management Guide](./team-management.md)
 - [Branding Guidelines](./branding.md)
-- [Security Best Practices](../../guides/developer/security.md) 
+- [Security Best Practices](../../guides/developer/security.md)

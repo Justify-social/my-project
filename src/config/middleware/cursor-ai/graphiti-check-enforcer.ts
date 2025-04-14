@@ -1,6 +1,6 @@
 /**
  * Graphiti Check Enforcer Middleware
- * 
+ *
  * This middleware intercepts Cursor AI requests and enforces Graphiti knowledge graph checks
  * before allowing any new task to proceed.
  */
@@ -39,19 +39,19 @@ setInterval(cleanExpiredSessions, 10 * 60 * 1000);
 function extractTaskInfo(req: NextRequest) {
   try {
     // Extract session ID with fallback mechanisms
-    const sessionId = req.headers.get('x-session-id') || 
-                     req.cookies.get('session-id')?.value ||
-                     req.headers.get('x-request-id') ||
-                     'default-session';
-    
+    const sessionId =
+      req.headers.get('x-session-id') ||
+      req.cookies.get('session-id')?.value ||
+      req.headers.get('x-request-id') ||
+      'default-session';
+
     // Determine if this is a new task based on conversation context
     const conversationContext = req.headers.get('x-conversation-context') || '';
-    const isNewTask = conversationContext === 'new' || 
-                     !conversationContext.includes('follow-up');
-    
+    const isNewTask = conversationContext === 'new' || !conversationContext.includes('follow-up');
+
     // Get task type if specified
     const taskType = req.headers.get('x-task-type') || 'unknown';
-    
+
     return { sessionId, isNewTask, taskType };
   } catch (error) {
     console.error('[GraphitiEnforcer] Error extracting task info:', error);
@@ -59,7 +59,7 @@ function extractTaskInfo(req: NextRequest) {
     return {
       sessionId: `error-session-${Date.now()}`,
       isNewTask: true,
-      taskType: 'unknown'
+      taskType: 'unknown',
     };
   }
 }
@@ -69,7 +69,7 @@ function containsGraphitiCheck(req: NextRequest): boolean {
   try {
     // More robust body handling
     let bodyContent = '';
-    
+
     // Try to get body as text
     if (req.body) {
       const bodyText = req.body.toString();
@@ -77,19 +77,21 @@ function containsGraphitiCheck(req: NextRequest): boolean {
         bodyContent = bodyText;
       }
     }
-    
+
     // Check headers for bypass cases (for testing/development)
     const bypassHeader = req.headers.get('x-graphiti-check-bypass');
     if (bypassHeader === process.env.GRAPHITI_BYPASS_SECRET) {
       console.log('[GraphitiEnforcer] Bypass header detected with valid secret');
       return true;
     }
-    
+
     // Structured check pattern
-    return bodyContent.includes('mcp_Graphiti_search_nodes') || 
-           bodyContent.includes('search_nodes') ||
-           bodyContent.includes('mcp_Graphiti_search_facts') ||
-           bodyContent.includes('search_facts');
+    return (
+      bodyContent.includes('mcp_Graphiti_search_nodes') ||
+      bodyContent.includes('search_nodes') ||
+      bodyContent.includes('mcp_Graphiti_search_facts') ||
+      bodyContent.includes('search_facts')
+    );
   } catch (error) {
     console.error('[GraphitiEnforcer] Error checking for Graphiti in request:', error);
     // Fail closed - require check if we can't determine
@@ -137,11 +139,11 @@ export async function graphitiCheckEnforcer(
 
   // Initialize or update session
   if (!graphitiCheckTracker.has(sessionId)) {
-    graphitiCheckTracker.set(sessionId, { 
-      hasCheckedGraphiti: false, 
+    graphitiCheckTracker.set(sessionId, {
+      hasCheckedGraphiti: false,
       lastUpdated: Date.now(),
       taskType,
-      queryCount: 0
+      queryCount: 0,
     });
   } else {
     // Update existing session
@@ -159,47 +161,51 @@ export async function graphitiCheckEnforcer(
     if (containsGraphitiCheck(req)) {
       sessionState.hasCheckedGraphiti = true;
       graphitiCheckTracker.set(sessionId, sessionState);
-      
+
       console.log(`[GraphitiEnforcer] Graphiti check detected for session ${sessionId}`);
-      
+
       // Record successful check telemetry
       recordTelemetry({
         timestamp: Date.now(),
         sessionId,
         action: 'check',
         taskType: sessionState.taskType,
-        success: true
+        success: true,
       });
-      
+
       return next();
     }
 
     // This is a new task without a Graphiti check, block it
-    console.warn(`[GraphitiEnforcer] Blocking request - missing Graphiti check for session ${sessionId}`);
-    
+    console.warn(
+      `[GraphitiEnforcer] Blocking request - missing Graphiti check for session ${sessionId}`
+    );
+
     // Record blocked request telemetry
     recordTelemetry({
       timestamp: Date.now(),
       sessionId,
       action: 'block',
       taskType: sessionState.taskType,
-      success: false
+      success: false,
     });
-    
+
     return new NextResponse(
       JSON.stringify({
         error: 'GRAPHITI_CHECK_REQUIRED',
-        message: 'Before starting any task, you must check the Graphiti knowledge graph for relevant information.',
-        requiredProcedure: 'Use mcp_Graphiti_search_nodes and mcp_Graphiti_search_facts before proceeding.',
+        message:
+          'Before starting any task, you must check the Graphiti knowledge graph for relevant information.',
+        requiredProcedure:
+          'Use mcp_Graphiti_search_nodes and mcp_Graphiti_search_facts before proceeding.',
         documentation: 'For more information, see docs/cursor-ai-graphiti-procedure.md',
-        sessionId // Include session ID for tracking
+        sessionId, // Include session ID for tracking
       }),
-      { 
+      {
         status: 400,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'X-Graphiti-Session': sessionId
-        }
+          'X-Graphiti-Session': sessionId,
+        },
       }
     );
   }
@@ -209,16 +215,18 @@ export async function graphitiCheckEnforcer(
     // Don't delete the session, just reset the check flag
     sessionState.hasCheckedGraphiti = false;
     graphitiCheckTracker.set(sessionId, sessionState);
-    
-    console.log(`[GraphitiEnforcer] Task completed, resetting check state for session ${sessionId}`);
-    
+
+    console.log(
+      `[GraphitiEnforcer] Task completed, resetting check state for session ${sessionId}`
+    );
+
     // Record task completion telemetry
     recordTelemetry({
       timestamp: Date.now(),
       sessionId,
       action: 'complete',
       taskType: sessionState.taskType,
-      success: true
+      success: true,
     });
   }
 
@@ -229,12 +237,12 @@ export async function graphitiCheckEnforcer(
       sessionId,
       action: 'bypass',
       taskType: sessionState.taskType,
-      success: true
+      success: true,
     });
   }
 
   return next();
-} 
+}
 
 // Export telemetry data for dashboard access
 export function getGraphitiTelemetry() {
@@ -244,8 +252,8 @@ export function getGraphitiTelemetry() {
       lastUpdated: new Date(state.lastUpdated).toISOString(),
       hasCheckedGraphiti: state.hasCheckedGraphiti,
       taskType: state.taskType,
-      queryCount: state.queryCount
+      queryCount: state.queryCount,
     })),
-    telemetry: [...telemetryBuffer]
+    telemetry: [...telemetryBuffer],
   };
-} 
+}

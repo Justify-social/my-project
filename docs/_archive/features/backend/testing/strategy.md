@@ -19,6 +19,7 @@ Our testing strategy follows a comprehensive approach to ensure the quality and 
 Unit tests focus on testing individual components, functions, and utilities to ensure they work correctly in isolation.
 
 **Tools**:
+
 - Jest: JavaScript testing framework
 - React Testing Library: For testing React components
 
@@ -31,6 +32,7 @@ Unit tests focus on testing individual components, functions, and utilities to e
 API tests verify that all API endpoints work correctly, handle errors appropriately, and return data in the expected format.
 
 **Tools**:
+
 - Node.js
 - node-fetch: For making HTTP requests
 - chalk: For colorful output
@@ -45,6 +47,7 @@ API tests verify that all API endpoints work correctly, handle errors appropriat
 Integration tests verify that different components of the application work correctly together.
 
 **Tools**:
+
 - Jest
 - React Testing Library
 - MSW (Mock Service Worker): For mocking API responses
@@ -58,6 +61,7 @@ Integration tests verify that different components of the application work corre
 End-to-end tests verify that complete user flows work correctly from start to finish.
 
 **Tools**:
+
 - Cypress: End-to-end testing framework
 
 **Location**: `cypress/integration`
@@ -69,6 +73,7 @@ End-to-end tests verify that complete user flows work correctly from start to fi
 Performance tests verify that the application performs well under load.
 
 **Tools**:
+
 - k6: Load testing tool
 
 **Location**: `performance-tests`
@@ -167,30 +172,30 @@ name: Test Suite
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
-    - name: Install dependencies
-      run: npm ci
-    - name: Run unit tests
-      run: npm run test:unit
-    - name: Run integration tests
-      run: npm run test:integration
-    - name: Run API tests
-      run: npm run test:api:ci
-    - name: Run E2E tests
-      run: npm run test:e2e:headless
+      - uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Run integration tests
+        run: npm run test:integration
+      - name: Run API tests
+        run: npm run test:api:ci
+      - name: Run E2E tests
+        run: npm run test:e2e:headless
 ```
 
 ## Test Data Management
@@ -212,9 +217,9 @@ const createTestCampaign = (overrides = {}) => ({
     name: 'Test User',
     email: 'test@example.com',
     phone: '+1 (555) 123-4567',
-    position: 'Manager'
+    position: 'Manager',
   },
-  ...overrides
+  ...overrides,
 });
 ```
 
@@ -258,4 +263,4 @@ If you encounter issues with the tests, contact the testing team or raise an iss
 2. **Contract Testing**: Add contract testing to verify API contracts
 3. **Property-Based Testing**: Add property-based testing for complex logic
 4. **Accessibility Testing**: Add accessibility testing to ensure the application is accessible
-5. **Security Testing**: Add security testing to identify vulnerabilities 
+5. **Security Testing**: Add security testing to identify vulnerabilities

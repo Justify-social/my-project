@@ -7,36 +7,42 @@ Our application is a marketing intelligence platform that helps brands measure t
 ## Core Features
 
 1. **Campaign Wizard**
+
    - Step-by-step guided campaign creation process
    - Budget management and timeline planning
    - Creative asset management
    - KPI definition and tracking
 
 2. **Brand Lift Measurement**
+
    - Pre/post campaign awareness tracking
    - Message association metrics
    - Purchase intent analysis
    - Quantified brand perception shifts
 
 3. **Creative Asset Testing**
+
    - A/B testing for campaign assets
    - Performance comparisons
    - Audience reaction analysis
    - Optimisation recommendations
 
 4. **Influencer Discovery**
+
    - Authentic engagement metrics
    - Audience alignment verification
    - Comprehensive brand safety tools
    - Performance projection models
 
 5. **Brand Health Monitoring**
+
    - Sentiment tracking over time
    - Competitive share of voice
    - Audience growth metrics
    - Brand loyalty indicators
 
 6. **Mixed Media Modelling**
+
    - Cross-channel campaign analysis
    - ROI comparison by platform
    - Budget allocation optimisation
@@ -53,21 +59,25 @@ Our application is a marketing intelligence platform that helps brands measure t
 The platform serves several distinct user types:
 
 ### Brand Marketers
+
 - **Role**: Digital marketing professionals managing social campaigns
 - **Goals**: Find authentic influencers, measure ROI, reduce vetting time
 - **Pain Points**: Overwhelmed by vanity metrics, difficulty assessing audience alignment
 
 ### Content Creators (Influencers)
+
 - **Role**: Social media content producers partnering with brands
 - **Goals**: Find aligned brand partnerships, demonstrate engagement quality
 - **Pain Points**: Being overlooked due to follower count, limited tools to show performance
 
 ### Agency Professionals
+
 - **Role**: Managing campaigns on behalf of brand clients
 - **Goals**: Deliver measurable results, streamline campaign workflows
 - **Pain Points**: Client reporting challenges, coordination complexities
 
 ### System Administrators
+
 - **Role**: Managing platform configuration and user access
 - **Goals**: Maintain system integrity, manage permissions
 - **Pain Points**: Complex permission structures, audit requirements
@@ -84,18 +94,21 @@ The system implements role-based access control with these primary roles:
 ## Technical Architecture
 
 ### Frontend
+
 - **Framework**: Next.js with React and TypeScript
 - **UI Components**: Custom component library with Tailwind CSS
 - **State Management**: React Context API with SWR for data fetching
 - **Testing**: Jest and React Testing Library
 
 ### Backend
+
 - **API**: Next.js API Routes with strong typing
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: JWT-based authentication
 - **Storage**: Cloud storage for assets and reports
 
 ### Key Development Principles
+
 - **Type Safety**: Comprehensive TypeScript throughout
 - **Component Reusability**: Modular architecture for maintainability
 - **Performance Optimisation**: Efficient data loading patterns

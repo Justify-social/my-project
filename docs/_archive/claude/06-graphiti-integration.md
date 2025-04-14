@@ -41,31 +41,32 @@ Use the `mcp_Graphiti_add_episode` function to add information to the graph:
 ```javascript
 // Adding a preference
 mcp_Graphiti_add_episode({
-  name: "Button Color Preference",
-  episode_body: "Primary buttons should use accent color #00BFFF",
-  source: "text",
-  source_description: "UI Guidelines"
+  name: 'Button Color Preference',
+  episode_body: 'Primary buttons should use accent color #00BFFF',
+  source: 'text',
+  source_description: 'UI Guidelines',
 });
 
 // Adding a procedure
 mcp_Graphiti_add_episode({
-  name: "Adding a New UI Component",
-  episode_body: "1. Create component directory\n2. Add index.ts file\n3. Create component file\n4. Add tests\n5. Update registry",
-  source: "text",
-  source_description: "Development Procedures"
+  name: 'Adding a New UI Component',
+  episode_body:
+    '1. Create component directory\n2. Add index.ts file\n3. Create component file\n4. Add tests\n5. Update registry',
+  source: 'text',
+  source_description: 'Development Procedures',
 });
 
 // Adding structured data
 mcp_Graphiti_add_episode({
-  name: "UI Component Registry",
+  name: 'UI Component Registry',
   episode_body: JSON.stringify({
-    "components": [
-      {"name": "Button", "path": "src/components/ui/atoms/button"},
-      {"name": "Card", "path": "src/components/ui/atoms/card"}
-    ]
+    components: [
+      { name: 'Button', path: 'src/components/ui/atoms/button' },
+      { name: 'Card', path: 'src/components/ui/atoms/card' },
+    ],
   }),
-  source: "json",
-  source_description: "Component Registry"
+  source: 'json',
+  source_description: 'Component Registry',
 });
 ```
 
@@ -76,19 +77,19 @@ Use the `mcp_Graphiti_search_nodes` function to find relevant nodes:
 ```javascript
 // Search for all preferences
 const preferences = await mcp_Graphiti_search_nodes({
-  query: "preferences",
-  entity: "Preference" 
+  query: 'preferences',
+  entity: 'Preference',
 });
 
 // Search for a specific procedure
 const addComponentProcedure = await mcp_Graphiti_search_nodes({
-  query: "adding new component"
+  query: 'adding new component',
 });
 
 // Search with specific filters
 const colorPreferences = await mcp_Graphiti_search_nodes({
-  query: "color",
-  entity: "Preference"
+  query: 'color',
+  entity: 'Preference',
 });
 ```
 
@@ -99,12 +100,12 @@ Use the `mcp_Graphiti_search_facts` function to find specific facts:
 ```javascript
 // Search for facts about buttons
 const buttonFacts = await mcp_Graphiti_search_facts({
-  query: "button"
+  query: 'button',
 });
 
 // Search for facts about a specific feature
 const wizardFacts = await mcp_Graphiti_search_facts({
-  query: "campaign wizard"
+  query: 'campaign wizard',
 });
 ```
 
@@ -115,12 +116,12 @@ Use the `mcp_Graphiti_delete_episode` or `mcp_Graphiti_delete_entity_edge` funct
 ```javascript
 // Delete an episode
 await mcp_Graphiti_delete_episode({
-  uuid: "episode-uuid"
+  uuid: 'episode-uuid',
 });
 
 // Delete a relationship
 await mcp_Graphiti_delete_entity_edge({
-  uuid: "edge-uuid"
+  uuid: 'edge-uuid',
 });
 ```
 
@@ -170,16 +171,16 @@ Graphiti knowledge is integrated into the development workflow in several ways:
 ```javascript
 // Before developing a new button variant
 const buttonPreferences = await mcp_Graphiti_search_nodes({
-  query: "button preferences",
-  entity: "Preference"
+  query: 'button preferences',
+  entity: 'Preference',
 });
 
 // After establishing a new standard
 await mcp_Graphiti_add_episode({
-  name: "Button Size Standard",
-  episode_body: "Button sizes should be: sm (24px), md (32px), lg (40px), xl (48px)",
-  source: "text",
-  source_description: "UI Component Standards"
+  name: 'Button Size Standard',
+  episode_body: 'Button sizes should be: sm (24px), md (32px), lg (40px), xl (48px)',
+  source: 'text',
+  source_description: 'UI Component Standards',
 });
 ```
 
@@ -188,14 +189,16 @@ await mcp_Graphiti_add_episode({
 ```javascript
 // Generate documentation from procedures
 const componentProcedures = await mcp_Graphiti_search_nodes({
-  query: "component development",
-  entity: "Procedure"
+  query: 'component development',
+  entity: 'Procedure',
 });
 
 // Format the procedures into markdown
-const markdown = componentProcedures.map(procedure => {
-  return `## ${procedure.name}\n\n${procedure.content}`;
-}).join('\n\n');
+const markdown = componentProcedures
+  .map(procedure => {
+    return `## ${procedure.name}\n\n${procedure.content}`;
+  })
+  .join('\n\n');
 ```
 
 ### Consistency Checks
@@ -203,8 +206,8 @@ const markdown = componentProcedures.map(procedure => {
 ```javascript
 // Check if a UI change aligns with preferences
 const colorPreferences = await mcp_Graphiti_search_nodes({
-  query: "color preferences",
-  entity: "Preference"
+  query: 'color preferences',
+  entity: 'Preference',
 });
 
 // Compare proposed changes against preferences
@@ -227,4 +230,4 @@ Graphiti is implemented using:
 1. **Access Control**: Only authorized users can modify the knowledge graph
 2. **Validation**: Knowledge additions are validated before storage
 3. **History**: All changes are tracked with full history
-4. **Backups**: Regular backups of the knowledge graph 
+4. **Backups**: Regular backups of the knowledge graph

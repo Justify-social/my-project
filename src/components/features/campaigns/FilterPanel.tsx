@@ -1,9 +1,9 @@
 ////////////////////////////////////
 // src/components/Influencers/FilterPanel.tsx
 ////////////////////////////////////
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 // Import Shadcn Select components
 import {
   Select,
@@ -11,8 +11,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface FilterPanelProps {
   filters: {
@@ -29,7 +29,12 @@ interface FilterPanelProps {
   resetFilters: () => void;
 }
 
-const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, uniqueDates, resetFilters }) => {
+const FilterPanel: React.FC<FilterPanelProps> = ({
+  filters,
+  setFilters,
+  uniqueDates,
+  resetFilters,
+}) => {
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
@@ -43,17 +48,19 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, uniqueDa
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       });
-    } catch { return 'Invalid date'; }
+    } catch {
+      return 'Invalid date';
+    }
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 font-work-sans">
+    <div className="flex flex-wrap items-center gap-3 font-body">
       {/* Platform Filter */}
       <Select
         value={filters.platform}
-        onValueChange={(value) => setFilters({ ...filters, platform: value })}
+        onValueChange={value => setFilters({ ...filters, platform: value })}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Platform" />
@@ -69,7 +76,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, uniqueDa
       {/* Status Filter */}
       <Select
         value={filters.status}
-        onValueChange={(value) => setFilters({ ...filters, status: value })}
+        onValueChange={value => setFilters({ ...filters, status: value })}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Status" />
@@ -89,14 +96,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, uniqueDa
       {/* Start Date Filter */}
       <Select
         value={filters.startDate}
-        onValueChange={(value) => setFilters({ ...filters, startDate: value })}
+        onValueChange={value => setFilters({ ...filters, startDate: value })}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Start Date" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">Start Date</SelectItem>
-          {uniqueDates.startDates.map((date) => (
+          {uniqueDates.startDates.map(date => (
             <SelectItem key={date} value={date}>
               {formatDate(date)}
             </SelectItem>
@@ -107,14 +114,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, setFilters, uniqueDa
       {/* End Date Filter */}
       <Select
         value={filters.endDate}
-        onValueChange={(value) => setFilters({ ...filters, endDate: value })}
+        onValueChange={value => setFilters({ ...filters, endDate: value })}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="End Date" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">End Date</SelectItem>
-          {uniqueDates.endDates.map((date) => (
+          {uniqueDates.endDates.map(date => (
             <SelectItem key={date} value={date}>
               {formatDate(date)}
             </SelectItem>

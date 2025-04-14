@@ -6,12 +6,9 @@ TypeScript type definitions and interfaces.
 
 ## Contents
 
-
-
 ### Files
 
 - 5 .ts files
-
 
 ## Usage
 
@@ -23,8 +20,6 @@ Import these types to ensure type safety throughout the application.
 - Follow the established patterns for naming and organization
 - Add unit tests for any non-trivial functionality
 - Keep components small and focused on a single responsibility
-
-
 
 ## Related
 

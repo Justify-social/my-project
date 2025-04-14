@@ -57,11 +57,11 @@ The Influencer Management feature is designed to be intuitive and efficient for 
 
 ## Configuration Options
 
-| Option | Description | Default | Allowed Values |
-|--------|-------------|---------|---------------|
-| Display Mode | How influencers are displayed in the marketplace | Grid | Grid, List, Compact |
-| Default Platform Filter | Platform filter applied on initial load | All | Instagram, TikTok, YouTube, X, All |
-| Metrics Display | Which metrics to show on influencer cards | Engagement Rate | Engagement Rate, Followers, Impressions, Conversions |
+| Option                  | Description                                      | Default         | Allowed Values                                       |
+| ----------------------- | ------------------------------------------------ | --------------- | ---------------------------------------------------- |
+| Display Mode            | How influencers are displayed in the marketplace | Grid            | Grid, List, Compact                                  |
+| Default Platform Filter | Platform filter applied on initial load          | All             | Instagram, TikTok, YouTube, X, All                   |
+| Metrics Display         | Which metrics to show on influencer cards        | Engagement Rate | Engagement Rate, Followers, Impressions, Conversions |
 
 ## Troubleshooting
 
@@ -81,4 +81,4 @@ The Influencer Management feature is designed to be intuitive and efficient for 
 
 - [Influencer Usage Guide](./usage.md)
 - [Campaign Wizard Integration](../campaign-wizard/usage.md)
-- [API Documentation for Influencer Endpoints](../../features-backend/apis/endpoints.md) 
+- [API Documentation for Influencer Endpoints](../../features-backend/apis/endpoints.md)

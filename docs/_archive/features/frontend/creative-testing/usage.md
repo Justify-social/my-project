@@ -77,6 +77,7 @@ Before you begin, make sure you have:
 > **Note:** Making significant changes during a test may invalidate your results
 
 If needed, you can:
+
 1. Adjust test duration
 2. Pause underperforming variants
 3. Add additional audience segments
@@ -115,7 +116,8 @@ If needed, you can:
 
 **Problem:** Test completed but shows no clear winner
 
-**Solution:** 
+**Solution:**
+
 - Check if sample size was sufficient
 - Extend test duration to gather more data
 - Make variants more distinct in future tests
@@ -125,6 +127,7 @@ If needed, you can:
 **Problem:** All variants performing below benchmarks
 
 **Solution:**
+
 - Review audience targeting settings
 - Check if creative assets match audience interests
 - Consider more compelling call-to-action elements
@@ -142,4 +145,4 @@ After completing your creative test, you might want to:
 
 - [Creative Testing Overview](./overview.md)
 - [Campaign Wizard Workflow](../campaign-wizard/workflow.md)
-- [Audience Targeting Guide](../campaign-wizard/audience-targeting.md) 
+- [Audience Targeting Guide](../campaign-wizard/audience-targeting.md)

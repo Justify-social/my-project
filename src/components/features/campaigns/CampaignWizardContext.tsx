@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 // Remove incorrect relative import for type defined later in this file
-// import CampaignWizardContextType from './wizard/CampaignWizardContext'; 
+// import CampaignWizardContextType from './wizard/CampaignWizardContext';
 // Remove unused permissions import
-// import P from '@/config/middleware/api/check-permissions'; 
+// import P from '@/config/middleware/api/check-permissions';
 // Import CampaignFormData type correctly
 import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer'; // Renamed to avoid conflict
 
@@ -24,7 +24,7 @@ export type {
   ObjectivesFormData,
   AudienceFormData,
   AssetFormData,
-  WizardCampaignFormData as CampaignFormData // Re-export with original intended name
+  WizardCampaignFormData as CampaignFormData, // Re-export with original intended name
 };
 
 // Define the context type based on the hook return type
@@ -48,19 +48,17 @@ export function CampaignWizardProvider({
   children,
   campaignId,
   initialStep,
-  enableAutosave
+  enableAutosave,
 }: CampaignWizardProviderProps) {
   // Use the hook to get all the wizard functionality
   const wizardState = useCampaignWizard({
     campaignId,
     initialStep,
-    enableAutosave
+    enableAutosave,
   });
 
   return (
-    <CampaignWizardContext.Provider value={wizardState}>
-      {children}
-    </CampaignWizardContext.Provider>
+    <CampaignWizardContext.Provider value={wizardState}>{children}</CampaignWizardContext.Provider>
   );
 }
 
@@ -96,7 +94,7 @@ export function withCampaignWizard<P extends object>(
         initialStep={initialStep}
         enableAutosave={enableAutosave}
       >
-        <ComponentWithContext {...rest as P} />
+        <ComponentWithContext {...(rest as P)} />
       </CampaignWizardProvider>
     );
 
@@ -108,4 +106,4 @@ export function withCampaignWizard<P extends object>(
   };
 }
 
-export default CampaignWizardContext; 
+export default CampaignWizardContext;

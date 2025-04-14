@@ -14,24 +14,24 @@ export type IconVariant = 'light' | 'solid';
 
 // Size constants
 export const SIZE_CLASSES: Record<IconSize, string> = {
-  'xs': 'w-3 h-3',
-  'sm': 'w-4 h-4',
-  'md': 'w-5 h-5',
-  'lg': 'w-6 h-6',
-  'xl': 'w-8 h-8',
+  xs: 'w-3 h-3',
+  sm: 'w-4 h-4',
+  md: 'w-5 h-5',
+  lg: 'w-6 h-6',
+  xl: 'w-8 h-8',
   '2xl': 'w-10 h-10',
   '3xl': 'w-12 h-12',
-  '4xl': 'w-16 h-16'
+  '4xl': 'w-16 h-16',
 };
 
 // Platform icon type map
 export const PLATFORM_ICON_TYPE_MAP: Record<PlatformName, IconName> = {
-  'facebook': 'faFacebook',
-  'instagram': 'faInstagram',
-  'linkedin': 'faLinkedin',
-  'tiktok': 'faTiktok',
-  'youtube': 'faYoutube',
-  'x': 'faXTwitter'
+  facebook: 'faFacebook',
+  instagram: 'faInstagram',
+  linkedin: 'faLinkedin',
+  tiktok: 'faTiktok',
+  youtube: 'faYoutube',
+  x: 'faXTwitter',
 } as const;
 
 /**
@@ -43,28 +43,28 @@ export interface IconProps {
    * This is the preferred and most direct way to specify an icon
    */
   iconId: string;
-  
+
   /**
    * Optional CSS class to apply to the icon
    */
   className?: string;
-  
+
   /**
    * Size of the icon (mapped to Tailwind classes)
    * @default 'md'
    */
   size?: IconSize;
-  
+
   /**
    * Optional accessibility title for the icon
    */
   title?: string;
-  
+
   /**
    * Optional click handler for the icon
    */
   onClick?: (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void;
-  
+
   /**
    * Any additional props to pass to the icon container
    */
@@ -112,43 +112,43 @@ export interface SafeIconProps {
 export interface IconMetadata {
   /** Unique identifier for the icon */
   id: string;
-  
+
   /** Display name for the icon */
   name?: string;
-  
+
   /** Category the icon belongs to (e.g., 'solid', 'light') */
   category?: string;
-  
+
   /** Path to the icon file */
   path?: string;
-  
+
   /** ViewBox dimensions for SVG */
   viewBox?: string;
-  
+
   /** Width of the icon */
   width?: number;
-  
+
   /** Height of the icon */
   height?: number;
-  
+
   /** Icon mapping data */
   map?: string;
-  
+
   /** Counter for icon usage in the app */
   usageCount?: number;
-  
+
   /** Tags for searchability */
   tags?: string[];
-  
+
   /** Kebab-case ID for the icon */
   kebabId?: string;
-  
+
   /** SVG content of the icon */
   svgContent?: string;
-  
+
   /** Weight of the icon (e.g., 'regular', 'light', 'solid') */
   weight?: string;
-  
+
   /** Version number of the icon */
   version?: string;
 
@@ -165,16 +165,16 @@ export interface IconMetadata {
 export interface IconRegistryData {
   /** Array of icon metadata */
   icons: IconMetadata[];
-  
+
   /** When the registry was last updated */
   lastUpdated?: string;
-  
+
   /** Registry version */
   version?: string;
-  
+
   /** When the registry was generated */
   generatedAt?: string;
-  
+
   /** When the registry was updated */
   updatedAt?: string;
 

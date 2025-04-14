@@ -1,14 +1,14 @@
 /**
  * Development Environment Configuration
- * 
+ *
  * Configuration overrides specific to the development environment.
  */
 
-import { 
-  DATABASE_DEFAULTS, 
-  LOGGING_DEFAULTS, 
+import {
+  DATABASE_DEFAULTS,
+  LOGGING_DEFAULTS,
   ERROR_HANDLING_DEFAULTS,
-  FEATURE_DEFAULTS
+  FEATURE_DEFAULTS,
 } from '../core/defaults.js';
 
 /**
@@ -77,4 +77,4 @@ export default {
   FEATURES,
   API,
   SERVER,
-}; 
+};

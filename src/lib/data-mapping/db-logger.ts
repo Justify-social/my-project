@@ -8,7 +8,7 @@ export enum LogLevel {
   DEBUG = 'DEBUG',
   INFO = 'INFO',
   WARN = 'WARN',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
 }
 
 // Log entry structure
@@ -29,7 +29,7 @@ export enum DbOperation {
   UPDATE = 'UPDATE',
   DELETE = 'DELETE',
   TRANSACTION = 'TRANSACTION',
-  VALIDATION = 'VALIDATION'
+  VALIDATION = 'VALIDATION',
 }
 
 // Type for log data that might contain a campaignId
@@ -64,7 +64,7 @@ class DbLogger {
 
     // Process campaign ID from data if it exists
     let campaignId: number | undefined = undefined;
-    
+
     if (data && 'campaignId' in data) {
       // Convert campaignId to number if it exists
       const rawCampaignId = data.campaignId;
@@ -77,7 +77,7 @@ class DbLogger {
           // Try to convert to number as a last resort
           campaignId = Number(rawCampaignId);
         }
-        
+
         // Ensure it's actually a valid number
         if (isNaN(campaignId)) {
           campaignId = undefined;
@@ -92,7 +92,7 @@ class DbLogger {
       message,
       campaignId,
       data: this.sanitizeData(data),
-      error: error ? this.formatError(error) : undefined
+      error: error ? this.formatError(error) : undefined,
     };
 
     // Add to in-memory log
@@ -136,7 +136,12 @@ class DbLogger {
   /**
    * Log an error message
    */
-  public error(operation: DbOperation | string, message: string, data?: LogData, error?: any): void {
+  public error(
+    operation: DbOperation | string,
+    message: string,
+    data?: LogData,
+    error?: any
+  ): void {
     this.log(LogLevel.ERROR, operation, message, data, error);
   }
 
@@ -187,12 +192,12 @@ class DbLogger {
    */
   private formatError(error: any): any {
     if (!error) return null;
-    
+
     return {
       message: error.message || String(error),
       stack: error.stack,
       name: error.name,
-      code: error.code
+      code: error.code,
     };
   }
 
@@ -201,7 +206,7 @@ class DbLogger {
    */
   private sanitizeData(data: any): any {
     if (!data) return null;
-    
+
     // Deep clone to avoid modifying original data
     let clonedData: any;
     try {
@@ -220,30 +225,41 @@ class DbLogger {
         }
       });
     }
-    
+
     // List of sensitive fields to redact
     const sensitiveFields = [
-      'password', 'secret', 'token', 'key', 'auth', 'credential', 'credit',
-      'email', 'phone', 'address', 'social', 'ssn', 'identifier'
+      'password',
+      'secret',
+      'token',
+      'key',
+      'auth',
+      'credential',
+      'credit',
+      'email',
+      'phone',
+      'address',
+      'social',
+      'ssn',
+      'identifier',
     ];
-    
+
     // Recursively sanitize the data
     const sanitize = (obj: any): any => {
       if (!obj || typeof obj !== 'object') return obj;
-      
+
       if (Array.isArray(obj)) {
         return obj.map(item => sanitize(item));
       }
-      
+
       const sanitized: any = {};
-      
+
       for (const key in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, key)) {
           // Check if this key contains sensitive information
-          const isFieldSensitive = sensitiveFields.some(field => 
+          const isFieldSensitive = sensitiveFields.some(field =>
             key.toLowerCase().includes(field.toLowerCase())
           );
-          
+
           if (isFieldSensitive) {
             // Redact sensitive fields but retain the type information
             if (typeof obj[key] === 'string') {
@@ -266,10 +282,10 @@ class DbLogger {
           }
         }
       }
-      
+
       return sanitized;
     };
-    
+
     return sanitize(clonedData);
   }
 
@@ -279,7 +295,7 @@ class DbLogger {
   private outputToConsole(log: LogEntry): void {
     const timestamp = log.timestamp.split('T')[1].split('.')[0]; // Extract time only
     const prefix = `[${timestamp}][${log.level}][${log.operation}]`;
-    
+
     switch (log.level) {
       case LogLevel.DEBUG:
         console.debug(
@@ -320,18 +336,18 @@ class DbLogger {
    */
   private storeLog(log: LogEntry): void {
     if (typeof window === 'undefined') return; // Skip if not in browser
-    
+
     try {
       const storedLogs = localStorage.getItem('dbLogs');
       let logs: LogEntry[] = storedLogs ? JSON.parse(storedLogs) : [];
-      
+
       logs.push(log);
-      
+
       // Keep only the latest 1000 logs
       if (logs.length > 1000) {
         logs = logs.slice(logs.length - 1000);
       }
-      
+
       localStorage.setItem('dbLogs', JSON.stringify(logs));
     } catch (error) {
       console.error('Failed to store log:', error);
@@ -343,4 +359,4 @@ class DbLogger {
 export const dbLogger = new DbLogger();
 
 // Export as default
-export default dbLogger; 
+export default dbLogger;

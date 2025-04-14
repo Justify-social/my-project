@@ -22,15 +22,15 @@
  * @param {Function} [props.tickFormatter] - Custom formatter function for axis tick labels.
  * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
  * @returns {React.ReactElement} The rendered area chart.
- * 
+ *
  * @example
- * <AreaChart 
+ * <AreaChart
  *   data={[
  *     { date: '2020-01', value: 100 },
  *     { date: '2020-02', value: 200 },
  *     { date: '2020-03', value: 150 }
- *   ]} 
- *   xKey="date" 
+ *   ]}
+ *   xKey="date"
  *   yKey="value"
  * />
  */
@@ -44,7 +44,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -76,10 +76,10 @@ export interface AreaChartProps {
 // Use HSL theme variables for default colors
 const DEFAULT_COLORS = [
   { stroke: 'hsl(var(--interactive))', fill: 'hsl(var(--interactive) / 0.2)' }, // Medium Blue
-  { stroke: 'hsl(var(--accent))', fill: 'hsl(var(--accent) / 0.2)' },      // Deep Sky Blue
-  { stroke: 'hsl(var(--secondary))', fill: 'hsl(var(--secondary) / 0.2)' },   // Payne's Grey
-  { stroke: 'hsl(var(--primary))', fill: 'hsl(var(--primary) / 0.2)' },     // Jet
-  { stroke: 'hsl(var(--success))', fill: 'hsl(var(--success) / 0.2)' },     // Example: Assuming a success color
+  { stroke: 'hsl(var(--accent))', fill: 'hsl(var(--accent) / 0.2)' }, // Deep Sky Blue
+  { stroke: 'hsl(var(--secondary))', fill: 'hsl(var(--secondary) / 0.2)' }, // Payne's Grey
+  { stroke: 'hsl(var(--primary))', fill: 'hsl(var(--primary) / 0.2)' }, // Jet
+  { stroke: 'hsl(var(--success))', fill: 'hsl(var(--success) / 0.2)' }, // Example: Assuming a success color
 ];
 
 export const AreaChart: React.FC<AreaChartProps> = ({
@@ -97,45 +97,31 @@ export const AreaChart: React.FC<AreaChartProps> = ({
   strokeWidth = 2,
   gridColor = 'hsl(var(--border))', // Use theme border color
   tickFormatter,
-  tooltipFormatter
+  tooltipFormatter,
 }) => {
   // Handle multiple y-keys
   const yKeys = Array.isArray(yKey) ? yKey : [yKey];
 
   return (
-    <div className={cn('w-full font-work-sans', className)}>
-      {title && (
-        <h3 className="text-xl font-medium mb-2 font-sora">{title}</h3>
-      )}
+    <div className={cn('w-full font-body', className)}>
+      {title && <h3 className="text-xl font-medium mb-2 font-heading">{title}</h3>}
 
       <ResponsiveContainer width={width} height={height}>
-        <RechartsAreaChart
-          data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        >
-          {showGrid && (
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-          )}
+        <RechartsAreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />}
 
-          <XAxis
-            dataKey={xKey}
-            tick={{ fontSize: 12 }}
-            tickFormatter={tickFormatter}
-          />
+          <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickFormatter={tickFormatter} />
 
-          <YAxis
-            tick={{ fontSize: 12 }}
-            tickFormatter={tickFormatter}
-          />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={tickFormatter} />
 
           <Tooltip
             formatter={tooltipFormatter}
             contentStyle={{
               fontSize: '12px',
               backgroundColor: 'hsl(var(--background))', // Use theme background
-              border: '1px solid hsl(var(--border))',  // Use theme border
+              border: '1px solid hsl(var(--border))', // Use theme border
               borderRadius: '4px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' // Keep shadow for now
+              boxShadow: 'var(--shadow-sm)', // Use CSS variable for shadow consistent with Tailwind's shadow-sm
             }}
           />
 
@@ -169,4 +155,4 @@ export const AreaChart: React.FC<AreaChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-}; 
+};

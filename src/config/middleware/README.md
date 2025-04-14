@@ -41,6 +41,6 @@ If you encounter navigation rendering issues:
 
 ## Migration
 
-Previous middleware in `src/middlewares/` and `src/middleware.ts` has been deprecated. 
-A wrapper remains in `src/middleware.ts` for backward compatibility, but all new development 
+Previous middleware in `src/middlewares/` and `src/middleware.ts` has been deprecated.
+A wrapper remains in `src/middleware.ts` for backward compatibility, but all new development
 should use this consolidated implementation.

@@ -42,7 +42,7 @@ config/
 └── index.js      # (Potentially) Main config entrypoint
 ```
 
-*For detailed information on using and modifying the configuration system, please refer to the README within the `/config` directory itself (if one exists) or specific tool documentation.*
+_For detailed information on using and modifying the configuration system, please refer to the README within the `/config` directory itself (if one exists) or specific tool documentation._
 
 ## Frontend Architecture
 
@@ -64,4 +64,4 @@ The backend logic primarily resides within:
 - **Library (`src/lib/`)**: Core utilities, database interactions (Prisma), external API clients
 - **Middleware (`src/middleware.ts`)**: For handling requests before they reach API routes or pages (e.g., authentication)
 
-*(Self-correction: Removed link to Backend Features doc as its existence is unverified)* 
+_(Self-correction: Removed link to Backend Features doc as its existence is unverified)_

@@ -1,6 +1,6 @@
 /**
  * CursorAI Agent Configuration Service
- * 
+ *
  * Provides configuration for CursorAI agents to ensure they check Graphiti before starting any task.
  * This service injects the necessary rules and instructions into agent system messages.
  */
@@ -44,7 +44,7 @@ export function createAgentConfig(
   customInstructions?: string
 ): AgentConfig {
   const instructionSet = INSTRUCTION_SETS[type];
-  
+
   // Build the system message with required Graphiti checking
   const systemMessage = `${BASE_AGENT_SYSTEM_MESSAGE}
 ${instructionSet}
@@ -53,7 +53,7 @@ ${customInstructions || ''}`;
   return {
     systemMessage,
     enforceGraphitiCheck: true, // Always enforce Graphiti checks
-    requireVerification: true,   // Require verification after task completion
+    requireVerification: true, // Require verification after task completion
     customInstructions,
   };
 }
@@ -73,24 +73,25 @@ export function validateUserQuery(
 
   // Check if this appears to be a new task (not follow-up to previous)
   const seemsLikeNewTask = !isFollowUpQuery(query, previousQueries);
-  
+
   if (seemsLikeNewTask) {
     // For new tasks, check if any previous queries in this session included Graphiti checks
-    const hasGraphitiCheck = previousQueries.some(q => 
-      q.includes('mcp_Graphiti_search_nodes') || 
-      q.includes('search_nodes') ||
-      q.includes('mcp_Graphiti_search_facts') ||
-      q.includes('search_facts')
+    const hasGraphitiCheck = previousQueries.some(
+      q =>
+        q.includes('mcp_Graphiti_search_nodes') ||
+        q.includes('search_nodes') ||
+        q.includes('mcp_Graphiti_search_facts') ||
+        q.includes('search_facts')
     );
-    
+
     if (!hasGraphitiCheck) {
-      return { 
-        valid: false, 
-        reason: 'Before starting a new task, you must check the Graphiti knowledge graph.' 
+      return {
+        valid: false,
+        reason: 'Before starting a new task, you must check the Graphiti knowledge graph.',
       };
     }
   }
-  
+
   return { valid: true };
 }
 
@@ -99,18 +100,27 @@ export function validateUserQuery(
  */
 function isFollowUpQuery(query: string, previousQueries: string[]): boolean {
   const followUpPhrases = [
-    'continue', 'go on', 'proceed', 'next', 'and then', 
-    'what about', 'additionally', 'also', 'furthermore',
-    'can you', 'please', 'now'
+    'continue',
+    'go on',
+    'proceed',
+    'next',
+    'and then',
+    'what about',
+    'additionally',
+    'also',
+    'furthermore',
+    'can you',
+    'please',
+    'now',
   ];
-  
+
   // Check if query starts with any follow-up phrases
-  const startsWithFollowUp = followUpPhrases.some(phrase => 
+  const startsWithFollowUp = followUpPhrases.some(phrase =>
     query.toLowerCase().trim().startsWith(phrase)
   );
-  
+
   // Check for pronouns referring to previous context
   const hasReferentialPronouns = /\b(it|this|that|these|those)\b/i.test(query);
-  
+
   return startsWithFollowUp || hasReferentialPronouns;
-} 
+}

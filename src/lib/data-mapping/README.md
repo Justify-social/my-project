@@ -98,17 +98,11 @@ To use the data persistence solution in a component:
 import { useCampaignWizardContext } from '@/contexts/CampaignWizardContext';
 
 function MyWizardComponent() {
-  const {
-    currentStep,
-    overviewData,
-    updateFormData,
-    saveStepData,
-    isLoading,
-    isDirty
-  } = useCampaignWizardContext();
+  const { currentStep, overviewData, updateFormData, saveStepData, isLoading, isDirty } =
+    useCampaignWizardContext();
 
   // Update form data
-  const handleChange = (e) => {
+  const handleChange = e => {
     updateFormData({ [e.target.name]: e.target.value });
   };
 
@@ -117,11 +111,7 @@ function MyWizardComponent() {
     await saveStepData(currentStep);
   };
 
-  return (
-    <div>
-      {/* Component implementation */}
-    </div>
-  );
+  return <div>{/* Component implementation */}</div>;
 }
 ```
 
@@ -144,4 +134,4 @@ Planned enhancements to the data persistence solution:
 2. **Conflict Resolution**: Implement strategies for handling concurrent edits
 3. **Performance Optimization**: Add caching for frequently accessed data
 4. **Analytics Integration**: Track user behavior and form completion rates
-5. **Data Migration**: Support for migrating data between schema versions 
+5. **Data Migration**: Support for migrating data between schema versions

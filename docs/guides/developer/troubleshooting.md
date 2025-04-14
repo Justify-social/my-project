@@ -23,11 +23,13 @@ Most issues occur at the boundaries between these layers, especially during data
 ### 1. Frontend-Backend Data Mismatches
 
 **Symptoms:**
+
 - "Validation failed" errors during form submission
 - Unexpected null values in the UI
 - Form fields not populating with API data
 
 **Root Causes:**
+
 - Enum format mismatches (camelCase vs. UPPERCASE_SNAKE_CASE)
 - Date format inconsistencies
 - JSON serialization/deserialization issues
@@ -50,11 +52,13 @@ const uiData = EnumTransformers.transformObjectFromBackend(apiResponse);
 ### 2. Component Rendering Issues
 
 **Symptoms:**
+
 - Client/server hydration warnings
 - "Cannot update a component while rendering" errors
 - Unresponsive UI after state updates
 
 **Root Causes:**
+
 - Mixing server and client components incorrectly
 - State updates during render
 - Missing key props in lists
@@ -67,7 +71,7 @@ const uiData = EnumTransformers.transformObjectFromBackend(apiResponse);
 export const dynamic = 'force-dynamic';
 
 // page.tsx (Client Component)
-"use client";
+('use client');
 import { useEffect, useState } from 'react';
 ```
 
@@ -76,11 +80,13 @@ import { useEffect, useState } from 'react';
 ### 3. API Route Issues
 
 **Symptoms:**
+
 - 500 errors from API routes
 - Timeouts during API calls
 - Inconsistent response formats
 
 **Root Causes:**
+
 - Incorrect error handling
 - Prisma query issues
 - Missing request validation
@@ -110,11 +116,13 @@ export async function GET(request: Request) {
 ### 4. Form Data Handling
 
 **Symptoms:**
+
 - Form state not updating
 - Lost data between form steps
 - Unexpected validation errors
 
 **Root Causes:**
+
 - Incorrect form initialization
 - Missing context providers
 - Improper validation schemas
@@ -139,11 +147,13 @@ useEffect(() => {
 ### 5. Database Connection Issues
 
 **Symptoms:**
+
 - "Connection refused" errors
 - Prisma client initialization failures
 - Slow database operations
 
 **Root Causes:**
+
 - Environment variable misconfiguration
 - Connection pool exhaustion
 - Missing database indexes
@@ -184,6 +194,7 @@ console.log('[Context:Wizard]', contextValue);
 ### Network Monitoring
 
 Monitor API calls through the browser's Network tab:
+
 1. Filter by XHR/Fetch requests
 2. Examine request payloads and response bodies
 3. Look for error status codes (4xx, 5xx)
@@ -191,6 +202,7 @@ Monitor API calls through the browser's Network tab:
 ### React DevTools
 
 Use React DevTools to inspect:
+
 1. Component hierarchy
 2. Props and state values
 3. Context providers and consumers
@@ -199,6 +211,7 @@ Use React DevTools to inspect:
 ### Prisma Studio
 
 For database issues:
+
 1. Run `npx prisma studio`
 2. Examine table relationships
 3. Verify data integrity
@@ -206,13 +219,13 @@ For database issues:
 
 ## Common Error Messages Explained
 
-| Error Message | Likely Cause | Solution |
-|---------------|--------------|----------|
-| "Invalid enum value" | Enum value format mismatch | Use EnumTransformers at API boundaries |
-| "Cannot update during render" | State change during component render | Move updates to effects or event handlers |
-| "Invalid revalidate value" | Server/client component confusion | Move directives to layout components |
-| "Influencer data incomplete" | Missing required fields in influencer object | Use draft validation for incomplete data |
-| "TypeError: Cannot read properties of undefined" | Attempting to access properties on null/undefined | Add null checks and default values |
+| Error Message                                    | Likely Cause                                      | Solution                                  |
+| ------------------------------------------------ | ------------------------------------------------- | ----------------------------------------- |
+| "Invalid enum value"                             | Enum value format mismatch                        | Use EnumTransformers at API boundaries    |
+| "Cannot update during render"                    | State change during component render              | Move updates to effects or event handlers |
+| "Invalid revalidate value"                       | Server/client component confusion                 | Move directives to layout components      |
+| "Influencer data incomplete"                     | Missing required fields in influencer object      | Use draft validation for incomplete data  |
+| "TypeError: Cannot read properties of undefined" | Attempting to access properties on null/undefined | Add null checks and default values        |
 
 ## Prevention Strategies
 
@@ -226,4 +239,4 @@ For database issues:
 
 - [Database Schema Updates](../../features-backend/database/schema-updates.md)
 - [Campaign Wizard Workflow](../../features-frontend/campaign-wizard/workflow.md)
-- [Deployment Guide](./deployment.md) 
+- [Deployment Guide](./deployment.md)

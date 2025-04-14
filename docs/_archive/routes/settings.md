@@ -13,6 +13,7 @@ This document details the routes in the (settings) group.
 **Description:** pricing page
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: Yes
 - Caching: Yes
@@ -24,10 +25,10 @@ This document details the routes in the (settings) group.
 **Title:** settings
 
 **Description:** Default Settings Page
-  This page serves as a redirect to the Profile Settings
+This page serves as a redirect to the Profile Settings
 
 **Implementation Details:**
+
 - Data Fetching: Yes
 - Revalidation: Yes
 - Caching: Yes
-

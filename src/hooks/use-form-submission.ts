@@ -1,6 +1,6 @@
 /**
  * useFormSubmission Hook
- * 
+ *
  * A custom hook for handling form submissions with API integration,
  * data transformation, and standardized error handling.
  */
@@ -74,7 +74,7 @@ export function useFormSubmission<TFormData, TApiData = TFormData>(
     headers = {},
     onSuccess,
     onError,
-    withCredentials = false
+    withCredentials = false,
   } = options;
 
   const [status, setStatus] = useState<SubmissionStatus>('idle');
@@ -88,56 +88,99 @@ export function useFormSubmission<TFormData, TApiData = TFormData>(
     setValidationErrors([]);
   }, []);
 
-  const submit = useCallback(async (formData: TFormData): Promise<boolean> => {
-    try {
-      // Reset state before submission
-      setStatus('submitting');
-      setError(null);
-      setValidationErrors([]);
+  const submit = useCallback(
+    async (formData: TFormData): Promise<boolean> => {
+      try {
+        // Reset state before submission
+        setStatus('submitting');
+        setError(null);
+        setValidationErrors([]);
 
-      // Transform data if needed
-      const apiData = transformData ? transformData(formData) : (formData as unknown as TApiData);
+        // Transform data if needed
+        const apiData = transformData ? transformData(formData) : (formData as unknown as TApiData);
 
-      // Make the API request
-      const fetchOptions: RequestInit = {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers
-        },
-        credentials: withCredentials ? 'include' : 'same-origin',
-        body: ['GET', 'HEAD'].includes(method) ? undefined : JSON.stringify(apiData)
-      };
+        // Make the API request
+        const fetchOptions: RequestInit = {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+          },
+          credentials: withCredentials ? 'include' : 'same-origin',
+          body: ['GET', 'HEAD'].includes(method) ? undefined : JSON.stringify(apiData),
+        };
 
-      const response = await fetch(endpoint, fetchOptions);
-      const responseData = await response.json();
+        const response = await fetch(endpoint, fetchOptions);
+        const responseData = await response.json();
 
-      if (!response.ok) {
-        // Handle validation errors
-        if (response.status === 400 && responseData.details) {
-          const fieldErrors: ValidationError[] = [];
-          
-          // Extract field-specific errors from response
-          if (typeof responseData.details === 'object') {
-            Object.entries(responseData.details).forEach(([field, errors]) => {
-              if (Array.isArray(errors)) {
-                errors.forEach(error => {
-                  fieldErrors.push({ field, message: error });
-                });
-              } else if (typeof errors === 'string') {
-                fieldErrors.push({ field, message: errors });
-              }
-            });
+        if (!response.ok) {
+          // Handle validation errors
+          if (response.status === 400 && responseData.details) {
+            const fieldErrors: ValidationError[] = [];
+
+            // Extract field-specific errors from response
+            if (typeof responseData.details === 'object') {
+              Object.entries(responseData.details).forEach(([field, errors]) => {
+                if (Array.isArray(errors)) {
+                  errors.forEach(error => {
+                    fieldErrors.push({ field, message: error });
+                  });
+                } else if (typeof errors === 'string') {
+                  fieldErrors.push({ field, message: errors });
+                }
+              });
+            }
+
+            setValidationErrors(fieldErrors);
           }
-          
-          setValidationErrors(fieldErrors);
+
+          // Create error object
+          const apiError: ApiError = {
+            code: responseData.code || `HTTP_${response.status}`,
+            message:
+              responseData.error ||
+              responseData.message ||
+              `Request failed with status ${response.status}`,
+            details: responseData.details,
+          };
+
+          setError(apiError);
+          setStatus('error');
+
+          // Show error toast
+          if (showToasts) {
+            toast.error(apiError.message);
+          }
+
+          // Call error callback
+          if (onError) {
+            onError(apiError);
+          }
+
+          return false;
         }
 
-        // Create error object
+        // Success handling
+        setStatus('success');
+        setResponse(responseData);
+
+        // Show success toast
+        if (showToasts) {
+          toast.success(successMessage);
+        }
+
+        // Call success callback
+        if (onSuccess) {
+          onSuccess(responseData);
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Form submission error:', error);
+
+        // Handle unexpected errors
         const apiError: ApiError = {
-          code: responseData.code || `HTTP_${response.status}`,
-          message: responseData.error || responseData.message || `Request failed with status ${response.status}`,
-          details: responseData.details
+          message: error instanceof Error ? error.message : 'An unexpected error occurred',
         };
 
         setError(apiError);
@@ -155,58 +198,19 @@ export function useFormSubmission<TFormData, TApiData = TFormData>(
 
         return false;
       }
-
-      // Success handling
-      setStatus('success');
-      setResponse(responseData);
-
-      // Show success toast
-      if (showToasts) {
-        toast.success(successMessage);
-      }
-
-      // Call success callback
-      if (onSuccess) {
-        onSuccess(responseData);
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Form submission error:', error);
-
-      // Handle unexpected errors
-      const apiError: ApiError = {
-        message: error instanceof Error 
-          ? error.message 
-          : 'An unexpected error occurred'
-      };
-
-      setError(apiError);
-      setStatus('error');
-
-      // Show error toast
-      if (showToasts) {
-        toast.error(apiError.message);
-      }
-
-      // Call error callback
-      if (onError) {
-        onError(apiError);
-      }
-
-      return false;
-    }
-  }, [
-    endpoint, 
-    method, 
-    showToasts, 
-    successMessage, 
-    transformData, 
-    headers, 
-    onSuccess, 
-    onError, 
-    withCredentials
-  ]);
+    },
+    [
+      endpoint,
+      method,
+      showToasts,
+      successMessage,
+      transformData,
+      headers,
+      onSuccess,
+      onError,
+      withCredentials,
+    ]
+  );
 
   return {
     status,
@@ -214,7 +218,7 @@ export function useFormSubmission<TFormData, TApiData = TFormData>(
     validationErrors,
     submit,
     reset,
-    response
+    response,
   };
 }
 
@@ -233,85 +237,91 @@ export function useAutosave<TFormData, TApiData = TFormData>(
     enabled?: boolean;
   }
 ) {
-  const { 
-    interval = 30000, 
+  const {
+    interval = 30000,
     debounce = 2000,
     enabled = true,
     showToasts = false,
-    ...submissionOptions 
+    ...submissionOptions
   } = options;
-  
+
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [intervalTimer, setIntervalTimer] = useState<ReturnType<typeof setInterval> | null>(null);
-  
+
   const formSubmission = useFormSubmission<TFormData, TApiData>({
     ...submissionOptions,
     showToasts,
     successMessage: 'Autosaved successfully',
-    onSuccess: (response) => {
+    onSuccess: response => {
       setLastSaved(new Date());
       setIsDirty(false);
       if (options.onSuccess) {
         options.onSuccess(response);
       }
-    }
+    },
   });
-  
+
   const { submit, status } = formSubmission;
-  
+
   /**
    * Mark the form as dirty and schedule an autosave
    */
-  const setDirty = useCallback((formData: TFormData) => {
-    if (!enabled) return;
-    
-    setIsDirty(true);
-    
-    // Clear existing timer
-    if (timer) {
-      clearTimeout(timer);
-    }
-    
-    // Set a new timer to save after debounce period
-    const newTimer = setTimeout(() => {
-      submit(formData);
-    }, debounce);
-    
-    setTimer(newTimer);
-  }, [enabled, timer, debounce, submit]);
-  
+  const setDirty = useCallback(
+    (formData: TFormData) => {
+      if (!enabled) return;
+
+      setIsDirty(true);
+
+      // Clear existing timer
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+      // Set a new timer to save after debounce period
+      const newTimer = setTimeout(() => {
+        submit(formData);
+      }, debounce);
+
+      setTimer(newTimer);
+    },
+    [enabled, timer, debounce, submit]
+  );
+
   /**
    * Start the autosave interval
    */
-  const startAutosave = useCallback((initialData: TFormData) => {
-    if (!enabled) return;
-    
-    // Clear any existing interval
-    if (intervalTimer) {
-      clearInterval(intervalTimer);
-    }
-    
-    // Set initial data
-    let currentData = initialData;
-    
-    // Create a new interval
-    const newIntervalTimer = setInterval(() => {
-      if (isDirty && status !== 'submitting') {
-        submit(currentData);
+  const startAutosave = useCallback(
+    (initialData: TFormData) => {
+      if (!enabled) return;
+
+      // Clear any existing interval
+      if (intervalTimer) {
+        clearInterval(intervalTimer);
       }
-    }, interval);
-    
-    setIntervalTimer(newIntervalTimer);
-    
-    // Return update function
-    return (newData: TFormData) => {
-      currentData = newData;
-      setDirty(newData);
-    };
-  }, [enabled, intervalTimer, interval, isDirty, status, submit, setDirty]);
-  
+
+      // Set initial data
+      let currentData = initialData;
+
+      // Create a new interval
+      const newIntervalTimer = setInterval(() => {
+        if (isDirty && status !== 'submitting') {
+          submit(currentData);
+        }
+      }, interval);
+
+      setIntervalTimer(newIntervalTimer);
+
+      // Return update function
+      return (newData: TFormData) => {
+        currentData = newData;
+        setDirty(newData);
+      };
+    },
+    [enabled, intervalTimer, interval, isDirty, status, submit, setDirty]
+  );
+
   /**
    * Stop the autosave interval
    */
@@ -320,19 +330,19 @@ export function useAutosave<TFormData, TApiData = TFormData>(
       clearInterval(intervalTimer);
       setIntervalTimer(null);
     }
-    
+
     if (timer) {
       clearTimeout(timer);
       setTimer(null);
     }
   }, [intervalTimer, timer]);
-  
+
   return {
     ...formSubmission,
     lastSaved,
     isDirty,
     setDirty,
     startAutosave,
-    stopAutosave
+    stopAutosave,
   };
-} 
+}

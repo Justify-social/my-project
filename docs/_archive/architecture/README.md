@@ -14,4 +14,4 @@ The architecture reference documents provide detailed technical information abou
 ## Related Documentation
 
 - [Components](../ui/components/README.md) - Documentation about UI components
-- [Development Guides](../../guides/developer/README.md) - Step-by-step guides for development tasks 
+- [Development Guides](../../guides/developer/README.md) - Step-by-step guides for development tasks

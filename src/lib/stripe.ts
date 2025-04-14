@@ -77,4 +77,4 @@ export const createCheckoutSession = async ({
     success_url: successUrl,
     cancel_url: cancelUrl,
   });
-}; 
+};

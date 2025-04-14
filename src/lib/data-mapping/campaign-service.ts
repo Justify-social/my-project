@@ -1,6 +1,6 @@
 /**
  * Campaign Service
- * 
+ *
  * A unified service to handle all campaign-related operations with proper validation and data mapping.
  * This service handles API requests, data validation, and error handling for campaign operations.
  */
@@ -15,7 +15,7 @@ import {
   CampaignData,
   AudienceData,
   AssetData,
-  ValidationResult
+  ValidationResult,
 } from './validation';
 
 /**
@@ -40,14 +40,10 @@ export class CampaignService {
    */
   public async getCampaign(id: number): Promise<ApiResponse<CampaignData>> {
     try {
-      dbLogger.info(
-        DbOperation.FETCH,
-        `Fetching campaign with ID ${id}`,
-        { campaignId: id }
-      );
+      dbLogger.info(DbOperation.FETCH, `Fetching campaign with ID ${id}`, { campaignId: id });
 
       const response = await fetch(`/api/campaigns/${id}`);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -56,28 +52,24 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to fetch campaign',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const campaignData = await response.json();
-      
-      dbLogger.debug(
-        DbOperation.FETCH,
-        `Successfully fetched campaign ${id}`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.debug(DbOperation.FETCH, `Successfully fetched campaign ${id}`, { campaignId: id });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign fetched successfully',
-        data: campaignData
+        data: campaignData,
       };
     } catch (error) {
       dbLogger.error(
@@ -86,11 +78,12 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while fetching campaign'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while fetching campaign',
       };
     }
   }
@@ -112,29 +105,25 @@ export class CampaignService {
         endDate: data.endDate,
         budget: data.budget,
         description: data.description,
-        brandId: data.brandId
+        brandId: data.brandId,
       };
-      
+
       const validationResult = validateCampaignData(campaignData);
-      
+
       if (!validationResult.valid) {
         return validationErrorResponse(validationResult);
       }
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Updating campaign ${id} overview`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Updating campaign ${id} overview`, { campaignId: id });
+
       const response = await fetch(`/api/campaigns/${id}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(campaignData)
+        body: JSON.stringify(campaignData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -143,28 +132,26 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to update campaign overview',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const updatedData = await response.json();
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Successfully updated campaign ${id} overview`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Successfully updated campaign ${id} overview`, {
+        campaignId: id,
+      });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign overview updated successfully',
-        data: updatedData
+        data: updatedData,
       };
     } catch (error) {
       dbLogger.error(
@@ -173,11 +160,12 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while updating campaign'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while updating campaign',
       };
     }
   }
@@ -195,25 +183,21 @@ export class CampaignService {
         id,
         name: data.name || '', // Required for validation but will be ignored in update
         status: data.status || 'draft',
-        objectives: data.objectives
+        objectives: data.objectives,
       };
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Updating campaign ${id} objectives`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Updating campaign ${id} objectives`, { campaignId: id });
+
       const response = await fetch(`/api/campaigns/${id}/objectives`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          objectives: data.objectives
-        })
+          objectives: data.objectives,
+        }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -222,28 +206,26 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to update campaign objectives',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const updatedData = await response.json();
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Successfully updated campaign ${id} objectives`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Successfully updated campaign ${id} objectives`, {
+        campaignId: id,
+      });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign objectives updated successfully',
-        data: updatedData
+        data: updatedData,
       };
     } catch (error) {
       dbLogger.error(
@@ -252,11 +234,14 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while updating objectives'
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error occurred while updating objectives',
       };
     }
   }
@@ -277,29 +262,25 @@ export class CampaignService {
         targetAgeRanges: data.ageRanges,
         screeningQuestions: data.screeningQuestions,
         languages: data.languages,
-        competitors: data.competitors
+        competitors: data.competitors,
       };
-      
+
       const validationResult = validateAudienceData(audienceData);
-      
+
       if (!validationResult.valid) {
         return validationErrorResponse(validationResult);
       }
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Updating campaign ${id} audience`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Updating campaign ${id} audience`, { campaignId: id });
+
       const response = await fetch(`/api/campaigns/${id}/audience`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(audienceData)
+        body: JSON.stringify(audienceData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -308,28 +289,26 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to update campaign audience',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const updatedData = await response.json();
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Successfully updated campaign ${id} audience`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Successfully updated campaign ${id} audience`, {
+        campaignId: id,
+      });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign audience updated successfully',
-        data: updatedData
+        data: updatedData,
       };
     } catch (error) {
       dbLogger.error(
@@ -338,11 +317,12 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while updating audience'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while updating audience',
       };
     }
   }
@@ -362,21 +342,20 @@ export class CampaignService {
           return validationErrorResponse(validationResult);
         }
       }
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Updating campaign ${id} assets`,
-        { campaignId: id, assetCount: assets.length }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Updating campaign ${id} assets`, {
+        campaignId: id,
+        assetCount: assets.length,
+      });
+
       const response = await fetch(`/api/campaigns/${id}/assets`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ assets })
+        body: JSON.stringify({ assets }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -385,28 +364,26 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to update campaign assets',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const updatedData = await response.json();
-      
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Successfully updated campaign ${id} assets`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.UPDATE, `Successfully updated campaign ${id} assets`, {
+        campaignId: id,
+      });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign assets updated successfully',
-        data: updatedData
+        data: updatedData,
       };
     } catch (error) {
       dbLogger.error(
@@ -415,11 +392,12 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while updating assets'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while updating assets',
       };
     }
   }
@@ -435,29 +413,25 @@ export class CampaignService {
       const campaignData: CampaignData = {
         name: data.name || 'New Campaign',
         status: 'draft',
-        ...data
+        ...data,
       };
-      
+
       const validationResult = validateCampaignData(campaignData);
-      
+
       if (!validationResult.valid) {
         return validationErrorResponse(validationResult);
       }
-      
-      dbLogger.info(
-        DbOperation.CREATE,
-        'Creating new campaign',
-        { name: campaignData.name }
-      );
-      
+
+      dbLogger.info(DbOperation.CREATE, 'Creating new campaign', { name: campaignData.name });
+
       const response = await fetch('/api/campaigns', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(campaignData)
+        body: JSON.stringify(campaignData),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -466,33 +440,33 @@ export class CampaignService {
           { name: campaignData.name, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to create campaign',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const createdCampaign = await response.json();
-      
+
       // Safely convert the ID to a number
-      const campaignId = typeof createdCampaign.id === 'string' 
-        ? parseInt(createdCampaign.id, 10) 
-        : (createdCampaign.id as number);
-      
-      dbLogger.info(
-        DbOperation.CREATE,
-        `Successfully created campaign with ID ${campaignId}`,
-        { campaignId, name: createdCampaign.name }
-      );
-      
+      const campaignId =
+        typeof createdCampaign.id === 'string'
+          ? parseInt(createdCampaign.id, 10)
+          : (createdCampaign.id as number);
+
+      dbLogger.info(DbOperation.CREATE, `Successfully created campaign with ID ${campaignId}`, {
+        campaignId,
+        name: createdCampaign.name,
+      });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign created successfully',
-        data: createdCampaign
+        data: createdCampaign,
       };
     } catch (error) {
       dbLogger.error(
@@ -501,11 +475,12 @@ export class CampaignService {
         { name: data.name },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while creating campaign'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while creating campaign',
       };
     }
   }
@@ -517,16 +492,12 @@ export class CampaignService {
    */
   public async deleteCampaign(id: number): Promise<ApiResponse> {
     try {
-      dbLogger.info(
-        DbOperation.DELETE,
-        `Deleting campaign with ID ${id}`,
-        { campaignId: id }
-      );
-      
+      dbLogger.info(DbOperation.DELETE, `Deleting campaign with ID ${id}`, { campaignId: id });
+
       const response = await fetch(`/api/campaigns/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -535,25 +506,21 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to delete campaign',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
-      dbLogger.info(
-        DbOperation.DELETE,
-        `Successfully deleted campaign ${id}`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.DELETE, `Successfully deleted campaign ${id}`, { campaignId: id });
+
       return {
         success: true,
         status: response.status,
-        message: 'Campaign deleted successfully'
+        message: 'Campaign deleted successfully',
       };
     } catch (error) {
       dbLogger.error(
@@ -562,11 +529,12 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while deleting campaign'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while deleting campaign',
       };
     }
   }
@@ -578,11 +546,11 @@ export class CampaignService {
    * @returns API response
    */
   public async updateFullCampaign(
-    id: number, 
+    id: number,
     data: {
-      campaign: CampaignData,
-      audience?: AudienceData,
-      assets?: AssetData[]
+      campaign: CampaignData;
+      audience?: AudienceData;
+      assets?: AssetData[];
     }
   ): Promise<ApiResponse> {
     try {
@@ -592,34 +560,28 @@ export class CampaignService {
         data.audience.campaignId = id;
       }
       if (data.assets) {
-        data.assets.forEach(asset => asset.campaignId = id);
+        data.assets.forEach(asset => (asset.campaignId = id));
       }
-      
+
       // Validate the full data set
-      const validationResult = validateFullCampaign(
-        data.campaign,
-        data.audience,
-        data.assets
-      );
-      
+      const validationResult = validateFullCampaign(data.campaign, data.audience, data.assets);
+
       if (!validationResult.valid) {
         return validationErrorResponse(validationResult);
       }
-      
-      dbLogger.info(
-        DbOperation.TRANSACTION,
-        `Updating full campaign ${id} data in transaction`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.TRANSACTION, `Updating full campaign ${id} data in transaction`, {
+        campaignId: id,
+      });
+
       const response = await fetch(`/api/campaigns/${id}/full`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.error(
@@ -628,28 +590,26 @@ export class CampaignService {
           { campaignId: id, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to update campaign data',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const updatedData = await response.json();
-      
-      dbLogger.info(
-        DbOperation.TRANSACTION,
-        `Successfully updated full campaign ${id} data`,
-        { campaignId: id }
-      );
-      
+
+      dbLogger.info(DbOperation.TRANSACTION, `Successfully updated full campaign ${id} data`, {
+        campaignId: id,
+      });
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign updated successfully',
-        data: updatedData
+        data: updatedData,
       };
     } catch (error) {
       dbLogger.error(
@@ -658,11 +618,12 @@ export class CampaignService {
         { campaignId: id },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while updating campaign'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while updating campaign',
       };
     }
   }
@@ -674,30 +635,25 @@ export class CampaignService {
    * @param data Step-specific data
    * @returns API response
    */
-  public async autoSaveWizardStep(
-    id: number,
-    step: number,
-    data: any
-  ): Promise<ApiResponse> {
+  public async autoSaveWizardStep(id: number, step: number, data: any): Promise<ApiResponse> {
     try {
-      dbLogger.info(
-        DbOperation.UPDATE,
-        `Auto-saving campaign ${id} wizard step ${step}`,
-        { campaignId: id, step }
-      );
-      
+      dbLogger.info(DbOperation.UPDATE, `Auto-saving campaign ${id} wizard step ${step}`, {
+        campaignId: id,
+        step,
+      });
+
       const response = await fetch(`/api/campaigns/${id}/wizard/${step}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           step,
           data,
-          autosave: true
-        })
+          autosave: true,
+        }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         dbLogger.warn(
@@ -706,28 +662,28 @@ export class CampaignService {
           { campaignId: id, step, status: response.status },
           errorData
         );
-        
+
         return {
           success: false,
           status: response.status,
           message: errorData.message || 'Failed to auto-save campaign data',
-          errors: errorData.errors
+          errors: errorData.errors,
         };
       }
-      
+
       const savedData = await response.json();
-      
+
       dbLogger.debug(
         DbOperation.UPDATE,
         `Successfully auto-saved campaign ${id} wizard step ${step}`,
         { campaignId: id, step }
       );
-      
+
       return {
         success: true,
         status: response.status,
         message: 'Campaign auto-saved successfully',
-        data: savedData
+        data: savedData,
       };
     } catch (error) {
       dbLogger.error(
@@ -736,11 +692,12 @@ export class CampaignService {
         { campaignId: id, step },
         error
       );
-      
+
       return {
         success: false,
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error occurred while auto-saving'
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred while auto-saving',
       };
     }
   }
@@ -750,4 +707,4 @@ export class CampaignService {
 export const campaignService = new CampaignService();
 
 // Default export
-export default campaignService; 
+export default campaignService;

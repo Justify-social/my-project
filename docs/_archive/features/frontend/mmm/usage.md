@@ -158,4 +158,4 @@ To use MMM data in other systems:
 
 - [Mixed Media Modeling Overview](./overview.md)
 - [Data Integration Guide](../../features-backend/apis/overview.md)
-- [Campaign Reporting Guide](../reports/usage.md) 
+- [Campaign Reporting Guide](../reports/usage.md)

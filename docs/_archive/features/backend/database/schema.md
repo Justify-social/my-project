@@ -10,19 +10,14 @@ The database is organized into logical subsystems that align with the business d
 
 1. **User Management Subsystem**
    - Managing user accounts, team memberships, and permissions
-   
 2. **Campaign Management Subsystem**
    - Handling campaign creation, editing, and submission processes
-   
 3. **Contact Management Subsystem**
    - Managing business contacts and their relationships to campaigns
-   
 4. **Audience Targeting Subsystem**
    - Defining target audiences with demographic and interest data
-   
 5. **Creative Management Subsystem**
    - Managing creative assets and requirements for campaigns
-   
 6. **Brand Management Subsystem**
    - Storing company-specific branding configurations
 
@@ -43,7 +38,7 @@ model User {
   role      UserRole    @default(USER)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  
+
   // Relationships
   notificationPrefs NotificationPrefs?
   campaigns         CampaignWizard[]
@@ -62,7 +57,7 @@ model TeamMember {
   userId    String
   role      TeamRole  @default(MEMBER)
   createdAt DateTime  @default(now())
-  
+
   // Relationships
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -94,7 +89,7 @@ model NotificationPrefs {
   userId           String  @unique
   emailNotifications Boolean @default(true)
   pushNotifications Boolean @default(false)
-  
+
   // Relationships
   user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -119,18 +114,18 @@ model CampaignWizard {
   updatedAt    DateTime
   currentStep  Int       @default(1)
   userId       String?
-  
+
   // JSON fields
   primaryContact   Json?
   secondaryContact Json?
   budget           Json?
-  
+
   // Flags for step completion
   step1Complete Boolean @default(false)
   step2Complete Boolean @default(false)
   step3Complete Boolean @default(false)
   step4Complete Boolean @default(false)
-  
+
   // Array fields
   secondaryKPIs Json[] @default([])
   features      Json[] @default([])
@@ -138,7 +133,7 @@ model CampaignWizard {
   competitors   Json[] @default([])
   assets        Json[] @default([])
   requirements  Json[] @default([])
-  
+
   // Relationships
   user          User?           @relation(fields: [userId], references: [id])
   influencers   Influencer[]
@@ -179,7 +174,7 @@ model CampaignWizardSubmission {
   submissionStatus  SubmissionStatus @default(draft)
   createdAt         DateTime         @default(now())
   userId            String?
-  
+
   // Relationships
   audience           Audience[]
   primaryContact     PrimaryContact?    @relation(fields: [primaryContactId], references: [id])
@@ -205,7 +200,7 @@ model Influencer {
   videos          Int       @default(0)
   reels           Int       @default(0)
   stories         Int       @default(0)
-  
+
   // Relationships
   campaignWizard  CampaignWizard @relation(fields: [campaignWizardId], references: [id], onDelete: Cascade)
 }
@@ -224,7 +219,7 @@ model WizardHistory {
   action          String?
   changes         Json?     @default("{}")
   performedBy     String?
-  
+
   // Relationships
   campaignWizard  CampaignWizard @relation(fields: [campaignWizardId], references: [id], onDelete: Cascade)
 }
@@ -243,7 +238,7 @@ model PrimaryContact {
   surname   String
   email     String
   position  Position @default(Manager)
-  
+
   // Relationships
   submissions CampaignWizardSubmission[]
 }
@@ -260,7 +255,7 @@ model SecondaryContact {
   surname   String
   email     String
   position  Position @default(Manager)
-  
+
   // Relationships
   submissions CampaignWizardSubmission[]
 }
@@ -280,7 +275,7 @@ model Audience {
   ageRangeMax     Int?
   keywords        String?
   interests       String?
-  
+
   // Age demographics
   age1824         Int       @default(0)
   age2534         Int       @default(0)
@@ -288,7 +283,7 @@ model Audience {
   age4554         Int       @default(0)
   age5564         Int       @default(0)
   age65plus       Int       @default(0)
-  
+
   // Relationships
   campaign        CampaignWizardSubmission @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   competitors     AudienceCompetitor[]
@@ -310,7 +305,7 @@ model AudienceLocation {
   country    String
   region     String?
   city       String?
-  
+
   // Relationships
   audience   Audience @relation(fields: [audienceId], references: [id], onDelete: Cascade)
 }
@@ -326,7 +321,7 @@ model AudienceGender {
   audienceId String
   gender     String
   percentage Int      @default(0)
-  
+
   // Relationships
   audience   Audience @relation(fields: [audienceId], references: [id], onDelete: Cascade)
 }
@@ -342,7 +337,7 @@ model AudienceScreeningQuestion {
   audienceId String
   question   String
   required   Boolean  @default(false)
-  
+
   // Relationships
   audience   Audience @relation(fields: [audienceId], references: [id], onDelete: Cascade)
 }
@@ -357,7 +352,7 @@ model AudienceLanguage {
   id         String   @id @default(uuid())
   audienceId String
   language   String
-  
+
   // Relationships
   audience   Audience @relation(fields: [audienceId], references: [id], onDelete: Cascade)
 }
@@ -372,7 +367,7 @@ model AudienceCompetitor {
   id         String   @id @default(uuid())
   audienceId String
   name       String
-  
+
   // Relationships
   audience   Audience @relation(fields: [audienceId], references: [id], onDelete: Cascade)
 }
@@ -396,7 +391,7 @@ model CreativeAsset {
   duration     Int?
   format       String
   submissionId String
-  
+
   // Relationships
   submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
@@ -412,7 +407,7 @@ model CreativeRequirement {
   description  String
   mandatory    Boolean   @default(false)
   submissionId String
-  
+
   // Relationships
   submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
@@ -614,4 +609,4 @@ For schema changes, we follow a structured process:
 
 This database schema provides a solid foundation for the Justify.social platform, with a clean, normalized structure, proper relationships between models, and performance optimizations for scaling. All models are properly defined, accessible through a type-safe client, and follow consistent patterns.
 
-The schema is designed to support current requirements while allowing for future expansion, making it a robust solution for enterprise-grade applications. 
+The schema is designed to support current requirements while allowing for future expansion, making it a robust solution for enterprise-grade applications.

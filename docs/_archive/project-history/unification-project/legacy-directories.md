@@ -5,19 +5,19 @@ These directories contain re-export files that point to the new component locati
 
 ## Directories
 
-| Legacy Directory | New Location | Description |
-|------------------|--------------|-------------|
-| `src/components/brand-lift` | `@/components/features/campaigns/brand-lift` | Brand lift components |
-| `src/components/Influencers` | `@/components/features/campaigns/influencers` | Influencer management components |
-| `src/components/Wizard` | `@/components/features/campaigns/wizard` | Campaign wizard components |
-| `src/components/Search` | `@/components/features/core/search` | Search components |
-| `src/components/mmm` | `@/components/features/analytics/mmm` | Marketing mix modeling components |
-| `src/components/ErrorBoundary` | `@/components/features/core/error-handling` | Error boundary components |
-| `src/components/ErrorFallback` | `@/components/ui/error-fallback` | Error fallback components |
-| `src/components/upload` | `@/components/features/assets/upload` | Upload components |
-| `src/components/gif` | `@/components/features/assets/gif` | GIF handling components |
-| `src/components/AssetPreview` | `@/components/features/assets` | Asset preview components |
-| `src/components/LoadingSkeleton` | `@/components/features/core/loading` | Loading skeleton components |
+| Legacy Directory                 | New Location                                  | Description                       |
+| -------------------------------- | --------------------------------------------- | --------------------------------- |
+| `src/components/brand-lift`      | `@/components/features/campaigns/brand-lift`  | Brand lift components             |
+| `src/components/Influencers`     | `@/components/features/campaigns/influencers` | Influencer management components  |
+| `src/components/Wizard`          | `@/components/features/campaigns/wizard`      | Campaign wizard components        |
+| `src/components/Search`          | `@/components/features/core/search`           | Search components                 |
+| `src/components/mmm`             | `@/components/features/analytics/mmm`         | Marketing mix modeling components |
+| `src/components/ErrorBoundary`   | `@/components/features/core/error-handling`   | Error boundary components         |
+| `src/components/ErrorFallback`   | `@/components/ui/error-fallback`              | Error fallback components         |
+| `src/components/upload`          | `@/components/features/assets/upload`         | Upload components                 |
+| `src/components/gif`             | `@/components/features/assets/gif`            | GIF handling components           |
+| `src/components/AssetPreview`    | `@/components/features/assets`                | Asset preview components          |
+| `src/components/LoadingSkeleton` | `@/components/features/core/loading`          | Loading skeleton components       |
 
 ## Migration Plan
 

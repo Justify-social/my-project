@@ -34,7 +34,7 @@ model User {
   role      UserRole    @default(USER)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  
+
   // Relationships
   notificationPrefs NotificationPrefs?
   campaigns         CampaignWizard[]
@@ -106,7 +106,7 @@ export default NextAuth({
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -114,17 +114,14 @@ export default NextAuth({
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: credentials.email },
         });
 
         if (!user || !user.password) {
           return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
           return null;
@@ -134,28 +131,28 @@ export default NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role
+          role: user.role,
         };
-      }
+      },
     }),
-    
+
     // OAuth providers
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
     MicrosoftProvider({
       clientId: process.env.MICROSOFT_CLIENT_ID,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET
-    })
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+    }),
   ],
-  
+
   // JWT configuration
   session: {
     strategy: 'jwt',
     maxAge: 60 * 60, // 1 hour
   },
-  
+
   // JWT callbacks
   callbacks: {
     async jwt({ token, user }) {
@@ -171,15 +168,15 @@ export default NextAuth({
         session.user.id = token.id;
       }
       return session;
-    }
+    },
   },
-  
+
   // Pages configuration
   pages: {
     signIn: '/auth/login',
     error: '/auth/error',
   },
-  
+
   // Security configuration
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
@@ -199,48 +196,48 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(request: NextRequest) {
   // Get the pathname
   const path = request.nextUrl.pathname;
-  
+
   // Public paths that don't require authentication
   const publicPaths = ['/auth/login', '/auth/register', '/api/auth'];
-  
+
   // Check if the path is public
-  const isPublicPath = publicPaths.some(publicPath => 
-    path === publicPath || path.startsWith(`${publicPath}/`)
+  const isPublicPath = publicPaths.some(
+    publicPath => path === publicPath || path.startsWith(`${publicPath}/`)
   );
-  
+
   if (isPublicPath) {
     return NextResponse.next();
   }
-  
+
   // Check if the user is authenticated
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET,
   });
-  
+
   // If not authenticated, redirect to login
   if (!token) {
     const url = new URL('/auth/login', request.url);
     url.searchParams.set('callbackUrl', encodeURI(request.url));
     return NextResponse.redirect(url);
   }
-  
+
   // Admin-only paths
   const adminPaths = ['/admin', '/api/admin'];
-  
+
   // Check if the path is admin-only
-  const isAdminPath = adminPaths.some(adminPath => 
-    path === adminPath || path.startsWith(`${adminPath}/`)
+  const isAdminPath = adminPaths.some(
+    adminPath => path === adminPath || path.startsWith(`${adminPath}/`)
   );
-  
+
   // If admin-only path but user is not admin, return forbidden
   if (isAdminPath && token.role !== 'ADMIN' && token.role !== 'SUPER_ADMIN') {
-    return new NextResponse(
-      JSON.stringify({ success: false, error: 'Permission denied' }),
-      { status: 403, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new NextResponse(JSON.stringify({ success: false, error: 'Permission denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-  
+
   return NextResponse.next();
 }
 
@@ -266,20 +263,20 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 export function withAuth(handler: NextApiHandler) {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await getServerSession(req, res, authOptions);
-    
+
     if (!session) {
       return res.status(401).json({
         success: false,
         error: {
           code: 'AUTHENTICATION_ERROR',
-          message: 'Authentication required'
-        }
+          message: 'Authentication required',
+        },
       });
     }
-    
+
     // Add user to request
     req.user = session.user;
-    
+
     // Call the original handler
     return handler(req, res);
   };
@@ -298,33 +295,33 @@ import { withAuth } from './withAuth';
 export function withRole(role: string | string[]) {
   return (handler: NextApiHandler) => {
     const authHandler = withAuth(handler);
-    
+
     return async (req: NextApiRequest, res: NextApiResponse) => {
       // Check if user has the required role
       const userRole = req.user?.role;
-      
+
       if (!userRole) {
         return res.status(401).json({
           success: false,
           error: {
             code: 'AUTHENTICATION_ERROR',
-            message: 'Authentication required'
-          }
+            message: 'Authentication required',
+          },
         });
       }
-      
+
       const roles = Array.isArray(role) ? role : [role];
-      
+
       if (!roles.includes(userRole)) {
         return res.status(403).json({
           success: false,
           error: {
             code: 'AUTHORIZATION_ERROR',
-            message: 'Permission denied'
-          }
+            message: 'Permission denied',
+          },
         });
       }
-      
+
       // Call the auth handler
       return authHandler(req, res);
     };
@@ -346,65 +343,62 @@ import { prisma } from '@/lib/prisma';
 const registerSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
-  password: z.string().min(8).max(100)
+  password: z.string().min(8).max(100),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({
       success: false,
       error: {
         code: 'METHOD_NOT_ALLOWED',
-        message: 'Method not allowed'
-      }
+        message: 'Method not allowed',
+      },
     });
   }
-  
+
   try {
     // Validate request body
     const data = registerSchema.parse(req.body);
-    
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: data.email }
+      where: { email: data.email },
     });
-    
+
     if (existingUser) {
       return res.status(409).json({
         success: false,
         error: {
           code: 'RESOURCE_CONFLICT',
-          message: 'User with this email already exists'
-        }
+          message: 'User with this email already exists',
+        },
       });
     }
-    
+
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 12);
-    
+
     // Create user
     const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
         password: hashedPassword,
-        role: 'USER'
+        role: 'USER',
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true
-      }
+        role: true,
+      },
     });
-    
+
     return res.status(201).json({
       success: true,
       data: { user },
-      message: 'User registered successfully'
+      message: 'User registered successfully',
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -413,17 +407,17 @@ export default async function handler(
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Validation failed',
-          details: error.errors
-        }
+          details: error.errors,
+        },
       });
     }
-    
+
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 }
@@ -449,60 +443,57 @@ import { generateToken } from '@/lib/auth/tokens';
 
 // Validation schema
 const forgotPasswordSchema = z.object({
-  email: z.string().email()
+  email: z.string().email(),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({
       success: false,
       error: {
         code: 'METHOD_NOT_ALLOWED',
-        message: 'Method not allowed'
-      }
+        message: 'Method not allowed',
+      },
     });
   }
-  
+
   try {
     // Validate request body
     const data = forgotPasswordSchema.parse(req.body);
-    
+
     // Find user
     const user = await prisma.user.findUnique({
-      where: { email: data.email }
+      where: { email: data.email },
     });
-    
+
     // Always return success, even if user doesn't exist (security)
     if (!user) {
       return res.status(200).json({
         success: true,
-        message: 'If your email is registered, you will receive a password reset link'
+        message: 'If your email is registered, you will receive a password reset link',
       });
     }
-    
+
     // Generate reset token
     const token = generateToken();
     const expires = new Date();
     expires.setHours(expires.getHours() + 1); // 1 hour expiration
-    
+
     // Save reset token
     await prisma.passwordReset.create({
       data: {
         userId: user.id,
         token,
-        expires
-      }
+        expires,
+      },
     });
-    
+
     // Send email
     await sendPasswordResetEmail(user.email, token);
-    
+
     return res.status(200).json({
       success: true,
-      message: 'If your email is registered, you will receive a password reset link'
+      message: 'If your email is registered, you will receive a password reset link',
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -511,17 +502,17 @@ export default async function handler(
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Validation failed',
-          details: error.errors
-        }
+          details: error.errors,
+        },
       });
     }
-    
+
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 }
@@ -539,61 +530,58 @@ import { prisma } from '@/lib/prisma';
 // Validation schema
 const resetPasswordSchema = z.object({
   token: z.string(),
-  password: z.string().min(8).max(100)
+  password: z.string().min(8).max(100),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({
       success: false,
       error: {
         code: 'METHOD_NOT_ALLOWED',
-        message: 'Method not allowed'
-      }
+        message: 'Method not allowed',
+      },
     });
   }
-  
+
   try {
     // Validate request body
     const data = resetPasswordSchema.parse(req.body);
-    
+
     // Find reset token
     const resetToken = await prisma.passwordReset.findUnique({
       where: { token: data.token },
-      include: { user: true }
+      include: { user: true },
     });
-    
+
     // Check if token exists and is valid
     if (!resetToken || resetToken.expires < new Date()) {
       return res.status(400).json({
         success: false,
         error: {
           code: 'INVALID_TOKEN',
-          message: 'Invalid or expired token'
-        }
+          message: 'Invalid or expired token',
+        },
       });
     }
-    
+
     // Hash new password
     const hashedPassword = await bcrypt.hash(data.password, 12);
-    
+
     // Update user password
     await prisma.user.update({
       where: { id: resetToken.userId },
-      data: { password: hashedPassword }
+      data: { password: hashedPassword },
     });
-    
+
     // Delete reset token
     await prisma.passwordReset.delete({
-      where: { id: resetToken.id }
+      where: { id: resetToken.id },
     });
-    
+
     return res.status(200).json({
       success: true,
-      message: 'Password reset successfully'
+      message: 'Password reset successfully',
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -602,17 +590,17 @@ export default async function handler(
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Validation failed',
-          details: error.errors
-        }
+          details: error.errors,
+        },
       });
     }
-    
+
     return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 }
@@ -639,19 +627,19 @@ const limiter = rateLimit({
   max: 5, // 5 requests per window
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
+  keyGenerator: req => {
     return getClientIp(req) || 'unknown';
-  }
+  },
 });
 
 export function withRateLimit(handler: NextApiHandler) {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     return new Promise((resolve, reject) => {
-      limiter(req, res, (result) => {
+      limiter(req, res, result => {
         if (result instanceof Error) {
           return reject(result);
         }
-        
+
         return resolve(handler(req, res));
       });
     });
@@ -672,38 +660,38 @@ const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
 export async function recordLoginAttempt(email: string, success: boolean) {
   const now = new Date();
-  
+
   if (success) {
     // Reset failed attempts on successful login
     await prisma.loginAttempt.deleteMany({
-      where: { email }
+      where: { email },
     });
     return;
   }
-  
+
   // Record failed attempt
   await prisma.loginAttempt.create({
     data: {
       email,
-      timestamp: now
-    }
+      timestamp: now,
+    },
   });
 }
 
 export async function isAccountLocked(email: string) {
   const now = new Date();
   const lockoutTime = new Date(now.getTime() - LOCKOUT_DURATION);
-  
+
   // Count recent failed attempts
   const recentAttempts = await prisma.loginAttempt.count({
     where: {
       email,
       timestamp: {
-        gte: lockoutTime
-      }
-    }
+        gte: lockoutTime,
+      },
+    },
   });
-  
+
   return recentAttempts >= MAX_ATTEMPTS;
 }
 ```
@@ -712,4 +700,4 @@ export async function isAccountLocked(email: string) {
 
 - [Authentication Overview](./overview.md)
 - [API Endpoints](../apis/endpoints.md)
-- [Database Schema](../database/schema.md) 
+- [Database Schema](../database/schema.md)

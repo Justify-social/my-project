@@ -25,4 +25,4 @@ This directory contains wireframes, screenshots, and diagrams used throughout th
 - `database-schema-diagram.png`: Database schema diagram
 - `api-flow-diagram.png`: API interaction flow diagram
 
-Note: This README serves as a placeholder. When adding new images, please update this list to maintain organization. 
+Note: This README serves as a placeholder. When adding new images, please update this list to maintain organization.

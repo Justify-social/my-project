@@ -161,4 +161,4 @@ For more detailed information, check these resources:
 
 - [Keyboard Shortcuts](./keyboard-shortcuts.md)
 - [Glossary of Terms](./glossary.md)
-- [Video Tutorials](https://example.com/tutorials) 
+- [Video Tutorials](https://example.com/tutorials)

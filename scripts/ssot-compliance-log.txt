@@ -1,0 +1,250 @@
+SSOT Compliance Fix Log
+=======================
+2025-04-14T09:22:33.483Z - File: src/app/(admin)/debug-tools/ui-components/preview/Accordion/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.488Z - File: src/app/(admin)/debug-tools/ui-components/preview/AlertDialog/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.489Z - File: src/app/(admin)/debug-tools/ui-components/preview/Alert/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.489Z - File: src/app/(admin)/debug-tools/ui-components/preview/Avatar/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.489Z - File: src/app/(admin)/debug-tools/ui-components/preview/Badge/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.489Z - File: src/app/(admin)/debug-tools/ui-components/preview/Breadcrumb/page.tsx - Change: File not found
+2025-04-14T09:22:33.490Z - File: src/app/(admin)/debug-tools/ui-components/preview/Button/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.490Z - File: src/app/(admin)/debug-tools/ui-components/preview/Card/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.490Z - File: src/app/(admin)/debug-tools/ui-components/preview/Checkbox/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.490Z - File: src/app/(admin)/debug-tools/ui-components/preview/Collapsible/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.491Z - File: src/app/(admin)/debug-tools/ui-components/preview/Command/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.491Z - File: src/app/(admin)/debug-tools/ui-components/preview/ContextMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.491Z - File: src/app/(admin)/debug-tools/ui-components/preview/DataTable/page.tsx - Change: File not found
+2025-04-14T09:22:33.491Z - File: src/app/(admin)/debug-tools/ui-components/preview/DateRangePicker/page.tsx - Change: File not found
+2025-04-14T09:22:33.491Z - File: src/app/(admin)/debug-tools/ui-components/preview/Dialog/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.491Z - File: src/app/(admin)/debug-tools/ui-components/preview/DropdownMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.492Z - File: src/app/(admin)/debug-tools/ui-components/preview/HoverCard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.492Z - File: src/app/(admin)/debug-tools/ui-components/preview/Input/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.492Z - File: src/app/(admin)/debug-tools/ui-components/preview/Label/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.492Z - File: src/app/(admin)/debug-tools/ui-components/preview/Menubar/page.tsx - Change: File not found
+2025-04-14T09:22:33.492Z - File: src/app/(admin)/debug-tools/ui-components/preview/NavigationMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.492Z - File: src/app/(admin)/debug-tools/ui-components/preview/Pagination/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.493Z - File: src/app/(admin)/debug-tools/ui-components/preview/Popover/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.493Z - File: src/app/(admin)/debug-tools/ui-components/preview/Progress/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.493Z - File: src/app/(admin)/debug-tools/ui-components/preview/RadioGroup/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.493Z - File: src/app/(admin)/debug-tools/ui-components/preview/ScrollArea/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.493Z - File: src/app/(admin)/debug-tools/ui-components/preview/Select/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.493Z - File: src/app/(admin)/debug-tools/ui-components/preview/Separator/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.494Z - File: src/app/(admin)/debug-tools/ui-components/preview/Sheet/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.494Z - File: src/app/(admin)/debug-tools/ui-components/preview/Skeleton/page.tsx - Change: File not found
+2025-04-14T09:22:33.494Z - File: src/app/(admin)/debug-tools/ui-components/preview/Slider/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.494Z - File: src/app/(admin)/debug-tools/ui-components/preview/Stepper/page.tsx - Change: File not found
+2025-04-14T09:22:33.494Z - File: src/app/(admin)/debug-tools/ui-components/preview/Switch/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.495Z - File: src/app/(admin)/debug-tools/ui-components/preview/Table/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.495Z - File: src/app/(admin)/debug-tools/ui-components/preview/Tabs/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.495Z - File: src/app/(admin)/debug-tools/ui-components/preview/Textarea/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.495Z - File: src/app/(admin)/debug-tools/ui-components/preview/ToggleGroup/page.tsx - Change: File not found
+2025-04-14T09:22:33.495Z - File: src/app/(admin)/debug-tools/ui-components/preview/Toggle/page.tsx - Change: File not found
+2025-04-14T09:22:33.495Z - File: src/app/(admin)/debug-tools/ui-components/preview/Tooltip/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.496Z - File: src/lib/email.ts - Change: Replaced typography /font-size:\s*\d+px/g with text-base (1 instances)
+2025-04-14T09:22:33.496Z - File: src/lib/email.ts - Change: Replaced spacing /margin:\s*\d+px/g with m-4 (1 instances)
+2025-04-14T09:22:33.496Z - File: src/lib/email.ts - Change: Replaced spacing /padding:\s*\d+px/g with p-4 (2 instances)
+2025-04-14T09:22:33.496Z - File: src/lib/email.ts - Change: Created backup at src/lib/email.ts.backup-1744622553496
+2025-04-14T09:22:33.496Z - File: src/components/features/campaigns/CampaignAssetUploader.tsx - Change: No changes needed
+2025-04-14T09:22:33.497Z - File: src/components/ui/chart-area.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.497Z - File: src/components/ui/chart-area.tsx - Change: Created backup at src/components/ui/chart-area.tsx.backup-1744622553497
+2025-04-14T09:22:33.497Z - File: src/app/globals.css - Change: Replaced color /#333333/g with var(--primary-color) (8 instances)
+2025-04-14T09:22:33.497Z - File: src/app/globals.css - Change: Replaced color /#4A5568/g with var(--secondary-color) (2 instances)
+2025-04-14T09:22:33.497Z - File: src/app/globals.css - Change: Replaced color /#00BFFF/g with var(--accent-color) (2 instances)
+2025-04-14T09:22:33.497Z - File: src/app/globals.css - Change: Replaced color /#FFFFFF/g with var(--background-color) (2 instances)
+2025-04-14T09:22:33.497Z - File: src/app/globals.css - Change: Replaced color /#D1D5DB/g with var(--divider-color) (1 instances)
+2025-04-14T09:22:33.497Z - File: src/app/globals.css - Change: Replaced color /#3182CE/g with var(--interactive-color) (2 instances)
+2025-04-14T09:22:33.498Z - File: src/app/globals.css - Change: Created backup at src/app/globals.css.backup-1744622553497
+2025-04-14T09:22:33.498Z - File: src/components/ui/chart-bar.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.498Z - File: src/components/ui/chart-bar.tsx - Change: Created backup at src/components/ui/chart-bar.tsx.backup-1744622553498
+2025-04-14T09:22:33.498Z - File: src/components/ui/chart-pie.tsx - Change: Replaced color /#333333/g with var(--primary-color) (1 instances)
+2025-04-14T09:22:33.498Z - File: src/components/ui/chart-pie.tsx - Change: Replaced color /#4A5568/g with var(--secondary-color) (1 instances)
+2025-04-14T09:22:33.498Z - File: src/components/ui/chart-pie.tsx - Change: Replaced color /#00BFFF/g with var(--accent-color) (1 instances)
+2025-04-14T09:22:33.499Z - File: src/components/ui/chart-pie.tsx - Change: Created backup at src/components/ui/chart-pie.tsx.backup-1744622553498
+2025-04-14T09:22:33.499Z - File: src/components/ui/chart-radar.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.499Z - File: src/components/ui/chart-radar.tsx - Change: Created backup at src/components/ui/chart-radar.tsx.backup-1744622553499
+2025-04-14T09:22:33.500Z - File: src/app/(campaigns)/campaigns/ServerCampaigns.tsx - Change: No changes needed
+2025-04-14T09:22:33.500Z - File: src/components/ui/navigation/sidebar.tsx - Change: Replaced color /#f5f5f5/g with var(--muted-background) (1 instances)
+2025-04-14T09:22:33.500Z - File: src/components/ui/navigation/sidebar.tsx - Change: Created backup at src/components/ui/navigation/sidebar.tsx.backup-1744622553500
+2025-04-14T09:22:33.501Z - File: src/app/(campaigns)/campaigns/[id]/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.502Z - File: src/app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.502Z - File: src/lib/db.ts - Change: No changes needed
+2025-04-14T09:22:33.502Z - File: src/components/features/campaigns/AgeDistributionSlider.tsx - Change: No changes needed
+2025-04-14T09:22:33.503Z - File: src/components/features/campaigns/BasicInfo.tsx - Change: No changes needed
+2025-04-14T09:22:33.503Z - File: src/hooks/use-error-recovery.tsx - Change: No changes needed
+2025-04-14T09:22:33.503Z - File: src/components/layouts/LayoutContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.503Z - File: src/components/features/dashboard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.503Z - File: src/components/layouts/client-layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.503Z - File: src/components/ui/chart-bar.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-bar.tsx - Change: Created backup at src/components/ui/chart-bar.tsx.backup-1744622553504
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-area.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-area.tsx - Change: Created backup at src/components/ui/chart-area.tsx.backup-1744622553504
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-radar.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-radar.tsx - Change: Created backup at src/components/ui/chart-radar.tsx.backup-1744622553504
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-scatter.tsx - Change: Replaced color /#3182CE/g with var(--interactive-color) (1 instances)
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-scatter.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.504Z - File: src/components/ui/chart-scatter.tsx - Change: Created backup at src/components/ui/chart-scatter.tsx.backup-1744622553504
+2025-04-14T09:22:33.505Z - File: src/components/ui/navigation/sidebar.tsx - Change: Replaced color /#f5f5f5/g with var(--muted-background) (1 instances)
+2025-04-14T09:22:33.505Z - File: src/components/ui/navigation/sidebar.tsx - Change: Created backup at src/components/ui/navigation/sidebar.tsx.backup-1744622553505
+2025-04-14T09:22:33.505Z - File: src/components/ui/navigation/sidebar-ui-components.tsx - Change: No changes needed
+2025-04-14T09:22:33.505Z - File: src/app/(campaigns)/campaigns/ServerCampaigns.tsx - Change: No changes needed
+2025-04-14T09:22:33.506Z - File: src/app/(campaigns)/campaigns/[id]/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.509Z - File: src/components/ui/chart-scatter.tsx - Change: Replaced color /#3182CE/g with var(--interactive-color) (1 instances)
+2025-04-14T09:22:33.509Z - File: src/components/ui/chart-scatter.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.509Z - File: src/components/ui/chart-scatter.tsx - Change: Created backup at src/components/ui/chart-scatter.tsx.backup-1744622553509
+2025-04-14T09:22:33.509Z - File: src/components/ui/chart-radar.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.509Z - File: src/components/ui/chart-radar.tsx - Change: Created backup at src/components/ui/chart-radar.tsx.backup-1744622553509
+2025-04-14T09:22:33.509Z - File: src/components/ui/chart-pie.tsx - Change: Replaced color /#333333/g with var(--primary-color) (1 instances)
+2025-04-14T09:22:33.510Z - File: src/components/ui/chart-pie.tsx - Change: Replaced color /#4A5568/g with var(--secondary-color) (1 instances)
+2025-04-14T09:22:33.510Z - File: src/components/ui/chart-pie.tsx - Change: Replaced color /#00BFFF/g with var(--accent-color) (1 instances)
+2025-04-14T09:22:33.510Z - File: src/components/ui/chart-pie.tsx - Change: Created backup at src/components/ui/chart-pie.tsx.backup-1744622553510
+2025-04-14T09:22:33.510Z - File: src/components/ui/chart-line.tsx - Change: No changes needed
+2025-04-14T09:22:33.511Z - File: src/components/ui/chart-funnel.tsx - Change: No changes needed
+2025-04-14T09:22:33.511Z - File: src/components/ui/chart-bar.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.511Z - File: src/components/ui/chart-bar.tsx - Change: Created backup at src/components/ui/chart-bar.tsx.backup-1744622553511
+2025-04-14T09:22:33.511Z - File: src/components/ui/chart-area.tsx - Change: Replaced color /#E2E8F0/g with var(--border-color) (1 instances)
+2025-04-14T09:22:33.511Z - File: src/components/ui/chart-area.tsx - Change: Created backup at src/components/ui/chart-area.tsx.backup-1744622553511
+2025-04-14T09:22:33.512Z - File: src/app/(admin)/debug-tools/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.512Z - File: src/app/(admin)/debug-tools/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.514Z - File: src/app/(admin)/debug-tools/api-verification/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.515Z - File: src/app/(admin)/debug-tools/ui-components/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.515Z - File: src/app/(admin)/debug-tools/ui-components/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.515Z - File: src/app/(admin)/debug-tools/ui-components/ComponentBrowser.tsx - Change: No changes needed
+2025-04-14T09:22:33.516Z - File: src/components/features/campaigns/index.tsx - Change: No changes needed
+2025-04-14T09:22:33.516Z - File: src/components/features/campaigns/WizardNavigation.tsx - Change: No changes needed
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/WizardContext.tsx - Change: No changes needed
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/TransparencyPanel.tsx - Change: No changes needed
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/StepContentLoader.tsx - Change: No changes needed
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/Step5Content.tsx - Change: Skipped - Excluded file
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/Step4Content.tsx - Change: Skipped - Excluded file
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/Step3Content.tsx - Change: Skipped - Excluded file
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/Step2Content.tsx - Change: Skipped - Excluded file
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/Step1Content.tsx - Change: Skipped - Excluded file
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/ScreeningQuestions.tsx - Change: No changes needed
+2025-04-14T09:22:33.517Z - File: src/components/features/campaigns/ProgressBar.tsx - Change: No changes needed
+2025-04-14T09:22:33.518Z - File: src/components/features/campaigns/ObjectivesContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.518Z - File: src/components/features/campaigns/LocationSelector.tsx - Change: No changes needed
+2025-04-14T09:22:33.518Z - File: src/components/features/campaigns/LanguagesSelector.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/InfluencerCard.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/IndividualInfluencerCard.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/Header.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/GenderSelection.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/FilterPanel.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/ErrorBoundary.tsx - Change: No changes needed
+2025-04-14T09:22:33.519Z - File: src/components/features/campaigns/CompetitorTracking.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/CampaignWizardContext.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/CampaignAssetUploader.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/BrandLiftLayout.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/BasicInfo.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/AutosaveIndicator.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/AudienceContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/AgeDistributionSlider.tsx - Change: No changes needed
+2025-04-14T09:22:33.520Z - File: src/components/features/campaigns/AdvancedTargeting.tsx - Change: No changes needed
+2025-04-14T09:22:33.521Z - File: src/components/layouts/client-layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.521Z - File: src/components/layouts/LayoutContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.521Z - File: src/hooks/use-error-recovery.tsx - Change: No changes needed
+2025-04-14T09:22:33.524Z - File: src/app/template.tsx - Change: No changes needed
+2025-04-14T09:22:33.525Z - File: src/app/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.525Z - File: src/app/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.525Z - File: src/app/global-error.tsx - Change: No changes needed
+2025-04-14T09:22:33.526Z - File: src/app/error.tsx - Change: No changes needed
+2025-04-14T09:22:33.526Z - File: src/app/settings/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.526Z - File: src/app/(dashboard)/not-found.tsx - Change: No changes needed
+2025-04-14T09:22:33.526Z - File: src/app/(dashboard)/error.tsx - Change: No changes needed
+2025-04-14T09:22:33.527Z - File: src/app/(dashboard)/dashboard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.527Z - File: src/app/(dashboard)/dashboard/ClientDashboard.tsx - Change: No changes needed
+2025-04-14T09:22:33.528Z - File: src/app/(campaigns)/not-found.tsx - Change: No changes needed
+2025-04-14T09:22:33.528Z - File: src/app/(campaigns)/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.528Z - File: src/app/(campaigns)/error.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/page.server.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/ServerCampaigns.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/wizard/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/wizard/submission/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.529Z - File: src/app/(campaigns)/campaigns/wizard/submission/SubmissionContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.530Z - File: src/app/(campaigns)/campaigns/wizard/step-5/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.530Z - File: src/app/(campaigns)/campaigns/wizard/step-5/ClientPage.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-4/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-4/ClientPage.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-3/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-3/FormContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-3/ClientPage.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-2/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-2/FormContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-2/ClientPage.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-1/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.531Z - File: src/app/(campaigns)/campaigns/wizard/step-1/FormContent.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(campaigns)/campaigns/wizard/step-1/ClientPage.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(campaigns)/campaigns/[id]/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(campaigns)/campaigns/[id]/loading.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(auth)/not-found.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(auth)/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(auth)/error.tsx - Change: No changes needed
+2025-04-14T09:22:33.532Z - File: src/app/(admin)/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/ui-components/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/ui-components/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/ui-components/ComponentBrowser.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/ui-components/preview/UpcomingCampaignsTable/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/ui-components/preview/Tooltip/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.533Z - File: src/app/(admin)/debug-tools/ui-components/preview/Toaster/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Toast/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/ThemeToggle/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Textarea/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Tabs/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Table/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Switch/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Slider/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Sheet/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Separator/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.534Z - File: src/app/(admin)/debug-tools/ui-components/preview/Select/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.535Z - File: src/app/(admin)/debug-tools/ui-components/preview/SectionHeader/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.535Z - File: src/app/(admin)/debug-tools/ui-components/preview/SearchBar/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.535Z - File: src/app/(admin)/debug-tools/ui-components/preview/ScrollArea/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.535Z - File: src/app/(admin)/debug-tools/ui-components/preview/ScatterChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.536Z - File: src/app/(admin)/debug-tools/ui-components/preview/Resizable/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.536Z - File: src/app/(admin)/debug-tools/ui-components/preview/RadioGroup/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.536Z - File: src/app/(admin)/debug-tools/ui-components/preview/RadarChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.536Z - File: src/app/(admin)/debug-tools/ui-components/preview/Progress/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.536Z - File: src/app/(admin)/debug-tools/ui-components/preview/Popover/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/PieChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/Pagination/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/NavigationMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/MobileMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/MetricsDashboard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/MetricsComparison/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/LoadingSpinner/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/LoadingSkeleton/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/LineChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.537Z - File: src/app/(admin)/debug-tools/ui-components/preview/Label/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/KpiCard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/Input/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/HoverCard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/FunnelChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/Form/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/DropdownMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/Dialog/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/DatePicker/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/ContextMenu/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/Command/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/Collapsible/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.538Z - File: src/app/(admin)/debug-tools/ui-components/preview/Checkbox/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/Carousel/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/Card/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/CalendarUpcoming/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/Calendar/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/Button/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/BarChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/Badge/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.539Z - File: src/app/(admin)/debug-tools/ui-components/preview/Avatar/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.540Z - File: src/app/(admin)/debug-tools/ui-components/preview/AssetCard/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.540Z - File: src/app/(admin)/debug-tools/ui-components/preview/AspectRatio/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.540Z - File: src/app/(admin)/debug-tools/ui-components/preview/AreaChart/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.540Z - File: src/app/(admin)/debug-tools/ui-components/preview/AlertDialog/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.540Z - File: src/app/(admin)/debug-tools/ui-components/preview/Alert/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.540Z - File: src/app/(admin)/debug-tools/ui-components/preview/Accordion/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.541Z - File: src/app/(admin)/debug-tools/database/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.541Z - File: src/app/(admin)/debug-tools/api-verification/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.542Z - File: src/app/(admin)/admin/page.tsx - Change: No changes needed
+2025-04-14T09:22:33.542Z - File: src/app/(admin)/admin/layout.tsx - Change: No changes needed
+2025-04-14T09:22:33.542Z - File: SCRIPT - Change: Completed execution

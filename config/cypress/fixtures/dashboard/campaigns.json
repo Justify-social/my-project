@@ -16,10 +16,7 @@
       },
       "createdAt": "2024-05-01T12:30:45.000Z",
       "audience": {
-        "locations": [
-          { "location": "United States" },
-          { "location": "Canada" }
-        ]
+        "locations": [{ "location": "United States" }, { "location": "Canada" }]
       },
       "performance": {
         "engagement": 4.2,
@@ -48,9 +45,7 @@
       },
       "createdAt": "2024-05-10T09:15:22.000Z",
       "audience": {
-        "locations": [
-          { "location": "United States" }
-        ]
+        "locations": [{ "location": "United States" }]
       }
     },
     {
@@ -294,4 +289,4 @@
       "creditsChange": -47
     }
   }
-} 
+}

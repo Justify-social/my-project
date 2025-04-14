@@ -6,12 +6,9 @@ export async function POST(req: Request) {
   try {
     const session = await getSession();
     console.log('Auth Session:', session); // Debug log
-    
+
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     // Get the base URL from the request
@@ -23,10 +20,7 @@ export async function POST(req: Request) {
     const { priceId } = body;
 
     if (!priceId) {
-      return NextResponse.json(
-        { error: 'Price ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Price ID is required' }, { status: 400 });
     }
 
     // Get or create Stripe customer
@@ -80,4 +74,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-} 
+}

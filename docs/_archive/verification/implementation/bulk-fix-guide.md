@@ -76,20 +76,23 @@ The bulk fix script processes issues in the following sequence:
 ### If Fixes Break the Build
 
 1. **Identify the problematic files**:
+
    ```bash
    git diff
    ```
 
 2. **Revert specific problematic files**:
+
    ```bash
    git checkout HEAD -- path/to/problem/file.js
    ```
 
 3. **Manually fix the issues**:
+
    ```bash
    # Open in editor and fix manually
    code path/to/problem/file.js
-   
+
    # Apply specific rules only
    npx eslint --config eslint.config.mjs --fix --rule 'specific-rule: error' path/to/problem/file.js
    ```
@@ -135,12 +138,12 @@ If function type conversions cause issues:
 
 ```typescript
 // Error after conversion
-const handler: (event: Event) => void = (event) => {
+const handler: (event: Event) => void = event => {
   // Function body references properties not in standard Event
 };
 
 // Solution: Use more specific event type
-const handler: (event: CustomEvent) => void = (event) => {
+const handler: (event: CustomEvent) => void = event => {
   // ...
 };
 ```
@@ -159,7 +162,7 @@ You can create targeted fix scripts for specific rule types:
 echo "Fixing CommonJS require() imports..."
 
 # Get list of files with require() issues
-FILES=$(npx eslint --config eslint.config.mjs --format json . | 
+FILES=$(npx eslint --config eslint.config.mjs --format json . |
   node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); \
   const files = data.filter(f => f.messages.some(m => m.ruleId === '@typescript-eslint/no-require-imports')).map(f => f.filePath); \
   console.log(files.join(' '))");
@@ -179,7 +182,7 @@ For very large codebases, you can process files in parallel:
 #!/bin/bash
 # Example: parallel-fix.sh
 
-FILES=$(npx eslint --config eslint.config.mjs --format json . | 
+FILES=$(npx eslint --config eslint.config.mjs --format json . |
   node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf8')); \
   const files = data.filter(f => f.messages.some(m => m.ruleId === '@typescript-eslint/no-require-imports')).map(f => f.filePath); \
   console.log(files.join('\n'))");
@@ -190,4 +193,4 @@ echo "$FILES" | xargs -P 4 -I{} node scripts/consolidated/linting/lint-fixer.js 
 
 ## Conclusion
 
-The bulk fix system provides a powerful way to systematically address ESLint issues across the codebase. By following the practices in this guide, you can efficiently clean up linting errors while minimizing risk to the application's functionality. 
+The bulk fix system provides a powerful way to systematically address ESLint issues across the codebase. By following the practices in this guide, you can efficiently clean up linting errors while minimizing risk to the application's functionality.

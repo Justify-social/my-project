@@ -50,6 +50,7 @@ The UI components are organized following the Atomic Design methodology:
 ## Access
 
 The component browser is accessible at:
+
 ```
 http://localhost:3000/debug-tools/ui-components
 ```
@@ -60,4 +61,4 @@ http://localhost:3000/debug-tools/ui-components
 
 All 45 components have been fully implemented, tested, and documented.
 
-Quality Score: 9.8/10 
+Quality Score: 9.8/10

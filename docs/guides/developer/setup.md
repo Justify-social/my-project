@@ -40,18 +40,20 @@ npm install
 ### Step 3: Set Up Environment Variables
 
 1. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
 
 2. Update the `.env` file with your local configuration:
+
    ```
    # Database configuration
    DATABASE_URL="postgresql://username:password@localhost:5432/campaign_wizard"
-   
+
    # Authentication (for development)
    AUTH_SECRET="your-development-secret"
-   
+
    # API keys (use development keys)
    API_KEY="your-development-api-key"
    ```
@@ -59,11 +61,13 @@ npm install
 ### Step 4: Set Up the Database
 
 1. Create a PostgreSQL database:
+
    ```bash
    createdb campaign_wizard
    ```
 
 2. Run Prisma migrations:
+
    ```bash
    npx prisma migrate dev
    ```
@@ -169,6 +173,7 @@ If you encounter build errors:
 The application includes a set of mock data for testing:
 
 1. Use the API testing endpoints:
+
    - `/api/test/campaigns`: Lists test campaigns
    - `/api/test/users`: Lists test users
 
@@ -188,4 +193,4 @@ Once your environment is set up, you can:
 
 - [GitHub Repository](https://github.com/organization/campaign-wizard)
 - [Internal Wiki](https://wiki.example.com)
-- [API Documentation](../../features-backend/apis/endpoints.md) 
+- [API Documentation](../../features-backend/apis/endpoints.md)

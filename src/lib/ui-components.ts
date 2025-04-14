@@ -10,48 +10,32 @@ export {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter
+  CardFooter,
 } from '@/components/ui/card';
 
-export {
-  Badge
-} from '@/components/ui/badge';
+export { Badge } from '@/components/ui/badge';
 
-export {
-  Button
-} from '@/components/ui/button';
+export { Button } from '@/components/ui/button';
 
-export {
-  Input
-} from '@/components/ui/input';
+export { Input } from '@/components/ui/input';
 
-export {
-  Label
-} from '@/components/ui/label';
+export { Label } from '@/components/ui/label';
 
-export {
-  ScrollArea
-} from '@/components/ui/scroll-area';
+export { ScrollArea } from '@/components/ui/scroll-area';
 
 export {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select';
 
-export {
-  Slider
-} from '@/components/ui/slider';
+export { Slider } from '@/components/ui/slider';
 
-export {
-  LoadingSpinner as Spinner
-} from '@/components/ui/loading-spinner';
+export { LoadingSpinner as Spinner } from '@/components/ui/loading-spinner';
 
-export {
-  Switch
-} from '@/components/ui/switch';
+export { Switch } from '@/components/ui/switch';
 
 export {
   Table,
@@ -59,25 +43,16 @@ export {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from '@/components/ui/table';
 
-export {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/components/ui/tabs';
+export { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export {
-  Alert,
-  AlertTitle,
-  AlertDescription
-} from '@/components/ui/alert';
+export { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 export {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion'; 
+  AccordionTrigger,
+} from '@/components/ui/accordion';

@@ -27,6 +27,7 @@ The Campaign Wizard is designed to be intuitive and user-friendly. Users progres
 4. **Creative Assets**: Asset uploads, guidelines, and requirements
 
 At each step, the wizard provides:
+
 - Clear guidance on required information
 - Automatic validation of inputs
 - Progress indicators
@@ -61,4 +62,4 @@ The Campaign Wizard integrates with several other system components:
 ## Related Documentation
 
 - [Database Schema](../../features-backend/database/schema.md)
-- [API Endpoints](../../features-backend/apis/endpoints.md) 
+- [API Endpoints](../../features-backend/apis/endpoints.md)

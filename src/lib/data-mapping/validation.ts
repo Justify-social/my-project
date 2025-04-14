@@ -1,6 +1,6 @@
 /**
  * Campaign Data Validation
- * 
+ *
  * This module provides validation functions for campaign data before it's saved to the database.
  * It ensures data integrity and provides helpful error messages for invalid data.
  */
@@ -116,7 +116,7 @@ export function validateCampaignData(campaignData: CampaignData): ValidationResu
     errors.push({
       field: 'name',
       message: 'Campaign name is required',
-      code: 'REQUIRED_FIELD'
+      code: 'REQUIRED_FIELD',
     });
   }
 
@@ -124,7 +124,7 @@ export function validateCampaignData(campaignData: CampaignData): ValidationResu
     errors.push({
       field: 'name',
       message: 'Campaign name must be less than 100 characters',
-      code: 'MAX_LENGTH_EXCEEDED'
+      code: 'MAX_LENGTH_EXCEEDED',
     });
   }
 
@@ -134,7 +134,7 @@ export function validateCampaignData(campaignData: CampaignData): ValidationResu
     errors.push({
       field: 'status',
       message: `Status must be one of: ${validStatuses.join(', ')}`,
-      code: 'INVALID_VALUE'
+      code: 'INVALID_VALUE',
     });
   }
 
@@ -142,28 +142,28 @@ export function validateCampaignData(campaignData: CampaignData): ValidationResu
   if (campaignData.startDate && campaignData.endDate) {
     const start = new Date(campaignData.startDate);
     const end = new Date(campaignData.endDate);
-    
+
     if (isNaN(start.getTime())) {
       errors.push({
         field: 'startDate',
         message: 'Start date is invalid',
-        code: 'INVALID_DATE'
+        code: 'INVALID_DATE',
       });
     }
-    
+
     if (isNaN(end.getTime())) {
       errors.push({
         field: 'endDate',
         message: 'End date is invalid',
-        code: 'INVALID_DATE'
+        code: 'INVALID_DATE',
       });
     }
-    
+
     if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start > end) {
       errors.push({
         field: 'endDate',
         message: 'End date must be after start date',
-        code: 'DATE_RANGE_INVALID'
+        code: 'DATE_RANGE_INVALID',
       });
     }
   }
@@ -173,7 +173,7 @@ export function validateCampaignData(campaignData: CampaignData): ValidationResu
     errors.push({
       field: 'budget',
       message: 'Budget must be a positive number',
-      code: 'NEGATIVE_VALUE'
+      code: 'NEGATIVE_VALUE',
     });
   }
 
@@ -185,16 +185,14 @@ export function validateCampaignData(campaignData: CampaignData): ValidationResu
       { campaignId: campaignData.id, errors }
     );
   } else {
-    dbLogger.debug(
-      DbOperation.VALIDATION,
-      'Campaign validation successful',
-      { campaignId: campaignData.id }
-    );
+    dbLogger.debug(DbOperation.VALIDATION, 'Campaign validation successful', {
+      campaignId: campaignData.id,
+    });
   }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -213,7 +211,7 @@ export function validateAudienceData(audienceData: AudienceData): ValidationResu
         errors.push({
           field: `targetLocations[${index}].country`,
           message: 'Country is required for all target locations',
-          code: 'REQUIRED_FIELD'
+          code: 'REQUIRED_FIELD',
         });
       }
     });
@@ -227,7 +225,7 @@ export function validateAudienceData(audienceData: AudienceData): ValidationResu
         errors.push({
           field: `targetGenders[${index}].gender`,
           message: `Gender must be one of: ${validGenders.join(', ')}`,
-          code: 'INVALID_VALUE'
+          code: 'INVALID_VALUE',
         });
       }
     });
@@ -240,23 +238,23 @@ export function validateAudienceData(audienceData: AudienceData): ValidationResu
         errors.push({
           field: `targetAgeRanges[${index}].minAge`,
           message: 'Minimum age cannot be negative',
-          code: 'NEGATIVE_VALUE'
+          code: 'NEGATIVE_VALUE',
         });
       }
-      
+
       if (ageRange.maxAge < ageRange.minAge) {
         errors.push({
           field: `targetAgeRanges[${index}].maxAge`,
           message: 'Maximum age must be greater than or equal to minimum age',
-          code: 'INVALID_RANGE'
+          code: 'INVALID_RANGE',
         });
       }
-      
+
       if (ageRange.maxAge > 120) {
         errors.push({
           field: `targetAgeRanges[${index}].maxAge`,
           message: 'Maximum age cannot exceed 120',
-          code: 'MAX_VALUE_EXCEEDED'
+          code: 'MAX_VALUE_EXCEEDED',
         });
       }
     });
@@ -269,15 +267,15 @@ export function validateAudienceData(audienceData: AudienceData): ValidationResu
         errors.push({
           field: `screeningQuestions[${index}].question`,
           message: 'Question text is required',
-          code: 'REQUIRED_FIELD'
+          code: 'REQUIRED_FIELD',
         });
       }
-      
+
       if (question.options && question.options.length === 0) {
         errors.push({
           field: `screeningQuestions[${index}].options`,
           message: 'Question must have at least one option or no options array',
-          code: 'EMPTY_ARRAY'
+          code: 'EMPTY_ARRAY',
         });
       }
     });
@@ -291,16 +289,15 @@ export function validateAudienceData(audienceData: AudienceData): ValidationResu
       { audienceId: audienceData.id, campaignId: audienceData.campaignId, errors }
     );
   } else {
-    dbLogger.debug(
-      DbOperation.VALIDATION,
-      'Audience validation successful',
-      { audienceId: audienceData.id, campaignId: audienceData.campaignId }
-    );
+    dbLogger.debug(DbOperation.VALIDATION, 'Audience validation successful', {
+      audienceId: audienceData.id,
+      campaignId: audienceData.campaignId,
+    });
   }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -318,7 +315,7 @@ export function validateAssetData(assetData: AssetData): ValidationResult {
     errors.push({
       field: 'type',
       message: `Asset type must be one of: ${validTypes.join(', ')}`,
-      code: 'INVALID_VALUE'
+      code: 'INVALID_VALUE',
     });
   }
 
@@ -327,7 +324,7 @@ export function validateAssetData(assetData: AssetData): ValidationResult {
     errors.push({
       field: 'url',
       message: 'URL is required for completed assets',
-      code: 'REQUIRED_FIELD'
+      code: 'REQUIRED_FIELD',
     });
   }
 
@@ -337,28 +334,27 @@ export function validateAssetData(assetData: AssetData): ValidationResult {
     errors.push({
       field: 'status',
       message: `Status must be one of: ${validStatuses.join(', ')}`,
-      code: 'INVALID_VALUE'
+      code: 'INVALID_VALUE',
     });
   }
 
   // Log validation results
   if (errors.length > 0) {
-    dbLogger.warn(
-      DbOperation.VALIDATION,
-      `Asset validation failed with ${errors.length} errors`,
-      { assetId: assetData.id, campaignId: assetData.campaignId, errors }
-    );
+    dbLogger.warn(DbOperation.VALIDATION, `Asset validation failed with ${errors.length} errors`, {
+      assetId: assetData.id,
+      campaignId: assetData.campaignId,
+      errors,
+    });
   } else {
-    dbLogger.debug(
-      DbOperation.VALIDATION,
-      'Asset validation successful',
-      { assetId: assetData.id, campaignId: assetData.campaignId }
-    );
+    dbLogger.debug(DbOperation.VALIDATION, 'Asset validation successful', {
+      assetId: assetData.id,
+      campaignId: assetData.campaignId,
+    });
   }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -377,13 +373,13 @@ export function validateFullCampaign(
   // Start with campaign validation
   const campaignValidation = validateCampaignData(campaignData);
   let errors = [...campaignValidation.errors];
-  
+
   // Add audience validation if provided
   if (audienceData) {
     const audienceValidation = validateAudienceData(audienceData);
     errors = [...errors, ...audienceValidation.errors];
   }
-  
+
   // Add assets validation if provided
   if (assetsData && assetsData.length > 0) {
     for (const asset of assetsData) {
@@ -391,7 +387,7 @@ export function validateFullCampaign(
       errors = [...errors, ...assetValidation.errors];
     }
   }
-  
+
   // Log overall validation results
   if (errors.length > 0) {
     dbLogger.warn(
@@ -400,16 +396,14 @@ export function validateFullCampaign(
       { campaignId: campaignData.id, errorCount: errors.length }
     );
   } else {
-    dbLogger.info(
-      DbOperation.VALIDATION,
-      'Full campaign validation successful',
-      { campaignId: campaignData.id }
-    );
+    dbLogger.info(DbOperation.VALIDATION, 'Full campaign validation successful', {
+      campaignId: campaignData.id,
+    });
   }
-  
+
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -422,10 +416,8 @@ export function formatValidationErrors(result: ValidationResult): string {
   if (result.valid) {
     return 'Validation passed successfully.';
   }
-  
-  return result.errors
-    .map(error => `${error.field}: ${error.message}`)
-    .join('\n');
+
+  return result.errors.map(error => `${error.field}: ${error.message}`).join('\n');
 }
 
 /**
@@ -441,7 +433,7 @@ export function validationErrorResponse(result: ValidationResult) {
     errors: result.errors.map(error => ({
       field: error.field,
       message: error.message,
-      code: error.code
-    }))
+      code: error.code,
+    })),
   };
-} 
+}

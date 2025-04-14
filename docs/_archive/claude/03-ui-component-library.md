@@ -49,7 +49,7 @@ The library includes these key components:
 - **Input**: Text input fields
 - **Textarea**: Multi-line text input
 
-### Layout Components 
+### Layout Components
 
 - **Container**: Controls maximum width and centers content
 - **Grid**: CSS Grid-based layout system
@@ -64,6 +64,7 @@ The library includes these key components:
 ## Component Registry System
 
 The project implements a Single Source of Truth (SSOT) approach for UI components:
+
 - Configuration files in `/config/ui/`
 - Runtime registries in `/public/static/component-registry.json`
 - Component discovery tools in development
@@ -145,7 +146,7 @@ src/components/ui/
 │   ├── index.ts               # Exports all from this component
 │   ├── {Component}.tsx        # Main component implementation
 │   ├── README.md              # Component documentation
-│   ├── styles/                # Component styles 
+│   ├── styles/                # Component styles
 │   │   └── {component}.styles.ts
 │   ├── types/                 # Component type definitions
 │   │   └── index.ts
@@ -156,21 +157,25 @@ src/components/ui/
 ## Component Implementation Guidelines
 
 1. **Component Files**:
+
    - Use PascalCase for component files: `Button.tsx`, not `button.tsx`
    - Place in the root of the component directory
 
 2. **Style Files**:
+
    - Place in `styles/` subdirectory
    - Use kebab-case: `button.styles.ts`
 
 3. **Type Definitions**:
+
    - Place in `types/` subdirectory
    - Export all types from `types/index.ts`
 
 4. **Documentation**:
+
    - Include a README.md with usage examples
    - Document props and variants
 
 5. **Examples**:
    - Place in `examples/` subdirectory
-   - Create demonstrations of various use cases 
+   - Create demonstrations of various use cases

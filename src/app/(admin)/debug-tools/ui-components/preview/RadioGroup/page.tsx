@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -18,14 +18,15 @@ const statusStyles: Record<string, string> = {
 
 export default function RadioGroupPreviewPage() {
   const componentMeta = {
-    "name": "RadioGroup",
-    "description": "A set of checkable buttons (radio buttons) where only one button can be checked at a time.",
-    "category": "molecule",
-    "subcategory": "input",
-    "renderType": "client",
-    "status": "stable",
-    "author": "Shadcn UI",
-    "since": "2023-01-01"
+    name: 'RadioGroup',
+    description:
+      'A set of checkable buttons (radio buttons) where only one button can be checked at a time.',
+    category: 'molecule',
+    subcategory: 'input',
+    renderType: 'client',
+    status: 'stable',
+    author: 'Shadcn UI',
+    since: '2023-01-01',
   };
 
   return (
@@ -33,10 +34,25 @@ export default function RadioGroupPreviewPage() {
       {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-secondary">
         <ol className="list-none p-0 inline-flex space-x-2">
-          <li className="flex items-center"><Link href="/debug-tools/ui-components" className="hover:text-Interactive">UI Components</Link></li>
-          <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.category}</span></li>
-          {componentMeta.subcategory && <li className="flex items-center"><span className="mx-2">/</span><span className="capitalize">{componentMeta.subcategory}</span></li>}
-          <li className="flex items-center"><span className="mx-2">/</span><span className="font-medium text-primary">{componentMeta.name}</span></li>
+          <li className="flex items-center">
+            <Link href="/debug-tools/ui-components" className="hover:text-Interactive">
+              UI Components
+            </Link>
+          </li>
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="capitalize">{componentMeta.category}</span>
+          </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
+          <li className="flex items-center">
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary">{componentMeta.name}</span>
+          </li>
         </ol>
       </nav>
 
@@ -46,12 +62,22 @@ export default function RadioGroupPreviewPage() {
           <h1 className="text-3xl font-bold text-primary mb-2 sm:mb-0">{componentMeta.name}</h1>
           <div className="flex items-center space-x-3 text-sm">
             {componentMeta.status && (
-              <Badge variant="outline" className={cn('font-medium', statusStyles[componentMeta.status] || statusStyles.development)}>{componentMeta.status}</Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  'font-medium',
+                  statusStyles[componentMeta.status] || statusStyles.development
+                )}
+              >
+                {componentMeta.status}
+              </Badge>
             )}
             <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
           </div>
         </div>
-        {componentMeta.description && <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>}
+        {componentMeta.description && (
+          <p className="mt-2 text-secondary max-w-3xl">{componentMeta.description}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
           {componentMeta.author && <span>Author: {componentMeta.author}</span>}
           {componentMeta.since && <span>Since: {componentMeta.since}</span>}
@@ -123,7 +149,6 @@ export default function RadioGroupPreviewPage() {
 
       {/* Code Snippets Section - Removed */}
       {/* {examples && examples.length > 0 && ( ... )} */}
-
     </div>
   );
 }

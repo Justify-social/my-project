@@ -27,4 +27,4 @@ export function createApiResponse(data: any, options?: ResponseInit) {
       'Content-Type': 'application/json',
     },
   });
-} 
+}

@@ -25,9 +25,9 @@ export interface Contact {
  * No transformation needed between frontend and backend
  */
 export enum Currency {
-  GBP = "GBP",
-  USD = "USD",
-  EUR = "EUR"
+  GBP = 'GBP',
+  USD = 'USD',
+  EUR = 'EUR',
 }
 
 /**
@@ -38,9 +38,9 @@ export enum Currency {
  * Use EnumTransformers.platformToBackend() and EnumTransformers.platformFromBackend()
  */
 export enum Platform {
-  Instagram = "Instagram", // Backend expects: "INSTAGRAM"
-  YouTube = "YouTube",     // Backend expects: "YOUTUBE"
-  TikTok = "TikTok"        // Backend expects: "TIKTOK"
+  Instagram = 'Instagram', // Backend expects: "INSTAGRAM"
+  YouTube = 'YouTube', // Backend expects: "YOUTUBE"
+  TikTok = 'TikTok', // Backend expects: "TIKTOK"
 }
 
 /**
@@ -48,9 +48,9 @@ export enum Platform {
  * No transformation needed
  */
 export enum Position {
-  Manager = "Manager",
-  Director = "Director",
-  VP = "VP"
+  Manager = 'Manager',
+  Director = 'Director',
+  VP = 'VP',
 }
 
 export interface StepLoaderProps {
@@ -70,4 +70,4 @@ export interface WizardStepProps {
   onNext?: () => void;
   onBack?: () => void;
   isLoading?: boolean;
-} 
+}

@@ -1,11 +1,13 @@
 # Test File Standardization Report
 
 ## Summary
+
 - Total test files processed: 13
 - Successfully standardized: 13
 - Failed: 0
 
 ## Successfully Standardized Files
+
 - ✅ `src/utils/enum-transformers.test.ts` -> `src/utils/__tests__/enum-transformers.test.ts` and `tests/unit/utils/enum-transformers.test.ts`
 - ✅ `src/components/ui/icons/__tests__/icon-test.tsx` -> `src/components/ui/icons/__tests__/icon.test.tsx` and `tests/unit/components/ui/icons/icon.test.tsx`
 - ✅ `src/components/features/users/profile/profile-settings-skeleton-test.tsx` -> `src/components/features/users/profile/__tests__/profile-settings-skeleton.test.tsx` and `tests/unit/components/features/users/profile/profile-settings-skeleton.test.tsx`
@@ -21,4 +23,3 @@
 - ✅ `src/__tests__/settings/shared/settings-page-skeleton-test.tsx` -> `src/__tests__/settings/shared/settings-page-skeleton.test.tsx` and `tests/unit/settings/shared/settings-page-skeleton.test.tsx`
 
 ## Failed Files
-

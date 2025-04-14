@@ -1,12 +1,12 @@
-"use client"; // Make sure this file is a client component if you're using Next.js 13 with the App Router.
+'use client'; // Make sure this file is a client component if you're using Next.js 13 with the App Router.
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer';
 import { DateService } from '@/utils/date-service';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import debounce from 'lodash/debounce';
-import { standardizeApiResponse } from "@/utils/api-response-formatter";
+import { standardizeApiResponse } from '@/utils/api-response-formatter';
 import useCampaignWizard, {
   WizardStep,
   OverviewFormData,
@@ -96,10 +96,7 @@ type CampaignData = Record<string, unknown>;
 
 interface WizardContextType {
   data: WizardData;
-  updateData: (
-    section: keyof WizardData,
-    newData: Partial<WizardData[keyof WizardData]>
-  ) => void;
+  updateData: (section: keyof WizardData, newData: Partial<WizardData[keyof WizardData]>) => void;
   isEditing: boolean;
   campaignData: CampaignData | null;
   loading: boolean;
@@ -119,37 +116,37 @@ interface WizardContextType {
 // Default values for the wizard data.
 const defaultWizardData: WizardData = {
   overview: {
-    name: "",
-    businessGoal: "",
-    startDate: "",
-    endDate: "",
-    timeZone: "UTC",
-    contacts: "",
+    name: '',
+    businessGoal: '',
+    startDate: '',
+    endDate: '',
+    timeZone: 'UTC',
+    contacts: '',
     primaryContact: {
-      firstName: "",
-      surname: "",
-      email: "",
-      position: "",
+      firstName: '',
+      surname: '',
+      email: '',
+      position: '',
     },
     secondaryContact: {
-      firstName: "",
-      surname: "",
-      email: "",
-      position: "",
+      firstName: '',
+      surname: '',
+      email: '',
+      position: '',
     },
-    currency: "£",
+    currency: '£',
     totalBudget: 5000,
     socialMediaBudget: 1000,
-    platform: "",
-    influencerHandle: "",
+    platform: '',
+    influencerHandle: '',
   },
   objectives: {
-    mainMessage: "",
-    hashtags: "",
-    memorability: "",
-    keyBenefits: "",
-    expectedAchievements: "",
-    purchaseIntent: "",
+    mainMessage: '',
+    hashtags: '',
+    memorability: '',
+    keyBenefits: '',
+    expectedAchievements: '',
+    purchaseIntent: '',
     primaryKPI: {
       // Assuming KPI is an object with properties
     },
@@ -197,7 +194,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const updateCampaignData = useCallback((updates: Record<string, unknown>) => {
     setCampaignData((current: CampaignData | null) => ({
       ...current,
-      ...updates
+      ...updates,
     }));
     // Update lastSaved
     setLastSaved(new Date());
@@ -207,7 +204,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadCampaignData(campaignId: string) {
       if (!campaignId) {
-        console.warn("Cannot load campaign data without campaign ID");
+        console.warn('Cannot load campaign data without campaign ID');
         return null;
       }
 
@@ -226,14 +223,14 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
         // Use optional chaining for normalizedData
         if (normalizedData?.success && normalizedData?.data) {
-          console.log("WizardContext: Initial campaign data loaded:", normalizedData.data);
+          console.log('WizardContext: Initial campaign data loaded:', normalizedData.data);
           setCampaignData(normalizedData.data);
         } else {
-          console.error("WizardContext: Failed to load initial data", normalizedData?.error);
+          console.error('WizardContext: Failed to load initial data', normalizedData?.error);
           setCampaignData(null);
         }
       } catch (error) {
-        console.error("WizardContext: Error fetching initial campaign data:", error);
+        console.error('WizardContext: Error fetching initial campaign data:', error);
         setCampaignData(null);
       } finally {
         setLoading(false);
@@ -250,42 +247,45 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   }, [campaignId, hasLoadedData]);
 
   // Save progress function
-  const saveProgress = useCallback(async (data: Record<string, unknown>) => {
-    if (!campaignId) {
-      console.warn("Cannot save progress without campaign ID");
-      return false;
-    }
-
-    try {
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ data }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to save progress: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        setLastSaved(new Date());
-        toast.success("Progress saved");
-        return true;
-      } else {
-        console.error("Failed to save progress:", result);
-        toast.error("Failed to save progress");
+  const saveProgress = useCallback(
+    async (data: Record<string, unknown>) => {
+      if (!campaignId) {
+        console.warn('Cannot save progress without campaign ID');
         return false;
       }
-    } catch (error) {
-      console.error("Error saving progress:", error);
-      toast.error("Error saving progress");
-      return false;
-    }
-  }, [campaignId]);
+
+      try {
+        const response = await fetch(`/api/campaigns/${campaignId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ data }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to save progress: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          setLastSaved(new Date());
+          toast.success('Progress saved');
+          return true;
+        } else {
+          console.error('Failed to save progress:', result);
+          toast.error('Failed to save progress');
+          return false;
+        }
+      } catch (error) {
+        console.error('Error saving progress:', error);
+        toast.error('Error saving progress');
+        return false;
+      }
+    },
+    [campaignId]
+  );
 
   // Debounced version of saveProgress for autosave
   const debouncedSaveProgress = useCallback(
@@ -302,7 +302,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     section: keyof WizardData,
     newData: Partial<WizardData[keyof WizardData]>
   ) => {
-    setData((prevData) => {
+    setData(prevData => {
       const updatedData = {
         ...prevData,
         [section]: {
@@ -386,9 +386,9 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 export const useWizard = () => {
   const context = useContext(WizardContext);
   if (context === undefined) {
-    throw new Error("useWizard must be used within a WizardProvider");
+    throw new Error('useWizard must be used within a WizardProvider');
   }
   return context;
 };
 
-export default WizardContext; 
+export default WizardContext;

@@ -6,13 +6,10 @@ Custom React hooks for reusable logic across components.
 
 ## Contents
 
-
-
 ### Files
 
 - 4 .ts files
 - 1 .tsx file
-
 
 ## Usage
 

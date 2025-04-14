@@ -47,6 +47,7 @@ Our application uses the following brand colors:
 ## Icon System
 
 We use Font Awesome Pro for our icons, with the following conventions:
+
 - Default icons use the 'fa-light' weight
 - Hover/active states use the 'fa-solid' weight
 

@@ -1,6 +1,6 @@
 /**
  * Route Type Definitions
- * 
+ *
  * This file provides TypeScript type safety for the application's routes.
  */
 

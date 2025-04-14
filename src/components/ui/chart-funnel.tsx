@@ -18,16 +18,16 @@
  * @param {boolean} [props.showPercentage=true] - Whether to show percentage values within the labels.
  * @param {Function} [props.tooltipFormatter] - Custom formatter function for the tooltip content.
  * @returns {React.ReactElement} The rendered funnel chart.
- * 
+ *
  * @example
- * <FunnelChart 
+ * <FunnelChart
  *   data={[
  *     { name: 'Visitors', value: 5000 },
  *     { name: 'Leads', value: 3200 },
  *     { name: 'Prospects', value: 1800 },
  *     { name: 'Opportunities', value: 800 },
  *     { name: 'Customers', value: 400 }
- *   ]} 
+ *   ]}
  * />
  */
 
@@ -38,7 +38,7 @@ import {
   LabelList,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
 } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -71,7 +71,7 @@ const DEFAULT_COLORS = [
   'hsl(var(--primary) / 0.2)',
   'hsl(var(--secondary))',
   'hsl(var(--secondary) / 0.7)',
-  'hsl(var(--secondary) / 0.4)'
+  'hsl(var(--secondary) / 0.4)',
 ];
 
 // Default Tooltip Formatter
@@ -92,7 +92,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   showLabels = true,
   labelPosition = 'inside',
   showPercentage = true,
-  tooltipFormatter = defaultTooltipFormatter // Use default formatter
+  tooltipFormatter = defaultTooltipFormatter, // Use default formatter
 }) => {
   const renderLabelContent = (props: any) => {
     const { value, percent, x, y, width, height, name, payload } = props;
@@ -100,7 +100,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
     const originalValue = payload?.value ?? value;
 
     // Use fixed light color for text inside segments for better contrast
-    const textColor = "hsl(var(--primary-foreground))"; // Assume this is white/light
+    const textColor = 'hsl(var(--primary-foreground))'; // Assume this is white/light
 
     return (
       <g transform={`translate(${x + width / 2}, ${y + height / 2 + 5})`}>
@@ -108,7 +108,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
         <text
           textAnchor="middle"
           dominantBaseline="middle"
-          className="font-sora"
+          className="font-heading"
           fontSize="11" // Reduced size
           fontWeight="normal" // Reduced weight
           fill={textColor}
@@ -120,7 +120,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
         <text
           textAnchor="middle"
           dominantBaseline="middle"
-          className="font-work-sans"
+          className="font-body"
           fontSize="14"
           fontWeight="semibold" // Use semibold
           dy="16" // Adjusted dy
@@ -133,7 +133,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
           <text
             textAnchor="middle"
             dominantBaseline="middle"
-            className="font-work-sans"
+            className="font-body"
             fontSize="10"
             fontWeight="normal"
             dy="32" // Adjusted dy
@@ -148,23 +148,21 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   };
 
   return (
-    <div className={cn('w-full font-work-sans', className)}>
-      {title && (
-        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-      )}
+    <div className={cn('w-full font-body', className)}>
+      {title && <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>}
       <ResponsiveContainer width={width} height={height}>
         <RechartsFunnelChart data={data}>
           <Tooltip
             formatter={tooltipFormatter} // Use the (potentially default) formatter
             contentStyle={{
-              backgroundColor: "hsl(var(--popover))",
-              borderColor: "hsl(var(--border))",
-              color: "hsl(var(--popover-foreground))",
+              backgroundColor: 'hsl(var(--popover))',
+              borderColor: 'hsl(var(--border))',
+              color: 'hsl(var(--popover-foreground))',
               fontSize: '12px',
               borderRadius: 'var(--radius)',
-              boxShadow: 'hsl(var(--shadow))'
+              boxShadow: 'hsl(var(--shadow))',
             }}
-            cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+            cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
           />
           <Funnel
             dataKey="value"
@@ -192,4 +190,4 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
       </ResponsiveContainer>
     </div>
   );
-}; 
+};

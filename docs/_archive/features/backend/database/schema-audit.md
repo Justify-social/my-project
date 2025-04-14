@@ -6,62 +6,62 @@
 
 ## Models Overview
 
-| Model | Fields | Has Sample Data |
-| ----- | ------ | --------------- |
-| _originalClient | 0 | ❌ |
-| _middlewares | 0 | ❌ |
-| _extensions | 0 | ❌ |
-| _previewFeatures | 0 | ❌ |
-| _tracingHelper | 0 | ❌ |
-| _runtimeDataModel | 0 | ❌ |
-| _engineConfig | 0 | ❌ |
-| _accelerateEngineConfig | 0 | ❌ |
-| _engine | 0 | ❌ |
-| _requestHandler | 0 | ❌ |
-| _appliedParent | 0 | ❌ |
-| campaignWizard | 0 | ✅ |
-| influencer | 0 | ❌ |
-| wizardHistory | 0 | ❌ |
-| campaignWizardSubmission | 0 | ✅ |
-| primaryContact | 0 | ✅ |
-| secondaryContact | 0 | ✅ |
-| audience | 0 | ✅ |
-| audienceLocation | 0 | ✅ |
-| audienceGender | 0 | ✅ |
-| audienceScreeningQuestion | 0 | ✅ |
-| audienceLanguage | 0 | ✅ |
-| audienceCompetitor | 0 | ✅ |
-| creativeAsset | 0 | ✅ |
-| creativeRequirement | 0 | ✅ |
-| user | 0 | ❌ |
-| notificationPrefs | 0 | ❌ |
-| teamMember | 0 | ❌ |
-| teamInvitation | 0 | ❌ |
-| brandingSettings | 0 | ❌ |
+| Model                     | Fields | Has Sample Data |
+| ------------------------- | ------ | --------------- |
+| \_originalClient          | 0      | ❌              |
+| \_middlewares             | 0      | ❌              |
+| \_extensions              | 0      | ❌              |
+| \_previewFeatures         | 0      | ❌              |
+| \_tracingHelper           | 0      | ❌              |
+| \_runtimeDataModel        | 0      | ❌              |
+| \_engineConfig            | 0      | ❌              |
+| \_accelerateEngineConfig  | 0      | ❌              |
+| \_engine                  | 0      | ❌              |
+| \_requestHandler          | 0      | ❌              |
+| \_appliedParent           | 0      | ❌              |
+| campaignWizard            | 0      | ✅              |
+| influencer                | 0      | ❌              |
+| wizardHistory             | 0      | ❌              |
+| campaignWizardSubmission  | 0      | ✅              |
+| primaryContact            | 0      | ✅              |
+| secondaryContact          | 0      | ✅              |
+| audience                  | 0      | ✅              |
+| audienceLocation          | 0      | ✅              |
+| audienceGender            | 0      | ✅              |
+| audienceScreeningQuestion | 0      | ✅              |
+| audienceLanguage          | 0      | ✅              |
+| audienceCompetitor        | 0      | ✅              |
+| creativeAsset             | 0      | ✅              |
+| creativeRequirement       | 0      | ✅              |
+| user                      | 0      | ❌              |
+| notificationPrefs         | 0      | ❌              |
+| teamMember                | 0      | ❌              |
+| teamInvitation            | 0      | ❌              |
+| brandingSettings          | 0      | ❌              |
 
 ## Detailed Model Information
 
-### _originalClient
+### \_originalClient
 
-### _middlewares
+### \_middlewares
 
-### _extensions
+### \_extensions
 
-### _previewFeatures
+### \_previewFeatures
 
-### _tracingHelper
+### \_tracingHelper
 
-### _runtimeDataModel
+### \_runtimeDataModel
 
-### _engineConfig
+### \_engineConfig
 
-### _accelerateEngineConfig
+### \_accelerateEngineConfig
 
-### _engine
+### \_engine
 
-### _requestHandler
+### \_requestHandler
 
-### _appliedParent
+### \_appliedParent
 
 ### campaignWizard
 
@@ -150,14 +150,8 @@
   "purchaseIntent": "High intent",
   "brandPerception": "Positive perception",
   "primaryKPI": "BRAND_AWARENESS",
-  "secondaryKPIs": [
-    "AD_RECALL",
-    "CONSIDERATION"
-  ],
-  "features": [
-    "CREATIVE_ASSET_TESTING",
-    "BRAND_LIFT"
-  ],
+  "secondaryKPIs": ["AD_RECALL", "CONSIDERATION"],
+  "features": ["CREATIVE_ASSET_TESTING", "BRAND_LIFT"],
   "submissionStatus": "draft",
   "createdAt": "2025-03-05T12:22:57.164Z",
   "userId": null
@@ -201,14 +195,8 @@
   "id": 1,
   "ageRangeMin": 18,
   "ageRangeMax": 35,
-  "keywords": [
-    "social media",
-    "digital marketing"
-  ],
-  "interests": [
-    "fashion",
-    "technology"
-  ],
+  "keywords": ["social media", "digital marketing"],
+  "interests": ["fashion", "technology"],
   "campaignId": 1,
   "age1824": 0,
   "age2534": 0,

@@ -29,12 +29,14 @@ The application uses Auth0 and NextAuth.js for authentication and authorization.
 
 ### Authentication Flow
 
-1. **User Sign-in**: 
+1. **User Sign-in**:
+
    - Users authenticate through Auth0
    - NextAuth.js handles the OAuth flow
    - Upon successful authentication, JWT tokens are issued
 
 2. **Session Management**:
+
    - User sessions are managed using secure HTTP-only cookies
    - JWT tokens contain user ID, role, and permissions
    - Sessions are validated on each API request
@@ -49,10 +51,10 @@ The application uses Auth0 and NextAuth.js for authentication and authorization.
 The authentication is configured in `src/app/api/auth/[...nextauth]/route.ts`:
 
 ```typescript
-import NextAuth from "next-auth";
-import Auth0Provider from "next-auth/providers/auth0";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
+import NextAuth from 'next-auth';
+import Auth0Provider from 'next-auth/providers/auth0';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import { prisma } from '@/lib/prisma';
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -80,12 +82,12 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error",
+    signIn: '/auth/signin',
+    signOut: '/auth/signout',
+    error: '/auth/error',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
@@ -101,38 +103,38 @@ The application uses Next.js middleware to protect routes and validate auth toke
 
 ```typescript
 // middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  
+
   // Public paths - allowed without authentication
-  const publicPaths = ["/auth/signin", "/auth/signup"];
-  
+  const publicPaths = ['/auth/signin', '/auth/signup'];
+
   // Check if path is public
   const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
-  
+
   // Redirect logic
   if (!token && !isPublicPath) {
     // Redirect to signin if not authenticated and path is protected
-    return NextResponse.redirect(new URL("/auth/signin", req.url));
+    return NextResponse.redirect(new URL('/auth/signin', req.url));
   }
-  
+
   // Role-based access control
-  if (token && req.nextUrl.pathname.startsWith("/admin") && token.role !== "ADMIN") {
+  if (token && req.nextUrl.pathname.startsWith('/admin') && token.role !== 'ADMIN') {
     // Redirect to home if trying to access admin routes without admin role
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     // Protect all paths except public assets
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 };
 ```
@@ -142,18 +144,22 @@ export const config = {
 The application employs several security measures:
 
 1. **CORS Configuration**:
+
    - Strict origin validation
    - Allowlist of trusted domains
 
 2. **Rate Limiting**:
+
    - Prevents brute force and DDoS attacks
    - Configured per-endpoint with different thresholds
 
 3. **CSRF Protection**:
+
    - Anti-CSRF tokens for state-changing operations
    - SameSite cookie attributes
 
 4. **Input Validation**:
+
    - Zod for schema validation
    - Sanitization of user inputs
 
@@ -168,11 +174,11 @@ The application employs several security measures:
 
 ```typescript
 // src/app/api/campaigns/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
 
 // Schema validation for campaign creation
 const campaignSchema = z.object({
@@ -199,14 +205,14 @@ export async function GET(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Query parameters
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status");
-    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : 10;
-    const page = searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1;
+    const status = searchParams.get('status');
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10;
+    const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
     const skip = (page - 1) * limit;
 
     // Database query with filters
@@ -220,7 +226,7 @@ export async function GET(req: NextRequest) {
       where,
       take: limit,
       skip,
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: 'desc' },
     });
 
     // Count total for pagination
@@ -236,11 +242,8 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching campaigns:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch campaigns" },
-      { status: 500 }
-    );
+    console.error('Error fetching campaigns:', error);
+    return NextResponse.json({ error: 'Failed to fetch campaigns' }, { status: 500 });
   }
 }
 
@@ -250,7 +253,7 @@ export async function POST(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Parse and validate request body
@@ -271,16 +274,13 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.format() },
+        { error: 'Validation failed', details: error.format() },
         { status: 400 }
       );
     }
 
-    console.error("Error creating campaign:", error);
-    return NextResponse.json(
-      { error: "Failed to create campaign" },
-      { status: 500 }
-    );
+    console.error('Error creating campaign:', error);
+    return NextResponse.json({ error: 'Failed to create campaign' }, { status: 500 });
   }
 }
 ```
@@ -290,37 +290,28 @@ export async function POST(req: NextRequest) {
 ```typescript
 // Example of a utility function to check permissions
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Role-based permission check
-export async function checkPermission(
-  req: NextRequest,
-  allowedRoles: string[]
-) {
+export async function checkPermission(req: NextRequest, allowedRoles: string[]) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session) {
     return {
       hasPermission: false,
-      response: NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
     };
   }
-  
+
   if (!allowedRoles.includes(session.user.role)) {
     return {
       hasPermission: false,
-      response: NextResponse.json(
-        { error: "Forbidden" },
-        { status: 403 }
-      ),
+      response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
     };
   }
-  
+
   return {
     hasPermission: true,
     userId: session.user.id,
@@ -334,6 +325,7 @@ export async function checkPermission(
 The application uses a consistent error handling approach:
 
 1. HTTP Status Codes:
+
    - 200: Success
    - 201: Resource created
    - 400: Bad request (validation errors)
@@ -343,6 +335,7 @@ The application uses a consistent error handling approach:
    - 500: Server error
 
 2. Error Response Format:
+
    ```json
    {
      "error": "Error message",
@@ -363,4 +356,4 @@ The application uses a consistent error handling approach:
        "pages": 10
      }
    }
-   ``` 
+   ```

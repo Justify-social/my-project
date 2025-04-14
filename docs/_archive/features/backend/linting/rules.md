@@ -12,59 +12,60 @@ This document details the linting rules enforced in the Justify.social platform.
 
 ### TypeScript Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `@typescript-eslint/no-explicit-any` | `warn` | Discourages use of the `any` type to maintain type safety |
-| `@typescript-eslint/explicit-function-return-type` | `off` | Return types can be inferred by TypeScript |
-| `@typescript-eslint/explicit-module-boundary-types` | `off` | Parameter types can be inferred in exported functions |
-| `@typescript-eslint/no-unused-vars` | `error` | Prevents unused variables |
-| `@typescript-eslint/no-non-null-assertion` | `warn` | Discourages non-null assertions (`!`) |
-| `@typescript-eslint/no-empty-interface` | `warn` | Prevents empty interfaces |
-| `@typescript-eslint/consistent-type-definitions` | `['error', 'interface']` | Prefer interfaces over type aliases for object definitions |
+| Rule                                                | Configuration            | Description                                                |
+| --------------------------------------------------- | ------------------------ | ---------------------------------------------------------- |
+| `@typescript-eslint/no-explicit-any`                | `warn`                   | Discourages use of the `any` type to maintain type safety  |
+| `@typescript-eslint/explicit-function-return-type`  | `off`                    | Return types can be inferred by TypeScript                 |
+| `@typescript-eslint/explicit-module-boundary-types` | `off`                    | Parameter types can be inferred in exported functions      |
+| `@typescript-eslint/no-unused-vars`                 | `error`                  | Prevents unused variables                                  |
+| `@typescript-eslint/no-non-null-assertion`          | `warn`                   | Discourages non-null assertions (`!`)                      |
+| `@typescript-eslint/no-empty-interface`             | `warn`                   | Prevents empty interfaces                                  |
+| `@typescript-eslint/consistent-type-definitions`    | `['error', 'interface']` | Prefer interfaces over type aliases for object definitions |
 
 ### React Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `react/react-in-jsx-scope` | `off` | Not needed with Next.js |
-| `react/prop-types` | `off` | Using TypeScript for prop validation |
-| `react/display-name` | `error` | Components should have a display name for debugging |
-| `react/no-unescaped-entities` | `error` | Prevents unescaped entities in JSX |
-| `react/no-children-prop` | `error` | Use children as a prop, not as an attribute |
-| `react/jsx-key` | `error` | Elements in iterators require keys |
-| `react/jsx-no-duplicate-props` | `error` | Prevents duplicate props |
+| Rule                           | Configuration | Description                                         |
+| ------------------------------ | ------------- | --------------------------------------------------- |
+| `react/react-in-jsx-scope`     | `off`         | Not needed with Next.js                             |
+| `react/prop-types`             | `off`         | Using TypeScript for prop validation                |
+| `react/display-name`           | `error`       | Components should have a display name for debugging |
+| `react/no-unescaped-entities`  | `error`       | Prevents unescaped entities in JSX                  |
+| `react/no-children-prop`       | `error`       | Use children as a prop, not as an attribute         |
+| `react/jsx-key`                | `error`       | Elements in iterators require keys                  |
+| `react/jsx-no-duplicate-props` | `error`       | Prevents duplicate props                            |
 
 ### React Hooks Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `react-hooks/rules-of-hooks` | `error` | Enforces Rules of Hooks |
-| `react-hooks/exhaustive-deps` | `warn` | Checks effect dependencies |
+| Rule                          | Configuration | Description                |
+| ----------------------------- | ------------- | -------------------------- |
+| `react-hooks/rules-of-hooks`  | `error`       | Enforces Rules of Hooks    |
+| `react-hooks/exhaustive-deps` | `warn`        | Checks effect dependencies |
 
 ### Accessibility Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `jsx-a11y/alt-text` | `error` | Images must have alt text |
-| `jsx-a11y/anchor-has-content` | `error` | Anchors must have content |
-| `jsx-a11y/aria-props` | `error` | ARIA properties must be valid |
-| `jsx-a11y/aria-role` | `error` | ARIA roles must be valid |
-| `jsx-a11y/role-has-required-aria-props` | `error` | Elements with ARIA roles must have required props |
-| `jsx-a11y/tabindex-no-positive` | `warn` | Avoid positive tabindex values |
+| Rule                                    | Configuration | Description                                       |
+| --------------------------------------- | ------------- | ------------------------------------------------- |
+| `jsx-a11y/alt-text`                     | `error`       | Images must have alt text                         |
+| `jsx-a11y/anchor-has-content`           | `error`       | Anchors must have content                         |
+| `jsx-a11y/aria-props`                   | `error`       | ARIA properties must be valid                     |
+| `jsx-a11y/aria-role`                    | `error`       | ARIA roles must be valid                          |
+| `jsx-a11y/role-has-required-aria-props` | `error`       | Elements with ARIA roles must have required props |
+| `jsx-a11y/tabindex-no-positive`         | `warn`        | Avoid positive tabindex values                    |
 
 ### Import Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `import/order` | See below | Enforces import order |
-| `import/no-duplicates` | `error` | Prevents duplicate imports |
-| `import/no-unresolved` | `off` | TypeScript handles this |
-| `import/first` | `error` | Imports must be at the top of the file |
-| `import/newline-after-import` | `error` | Requires a newline after imports |
+| Rule                          | Configuration | Description                            |
+| ----------------------------- | ------------- | -------------------------------------- |
+| `import/order`                | See below     | Enforces import order                  |
+| `import/no-duplicates`        | `error`       | Prevents duplicate imports             |
+| `import/no-unresolved`        | `off`         | TypeScript handles this                |
+| `import/first`                | `error`       | Imports must be at the top of the file |
+| `import/newline-after-import` | `error`       | Requires a newline after imports       |
 
 **Import Order Configuration**:
+
 ```javascript
-'import/order': ['error', { 
+'import/order': ['error', {
   'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
   'newlines-between': 'always',
   'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
@@ -73,23 +74,23 @@ This document details the linting rules enforced in the Justify.social platform.
 
 ### Next.js Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `@next/next/no-img-element` | `warn` | Prefer Next.js Image component |
-| `@next/next/no-html-link-for-pages` | `error` | Use Next.js Link for internal navigation |
-| `@next/next/no-sync-scripts` | `error` | Prevent synchronous scripts |
+| Rule                                | Configuration | Description                              |
+| ----------------------------------- | ------------- | ---------------------------------------- |
+| `@next/next/no-img-element`         | `warn`        | Prefer Next.js Image component           |
+| `@next/next/no-html-link-for-pages` | `error`       | Use Next.js Link for internal navigation |
+| `@next/next/no-sync-scripts`        | `error`       | Prevent synchronous scripts              |
 
 ## Prettier Rules
 
-| Rule | Configuration | Description |
-|------|--------------|-------------|
-| `semi` | `true` | Require semicolons |
-| `trailingComma` | `es5` | Trailing commas where valid in ES5 |
-| `singleQuote` | `true` | Use single quotes |
-| `tabWidth` | `2` | 2 spaces for indentation |
-| `printWidth` | `100` | Line length limit |
-| `bracketSpacing` | `true` | Spaces in object literals |
-| `arrowParens` | `always` | Always include parentheses around arrow function parameters |
+| Rule             | Configuration | Description                                                 |
+| ---------------- | ------------- | ----------------------------------------------------------- |
+| `semi`           | `true`        | Require semicolons                                          |
+| `trailingComma`  | `es5`         | Trailing commas where valid in ES5                          |
+| `singleQuote`    | `true`        | Use single quotes                                           |
+| `tabWidth`       | `2`           | 2 spaces for indentation                                    |
+| `printWidth`     | `100`         | Line length limit                                           |
+| `bracketSpacing` | `true`        | Spaces in object literals                                   |
+| `arrowParens`    | `always`      | Always include parentheses around arrow function parameters |
 
 ## Custom Rules
 
@@ -151,4 +152,4 @@ After making changes, run `npm run lint` to verify that the rules are applied co
 
 - [Linting Overview](./overview.md)
 - [Linting Improvement Plan](./improvement-plan.md)
-- [Development Workflow](../../guides/developer/workflow.md) 
+- [Development Workflow](../../guides/developer/workflow.md)

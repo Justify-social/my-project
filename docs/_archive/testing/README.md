@@ -3,6 +3,7 @@
 This document provides comprehensive guidance for writing and running tests in our project. Following these guidelines ensures consistent test quality and maintainability.
 
 ## Table of Contents
+
 - [Testing Philosophy](#testing-philosophy)
 - [Test Directory Structure](#test-directory-structure)
 - [Testing Tools](#testing-tools)
@@ -73,12 +74,14 @@ Our testing stack includes:
 Unit tests verify that individual functions or components work correctly in isolation.
 
 **Best for**:
+
 - Pure functions
 - Utility functions
 - Hooks
 - Small, isolated components
 
 **Example**:
+
 ```typescript
 // utils/formatDate.test.ts
 import { formatDate } from './formatDate';
@@ -100,12 +103,14 @@ describe('formatDate', () => {
 Integration tests verify that multiple units work together correctly.
 
 **Best for**:
+
 - Feature components
 - API endpoints
 - State management
 - Form submissions
 
 **Example**:
+
 ```typescript
 // features/auth/LoginForm.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -115,23 +120,23 @@ import { AuthProvider } from '@/contexts/auth';
 describe('LoginForm', () => {
   it('submits the form with user credentials', async () => {
     const mockLogin = jest.fn().mockResolvedValue({ success: true });
-    
+
     render(
       <AuthProvider loginFn={mockLogin}>
         <LoginForm />
       </AuthProvider>
     );
-    
+
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: 'user@example.com' }
     });
-    
+
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'password123' }
     });
-    
+
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
-    
+
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith({
         email: 'user@example.com',
@@ -147,11 +152,13 @@ describe('LoginForm', () => {
 E2E tests verify that complete user flows work correctly from start to finish.
 
 **Best for**:
+
 - Critical user journeys
 - Business processes
 - Multi-step workflows
 
 **Example**:
+
 ```typescript
 // cypress/integration/campaigns/create-campaign.spec.ts
 describe('Campaign Creation', () => {
@@ -165,15 +172,15 @@ describe('Campaign Creation', () => {
     cy.getByTestId('campaign-name').type('Test Campaign');
     cy.getByTestId('campaign-goal').type('Increase brand awareness');
     cy.getByTestId('next-button').click();
-    
+
     // Step 2: Fill out audience information
     cy.getByTestId('target-audience').type('Young professionals');
     cy.getByTestId('next-button').click();
-    
+
     // Step 3: Fill out budget information
     cy.getByTestId('budget-amount').type('10000');
     cy.getByTestId('submit-button').click();
-    
+
     // Assert: Campaign created
     cy.url().should('include', '/campaigns');
     cy.contains('Campaign created successfully');
@@ -196,11 +203,13 @@ describe('ComponentName', () => {
   describe('behavior category', () => {
     it('should do something specific', () => {
       // Arrange
-      const props = { /* ... */ };
-      
+      const props = {
+        /* ... */
+      };
+
       // Act
       const { result } = renderHook(() => useMyHook(props));
-      
+
       // Assert
       expect(result.current).toEqual(expectedValue);
     });
@@ -217,10 +226,10 @@ describe('FeatureName', () => {
   it('allows the user to complete a specific task', async () => {
     // Arrange
     render(<ComponentWithProviders />);
-    
+
     // Act: User interactions
     userEvent.click(screen.getByText('Submit'));
-    
+
     // Assert: Expected outcomes
     await waitFor(() => {
       expect(screen.getByText('Success')).toBeInTheDocument();
@@ -237,15 +246,15 @@ describe('FeatureName', () => {
 it('loads data asynchronously', async () => {
   // Arrange
   render(<AsyncComponent />);
-  
+
   // Assert initial loading state
   expect(screen.getByText('Loading...')).toBeInTheDocument();
-  
+
   // Wait for data to load
   await waitFor(() => {
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
   });
-  
+
   // Assert loaded state
   expect(screen.getByText('Data loaded')).toBeInTheDocument();
 });
@@ -261,14 +270,14 @@ it('handles errors gracefully', async () => {
       return res(ctx.status(500));
     })
   );
-  
+
   render(<DataFetchingComponent />);
-  
+
   // Wait for error state
   await waitFor(() => {
     expect(screen.getByText('Error loading data')).toBeInTheDocument();
   });
-  
+
   // Assert that retry mechanism is available
   expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
 });
@@ -320,6 +329,7 @@ npm run test:coverage
 ### Do's and Don'ts
 
 ✅ **Do**:
+
 - Test from the user's perspective
 - Use meaningful test and variable names
 - Keep tests independent and isolated
@@ -327,6 +337,7 @@ npm run test:coverage
 - Clean up after tests (restore mocks, clear state)
 
 ❌ **Don't**:
+
 - Test implementation details
 - Use unnecessary mocks
 - Write brittle tests that break with minor changes
@@ -361,15 +372,12 @@ const submitButton = screen.getByTestId('submit-button');
 ```typescript
 // Mocking a module
 jest.mock('@/services/api', () => ({
-  fetchData: jest.fn().mockResolvedValue({ data: 'test' })
+  fetchData: jest.fn().mockResolvedValue({ data: 'test' }),
 }));
 
 // Mocking with MSW
 rest.get('/api/user', (req, res, ctx) => {
-  return res(
-    ctx.status(200),
-    ctx.json({ id: 1, name: 'Test User' })
-  );
+  return res(ctx.status(200), ctx.json({ id: 1, name: 'Test User' }));
 });
 ```
 
@@ -378,6 +386,7 @@ rest.get('/api/user', (req, res, ctx) => {
 ### Cypress Best Practices
 
 1. **Use custom commands** for repeated actions:
+
 ```typescript
 // cypress/support/commands.ts
 Cypress.Commands.add('login', (email = 'user@example.com', password = 'password') => {
@@ -390,6 +399,7 @@ Cypress.Commands.add('login', (email = 'user@example.com', password = 'password'
 ```
 
 2. **Use data attributes** for selecting elements:
+
 ```html
 <button data-testid="submit-button">Submit</button>
 ```
@@ -399,6 +409,7 @@ cy.get('[data-testid=submit-button]').click();
 ```
 
 3. **Properly handle async operations**:
+
 ```typescript
 cy.intercept('POST', '/api/campaigns').as('createCampaign');
 cy.get('[data-testid=submit-button]').click();
@@ -418,6 +429,7 @@ cy.get('[data-testid=success-message]').should('be.visible');
 ### Test Refactoring
 
 When refactoring tests:
+
 1. Ensure they still test the same behavior
 2. Improve readability and maintainability
 3. Remove duplication by extracting common setup
@@ -427,4 +439,4 @@ When refactoring tests:
 
 Following these testing guidelines will help ensure our tests are reliable, maintainable, and valuable. Remember that tests are also code and deserve the same level of care and attention as production code.
 
-If you have questions or suggestions for improving this guide, please open an issue or pull request. 
+If you have questions or suggestions for improving this guide, please open an issue or pull request.

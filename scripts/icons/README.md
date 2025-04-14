@@ -4,29 +4,30 @@ This directory contains essential icon management, validation, and processing sc
 
 ## Available Scripts
 
-| Script | Purpose | When to Use |
-|--------|---------|-------------|
-| `download-light-icons.mjs` | Downloads light icons from FontAwesome | When adding new light icons |
-| `download-solid-icons.mjs` | Downloads solid icons from FontAwesome | When adding new solid icons |
-| `download-brands-icons.mjs` | Downloads brand icons from FontAwesome | When adding new brand icons |
-| `check-light-icons.mjs` | Validates light icon registry | After modifying light icons |
-| `check-solid-icons.mjs` | Validates solid icon registry | After modifying solid icons |
-| `validate-solid-registry.mjs` | Deep validation of solid registry | Quality assurance |
-| `validate-icon-registry.js` | Validates all registry files for required fields | Periodic validation checks |
-| `validate-id-ssot.mjs` | Verifies SSOT compliance | During code reviews |
-| `lock-registry-files.sh` | Secures registry files as read-only | After any registry modifications |
-| `merge-icon-registries.mjs` | Merges icons from staging to main registries | When new icons are ready for production |
-| `audit-icons.mjs` | Audits icon usage across codebase | Quarterly maintenance |
-| `audit-icon-usage.mjs` | Detailed icon usage analysis | When optimizing icon use |
-| `eslint-rule-icon-id.js` | ESLint rule for iconId usage | Integrated with lint process |
-| `scan-icon-references.js` | Scans for modern icon references | During code maintenance |
-| `verify-icon-rendering.mjs` | Tests icon rendering | When debugging icon issues |
-| `fix-icon-imports.sh` | Fixes incorrect icon import paths | When refactoring components |
-| `update-icon-imports.sh` | Updates icon import patterns | During codebase standardization |
+| Script                        | Purpose                                          | When to Use                             |
+| ----------------------------- | ------------------------------------------------ | --------------------------------------- |
+| `download-light-icons.mjs`    | Downloads light icons from FontAwesome           | When adding new light icons             |
+| `download-solid-icons.mjs`    | Downloads solid icons from FontAwesome           | When adding new solid icons             |
+| `download-brands-icons.mjs`   | Downloads brand icons from FontAwesome           | When adding new brand icons             |
+| `check-light-icons.mjs`       | Validates light icon registry                    | After modifying light icons             |
+| `check-solid-icons.mjs`       | Validates solid icon registry                    | After modifying solid icons             |
+| `validate-solid-registry.mjs` | Deep validation of solid registry                | Quality assurance                       |
+| `validate-icon-registry.js`   | Validates all registry files for required fields | Periodic validation checks              |
+| `validate-id-ssot.mjs`        | Verifies SSOT compliance                         | During code reviews                     |
+| `lock-registry-files.sh`      | Secures registry files as read-only              | After any registry modifications        |
+| `merge-icon-registries.mjs`   | Merges icons from staging to main registries     | When new icons are ready for production |
+| `audit-icons.mjs`             | Audits icon usage across codebase                | Quarterly maintenance                   |
+| `audit-icon-usage.mjs`        | Detailed icon usage analysis                     | When optimizing icon use                |
+| `eslint-rule-icon-id.js`      | ESLint rule for iconId usage                     | Integrated with lint process            |
+| `scan-icon-references.js`     | Scans for modern icon references                 | During code maintenance                 |
+| `verify-icon-rendering.mjs`   | Tests icon rendering                             | When debugging icon issues              |
+| `fix-icon-imports.sh`         | Fixes incorrect icon import paths                | When refactoring components             |
+| `update-icon-imports.sh`      | Updates icon import patterns                     | During codebase standardization         |
 
 ## Icon Registry SSOT
 
 All icon registry files follow the SSOT pattern and are securely stored in:
+
 - `public/static/app-icon-registry.json` - Application icons
 - `public/static/brands-icon-registry.json` - Brand icons
 - `public/static/kpis-icon-registry.json` - KPI icons
@@ -34,6 +35,7 @@ All icon registry files follow the SSOT pattern and are securely stored in:
 - `public/static/solid-icon-registry.json` - Solid variant icons
 
 Additionally, we have staging registries for new icons:
+
 - `public/static/new-light-icon-registry.json` - New light icons pending addition
 - `public/static/new-solid-icon-registry.json` - New solid icons pending addition
 

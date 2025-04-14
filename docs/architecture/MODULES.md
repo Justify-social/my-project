@@ -26,6 +26,7 @@ src/
 ### Data Flow
 
 1. **Client Request Flow:**
+
    - User interactions trigger component actions
    - Components use hooks/contexts to access state
    - API requests are made through services
@@ -60,12 +61,14 @@ graph TD
 Components are organized into three main categories:
 
 1. **UI Components** (`/components/ui/`):
+
    - Pure presentation components
    - No business logic
    - Highly reusable
    - Styled with Tailwind CSS
 
 2. **Feature Components** (`/components/features/`):
+
    - Implement specific business capabilities
    - Can contain business logic
    - Typically domain-specific
@@ -112,12 +115,14 @@ The application uses a combination of state management approaches:
 ### API Routes (`/app/api/`)
 
 API routes follow a structured pattern:
+
 - Route handlers in appropriate directories
 - Schema validation using Zod
 - Consistent error handling
 - Clear separation of validation and business logic
 
 Example route structure:
+
 ```
 api/
 ├── auth/
@@ -174,12 +179,12 @@ try {
     { context: 'relevant context' },
     error instanceof Error ? error : new Error(String(error))
   );
-  
+
   // Standard error response
   return {
     success: false,
     error: 'User-friendly error message',
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
   };
 }
 ```
@@ -188,8 +193,8 @@ try {
 
 ```typescript
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email is required")
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Valid email is required'),
 });
 
 const validationResult = schema.safeParse(data);
@@ -214,7 +219,8 @@ To maintain a clean architecture, these dependencies are enforced:
 ## Conclusion
 
 This architectural approach ensures:
+
 1. **Scalability** - New features can be added without disrupting existing ones
 2. **Maintainability** - Code is organized in a predictable way
 3. **Testability** - Components and services can be tested in isolation
-4. **Developer Experience** - Clear patterns make onboarding easier 
+4. **Developer Experience** - Clear patterns make onboarding easier

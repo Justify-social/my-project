@@ -16,7 +16,7 @@ Always use transactions for operations that modify multiple related records:
 
 ```typescript
 // Example of using transactions
-const result = await prisma.$transaction(async (tx) => {
+const result = await prisma.$transaction(async tx => {
   // Create campaign
   const campaign = await tx.campaignWizard.create({
     data: {
@@ -24,9 +24,9 @@ const result = await prisma.$transaction(async (tx) => {
       startDate: new Date(),
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       // other fields...
-    }
+    },
   });
-  
+
   // Create related influencer in the same transaction
   const influencer = await tx.influencer.create({
     data: {
@@ -34,9 +34,9 @@ const result = await prisma.$transaction(async (tx) => {
       platform: 'INSTAGRAM',
       handle: '@example',
       // other fields...
-    }
+    },
   });
-  
+
   return { campaign, influencer };
 });
 ```
@@ -50,7 +50,7 @@ try {
   const result = await prisma.campaignWizard.create({
     data: {
       // data fields...
-    }
+    },
   });
   return result;
 } catch (error) {
@@ -76,8 +76,8 @@ const campaigns = await prisma.campaignWizard.findMany({
     name: true,
     startDate: true,
     endDate: true,
-    status: true
-  }
+    status: true,
+  },
 });
 ```
 
@@ -93,8 +93,8 @@ const campaigns = await prisma.campaignWizard.findMany({
   skip: (page - 1) * pageSize,
   take: pageSize,
   orderBy: {
-    createdAt: 'desc'
-  }
+    createdAt: 'desc',
+  },
 });
 
 const total = await prisma.campaignWizard.count();
@@ -117,7 +117,7 @@ const campaign = await prisma.campaignWizard.create({
     status: 'DRAFT',
     step1Complete: true,
     // other fields...
-  }
+  },
 });
 ```
 
@@ -129,7 +129,7 @@ const campaign = await prisma.campaignWizard.create({
   data: {
     name: 'Campaign with Relations',
     // other campaign fields...
-    
+
     // Create influencer at the same time
     influencers: {
       create: [
@@ -137,10 +137,10 @@ const campaign = await prisma.campaignWizard.create({
           platform: 'INSTAGRAM',
           handle: '@influencer1',
           // other influencer fields...
-        }
-      ]
-    }
-  }
+        },
+      ],
+    },
+  },
 });
 ```
 
@@ -150,12 +150,12 @@ const campaign = await prisma.campaignWizard.create({
 // Update a campaign
 const updatedCampaign = await prisma.campaignWizard.update({
   where: {
-    id: 'campaign-id'
+    id: 'campaign-id',
   },
   data: {
     name: 'Updated Campaign Name',
-    status: 'IN_REVIEW'
-  }
+    status: 'IN_REVIEW',
+  },
 });
 ```
 
@@ -167,15 +167,15 @@ const campaigns = await prisma.campaignWizard.findMany({
   where: {
     status: 'DRAFT',
     startDate: {
-      gte: new Date()
-    }
+      gte: new Date(),
+    },
   },
   orderBy: {
-    createdAt: 'desc'
+    createdAt: 'desc',
   },
   include: {
-    influencers: true
-  }
+    influencers: true,
+  },
 });
 ```
 
@@ -185,8 +185,8 @@ const campaigns = await prisma.campaignWizard.findMany({
 // Delete a campaign
 const deletedCampaign = await prisma.campaignWizard.delete({
   where: {
-    id: 'campaign-id'
-  }
+    id: 'campaign-id',
+  },
 });
 ```
 
@@ -204,4 +204,4 @@ See the [Database Health Check API](../../features-frontend/admin/database-healt
 ## Related Documentation
 
 - [Database Schema](./schema.md)
-- [Architecture Overview](../architecture/overview.md) 
+- [Architecture Overview](../architecture/overview.md)

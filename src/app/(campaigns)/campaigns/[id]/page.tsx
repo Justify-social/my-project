@@ -12,23 +12,33 @@ import ErrorFallback from '@/components/features/core/error-handling/ErrorFallba
 import Skeleton from '@/components/ui/loading-skeleton';
 import Image from 'next/image';
 import { Icon } from '@/components/ui/icon/icon';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui";
-import { Button } from "@/components/ui";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui';
+import { Button } from '@/components/ui';
 
 // Define types locally instead of importing
 // These will be used to define our component props and state
 enum Currency {
   USD = 'USD',
   EUR = 'EUR',
-  GBP = 'GBP'
+  GBP = 'GBP',
 }
 
 enum Platform {
   Instagram = 'Instagram',
   YouTube = 'YouTube',
-  TikTok = 'TikTok'
+  TikTok = 'TikTok',
 }
 
 enum Position {
@@ -37,7 +47,7 @@ enum Position {
   CMO = 'CMO',
   Marketing = 'Marketing',
   Manager = 'Manager',
-  Other = 'Other'
+  Other = 'Other',
 }
 
 // Define UI_ICON_MAP for use in the component
@@ -62,7 +72,7 @@ enum Position {
 // };
 
 // Import the asset components
-import { AssetCard } from '@/components/ui/card-asset'
+import { AssetCard } from '@/components/ui/card-asset';
 
 // Remove local enum definitions that conflict with imported ones
 // Only keep non-conflicting enums
@@ -150,7 +160,7 @@ interface CampaignDetail {
   // Creative Assets
   creativeAssets: Array<{
     name: string;
-    type: "image" | "video";
+    type: 'image' | 'video';
     url: string;
     size?: number;
     duration?: number;
@@ -211,7 +221,8 @@ interface APICampaignResponse {
     position: string;
   };
   // Update to reflect actual usage in processing logic
-  demographics?: { // Optional based on usage like result.demographics?.
+  demographics?: {
+    // Optional based on usage like result.demographics?.
     ageDistribution?: Record<string, number>;
     gender?: string[];
     educationLevel?: string;
@@ -219,7 +230,8 @@ interface APICampaignResponse {
     jobTitles?: string[];
   };
   locations?: Array<{ location?: string }>; // Based on result.locations.map((loc: any) => loc.location || '')
-  targeting?: { // Based on result.targeting?.languages
+  targeting?: {
+    // Based on result.targeting?.languages
     languages?: Array<{ language?: string }>;
   };
   // audience: null | {}; // Removed based on usage, fields seem top-level
@@ -231,33 +243,33 @@ interface APICampaignResponse {
 const fadeIn = {
   initial: {
     opacity: 0,
-    y: 20
+    y: 20,
   },
   animate: {
     opacity: 1,
-    y: 0
+    y: 0,
   },
   exit: {
     opacity: 0,
-    y: -20
-  }
+    y: -20,
+  },
 };
 const slideIn = {
   initial: {
     x: -20,
-    opacity: 0
+    opacity: 0,
   },
   animate: {
     x: 0,
-    opacity: 1
+    opacity: 1,
   },
   exit: {
     x: 20,
-    opacity: 0
-  }
+    opacity: 0,
+  },
 };
 
-// --- REMOVE START --- 
+// --- REMOVE START ---
 // Add a KPI mapping with icons
 // const kpiIconsMap = {
 //   adRecall: {
@@ -317,18 +329,21 @@ const slideIn = {
 //     icon: "/icons/app/MMM.svg"
 //   }
 // };
-// --- REMOVE END --- 
+// --- REMOVE END ---
 
 // Format feature name for display - REMOVE MAP USAGE
 const formatFeatureName = (feature: string): string => {
-  if (!feature) return "N/A";
-  return feature.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  if (!feature) return 'N/A';
+  return feature
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, char => char.toUpperCase());
 };
 
 // Format KPI name for display - REMOVE MAP USAGE
 const formatKpiName = (kpi: string): string => {
-  if (!kpi) return "N/A";
-  return kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+  if (!kpi) return 'N/A';
+  return kpi.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
 };
 
 // Updated MetricCard component
@@ -336,9 +351,9 @@ interface MetricCardProps {
   title: string;
   value: string | number;
   iconId?: string;
-  trend?: "up" | "down" | "none";
+  trend?: 'up' | 'down' | 'none';
   subtext?: string;
-  format?: "number" | "currency" | "percent" | "text";
+  format?: 'number' | 'currency' | 'percent' | 'text';
   // REMOVE platformIcon PROP
 }
 
@@ -346,59 +361,63 @@ const CampaignMetricCard = ({
   title,
   value,
   iconId,
-  trend = "none",
+  trend = 'none',
   subtext,
-  format = "text",
+  format = 'text',
   // REMOVE platformIcon PROP
 }: MetricCardProps) => {
   // Format the value based on the format prop
   let formattedValue = value;
-  if (format === "currency" && typeof value === "number") {
+  if (format === 'currency' && typeof value === 'number') {
     formattedValue = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
     }).format(value);
-  } else if (format === "percent" && typeof value === "number") {
+  } else if (format === 'percent' && typeof value === 'number') {
     formattedValue = formatPercentage(value);
-  } else if (format === "number" && typeof value === "number") {
+  } else if (format === 'number' && typeof value === 'number') {
     formattedValue = new Intl.NumberFormat('en-US').format(value);
   }
 
   // Determine trend arrow and color
   let trendIcon = null;
-  let trendColor = "text-gray-500";
-  if (trend === "up") {
+  let trendColor = 'text-gray-500';
+  if (trend === 'up') {
     trendIcon = <Icon iconId="faArrowUpLight" className="inline-block h-4 w-4 ml-1" />;
-    trendColor = "text-green-600";
-  } else if (trend === "down") {
+    trendColor = 'text-green-600';
+  } else if (trend === 'down') {
     trendIcon = <Icon iconId="faArrowDownLight" className="inline-block h-4 w-4 ml-1" />;
-    trendColor = "text-red-600";
+    trendColor = 'text-red-600';
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)] font-work-sans transform transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-[var(--accent-color)]">
-      <div className="flex justify-between items-start font-work-sans">
-        <div className="font-work-sans">
-          <div className="text-[var(--secondary-color)] text-sm mb-2 font-work-sans">{title}</div>
-          <div className="text-2xl font-semibold text-[var(--primary-color)] flex items-center font-sora">
-            {title === "Platform" && typeof value === 'string' ? (
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-[var(--divider-color)] font-body transform transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-[var(--accent-color)]">
+      <div className="flex justify-between items-start font-body">
+        <div className="font-body">
+          <div className="text-[var(--secondary-color)] text-sm mb-2 font-body">{title}</div>
+          <div className="text-2xl font-semibold text-[var(--primary-color)] flex items-center font-heading">
+            {title === 'Platform' && typeof value === 'string' ? (
               <div className="flex items-center">
                 {value}
-                <span className={`${trendColor} font-work-sans ml-1`}>{trendIcon}</span>
+                <span className={`${trendColor} font-body ml-1`}>{trendIcon}</span>
               </div>
             ) : (
               <>
                 {formattedValue}
-                <span className={`${trendColor} font-work-sans ml-1`}>{trendIcon}</span>
+                <span className={`${trendColor} font-body ml-1`}>{trendIcon}</span>
               </>
             )}
           </div>
-          {subtext && <div className="text-xs text-[var(--secondary-color)] mt-1 font-work-sans">{subtext}</div>}
+          {subtext && (
+            <div className="text-xs text-[var(--secondary-color)] mt-1 font-body">
+              {subtext}
+            </div>
+          )}
         </div>
-        <div className="p-3 bg-[rgba(0,191,255,0.1)] rounded-full font-work-sans">
+        <div className="p-3 bg-[rgba(0,191,255,0.1)] rounded-full font-body">
           {/* Ensure Icon uses iconId directly */}
           <Icon
-            iconId={iconId || "faQuestionCircleLight"}
+            iconId={iconId || 'faQuestionCircleLight'}
             className="h-5 w-5 text-[var(--accent-color)]"
           />
         </div>
@@ -423,30 +442,32 @@ const DataCard: React.FC<DataCardProps> = ({
   iconId, // Use iconId directly
   children,
   className = '',
-  actions
+  actions,
 }) => (
   <Card className={`overflow-hidden ${className}`}>
     <CardHeader className="border-b border-[var(--divider-color)] bg-white px-4 py-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center">
         <div className="bg-[rgba(0,191,255,0.1)] p-2 rounded-md mr-3">
           <Icon
-            iconId={iconId || "faQuestionCircleLight"} // Use iconId, provide a default fallback
+            iconId={iconId || 'faQuestionCircleLight'} // Use iconId, provide a default fallback
             className="h-5 w-5 text-[var(--accent-color)]"
             aria-hidden="true"
           />
         </div>
         <div>
-          <CardTitle className="text-[var(--primary-color)] font-semibold font-sora">{title}</CardTitle>
-          {description && <CardDescription className="text-[var(--secondary-color)] text-sm mt-1">{description}</CardDescription>}
+          <CardTitle className="text-[var(--primary-color)] font-semibold font-heading">
+            {title}
+          </CardTitle>
+          {description && (
+            <CardDescription className="text-[var(--secondary-color)] text-sm mt-1">
+              {description}
+            </CardDescription>
+          )}
         </div>
       </div>
-      {actions && <div className="flex space-x-2">
-        {actions}
-      </div>}
+      {actions && <div className="flex space-x-2">{actions}</div>}
     </CardHeader>
-    <CardContent className="px-4 py-5 sm:p-6 bg-white">
-      {children}
-    </CardContent>
+    <CardContent className="px-4 py-5 sm:p-6 bg-white">{children}</CardContent>
   </Card>
 );
 
@@ -464,75 +485,85 @@ const DataRow = ({
   value,
   iconId, // Use iconId directly
   tooltip,
-  featured = false
-}: DataRowProps) => <div className={`flex ${featured ? 'py-3' : 'py-2'} font-work-sans`}>
-    <div className="w-1/3 flex-shrink-0 font-work-sans">
-      <div className="flex items-center text-[var(--secondary-color)] font-work-sans">
+  featured = false,
+}: DataRowProps) => (
+  <div className={`flex ${featured ? 'py-3' : 'py-2'} font-body`}>
+    <div className="w-1/3 flex-shrink-0 font-body">
+      <div className="flex items-center text-[var(--secondary-color)] font-body">
         {/* Use iconId directly */}
-        {iconId && <span className="mr-2 flex-shrink-0 font-work-sans">
-          <Icon
-            iconId={iconId}
-            className="h-4 w-4"
-          />
-        </span>}
-        <span className={`${featured ? 'font-medium' : ''} font-work-sans`}>{label}</span>
-        {tooltip && <span className="ml-1 cursor-help font-work-sans" title={tooltip}>
-          {/* Assuming faCircleInfoLight exists */}
-          {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-work-sans" />}
-        </span>}
+        {iconId && (
+          <span className="mr-2 flex-shrink-0 font-body">
+            <Icon iconId={iconId} className="h-4 w-4" />
+          </span>
+        )}
+        <span className={`${featured ? 'font-medium' : ''} font-body`}>{label}</span>
+        {tooltip && (
+          <span className="ml-1 cursor-help font-body" title={tooltip}>
+            {/* Assuming faCircleInfoLight exists */}
+            {<Icon iconId="faCircleInfoLight" className="h-4 w-4 text-gray-400 font-body" />}
+          </span>
+        )}
       </div>
     </div>
-    <div className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'} font-work-sans`}>
+    <div
+      className={`w-2/3 ${featured ? 'font-semibold text-[var(--primary-color)]' : 'text-[var(--secondary-color)]'} font-body`}
+    >
       {value}
     </div>
-  </div>;
+  </div>
+);
 
 // Add new components for enhanced sections
 const AudienceSection: React.FC<{
   audience: CampaignDetail['audience'] | null;
-}> = ({
-  audience
-}) => {
-    if (!audience) return null;
+}> = ({ audience }) => {
+  if (!audience) return null;
 
-    // Helper function to get audience percentage for visualization
-    const getAgePercentage = (value: string): number => {
-      if (value.includes('+')) {
-        return 100; // Full for 65+
-      }
-      const parts = value.split('-');
-      if (parts.length === 2) {
-        return ((parseInt(parts[0]) + parseInt(parts[1])) / 2) / 65 * 100; // Normalize to percentage
-      }
-      return 0;
-    };
+  // Helper function to get audience percentage for visualization
+  const getAgePercentage = (value: string): number => {
+    if (value.includes('+')) {
+      return 100; // Full for 65+
+    }
+    const parts = value.split('-');
+    if (parts.length === 2) {
+      return ((parseInt(parts[0]) + parseInt(parts[1])) / 2 / 65) * 100; // Normalize to percentage
+    }
+    return 0;
+  };
 
-    // Sorting age ranges by their numeric value
-    const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort((a, b) => {
-      const aValue = parseInt(a.split('-')[0] || a.replace('+', ''));
-      const bValue = parseInt(b.split('-')[0] || b.replace('+', ''));
-      return aValue - bValue;
-    });
+  // Sorting age ranges by their numeric value
+  const sortedAgeRanges = [...(audience.demographics.ageRange || [])].sort((a, b) => {
+    const aValue = parseInt(a.split('-')[0] || a.replace('+', ''));
+    const bValue = parseInt(b.split('-')[0] || b.replace('+', ''));
+    return aValue - bValue;
+  });
 
-    return <DataCard title="Audience Demographics" iconId="faUserGroupLight" description="Target audience information for this campaign">
-      <div className="space-y-6 font-work-sans">
+  return (
+    <DataCard
+      title="Audience Demographics"
+      iconId="faUserGroupLight"
+      description="Target audience information for this campaign"
+    >
+      <div className="space-y-6 font-body">
         {/* Demographics Section */}
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-start mb-4">
             <Icon iconId="faUserLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
-            <h3 className="font-medium text-gray-800 font-sora">Demographics</h3>
+            <h3 className="font-medium text-gray-800 font-heading">Demographics</h3>
           </div>
 
           {/* Age Range */}
           <div className="mb-5">
-            <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Age Range</h4>
+            <h4 className="text-gray-700 font-medium mb-3 text-sm font-heading">Age Range</h4>
             <div className="grid grid-cols-6 gap-1">
-              {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map((range) => (
+              {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => (
                 <div
                   key={range}
-                  className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range)
-                    ? 'bg-[var(--accent-color)] text-white font-medium'
-                    : 'bg-gray-100 text-gray-500'}`}
+                  className={`text-center py-1.5 text-xs rounded ${
+                    sortedAgeRanges.includes(range)
+                      ? 'bg-[var(--accent-color)] text-white font-medium'
+                      : 'bg-gray-100 text-gray-500'
+                  }`}
                 >
                   {range}
                 </div>
@@ -542,11 +573,14 @@ const AudienceSection: React.FC<{
 
           {/* Gender */}
           <div className="mb-5">
-            <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Gender</h4>
+            <h4 className="text-gray-700 font-medium mb-3 text-sm font-heading">Gender</h4>
             <div className="flex flex-wrap gap-2">
               {audience.demographics.gender && audience.demographics.gender.length > 0 ? (
                 audience.demographics.gender.map((gender, idx) => (
-                  <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                  <span
+                    key={idx}
+                    className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm"
+                  >
                     {gender}
                   </span>
                 ))
@@ -558,17 +592,27 @@ const AudienceSection: React.FC<{
 
           {/* Education */}
           <div className="mb-5">
-            <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Education Level</h4>
+            <h4 className="text-gray-700 font-medium mb-3 text-sm font-heading">Education Level</h4>
             <div className="flex flex-wrap gap-2">
               {audience.demographics.education && audience.demographics.education.length > 0 ? (
                 audience.demographics.education.map((education, idx) => (
-                  <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
-                    {education === 'some_college' ? 'Some College' :
-                      education === 'professional' ? 'Professional Degree' :
-                        education === 'bachelors' ? 'Bachelor\'s Degree' :
-                          education === 'associates' ? 'Associate\'s Degree' :
-                            education === 'high_school' ? 'High School' :
-                              education === 'graduate' ? 'Graduate Degree' : education}
+                  <span
+                    key={idx}
+                    className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm"
+                  >
+                    {education === 'some_college'
+                      ? 'Some College'
+                      : education === 'professional'
+                        ? 'Professional Degree'
+                        : education === 'bachelors'
+                          ? "Bachelor's Degree"
+                          : education === 'associates'
+                            ? "Associate's Degree"
+                            : education === 'high_school'
+                              ? 'High School'
+                              : education === 'graduate'
+                                ? 'Graduate Degree'
+                                : education}
                   </span>
                 ))
               ) : (
@@ -582,16 +626,19 @@ const AudienceSection: React.FC<{
         <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-start mb-4">
             <Icon iconId="faMapLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
-            <h3 className="font-medium text-gray-800 font-sora">Location</h3>
+            <h3 className="font-medium text-gray-800 font-heading">Location</h3>
           </div>
 
           {/* Locations */}
           <div className="mb-5">
-            <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Locations</h4>
+            <h4 className="text-gray-700 font-medium mb-3 text-sm font-heading">Locations</h4>
             <div className="flex flex-wrap gap-2">
               {audience.demographics.locations && audience.demographics.locations.length > 0 ? (
                 audience.demographics.locations.map((location, idx) => (
-                  <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                  <span
+                    key={idx}
+                    className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm"
+                  >
                     {location}
                   </span>
                 ))
@@ -603,11 +650,14 @@ const AudienceSection: React.FC<{
 
           {/* Languages */}
           <div className="mb-5">
-            <h4 className="text-gray-700 font-medium mb-3 text-sm font-sora">Languages</h4>
+            <h4 className="text-gray-700 font-medium mb-3 text-sm font-heading">Languages</h4>
             <div className="flex flex-wrap gap-2">
               {audience.demographics.languages && audience.demographics.languages.length > 0 ? (
                 audience.demographics.languages.map((language, idx) => (
-                  <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                  <span
+                    key={idx}
+                    className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm"
+                  >
                     {language}
                   </span>
                 ))
@@ -622,13 +672,19 @@ const AudienceSection: React.FC<{
         {audience.demographics.interests && audience.demographics.interests.length > 0 && (
           <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
             <div className="flex items-start mb-4">
-              <Icon iconId="faChartPieLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5" />
-              <h3 className="font-medium text-gray-800 font-sora">Interests & Job Titles</h3>
+              <Icon
+                iconId="faChartPieLight"
+                className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5"
+              />
+              <h3 className="font-medium text-gray-800 font-heading">Interests & Job Titles</h3>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {audience.demographics.interests.map((interest, idx) => (
-                <span key={idx} className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm">
+                <span
+                  key={idx}
+                  className="bg-[rgba(0,191,255,0.1)] text-[var(--accent-color)] px-3 py-1 rounded-full text-sm"
+                >
                   {interest}
                 </span>
               ))}
@@ -636,18 +692,24 @@ const AudienceSection: React.FC<{
           </div>
         )}
       </div>
-    </DataCard>;
-  };
+    </DataCard>
+  );
+};
 
-// Add this Step5-style Asset Preview component 
+// Add this Step5-style Asset Preview component
 const CampaignDetailAssetPreview = ({
   url,
   fileName,
   type,
-  className = ''
-}: { url: string; fileName: string; type: string; className?: string; }) => {
-  const isVideo = type === 'video' || typeof type === 'string' && type.includes('video');
-  const isImage = type === 'image' || typeof type === 'string' && type.includes('image');
+  className = '',
+}: {
+  url: string;
+  fileName: string;
+  type: string;
+  className?: string;
+}) => {
+  const isVideo = type === 'video' || (typeof type === 'string' && type.includes('video'));
+  const isImage = type === 'image' || (typeof type === 'string' && type.includes('image'));
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
@@ -661,10 +723,9 @@ const CampaignDetailAssetPreview = ({
       videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play()
-        .catch(error => {
-          console.warn('Play was prevented:', error);
-        });
+      videoRef.current.play().catch(error => {
+        console.warn('Play was prevented:', error);
+      });
       setIsPlaying(true);
     }
   };
@@ -765,10 +826,10 @@ const CampaignDetailAssetPreview = ({
               <button
                 onClick={togglePlayPause}
                 className="w-16 h-16 bg-black bg-opacity-60 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 z-10 absolute"
-                aria-label={isPlaying ? "Pause video" : "Play video"}
+                aria-label={isPlaying ? 'Pause video' : 'Play video'}
               >
                 <Icon
-                  iconId={isPlaying ? "faPause" : "faPlay"} // Changed name to iconId
+                  iconId={isPlaying ? 'faPause' : 'faPlay'} // Changed name to iconId
                   className="h-6 w-6 text-white"
                   iconType="button"
                   solid={true}
@@ -792,173 +853,238 @@ const CampaignDetailAssetPreview = ({
 // Add new components for missing sections
 const ObjectivesSection: React.FC<{
   campaign: CampaignDetail;
-}> = ({
-  campaign
-}) => <DataCard title="Campaign Objectives" iconId="faBoltLight" description="Key objectives and performance indicators">
+}> = ({ campaign }) => (
+  <DataCard
+    title="Campaign Objectives"
+    iconId="faBoltLight"
+    description="Key objectives and performance indicators"
+  >
+    <div className="space-y-6 font-body">
+      {/* Primary KPI with enhanced styling using Icon */}
+      <div className="bg-white rounded-lg p-4 font-body border border-gray-100 shadow-sm">
+        <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">Primary KPI</h4>
+        {campaign.primaryKPI ? (
+          <div className="bg-[var(--accent-color)] text-white px-3 py-2 rounded-md inline-flex items-center">
+            <Icon
+              // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
+              iconId={`kpis${capitalizeCamelCase(campaign.primaryKPI)}`}
+              // Add filter to force icon to white
+              className="w-6 h-6 mr-2 filter brightness-0 invert"
+              solid="true" // Keep as string for React prop handling
+            />
+            <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>
+          </div>
+        ) : (
+          <div className="text-gray-500">Not specified</div>
+        )}
+      </div>
 
-      <div className="space-y-6 font-work-sans">
-        {/* Primary KPI with enhanced styling using Icon */}
-        <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
-          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
-          {campaign.primaryKPI ? (
-            <div className="bg-[var(--accent-color)] text-white px-3 py-2 rounded-md inline-flex items-center">
-              <Icon
-                // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
-                iconId={`kpis${capitalizeCamelCase(campaign.primaryKPI)}`}
-                // Add filter to force icon to white
-                className="w-6 h-6 mr-2 filter brightness-0 invert"
-                solid="true" // Keep as string for React prop handling
-              />
-              <span className="font-medium">{formatKpiName(campaign.primaryKPI)}</span>
+      {/* Secondary KPIs with enhanced styling using Icon */}
+      {campaign.secondaryKPIs && campaign.secondaryKPIs.length > 0 && (
+        <div className="bg-white rounded-lg p-4 font-body border border-gray-100 shadow-sm">
+          <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">Secondary KPIs</h4>
+          <div className="flex flex-wrap gap-2 font-body">
+            {campaign.secondaryKPIs.map((kpi, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center"
+              >
+                <Icon
+                  // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
+                  iconId={`kpis${capitalizeCamelCase(kpi)}`}
+                  className="w-5 h-5 mr-2"
+                  solid="false" // Keep as string for React prop handling
+                />
+                <span>{formatKpiName(kpi)}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Messaging Section with enhanced icons and styling */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="font-medium text-gray-800 mb-4 font-heading">Messaging</h3>
+
+        {/* Main Message */}
+        <div className="space-y-6">
+          <div className="flex items-start">
+            <Icon
+              iconId="faCommentDotsLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.mainMessage || 'Not specified'}
+              </span>
             </div>
-          ) : (
-            <div className="text-gray-500">Not specified</div>
-          )}
+          </div>
+
+          {/* Hashtags */}
+          <div className="flex items-start">
+            <Icon
+              iconId="faTagLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.hashtags || 'Not specified'}
+              </span>
+            </div>
+          </div>
+
+          {/* Memorability Score */}
+          <div className="flex items-start">
+            <Icon
+              iconId="faStarLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.memorability || 'Not specified'}
+              </span>
+            </div>
+          </div>
+
+          {/* Key Benefits */}
+          <div className="flex items-start">
+            <Icon
+              iconId="faCircleCheckLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.keyBenefits || 'Not specified'}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Secondary KPIs with enhanced styling using Icon */}
-        {campaign.secondaryKPIs && campaign.secondaryKPIs.length > 0 && (
-          <div className="bg-white rounded-lg p-4 font-work-sans border border-gray-100 shadow-sm">
-            <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
-            <div className="flex flex-wrap gap-2 font-work-sans">
-              {campaign.secondaryKPIs.map((kpi, index) => (
-                <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md inline-flex items-center">
-                  <Icon
-                    // Construct the icon ID using kpis{CorrectlyCapitalizedKpiName} format
-                    iconId={`kpis${capitalizeCamelCase(kpi)}`}
-                    className="w-5 h-5 mr-2"
-                    solid="false" // Keep as string for React prop handling
-                  />
-                  <span>{formatKpiName(kpi)}</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        <h3 className="font-medium text-gray-800 mt-8 mb-4 font-heading">Expected Outcomes</h3>
 
-        {/* Messaging Section with enhanced icons and styling */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-          <h3 className="font-medium text-gray-800 mb-4 font-sora">Messaging</h3>
-
-          {/* Main Message */}
-          <div className="space-y-6">
-            <div className="flex items-start">
-              <Icon iconId="faCommentDotsLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Main Message</span>
-                <span className="text-base text-gray-800 block">{campaign.mainMessage || 'Not specified'}</span>
-              </div>
-            </div>
-
-            {/* Hashtags */}
-            <div className="flex items-start">
-              <Icon iconId="faTagLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Hashtags</span>
-                <span className="text-base text-gray-800 block">{campaign.hashtags || 'Not specified'}</span>
-              </div>
-            </div>
-
-            {/* Memorability Score */}
-            <div className="flex items-start">
-              <Icon iconId="faStarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Memorability Score</span>
-                <span className="text-base text-gray-800 block">{campaign.memorability || 'Not specified'}</span>
-              </div>
-            </div>
-
-            {/* Key Benefits */}
-            <div className="flex items-start">
-              <Icon iconId="faCircleCheckLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Key Benefits</span>
-                <span className="text-base text-gray-800 block">{campaign.keyBenefits || 'Not specified'}</span>
-              </div>
+        {/* Expected Achievements */}
+        <div className="space-y-6">
+          <div className="flex items-start">
+            <Icon
+              iconId="faArrowTrendUpLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.expectedAchievements || 'Not specified'}
+              </span>
             </div>
           </div>
 
-          <h3 className="font-medium text-gray-800 mt-8 mb-4 font-sora">Expected Outcomes</h3>
-
-          {/* Expected Achievements */}
-          <div className="space-y-6">
-            <div className="flex items-start">
-              <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Expected Achievements</span>
-                <span className="text-base text-gray-800 block">{campaign.expectedAchievements || 'Not specified'}</span>
-              </div>
+          {/* Impact on Purchase Intent */}
+          <div className="flex items-start">
+            <Icon
+              iconId="faDollarSignLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.purchaseIntent || 'Not specified'}
+              </span>
             </div>
+          </div>
 
-            {/* Impact on Purchase Intent */}
-            <div className="flex items-start">
-              <Icon iconId="faDollarSignLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Impact on Purchase Intent</span>
-                <span className="text-base text-gray-800 block">{campaign.purchaseIntent || 'Not specified'}</span>
-              </div>
-            </div>
-
-            {/* Brand Perception Change */}
-            <div className="flex items-start">
-              <Icon iconId="faChartBarLight" className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
-                <span className="text-base text-gray-800 block">{campaign.brandPerception || 'Not specified'}</span>
-              </div>
+          {/* Brand Perception Change */}
+          <div className="flex items-start">
+            <Icon
+              iconId="faChartBarLight"
+              className="h-5 w-5 text-[var(--accent-color)] mr-3 mt-0.5 flex-shrink-0"
+            />
+            <div className="flex-1">
+              <span className="text-sm text-gray-500 mb-1 block">Brand Perception Change</span>
+              <span className="text-base text-gray-800 block">
+                {campaign.brandPerception || 'Not specified'}
+              </span>
             </div>
           </div>
         </div>
       </div>
-    </DataCard>;
+    </div>
+  </DataCard>
+);
 const AudienceInsightsSection: React.FC<{
   audience: CampaignDetail['audience'] | null;
-}> = ({
-  audience
-}) => {
-    if (!audience) return null; // Early return if no audience data
+}> = ({ audience }) => {
+  if (!audience) return null; // Early return if no audience data
 
-    return <DataCard title="Audience Insights" iconId="userCircle" className="col-span-2">
-      <div className="grid grid-cols-2 gap-8 font-work-sans">
+  return (
+    <DataCard title="Audience Insights" iconId="userCircle" className="col-span-2">
+      <div className="grid grid-cols-2 gap-8 font-body">
         {/* Screening Questions */}
-        <div className="font-work-sans">
-          <h3 className="text-lg font-medium mb-4 font-sora">Screening Questions</h3>
-          <div className="space-y-2 font-work-sans">
-            {audience.demographics.interests.map((interest) => <div key={interest} className="p-3 bg-gray-50 rounded-lg font-work-sans">
-              {interest}
-            </div>)}
+        <div className="font-body">
+          <h3 className="text-lg font-medium mb-4 font-heading">Screening Questions</h3>
+          <div className="space-y-2 font-body">
+            {audience.demographics.interests.map(interest => (
+              <div key={interest} className="p-3 bg-gray-50 rounded-lg font-body">
+                {interest}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Competitors */}
-        <div className="font-work-sans">
-          <h3 className="text-lg font-medium mb-4 font-sora">Competitors</h3>
-          <div className="flex flex-wrap gap-2 font-work-sans">
-            {audience.demographics.interests.map((interest) => <span key={interest} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-work-sans">
-              {interest}
-            </span>)}
+        <div className="font-body">
+          <h3 className="text-lg font-medium mb-4 font-heading">Competitors</h3>
+          <div className="flex flex-wrap gap-2 font-body">
+            {audience.demographics.interests.map(interest => (
+              <span
+                key={interest}
+                className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-body"
+              >
+                {interest}
+              </span>
+            ))}
           </div>
         </div>
       </div>
-    </DataCard>;
-  };
+    </DataCard>
+  );
+};
 
 // Add Creative Requirements Section
 const CreativeRequirementsSection: React.FC<{
   requirements: CampaignDetail['creativeRequirements'];
-}> = ({
-  requirements
-}) => <DataCard title="Creative Requirements" iconId="documentText" description="Campaign creative specifications">
-
-      <div className="space-y-2 font-work-sans">
-        {requirements && requirements.length > 0 ? requirements.map((req) => <div key={req.requirement} className="p-3 bg-gray-50 rounded-lg flex items-start font-work-sans">
-          {<Icon iconId="faFileLight" className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-work-sans" />}
-          <span className="text-gray-700 font-work-sans">{req.requirement}</span>
-        </div>) : <div className="p-3 bg-gray-50 rounded-lg font-work-sans">
-          <p className="text-gray-500 italic font-work-sans">No requirements specified</p>
-        </div>}
-      </div>
-    </DataCard>;
+}> = ({ requirements }) => (
+  <DataCard
+    title="Creative Requirements"
+    iconId="documentText"
+    description="Campaign creative specifications"
+  >
+    <div className="space-y-2 font-body">
+      {requirements && requirements.length > 0 ? (
+        requirements.map(req => (
+          <div
+            key={req.requirement}
+            className="p-3 bg-gray-50 rounded-lg flex items-start font-body"
+          >
+            {
+              <Icon
+                iconId="faFileLight"
+                className="w-5 h-5 text-gray-400 mr-3 mt-0.5 font-body"
+              />
+            }
+            <span className="text-gray-700 font-body">{req.requirement}</span>
+          </div>
+        ))
+      ) : (
+        <div className="p-3 bg-gray-50 rounded-lg font-body">
+          <p className="text-gray-500 italic font-body">No requirements specified</p>
+        </div>
+      )}
+    </div>
+  </DataCard>
+);
 
 // 1. Define strict types for all possible string operations
 type StringOperation = {
@@ -974,13 +1100,13 @@ class StringOperationTracker {
   static track(operation: Omit<StringOperation, 'timestamp'>) {
     this.operations.push({
       ...operation,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
     if (process.env.NODE_ENV === 'development') {
       console.log(`String Operation: ${operation.operation}`, {
         value: operation.value,
         source: operation.source,
-        type: typeof operation.value
+        type: typeof operation.value,
       });
     }
   }
@@ -992,11 +1118,15 @@ class StringOperationTracker {
 // 3. Implement robust string handling with instrumentation
 class SafeString {
   private static readonly FALLBACK = '';
-  static transform(value: unknown, operation: 'toUpperCase' | 'toLowerCase', source: string): string {
+  static transform(
+    value: unknown,
+    operation: 'toUpperCase' | 'toLowerCase',
+    source: string
+  ): string {
     StringOperationTracker.track({
       operation,
       value,
-      source
+      source,
     });
     try {
       // Guard against null/undefined
@@ -1014,7 +1144,7 @@ class SafeString {
       console.error(`String operation ${operation} failed:`, {
         value,
         source,
-        error
+        error,
       });
       return this.FALLBACK;
     }
@@ -1042,7 +1172,7 @@ function debugLog(event: Omit<DebugEvent, 'timestamp'>) {
   if (!DEBUG) return;
   const logEvent: DebugEvent = {
     ...event,
-    timestamp: performance.now()
+    timestamp: performance.now(),
   };
   debugHistory.push(logEvent);
   console.group(`🔍 [${logEvent.type}] ${logEvent.message}`);
@@ -1056,7 +1186,11 @@ function debugLog(event: Omit<DebugEvent, 'timestamp'>) {
 
 // Type guard utilities
 function isIterable(value: unknown): value is Iterable<unknown> {
-  return Boolean(value != null && typeof value === 'object' && typeof (value as any)[Symbol.iterator] === 'function');
+  return Boolean(
+    value != null &&
+      typeof value === 'object' &&
+      typeof (value as any)[Symbol.iterator] === 'function'
+  );
 }
 function isCampaignData(data: unknown): data is CampaignDetail {
   return data != null && typeof data === 'object' && 'id' in data;
@@ -1067,7 +1201,7 @@ function debugString(value: any, fieldName: string): string {
   console.log(`Attempting to process string for ${fieldName}:`, {
     value,
     type: typeof value,
-    fieldName
+    fieldName,
   });
   if (value === undefined || value === null) {
     console.warn(`Warning: ${fieldName} is ${value}`);
@@ -1109,20 +1243,29 @@ function validateCampaignData(data: any): CampaignValidation {
     errors.push('No campaign data received');
     return {
       isValid: false,
-      errors
+      errors,
     };
   }
 
   // Required fields
-  const requiredFields = ['id', 'campaignName', 'startDate', 'endDate', 'currency', 'totalBudget', 'platform', 'submissionStatus'];
-  requiredFields.forEach((field) => {
+  const requiredFields = [
+    'id',
+    'campaignName',
+    'startDate',
+    'endDate',
+    'currency',
+    'totalBudget',
+    'platform',
+    'submissionStatus',
+  ];
+  requiredFields.forEach(field => {
     if (!data[field]) {
       errors.push(`Missing required field: ${field}`);
     }
   });
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -1147,52 +1290,56 @@ const capitalizeCamelCase = (str: string): string => {
 };
 
 // StatusBadge component with semantic icons
-const CampaignStatusBadge = ({ status }: { status?: string; }) => {
-  let statusColor = "bg-gray-100 text-gray-700";
+const CampaignStatusBadge = ({ status }: { status?: string }) => {
+  let statusColor = 'bg-gray-100 text-gray-700';
   let statusIcon = <Icon iconId="faCircleQuestionLight" className="h-4 w-4 mr-1" />;
 
   switch (status?.toLowerCase()) {
     case 'draft':
-      statusColor = "bg-yellow-50 text-yellow-700";
+      statusColor = 'bg-yellow-50 text-yellow-700';
       statusIcon = <Icon iconId="faPencilLight" className="h-4 w-4 mr-1" />;
       break;
     case 'submitted':
-      statusColor = "bg-blue-50 text-blue-700";
+      statusColor = 'bg-blue-50 text-blue-700';
       statusIcon = <Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1" />;
       break;
     case 'pending':
-      statusColor = "bg-orange-50 text-orange-700";
+      statusColor = 'bg-orange-50 text-orange-700';
       statusIcon = <Icon iconId="faClockLight" className="h-4 w-4 mr-1" />;
       break;
     case 'approved':
-      statusColor = "bg-green-50 text-green-700";
+      statusColor = 'bg-green-50 text-green-700';
       statusIcon = <Icon iconId="faCircleCheckLight" className="h-4 w-4 mr-1" />;
       break;
     case 'rejected':
-      statusColor = "bg-red-50 text-red-700";
+      statusColor = 'bg-red-50 text-red-700';
       statusIcon = <Icon iconId="faCircleXmarkLight" className="h-4 w-4 mr-1" />;
       break;
     case 'error':
-      statusColor = "bg-red-50 text-red-700";
+      statusColor = 'bg-red-50 text-red-700';
       statusIcon = <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-1" />;
       break;
     case 'active':
-      statusColor = "bg-green-50 text-green-700";
+      statusColor = 'bg-green-50 text-green-700';
       statusIcon = <Icon iconId="faPlayLight" className="h-4 w-4 mr-1" />;
       break;
     case 'completed':
-      statusColor = "bg-purple-50 text-purple-700";
+      statusColor = 'bg-purple-50 text-purple-700';
       statusIcon = <Icon iconId="faFlagLight" className="h-4 w-4 mr-1" />;
       break;
     default:
-      statusColor = "bg-gray-100 text-gray-700";
+      statusColor = 'bg-gray-100 text-gray-700';
       statusIcon = <Icon iconId="faCircleQuestionLight" className="h-4 w-4 mr-1" />;
   }
 
-  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor} font-work-sans`}>
-    {statusIcon}
-    {capitalize(status || 'Unknown')}
-  </span>;
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor} font-body`}
+    >
+      {statusIcon}
+      {capitalize(status || 'Unknown')}
+    </span>
+  );
 };
 
 // Add missing utility functions
@@ -1235,15 +1382,19 @@ const safeCurrency = (value: Currency | string | undefined | null): string => {
   if (value === undefined || value === null) {
     return 'USD';
   }
-  return typeof value === 'string' ? value : String(Object.values(Currency)[Object.values(Currency).indexOf(value)]);
+  return typeof value === 'string'
+    ? value
+    : String(Object.values(Currency)[Object.values(Currency).indexOf(value)]);
 };
 
 // Error status badge for displaying API errors
-const ErrorStatusBadge = ({ message }: { message: string; }) => {
-  return <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm font-work-sans">
-    <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-2" />
-    <span className="font-work-sans">{message}</span>
-  </div>;
+const ErrorStatusBadge = ({ message }: { message: string }) => {
+  return (
+    <div className="inline-flex items-center bg-red-50 text-red-700 px-3 py-1 rounded-md text-sm font-body">
+      <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 mr-2" />
+      <span className="font-body">{message}</span>
+    </div>
+  );
 };
 
 export default function CampaignDetail() {
@@ -1258,40 +1409,40 @@ export default function CampaignDetail() {
 
   // Create an empty data object with N/A values for when API fails
   const emptyData: CampaignDetail = {
-    id: "N/A",
-    campaignName: "N/A",
-    description: "N/A",
-    startDate: "",
-    endDate: "",
-    timeZone: "N/A",
+    id: 'N/A',
+    campaignName: 'N/A',
+    description: 'N/A',
+    startDate: '',
+    endDate: '',
+    timeZone: 'N/A',
     currency: Currency.USD,
     totalBudget: 0,
     socialMediaBudget: 0,
     platform: Platform.Instagram,
-    influencerHandle: "N/A",
-    website: "N/A",
+    influencerHandle: 'N/A',
+    website: 'N/A',
     primaryContact: {
-      firstName: "N/A",
-      surname: "N/A",
-      email: "N/A",
+      firstName: 'N/A',
+      surname: 'N/A',
+      email: 'N/A',
       position: Position.Manager,
-      phone: "N/A"
+      phone: 'N/A',
     },
-    brandName: "N/A",
-    category: "N/A",
-    product: "N/A",
-    targetMarket: "N/A",
-    submissionStatus: "error",
+    brandName: 'N/A',
+    category: 'N/A',
+    product: 'N/A',
+    targetMarket: 'N/A',
+    submissionStatus: 'error',
     // Special status to indicate error
-    primaryKPI: "N/A",
+    primaryKPI: 'N/A',
     secondaryKPIs: [],
-    mainMessage: "N/A",
-    hashtags: "N/A",
-    memorability: "N/A",
-    keyBenefits: "N/A",
-    expectedAchievements: "N/A",
-    purchaseIntent: "N/A",
-    brandPerception: "N/A",
+    mainMessage: 'N/A',
+    hashtags: 'N/A',
+    memorability: 'N/A',
+    keyBenefits: 'N/A',
+    expectedAchievements: 'N/A',
+    purchaseIntent: 'N/A',
+    brandPerception: 'N/A',
     features: [],
     audience: {
       demographics: {
@@ -1301,13 +1452,13 @@ export default function CampaignDetail() {
         income: [],
         interests: [],
         locations: [],
-        languages: []
-      }
+        languages: [],
+      },
     },
     creativeAssets: [],
     creativeRequirements: [],
-    createdAt: "",
-    updatedAt: ""
+    createdAt: '',
+    updatedAt: '',
   };
   useEffect(() => {
     // Check URL params for test mode
@@ -1365,8 +1516,11 @@ export default function CampaignDetail() {
           endDate: result.endDate || '',
           currency: result.budget?.currency || result.currency || 'USD',
           totalBudget: result.budget?.total || result.totalBudget || 0,
-          platform: result.influencers && result.influencers[0]?.platform ? result.influencers[0].platform : result.platform || 'Instagram',
-          submissionStatus: result.status?.toLowerCase() || result.submissionStatus || 'draft'
+          platform:
+            result.influencers && result.influencers[0]?.platform
+              ? result.influencers[0].platform
+              : result.platform || 'Instagram',
+          submissionStatus: result.status?.toLowerCase() || result.submissionStatus || 'draft',
         };
         console.log('Mapped result for validation:', mappedResult);
 
@@ -1396,51 +1550,66 @@ export default function CampaignDetail() {
           socialMediaBudget: result.budget?.socialMedia || result.socialMediaBudget || 0,
           platform: mappedResult.platform as Platform,
           influencerHandle: result.influencerHandle || '',
-          website: result.website || "",
+          website: result.website || '',
           // Format the primary contact data
           primaryContact: {
             firstName: result.primaryContact?.firstName || '',
             surname: result.primaryContact?.surname || '',
             email: result.primaryContact?.email || '',
             position: result.primaryContact?.position || 'Manager',
-            phone: result.primaryContact?.phone || "N/A"
+            phone: result.primaryContact?.phone || 'N/A',
           },
           // Format secondary contact if available
-          secondaryContact: result.secondaryContact ? {
-            firstName: result.secondaryContact.firstName || '',
-            surname: result.secondaryContact.surname || '',
-            email: result.secondaryContact.email || '',
-            position: result.secondaryContact.position || 'Manager',
-            phone: result.secondaryContact.phone || "N/A"
-          } : undefined,
+          secondaryContact: result.secondaryContact
+            ? {
+                firstName: result.secondaryContact.firstName || '',
+                surname: result.secondaryContact.surname || '',
+                email: result.secondaryContact.email || '',
+                position: result.secondaryContact.position || 'Manager',
+                phone: result.secondaryContact.phone || 'N/A',
+              }
+            : undefined,
           // Campaign Details
           brandName: result.brandName || mappedResult.campaignName,
-          category: result.category || "Not specified",
-          product: result.product || "Not specified",
-          targetMarket: result.targetMarket || "Global",
+          category: result.category || 'Not specified',
+          product: result.product || 'Not specified',
+          targetMarket: result.targetMarket || 'Global',
           submissionStatus: mappedResult.submissionStatus,
           primaryKPI: result.primaryKPI || '',
           secondaryKPIs: result.secondaryKPIs || [],
           // Campaign Objectives
-          mainMessage: result.messaging?.mainMessage || result.mainMessage || "",
-          hashtags: result.messaging?.hashtags || result.hashtags || "",
-          memorability: result.messaging?.memorability || result.memorability || "",
-          keyBenefits: result.messaging?.keyBenefits || result.keyBenefits || "",
-          expectedAchievements: result.messaging?.expectedAchievements || result.expectedAchievements || "",
-          purchaseIntent: result.messaging?.purchaseIntent || result.purchaseIntent || "",
-          brandPerception: result.messaging?.brandPerception || result.brandPerception || "",
+          mainMessage: result.messaging?.mainMessage || result.mainMessage || '',
+          hashtags: result.messaging?.hashtags || result.hashtags || '',
+          memorability: result.messaging?.memorability || result.memorability || '',
+          keyBenefits: result.messaging?.keyBenefits || result.keyBenefits || '',
+          expectedAchievements:
+            result.messaging?.expectedAchievements || result.expectedAchievements || '',
+          purchaseIntent: result.messaging?.purchaseIntent || result.purchaseIntent || '',
+          brandPerception: result.messaging?.brandPerception || result.brandPerception || '',
           features: result.features || [],
           // Audience data
           audience: {
             demographics: {
-              ageRange: result.demographics?.ageDistribution ? Object.entries(result.demographics.ageDistribution).filter(([_, value]) => Number(value) > 0).map(([key]) => key.replace('age', '').replace('plus', '+')) : ['18-24', '25-34'],
+              ageRange: result.demographics?.ageDistribution
+                ? Object.entries(result.demographics.ageDistribution)
+                    .filter(([_, value]) => Number(value) > 0)
+                    .map(([key]) => key.replace('age', '').replace('plus', '+'))
+                : ['18-24', '25-34'],
               gender: result.demographics?.gender || ['All'],
-              education: result.demographics?.educationLevel ? [result.demographics.educationLevel] : ['All'],
-              income: result.demographics?.incomeLevel ? [result.demographics.incomeLevel.toString()] : ['All'],
+              education: result.demographics?.educationLevel
+                ? [result.demographics.educationLevel]
+                : ['All'],
+              income: result.demographics?.incomeLevel
+                ? [result.demographics.incomeLevel.toString()]
+                : ['All'],
               interests: result.demographics?.jobTitles || [],
-              locations: result.locations ? result.locations.map((loc: any) => loc.location || '') : [],
-              languages: result.targeting?.languages ? result.targeting.languages.map((lang: any) => lang.language || '') : ['English']
-            }
+              locations: result.locations
+                ? result.locations.map((loc: any) => loc.location || '')
+                : [],
+              languages: result.targeting?.languages
+                ? result.targeting.languages.map((lang: any) => lang.language || '')
+                : ['English'],
+            },
           },
           // Creative Assets
           creativeAssets: result.assets || result.creativeAssets || [],
@@ -1448,7 +1617,7 @@ export default function CampaignDetail() {
           creativeRequirements: result.requirements || result.creativeRequirements || [],
           // Timestamps
           createdAt: result.createdAt || new Date().toISOString(),
-          updatedAt: result.updatedAt || new Date().toISOString()
+          updatedAt: result.updatedAt || new Date().toISOString(),
         };
         setData(processedData);
         setError(null);
@@ -1474,7 +1643,7 @@ export default function CampaignDetail() {
 
   // Define handler for resetting error state
   const handleResetError = useCallback(() => {
-    console.log("Attempting to reset error state...");
+    console.log('Attempting to reset error state...');
     setError(null); // Reset error state
     setLoading(true); // Set loading to true to trigger refetch in useEffect
   }, []); // Dependencies array is empty as it doesn't depend on component state/props directly needing re-creation
@@ -1523,7 +1692,7 @@ export default function CampaignDetail() {
         currency: currencyString,
         // Use the string directly
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
       }).format(safeValue);
     } catch (error) {
       console.error('Error formatting currency:', error);
@@ -1531,7 +1700,7 @@ export default function CampaignDetail() {
       return new Intl.NumberFormat('en-US', {
         style: 'decimal',
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
       }).format(safeValue);
     }
   };
@@ -1547,7 +1716,7 @@ export default function CampaignDetail() {
       return new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       }).format(date);
     } catch (error) {
       console.error('Error formatting date:', error);
@@ -1583,250 +1752,409 @@ export default function CampaignDetail() {
   // Loading state is handled by src/app/(campaigns)/campaigns/[id]/loading.tsx via Suspense
 
   if (error && !data) {
-    return <div className="py-10 font-work-sans">
-      <ErrorFallback error={new Error(error)} resetErrorBoundary={handleResetError} />
-    </div>;
+    return (
+      <div className="py-10 font-body">
+        <ErrorFallback error={new Error(error)} resetErrorBoundary={handleResetError} />
+      </div>
+    );
   }
 
   // Wrap the main content in an ErrorBoundary using the 'fallback' prop
-  return <ErrorBoundary fallback={<ErrorFallback error={error ? new Error(error) : new Error('Unknown error')} resetErrorBoundary={handleResetError} />}>
-    <div className="min-h-screen bg-gray-50 font-work-sans">
-      {/* Header Section */}
-      <div className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-work-sans shadow-sm`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-work-sans">
-          {error && <div className="mb-4 font-work-sans">
-            <ErrorStatusBadge message={error} />
-          </div>}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between font-work-sans">
-            <div className="flex items-center space-x-4 font-work-sans">
-              <button
-                onClick={() => window.history.back()}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-work-sans"
-                aria-label="Go back"
-              >
-                <Icon iconId="faChevronLeftLight"
-                  className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-work-sans"
-
-                />
-              </button>
-              <div className="font-work-sans">
-                <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-sora">{data?.campaignName || "N/A"}</h1>
-                <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-work-sans">
-                  <CampaignStatusBadge status={error ? "error" : data?.submissionStatus} />
-                  <span className="mx-2 font-work-sans text-gray-400">•</span>
-                  <span className="font-work-sans">Created on {data?.createdAt ? formatDate(data.createdAt) : "N/A"}</span>
+  return (
+    <ErrorBoundary
+      fallback={
+        <ErrorFallback
+          error={error ? new Error(error) : new Error('Unknown error')}
+          resetErrorBoundary={handleResetError}
+        />
+      }
+    >
+      <div className="min-h-screen bg-gray-50 font-body">
+        {/* Header Section */}
+        <div
+          className={`${error ? 'bg-red-50' : 'bg-white'} border-b border-[var(--divider-color)] font-body shadow-sm`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-body">
+            {error && (
+              <div className="mb-4 font-body">
+                <ErrorStatusBadge message={error} />
+              </div>
+            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between font-body">
+              <div className="flex items-center space-x-4 font-body">
+                <button
+                  onClick={() => window.history.back()}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 group font-body"
+                  aria-label="Go back"
+                >
+                  <Icon
+                    iconId="faChevronLeftLight"
+                    className="h-5 w-5 text-[var(--secondary-color)] group-hover:text-[var(--primary-color)] transition-colors duration-200 font-body"
+                  />
+                </button>
+                <div className="font-body">
+                  <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-heading">
+                    {data?.campaignName || 'N/A'}
+                  </h1>
+                  <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-body">
+                    <CampaignStatusBadge status={error ? 'error' : data?.submissionStatus} />
+                    <span className="mx-2 font-body text-gray-400">•</span>
+                    <span className="font-body">
+                      Created on {data?.createdAt ? formatDate(data.createdAt) : 'N/A'}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex space-x-3 mt-4 md:mt-0 font-work-sans">
-              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-                <Icon iconId="faPrintLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
-                <span className="font-work-sans">Print</span>
-              </button>
-              <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-work-sans">
-                <Icon iconId="faShareLight" className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]" />
-                <span className="font-work-sans">Share</span>
-              </button>
-              <button
-                onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
-                className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-work-sans"
-                disabled={!!error}
-              >
-                <Icon iconId="faPenToSquareSolid" className="h-4 w-4 mr-2 text-white !text-white" />
-                <span className="font-work-sans">Edit Campaign</span>
-              </button>
+              <div className="flex space-x-3 mt-4 md:mt-0 font-body">
+                <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-body">
+                  <Icon
+                    iconId="faPrintLight"
+                    className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]"
+                  />
+                  <span className="font-body">Print</span>
+                </button>
+                <button className="inline-flex items-center px-3 py-2 border border-[var(--divider-color)] rounded-md text-sm font-medium text-[var(--secondary-color)] bg-white hover:bg-gray-50 transition-colors duration-200 group font-body">
+                  <Icon
+                    iconId="faShareLight"
+                    className="h-4 w-4 mr-2 group-hover:text-[var(--accent-color)]"
+                  />
+                  <span className="font-body">Share</span>
+                </button>
+                <button
+                  onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
+                  className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-body"
+                  disabled={!!error}
+                >
+                  <Icon
+                    iconId="faPenToSquareSolid"
+                    className="h-4 w-4 mr-2 text-white !text-white"
+                  />
+                  <span className="font-body">Edit Campaign</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-work-sans">
-        {/* Key Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-work-sans">
-          <CampaignMetricCard
-            title="Total Budget"
-            value={error ? "N/A" : data?.totalBudget || 0}
-            iconId="faDollarSignLight"
-            format={error ? "text" : "currency"}
-          />
-          <CampaignMetricCard
-            title="Campaign Duration"
-            value={error ? "N/A" : calculateDuration(data?.startDate || "", data?.endDate || "")}
-            iconId="faCalendarLight"
-          />
-        </div>
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-body">
+          {/* Key Metrics Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-body">
+            <CampaignMetricCard
+              title="Total Budget"
+              value={error ? 'N/A' : data?.totalBudget || 0}
+              iconId="faDollarSignLight"
+              format={error ? 'text' : 'currency'}
+            />
+            <CampaignMetricCard
+              title="Campaign Duration"
+              value={error ? 'N/A' : calculateDuration(data?.startDate || '', data?.endDate || '')}
+              iconId="faCalendarLight"
+            />
+          </div>
 
-        {/* Campaign Details & Primary Contact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          <DataCard title="Campaign Details" iconId="faFileLinesLight" description="Basic campaign information">
-            <div className="space-y-3 font-work-sans">
-              <DataRow label="Campaign Name" value={error ? "N/A" : data?.campaignName || "N/A"} featured={true} />
-              <DataRow label="Description" value={error ? "N/A" : data?.description || "N/A"} />
-              <DataRow label="Brand Name" value={error ? "N/A" : data?.brandName || "N/A"} />
-              <DataRow label="Start Date" value={error ? "N/A" : data?.startDate ? formatDate(data.startDate) : "N/A"} iconId="faCalendarLight" />
-              <DataRow label="End Date" value={error ? "N/A" : data?.endDate ? formatDate(data.endDate) : "N/A"} iconId="faCalendarLight" />
-              <DataRow label="Time Zone" value={error ? "N/A" : data?.timeZone || "N/A"} iconId="faClockLight" />
-              <DataRow label="Currency" value={error ? "N/A" : safeCurrency(data?.currency)} iconId="faDollarSignLight" />
-              <DataRow label="Total Budget" value={error ? "N/A" : formatCurrency(data?.totalBudget || 0, data?.currency)} iconId="faDollarSignLight" featured={true} />
-              <DataRow label="Social Media Budget" value={error ? "N/A" : formatCurrency(data?.socialMediaBudget || 0, data?.currency)} iconId="faDollarSignLight" />
-              <DataRow label="Website" value={error ? "N/A" : data?.website || "N/A"} iconId="faGlobeLight" />
-            </div>
-          </DataCard>
+          {/* Campaign Details & Primary Contact */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-body">
+            <DataCard
+              title="Campaign Details"
+              iconId="faFileLinesLight"
+              description="Basic campaign information"
+            >
+              <div className="space-y-3 font-body">
+                <DataRow
+                  label="Campaign Name"
+                  value={error ? 'N/A' : data?.campaignName || 'N/A'}
+                  featured={true}
+                />
+                <DataRow label="Description" value={error ? 'N/A' : data?.description || 'N/A'} />
+                <DataRow label="Brand Name" value={error ? 'N/A' : data?.brandName || 'N/A'} />
+                <DataRow
+                  label="Start Date"
+                  value={error ? 'N/A' : data?.startDate ? formatDate(data.startDate) : 'N/A'}
+                  iconId="faCalendarLight"
+                />
+                <DataRow
+                  label="End Date"
+                  value={error ? 'N/A' : data?.endDate ? formatDate(data.endDate) : 'N/A'}
+                  iconId="faCalendarLight"
+                />
+                <DataRow
+                  label="Time Zone"
+                  value={error ? 'N/A' : data?.timeZone || 'N/A'}
+                  iconId="faClockLight"
+                />
+                <DataRow
+                  label="Currency"
+                  value={error ? 'N/A' : safeCurrency(data?.currency)}
+                  iconId="faDollarSignLight"
+                />
+                <DataRow
+                  label="Total Budget"
+                  value={error ? 'N/A' : formatCurrency(data?.totalBudget || 0, data?.currency)}
+                  iconId="faDollarSignLight"
+                  featured={true}
+                />
+                <DataRow
+                  label="Social Media Budget"
+                  value={
+                    error ? 'N/A' : formatCurrency(data?.socialMediaBudget || 0, data?.currency)
+                  }
+                  iconId="faDollarSignLight"
+                />
+                <DataRow
+                  label="Website"
+                  value={error ? 'N/A' : data?.website || 'N/A'}
+                  iconId="faGlobeLight"
+                />
+              </div>
+            </DataCard>
 
-          <DataCard title="Primary Contact" iconId="faUserCircleLight" description="Primary point of contact for this campaign">
-            <div className="space-y-3 font-work-sans">
-              <div className="flex items-center mb-4 font-work-sans">
-                <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-work-sans">
-                  {error ? "NA" : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
+            <DataCard
+              title="Primary Contact"
+              iconId="faUserCircleLight"
+              description="Primary point of contact for this campaign"
+            >
+              <div className="space-y-3 font-body">
+                <div className="flex items-center mb-4 font-body">
+                  <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-body">
+                    {error
+                      ? 'NA'
+                      : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
+                  </div>
+                  <div className="font-body">
+                    <h4 className="text-[var(--primary-color)] font-semibold font-heading">
+                      {error
+                        ? 'N/A'
+                        : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+                    </h4>
+                    <p className="text-[var(--secondary-color)] text-sm font-body">
+                      {error ? 'N/A' : data?.primaryContact?.position || 'N/A'}
+                    </p>
+                  </div>
                 </div>
-                <div className="font-work-sans">
-                  <h4 className="text-[var(--primary-color)] font-semibold font-sora">
-                    {error ? "N/A" : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+
+                <DataRow
+                  label="Email"
+                  value={
+                    error ? (
+                      'N/A'
+                    ) : (
+                      <a
+                        href={`mailto:${data?.primaryContact?.email}`}
+                        className="text-[var(--accent-color)] hover:underline flex items-center font-body"
+                      >
+                        {data?.primaryContact?.email || 'N/A'}
+                      </a>
+                    )
+                  }
+                  iconId="faEnvelopeLight"
+                />
+                <DataRow
+                  label="Position"
+                  value={error ? 'N/A' : data?.primaryContact?.position || 'N/A'}
+                  iconId="faBuildingLight"
+                />
+              </div>
+
+              {!error && data?.secondaryContact && (
+                <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-body">
+                  <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">
+                    Secondary Contact
                   </h4>
-                  <p className="text-[var(--secondary-color)] text-sm font-work-sans">{error ? "N/A" : data?.primaryContact?.position || "N/A"}</p>
+                  <div className="space-y-3 font-body">
+                    <DataRow
+                      label="Name"
+                      value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`}
+                      iconId="faUserCircleLight"
+                    />
+                    <DataRow
+                      label="Email"
+                      value={
+                        <a
+                          href={`mailto:${data.secondaryContact.email}`}
+                          className="text-[var(--accent-color)] hover:underline font-body"
+                        >
+                          {data.secondaryContact.email}
+                        </a>
+                      }
+                      iconId="faEnvelopeLight"
+                    />
+                    <DataRow
+                      label="Position"
+                      value={data.secondaryContact.position}
+                      iconId="faBuildingLight"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
+            </DataCard>
+          </div>
 
-              <DataRow label="Email" value={error ? "N/A" : <a href={`mailto:${data?.primaryContact?.email}`} className="text-[var(--accent-color)] hover:underline flex items-center font-work-sans">
-                {data?.primaryContact?.email || "N/A"}
-              </a>} iconId="faEnvelopeLight" />
-              <DataRow label="Position" value={error ? "N/A" : data?.primaryContact?.position || "N/A"} iconId="faBuildingLight" />
-            </div>
-
-            {!error && data?.secondaryContact && <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-work-sans">
-              <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary Contact</h4>
-              <div className="space-y-3 font-work-sans">
-                <DataRow label="Name" value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`} iconId="faUserCircleLight" />
-                <DataRow label="Email" value={<a href={`mailto:${data.secondaryContact.email}`} className="text-[var(--accent-color)] hover:underline font-work-sans">
-                  {data.secondaryContact.email}
-                </a>} iconId="faEnvelopeLight" />
-                <DataRow label="Position" value={data.secondaryContact.position} iconId="faBuildingLight" />
-              </div>
-            </div>}
-          </DataCard>
-        </div>
-
-        {/* Objectives & Audience */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-work-sans">
-          {error ? <DataCard title="Campaign Objectives" iconId="faBoltLight" description="Key objectives and performance indicators">
-            <div className="space-y-5 font-work-sans">
-              <div className="font-work-sans">
-                <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Primary KPI</h4>
-                <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
-              </div>
-              <div className="font-work-sans">
-                <h4 className="text-[var(--primary-color)] font-medium mb-3 font-sora">Secondary KPIs</h4>
-                <div className="text-[var(--secondary-color)] font-work-sans">N/A</div>
-              </div>
-              <div className="space-y-3 pt-2 font-work-sans">
-                <DataRow label="Main Message" value="N/A" iconId="faLightbulbLight" />
-                <DataRow label="Brand Perception" value="N/A" iconId="faChartLineLight" />
-                <DataRow label="Hashtags" value="N/A" iconId="faTagLight" />
-                <DataRow label="Key Benefits" value="N/A" iconId="faCircleCheckLight" />
-                <DataRow label="Memorability" value="N/A" iconId="faBookmarkLight" />
-                <DataRow label="Expected Achievements" value="N/A" iconId="faTrendUpLight" />
-                <DataRow label="Purchase Intent" value="N/A" iconId="faDollarSignLight" />
-              </div>
-            </div>
-          </DataCard> : data && <ObjectivesSection campaign={data} />}
-
-          {error ? <DataCard title="Target Audience" iconId="faUserGroupLight" description="Detailed audience targeting information">
-            <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-              <p className="font-work-sans">N/A</p>
-            </div>
-          </DataCard> : data && <AudienceSection audience={data.audience} />}
-        </div>
-
-        {/* Creative Assets */}
-        <div className="mb-6 font-work-sans">
-          <DataCard title="Creative Assets" iconId="faImageLight" description="Campaign creative assets" actions={<button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-work-sans">View All</button>}>
-            {error ? <div className="text-center py-10 text-[var(--secondary-color)] font-work-sans">
-              {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
-              <p className="font-work-sans">No creative assets available</p>
-            </div> :
-              <div>
-                {data && data.creativeAssets && Array.isArray(data.creativeAssets) && data.creativeAssets.length > 0 ?
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-work-sans">
-                    {data.creativeAssets.map((asset: any, index: number) =>
-                      <AssetCard
-                        key={asset.id || index}
-                        asset={{
-                          id: asset.id,
-                          name: asset.assetName || asset.name,
-                          url: asset.url,
-                          type: asset.type,
-                          platform: asset.platform || data.platform,
-                          influencerHandle: asset.influencerHandle || data.influencerHandle,
-                          description: asset.description || asset.whyInfluencer,
-                          budget: asset.budget
-                        }}
-                        currency={data.currency}
-                        defaultPlatform={data.platform}
-                        className="font-work-sans"
-                      />
-                    )}
+          {/* Objectives & Audience */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-body">
+            {error ? (
+              <DataCard
+                title="Campaign Objectives"
+                iconId="faBoltLight"
+                description="Key objectives and performance indicators"
+              >
+                <div className="space-y-5 font-body">
+                  <div className="font-body">
+                    <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">
+                      Primary KPI
+                    </h4>
+                    <div className="text-[var(--secondary-color)] font-body">N/A</div>
                   </div>
-                  :
-                  <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                    <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="font-work-sans">No creative assets uploaded yet</p>
+                  <div className="font-body">
+                    <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">
+                      Secondary KPIs
+                    </h4>
+                    <div className="text-[var(--secondary-color)] font-body">N/A</div>
                   </div>
-                }
-              </div>
-            }
-          </DataCard>
-        </div>
+                  <div className="space-y-3 pt-2 font-body">
+                    <DataRow label="Main Message" value="N/A" iconId="faLightbulbLight" />
+                    <DataRow label="Brand Perception" value="N/A" iconId="faChartLineLight" />
+                    <DataRow label="Hashtags" value="N/A" iconId="faTagLight" />
+                    <DataRow label="Key Benefits" value="N/A" iconId="faCircleCheckLight" />
+                    <DataRow label="Memorability" value="N/A" iconId="faBookmarkLight" />
+                    <DataRow label="Expected Achievements" value="N/A" iconId="faTrendUpLight" />
+                    <DataRow label="Purchase Intent" value="N/A" iconId="faDollarSignLight" />
+                  </div>
+                </div>
+              </DataCard>
+            ) : (
+              data && <ObjectivesSection campaign={data} />
+            )}
 
-        {/* Campaign Features */}
-        <div className="mb-6 font-work-sans">
-          <DataCard title="Campaign Features" iconId="faBoltLight" description="Additional features enabled for this campaign">
-            {error ? <div className="text-center py-8 text-[var(--secondary-color)] font-work-sans">
-              <p className="font-work-sans">N/A</p>
-            </div> :
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-work-sans">
-                {data?.features && data.features.length > 0 ?
-                  data.features.map((feature: string, index: number) => {
-                    // Construct the icon ID using app{CapitalizedFeatureName} format
-                    // Remove underscores, then capitalize
-                    const capitalizedFeature = feature.split('_').map(capitalize).join('');
-                    const featureIconId = `app${capitalizedFeature}`;
-                    return (
-                      <div key={index} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]">
-                        <div className="flex items-start">
-                          <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
-                            {/* Use Icon component with constructed ID */}
-                            <Icon
-                              iconId={featureIconId}
-                              className="h-7 w-7 text-[var(--accent-color)]"
-                            // Remove the fallbackIconId prop
-                            // fallbackIconId="faBoltLight"
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <h4 className="font-medium text-[var(--primary-color)] font-sora text-lg mb-1">
-                              {/* Use formatted name without map lookup */}
-                              {formatFeatureName(feature)}
-                            </h4>
-                            <p className="text-sm text-[var(--secondary-color)] mt-1 font-work-sans">
-                              {getFeatureDescription(feature)}
-                            </p>
+            {error ? (
+              <DataCard
+                title="Target Audience"
+                iconId="faUserGroupLight"
+                description="Detailed audience targeting information"
+              >
+                <div className="text-center py-10 text-[var(--secondary-color)] font-body">
+                  <p className="font-body">N/A</p>
+                </div>
+              </DataCard>
+            ) : (
+              data && <AudienceSection audience={data.audience} />
+            )}
+          </div>
+
+          {/* Creative Assets */}
+          <div className="mb-6 font-body">
+            <DataCard
+              title="Creative Assets"
+              iconId="faImageLight"
+              description="Campaign creative assets"
+              actions={
+                <button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-body">
+                  View All
+                </button>
+              }
+            >
+              {error ? (
+                <div className="text-center py-10 text-[var(--secondary-color)] font-body">
+                  {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
+                  <p className="font-body">No creative assets available</p>
+                </div>
+              ) : (
+                <div>
+                  {data &&
+                  data.creativeAssets &&
+                  Array.isArray(data.creativeAssets) &&
+                  data.creativeAssets.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-body">
+                      {data.creativeAssets.map((asset: any, index: number) => (
+                        <AssetCard
+                          key={asset.id || index}
+                          asset={{
+                            id: asset.id,
+                            name: asset.assetName || asset.name,
+                            url: asset.url,
+                            type: asset.type,
+                            platform: asset.platform || data.platform,
+                            influencerHandle: asset.influencerHandle || data.influencerHandle,
+                            description: asset.description || asset.whyInfluencer,
+                            budget: asset.budget,
+                          }}
+                          currency={data.currency}
+                          defaultPlatform={data.platform}
+                          className="font-body"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-[var(--secondary-color)] font-body">
+                      <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="font-body">No creative assets uploaded yet</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </DataCard>
+          </div>
+
+          {/* Campaign Features */}
+          <div className="mb-6 font-body">
+            <DataCard
+              title="Campaign Features"
+              iconId="faBoltLight"
+              description="Additional features enabled for this campaign"
+            >
+              {error ? (
+                <div className="text-center py-8 text-[var(--secondary-color)] font-body">
+                  <p className="font-body">N/A</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-body">
+                  {data?.features && data.features.length > 0 ? (
+                    data.features.map((feature: string, index: number) => {
+                      // Construct the icon ID using app{CapitalizedFeatureName} format
+                      // Remove underscores, then capitalize
+                      const capitalizedFeature = feature.split('_').map(capitalize).join('');
+                      const featureIconId = `app${capitalizedFeature}`;
+                      return (
+                        <div
+                          key={index}
+                          className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]"
+                        >
+                          <div className="flex items-start">
+                            <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
+                              {/* Use Icon component with constructed ID */}
+                              <Icon
+                                iconId={featureIconId}
+                                className="h-7 w-7 text-[var(--accent-color)]"
+                                // Remove the fallbackIconId prop
+                                // fallbackIconId="faBoltLight"
+                              />
+                            </div>
+                            <div className="ml-4">
+                              <h4 className="font-medium text-[var(--primary-color)] font-heading text-lg mb-1">
+                                {/* Use formatted name without map lookup */}
+                                {formatFeatureName(feature)}
+                              </h4>
+                              <p className="text-sm text-[var(--secondary-color)] mt-1 font-body">
+                                {getFeatureDescription(feature)}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  }) :
-                  <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-work-sans">
-                    <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="font-work-sans">No features enabled for this campaign</p>
-                  </div>
-                }
-              </div>
-            }
-          </DataCard>
+                      );
+                    })
+                  ) : (
+                    <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-body">
+                      <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="font-body">No features enabled for this campaign</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </DataCard>
+          </div>
         </div>
       </div>
-    </div>
-  </ErrorBoundary>; // Close ErrorBoundary
+    </ErrorBoundary>
+  ); // Close ErrorBoundary
 }

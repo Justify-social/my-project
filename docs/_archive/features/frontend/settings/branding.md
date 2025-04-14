@@ -55,11 +55,13 @@ Customize the application colors to match your brand:
 #### Primary Colors
 
 1. **Primary Color**: The main brand color used for key UI elements
+
    - Used for: Primary buttons, active navigation, and accent elements
    - Click the color picker or enter a hex code value
    - Best practice: Choose a color that contrasts well with white text
 
 2. **Secondary Color**: The supporting brand color
+
    - Used for: Secondary buttons, highlights, and supporting elements
    - Click the color picker or enter a hex code value
 
@@ -94,6 +96,7 @@ Customize the text appearance throughout the application:
 #### Font Selection
 
 1. **Heading Font**: Used for all headings (H1-H6)
+
    - Select from the available web-safe fonts
    - Or enter a custom Google Font name
    - Note: Custom fonts may impact application performance
@@ -171,6 +174,7 @@ Note: Multiple brand profiles are only available on Enterprise plans.
 **Issue**: Logo fails to upload or displays incorrectly.
 
 **Solution**:
+
 - Verify the file meets size and format requirements
 - Try converting to a different format (SVG is preferred)
 - Ensure the logo has a transparent background if possible
@@ -181,6 +185,7 @@ Note: Multiple brand profiles are only available on Enterprise plans.
 **Issue**: Color scheme changes don't appear after saving.
 
 **Solution**:
+
 - Clear your browser cache and reload the application
 - Check if your browser supports CSS variables
 - Try a different browser to rule out compatibility issues
@@ -191,6 +196,7 @@ Note: Multiple brand profiles are only available on Enterprise plans.
 **Issue**: Custom fonts don't appear as expected.
 
 **Solution**:
+
 - Verify the font name is spelled correctly
 - Ensure the font is available on Google Fonts
 - Try using web-safe fonts instead
@@ -201,4 +207,4 @@ Note: Multiple brand profiles are only available on Enterprise plans.
 - [Settings Overview](./overview.md)
 - [Settings Usage Guide](./usage.md)
 - [Team Management Guide](./team-management.md)
-- [Enterprise Plan Features](../../guides/user/subscription-plans.md) 
+- [Enterprise Plan Features](../../guides/user/subscription-plans.md)

@@ -1,6 +1,6 @@
 /**
  * Jest setup file
- * 
+ *
  * This file configures the testing environment for UI components.
  */
 

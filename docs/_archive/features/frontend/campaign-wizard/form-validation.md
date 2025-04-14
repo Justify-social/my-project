@@ -13,7 +13,7 @@ This guide provides a systematic approach to verify that all forms in the Campai
 
 When creating test campaigns, use a consistent naming pattern to easily identify test data:
 
-- Prefix: TEST_
+- Prefix: TEST\_
 - Date: YYYYMMDD
 - Random suffix: 3-4 characters
 
@@ -24,12 +24,14 @@ Example: `TEST_20230615_A7B9`
 ### 1. Campaign Details Form (Step 1)
 
 **What to test:**
+
 - Basic campaign information
 - Contacts information
 - Date selection
 - Budget information
 
 **Fields to validate:**
+
 - Campaign Name
 - Description
 - Start/End Dates
@@ -42,27 +44,29 @@ Example: `TEST_20230615_A7B9`
 - Additional Contacts (if applicable)
 
 **Database verification:**
+
 ```sql
-SELECT 
-    id, 
-    campaign_name, 
-    description, 
-    start_date, 
-    end_date, 
-    time_zone, 
-    currency, 
-    total_budget, 
-    social_media_budget, 
+SELECT
+    id,
+    campaign_name,
+    description,
+    start_date,
+    end_date,
+    time_zone,
+    currency,
+    total_budget,
+    social_media_budget,
     contacts
-FROM 
-    campaigns 
-WHERE 
+FROM
+    campaigns
+WHERE
     id = 'campaign_id';
 ```
 
 ### 2. Objectives & Messaging Form (Step 2)
 
 **What to test:**
+
 - Main message
 - Hashtags
 - Primary KPI selection and target
@@ -70,6 +74,7 @@ WHERE
 - Features/USPs
 
 **Fields to validate:**
+
 - Main Message
 - Hashtags
 - Primary KPI (name and target)
@@ -77,13 +82,14 @@ WHERE
 - Features/USPs
 
 **Database verification:**
+
 ```sql
-SELECT 
-    id, 
+SELECT
+    id,
     objectives
-FROM 
-    campaigns 
-WHERE 
+FROM
+    campaigns
+WHERE
     id = 'campaign_id';
 ```
 
@@ -92,12 +98,14 @@ Then parse the JSON in the `objectives` field.
 ### 3. Target Audience Form (Step 3)
 
 **What to test:**
+
 - Audience segments
 - Demographic information
 - Geographic targeting
 - Competitors
 
 **Fields to validate:**
+
 - Target audience segments
 - Age ranges
 - Gender distribution
@@ -105,39 +113,43 @@ Then parse the JSON in the `objectives` field.
 - Competitor information
 
 **Database verification:**
+
 ```sql
-SELECT 
-    id, 
-    target_audience, 
+SELECT
+    id,
+    target_audience,
     competitors
-FROM 
-    campaigns 
-WHERE 
+FROM
+    campaigns
+WHERE
     id = 'campaign_id';
 ```
 
 ### 4. Creative Assets Form (Step 4)
 
 **What to test:**
+
 - Asset uploads
 - Asset metadata
 - Guidelines
 
 **Fields to validate:**
+
 - Uploaded assets
 - Asset descriptions
 - Brand guidelines
 - Content preferences
 
 **Database verification:**
+
 ```sql
-SELECT 
-    id, 
+SELECT
+    id,
     assets,
     guidelines
-FROM 
-    campaigns 
-WHERE 
+FROM
+    campaigns
+WHERE
     id = 'campaign_id';
 ```
 
@@ -175,6 +187,7 @@ If you find issues with a particular form:
 ## Logging Results
 
 Create a spreadsheet with the following columns:
+
 - Campaign ID
 - Step Number
 - Fields Tested
@@ -198,24 +211,30 @@ async function validateCampaignData(campaignId) {
     where: { id: campaignId },
     include: {
       assets: true,
-    }
+    },
   });
 
   console.log('Basic Campaign Data:');
-  console.log(JSON.stringify({
-    id: campaign.id,
-    name: campaign.campaignName,
-    description: campaign.description,
-    dates: {
-      start: campaign.startDate,
-      end: campaign.endDate,
-    },
-    budget: {
-      total: campaign.totalBudget,
-      socialMedia: campaign.socialMediaBudget,
-      currency: campaign.currency,
-    }
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        id: campaign.id,
+        name: campaign.campaignName,
+        description: campaign.description,
+        dates: {
+          start: campaign.startDate,
+          end: campaign.endDate,
+        },
+        budget: {
+          total: campaign.totalBudget,
+          socialMedia: campaign.socialMediaBudget,
+          currency: campaign.currency,
+        },
+      },
+      null,
+      2
+    )
+  );
 
   // Parse JSON fields
   try {
@@ -249,4 +268,4 @@ async function validateCampaignData(campaignId) {
 
 // Usage:
 // validateCampaignData('campaign_id_here');
-``` 
+```

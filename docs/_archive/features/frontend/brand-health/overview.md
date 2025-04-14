@@ -87,4 +87,4 @@ Brand Health monitoring typically involves:
 
 - [Brand Health Usage Guide](./usage.md)
 - [Brand Lift](../brand-lift/overview.md)
-- [Reports](../reports/overview.md) 
+- [Reports](../reports/overview.md)

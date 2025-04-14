@@ -1,4 +1,4 @@
-import 'cypress-file-upload'; 
+import 'cypress-file-upload';
 
 // ***********************************************
 // This example commands.js shows you how to
@@ -28,7 +28,7 @@ Cypress.Commands.add('verifyValidationError', (fieldName, errorMessage) => {
 });
 
 // Custom command to fill a form
-Cypress.Commands.add('fillForm', (formFields) => {
+Cypress.Commands.add('fillForm', formFields => {
   Object.entries(formFields).forEach(([field, value]) => {
     if (typeof value === 'boolean') {
       // Handle checkbox/toggle
@@ -42,4 +42,4 @@ Cypress.Commands.add('fillForm', (formFields) => {
       cy.get(`[name="${field}"]`).clear().type(value);
     }
   });
-}); 
+});

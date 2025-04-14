@@ -5,6 +5,7 @@
 Total components analyzed: 87
 
 ### Components by Domain
+
 - users: 8 components
 - settings: 24 components
 - dashboard: 6 components
@@ -13,12 +14,14 @@ Total components analyzed: 87
 - campaigns: 34 components
 
 ### Category Analysis
+
 - feature: 72 components
 - ui: 14 components
 - layout: 1 components
 - unknown: 0 components
 
 ## Move Results
+
 - Total moves attempted: 87
 - Successfully moved: 0
 - Skipped: 87
@@ -26,8 +29,8 @@ Total components analyzed: 87
 
 ### Successfully Moved Components
 
-
 ### Skipped Components
+
 - ⏩ `src/components/features/users/page.tsx`: Component already in the correct location
 - ⏩ `src/components/features/users/index.ts`: Component already in the correct location
 - ⏩ `src/components/features/users/ProfileSettingsSkeleton.tsx`: Component already in the correct location
@@ -118,8 +121,8 @@ Total components analyzed: 87
 
 ### Failed Moves
 
-
 ## Components that Should be Moved to UI
+
 - `src/components/features/settings/TestModal.tsx` -> `src/components/ui/settings/TestModal.tsx`
   Reason: Component appears to be a generic UI element without business logic
 - `src/components/features/settings/SurveyProgressBar.tsx` -> `src/components/ui/settings/SurveyProgressBar.tsx`
@@ -150,5 +153,6 @@ Total components analyzed: 87
   Reason: Component appears to be a generic UI element without business logic
 
 ## Components that Should be Moved to Layouts
+
 - `src/components/features/campaigns/BrandLiftLayout.tsx` -> `src/components/layouts/campaigns/BrandLiftLayout.tsx`
   Reason: Component appears to be a layout container without specific business logic

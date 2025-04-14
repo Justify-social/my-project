@@ -31,13 +31,13 @@ const SuccessIcon = ({ className }: { className?: string }) => (
   <Icon iconId="faCircleCheckLight" className={className} />
 );
 
-const StaticIcon = ({ className, iconId }: { className?: string, iconId: string }) => (
+const StaticIcon = ({ className, iconId }: { className?: string; iconId: string }) => (
   <Icon iconId={iconId} className={className} />
 );
 
 const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionProps> = ({
   initialData,
-  onSave
+  onSave,
 }) => {
   const [preferences, setPreferences] = useState<NotificationPreferences>(initialData);
   const [originalData] = useState<NotificationPreferences>(initialData);
@@ -51,7 +51,7 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
 
     setPreferences(prev => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -136,21 +136,25 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
         <div className="mt-6 p-3 bg-blue-50 text-blue-700 rounded-md flex items-start">
           <StaticIcon iconId="faCircleInfoLight" className="mr-2 mt-0.5 flex-shrink-0" />
           <span>
-            Email notifications will be sent to your registered email address.
-            You can update your email in the Personal Information section.
+            Email notifications will be sent to your registered email address. You can update your
+            email in the Personal Information section.
           </span>
         </div>
 
         {/* Campaign Updates - Use Shadcn Switch */}
         <div className="flex items-center justify-between p-4 border rounded-md">
           <div>
-            <label htmlFor="campaign-updates" className="font-medium">Campaign Updates</label>
-            <p className="text-sm text-muted-foreground">Receive notifications about campaign status changes and performance updates.</p>
+            <label htmlFor="campaign-updates" className="font-medium">
+              Campaign Updates
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Receive notifications about campaign status changes and performance updates.
+            </p>
           </div>
           <Switch
             id="campaign-updates"
             checked={preferences.campaignUpdates}
-            onCheckedChange={(checked) => handleToggle('campaignUpdates', checked)}
+            onCheckedChange={checked => handleToggle('campaignUpdates', checked)}
             disabled={!isEditing || isSaving}
           />
         </div>
@@ -158,13 +162,17 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
         {/* Brand Health Alerts - Use Shadcn Switch */}
         <div className="flex items-center justify-between p-4 border rounded-md">
           <div>
-            <label htmlFor="brand-health-alerts" className="font-medium">Brand Health Alerts</label>
-            <p className="text-sm text-muted-foreground">Get alerted when there are significant changes to your brand health metrics.</p>
+            <label htmlFor="brand-health-alerts" className="font-medium">
+              Brand Health Alerts
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Get alerted when there are significant changes to your brand health metrics.
+            </p>
           </div>
           <Switch
             id="brand-health-alerts"
             checked={preferences.brandHealthAlerts}
-            onCheckedChange={(checked) => handleToggle('brandHealthAlerts', checked)}
+            onCheckedChange={checked => handleToggle('brandHealthAlerts', checked)}
             disabled={!isEditing || isSaving}
           />
         </div>
@@ -172,13 +180,17 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
         {/* AI Insight Notifications - Use Shadcn Switch */}
         <div className="flex items-center justify-between p-4 border rounded-md">
           <div>
-            <label htmlFor="ai-insight-notifications" className="font-medium">AI Insight Notifications</label>
-            <p className="text-sm text-muted-foreground">Receive notifications when our AI generates new insights about your campaigns.</p>
+            <label htmlFor="ai-insight-notifications" className="font-medium">
+              AI Insight Notifications
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Receive notifications when our AI generates new insights about your campaigns.
+            </p>
           </div>
           <Switch
             id="ai-insight-notifications"
             checked={preferences.aiInsightNotifications}
-            onCheckedChange={(checked) => handleToggle('aiInsightNotifications', checked)}
+            onCheckedChange={checked => handleToggle('aiInsightNotifications', checked)}
             disabled={!isEditing || isSaving}
           />
         </div>
@@ -200,4 +212,4 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
   );
 };
 
-export default NotificationPreferencesSection; 
+export default NotificationPreferencesSection;

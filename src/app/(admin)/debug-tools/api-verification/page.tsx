@@ -14,13 +14,15 @@ import {
   verifyDatabaseConnection,
   verifyAllApis,
   ApiVerificationResult,
-  ApiErrorType } from
-'@/lib/api-verification';
+  ApiErrorType,
+} from '@/lib/api-verification';
 
 /**
  * Helper function to check if a host is reachable without triggering CORS issues
  */
-async function isHostReachable(hostname: string): Promise<{reachable: boolean;latency?: number;}> {
+async function isHostReachable(
+  hostname: string
+): Promise<{ reachable: boolean; latency?: number }> {
   const startTime = Date.now();
 
   try {
@@ -31,7 +33,7 @@ async function isHostReachable(hostname: string): Promise<{reachable: boolean;la
     const response = await fetch(`https://${hostname}/`, {
       method: 'HEAD',
       mode: 'no-cors', // This prevents CORS errors but means we can't read the response
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
@@ -48,7 +50,7 @@ async function isHostReachable(hostname: string): Promise<{reachable: boolean;la
 
 /**
  * API Verification Debug Tool
- * 
+ *
  * This page allows administrators to test and verify external API integrations
  * used in Justify. It provides detailed information about API
  * response times, status, and any potential issues.
@@ -67,20 +69,28 @@ export default function ApiVerificationPage() {
     stripe: null,
     auth0: null,
     uploadthing: null,
-    database: null
+    database: null,
   });
 
   // API descriptions shown in the UI
   const apiDescriptions: Record<string, string> = {
-    geolocation: "Used to determine user location for targeted campaigns and localized content. Helps optimize campaign delivery to specific regions.",
-    exchange: "Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.",
-    phyllo: "Integrates with influencer platforms to verify accounts and retrieve metrics. Critical for influencer-based campaigns.",
-    giphy: "Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content.",
-    cint: "Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.",
-    stripe: "Payment processing platform for subscription and one-time payments. Powers the billing system for premium features.",
-    auth0: "Authentication and user management platform. Handles user sign-up, login, and profile management.",
-    uploadthing: "File upload service for handling media uploads. Used for storing and managing user-generated content.",
-    database: "Database connection using Postgres. Stores all application data including user profiles, campaigns, and analytics."
+    geolocation:
+      'Used to determine user location for targeted campaigns and localized content. Helps optimize campaign delivery to specific regions.',
+    exchange:
+      'Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.',
+    phyllo:
+      'Integrates with influencer platforms to verify accounts and retrieve metrics. Critical for influencer-based campaigns.',
+    giphy:
+      'Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content.',
+    cint: 'Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.',
+    stripe:
+      'Payment processing platform for subscription and one-time payments. Powers the billing system for premium features.',
+    auth0:
+      'Authentication and user management platform. Handles user sign-up, login, and profile management.',
+    uploadthing:
+      'File upload service for handling media uploads. Used for storing and managing user-generated content.',
+    database:
+      'Database connection using Postgres. Stores all application data including user profiles, campaigns, and analytics.',
   };
 
   // Test a specific API
@@ -124,9 +134,9 @@ export default function ApiVerificationPage() {
       }
 
       setResults([result]);
-      setLastTested((prev) => ({
+      setLastTested(prev => ({
         ...prev,
-        [apiName]: new Date()
+        [apiName]: new Date(),
       }));
     } catch (error) {
       console.error(`Error testing API: ${apiName}`, error);
@@ -152,19 +162,19 @@ export default function ApiVerificationPage() {
       const databaseResult = await verifyDatabaseConnection();
 
       const allResults = [
-      geolocationResult,
-      exchangeRatesResult,
-      phylloResult,
-      giphyResult,
-      cintResult,
-      stripeResult,
-      auth0Result,
-      uploadthingResult,
-      databaseResult];
-
+        geolocationResult,
+        exchangeRatesResult,
+        phylloResult,
+        giphyResult,
+        cintResult,
+        stripeResult,
+        auth0Result,
+        uploadthingResult,
+        databaseResult,
+      ];
 
       setResults(allResults);
-      setLastTested((prev) => ({
+      setLastTested(prev => ({
         ...prev,
         all: new Date(),
         geolocation: new Date(),
@@ -175,7 +185,7 @@ export default function ApiVerificationPage() {
         stripe: new Date(),
         auth0: new Date(),
         uploadthing: new Date(),
-        database: new Date()
+        database: new Date(),
       }));
     } catch (error) {
       console.error('Error testing all APIs:', error);
@@ -199,9 +209,9 @@ export default function ApiVerificationPage() {
 
   // Get status badge class based on success
   const getStatusBadgeClass = (success: boolean) => {
-    return success ?
-    'bg-green-100 text-green-800 border-green-200' :
-    'bg-red-100 text-red-800 border-red-200';
+    return success
+      ? 'bg-green-100 text-green-800 border-green-200'
+      : 'bg-red-100 text-red-800 border-red-200';
   };
 
   // Get error type badge class
@@ -231,446 +241,534 @@ export default function ApiVerificationPage() {
   };
 
   // Render API badge
-  const renderApiBadge = (apiName: string, lastTestedDate: Date | null, isInResults: boolean = false) => {
+  const renderApiBadge = (
+    apiName: string,
+    lastTestedDate: Date | null,
+    isInResults: boolean = false
+  ) => {
     const hasBeenTested = lastTestedDate !== null;
-    const result = results.find((r) => r.apiName.includes(apiName));
+    const result = results.find(r => r.apiName.includes(apiName));
     const isSuccess = result?.success || false;
 
     if (!hasBeenTested) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 font-work-sans">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 font-body">
           Not Tested
-        </span>);
-
+        </span>
+      );
     }
 
     if (isInResults && result) {
       return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(isSuccess)} font-work-sans`}>
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(isSuccess)} font-body`}
+        >
           {isSuccess ? 'Verified' : 'Failed'}
-        </span>);
-
+        </span>
+      );
     }
 
     // If it's been tested but not in current results
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 font-work-sans">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 font-body">
         Previously Tested
-      </span>);
-
+      </span>
+    );
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 font-work-sans">
-      <header className="mb-8 font-sora">
-        <div className="flex items-center justify-between font-work-sans">
-          <div className="font-work-sans">
-            <h1 className="text-2xl font-bold text-gray-900 font-sora">API Verification Debug Tool</h1>
-            <p className="mt-1 text-gray-600 font-work-sans">
-              Test and verify all external API integrations used in Justify
-            </p>
-          </div>
-          <Link
-            href="/debug-tools"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 font-work-sans">
+    <div className="container mx-auto py-6 max-w-7xl">
+      <h1 className="text-3xl font-bold mb-6 font-heading">API Verification Tool</h1>
 
-            Back to Debug Tools
-          </Link>
-        </div>
-      </header>
+      {/* Overview Section */}
+      <section className="bg-background rounded-lg shadow-md p-6 mb-8 border border-border">
+        <h2 className="text-2xl font-semibold mb-4 font-heading">Overview</h2>
+        <p className="text-muted-foreground mb-6">
+          This tool verifies the status and response times of external API integrations used in
+          Justify. Use the buttons below to test individual APIs or all at once. Results will
+          display detailed information about each API's health.
+        </p>
+      </section>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden font-work-sans">
-        <div className="p-6 border-b font-work-sans">
-          <h2 className="text-lg font-medium text-gray-900 font-sora">Test External APIs</h2>
-          <p className="mt-1 text-sm text-gray-500 font-work-sans">
+      <div className="bg-white rounded-lg shadow overflow-hidden font-body">
+        <div className="p-6 border-b font-body">
+          <h2 className="text-lg font-medium text-gray-900 font-heading">Test External APIs</h2>
+          <p className="mt-1 text-sm text-gray-500 font-body">
             Verify that all external API integrations are functioning correctly
           </p>
         </div>
 
-        <div className="p-6 bg-gray-50 space-y-6 font-work-sans">
+        <div className="p-6 bg-gray-50 space-y-6 font-body">
           {/* API Information Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 font-work-sans">
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">IP Geolocation API</h3>
-                {renderApiBadge('IP Geolocation API', lastTested.geolocation, results.some((r) => r.apiName.includes('IP Geolocation')))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 font-body">
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">IP Geolocation API</h3>
+                {renderApiBadge(
+                  'IP Geolocation API',
+                  lastTested.geolocation,
+                  results.some(r => r.apiName.includes('IP Geolocation'))
+                )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.geolocation}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.geolocation)}</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Exchange Rates API</h3>
-                {renderApiBadge('Exchange Rates API', lastTested.exchange, results.some((r) => r.apiName.includes('Exchange Rates')))}
-              </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.exchange}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.exchange)}</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Phyllo API</h3>
-                {renderApiBadge('Phyllo API', lastTested.phyllo, results.some((r) => r.apiName.includes('Phyllo')))}
-              </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.phyllo}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.phyllo)}</span>
+              <p className="text-sm text-gray-500 mt-1 font-body">
+                {apiDescriptions.geolocation}
+              </p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.geolocation)}
+                </span>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">GIPHY API</h3>
-                {renderApiBadge('GIPHY API', lastTested.giphy, results.some((r) => r.apiName.includes('GIPHY')))}
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Exchange Rates API</h3>
+                {renderApiBadge(
+                  'Exchange Rates API',
+                  lastTested.exchange,
+                  results.some(r => r.apiName.includes('Exchange Rates'))
+                )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.giphy}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.giphy || null)}</span>
+              <p className="text-sm text-gray-500 mt-1 font-body">
+                {apiDescriptions.exchange}
+              </p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.exchange)}
+                </span>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Cint Exchange API</h3>
-                {renderApiBadge('Cint Exchange API', lastTested.cint, results.some((r) => r.apiName.includes('Cint')))}
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Phyllo API</h3>
+                {renderApiBadge(
+                  'Phyllo API',
+                  lastTested.phyllo,
+                  results.some(r => r.apiName.includes('Phyllo'))
+                )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.cint}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.cint || null)}</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Stripe API</h3>
-                {renderApiBadge('Stripe API', lastTested.stripe, results.some((r) => r.apiName.includes('Stripe')))}
-              </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.stripe}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.stripe || null)}</span>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.phyllo}</p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.phyllo)}
+                </span>
               </div>
             </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Auth0 API</h3>
-                {renderApiBadge('Auth0 API', lastTested.auth0, results.some((r) => r.apiName.includes('Auth0')))}
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">GIPHY API</h3>
+                {renderApiBadge(
+                  'GIPHY API',
+                  lastTested.giphy,
+                  results.some(r => r.apiName.includes('GIPHY'))
+                )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.auth0}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.auth0 || null)}</span>
-              </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Uploadthing API</h3>
-                {renderApiBadge('Uploadthing API', lastTested.uploadthing, results.some((r) => r.apiName.includes('Uploadthing')))}
-              </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.uploadthing}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.uploadthing || null)}</span>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.giphy}</p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.giphy || null)}
+                </span>
               </div>
             </div>
-            
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-work-sans">
-              <div className="flex justify-between items-start font-work-sans">
-                <h3 className="font-medium text-gray-900 font-sora">Database Connection</h3>
-                {renderApiBadge('Database Connection', lastTested.database, results.some((r) => r.apiName.includes('Database')))}
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Cint Exchange API</h3>
+                {renderApiBadge(
+                  'Cint Exchange API',
+                  lastTested.cint,
+                  results.some(r => r.apiName.includes('Cint'))
+                )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-work-sans">{apiDescriptions.database}</p>
-              <div className="mt-2 text-xs text-gray-500 font-work-sans">
-                Last tested: <span className="font-medium font-work-sans">{formatTimestamp(lastTested.database || null)}</span>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.cint}</p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.cint || null)}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Stripe API</h3>
+                {renderApiBadge(
+                  'Stripe API',
+                  lastTested.stripe,
+                  results.some(r => r.apiName.includes('Stripe'))
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.stripe}</p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.stripe || null)}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Auth0 API</h3>
+                {renderApiBadge(
+                  'Auth0 API',
+                  lastTested.auth0,
+                  results.some(r => r.apiName.includes('Auth0'))
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.auth0}</p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.auth0 || null)}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Uploadthing API</h3>
+                {renderApiBadge(
+                  'Uploadthing API',
+                  lastTested.uploadthing,
+                  results.some(r => r.apiName.includes('Uploadthing'))
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-1 font-body">
+                {apiDescriptions.uploadthing}
+              </p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.uploadthing || null)}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
+              <div className="flex justify-between items-start font-body">
+                <h3 className="font-medium text-gray-900 font-heading">Database Connection</h3>
+                {renderApiBadge(
+                  'Database Connection',
+                  lastTested.database,
+                  results.some(r => r.apiName.includes('Database'))
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-1 font-body">
+                {apiDescriptions.database}
+              </p>
+              <div className="mt-2 text-xs text-gray-500 font-body">
+                Last tested:{' '}
+                <span className="font-medium font-body">
+                  {formatTimestamp(lastTested.database || null)}
+                </span>
               </div>
             </div>
           </div>
 
           {/* API Selection */}
-          <div className="mb-6 font-work-sans">
-            <h2 className="text-lg font-bold text-primary-color font-sora mb-3">Select API to Test</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 font-work-sans">
+          <div className="mb-6 font-body">
+            <h2 className="text-lg font-bold text-primary-color font-heading mb-3">
+              Select API to Test
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 font-body">
               <button
                 onClick={() => testApi('geolocation')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'geolocation' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'geolocation' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'IP Geolocation API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'geolocation'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'geolocation' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'IP Geolocation API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('exchange')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'exchange' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'exchange' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Exchange Rates API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'exchange'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'exchange' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Exchange Rates API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('phyllo')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'phyllo' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'phyllo' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Phyllo API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'phyllo'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'phyllo' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Phyllo API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('giphy')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'giphy' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'giphy' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'GIPHY API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'giphy'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'giphy' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'GIPHY API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('cint')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'cint' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'cint' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Cint Exchange API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'cint'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'cint' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Cint Exchange API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('stripe')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'stripe' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'stripe' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Stripe API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'stripe'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'stripe' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Stripe API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('auth0')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'auth0' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'auth0' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Auth0 API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'auth0'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'auth0' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Auth0 API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('uploadthing')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'uploadthing' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'uploadthing' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Uploadthing API'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'uploadthing'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'uploadthing' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Uploadthing API'
+                )}
               </button>
-              
+
               <button
                 onClick={() => testApi('database')}
-                className={`px-4 py-3 rounded-md border font-work-sans transition-colors ${
-                selectedApi === 'database' ?
-                'bg-accent-color text-white border-accent-color' :
-                'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'database' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing...</span>
-                  </div> :
-
-                'Database Connection'
-                }
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'database'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'database' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing...</span>
+                  </div>
+                ) : (
+                  'Database Connection'
+                )}
               </button>
-              
+
               <button
                 onClick={testAllApis}
-                className={`px-4 py-3 rounded-md border font-work-sans font-bold transition-colors ${
-                selectedApi === 'all' ?
-                'bg-blue-600 text-white border-blue-600' :
-                'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white'}`
-                }
-                disabled={isLoading}>
-
-                {isLoading && selectedApi === 'all' ?
-                <div className="flex items-center justify-center font-work-sans">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-work-sans"></span>
-                    <span className="font-work-sans">Testing All...</span>
-                  </div> :
-
-                'Test All APIs'
-                }
+                className={`px-4 py-3 rounded-md border font-body font-bold transition-colors ${selectedApi === 'all'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white'
+                  }`}
+                disabled={isLoading}
+              >
+                {isLoading && selectedApi === 'all' ? (
+                  <div className="flex items-center justify-center font-body">
+                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
+                    <span className="font-body">Testing All...</span>
+                  </div>
+                ) : (
+                  'Test All APIs'
+                )}
               </button>
             </div>
-            
-            {isLoading &&
-            <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md font-work-sans">
-                <p className="text-sm font-medium font-work-sans">Testing in progress, please wait...</p>
+
+            {isLoading && (
+              <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md font-body">
+                <p className="text-sm font-medium font-body">
+                  Testing in progress, please wait...
+                </p>
               </div>
-            }
+            )}
           </div>
         </div>
 
-        {results.length > 0 &&
-        <div className="p-6 border-t font-work-sans">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 font-sora">Results</h3>
+        {results.length > 0 && (
+          <div className="p-6 border-t font-body">
+            <h3 className="text-lg font-medium text-gray-900 mb-4 font-heading">Results</h3>
 
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg font-work-sans">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg font-body">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 font-work-sans">
+                    <th
+                      scope="col"
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 font-body"
+                    >
                       API Name
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 font-work-sans">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 font-body"
+                    >
                       Status
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 font-work-sans">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 font-body"
+                    >
                       Latency
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-40 font-work-sans">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-40 font-body"
+                    >
                       Endpoint
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 font-work-sans">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 font-body"
+                    >
                       Details
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {results.map((result, index) =>
-                <tr key={index} className={result.success ? '' : 'bg-red-50'}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 font-work-sans">
+                  {results.map((result, index) => (
+                    <tr key={index} className={result.success ? '' : 'bg-red-50'}>
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 font-body">
                         {result.apiName}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm font-work-sans">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClass(result.success)} font-work-sans`}>
-                          {result.success ? 'Success' : 'Failed'}
+                      <td className="whitespace-nowrap px-3 py-4 text-sm font-body">
+                        <span
+                          className={`inline-block px-2 py-1 rounded-md text-xs font-medium ${getStatusBadgeClass(result.success)
+                            }`}
+                        >
+                          {result.success ? 'Operational' : 'Error'}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm font-work-sans">
-                        <span className={`${getLatencyColorClass(result.latency)} font-work-sans`}>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm font-body">
+                        <span className={`${getLatencyColorClass(result.latency)} font-body`}>
                           {formatLatency(result.latency)}
                         </span>
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-500 w-40 max-w-xs font-work-sans">
-                        <div className="truncate font-work-sans" title={result.endpoint || 'N/A'}>
+                      <td className="px-3 py-4 text-sm text-gray-500 w-40 max-w-xs font-body">
+                        <div className="truncate font-body" title={result.endpoint || 'N/A'}>
                           {result.endpoint || 'N/A'}
                         </div>
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-500 font-work-sans">
-                        {result.success ?
-                    <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto max-h-40 font-work-sans">
+                      <td className="px-3 py-4 text-sm text-gray-500 font-body">
+                        {result.success ? (
+                          <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto max-h-40 font-body">
                             {JSON.stringify(result.data, null, 2)}
-                          </pre> :
-
-                    <div className="space-y-2 font-work-sans">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getErrorTypeBadgeClass(result.error?.type || ApiErrorType.UNKNOWN_ERROR)} font-work-sans`}>
+                          </pre>
+                        ) : (
+                          <div className="space-y-2 font-body">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getErrorTypeBadgeClass(result.error?.type || ApiErrorType.UNKNOWN_ERROR)} font-body`}
+                            >
                               {result.error?.type}
                             </span>
-                            <p className="font-work-sans">{result.error?.message}</p>
-                            {result.error?.details &&
-                      <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto max-h-40 font-work-sans">
+                            <p className="font-body">{result.error?.message}</p>
+                            {result.error?.details && (
+                              <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto max-h-40 font-body">
                                 {JSON.stringify(result.error.details, null, 2)}
                               </pre>
-                      }
-                            <div className="font-work-sans">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${result.error?.isRetryable ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'} font-work-sans`}>
+                            )}
+                            <div className="font-body">
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${result.error?.isRetryable ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'} font-body`}
+                              >
                                 {result.error?.isRetryable ? 'Retryable' : 'Non-retryable'}
                               </span>
                             </div>
                           </div>
-                    }
+                        )}
                       </td>
                     </tr>
-                )}
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
-        }
+        )}
       </div>
-    </div>);
-
+    </div>
+  );
 }

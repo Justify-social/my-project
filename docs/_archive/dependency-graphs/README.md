@@ -26,4 +26,4 @@ These visualisations help you to:
 
 ## Updating Graphs
 
-When making significant architectural changes, please update these graphs. You can edit the .mmd files using any text editor, or use tools like [Mermaid Live Editor](https://mermaid.live/) for visual editing. 
+When making significant architectural changes, please update these graphs. You can edit the .mmd files using any text editor, or use tools like [Mermaid Live Editor](https://mermaid.live/) for visual editing.

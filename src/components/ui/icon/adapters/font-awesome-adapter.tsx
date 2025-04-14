@@ -2,19 +2,19 @@
 
 /**
  * FontAwesome Icon Adapter - CANONICAL IMPLEMENTATION
- * 
+ *
  * This adapter provides a compatibility layer for legacy FontAwesome icon usage.
  * It implements the SSOT pattern by ultimately rendering through the core Icon component.
- * 
+ *
  * @example
  * ```tsx
  * // Basic usage
  * <IconAdapter iconId="faChevronDownLight" />
- * 
- * // Legacy usage with solid prop (not recommended for new code)
- * <IconAdapter iconId="faChevronDown" solid={true} />
+ *
+ * // Explicit solid usage
+ * <IconAdapter iconId="faChevronDownSolid" />
  * ```
- * 
+ *
  * For new components, prefer the ShadcnIcon adapter or direct Icon usage.
  */
 
@@ -32,61 +32,42 @@ export interface IconAdapterProps {
    * e.g., "faChevronDownLight" instead of "faChevronDown"
    */
   iconId: string;
-  
+
   /**
    * CSS classes to apply to the icon
    */
   className?: string;
-  
+
   /**
    * @deprecated - Legacy prop, use iconId with Solid suffix instead
    * For SSOT compliance, prefer using iconId="faChevronDownSolid" over solid={true}
    */
-  solid?: boolean;
-  
+  // solid?: boolean; // Removed deprecated prop
+
   /**
    * Optional inline style
    */
   style?: React.CSSProperties;
-  
+
   /**
    * Optional click handler
    */
   onClick?: () => void;
-  
+
   /**
    * Optional title for the icon
    */
   title?: string;
-  
+
   /**
    * @deprecated - Legacy prop, no longer used
    */
-  iconType?: string;
-  
+  // iconType?: string; // Removed deprecated prop
+
   /**
    * Any additional props
    */
   [key: string]: any;
-}
-
-/**
- * Formats an icon name to ensure it has the correct variant suffix
- * This is essential for SSOT compliance as it ensures the icon ID
- * contains the explicit variant information.
- * 
- * @param id - The icon ID to format
- * @param solid - Whether to use the solid variant
- * @returns The formatted icon ID with correct variant suffix
- */
-function formatIconId(id: string, solid: boolean = false): string {
-  // If the ID already has a variant suffix, use it as is
-  if (id.endsWith('Light') || id.endsWith('Solid')) {
-    return id;
-  }
-  
-  // Otherwise, add the appropriate variant suffix
-  return solid ? `${id}Solid` : `${id}Light`;
 }
 
 /**
@@ -97,11 +78,9 @@ function formatIconId(id: string, solid: boolean = false): string {
 export const IconAdapter: React.FC<IconAdapterProps> = ({
   iconId,
   className,
-  solid = false,
   style,
   onClick,
   title,
-  iconType,
   ...rest
 }) => {
   // Skip rendering if no ID provided
@@ -110,22 +89,10 @@ export const IconAdapter: React.FC<IconAdapterProps> = ({
     return null;
   }
 
-  // Format the icon ID properly to include variant suffix
-  // This ensures SSOT compliance even with legacy usage patterns
-  const formattedIconId = formatIconId(iconId, solid);
-
-  // In development, warn about deprecated solid prop usage
-  if (process.env.NODE_ENV === 'development' && solid) {
-    console.warn(
-      `[IconAdapter] Using 'solid' prop is deprecated. ` +
-      `Prefer using iconId with explicit suffix: "${formattedIconId}"`
-    );
-  }
-
   // Pass through to the core Icon component (SSOT implementation)
   return (
     <Icon
-      iconId={formattedIconId}
+      iconId={iconId}
       className={className}
       style={style}
       onClick={onClick}
@@ -133,4 +100,4 @@ export const IconAdapter: React.FC<IconAdapterProps> = ({
       {...rest}
     />
   );
-}; 
+};

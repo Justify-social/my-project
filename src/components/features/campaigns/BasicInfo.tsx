@@ -17,7 +17,7 @@ interface BasicInfoProps {
 
 /**
  * Campaign Basic Information Step
- * 
+ *
  * First step in the campaign creation wizard that collects
  * the essential information about the campaign.
  */
@@ -31,8 +31,12 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
   // Budget might be stored differently, adjust access if needed
   const [budget, setBudget] = useState(overviewData?.budget?.toString() || '0');
   // Dates need careful handling (string vs Date)
-  const [startDate, setStartDate] = useState<Date | null>(overviewData?.startDate ? new Date(overviewData.startDate) : null);
-  const [endDate, setEndDate] = useState<Date | null>(overviewData?.endDate ? new Date(overviewData.endDate) : null);
+  const [startDate, setStartDate] = useState<Date | null>(
+    overviewData?.startDate ? new Date(overviewData.startDate) : null
+  );
+  const [endDate, setEndDate] = useState<Date | null>(
+    overviewData?.endDate ? new Date(overviewData.endDate) : null
+  );
 
   // Validation state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -93,12 +97,12 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
         budget: parseFloat(budget),
         // Convert Dates back to string format if needed by the hook/API
         startDate: startDate ? startDate.toISOString() : undefined,
-        endDate: endDate ? endDate.toISOString() : undefined
+        endDate: endDate ? endDate.toISOString() : undefined,
       });
 
       // Call saveAsDraft here if submitting should also save
       // Or rely on the dedicated Save Draft button
-      // await saveAsDraft(); 
+      // await saveAsDraft();
 
       // Move to next step
       if (onNext) {
@@ -142,12 +146,17 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
 
   return (
     <div className="space-y-6 p-4 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 font-sora text-foreground">Campaign Basic Information</h2>
+      <h2 className="text-2xl font-bold mb-6 font-heading text-foreground">
+        Campaign Basic Information
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Campaign Name */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-secondary mb-1 font-body"
+          >
             Campaign Name <span className="text-destructive">*</span>
           </label>
           <Input
@@ -161,7 +170,10 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-secondary mb-1 font-body"
+          >
             Description
           </label>
           <Textarea
@@ -175,12 +187,15 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
 
         {/* Budget */}
         <div>
-          <label htmlFor="budget" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+          <label
+            htmlFor="budget"
+            className="block text-sm font-medium text-secondary mb-1 font-body"
+          >
             Budget <span className="text-destructive">*</span>
           </label>
           <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-muted-foreground sm:text-sm font-work-sans">$</span>
+              <span className="text-muted-foreground sm:text-sm font-body">$</span>
             </div>
             <Input
               id="budget"
@@ -199,7 +214,10 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
         {/* Date Range */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+            <label
+              htmlFor="startDate"
+              className="block text-sm font-medium text-secondary mb-1 font-body"
+            >
               Start Date <span className="text-destructive">*</span>
             </label>
             <DatePicker
@@ -208,11 +226,16 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
               onChange={handleStartDateChange}
               placeholder="Select start date"
             />
-            {errors.startDate && <p className="text-destructive text-xs mt-1">{errors.startDate}</p>}
+            {errors.startDate && (
+              <p className="text-destructive text-xs mt-1">{errors.startDate}</p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-secondary mb-1 font-work-sans">
+            <label
+              htmlFor="endDate"
+              className="block text-sm font-medium text-secondary mb-1 font-body"
+            >
               End Date
             </label>
             <DatePicker
@@ -220,7 +243,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
               value={endDate}
               onChange={handleEndDateChange}
               placeholder="Select end date"
-              disabled={(date) => {
+              disabled={date => {
                 if (!startDate) return false;
                 const comparisonDate = new Date(date);
                 comparisonDate.setHours(0, 0, 0, 0);
@@ -246,19 +269,11 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
           </Button>
 
           <div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={saveAsDraft}
-              className="mr-2"
-            >
+            <Button type="button" variant="outline" onClick={saveAsDraft} className="mr-2">
               Save Draft
             </Button>
 
-            <Button
-              type="submit"
-              className="w-24"
-            >
+            <Button type="submit" className="w-24">
               Next
             </Button>
           </div>
@@ -268,4 +283,4 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onNext, onBack }) => {
   );
 };
 
-export default BasicInfo; 
+export default BasicInfo;

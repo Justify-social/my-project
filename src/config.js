@@ -1,9 +1,9 @@
 /**
  * Application Configuration Entrypoint
- * 
- * This file exports the central configuration system to be used throughout 
+ *
+ * This file exports the central configuration system to be used throughout
  * the application. It's the single entry point for all configuration needs.
- * 
+ *
  * Import from this file instead of directly accessing the config system:
  * import { config } from '@/config';
  */
@@ -24,5 +24,5 @@ export const {
   features,
   api,
   server,
-  security
-} = config; 
+  security,
+} = config;

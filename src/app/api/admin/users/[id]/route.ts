@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/session';
 
@@ -27,7 +27,7 @@ async function isSuperAdmin() {
 }
 
 // Define interface for the GET route context parameters
-// interface RouteParams { // Keep commented out 
+// interface RouteParams { // Keep commented out
 //   id: string;
 // }
 
@@ -56,10 +56,7 @@ export async function GET(
     // Safely access id
     id = contextOrParams?.params?.id || contextOrParams?.id;
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'User ID is required' }, { status: 400 });
     }
 
     // TODO: Add actual admin check and Prisma logic here, referencing backup file
@@ -67,15 +64,11 @@ export async function GET(
     // if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     // Simulated response for now
-    const simulatedUser = { id, name: "Simulated User", email: `user-${id}@example.com` };
+    const simulatedUser = { id, name: 'Simulated User', email: `user-${id}@example.com` };
     return NextResponse.json({ success: true, data: simulatedUser });
-
   } catch (error) {
     // Use id (now accessible) in error message
     console.error(`Error in GET /api/admin/users/${id}:`, error);
-    return NextResponse.json(
-      { success: false, error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
-} 
+}
