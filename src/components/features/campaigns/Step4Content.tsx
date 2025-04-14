@@ -12,6 +12,7 @@ import {
     DraftCampaignData,
     // Import sub-schemas if needed
     DraftAssetSchema,
+    CreativeAssetTypeEnum,
 } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
@@ -207,17 +208,26 @@ function Step4Content() {
     // Updated callback for the new FileUploader
     const handleAssetUploadComplete = useCallback((results: UploadThingResult[]) => {
         // Map UploadThingResult to DraftAssetSchema format
-        const assetsToAdd: z.infer<typeof DraftAssetSchema>[] = results.map(res => ({
-            // Generate a temporary client-side ID or use res.key if unique enough
-            id: `temp-${res.key || Date.now()}`,
-            url: res.url,
-            name: res.name,
-            fileName: res.name,
-            fileSize: res.size,
-            // Basic type detection - enhance if needed
-            type: res.name.includes('.') && res.name.split('.').pop()?.toLowerCase() === 'mp4' ? 'video' : 'image',
-            temp: false,
-        }));
+        const assetsToAdd: z.infer<typeof DraftAssetSchema>[] = results.map(res => {
+            let assetType: z.infer<typeof CreativeAssetTypeEnum> | undefined = undefined;
+            if (res.type?.startsWith('image/')) {
+                assetType = 'image';
+            } else if (res.type?.startsWith('video/')) {
+                assetType = 'video';
+            }
+            // TODO: Consider handling other types or logging a warning for unmapped types
+
+            return {
+                // Generate a temporary client-side ID or use res.key if unique enough
+                id: `temp-${res.key || Date.now()}`,
+                url: res.url,
+                name: res.name,
+                fileName: res.name,
+                fileSize: res.size,
+                type: assetType,
+                temp: true, // Mark as temporary until full form save
+            };
+        });
         appendAsset(assetsToAdd);
     }, [appendAsset]);
 
@@ -349,7 +359,7 @@ function Step4Content() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Creative Assets</CardTitle>
-                            <CardDescription>Upload campaign assets like images, videos, or documents.</CardDescription>
+                            <CardDescription>Upload your videos or images.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {/* Use the new FileUploader from /ui */}
@@ -410,7 +420,7 @@ function Step4Content() {
                                     <FormItem>
                                         <FormLabel>Brand Guidelines Summary</FormLabel>
                                         <FormControl>
-                                            <Textarea placeholder="Summarize key Do's and Don'ts, tone of voice, visual style..." {...field} rows={4} />
+                                            <Textarea placeholder="Summarize key Do's and Don'ts, tone of voice, visual style..." {...field} value={field.value ?? ''} rows={4} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -478,7 +488,7 @@ function Step4Content() {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Textarea placeholder="Add any extra details here..." {...field} rows={5} />
+                                            <Textarea placeholder="Add any extra details here..." {...field} value={field.value ?? ''} rows={5} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

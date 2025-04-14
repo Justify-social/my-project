@@ -57,7 +57,6 @@ export {
   getLightVariant,
   getSolidVariant,
   ensureIconVariant,
-  createIcon,
   createIconWithId,
   getBaseIconName,
   isLightVariant,

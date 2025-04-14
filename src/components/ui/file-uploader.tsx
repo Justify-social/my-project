@@ -29,6 +29,7 @@ export interface UploadThingResult {
     name: string;
     size: number;
     url: string;
+    type: string;
     // Add any custom metadata you might return
     // customId?: string;
 }
@@ -203,7 +204,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
                             {/* Content based on state */}
                             {isUploading ? (
                                 <div className="text-center">
-                                    <Icon iconId="faSpinnerThirdLight" className="h-8 w-8 text-primary animate-spin mb-3" />
+                                    <Icon iconId="faCircleNotchLight" className="h-8 w-8 text-primary animate-spin mb-3" />
                                     <p className="text-sm font-medium text-primary">Uploading...</p>
                                     <Progress value={uploadProgress} className="w-full h-1.5 mt-2" aria-label={`Upload progress ${uploadProgress}%`} />
                                 </div>
@@ -214,7 +215,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
                                 </div>
                             ) : localFiles.length > 0 ? (
                                 <div className="text-center">
-                                    <Icon iconId="faCheckCircleSolid" className="h-8 w-8 text-green-600 mb-3" />
+                                    <Icon iconId="faCircleCheckSolid" className="h-8 w-8 text-green-600 mb-3" />
                                     <p className="text-sm font-medium">{localFiles.length} file(s) selected</p>
                                     <p className="text-xs text-muted-foreground mt-1">Ready to upload</p>
                                 </div>
@@ -226,7 +227,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
                                 </div>
                             ) : (
                                 <div className="text-center">
-                                    <Icon iconId="faCloudArrowUpLight" className="h-8 w-8 text-muted-foreground mb-3" />
+                                    <Icon iconId="faUploadLight" className="h-8 w-8 text-muted-foreground mb-3" />
                                     <p className="text-sm font-medium">Drag & drop or click to select</p>
                                     <p className="text-xs text-muted-foreground mt-1">
                                         {maxFiles > 1 ? `Max ${maxFiles} files, ` : ""}up to {maxSizeMB}MB each

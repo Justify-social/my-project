@@ -4,6 +4,27 @@
  * @description A fixed footer progress bar for multi-step wizards, providing navigation.
  * Uses Shadcn UI Button, Badge.
  * @status 10th April
+ * @example
+ * // Example usage for a 5-step campaign wizard:
+ * <ProgressBarWizard
+ *   currentStep={currentStep} // e.g., 1, 2, 3, 4, or 5
+ *   steps={[
+ *     { number: 1, label: 'Setup' },
+ *     { number: 2, label: 'Targeting' },
+ *     { number: 3, label: 'Creative' },
+ *     { number: 4, label: 'Budget' },
+ *     { number: 5, label: 'Review' }
+ *   ]}
+ *   onStepClick={(step) => handleStepChange(step)}
+ *   onBack={currentStep > 1 ? () => setCurrentStep(currentStep - 1) : null}
+ *   onNext={() => {
+ *     if (currentStep < 5) setCurrentStep(currentStep + 1);
+ *     else handleSubmit();
+ *   }}
+ *   isNextDisabled={!isStepValid(currentStep)}
+ *   isNextLoading={isLoading}
+ *   submitButtonText="Launch Campaign"
+ * />
  */
 
 'use client';
@@ -137,6 +158,7 @@ export function ProgressBarWizard({
                     )}
                     {currentStep < totalSteps ? 'Next' : submitButtonText}
                 </Button>
+                {/* Note: If the progress bar is not visible on certain steps (e.g., step 3), check parent component for conditional rendering or CSS issues. */}
             </div>
         </footer>
     );

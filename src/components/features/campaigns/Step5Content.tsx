@@ -64,18 +64,32 @@ const SummarySection: React.FC<SummarySectionProps> = ({ title, stepNumber, onEd
     return (
         <AccordionItem value={`step-${stepNumber}`} className="border-b-0">
             <AccordionTrigger className={cn(
+                "group",
                 "flex justify-between items-center w-full text-left text-lg font-semibold text-primary p-4 rounded-lg border mb-2 transition-colors hover:bg-muted/50",
                 isComplete ? "border-green-200 bg-green-50/50 hover:bg-green-50/80" : "border-border bg-card"
             )}>
                 <div className="flex items-center">
                     <Badge variant={isComplete ? "default" : "secondary"} className={cn("mr-3 h-6 w-6 justify-center", isComplete && "bg-green-600 text-white")}>{stepNumber}</Badge>
-                    {title}
-                    {isComplete && <Icon iconId="faCheckCircleSolid" className="ml-2 h-4 w-4 text-green-600" />}
+                    <span className="group-hover:underline">{title}</span>
+                    {isComplete && <Icon iconId="faCircleCheckSolid" className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
                 </div>
                 <div className="flex items-center">
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(); }} className="mr-2 text-sm">
+                    {/* Use a span styled as a button to avoid nesting button elements */}
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onEdit(); } }} // Add keyboard accessibility
+                        className={cn(
+                            // Mimic Button styles (variant="ghost", size="sm")
+                            'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
+                            'hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                            'h-8 px-3', // size=sm
+                            'mr-2 text-sm cursor-pointer' // Added cursor-pointer
+                        )}
+                    >
                         <Icon iconId="faPenToSquareLight" className="mr-1.5 h-3.5 w-3.5" /> Edit
-                    </Button>
+                    </span>
                     {/* Accordion chevron is added automatically by AccordionTrigger */}
                 </div>
             </AccordionTrigger>
@@ -124,12 +138,12 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
         <DataItem label="Campaign Name" value={data.name} />
         <DataItem label="Business Goal" value={data.businessGoal} className="md:col-span-2" />
-        <DataItem label="Start Date" value={data.startDate} />
-        <DataItem label="End Date" value={data.endDate} />
+        <DataItem label="Start Date" value={data.startDate ? new Date(data.startDate).toLocaleDateString() : null} />
+        <DataItem label="End Date" value={data.endDate ? new Date(data.endDate).toLocaleDateString() : null} />
         <DataItem label="Timezone" value={data.timeZone} />
         <DataItem label="Currency" value={data.budget?.currency} />
-        <DataItem label="Total Budget" value={data.budget?.totalBudget?.toLocaleString()} />
-        <DataItem label="Social Media Budget" value={data.budget?.socialMediaBudget?.toLocaleString()} />
+        <DataItem label="Total Budget" value={data.budget?.total?.toLocaleString()} />
+        <DataItem label="Social Media Budget" value={data.budget?.socialMedia?.toLocaleString()} />
         <DataItem label="Primary Contact Name" value={`${data.primaryContact?.firstName} ${data.primaryContact?.surname}`} />
         <DataItem label="Primary Contact Email" value={data.primaryContact?.email} />
         <DataItem label="Primary Contact Position" value={data.primaryContact?.position} />
@@ -142,9 +156,9 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
         )}
         <div className="md:col-span-2">
             <p className="text-sm font-medium text-muted-foreground mb-1">Influencers</p>
-            {data.influencers && data.influencers.length > 0 ? (
+            {data.Influencer && data.Influencer.length > 0 ? (
                 <div className="space-y-2">
-                    {data.influencers.map((inf, idx) => (
+                    {data.Influencer.map((inf, idx) => (
                         <InfluencerCard
                             key={idx}
                             platform={inf.platform}
@@ -253,14 +267,14 @@ function Step5Content() {
             // Core Info
             campaignName: draft.name ?? 'Untitled Campaign', // Ensure required fields have fallbacks
             description: draft.businessGoal ?? '',
-            startDate: draft.startDate, // Assume format is correct, API should validate/parse
-            endDate: draft.endDate,
+            startDate: draft.startDate ? (typeof draft.startDate === 'string' ? draft.startDate : draft.startDate.toISOString()) : undefined,
+            endDate: draft.endDate ? (typeof draft.endDate === 'string' ? draft.endDate : draft.endDate.toISOString()) : undefined,
             timeZone: draft.timeZone ?? 'UTC', // Default timezone if necessary
             currency: draft.budget?.currency,
-            totalBudget: draft.budget?.totalBudget,
-            socialMediaBudget: draft.budget?.socialMediaBudget,
-            platform: draft.influencers?.[0]?.platform, // STILL AN ASSUMPTION - Needs clarification
-            influencerHandle: draft.influencers?.[0]?.handle, // STILL AN ASSUMPTION
+            totalBudget: draft.budget?.total,
+            socialMediaBudget: draft.budget?.socialMedia,
+            platform: draft.Influencer?.[0]?.platform, // Use capitalized Influencer
+            influencerHandle: draft.Influencer?.[0]?.handle, // Use capitalized Influencer
 
             // Contacts
             primaryContact: draft.primaryContact ? {
@@ -277,7 +291,7 @@ function Step5Content() {
             } : undefined,
 
             // Objectives
-            primaryKPI: draft.primaryKPI,
+            primaryKPI: draft.primaryKPI ?? undefined, // Map null to undefined for submission schema
             secondaryKPIs: draft.secondaryKPIs ?? [],
             features: draft.features ?? [],
             mainMessage: draft.messaging?.mainMessage ?? '',
@@ -475,7 +489,7 @@ function Step5Content() {
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={handleNext} id="step5-confirmation-form">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                             <FormField
                                 control={form.control}
                                 name="confirm"

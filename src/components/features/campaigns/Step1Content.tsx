@@ -337,7 +337,7 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<{
 }
 
 function Step1Content() {
-    const { wizardState, updateWizardState, isLoading, saveProgress, lastSaved, autosaveEnabled } = useWizard();
+    const { wizardState, updateWizardState, isLoading, saveProgress, lastSaved, autosaveEnabled, stepsConfig } = useWizard();
     const router = useRouter();
     const initialDataLoaded = useRef(false);
     const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
@@ -597,7 +597,7 @@ function Step1Content() {
             </div>
             <ProgressBarWizard
                 currentStep={1}
-                steps={Array.isArray(wizardState?.stepsConfig) ? wizardState.stepsConfig : []}
+                steps={stepsConfig}
                 onStepClick={handleStepClick}
                 onBack={null}
                 onNext={onSubmitAndNavigate}
