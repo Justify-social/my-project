@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,18 +43,70 @@ import {
 } from '@/components/features/campaigns/types';
 import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
 import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 // --- Constants for Display ---
 const kpis = [
-    { key: KPIEnum.Values.AD_RECALL, title: 'Ad Recall', icon: '/icons/kpis/kpisAdRecall.svg' },
-    { key: KPIEnum.Values.BRAND_AWARENESS, title: 'Brand Awareness', icon: '/icons/kpis/kpisBrandAwareness.svg' },
-    { key: KPIEnum.Values.CONSIDERATION, title: 'Consideration', icon: '/icons/kpis/kpisConsideration.svg' },
-    { key: KPIEnum.Values.MESSAGE_ASSOCIATION, title: 'Message Association', icon: '/icons/kpis/kpisMessageAssociation.svg' },
-    { key: KPIEnum.Values.BRAND_PREFERENCE, title: 'Brand Preference', icon: '/icons/kpis/kpisBrandPreference.svg' },
-    { key: KPIEnum.Values.PURCHASE_INTENT, title: 'Purchase Intent', icon: '/icons/kpis/kpisPurchaseIntent.svg' },
-    { key: KPIEnum.Values.ACTION_INTENT, title: 'Action Intent', icon: '/icons/kpis/kpisActionIntent.svg' },
-    { key: KPIEnum.Values.RECOMMENDATION_INTENT, title: 'Recommendation Intent', icon: '/icons/kpis/kpisRecommendationIntent.svg' },
-    { key: KPIEnum.Values.ADVOCACY, title: 'Advocacy', icon: '/icons/kpis/kpisAdvocacy.svg' },
+    {
+        key: KPIEnum.Values.AD_RECALL, title: 'Ad Recall', iconId: 'kpisAdRecall',
+        description: 'The percentage of people who remember seeing your advertisement.',
+        example: 'After a week, 60% of viewers can recall your ad\'s main message.'
+    },
+    {
+        key: KPIEnum.Values.BRAND_AWARENESS, title: 'Brand Awareness', iconId: 'kpisBrandAwareness',
+        description: 'The increase in recognition of your brand.',
+        example: 'Your brand name is recognised by 30% more people after the campaign.'
+    },
+    {
+        key: KPIEnum.Values.CONSIDERATION, title: 'Consideration', iconId: 'kpisConsideration',
+        description: 'The percentage of people considering purchasing from your brand.',
+        example: '25% of your audience considers buying your product after seeing your campaign.'
+    },
+    {
+        key: KPIEnum.Values.MESSAGE_ASSOCIATION, title: 'Message Association', iconId: 'kpisMessageAssociation',
+        description: 'How well people link your key messages to your brand.',
+        example: 'When hearing your slogan, 70% of people associate it directly with your brand.'
+    },
+    {
+        key: KPIEnum.Values.BRAND_PREFERENCE, title: 'Brand Preference', iconId: 'kpisBrandPreference',
+        description: "Preference for your brand over competitors'.",
+        example: '40% of customers prefer your brand when choosing between similar products.'
+    },
+    {
+        key: KPIEnum.Values.PURCHASE_INTENT, title: 'Purchase Intent', iconId: 'kpisPurchaseIntent',
+        description: 'Likelihood of purchasing your product or service.',
+        example: '50% of viewers intend to buy your product after seeing the ad.'
+    },
+    {
+        key: KPIEnum.Values.ACTION_INTENT, title: 'Action Intent', iconId: 'kpisActionIntent',
+        description: 'Likelihood of taking a specific action related to your brand (e.g., visiting your website).',
+        example: '35% of people are motivated to visit your website after the campaign.'
+    },
+    {
+        key: KPIEnum.Values.RECOMMENDATION_INTENT, title: 'Recommendation Intent', iconId: 'kpisRecommendationIntent',
+        description: 'Likelihood of recommending your brand to others.',
+        example: '45% of customers are willing to recommend your brand to friends and family.'
+    },
+    {
+        key: KPIEnum.Values.ADVOCACY, title: 'Advocacy', iconId: 'kpisAdvocacy',
+        description: 'Willingness to actively promote your brand.',
+        example: '20% of your customers regularly share your brand on social media or write positive reviews.'
+    },
 ];
 
 const features = [
@@ -73,12 +125,12 @@ function Step2Content() {
         resolver: zodResolver(Step2ValidationSchema),
         mode: 'onChange',
         defaultValues: {
-            primaryKPI: wizard.wizardState?.primaryKPI,
+            primaryKPI: wizard.wizardState?.primaryKPI ?? undefined,
             secondaryKPIs: wizard.wizardState?.secondaryKPIs ?? [],
             features: wizard.wizardState?.features ?? [],
             messaging: {
                 mainMessage: wizard.wizardState?.messaging?.mainMessage ?? '',
-                hashtags: wizard.wizardState?.messaging?.hashtags ?? '',
+                hashtags: wizard.wizardState?.messaging?.hashtags ?? [],
                 keyBenefits: wizard.wizardState?.messaging?.keyBenefits ?? '',
             },
             expectedOutcomes: {
@@ -95,12 +147,12 @@ function Step2Content() {
             const messaging = wizard.wizardState.messaging ?? {};
             const outcomes = wizard.wizardState.expectedOutcomes ?? {};
             form.reset({
-                primaryKPI: wizard.wizardState.primaryKPI,
+                primaryKPI: wizard.wizardState.primaryKPI ?? undefined,
                 secondaryKPIs: wizard.wizardState.secondaryKPIs ?? [],
                 features: wizard.wizardState.features ?? [],
                 messaging: {
                     mainMessage: messaging.mainMessage ?? '',
-                    hashtags: messaging.hashtags ?? '',
+                    hashtags: messaging.hashtags ?? [],
                     keyBenefits: messaging.keyBenefits ?? '',
                 },
                 expectedOutcomes: {
@@ -111,6 +163,9 @@ function Step2Content() {
             });
         }
     }, [wizard.wizardState, wizard.isLoading, form.reset, form.formState.isDirty]);
+
+    // State for the hashtag input field
+    const [hashtagInput, setHashtagInput] = useState('');
 
     // Watch form values for autosave
     const watchedValues = form.watch();
@@ -125,7 +180,11 @@ function Step2Content() {
         const payload: Partial<DraftCampaignData> = {
             primaryKPI: currentData.primaryKPI,
             secondaryKPIs: currentData.secondaryKPIs,
-            messaging: currentData.messaging,
+            messaging: {
+                mainMessage: currentData.messaging?.mainMessage,
+                hashtags: currentData.messaging?.hashtags ?? [],
+                keyBenefits: currentData.messaging?.keyBenefits,
+            },
             expectedOutcomes: currentData.expectedOutcomes,
             features: currentData.features,
             step2Complete: form.formState.isValid,
@@ -188,7 +247,11 @@ function Step2Content() {
         const payload: Partial<DraftCampaignData> = {
             primaryKPI: data.primaryKPI,
             secondaryKPIs: data.secondaryKPIs,
-            messaging: data.messaging,
+            messaging: {
+                mainMessage: data.messaging?.mainMessage,
+                hashtags: data.messaging?.hashtags ?? [],
+                keyBenefits: data.messaging?.keyBenefits,
+            },
             expectedOutcomes: data.expectedOutcomes,
             features: data.features,
             step2Complete: true,
@@ -215,6 +278,29 @@ function Step2Content() {
         return 'idle';
     };
 
+    // Watch hashtag array for UI updates
+    const currentHashtags = form.watch('messaging.hashtags') ?? [];
+
+    // --- Hashtag Input Handlers ---
+    const handleAddHashtag = () => {
+        const newHashtag = hashtagInput.trim().replace(/^#/, ''); // Remove leading # if present
+        if (newHashtag && !currentHashtags.includes(newHashtag)) {
+            form.setValue('messaging.hashtags', [...currentHashtags, newHashtag], { shouldValidate: true, shouldDirty: true });
+            setHashtagInput(''); // Clear input
+        }
+    };
+
+    const handleRemoveHashtag = (tagToRemove: string) => {
+        form.setValue('messaging.hashtags', currentHashtags.filter(tag => tag !== tagToRemove), { shouldValidate: true, shouldDirty: true });
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission
+            handleAddHashtag();
+        }
+    };
+
     return (
         <div className="space-y-8">
             <ProgressBarWizard
@@ -235,80 +321,147 @@ function Step2Content() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-8 pb-[var(--footer-height)]">
 
-                    {/* KPIs Card */}
+                    {/* KPIs Card - REVISED LAYOUT */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center"><Icon iconId="faChartBarLight" className="w-5 h-5 mr-2 text-accent" />Key Performance Indicators (KPIs)</CardTitle>
-                            <CardDescription>Select 1 Primary KPI and up to 4 Secondary KPIs.</CardDescription>
+                            <CardDescription>Select 1 Primary KPI and up to 4 Secondary KPIs. Hover over titles for details.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* Primary KPI Column */}
-                                <FormField
-                                    control={form.control}
-                                    name="primaryKPI"
-                                    render={({ field }) => (
-                                        <FormItem className="space-y-3 md:col-span-1">
-                                            <FormLabel className="text-base font-semibold">Primary KPI *</FormLabel>
-                                            <FormControl>
-                                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-1">
-                                                    {kpis.map((kpi) => (
-                                                        <FormItem key={`primary-${kpi.key}`} className="flex items-center space-x-3 space-y-0">
-                                                            <FormControl><RadioGroupItem value={kpi.key} /></FormControl>
-                                                            <FormLabel className="font-normal flex items-center cursor-pointer">
-                                                                <Image src={kpi.icon} alt={kpi.title} width={16} height={16} className="mr-1.5" /> {kpi.title}
-                                                            </FormLabel>
-                                                        </FormItem>
-                                                    ))}
-                                                </RadioGroup>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                {/* Secondary KPIs Column */}
-                                <FormField
-                                    control={form.control}
-                                    name="secondaryKPIs"
-                                    render={() => (
-                                        <FormItem className="space-y-3 md:col-span-2">
-                                            <FormLabel className="text-base font-semibold">Secondary KPIs (Max 4)</FormLabel>
-                                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                                {kpis.map((kpi) => (
-                                                    <FormField
-                                                        key={`secondary-${kpi.key}`}
-                                                        control={form.control}
-                                                        name="secondaryKPIs"
-                                                        render={({ field }) => {
-                                                            const isDisabled = primaryKPIValue === kpi.key || (secondaryKPIValues.length >= 4 && !secondaryKPIValues.includes(kpi.key));
-                                                            return (
-                                                                <FormItem className={cn("flex flex-row items-center space-x-3 space-y-0 p-2 rounded-md", isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-muted/50")}>
-                                                                    <FormControl>
-                                                                        <Checkbox
-                                                                            checked={field.value?.includes(kpi.key)}
-                                                                            onCheckedChange={(checked) => {
-                                                                                if (isDisabled && checked) return;
-                                                                                const currentValues = field.value || [];
-                                                                                return checked ? field.onChange([...currentValues, kpi.key]) : field.onChange(currentValues.filter((value) => value !== kpi.key));
-                                                                            }}
-                                                                            disabled={isDisabled}
-                                                                        />
-                                                                    </FormControl>
-                                                                    <FormLabel className={cn("font-normal flex items-center", isDisabled ? "text-muted-foreground" : "cursor-pointer")}>
-                                                                        <Image src={kpi.icon} alt={kpi.title} width={16} height={16} className="mr-1.5" /> {kpi.title}
-                                                                    </FormLabel>
-                                                                </FormItem>
-                                                            );
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <FormMessage />
-                                            {secondaryKPIValues.length >= 4 && (<FormDescription className="text-xs">Maximum 4 selected.</FormDescription>)}
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            <TooltipProvider delayDuration={300}>
+                                <div className="border rounded-md overflow-hidden">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                                <TableHead className="w-[50%] pl-4">Explanation</TableHead>
+                                                <TableHead className="text-center w-[120px]">Primary</TableHead>
+                                                <TableHead className="text-center w-[120px]">Secondary</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {kpis.map((kpi) => {
+                                                const isPrimarySelected = primaryKPIValue === kpi.key;
+                                                const isSecondarySelected = secondaryKPIValues.includes(kpi.key);
+                                                const canSelectSecondary = !isPrimarySelected && (secondaryKPIValues.length < 4 || isSecondarySelected);
+                                                const secondaryIsDisabled = isPrimarySelected || !canSelectSecondary;
+
+                                                return (
+                                                    <TableRow
+                                                        key={kpi.key}
+                                                        className={cn(
+                                                            "transition-colors",
+                                                            isPrimarySelected
+                                                                ? "bg-primary/10 hover:bg-primary/20 border-l-4 border-l-primary"
+                                                                : "hover:bg-muted/50"
+                                                        )}
+                                                        onClick={() => form.setValue('primaryKPI', kpi.key, { shouldValidate: true })}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        {/* Explanation Cell - Revised for vertical icon span */}
+                                                        <TableCell className="font-medium align-top py-3 pl-4 flex items-start space-x-4"> {/* Increased space-x */}
+                                                            {/* Icon as direct child - Larger size */}
+                                                            <Icon iconId={kpi.iconId} className="h-8 w-8 flex-shrink-0 text-muted-foreground" /> {/* Increased size, removed mt-0.5 */}
+                                                            {/* Container for text content */}
+                                                            <div className="flex-grow pt-1"> {/* Added slight top padding to text container for better alignment with larger icon center */}
+                                                                <div className="flex items-center space-x-2 mb-0.5"> {/* Title row */}
+                                                                    {/* Icon removed from here */}
+                                                                    <span className="font-semibold">{kpi.title}</span>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            {/* Wrap icon in a span to allow TooltipTrigger to work */}
+                                                                            <span className="cursor-help">
+                                                                                <Icon iconId="faCircleInfoLight" className="h-3.5 w-3.5 text-muted-foreground opacity-70" />
+                                                                            </span>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent side="top" align="start" className="max-w-xs z-50 p-3">
+                                                                            {/* Display only the example in the tooltip */}
+                                                                            <p className="text-sm whitespace-normal">{kpi.example}</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </div>
+                                                                {/* Description row - remove padding */}
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {kpi.description}
+                                                                </p>
+                                                            </div>
+                                                        </TableCell>
+
+                                                        <TableCell className="text-center align-middle py-3">
+                                                            <div className={cn(
+                                                                "mx-auto w-5 h-5 rounded-full border-2 flex items-center justify-center",
+                                                                isPrimarySelected ? "border-primary bg-primary" : "border-muted-foreground"
+                                                            )}>
+                                                                {isPrimarySelected && <Icon iconId="faCheckSolid" className="h-2.5 w-2.5 text-primary-foreground" />}
+                                                            </div>
+                                                        </TableCell>
+
+                                                        <TableCell
+                                                            className="text-center align-middle py-3"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <FormItem className={cn("flex justify-center items-center", secondaryIsDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer")}>
+                                                                <FormControl>
+                                                                    <Checkbox
+                                                                        id={`secondary-${kpi.key}`}
+                                                                        checked={isSecondarySelected}
+                                                                        onCheckedChange={(checked) => {
+                                                                            if (secondaryIsDisabled && checked) return;
+                                                                            const currentValues = form.getValues('secondaryKPIs') || [];
+                                                                            const updatedValues = checked
+                                                                                ? [...currentValues, kpi.key]
+                                                                                : currentValues.filter((value) => value !== kpi.key);
+                                                                            form.setValue('secondaryKPIs', updatedValues, { shouldValidate: true });
+                                                                        }}
+                                                                        disabled={secondaryIsDisabled}
+                                                                        aria-label={`Select ${kpi.title} as Secondary KPI`}
+                                                                    />
+                                                                </FormControl>
+                                                            </FormItem>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                <div className="pt-2 px-1 text-xs min-h-[20px]">
+                                    {form.formState.errors.primaryKPI && <FormMessage>{form.formState.errors.primaryKPI?.message}</FormMessage>}
+                                    {form.formState.errors.secondaryKPIs && <FormMessage>{form.formState.errors.secondaryKPIs?.message || form.formState.errors.secondaryKPIs?.root?.message}</FormMessage>}
+                                </div>
+                                <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-6">
+                                    <div className="flex flex-col space-y-1">
+                                        <span className="text-sm font-medium text-muted-foreground">Primary KPI:</span>
+                                        <div>
+                                            {primaryKPIValue ? (
+                                                <Badge variant="default" className="text-sm px-3 py-1">
+                                                    <Icon iconId={kpis.find(k => k.key === primaryKPIValue)?.iconId || 'faQuestionCircleLight'} className="mr-1.5 h-4 w-4" />
+                                                    {kpis.find(k => k.key === primaryKPIValue)?.title}
+                                                </Badge>
+                                            ) : (
+                                                <span className="text-sm italic text-muted-foreground">Not Selected</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col space-y-1">
+                                        <span className="text-sm font-medium text-muted-foreground">Secondary KPIs: {secondaryKPIValues.length >= 4 ? "(Max 4)" : `(${secondaryKPIValues.length}/4)`}</span>
+                                        <div className="flex flex-wrap gap-1 min-h-[28px] items-center">
+                                            {secondaryKPIValues.length > 0 ? (
+                                                secondaryKPIValues.map(key => {
+                                                    const kpiInfo = kpis.find(k => k.key === key);
+                                                    return (
+                                                        <Badge key={key} variant="secondary" className="px-2.5 py-0.5">
+                                                            <Icon iconId={kpiInfo?.iconId || 'faQuestionCircleLight'} className="mr-1.5 h-4 w-4" />
+                                                            {kpiInfo?.title}
+                                                        </Badge>
+                                                    );
+                                                })
+                                            ) : (
+                                                <span className="text-sm italic text-muted-foreground">None Selected</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </TooltipProvider>
                         </CardContent>
                     </Card>
 
@@ -320,7 +473,42 @@ function Step2Content() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <FormField control={form.control} name="messaging.mainMessage" render={({ field }) => (<FormItem><FormLabel>Main Message *</FormLabel><FormControl><Textarea placeholder="Single most important takeaway..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name="messaging.hashtags" render={({ field }) => (<FormItem><FormLabel>Campaign Hashtags</FormLabel><FormControl><Input placeholder="#Campaign #Example" {...field} /></FormControl><FormMessage /></FormItem>)} />
+
+                            {/* --- Hashtag Input - REVISED --- */}
+                            <FormItem>
+                                <FormLabel>Campaign Hashtags</FormLabel>
+                                {/* Input first */}
+                                <FormControl>
+                                    <Input
+                                        placeholder="Type a hashtag and press Enter..."
+                                        value={hashtagInput}
+                                        onChange={(e) => setHashtagInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                    />
+                                </FormControl>
+                                {/* Badges display below input */}
+                                <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center"> {/* Added pt-2 */}
+                                    {currentHashtags.map((tag) => (
+                                        <Badge key={tag} variant="secondary" className="pl-2 pr-1 text-sm">
+                                            #{tag} {/* Add # prefix for display */}
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                // Make icon white on secondary badge
+                                                className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                onClick={() => handleRemoveHashtag(tag)}
+                                            >
+                                                <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                <span className="sr-only">Remove hashtag {tag}</span>
+                                            </Button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <FormMessage>{form.formState.errors.messaging?.hashtags?.message}</FormMessage>
+                            </FormItem>
+                            {/* --- End Hashtag Input --- */}
+
                             <FormField control={form.control} name="messaging.keyBenefits" render={({ field }) => (<FormItem><FormLabel>Key Benefits / Value Proposition *</FormLabel><FormControl><Textarea placeholder="List 3-5 key benefits..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                         </CardContent>
                     </Card>
@@ -345,44 +533,51 @@ function Step2Content() {
                             <CardDescription>Select features to enable for this campaign.</CardDescription>
                         </CardHeader>
                         <CardContent>
+                            {/* Single FormField for the features array */}
                             <FormField
                                 control={form.control}
                                 name="features"
-                                render={() => (
+                                render={({ field }) => ( // Use the field object from the outer FormField
                                     <FormItem>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            {features.map((feature) => (
-                                                <FormField
-                                                    key={feature.key}
-                                                    control={form.control}
-                                                    name="features"
-                                                    render={({ field }) => (
-                                                        <FormItem
-                                                            className={cn("flex flex-col items-center justify-between rounded-lg border p-4 cursor-pointer transition-all", field.value?.includes(feature.key) ? "bg-accent text-accent-foreground border-accent/40 shadow-md" : "bg-background hover:bg-accent/5")}
-                                                            onClick={() => {
-                                                                const current = field.value || [];
-                                                                const updated = current.includes(feature.key) ? current.filter(f => f !== feature.key) : [...current, feature.key];
-                                                                field.onChange(updated);
-                                                            }}
-                                                        >
-                                                            <FormControl>
-                                                                <Checkbox checked={field.value?.includes(feature.key)} onCheckedChange={(checked) => field.onChange(checked ? [...(field.value || []), feature.key] : (field.value || []).filter(f => f !== feature.key))} className="sr-only" />
-                                                            </FormControl>
-                                                            <div className="flex items-center mb-3">
-                                                                <div className="mr-3 w-6 h-6 flex items-center justify-center">
-                                                                    <Image src={feature.icon} alt={feature.title} width={28} height={28} className={cn(field.value?.includes(feature.key) ? "filter brightness-0 invert" : "")} />
-                                                                </div>
-                                                                <FormLabel className="font-medium cursor-pointer">{feature.title}</FormLabel>
+                                            {features.map((feature) => {
+                                                const isSelected = field.value?.includes(feature.key);
+                                                return (
+                                                    // Clickable FormItem directly updates the field array value
+                                                    <FormItem
+                                                        key={feature.key}
+                                                        className={cn(
+                                                            "flex flex-col items-center justify-between rounded-lg border p-4 cursor-pointer transition-all",
+                                                            isSelected ? "bg-accent text-accent-foreground border-accent/40 shadow-md" : "bg-background hover:bg-accent/5"
+                                                        )}
+                                                        onClick={() => {
+                                                            const currentValues = field.value || [];
+                                                            const updatedValues = isSelected
+                                                                ? currentValues.filter(f => f !== feature.key)
+                                                                : [...currentValues, feature.key];
+                                                            // Use setValue to update the array
+                                                            form.setValue('features', updatedValues, { shouldValidate: true, shouldDirty: true });
+                                                        }}
+                                                    >
+                                                        {/* Remove redundant FormControl and sr-only Checkbox */}
+                                                        <div className="flex items-center mb-3">
+                                                            <div className="mr-3 w-6 h-6 flex items-center justify-center">
+                                                                {/* Remove filter, rely on parent text color */}
+                                                                <Image src={feature.icon} alt="" width={28} height={28} />
                                                             </div>
-                                                            <div className="flex justify-end w-full mt-auto pt-2">
-                                                                {field.value?.includes(feature.key) ? <Icon iconId="faCheckCircleSolid" className="w-5 h-5 text-accent-foreground" /> : <div className="w-5 h-5 border-2 border-muted rounded-full"></div>}
-                                                            </div>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            ))}
+                                                            {/* Add text-accent-foreground when selected */}
+                                                            <FormLabel className={cn("font-medium cursor-pointer", isSelected && "text-accent-foreground")}>{feature.title}</FormLabel>
+                                                        </div>
+                                                        <div className="flex justify-end w-full mt-auto pt-2">
+                                                            {/* Visual indicator - Use correct icon ID and color */}
+                                                            {isSelected ? <Icon iconId="faCircleCheckSolid" className="w-5 h-5 text-accent-foreground" /> : <div className="w-5 h-5 border-2 border-muted rounded-full"></div>}
+                                                        </div>
+                                                    </FormItem>
+                                                );
+                                            })}
                                         </div>
-                                        <FormMessage />
+                                        {/* Error message for the features array field */}
+                                        <FormMessage>{form.formState.errors.features?.message}</FormMessage>
                                     </FormItem>
                                 )}
                             />

@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { standardizeApiResponse } from '@/utils/api-response-formatter';
+import { logger } from '@/utils/logger';
 // TODO: Remove this import if useCampaignWizard hook becomes obsolete after RHF migration
 // import useCampaignWizard, {
 //   WizardStep,
@@ -168,7 +169,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   const [isSaving, setIsSaving] = useState(false);
   const [userEdited, setUserEdited] = useState(false);
 
-  console.log('WizardProvider:', { campaignId, isLoading, hasLoaded, wizardState: !!wizardState });
+  // logger.debug('WizardProvider Init:', { campaignId, isLoading, hasLoaded, wizardState: !!wizardState });
 
   // --- Data Loading ---
   const loadCampaignData = useCallback(async (id: string) => {
@@ -178,7 +179,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       setHasLoaded(true);
       return;
     }
-    console.log(`Fetching campaign data for ID: ${id}`);
+    logger.info(`Fetching campaign data for ID: ${id}`);
     setIsLoading(true);
     setWizardState(null);
     try {
@@ -186,31 +187,28 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         throw new Error(`Failed to fetch campaign data: ${response.status} ${response.statusText}`);
       }
-      const apiData = await response.json();
-      const normalizedData = standardizeApiResponse(apiData);
+      const result = await response.json();
+      const normalizedData = standardizeApiResponse(result);
 
       if (normalizedData?.success && normalizedData?.data) {
-        // --- DEBUG LOGGING START ---
-        console.log('WizardContext: Raw data received from API before parsing:');
-        console.log(JSON.stringify(normalizedData.data, null, 2));
-        // --- DEBUG LOGGING END ---
-        console.log('WizardContext: Attempting to parse raw data against DraftCampaignDataSchema...');
+        logger.debug('WizardContext: Raw data received:', normalizedData.data);
+        logger.debug('WizardContext: Attempting to parse raw data against DraftCampaignDataSchema...');
         const parseResult = DraftCampaignDataSchema.safeParse(normalizedData.data);
         if (parseResult.success) {
           setWizardState(parseResult.data);
-          console.log('WizardContext: Successfully parsed and set wizardState.');
+          logger.info('WizardContext: Successfully parsed and set wizardState.');
         } else {
-          console.error("WizardContext: Failed to parse loaded data against schema:", parseResult.error.errors);
-          toast.error("Loaded campaign data has an unexpected format. Please contact support.");
-          setWizardState(null); // Set to null if parsing fails
+          logger.error("WizardContext: Failed to parse loaded data against schema:", parseResult.error.errors);
+          toast.error("Loaded campaign data has an unexpected format.");
+          setWizardState(null);
         }
       } else {
-        console.error('WizardContext: Failed to load or normalize initial data', normalizedData?.error);
+        logger.error('WizardContext: Failed to load or normalize initial data', normalizedData?.error);
         toast.error(`Failed to load campaign data: ${normalizedData?.error || 'Unknown error'}`);
         setWizardState(null);
       }
     } catch (error: any) {
-      console.error('WizardContext: Error fetching initial campaign data:', error);
+      logger.error('WizardContext: Error fetching initial campaign data:', error);
       toast.error(`Error fetching campaign data: ${error.message}`);
       setWizardState(null);
     } finally {
@@ -240,11 +238,9 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   // --- State Update ---
   const updateWizardState = useCallback((updates: Partial<DraftCampaignData>) => {
     setWizardState(prevState => {
-      // Ensure types are handled correctly during merge
       const merged = prevState ? { ...prevState, ...updates } : (updates as DraftCampaignData);
-      // Optionally, validate the merged state here if needed
-      console.log('Updating wizard state:', { updates, newState: merged });
-      setUserEdited(true); // Flag that this update is from user edit
+      logger.debug('Updating wizard state:', { updates, newState: merged });
+      setUserEdited(true);
       return merged;
     });
   }, []);
@@ -252,22 +248,20 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   // --- Saving Progress ---
   const saveProgress = useCallback(async (): Promise<boolean> => {
     if (!campaignId || !wizardState) {
-      console.warn('Save prerequisites not met:', { campaignId: !!campaignId, wizardState: !!wizardState });
+      logger.warn('Save prerequisites not met:', { campaignId: !!campaignId, wizardState: !!wizardState });
       return false;
     }
-    // Optional: Validate full state before saving
     const validation = DraftCampaignDataSchema.safeParse(wizardState);
     if (!validation.success) {
-      console.error("Save aborted: Current wizard state is invalid", validation.error.errors);
+      logger.error("Save aborted: Current wizard state is invalid", validation.error.errors);
       toast.error("Cannot save, data is invalid. Please check fields.");
       return false;
     }
-    console.log('Attempting to save progress for campaign:', campaignId);
+    logger.info('Attempting to save progress for campaign:', campaignId);
     try {
       const response = await fetch(`/api/campaigns/${campaignId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        // Send the validated data
         body: JSON.stringify({ data: validation.data }),
       });
       if (!response.ok) {
@@ -281,25 +275,23 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       const result = await response.json();
       if (result.success) {
         setLastSaved(new Date());
-        toast.success('Progress saved');
-        // Update state with potentially updated fields from backend (e.g., updatedAt)
+        logger.info('Progress saved successfully');
         if (result.data) {
           const parsedUpdate = DraftCampaignDataSchema.safeParse(result.data);
           if (parsedUpdate.success) {
             setWizardState(prevState => (prevState ? { ...prevState, ...parsedUpdate.data } : parsedUpdate.data));
           } else {
-            console.warn("Backend save response data failed validation", parsedUpdate.error.errors);
-            // Still return true as API reported success, but log the issue
+            logger.warn("Backend save response data failed validation", parsedUpdate.error.errors);
           }
         }
         return true;
       } else {
-        console.error('Failed to save progress (API failure):', result);
+        logger.error('Failed to save progress (API failure):', result);
         toast.error(`Failed to save progress: ${result.error || 'Unknown API error'}`);
         return false;
       }
     } catch (error: any) {
-      console.error('Error saving progress:', error);
+      logger.error('Error saving progress:', error);
       toast.error(`Error saving progress: ${error.message}`);
       return false;
     }
@@ -309,11 +301,11 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   const debouncedSaveProgress = useCallback(
     debounce(() => {
       if (autosaveEnabled && campaignId && wizardState && !isSaving) {
-        console.log('Autosave triggered...', { userEdited });
+        logger.debug('Autosave triggered...', { userEdited });
         setIsSaving(true);
         saveProgress().finally(() => setIsSaving(false));
       } else {
-        console.log('Autosave skipped', { autosaveEnabled, campaignId: !!campaignId, wizardState: !!wizardState, isSaving });
+        logger.debug('Autosave skipped', { autosaveEnabled, campaignId: !!campaignId, wizardState: !!wizardState, isSaving });
       }
     }, 2000),
     [saveProgress, autosaveEnabled, campaignId, wizardState, isSaving]
@@ -321,11 +313,11 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
   // Effect to trigger debounced save when wizardState changes
   useEffect(() => {
-    console.log('Checking autosave conditions', { isLoading, campaignId: !!campaignId, wizardState: !!wizardState, autosaveEnabled, isSaving, userEdited });
+    logger.debug('Checking autosave conditions', { isLoading, campaignId: !!campaignId, wizardState: !!wizardState, autosaveEnabled, isSaving, userEdited });
     if (!isLoading && campaignId && wizardState && autosaveEnabled && !isSaving && userEdited) {
-      console.log('Triggering autosave due to user edit');
+      logger.debug('Triggering autosave due to user edit');
       debouncedSaveProgress();
-      setUserEdited(false); // Reset after triggering save
+      setUserEdited(false);
     }
     return () => {
       debouncedSaveProgress.cancel();
@@ -337,7 +329,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
   // --- Context Value ---
   const contextValue = useMemo(() => {
-    console.log('Updating context value', { wizardState: !!wizardState, isLoading, isEditing });
+    logger.debug('Updating context value', { wizardState: !!wizardState, isLoading, isEditing });
     return {
       wizardState,
       updateWizardState,

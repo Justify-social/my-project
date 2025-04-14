@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, lazy } from 'react';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton'; // Assuming a generic loading skeleton
+import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { StepContentProps } from './types'; // Import shared props type
 
 // Define a mapping from step number to the component path
@@ -26,7 +26,7 @@ export const StepContentLoader: React.FC<StepContentProps> = ({ step, ...restPro
     }
 
     return (
-        <Suspense fallback={<LoadingSkeleton />}>
+        <Suspense fallback={<WizardSkeleton step={step} />}>
             <StepComponent step={step} {...restProps} />
         </Suspense>
     );

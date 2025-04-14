@@ -328,6 +328,7 @@ function Step4Content() {
 
     // Render Logic
     if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
+        // Revert to using LoadingSkeleton
         return <LoadingSkeleton />;
     }
 
@@ -362,13 +363,11 @@ function Step4Content() {
                             <CardDescription>Upload your videos or images.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {/* Use the new FileUploader from /ui */}
                             <FileUploader
                                 name="assets" // RHF field name (for validation trigger)
                                 control={form.control}
                                 endpoint="campaignAssetUploader" // Your UploadThing endpoint name
                                 label="Upload Campaign Assets"
-                                description="Max 4MB per file. Images and videos accepted."
                                 onUploadComplete={handleAssetUploadComplete}
                                 onUploadError={handleUploadError}
                                 accept={{ "image/*": [], "video/*": [] }} // Example accept prop
@@ -403,97 +402,6 @@ function Step4Content() {
                                     </Card>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* --- Guidelines Card --- */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Brand Guidelines & Mandatories</CardTitle>
-                            <CardDescription>Provide essential guidelines and list mandatory requirements.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <FormField
-                                control={form.control}
-                                name="guidelines"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Brand Guidelines Summary</FormLabel>
-                                        <FormControl>
-                                            <Textarea placeholder="Summarize key Do's and Don'ts, tone of voice, visual style..." {...field} value={field.value ?? ''} rows={4} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div>
-                                <FormLabel className="text-base font-semibold">Mandatory Requirements</FormLabel>
-                                <FormDescription className="mb-4">List specific elements that MUST be included in the content.</FormDescription>
-                                <div className="space-y-3">
-                                    {requirementFields.map((item, index) => (
-                                        <Card key={item.id} className="flex items-center space-x-2 p-3 bg-muted/50">
-                                            <FormField
-                                                control={form.control}
-                                                name={`requirements.${index}.mandatory`}
-                                                render={({ field }) => (
-                                                    <FormItem className="flex items-center space-x-2 mt-1">
-                                                        <FormControl>
-                                                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name={`requirements.${index}.description`}
-                                                render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormControl>
-                                                            <Input placeholder={`Requirement ${index + 1}...`} {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeRequirement(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                                                <Icon iconId="faTrashCanLight" className="h-4 w-4" />
-                                            </Button>
-                                        </Card>
-                                    ))}
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-4"
-                                    onClick={() => appendRequirement({ description: '', mandatory: true })}
-                                >
-                                    <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Requirement
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* --- Additional Notes Card --- */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Additional Notes</CardTitle>
-                            <CardDescription>Include any other relevant information or context (optional).</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Textarea placeholder="Add any extra details here..." {...field} value={field.value ?? ''} rows={5} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                         </CardContent>
                     </Card>
                 </form>

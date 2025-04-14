@@ -559,11 +559,10 @@ const AudienceSection: React.FC<{
               {['18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(range => (
                 <div
                   key={range}
-                  className={`text-center py-1.5 text-xs rounded ${
-                    sortedAgeRanges.includes(range)
-                      ? 'bg-[var(--accent-color)] text-white font-medium'
-                      : 'bg-gray-100 text-gray-500'
-                  }`}
+                  className={`text-center py-1.5 text-xs rounded ${sortedAgeRanges.includes(range)
+                    ? 'bg-[var(--accent-color)] text-white font-medium'
+                    : 'bg-gray-100 text-gray-500'
+                    }`}
                 >
                   {range}
                 </div>
@@ -850,7 +849,7 @@ const CampaignDetailAssetPreview = ({
   );
 };
 
-// Add new components for missing sections
+// Add new components for enhanced sections
 const ObjectivesSection: React.FC<{
   campaign: CampaignDetail;
 }> = ({ campaign }) => (
@@ -1188,8 +1187,8 @@ function debugLog(event: Omit<DebugEvent, 'timestamp'>) {
 function isIterable(value: unknown): value is Iterable<unknown> {
   return Boolean(
     value != null &&
-      typeof value === 'object' &&
-      typeof (value as any)[Symbol.iterator] === 'function'
+    typeof value === 'object' &&
+    typeof (value as any)[Symbol.iterator] === 'function'
   );
 }
 function isCampaignData(data: unknown): data is CampaignDetail {
@@ -1398,97 +1397,25 @@ const ErrorStatusBadge = ({ message }: { message: string }) => {
 };
 
 export default function CampaignDetail() {
-  const params = useParams();
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [data, setData] = useState<CampaignDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Add a runtime test mode
-  const [testMode, setTestMode] = useState(false);
-  const [useFallbackData, setUseFallbackData] = useState(false);
 
-  // Create an empty data object with N/A values for when API fails
-  const emptyData: CampaignDetail = {
-    id: 'N/A',
-    campaignName: 'N/A',
-    description: 'N/A',
-    startDate: '',
-    endDate: '',
-    timeZone: 'N/A',
-    currency: Currency.USD,
-    totalBudget: 0,
-    socialMediaBudget: 0,
-    platform: Platform.Instagram,
-    influencerHandle: 'N/A',
-    website: 'N/A',
-    primaryContact: {
-      firstName: 'N/A',
-      surname: 'N/A',
-      email: 'N/A',
-      position: Position.Manager,
-      phone: 'N/A',
-    },
-    brandName: 'N/A',
-    category: 'N/A',
-    product: 'N/A',
-    targetMarket: 'N/A',
-    submissionStatus: 'error',
-    // Special status to indicate error
-    primaryKPI: 'N/A',
-    secondaryKPIs: [],
-    mainMessage: 'N/A',
-    hashtags: 'N/A',
-    memorability: 'N/A',
-    keyBenefits: 'N/A',
-    expectedAchievements: 'N/A',
-    purchaseIntent: 'N/A',
-    brandPerception: 'N/A',
-    features: [],
-    audience: {
-      demographics: {
-        ageRange: [],
-        gender: [],
-        education: [],
-        income: [],
-        interests: [],
-        locations: [],
-        languages: [],
-      },
-    },
-    creativeAssets: [],
-    creativeRequirements: [],
-    createdAt: '',
-    updatedAt: '',
-  };
-  useEffect(() => {
-    // Check URL params for test mode
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('test') || urlParams.has('debug')) {
-        setTestMode(true);
-        console.info('🧪 Test mode enabled - checking for potential errors');
-      }
-
-      // Check if we should use the mock data directly
-      if (urlParams.has('mock')) {
-        setUseFallbackData(true);
-        console.info('🔄 Using fallback mock data instead of API');
-      }
-    }
-  }, []);
   useEffect(() => {
     const fetchData = async () => {
-      debugLog({ type: 'LIFECYCLE', message: 'fetchData called', data: { id: params?.id } });
-      if (!params?.id) {
+      debugLog({ type: 'LIFECYCLE', message: 'fetchData called', data: { id } });
+      if (!id) {
         setError('Campaign ID is missing'); // Pass string instead of Error object
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
       try {
-        setLoading(true);
-        console.log(`Fetching campaign data for ID: ${params.id}`);
-        const response = await fetch(`/api/campaigns/${params.id}`);
+        setIsLoading(true);
+        console.log(`Fetching campaign data for ID: ${id}`);
+        const response = await fetch(`/api/campaigns/${id}`);
         if (!response.ok) {
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
         }
@@ -1502,9 +1429,9 @@ export default function CampaignDetail() {
         // Check if the result is empty
         if (!result || Object.keys(result).length === 0) {
           console.warn('Empty API response received. Using empty data.');
-          setData(emptyData);
+          setCampaign(emptyData);
           setError('API ERROR: Empty response received');
-          setLoading(false);
+          setIsLoading(false);
           return;
         }
 
@@ -1531,9 +1458,9 @@ export default function CampaignDetail() {
 
           // Use empty data instead of fallback data
           console.warn('Using empty data due to validation errors');
-          setData(emptyData);
+          setCampaign(emptyData);
           setError(`API ERROR: Invalid data format - ${validation.errors.join(', ')}`);
-          setLoading(false);
+          setIsLoading(false);
           return;
         }
 
@@ -1562,12 +1489,12 @@ export default function CampaignDetail() {
           // Format secondary contact if available
           secondaryContact: result.secondaryContact
             ? {
-                firstName: result.secondaryContact.firstName || '',
-                surname: result.secondaryContact.surname || '',
-                email: result.secondaryContact.email || '',
-                position: result.secondaryContact.position || 'Manager',
-                phone: result.secondaryContact.phone || 'N/A',
-              }
+              firstName: result.secondaryContact.firstName || '',
+              surname: result.secondaryContact.surname || '',
+              email: result.secondaryContact.email || '',
+              position: result.secondaryContact.position || 'Manager',
+              phone: result.secondaryContact.phone || 'N/A',
+            }
             : undefined,
           // Campaign Details
           brandName: result.brandName || mappedResult.campaignName,
@@ -1592,8 +1519,8 @@ export default function CampaignDetail() {
             demographics: {
               ageRange: result.demographics?.ageDistribution
                 ? Object.entries(result.demographics.ageDistribution)
-                    .filter(([_, value]) => Number(value) > 0)
-                    .map(([key]) => key.replace('age', '').replace('plus', '+'))
+                  .filter(([_, value]) => Number(value) > 0)
+                  .map(([key]) => key.replace('age', '').replace('plus', '+'))
                 : ['18-24', '25-34'],
               gender: result.demographics?.gender || ['All'],
               education: result.demographics?.educationLevel
@@ -1619,33 +1546,33 @@ export default function CampaignDetail() {
           createdAt: result.createdAt || new Date().toISOString(),
           updatedAt: result.updatedAt || new Date().toISOString(),
         };
-        setData(processedData);
+        setCampaign(processedData);
         setError(null);
       } catch (err) {
         console.error('Error fetching campaign data:', err);
 
         // Use empty data on error
         console.warn('Using empty data due to API error');
-        setData(emptyData);
+        setCampaign(emptyData);
         if (err instanceof Error) {
           setError(`API ERROR: ${err.message}`);
         } else {
           setError('API ERROR: Failed to load campaign data');
         }
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    if (params?.id) {
+    if (id) {
       fetchData();
     }
-  }, [params?.id, useFallbackData]); // Remove testMode and fallbackData to prevent extra rerenders
+  }, [id]); // Remove testMode and fallbackData to prevent extra rerenders
 
   // Define handler for resetting error state
   const handleResetError = useCallback(() => {
     console.log('Attempting to reset error state...');
     setError(null); // Reset error state
-    setLoading(true); // Set loading to true to trigger refetch in useEffect
+    setIsLoading(true); // Set loading to true to trigger refetch in useEffect
   }, []); // Dependencies array is empty as it doesn't depend on component state/props directly needing re-creation
 
   // Move the format functions here, before they're used in stress testing
@@ -1744,19 +1671,24 @@ export default function CampaignDetail() {
   };
 
   // Test all components that will render with data
-  if (DEBUG && data) {
-    console.log('Debug mode active for campaign details', data.id);
+  if (DEBUG && campaign) {
+    console.log('Debug mode active for campaign details', campaign.id);
   }
 
   // Ensure we have data before rendering the component
   // Loading state is handled by src/app/(campaigns)/campaigns/[id]/loading.tsx via Suspense
 
-  if (error && !data) {
+  if (error && !campaign) {
     return (
       <div className="py-10 font-body">
         <ErrorFallback error={new Error(error)} resetErrorBoundary={handleResetError} />
       </div>
     );
+  }
+
+  if (isLoading) {
+    // Revert back to generic Skeleton
+    return <Skeleton className="h-64 w-full" />;
   }
 
   // Wrap the main content in an ErrorBoundary using the 'fallback' prop
@@ -1794,13 +1726,13 @@ export default function CampaignDetail() {
                 </button>
                 <div className="font-body">
                   <h1 className="text-xl font-bold text-[var(--primary-color)] sm:text-2xl font-heading">
-                    {data?.campaignName || 'N/A'}
+                    {campaign?.campaignName || 'N/A'}
                   </h1>
                   <div className="flex items-center text-[var(--secondary-color)] text-sm mt-1 font-body">
-                    <CampaignStatusBadge status={error ? 'error' : data?.submissionStatus} />
+                    <CampaignStatusBadge status={error ? 'error' : campaign?.submissionStatus} />
                     <span className="mx-2 font-body text-gray-400">•</span>
                     <span className="font-body">
-                      Created on {data?.createdAt ? formatDate(data.createdAt) : 'N/A'}
+                      Created on {campaign?.createdAt ? formatDate(campaign.createdAt) : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -1822,7 +1754,7 @@ export default function CampaignDetail() {
                   <span className="font-body">Share</span>
                 </button>
                 <button
-                  onClick={() => router.push(`/campaigns/wizard/step-1?id=${data?.id}`)}
+                  onClick={() => router.push(`/campaigns/wizard/step-1?id=${campaign?.id}`)}
                   className="inline-flex items-center px-4 py-2 border border-[var(--primary-color)] rounded-md text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-[#222222] transition-colors duration-200 group shadow-sm font-body"
                   disabled={!!error}
                 >
@@ -1843,13 +1775,13 @@ export default function CampaignDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 font-body">
             <CampaignMetricCard
               title="Total Budget"
-              value={error ? 'N/A' : data?.totalBudget || 0}
+              value={error ? 'N/A' : campaign?.totalBudget || 0}
               iconId="faDollarSignLight"
               format={error ? 'text' : 'currency'}
             />
             <CampaignMetricCard
               title="Campaign Duration"
-              value={error ? 'N/A' : calculateDuration(data?.startDate || '', data?.endDate || '')}
+              value={error ? 'N/A' : calculateDuration(campaign?.startDate || '', campaign?.endDate || '')}
               iconId="faCalendarLight"
             />
           </div>
@@ -1864,47 +1796,47 @@ export default function CampaignDetail() {
               <div className="space-y-3 font-body">
                 <DataRow
                   label="Campaign Name"
-                  value={error ? 'N/A' : data?.campaignName || 'N/A'}
+                  value={error ? 'N/A' : campaign?.campaignName || 'N/A'}
                   featured={true}
                 />
-                <DataRow label="Description" value={error ? 'N/A' : data?.description || 'N/A'} />
-                <DataRow label="Brand Name" value={error ? 'N/A' : data?.brandName || 'N/A'} />
+                <DataRow label="Description" value={error ? 'N/A' : campaign?.description || 'N/A'} />
+                <DataRow label="Brand Name" value={error ? 'N/A' : campaign?.brandName || 'N/A'} />
                 <DataRow
                   label="Start Date"
-                  value={error ? 'N/A' : data?.startDate ? formatDate(data.startDate) : 'N/A'}
+                  value={error ? 'N/A' : campaign?.startDate ? formatDate(campaign.startDate) : 'N/A'}
                   iconId="faCalendarLight"
                 />
                 <DataRow
                   label="End Date"
-                  value={error ? 'N/A' : data?.endDate ? formatDate(data.endDate) : 'N/A'}
+                  value={error ? 'N/A' : campaign?.endDate ? formatDate(campaign.endDate) : 'N/A'}
                   iconId="faCalendarLight"
                 />
                 <DataRow
                   label="Time Zone"
-                  value={error ? 'N/A' : data?.timeZone || 'N/A'}
+                  value={error ? 'N/A' : campaign?.timeZone || 'N/A'}
                   iconId="faClockLight"
                 />
                 <DataRow
                   label="Currency"
-                  value={error ? 'N/A' : safeCurrency(data?.currency)}
+                  value={error ? 'N/A' : safeCurrency(campaign?.currency)}
                   iconId="faDollarSignLight"
                 />
                 <DataRow
                   label="Total Budget"
-                  value={error ? 'N/A' : formatCurrency(data?.totalBudget || 0, data?.currency)}
+                  value={error ? 'N/A' : formatCurrency(campaign?.totalBudget || 0, campaign?.currency)}
                   iconId="faDollarSignLight"
                   featured={true}
                 />
                 <DataRow
                   label="Social Media Budget"
                   value={
-                    error ? 'N/A' : formatCurrency(data?.socialMediaBudget || 0, data?.currency)
+                    error ? 'N/A' : formatCurrency(campaign?.socialMediaBudget || 0, campaign?.currency)
                   }
                   iconId="faDollarSignLight"
                 />
                 <DataRow
                   label="Website"
-                  value={error ? 'N/A' : data?.website || 'N/A'}
+                  value={error ? 'N/A' : campaign?.website || 'N/A'}
                   iconId="faGlobeLight"
                 />
               </div>
@@ -1920,241 +1852,12 @@ export default function CampaignDetail() {
                   <div className="mr-4 bg-[var(--accent-color)] text-white rounded-full h-14 w-14 flex items-center justify-center text-lg font-semibold font-body">
                     {error
                       ? 'NA'
-                      : `${data?.primaryContact?.firstName?.charAt(0) || ''}${data?.primaryContact?.surname?.charAt(0) || ''}`}
+                      : `${campaign?.primaryContact?.firstName?.charAt(0) || ''}${campaign?.primaryContact?.surname?.charAt(0) || ''}`}
                   </div>
                   <div className="font-body">
                     <h4 className="text-[var(--primary-color)] font-semibold font-heading">
                       {error
                         ? 'N/A'
-                        : `${data?.primaryContact?.firstName || ''} ${data?.primaryContact?.surname || ''}`}
+                        : `${campaign?.primaryContact?.firstName || ''} ${campaign?.primaryContact?.surname || ''}`}
                     </h4>
                     <p className="text-[var(--secondary-color)] text-sm font-body">
-                      {error ? 'N/A' : data?.primaryContact?.position || 'N/A'}
-                    </p>
-                  </div>
-                </div>
-
-                <DataRow
-                  label="Email"
-                  value={
-                    error ? (
-                      'N/A'
-                    ) : (
-                      <a
-                        href={`mailto:${data?.primaryContact?.email}`}
-                        className="text-[var(--accent-color)] hover:underline flex items-center font-body"
-                      >
-                        {data?.primaryContact?.email || 'N/A'}
-                      </a>
-                    )
-                  }
-                  iconId="faEnvelopeLight"
-                />
-                <DataRow
-                  label="Position"
-                  value={error ? 'N/A' : data?.primaryContact?.position || 'N/A'}
-                  iconId="faBuildingLight"
-                />
-              </div>
-
-              {!error && data?.secondaryContact && (
-                <div className="mt-6 pt-6 border-t border-[var(--divider-color)] font-body">
-                  <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">
-                    Secondary Contact
-                  </h4>
-                  <div className="space-y-3 font-body">
-                    <DataRow
-                      label="Name"
-                      value={`${data.secondaryContact.firstName} ${data.secondaryContact.surname}`}
-                      iconId="faUserCircleLight"
-                    />
-                    <DataRow
-                      label="Email"
-                      value={
-                        <a
-                          href={`mailto:${data.secondaryContact.email}`}
-                          className="text-[var(--accent-color)] hover:underline font-body"
-                        >
-                          {data.secondaryContact.email}
-                        </a>
-                      }
-                      iconId="faEnvelopeLight"
-                    />
-                    <DataRow
-                      label="Position"
-                      value={data.secondaryContact.position}
-                      iconId="faBuildingLight"
-                    />
-                  </div>
-                </div>
-              )}
-            </DataCard>
-          </div>
-
-          {/* Objectives & Audience */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 font-body">
-            {error ? (
-              <DataCard
-                title="Campaign Objectives"
-                iconId="faBoltLight"
-                description="Key objectives and performance indicators"
-              >
-                <div className="space-y-5 font-body">
-                  <div className="font-body">
-                    <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">
-                      Primary KPI
-                    </h4>
-                    <div className="text-[var(--secondary-color)] font-body">N/A</div>
-                  </div>
-                  <div className="font-body">
-                    <h4 className="text-[var(--primary-color)] font-medium mb-3 font-heading">
-                      Secondary KPIs
-                    </h4>
-                    <div className="text-[var(--secondary-color)] font-body">N/A</div>
-                  </div>
-                  <div className="space-y-3 pt-2 font-body">
-                    <DataRow label="Main Message" value="N/A" iconId="faLightbulbLight" />
-                    <DataRow label="Brand Perception" value="N/A" iconId="faChartLineLight" />
-                    <DataRow label="Hashtags" value="N/A" iconId="faTagLight" />
-                    <DataRow label="Key Benefits" value="N/A" iconId="faCircleCheckLight" />
-                    <DataRow label="Memorability" value="N/A" iconId="faBookmarkLight" />
-                    <DataRow label="Expected Achievements" value="N/A" iconId="faTrendUpLight" />
-                    <DataRow label="Purchase Intent" value="N/A" iconId="faDollarSignLight" />
-                  </div>
-                </div>
-              </DataCard>
-            ) : (
-              data && <ObjectivesSection campaign={data} />
-            )}
-
-            {error ? (
-              <DataCard
-                title="Target Audience"
-                iconId="faUserGroupLight"
-                description="Detailed audience targeting information"
-              >
-                <div className="text-center py-10 text-[var(--secondary-color)] font-body">
-                  <p className="font-body">N/A</p>
-                </div>
-              </DataCard>
-            ) : (
-              data && <AudienceSection audience={data.audience} />
-            )}
-          </div>
-
-          {/* Creative Assets */}
-          <div className="mb-6 font-body">
-            <DataCard
-              title="Creative Assets"
-              iconId="faImageLight"
-              description="Campaign creative assets"
-              actions={
-                <button className="text-sm text-[var(--accent-color)] hover:text-[var(--accent-color)] hover:underline font-body">
-                  View All
-                </button>
-              }
-            >
-              {error ? (
-                <div className="text-center py-10 text-[var(--secondary-color)] font-body">
-                  {<Icon iconId="faImageLight" className="h-10 w-10 mx-auto mb-2 opacity-50" />}
-                  <p className="font-body">No creative assets available</p>
-                </div>
-              ) : (
-                <div>
-                  {data &&
-                  data.creativeAssets &&
-                  Array.isArray(data.creativeAssets) &&
-                  data.creativeAssets.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-body">
-                      {data.creativeAssets.map((asset: any, index: number) => (
-                        <AssetCard
-                          key={asset.id || index}
-                          asset={{
-                            id: asset.id,
-                            name: asset.assetName || asset.name,
-                            url: asset.url,
-                            type: asset.type,
-                            platform: asset.platform || data.platform,
-                            influencerHandle: asset.influencerHandle || data.influencerHandle,
-                            description: asset.description || asset.whyInfluencer,
-                            budget: asset.budget,
-                          }}
-                          currency={data.currency}
-                          defaultPlatform={data.platform}
-                          className="font-body"
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-[var(--secondary-color)] font-body">
-                      <Icon iconId="faImageLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="font-body">No creative assets uploaded yet</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </DataCard>
-          </div>
-
-          {/* Campaign Features */}
-          <div className="mb-6 font-body">
-            <DataCard
-              title="Campaign Features"
-              iconId="faBoltLight"
-              description="Additional features enabled for this campaign"
-            >
-              {error ? (
-                <div className="text-center py-8 text-[var(--secondary-color)] font-body">
-                  <p className="font-body">N/A</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 font-body">
-                  {data?.features && data.features.length > 0 ? (
-                    data.features.map((feature: string, index: number) => {
-                      // Construct the icon ID using app{CapitalizedFeatureName} format
-                      // Remove underscores, then capitalize
-                      const capitalizedFeature = feature.split('_').map(capitalize).join('');
-                      const featureIconId = `app${capitalizedFeature}`;
-                      return (
-                        <div
-                          key={index}
-                          className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-white p-4 transform hover:-translate-y-1 duration-200 hover:border-[var(--accent-color)]"
-                        >
-                          <div className="flex items-start">
-                            <div className="rounded-md flex-shrink-0 p-2 bg-[rgba(0,191,255,0.1)]">
-                              {/* Use Icon component with constructed ID */}
-                              <Icon
-                                iconId={featureIconId}
-                                className="h-7 w-7 text-[var(--accent-color)]"
-                                // Remove the fallbackIconId prop
-                                // fallbackIconId="faBoltLight"
-                              />
-                            </div>
-                            <div className="ml-4">
-                              <h4 className="font-medium text-[var(--primary-color)] font-heading text-lg mb-1">
-                                {/* Use formatted name without map lookup */}
-                                {formatFeatureName(feature)}
-                              </h4>
-                              <p className="text-sm text-[var(--secondary-color)] mt-1 font-body">
-                                {getFeatureDescription(feature)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="col-span-3 text-center py-8 text-[var(--secondary-color)] font-body">
-                      <Icon iconId="faBoltLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="font-body">No features enabled for this campaign</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </DataCard>
-          </div>
-        </div>
-      </div>
-    </ErrorBoundary>
-  ); // Close ErrorBoundary
-}

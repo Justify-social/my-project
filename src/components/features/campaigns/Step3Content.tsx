@@ -15,7 +15,7 @@ import {
     LocationSchema
 } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { LoadingSkeleton, WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,7 @@ import { cn } from '@/lib/utils';
 
 // Import the new UI components
 import { AgeRangeSlider } from "@/components/ui/slider-age-range";
+import { AgeDistributionSliderGroup } from "@/components/ui/slider-age-distribution";
 import { GenderSelector } from "@/components/ui/selector-gender";
 import { LanguageSelector } from "@/components/ui/selector-language";
 
@@ -91,7 +92,11 @@ function Step3Content() {
         resolver: zodResolver(Step3ValidationSchema),
         mode: 'onChange',
         defaultValues: {
-            demographics: wizard.wizardState?.demographics ?? { ageRange: [18, 65], genders: [], languages: [] },
+            demographics: wizard.wizardState?.demographics ?? {
+                age18_24: 0, age25_34: 0, age35_44: 0,
+                age45_54: 0, age55_64: 0, age65plus: 0,
+                genders: [], languages: []
+            },
             locations: wizard.wizardState?.locations ?? [],
             targeting: wizard.wizardState?.targeting ?? { interests: [], keywords: [] },
             competitors: wizard.wizardState?.competitors ?? [],
@@ -101,7 +106,11 @@ function Step3Content() {
     useEffect(() => {
         if (wizard.wizardState && !form.formState.isDirty && !wizard.isLoading) {
             form.reset({
-                demographics: wizard.wizardState.demographics ?? { ageRange: [18, 65], genders: [], languages: [] },
+                demographics: wizard.wizardState.demographics ?? {
+                    age18_24: 0, age25_34: 0, age35_44: 0,
+                    age45_54: 0, age55_64: 0, age65plus: 0,
+                    genders: [], languages: []
+                },
                 locations: wizard.wizardState.locations ?? [],
                 targeting: wizard.wizardState.targeting ?? { interests: [], keywords: [] },
                 competitors: wizard.wizardState.competitors ?? [],
@@ -193,7 +202,8 @@ function Step3Content() {
 
     // Render Logic
     if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
-        return <LoadingSkeleton />;
+        // Use WizardSkeleton for step 3 loading
+        return <WizardSkeleton step={3} />;
     }
 
     // Temporary helper for JSON Textarea fields
@@ -236,13 +246,14 @@ function Step3Content() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Demographics</CardTitle>
-                            <CardDescription>Define the age and gender of your target audience.</CardDescription>
+                            <CardDescription>Define the age distribution and gender of your target audience.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <AgeRangeSlider
-                                name="demographics.ageRange"
+                            <AgeDistributionSliderGroup
+                                name="demographics"
                                 control={form.control}
-                                label="Age Range"
+                                setValue={form.setValue}
+                                errors={form.formState.errors}
                             />
                             <GenderSelector
                                 name="demographics.genders"

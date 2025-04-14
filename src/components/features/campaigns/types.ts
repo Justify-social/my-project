@@ -109,16 +109,34 @@ export const DraftAssetSchema = z.object({
 }).strict();
 
 /** Schema for Demographics object (used within DraftCampaignData). */
+// REVISED SCHEMA for percentage distribution
 export const DemographicsSchema = z.object({
-  // Adjusted based on UI placeholders in Step3Content
-  /** Age range [min, max]. */
-  ageRange: z.array(z.number().int().min(13).max(100)).length(2, { message: "Must provide min and max age" }).optional(),
+  // Define age brackets explicitly
+  age18_24: z.number().int().min(0).max(100).optional().default(0),
+  age25_34: z.number().int().min(0).max(100).optional().default(0),
+  age35_44: z.number().int().min(0).max(100).optional().default(0),
+  age45_54: z.number().int().min(0).max(100).optional().default(0),
+  age55_64: z.number().int().min(0).max(100).optional().default(0),
+  age65plus: z.number().int().min(0).max(100).optional().default(0),
   /** Selected genders. */
-  genders: z.array(z.string()).optional(), // Array of strings like ["Male", "Female"]
-  // Removed specific age distribution fields (age1824 etc.)
-  // Removed genderDistribution record
-  languages: z.array(z.string()).optional(), // Moved from targeting based on Step3 structure
-}).strict(); // Made strict as fields are now explicit
+  genders: z.array(z.string()).optional(),
+  languages: z.array(z.string()).optional(),
+}).strict()
+  // Add refinement to check if sum is 100
+  .refine(data => {
+    const sum = (data.age18_24 || 0) +
+      (data.age25_34 || 0) +
+      (data.age35_44 || 0) +
+      (data.age45_54 || 0) +
+      (data.age55_64 || 0) +
+      (data.age65plus || 0);
+    // Allow a small tolerance for floating point issues if needed, but aim for exact 100
+    return Math.abs(sum - 100) < 0.01 || sum === 0; // Allow 0 sum if untouched
+  }, {
+    message: "Total age distribution must equal 100%",
+    // Path can point to a general field or the object itself
+    path: ["ageDistribution"], // Use a conceptual path if field removed
+  });
 
 /** Schema for Location object (used within DraftCampaignData locations array). */
 export const LocationSchema = z.object({
@@ -180,7 +198,7 @@ const DraftCampaignDataBaseSchema = z.object({
   /** Messaging details (structure assumed, verify with Step 2 form). */
   messaging: z.object({ // Example structure for JSON messaging
     mainMessage: z.string().optional(),
-    hashtags: z.string().optional(), // Or z.array(z.string())
+    hashtags: z.array(z.string()).optional(),
     keyBenefits: z.string().optional(),
   }).passthrough().nullable().optional(), // Allow null
   /** Expected outcomes (structure assumed, verify with Step 2 form). */
@@ -449,22 +467,26 @@ export type Step2FormData = z.infer<typeof Step2ValidationSchema>;
 
 /** Validation schema for Step 3: Audience. Uses refined sub-schemas. */
 export const Step3ValidationSchema = DraftCampaignDataBaseSchema.pick({
-  demographics: true, // Includes ageRange, genders, languages
+  demographics: true, // This now refers to the schema with ageDistribution
   locations: true,
-  targeting: true,    // Includes interests, keywords
+  targeting: true,
   competitors: true,
-}).extend({
-  // Add specific refinements for Step 3 fields if needed
-  // Example: Ensure age range array has min <= max if provided
-  demographics: DemographicsSchema.nullable().optional().refine(demo =>
-    !demo || !demo.ageRange || demo.ageRange.length !== 2 || demo.ageRange[0] <= demo.ageRange[1],
-    {
-      message: "Minimum age cannot be greater than maximum age",
-      // Path should point to the array itself or a specific index
-      path: ['demographics', 'ageRange']
-    }
-  ),
-  // Removed refine check on locations as proportion field was removed
+}).refine(data => {
+  // Refinement for age distribution sum
+  if (data.demographics) {
+    const sum = (data.demographics.age18_24 || 0) +
+      (data.demographics.age25_34 || 0) +
+      (data.demographics.age35_44 || 0) +
+      (data.demographics.age45_54 || 0) +
+      (data.demographics.age55_64 || 0) +
+      (data.demographics.age65plus || 0);
+    // Only enforce if the user has interacted (sum is not 0)
+    return sum === 0 || Math.abs(sum - 100) < 0.01;
+  }
+  return true;
+}, {
+  message: "Total age distribution must equal 100%",
+  path: ['demographics', 'age18_24'], // Point error to first field for UI
 });
 /** TypeScript type for Step 3 form data. */
 export type Step3FormData = z.infer<typeof Step3ValidationSchema>;

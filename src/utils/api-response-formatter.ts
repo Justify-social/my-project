@@ -10,6 +10,7 @@
  * 3. Other inconsistencies in API responses that cause frontend errors
  */
 import { DateService } from './date-service';
+import { logger } from './logger';
 
 /**
  * Standardizes an API response by normalizing data formats
@@ -28,7 +29,7 @@ export function standardizeApiResponse(data: unknown) {
   // Handle date fields using DateService
   ['createdAt', 'updatedAt', 'startDate', 'endDate'].forEach(field => {
     if (field in result) {
-      console.log(`Processing date field ${field}:`, result[field]);
+      // logger.debug(`Processing date field ${field}:`, result[field]);
 
       // Use DateService to standardize dates
       const standardized = DateService.standardizeDate(result[field]);
@@ -37,18 +38,18 @@ export function standardizeApiResponse(data: unknown) {
       if (field === 'startDate' || field === 'endDate') {
         // For form date fields, use formatted (YYYY-MM-DD)
         result[field] = standardized.formatted || null;
-        console.log(`Standardized ${field} to form date:`, result[field]);
+        // logger.debug(`Standardized ${field} to form date:`, result[field]);
       } else {
         // For other date fields use ISO
         result[field] = standardized.iso || null;
-        console.log(`Standardized ${field} to ISO date:`, result[field]);
+        // logger.debug(`Standardized ${field} to ISO date:`, result[field]);
       }
     }
   });
 
   // Handle the Influencer relation from Prisma model
   if (result.Influencer && Array.isArray(result.Influencer)) {
-    console.log('Found Influencer relation in API response:', result.Influencer);
+    // logger.debug('Found Influencer relation in API response:', result.Influencer);
 
     // Copy the Influencer relation to the influencers field expected by the frontend
     result.influencers = result.Influencer.map((inf: Record<string, unknown>) => ({
@@ -58,7 +59,7 @@ export function standardizeApiResponse(data: unknown) {
       platformId: inf.platformId,
     }));
 
-    console.log('Mapped Influencer relation to influencers array:', result.influencers);
+    // logger.debug('Mapped Influencer relation to influencers array:', result.influencers);
 
     // Remove the original Influencer field to avoid confusion
     delete result.Influencer;
@@ -78,12 +79,12 @@ export function standardizeApiResponse(data: unknown) {
   ].forEach(field => {
     if (typeof result[field] === 'string') {
       try {
-        console.log(`Parsing JSON string for ${field}:`, result[field]);
+        // logger.debug(`Parsing JSON string for ${field}:`, result[field]);
         const parsed = JSON.parse(result[field]);
         result[field] = parsed;
-        console.log(`Successfully parsed ${field} to:`, result[field]);
+        // logger.debug(`Successfully parsed ${field} to:`, result[field]);
       } catch {
-        console.warn(`Failed to parse ${field} JSON:`, result[field]);
+        logger.warn(`Failed to parse ${field} JSON:`, result[field]);
         // Set appropriate defaults based on field type
         if (field === 'primaryContact' || field === 'secondaryContact') {
           result[field] = {};
@@ -110,12 +111,6 @@ export function standardizeApiResponse(data: unknown) {
   const targeting = result.targeting || {};
   const competitors = Array.isArray(result.competitors) ? result.competitors : [];
 
-  // Debug logs for array fields
-  console.log('API formatter - demographics:', demographics);
-  console.log('API formatter - locations:', locations);
-  console.log('API formatter - targeting:', targeting);
-  console.log('API formatter - competitors:', competitors);
-
   // Extract location strings
   const locationStrings = locations
     .map((loc: Record<string, unknown>) => {
@@ -125,50 +120,50 @@ export function standardizeApiResponse(data: unknown) {
       return '';
     })
     .filter(Boolean);
-  console.log('API formatter - extracted locationStrings:', locationStrings);
+  // console.log('API formatter - extracted locationStrings:', locationStrings);
 
   // Extract screening questions
   const targetingWithScreening = targeting as { screeningQuestions?: unknown[] };
   const screeningQuestions = Array.isArray(targetingWithScreening.screeningQuestions)
     ? targetingWithScreening.screeningQuestions
-        .map((q: unknown) => {
-          if (typeof q === 'string') return q;
-          if (q && typeof q === 'object') {
-            const questionObj = q as Record<string, unknown>;
-            if (typeof questionObj.question === 'string') return questionObj.question;
-          }
-          return '';
-        })
-        .filter(Boolean)
+      .map((q: unknown) => {
+        if (typeof q === 'string') return q;
+        if (q && typeof q === 'object') {
+          const questionObj = q as Record<string, unknown>;
+          if (typeof questionObj.question === 'string') return questionObj.question;
+        }
+        return '';
+      })
+      .filter(Boolean)
     : [];
-  console.log('API formatter - extracted screeningQuestions:', screeningQuestions);
+  // console.log('API formatter - extracted screeningQuestions:', screeningQuestions);
 
   // Extract languages
   const targetingWithLanguages = targeting as { languages?: unknown[] };
   const languages = Array.isArray(targetingWithLanguages.languages)
     ? targetingWithLanguages.languages
-        .map((l: unknown) => {
-          if (typeof l === 'string') return l;
-          if (l && typeof l === 'object') {
-            const languageObj = l as Record<string, unknown>;
-            if (typeof languageObj.language === 'string') return languageObj.language;
-          }
-          return '';
-        })
-        .filter(Boolean)
+      .map((l: unknown) => {
+        if (typeof l === 'string') return l;
+        if (l && typeof l === 'object') {
+          const languageObj = l as Record<string, unknown>;
+          if (typeof languageObj.language === 'string') return languageObj.language;
+        }
+        return '';
+      })
+      .filter(Boolean)
     : [];
-  console.log('API formatter - extracted languages:', languages);
+  // console.log('API formatter - extracted languages:', languages);
 
   // Extract job titles
   const demographicsWithJobs = demographics as { jobTitles?: unknown[] };
   const jobTitles = Array.isArray(demographicsWithJobs.jobTitles)
     ? demographicsWithJobs.jobTitles
     : [];
-  console.log('API formatter - jobTitles:', jobTitles);
+  // console.log('API formatter - jobTitles:', jobTitles);
 
   // Extract competitors
   const competitorStrings = Array.isArray(competitors) ? competitors : [];
-  console.log('API formatter - extracted competitorStrings:', competitorStrings);
+  // console.log('API formatter - extracted competitorStrings:', competitorStrings);
 
   // Create or update audience field with transformed data
   const demographicsWithAge = demographics as {
@@ -186,7 +181,7 @@ export function standardizeApiResponse(data: unknown) {
     incomeLevel?: number;
   };
 
-  result.audience = {
+  const audience = {
     ...(result.audience || {}),
     location: locationStrings,
     ageDistribution: {
@@ -207,7 +202,7 @@ export function standardizeApiResponse(data: unknown) {
     competitors: competitorStrings,
   };
 
-  console.log('Normalized audience data:', result.audience);
+  // console.log('Normalized audience data:', audience);
 
   // Handle special case for budget object
   if (typeof result.budget === 'object' && result.budget !== null) {
@@ -226,19 +221,19 @@ export function standardizeApiResponse(data: unknown) {
   // Ensure arrays are properly initialized
   ['influencers', 'additionalContacts', 'locations', 'competitors'].forEach(field => {
     if (!Array.isArray(result[field])) {
-      console.log(`Initializing ${field} as empty array`);
+      // logger.debug(`Initializing ${field} as empty array`);
       result[field] = [];
     }
   });
 
   // Ensure influencers has at least one empty item if it's empty
   if (Array.isArray(result.influencers) && result.influencers.length === 0) {
-    console.log('Adding default empty influencer item to empty array');
+    // logger.debug('Adding default empty influencer item to empty array');
     result.influencers = [{ platform: '', handle: '' }];
   }
 
   // Log standardized response for debugging
-  console.log('Standardized API response:', result);
+  // logger.debug('Standardized API response:', result);
 
   return result;
 }

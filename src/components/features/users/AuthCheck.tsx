@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 import { useAuthState } from '@/lib/auth/authCoordinator';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton';
 
 export default function AuthCheck({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading, isInitialized } = useAuthState();
@@ -19,10 +19,10 @@ export default function AuthCheck({ children }: { children: ReactNode }) {
   if (isLoading || !isInitialized) {
     return (
       <>
-        <div className="fixed inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center">
-          <LoadingSpinner size="lg" color="primary" />
+        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
+          <DashboardSkeleton />
         </div>
-        {children}
+        <div style={{ visibility: 'hidden' }}>{children}</div>
       </>
     );
   }

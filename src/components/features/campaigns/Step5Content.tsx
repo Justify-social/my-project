@@ -17,7 +17,7 @@ import {
     FeatureEnum,
 } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { LoadingSkeleton, WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,31 +66,34 @@ const SummarySection: React.FC<SummarySectionProps> = ({ title, stepNumber, onEd
             <AccordionTrigger className={cn(
                 "group",
                 "flex justify-between items-center w-full text-left text-lg font-semibold text-primary p-4 rounded-lg border mb-2 transition-colors hover:bg-muted/50",
-                isComplete ? "border-green-200 bg-green-50/50 hover:bg-green-50/80" : "border-border bg-card"
+                isComplete ? "border-green-200 bg-green-50/50 hover:bg-green-50/80" : "border-border bg-card",
+                "no-underline hover:no-underline"
             )}>
                 <div className="flex items-center">
-                    <Badge variant={isComplete ? "default" : "secondary"} className={cn("mr-3 h-6 w-6 justify-center", isComplete && "bg-green-600 text-white")}>{stepNumber}</Badge>
-                    <span className="group-hover:underline">{title}</span>
-                    {isComplete && <Icon iconId="faCircleCheckSolid" className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
+                    <Badge
+                        variant={isComplete ? "default" : "secondary"}
+                        className={cn(
+                            "mr-3 h-6 w-6 justify-center no-underline",
+                            isComplete && "bg-green-600 text-white"
+                        )}>{stepNumber}</Badge>
+                    <span className="no-underline group-hover:underline">{title}</span>
+                    {isComplete && <Icon iconId="faCircleCheckSolid" className="ml-2 h-4 w-4 text-green-600 flex-shrink-0 no-underline" />}
                 </div>
                 <div className="flex items-center">
-                    {/* Use a span styled as a button to avoid nesting button elements */}
                     <span
                         role="button"
                         tabIndex={0}
                         onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onEdit(); } }} // Add keyboard accessibility
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onEdit(); } }}
                         className={cn(
-                            // Mimic Button styles (variant="ghost", size="sm")
                             'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
                             'hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                            'h-8 px-3', // size=sm
-                            'mr-2 text-sm cursor-pointer' // Added cursor-pointer
+                            'h-8 px-3',
+                            'mr-2 text-sm cursor-pointer no-underline'
                         )}
                     >
                         <Icon iconId="faPenToSquareLight" className="mr-1.5 h-3.5 w-3.5" /> Edit
                     </span>
-                    {/* Accordion chevron is added automatically by AccordionTrigger */}
                 </div>
             </AccordionTrigger>
             <AccordionContent className="p-4 pt-0">
@@ -423,7 +426,7 @@ function Step5Content() {
     // --- Render Logic ---
     const { wizardState, isLoading, stepsConfig } = wizard;
 
-    if (isLoading && !wizardState && wizard.campaignId) return <LoadingSkeleton />;
+    if (isLoading && !wizardState && wizard.campaignId) return <WizardSkeleton step={5} />;
     if (!wizardState) {
         return (
             <div className="text-center py-10">

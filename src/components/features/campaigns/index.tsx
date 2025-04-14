@@ -1,9 +1,11 @@
+'use client';
+
 // Updated import paths via tree-shake script - 2025-04-01T17:13:32.218Z
 import React, { useState } from 'react';
 import { Alert } from '@/components/ui/alert';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { cn } from '@/lib/utils';
-import { Influencer } from '../../../types/influencer';
+import { Influencer } from '@/types/influencer';
 import { Icon } from '@/components/ui/icon/icon';
 import { InfluencerCard } from '@/components/ui/card-influencer';
 import { PlatformSchema, PlatformEnumBackend } from './types';
@@ -31,7 +33,19 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   const [hoveredInfluencer, setHoveredInfluencer] = useState<string | null>(null);
 
   if (isLoading) {
-    return <LoadingSpinner className="mt-10 mx-auto" />;
+    const skeletonCount = 10; // Number of skeleton cards to show
+    return (
+      <div className={cn(
+        'mt-6 grid gap-4',
+        viewMode === 'grid'
+          ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+          : 'grid-cols-1'
+      )}>
+        {Array.from({ length: skeletonCount }).map((_, index) => (
+          <LoadingSkeleton key={index} variant="card" height={150} /> // Use card variant
+        ))}
+      </div>
+    );
   }
 
   if (error) {
