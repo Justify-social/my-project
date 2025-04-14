@@ -1,25 +1,25 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/session';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 
-// Custom type for Auth0 session user
-interface Auth0User {
-  sub: string;
-  email: string;
-  name: string;
-  [key: string]: any; // For custom claims
+// Define expected structure for sessionClaims metadata
+interface SessionClaimsMetadata {
+  role?: string;
 }
 
-// Helper to check if user is a Super Admin
+interface CustomSessionClaims {
+  metadata?: SessionClaimsMetadata;
+}
+
+// Helper to check if user is a Super Admin using Clerk
 async function isSuperAdmin() {
   try {
-    const session = await getSession();
-    if (!session || !session.user) return false;
+    const { userId, sessionClaims } = await auth();
+    if (!userId) return false;
 
-    // Cast user to Auth0User type to access custom claims
-    const user = session.user as Auth0User;
-    const roles = user['https://justify.social/roles'] || [];
-    return Array.isArray(roles) && roles.includes('super_admin');
+    // Check role in Clerk metadata
+    const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
+    return metadata?.role === 'super_admin';
   } catch (error) {
     console.error('Error checking super admin status:', error);
     return false;
@@ -57,8 +57,9 @@ export async function POST(request: Request) {
     }
 
     // Check if the user exists
+    // IMPORTANT: Ensure userId being passed matches the ID format in your User table (e.g., Clerk User ID)
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: userId }, // Or perhaps where: { clerkId: userId }
       select: { id: true, email: true },
     });
 
@@ -73,13 +74,15 @@ export async function POST(request: Request) {
     }
 
     // In a production application, you would implement actual user suspension here.
-    // For this demo, we'll just return success and handle it on the frontend
+    // This might involve calling the Clerk Backend API to ban the user:
+    // https://clerk.com/docs/reference/backend-api/tag/Users#operation/BanUser
+    // For now, we log and return success.
 
     console.log(`User suspension requested for user ID: ${userId}`);
 
     return NextResponse.json({
       success: true,
-      message: 'User suspended successfully',
+      message: 'User suspension requested successfully (backend action pending)',
       userId: userId,
     });
   } catch (error) {

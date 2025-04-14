@@ -9,7 +9,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { UserProfile } from '@auth0/nextjs-auth0/client';
+import type { UserResource } from '@clerk/types';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
 import { iconExists } from '@/components/ui/icon/icons';
@@ -43,7 +43,7 @@ export interface MobileMenuProps {
   remainingCredits: number; // Data for the footer
   notificationsCount: number; // Data for the footer
   companyName: string; // Data for the header
-  user?: UserProfile; // Optional user data for the footer
+  user?: UserResource | null | undefined; // Use Clerk UserResource type
   className?: string; // Optional additional class names for SheetContent
   onItemClick?: (item: MenuItem) => void; // Optional click handler
 }
@@ -276,18 +276,22 @@ export function MobileMenu({
                 {' '}
                 {/* Added pt-4 */}
                 <Image
-                  src={user.picture || ICONS.USER_FALLBACK}
+                  src={user.imageUrl || ICONS.USER_FALLBACK}
                   alt="Profile"
                   width={32}
                   height={32}
                   className="rounded-full"
                   onError={e => {
-                    e.currentTarget.src = ICONS.USER_FALLBACK;
+                    (e.target as HTMLImageElement).src = ICONS.USER_FALLBACK;
                   }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-sm">{user.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  <p className="font-medium truncate text-sm">
+                    {user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user.primaryEmailAddress?.emailAddress || 'No email'}
+                  </p>
                 </div>
               </div>
             )}

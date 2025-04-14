@@ -2,21 +2,20 @@
 
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
-import { useAuthState } from '@/lib/auth/authCoordinator';
+import { useAuth } from '@clerk/nextjs';
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton';
 
 export default function AuthCheck({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading, isInitialized } = useAuthState();
+  const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isInitialized && !isLoading && !isAuthenticated) {
-      router.push('/api/auth/login');
+    if (isLoaded && !isSignedIn) {
+      router.push('/signin');
     }
-  }, [isAuthenticated, isLoading, isInitialized, router]);
+  }, [isSignedIn, isLoaded, router]);
 
-  // Important: Always render children to prevent interrupting component lifecycle
-  if (isLoading || !isInitialized) {
+  if (!isLoaded) {
     return (
       <>
         <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">

@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 import { getGraphitiTelemetry } from '@/config/middleware/cursor-ai';
+
+// Define expected structure for sessionClaims metadata
+interface SessionClaimsMetadata {
+  role?: string;
+}
+
+interface CustomSessionClaims {
+  metadata?: SessionClaimsMetadata;
+}
 
 // Internal API endpoint to retrieve Graphiti telemetry data
 // This is for monitoring and debugging purposes only
 export async function GET(req: NextRequest) {
   try {
-    // Only allow authenticated admin users to access this endpoint
-    const session = await getSession();
-    const userRoles = session?.user?.roles || [];
+    // Check authentication and authorization using Clerk
+    const { userId, sessionClaims } = await auth();
+    const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
+    const userRole = metadata?.role;
 
-    if (!userRoles.includes('admin') && !userRoles.includes('super_admin')) {
+    if (!userId || (!userRole?.includes('admin') && !userRole?.includes('super_admin'))) {
+      console.warn(`Unauthorized access attempt to Graphiti telemetry by user ${userId || 'unknown'}`);
       return NextResponse.json({ error: 'Unauthorized. Admin access required.' }, { status: 403 });
     }
 

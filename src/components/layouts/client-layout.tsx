@@ -4,8 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/ui/navigation/header';
 import { Sidebar } from '@/components/ui/navigation/sidebar';
 import { useSidebar } from '@/providers/SidebarProvider';
-import { usePathname, useRouter } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { usePathname } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Icon } from '@/components/ui/icon/icon';
 import Link from 'next/link';
@@ -14,6 +13,7 @@ import SidebarUIComponents from '@/components/ui/navigation/sidebar-ui-component
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { MobileMenu } from '@/components/ui/navigation/mobile-menu';
 import { cn } from '@/lib/utils';
+import { useUser } from '@clerk/nextjs';
 
 // --- App Icon Mapping (Copied from MobileMenu.tsx) ---
 const appIconMap: Record<string, string> = {
@@ -67,55 +67,15 @@ interface NavItemDef {
 
 interface ClientLayoutProps {
   children: React.ReactNode;
+  authHeaderControls?: React.ReactNode;
 }
 
 // Inner component that uses the SidebarProvider
-const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
+const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderControls }) => {
   const pathname = usePathname() ?? '';
-  const router = useRouter();
-  const { user, error, isLoading } = useUser();
+  const { user } = useUser();
   const { isOpen: isSidebarProviderOpen, toggle: toggleSidebarProvider } = useSidebar();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-  useEffect(() => {
-    // If there's no user and we're not loading, redirect to login
-    if (!isLoading && !user && pathname !== '/api/auth/login') {
-      router.replace('/api/auth/login');
-      return;
-    }
-  }, [isLoading, user, router, pathname]);
-
-  // Show the auth spinner while checking authentication
-  if (isLoading) {
-    // Wrap the LoadingSpinner in a full-height, centered div
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner label="Loading Justify..." />
-      </div>
-    );
-  }
-
-  // Show error with login button if authentication fails
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center font-body">
-        <div className="text-center text-red-600 font-body">
-          <p className="font-body">Authentication error. Please try again.</p>
-          <button
-            onClick={() => router.push('/api/auth/login')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-body"
-          >
-            Back to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Only render the layout if we have a user
-  if (!user) {
-    return null;
-  }
 
   // --- Navigation Definitions (SSOT) ---
   const sidebarItems: SidebarItemDef[] = [
@@ -288,6 +248,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           remainingCredits={100}
           notificationsCount={3}
           onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
+          authControls={authHeaderControls}
         />
 
         <div className="flex flex-1 overflow-hidden">
@@ -326,17 +287,8 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
 };
 
 // Export the ClientLayoutInner directly since SidebarProvider is now in RootLayout
-const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
-  return <ClientLayoutInner>{children}</ClientLayoutInner>;
+const ClientLayout: React.FC<ClientLayoutProps> = ({ children, authHeaderControls }) => {
+  return <ClientLayoutInner authHeaderControls={authHeaderControls}>{children}</ClientLayoutInner>;
 };
 
 export default ClientLayout;
-
-// Helper Function (if needed elsewhere, move to utils)
-function safeGet<T, K extends keyof T>(
-  obj: T | undefined | null,
-  key: K,
-  defaultValue: T[K]
-): T[K] {
-  return obj?.[key] ?? defaultValue;
-}

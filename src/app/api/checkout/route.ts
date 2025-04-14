@@ -1,14 +1,31 @@
 import { NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 import { stripe, getStripeCustomer } from '@/lib/stripe';
+
+// Define expected structure for sessionClaims if possible
+interface CustomSessionClaims {
+  email?: string;
+  // Add other claims if needed
+}
 
 export async function POST(req: Request) {
   try {
-    const session = await getSession();
-    console.log('Auth Session:', session); // Debug log
+    // Get session using Clerk's auth()
+    const { userId, sessionClaims } = await auth();
+    const typedClaims = sessionClaims as CustomSessionClaims | null;
 
-    if (!session?.user?.email) {
+    console.log('Clerk Auth Data:', { userId, sessionClaims }); // Debug log
+
+    // Check for authenticated user ID
+    if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Get user email from claims (ensure it exists)
+    const userEmail = typedClaims?.email;
+    if (!userEmail) {
+      console.error('User email not found in Clerk session claims.');
+      return NextResponse.json({ error: 'User email missing' }, { status: 400 });
     }
 
     // Get the base URL from the request
@@ -23,9 +40,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Price ID is required' }, { status: 400 });
     }
 
-    // Get or create Stripe customer
+    // Get or create Stripe customer using email
     try {
-      const customer = await getStripeCustomer(session.user.email);
+      // Assuming getStripeCustomer uses email, pass the email from claims
+      const customer = await getStripeCustomer(userEmail);
       console.log('Stripe customer:', customer); // Debug log
 
       // Updated to use subscription mode
@@ -40,12 +58,13 @@ export async function POST(req: Request) {
         mode: 'subscription', // Changed from 'payment' to 'subscription'
         success_url: `${baseUrl}/campaigns/wizard/step-1?success=true`,
         cancel_url: `${baseUrl}/pricing?canceled=true`,
+        // Use Clerk userId in metadata
         metadata: {
-          userId: session.user.sub, // Auth0 user ID
+          userId: userId,
         },
         subscription_data: {
           metadata: {
-            userId: session.user.sub,
+            userId: userId,
           },
         },
         allow_promotion_codes: true,

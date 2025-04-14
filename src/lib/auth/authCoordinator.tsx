@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useAuth } from '@clerk/nextjs';
 
 type AuthState = {
   isAuthenticated: boolean;
@@ -16,18 +16,18 @@ const AuthStateContext = createContext<AuthState>({
 });
 
 export function AuthStateProvider({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (isLoaded) {
       setIsInitialized(true);
     }
-  }, [isLoading]);
+  }, [isLoaded]);
 
   const authState = {
-    isAuthenticated: !!user,
-    isLoading,
+    isAuthenticated: !!isSignedIn,
+    isLoading: !isLoaded,
     isInitialized,
   };
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/ui/icon/icon';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@clerk/nextjs';
 import { LoadingSkeleton, TableSkeleton } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -204,13 +204,13 @@ interface Campaign {
   id: string | number; // Handle both string and number IDs
   campaignName: string;
   submissionStatus:
-    | 'draft'
-    | 'in_review'
-    | 'approved'
-    | 'active'
-    | 'submitted'
-    | 'paused'
-    | 'completed';
+  | 'draft'
+  | 'in_review'
+  | 'approved'
+  | 'active'
+  | 'submitted'
+  | 'paused'
+  | 'completed';
   platform: 'Instagram' | 'YouTube' | 'TikTok';
   startDate: string;
   endDate: string;
@@ -231,14 +231,14 @@ interface Campaign {
 }
 type SortDirection = 'ascending' | 'descending';
 const ClientCampaignList: React.FC = () => {
-  const { user, isLoading: userLoading, error: userError } = useUser();
+  const { user, isLoaded } = useUser();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [objectiveFilter, setObjectiveFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [campaignsPerPage, setCampaignsPerPage] = useState(10);
@@ -261,39 +261,28 @@ const ClientCampaignList: React.FC = () => {
   // Fetch campaigns from API
   useEffect(() => {
     const fetchCampaigns = async () => {
-      setLoading(true);
+      setIsLoadingData(true);
       try {
-        if (!user) {
-          throw new Error('Not authenticated');
-        }
         const response = await fetch('/api/campaigns', {
           method: 'GET',
-          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
         });
         if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            throw new Error('Unauthorized to fetch campaigns.');
+          }
           throw new Error(`Failed to load campaigns: ${response.status}`);
         }
         const data = await response.json();
         console.log('API Response:', data);
         if (data.success && Array.isArray(data.data)) {
           console.log('Setting campaigns:', data.data);
-
-          // Transform the raw campaign data to match the Campaign interface
           const transformedCampaigns = data.data.map(transformCampaignData);
-
-          // Debug the first campaign's dates if available
-          if (transformedCampaigns.length > 0) {
-            console.log("Debugging first campaign's dates:");
-            const firstCampaign = transformedCampaigns[0];
-            console.log(`Campaign: ${firstCampaign.campaignName}`);
-            console.log(`Start date: ${firstCampaign.startDate}`);
-            console.log(`End date: ${firstCampaign.endDate}`);
-          }
           console.log('Transformed campaigns:', transformedCampaigns);
           setCampaigns(transformedCampaigns);
+          setError('');
         } else {
           console.log('Invalid data format:', data);
           const errorDetails = !data.success
@@ -307,13 +296,15 @@ const ClientCampaignList: React.FC = () => {
         console.error('Error fetching campaigns:', error);
         setError(error instanceof Error ? error.message : 'Failed to load campaigns');
       } finally {
-        setLoading(false);
+        setIsLoadingData(false);
       }
     };
-    if (!userLoading && user) {
+    if (isLoaded && user) {
       fetchCampaigns();
+    } else if (isLoaded && !user) {
+      setIsLoadingData(false);
     }
-  }, [user, userLoading]);
+  }, [isLoaded, user]);
 
   // Get unique start and end dates from campaigns
   const uniqueDates = useMemo(() => {
@@ -486,10 +477,9 @@ const ClientCampaignList: React.FC = () => {
   // Function to refetch campaigns from the server
   const refetchCampaigns = async () => {
     try {
-      setLoading(true);
+      setIsLoadingData(true);
       const response = await fetch('/api/campaigns', {
         method: 'GET',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           // Add cache busting to ensure we get fresh data
@@ -511,7 +501,7 @@ const ClientCampaignList: React.FC = () => {
     } catch (error) {
       console.error('Error refreshing campaigns:', error);
     } finally {
-      setLoading(false);
+      setIsLoadingData(false);
     }
   };
   const deleteCampaign = async (campaignId: string) => {
@@ -686,7 +676,7 @@ const ClientCampaignList: React.FC = () => {
   const duplicateCampaign = async () => {
     if (!campaignToAction || !duplicateName.trim()) return;
     try {
-      setLoading(true);
+      setIsLoadingData(true);
       const response = await fetch(`/api/campaigns/${campaignToAction.id}/duplicate`, {
         method: 'POST',
         headers: {
@@ -722,7 +712,7 @@ const ClientCampaignList: React.FC = () => {
       console.error('Error duplicating campaign:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to duplicate campaign');
     } finally {
-      setLoading(false);
+      setIsLoadingData(false);
     }
   };
   const handleViewCampaign = (campaignId: string) => {
@@ -788,18 +778,44 @@ const ClientCampaignList: React.FC = () => {
     const kpi = KPI_OPTIONS.find(k => k.key === kpiKey);
     return kpi ? kpi.title : kpiKey;
   };
+
+  // Use isLoadingData for rendering loading state
+  if (!isLoaded || (isLoadingData && !error)) {
+    // Show skeleton if Clerk hasn't loaded OR if we are loading data (and no error occurred yet)
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <LoadingSkeleton className="h-9 w-1/3" />
+          <LoadingSkeleton className="h-10 w-36" />
+        </div>
+        {/* Correct props for TableSkeleton */}
+        <TableSkeleton columns={6} rows={campaignsPerPage} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-600">Error: {error}</div>;
+  }
+
+  if (isLoaded && !user) {
+    return <div className="p-4 text-muted-foreground">Please sign in to view campaigns.</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-white px-4 md:px-6 py-6">
-      {/* Header: Title */}
-      <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-800">Campaign List View</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
+        <Link href="/campaigns/wizard/step-1" passHref>
+          <Button>
+            <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
+            New Campaign
+          </Button>
+        </Link>
       </div>
 
-      {/* Filters and Actions Row - Ensure items-center for vertical alignment */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-        {/* Filters Group - Ensure items-center */}
         <div className="flex flex-wrap items-center gap-3 flex-grow">
-          {/* Search Bar - Use Divider color border */}
           <div className="relative w-full md:w-auto md:min-w-[250px]">
             <Icon
               iconId="faMagnifyingGlassLight"
@@ -819,7 +835,6 @@ const ClientCampaignList: React.FC = () => {
             />
           </div>
 
-          {/* Objective Filter - Use Divider color border */}
           <Select
             value={objectiveFilter}
             onValueChange={value => {
@@ -839,7 +854,6 @@ const ClientCampaignList: React.FC = () => {
             </SelectContent>
           </Select>
 
-          {/* Status Filter - Use Divider color border */}
           <Select
             value={statusFilter}
             onValueChange={value => {
@@ -861,7 +875,6 @@ const ClientCampaignList: React.FC = () => {
             </SelectContent>
           </Select>
 
-          {/* Start Date Filter - Use Divider color border */}
           <Select
             value={startDateFilter}
             onValueChange={value => {
@@ -881,7 +894,6 @@ const ClientCampaignList: React.FC = () => {
             </SelectContent>
           </Select>
 
-          {/* End Date Filter - Use Divider color border */}
           <Select
             value={endDateFilter}
             onValueChange={value => {
@@ -902,14 +914,9 @@ const ClientCampaignList: React.FC = () => {
           </Select>
         </div>
 
-        {/* New Campaign Button - Use Accent color, moved inline */}
         <div className="flex-shrink-0 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
-          {' '}
-          {/* Adjusted for inline layout */}
           <Link href="/campaigns/wizard/step-1">
             <Button className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto">
-              {' '}
-              {/* Use accent color */}
               <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
               New Campaign
             </Button>
@@ -917,20 +924,12 @@ const ClientCampaignList: React.FC = () => {
         </div>
       </div>
 
-      {/* Loading, Error, or Empty States */}
-      {userLoading || loading ? (
-        <div className="bg-white p-6 rounded-lg border border-divider overflow-hidden">
-          <TableSkeleton rows={campaignsPerPage} columns={6} />
-        </div>
-      ) : error ? (
-        <div className="bg-white p-6 text-center text-red-500">{error}</div>
-      ) : sortedCampaigns.length === 0 ? (
+      {sortedCampaigns.length === 0 ? (
         <div className="bg-white p-6 text-center">
           No campaigns found. Try adjusting your search criteria.
         </div>
       ) : (
         <>
-          {/* Campaign Table - Use border-divider */}
           <div className="hidden md:block border rounded-lg border-divider overflow-hidden">
             <Table>
               <TableHeader className="bg-background">
@@ -998,9 +997,6 @@ const ClientCampaignList: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2 justify-center">
-                          {' '}
-                          {/* Increased space slightly */}
-                          {/* Updated Action Icons without Button wrapper - Accent hover */}
                           <span
                             className="group text-secondary hover:text-accent cursor-pointer p-1"
                             onClick={() => handleViewCampaign(campaign.id.toString())}
@@ -1071,7 +1067,6 @@ const ClientCampaignList: React.FC = () => {
             </Table>
           </div>
 
-          {/* Pagination (Desktop) - Use border-divider */}
           <div className="hidden md:flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">Show</span>
@@ -1121,8 +1116,6 @@ const ClientCampaignList: React.FC = () => {
         </>
       )}
 
-      {/* Modals - Update Duplicate button color */}
-      {/* Delete Confirmation Modal */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent>
           <DialogHeader>
@@ -1148,7 +1141,6 @@ const ClientCampaignList: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Duplicate Campaign Modal */}
       <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
         <DialogContent>
           <DialogHeader>
@@ -1170,16 +1162,15 @@ const ClientCampaignList: React.FC = () => {
             </Button>
             <Button
               onClick={duplicateCampaign}
-              disabled={!duplicateName.trim() || loading}
+              disabled={!duplicateName.trim() || isLoadingData}
               className="bg-interactive hover:bg-interactive/90 text-white"
             >
-              {loading ? 'Duplicating...' : 'Duplicate'}
+              {isLoadingData ? 'Duplicating...' : 'Duplicate'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Mobile View Cards - Update Action Buttons */}
       <div className="md:hidden space-y-4">
         {displayedCampaigns.map(campaign => {
           const statusInfo = getStatusInfo(campaign.submissionStatus);
@@ -1188,7 +1179,6 @@ const ClientCampaignList: React.FC = () => {
               key={campaign.id}
               className="bg-white border border-divider rounded-lg p-4 shadow-sm"
             >
-              {/* ... Card Header ... */}
               <div className="flex justify-between items-start mb-3">
                 <Link href={`/campaigns/${campaign.id}`}>
                   <h3 className="font-semibold text-accent hover:underline">
@@ -1202,24 +1192,19 @@ const ClientCampaignList: React.FC = () => {
                 </span>
               </div>
 
-              {/* ... Card Grid Content ... */}
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                {/* Objective */}
                 <div>
                   <p className="text-gray-500 mb-1">Objective</p>
                   <p className="font-medium text-gray-900">
                     {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
                   </p>
                 </div>
-                {/* Status - Already handled in header */}
-                {/* Start Date */}
                 <div>
                   <p className="text-gray-500 mb-1">Start Date</p>
                   <p className="font-medium text-gray-900">
                     {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
                   </p>
                 </div>
-                {/* End Date */}
                 <div>
                   <p className="text-gray-500 mb-1">End Date</p>
                   <p className="font-medium text-gray-900">
@@ -1228,9 +1213,7 @@ const ClientCampaignList: React.FC = () => {
                 </div>
               </div>
 
-              {/* Use standard Button components for actions */}
               <div className="flex justify-end space-x-2 border-t border-divider pt-3 mt-3">
-                {/* Updated Mobile Action Icons without Button wrapper - Accent hover */}
                 <span
                   className="group text-secondary hover:text-accent cursor-pointer p-1"
                   onClick={() => handleViewCampaign(campaign.id.toString())}
@@ -1274,7 +1257,6 @@ const ClientCampaignList: React.FC = () => {
             </div>
           );
         })}
-        {/* Mobile Pagination */}
         <div className="flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
           <Button
             variant="outline"

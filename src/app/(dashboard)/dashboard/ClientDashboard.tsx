@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { CalendarUpcoming, type CalendarEvent } from '@/components/ui/calendar-upcoming';
@@ -44,31 +44,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // Component definition no longer uses ClientDashboardProps
 export default function ClientDashboard() {
   const router = useRouter();
-  const { user, error: userError, isLoading: userLoading } = useUser();
+  const { user, isLoaded } = useUser();
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && !userLoading) {
+    if (isLoaded && user) {
       const fetchData = async () => {
-        setIsLoading(true);
+        setIsLoadingData(true);
         setFetchError(null);
         try {
-          // Fetch data from actual API endpoints
           const [eventsResponse, campaignsResponse] = await Promise.all([
-            fetch('/api/dashboard/events'), // Using actual endpoint
-            fetch('/api/dashboard/campaigns'), // Using actual endpoint
+            fetch('/api/dashboard/events'),
+            fetch('/api/dashboard/campaigns'),
           ]);
 
-          if (!eventsResponse.ok)
-            throw new Error(`Failed to fetch events: ${eventsResponse.statusText}`);
-          if (!campaignsResponse.ok)
-            throw new Error(`Failed to fetch campaigns: ${campaignsResponse.statusText}`);
+          if (!eventsResponse.ok) {
+            const errorData = await eventsResponse.json().catch(() => ({}));
+            throw new Error(`Failed to fetch events: ${eventsResponse.statusText} (${errorData?.error || 'Unknown error'})`);
+          }
+          if (!campaignsResponse.ok) {
+            const errorData = await campaignsResponse.json().catch(() => ({}));
+            throw new Error(`Failed to fetch campaigns: ${campaignsResponse.statusText} (${errorData?.error || 'Unknown error'})`);
+          }
 
-          // Parse actual JSON responses
           const eventsData = await eventsResponse.json();
           const campaignsData = await campaignsResponse.json();
 
@@ -76,18 +78,14 @@ export default function ClientDashboard() {
             setEvents(eventsData.data);
           } else {
             console.error('Invalid events data format:', eventsData);
-            setFetchError((eventsData as any).error || 'Invalid format for events data');
+            setFetchError('Invalid format for events data');
           }
 
           if (campaignsData.success && Array.isArray(campaignsData.data)) {
             setCampaigns(campaignsData.data);
           } else {
             console.error('Invalid campaigns data format:', campaignsData);
-            setFetchError(prev =>
-              prev
-                ? `${prev}; ${(campaignsData as any).error || 'Invalid format for campaigns data'}`
-                : (campaignsData as any).error || 'Invalid format for campaigns data'
-            );
+            setFetchError(prev => prev ? `${prev}; Invalid format for campaigns data` : 'Invalid format for campaigns data');
           }
         } catch (error) {
           console.error('Failed to fetch dashboard data:', error);
@@ -95,15 +93,15 @@ export default function ClientDashboard() {
           setEvents([]);
           setCampaigns([]);
         } finally {
-          setIsLoading(false);
+          setIsLoadingData(false);
         }
       };
 
       fetchData();
-    } else if (!userLoading && !user) {
-      setIsLoading(false);
+    } else if (isLoaded && !user) {
+      setIsLoadingData(false);
     }
-  }, [user, userLoading]);
+  }, [isLoaded, user]);
 
   const handleCampaignClick = (campaignId: string | number) => {
     router.push(`/campaigns/${campaignId}`);
@@ -112,13 +110,16 @@ export default function ClientDashboard() {
   const hasEvents = events && events.length > 0;
   const hasCampaigns = campaigns && campaigns.length > 0;
 
-  // Handle Auth0 error
-  if (userError) {
-    return <div className="p-4 text-red-600">Error loading user: {userError.message}</div>;
-  }
-  // Handle Fetch error
   if (fetchError) {
     return <div className="p-4 text-red-600">Error loading dashboard data: {fetchError}</div>;
+  }
+
+  if (isLoadingData && isLoaded) {
+    return <div className="p-4">Loading dashboard data...</div>;
+  }
+
+  if (isLoaded && !user) {
+    return <div className="p-4">Redirecting to sign in...</div>;
   }
 
   return (
@@ -126,10 +127,10 @@ export default function ClientDashboard() {
       {/* Header Row */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-primary font-heading">
-          {userLoading ? 'Loading...' : user ? `${user.name}'s Dashboard` : 'Dashboard'}
+          {user ? `${user.fullName || user.firstName || 'User'}'s Dashboard` : 'Dashboard'}
         </h1>
         <Link href="/campaigns/wizard/step-1" passHref>
-          <Button disabled={userLoading || !user}>
+          <Button disabled={!isLoaded || !user}>
             <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
             New Campaign
           </Button>
@@ -147,7 +148,7 @@ export default function ClientDashboard() {
             {hasEvents ? (
               <CalendarUpcoming events={events} />
             ) : (
-              !isLoading && <p className="p-4 text-muted-foreground">No upcoming events.</p>
+              !isLoadingData && <p className="p-4 text-muted-foreground">No upcoming events.</p>
             )}
           </CardContent>
         </Card>
@@ -161,7 +162,7 @@ export default function ClientDashboard() {
             {hasCampaigns ? (
               <UpcomingCampaignsTable campaigns={campaigns} onRowClick={handleCampaignClick} />
             ) : (
-              !isLoading && <p className="p-4 text-muted-foreground">No upcoming campaigns.</p>
+              !isLoadingData && <p className="p-4 text-muted-foreground">No upcoming campaigns.</p>
             )}
           </CardContent>
         </Card>

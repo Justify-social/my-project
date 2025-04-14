@@ -9,7 +9,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0/client';
 import { MobileMenu, type MenuItem } from '@/components/ui/navigation/mobile-menu';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
@@ -33,18 +32,19 @@ interface HeaderProps {
   onMenuClick?: () => void;
   navItems?: MenuItem[];
   settingsNavItem?: MenuItem;
+  authControls?: React.ReactNode;
 }
 
 const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits,
   notificationsCount,
-  profileImageUrl = '/icons/solid/user-circle.svg',
+  profileImageUrl,
   onMenuClick,
   navItems,
   settingsNavItem,
+  authControls,
 }) => {
-  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const { handleSearch, isSearching } = useSearch();
 
@@ -54,9 +54,6 @@ const Header: React.FC<HeaderProps> = ({
 
   const bellIconId = 'faBellLight';
   const hasBellIcon = iconExists(bellIconId);
-
-  const userIconId = 'faUserCircleLight';
-  const hasUserIcon = iconExists(userIconId);
 
   const menuIconId = 'faBarsLight'; // Use Light variant from map
   const hasMenuIcon = iconExists(menuIconId);
@@ -103,65 +100,67 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right: Icon Group */}
-        <div className="flex items-center space-x-1 font-body">
+        <div className="flex items-center space-x-4 md:space-x-6 font-body">
           {/* Desktop Icons */}
-          <div className="hidden md:flex items-center font-body ml-auto mr-3">
-            {/* Combined Credits and Notifications container */}
-            <div className="relative flex items-center">
-              {/* Credits */}
-              <Link href="/billing">
-                <div className="flex items-center space-x-1 cursor-pointer font-body">
-                  {hasCoinsIcon ? (
-                    <Icon
-                      iconId="faCoinsSolid" // Use Solid ID directly
-                      className="w-6 h-6 text-foreground" // Changed to text-foreground
-                      data-testid="coins-icon"
-                    />
-                  ) : (
-                    // Fallback if icon doesn't exist
-                    <div
-                      className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
-                      title="Coins icon not found"
-                    >
-                      $
-                    </div>
-                  )}
-                  {/* Use text-foreground for credit count */}
-                  <span className="text-foreground font-medium text-sm font-body">
-                    {remainingCredits}
-                  </span>
-                </div>
-              </Link>
-
-              {/* Notifications - positioned directly adjacent to coins */}
-              <div className="relative font-body ml-1">
-                {hasBellIcon ? (
+          <div className="hidden md:flex items-center space-x-4 font-body">
+            {/* Credits */}
+            <Link href="/billing">
+              <div className="flex items-center space-x-1 cursor-pointer font-body">
+                {hasCoinsIcon ? (
                   <Icon
-                    iconId="faBellSolid" // Use Solid ID directly
+                    iconId="faCoinsSolid" // Use Solid ID directly
                     className="w-6 h-6 text-foreground" // Changed to text-foreground
-                    title="Notifications"
-                    data-testid="notifications-icon"
+                    data-testid="coins-icon"
                   />
                 ) : (
                   // Fallback if icon doesn't exist
                   <div
                     className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
-                    title="Notifications icon not found"
+                    title="Coins icon not found"
                   >
-                    N
+                    $
                   </div>
                 )}
-
-                {notificationsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-background rounded-full text-xs w-4 h-4 flex items-center justify-center font-body">
-                    {notificationsCount}
-                  </span>
-                )}
+                {/* Use text-foreground for credit count */}
+                <span className="text-foreground font-medium text-sm font-body">
+                  {remainingCredits}
+                </span>
               </div>
+            </Link>
+
+            {/* Notifications - positioned directly adjacent to coins */}
+            <div className="relative font-body">
+              {hasBellIcon ? (
+                <Icon
+                  iconId="faBellSolid" // Use Solid ID directly
+                  className="w-6 h-6 text-foreground" // Changed to text-foreground
+                  title="Notifications"
+                  data-testid="notifications-icon"
+                />
+              ) : (
+                // Fallback if icon doesn't exist
+                <div
+                  className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
+                  title="Notifications icon not found"
+                >
+                  N
+                </div>
+              )}
+
+              {notificationsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-background rounded-full text-xs w-4 h-4 flex items-center justify-center font-body">
+                  {notificationsCount}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Render Clerk Auth Controls (passed as prop) - visible on desktop */}
+          <div className="hidden md:block font-body">
+            {authControls}
+          </div>
+
+          {/* Mobile Menu Button - moved slightly right for balance */}
           <button
             onClick={onMenuClick}
             className="md:hidden p-2 font-body"
@@ -179,39 +178,6 @@ const Header: React.FC<HeaderProps> = ({
               <Icon iconId="faBarsLight" className="w-6 h-6" />
             )}
           </button>
-
-          {/* User Button (visible on desktop) */}
-          <div className="hidden md:block font-body">
-            {user && (
-              <Link href="/settings">
-                {hasUserIcon ? (
-                  <Icon
-                    iconId="faUserCircleSolid" // Use Solid ID directly
-                    className="w-8 h-8 text-foreground" // Changed to text-foreground
-                    title="Profile"
-                    data-testid="user-profile-icon"
-                  />
-                ) : user.picture ? (
-                  // Use user profile picture if available and icon is missing
-                  <Image
-                    src={user.picture}
-                    alt="User Profile"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                ) : (
-                  // Ultimate fallback
-                  <div
-                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-xs"
-                    title="User profile icon not found"
-                  >
-                    {user.name?.charAt(0) || 'U'}
-                  </div>
-                )}
-              </Link>
-            )}
-          </div>
         </div>
       </div>
     </header>

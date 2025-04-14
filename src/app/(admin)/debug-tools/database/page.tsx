@@ -1,11 +1,17 @@
 // Updated import paths via tree-shake script - 2025-04-01T17:13:32.200Z
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@clerk/nextjs';
 import { Icon } from '@/components/ui/icon';
+
+// Define expected structure for Clerk publicMetadata
+interface PublicMetadata {
+  role?: string;
+}
+
 interface DocFile {
   name: string;
   path: string;
@@ -13,6 +19,7 @@ interface DocFile {
   category: 'database' | 'linter' | 'api' | 'general';
   icon: React.ReactNode;
 }
+
 interface DbHealthData {
   status: string;
   database: {
@@ -46,6 +53,7 @@ interface TransactionMetrics {
     timestamp: string;
   }>;
 }
+
 interface SlowQueryDetail {
   operation: string;
   model: string;
@@ -53,6 +61,7 @@ interface SlowQueryDetail {
   timestamp: string;
   query?: string;
 }
+
 interface ExtendedDbHealthData extends DbHealthData {
   transactions?: TransactionMetrics;
   connectionPool?: {
@@ -69,11 +78,12 @@ interface ExtendedDbHealthData extends DbHealthData {
     lastUpdated: string;
   }>;
 }
+
 export default function DatabasePage() {
-  const { user, isLoading } = useUser();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
   const [dbHealth, setDbHealth] = useState<ExtendedDbHealthData | null>(null);
-  const [isLoadingHealth, setIsLoadingHealth] = useState(false);
+  const [isLoadingHealth, setIsLoadingHealth] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [activeSection, setActiveSection] = useState('overview');
   const [healthCheckError, setHealthCheckError] = useState<string | null>(null);
@@ -161,24 +171,26 @@ export default function DatabasePage() {
     },
   ];
 
-  // Check if user is admin
+  // Check if user is admin using Clerk metadata
+  const isAdmin = useMemo(() => {
+    if (!isLoaded || !user) return false;
+    const metadata = user.publicMetadata as PublicMetadata;
+    const userRole = metadata?.role;
+    return userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+  }, [isLoaded, user]);
+
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const canAccess = isAdmin || isDevelopment;
+
+  // Redirect if not authorized after Clerk loads
   useEffect(() => {
-    if (!isLoading && user) {
-      // Get user roles from Auth0 user metadata
-      const userRoles = (user['https://justify.social/roles'] || ['USER']) as string[];
-
-      // Check if user has admin role
-      const isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
-
-      // In development, allow access for all users for testing purposes
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      if (!isAdmin && !isDevelopment) {
-        router.push('/debug-tools');
-      }
+    if (isLoaded && !canAccess) {
+      console.warn('Redirecting non-admin user from Database Debug page');
+      router.push('/debug-tools'); // Redirect to a safe page
     }
-  }, [user, isLoading, router]);
+  }, [isLoaded, canAccess, router]);
 
-  // Fetch database health information - enhanced
+  // Fetch database health information - only if user can access
   useEffect(() => {
     async function fetchDbHealth() {
       setIsLoadingHealth(true);
@@ -197,8 +209,11 @@ export default function DatabasePage() {
         setIsLoadingHealth(false);
       }
     }
-    fetchDbHealth();
-  }, []);
+    // Fetch only when user is loaded and has access
+    if (isLoaded && canAccess) {
+      fetchDbHealth();
+    }
+  }, [isLoaded, canAccess]);
 
   // Run database transaction test
   const runTransactionTest = async (testType: string) => {
@@ -246,8 +261,8 @@ export default function DatabasePage() {
   // Filter docs based on active tab
   const filteredDocs = activeTab === 'all' ? docs : docs.filter(doc => doc.category === activeTab);
 
-  // If loading or not an admin, show loading state
-  if (isLoading || !user) {
+  // Show loading state while Clerk is loading
+  if (!isLoaded) {
     return (
       <div className="container mx-auto p-6 max-w-5xl font-body">
         <div className="flex items-center justify-center h-64 font-body">
@@ -260,20 +275,15 @@ export default function DatabasePage() {
     );
   }
 
-  // Get user roles from Auth0 user metadata
-  const userRoles = (user['https://justify.social/roles'] || ['USER']) as string[];
-
-  // Check if user has admin role
-  const isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  if (!isAdmin && !isDevelopment) {
+  // Show Access Denied message if user is loaded but not authorized
+  if (!canAccess) {
     return (
       <div className="container mx-auto p-6 max-w-5xl font-body">
         <div className="flex items-center justify-center h-64 font-body">
           <div className="text-center font-body">
             <p className="text-red-600 font-medium text-lg font-body">Access Denied</p>
             <p className="mt-2 text-[var(--secondary-color)] font-body">
-              You don't have permission to view this page.
+              Admin access required for this page.
             </p>
             <Link
               href="/debug-tools"
@@ -286,6 +296,7 @@ export default function DatabasePage() {
       </div>
     );
   }
+
   return (
     <div className="container mx-auto p-6 max-w-5xl font-body">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 font-body">

@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useState } from 'react';
 import { ThemeProvider } from 'next-themes';
-import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 export default function Providers({
   children,
@@ -25,13 +24,11 @@ export default function Providers({
   );
 
   return (
-    <UserProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster position="top-right" />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </UserProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        {children}
+        <Toaster position="top-right" />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

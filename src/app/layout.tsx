@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
-import { UserProvider } from '@auth0/nextjs-auth0/client';
+// Remove Auth0 UserProvider
+// import { UserProvider } from '@auth0/nextjs-auth0/client';
 import ClientLayout from '@/components/layouts/client-layout';
 import './globals.css';
 import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
@@ -11,10 +12,12 @@ import { connection } from 'next/server';
 // import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import
 import { SidebarProvider } from '@/providers/SidebarProvider';
 import { SearchProvider } from '@/providers/SearchProvider';
-// Import the new auth state provider
-import { AuthStateProvider } from '@/lib/auth/authCoordinator';
+// Remove the custom AuthStateProvider import
+// import { AuthStateProvider } from '@/lib/auth/authCoordinator';
 // Import Shadcn Toaster
 import { Toaster } from '@/components/ui/toaster';
+// Import ClerkProvider and UI components
+import { ClerkProvider, SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
@@ -40,35 +43,37 @@ async function UTSSR() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>{/* Using local SVG icons - no external scripts needed */}</head>
-      <body className={`${inter.className} bg-white`}>
-        <UserProvider>
-          {/* Add AuthStateProvider as the SSOT for auth state */}
-          <AuthStateProvider>
-            {/* // Removed IconContextProvider wrapper
-            <IconContextProvider 
-              defaultVariant="light" 
-              defaultSize="md"
-              iconBasePath="/icons"
-            >
-            */}
-            <SidebarProvider>
-              <SearchProvider>
-                {/* Remove NotificationSonner element */}
-                {/* <NotificationSonner /> */}
-                <Suspense>
-                  <UTSSR />
-                </Suspense>
-                <ClientLayout>{children}</ClientLayout>
-                {/* Render Shadcn Toaster */}
-                <Toaster />
-              </SearchProvider>
-            </SidebarProvider>
-            {/* </IconContextProvider> */}
-          </AuthStateProvider>
-        </UserProvider>
-      </body>
-    </html>
+    <ClerkProvider> {/* Wrap with ClerkProvider */}
+      <html lang="en">
+        <head>{/* Using local SVG icons - no external scripts needed */}</head>
+        <body className={`${inter.className} bg-white`}>
+          {/* Remove AuthStateProvider wrapper */}
+          <SidebarProvider>
+            <SearchProvider>
+              <Suspense>
+                <UTSSR />
+              </Suspense>
+              {/* Pass Clerk UI components into ClientLayout for rendering in header */}
+              <ClientLayout
+                authHeaderControls={(
+                  <div className="flex items-center gap-4">
+                    <SignedOut>
+                      <SignInButton />
+                      <SignUpButton />
+                    </SignedOut>
+                    <SignedIn>
+                      <UserButton />
+                    </SignedIn>
+                  </div>
+                )}
+              >
+                {children}
+              </ClientLayout>
+              <Toaster />
+            </SearchProvider>
+          </SidebarProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

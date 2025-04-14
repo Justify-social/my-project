@@ -1,31 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 
 const execPromise = promisify(exec);
+
+// Define expected structure for sessionClaims metadata
+interface SessionClaimsMetadata {
+  role?: string;
+}
+
+interface CustomSessionClaims {
+  metadata?: SessionClaimsMetadata;
+}
 
 /**
  * POST /api/debug/run-script
  * Run a specific debugging script and return the results
  *
  * Body: { scriptName: string }
- * Protected: Only accessible by ADMIN and SUPER_ADMIN users (and all users in development mode)
+ * Protected: Only accessible by users with 'ADMIN' or 'SUPER_ADMIN' roles (or all users in development)
  */
 export async function POST(request: NextRequest) {
-  // Check authentication and authorization
-  const session = await getSession();
+  // Check authentication and authorization using Clerk
+  const { userId, sessionClaims } = await auth();
 
-  if (!session?.user) {
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Check if we're in development mode
   const isDevelopment = process.env.NODE_ENV === 'development';
 
+  // Get role from Clerk metadata
+  const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
+  const userRole = metadata?.role || 'USER';
+
   // Only allow admins to run scripts (or anyone in development mode)
-  const userRole = session.user.role || 'USER';
   if (!isDevelopment && userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
+    console.warn(`Forbidden access attempt to run-script by user ${userId} with role ${userRole}`);
     return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
   }
 

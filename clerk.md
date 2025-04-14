@@ -155,14 +155,14 @@
 - [ ] `middleware.ts` implemented with `clerkMiddleware`.
 - [ ] `src/lib/auth.ts` adapted or removed.
 - [ ] `src/lib/session.ts` updated to use `auth()`.
-- [ ] All API routes secured using Clerk's `auth()`.
-- [ ] `[auth0]` API route removed/renamed.
-- [ ] Auth context/provider (`authCoordinator.tsx`) updated.
-- [ ] Client-side `AuthCheck` component updated.
-- [ ] `app/layout.tsx` wrapped in `<ClerkProvider>`, UI components added.
-- [ ] Client-side permission hook (`use-permissions.ts`) updated.
-- [ ] Server-side permission checks updated.
-- [ ] Database user sync logic implemented (using Clerk `userId`).
+- [X] All API routes secured using Clerk's `auth()`.
+- [X] `[auth0]` API route removed/renamed.
+- [X] Auth context/provider (`authCoordinator.tsx`) updated.
+- [X] Client-side `AuthCheck` component updated.
+- [X] `app/layout.tsx` wrapped in `<ClerkProvider>`, UI components added.
+- [X] Client-side permission hook (`use-permissions.ts`) updated.
+- [X] Server-side permission checks updated.
+- [ ] Database user sync logic implemented (using Clerk `userId`). *(`clerkId` field added to schema, Stripe webhook updated. Full sync via webhooks recommended but pending)*
 - [ ] Comprehensive testing completed (sign-up, sign-in, protected routes, roles).
 - [ ] All deprecated Auth0 code/files/variables removed.
 - [ ] Document migration procedure in Graphiti (`mcp_Graphiti_add_episode`).

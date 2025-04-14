@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 import { getUpcomingCampaigns } from '@/lib/data/dashboard';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger'; // Adjust path if needed
 
@@ -10,22 +10,20 @@ export const dynamic = 'force-dynamic';
 // export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
-  const response = new NextResponse();
   try {
-    // Pass request and response to getSession
-    const session = await getSession(request, response);
-    const user = session?.user;
+    // Get userId using Clerk's auth() helper
+    const { userId } = await auth();
 
-    if (!user?.sub) {
+    if (!userId) {
       // Return a new response for unauthorized access
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = user.sub;
+    // Fetch campaigns using the Clerk userId
     const campaigns = await getUpcomingCampaigns(userId);
 
-    // Return standard NextResponse, passing the response object
-    return NextResponse.json({ success: true, data: campaigns }, response);
+    // Return standard NextResponse
+    return NextResponse.json({ success: true, data: campaigns });
   } catch (error) {
     console.error('API Error fetching dashboard campaigns:', error);
     // Assuming logger exists and is configured

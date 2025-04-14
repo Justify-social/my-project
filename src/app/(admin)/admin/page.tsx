@@ -4,15 +4,21 @@
 export const dynamic = 'force-dynamic'; // Force dynamic rendering
 
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@clerk/nextjs';
 import { toast } from 'react-hot-toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { useRouter } from 'next/navigation';
-import { getSession } from '@auth0/nextjs-auth0';
-import type { UserProfile } from '@auth0/nextjs-auth0/client';
+import { LoadingSkeleton, TableSkeleton } from '@/components/ui/loading-skeleton';
+
+// Define expected structure for Clerk publicMetadata
+interface PublicMetadata {
+  role?: string;
+}
+
+// Interfaces for UserData, Company (keep as is for now, assuming API returns this)
 interface Company {
   id: string;
   name: string;
@@ -22,7 +28,7 @@ interface Company {
   subscription: string;
 }
 interface UserData {
-  id: string;
+  id: string; // This might need to change to clerkId depending on your API response
   name: string;
   email: string;
   companyId: string;
@@ -32,15 +38,18 @@ interface UserData {
   updatedAt?: string;
   isActive?: boolean;
 }
+
 export default function AdminDashboard() {
-  const { user, error: userError, isLoading: userLoading } = useUser();
+  // Use Clerk's useUser hook
+  const { user, isLoaded, isSignedIn } = useUser();
   const [users, setUsers] = useState<UserData[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [suspendUserId, setSuspendUserId] = useState<string | null>(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // Rename loading state
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState<string>('');
   const [showAlertSuccess, setShowAlertSuccess] = useState(false);
   const [showAlertError, setShowAlertError] = useState(false);
@@ -48,108 +57,69 @@ export default function AdminDashboard() {
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
   const router = useRouter();
 
-  // Track suspended users in local state
   const [suspendedUserIds, setSuspendedUserIds] = useState<Set<string>>(new Set());
-
-  // Add state for the user details modal
   const [isUserDetailLoading, setIsUserDetailLoading] = useState(false);
   const [userDetailError, setUserDetailError] = useState<string | null>(null);
-
-  // Add state for the suspend user confirmation modal
   const [userToSuspend, setUserToSuspend] = useState<UserData | null>(null);
   const [isSuspending, setIsSuspending] = useState(false);
 
-  // Helper function to check if user is super admin
-  const checkIsSuperAdmin = (userToCheck: any): boolean => {
-    if (!userToCheck) return false;
-    const userRoles = (userToCheck['https://justify.social/roles'] as string[]) || [];
-    return userRoles.includes('super_admin');
-  };
+  // Determine admin status directly from Clerk user object
+  const isSuperAdmin = isLoaded && user ? (user.publicMetadata as PublicMetadata)?.role === 'super_admin' : false;
 
-  // Fetch users data for Super Admins
-  const fetchUsers = async () => {
-    if (user && checkIsSuperAdmin(user)) {
-      setLoading(true);
+  // Fetch users data - only if user is loaded and is a super admin
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoadingData(true);
       setError('');
       try {
         const response = await fetch('/api/admin/users');
         if (!response.ok) {
+          if (response.status === 403) throw new Error('Forbidden: Admin access required.');
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setUsers(data.users || []);
+        if (data.success) {
+          setUsers(data.users || []);
+        } else {
+          throw new Error(data.error || 'Failed to parse users data');
+        }
       } catch (err) {
         console.error('Error fetching users:', err);
         setError(err instanceof Error ? err.message : 'Failed to load users');
-        // Add some mock data for development
-        if (process.env.NODE_ENV === 'development') {
-          setUsers([
-            {
-              id: '1',
-              name: 'Alice Smith',
-              email: 'alice@example.com',
-              companyId: 'comp1',
-              role: 'admin',
-              lastLogin: '2023-01-15T10:30:00Z',
-            },
-            {
-              id: '2',
-              name: 'Bob Johnson',
-              email: 'bob@example.com',
-              companyId: 'comp1',
-              role: 'editor',
-              lastLogin: '2023-01-10T09:15:00Z',
-            },
-          ]);
-        }
+        // Add mock data only if strictly needed for isolated development
+        // if (process.env.NODE_ENV === 'development') { setUsers([...]); }
       } finally {
-        setLoading(false);
+        setIsLoadingData(false);
       }
-    }
-  };
-  useEffect(() => {
-    // Only fetch data if the user is loaded and is a super admin
-    if (user) {
+    };
+
+    // Fetch only when Clerk is loaded and user is confirmed super admin
+    if (isLoaded && isSuperAdmin) {
       fetchUsers();
+    } else if (isLoaded && !isSuperAdmin) {
+      // If loaded but not admin, stop loading and show access denied later
+      setIsLoadingData(false);
+      setError('Access Denied: Super Admin role required.');
     }
-  }, [user]);
+  }, [isLoaded, isSuperAdmin]); // Depend on isLoaded and derived isSuperAdmin state
 
   // Handler for updating a user's role
   const handleUpdateUserRole = async (userId: string, newRole: string) => {
     try {
-      // Make API request to update user role
-      const response = await fetch('/api/admin/users/role', {
+      const response = await fetch('/api/admin/users/update-role', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          role: newRole,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role: newRole }), // Assuming API needs internal DB ID
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update user role');
       }
-
-      // Update local state
-      setUsers(
-        users.map(u =>
-          u.id === userId
-            ? {
-                ...u,
-                role: newRole,
-              }
-            : u
-        )
-      );
-
-      // Success notification
-      console.log(`Updated role for user ${userId} to ${newRole}`);
+      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      toast.success('User role updated');
     } catch (error) {
       console.error('Error updating user role:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update user role');
+      toast.error(error instanceof Error ? error.message : 'Failed to update user role');
     }
   };
 
@@ -160,6 +130,7 @@ export default function AdminDashboard() {
     setIsUserDetailLoading(true);
     setUserDetailError(null);
     try {
+      // Assuming API expects internal DB ID
       const response = await fetch(`/api/admin/users/${userData.id}`);
       if (!response.ok) {
         const errorData = await response.json();
@@ -180,36 +151,23 @@ export default function AdminDashboard() {
     if (!userToSuspend) return;
     setIsSuspending(true);
     try {
+      // Assuming API expects internal DB ID
       const response = await fetch('/api/admin/users/suspend', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: userToSuspend.id,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userToSuspend.id }),
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to suspend user');
       }
-
-      // Track suspended users in our local state
-      setSuspendedUserIds(prev => {
-        const newSet = new Set(prev);
-        newSet.add(userToSuspend.id);
-        return newSet;
-      });
-
-      // Close confirmation modal
+      setSuspendedUserIds(prev => { const newSet = new Set(prev); newSet.add(userToSuspend.id); return newSet; });
       setShowSuspendConfirm(false);
       setUserToSuspend(null);
-
-      // Show success notification
-      alert('User suspended successfully');
+      toast.success('User suspended successfully');
     } catch (error) {
       console.error('Error suspending user:', error);
-      alert(error instanceof Error ? error.message : 'Failed to suspend user');
+      toast.error(error instanceof Error ? error.message : 'Failed to suspend user');
     } finally {
       setIsSuspending(false);
     }
@@ -219,95 +177,54 @@ export default function AdminDashboard() {
   const isUserSuspended = (userId: string) => {
     return suspendedUserIds.has(userId);
   };
-  if (userLoading) {
+
+  // Loading state based on Clerk loading
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen font-body">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[var(--accent-color)] font-body"></div>
-      </div>
-    );
-  }
-  if (userError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen font-body">
-        <div className="bg-red-50 text-red-800 rounded-lg p-4 border border-red-200 font-body">
-          Error loading dashboard:{' '}
-          {userError instanceof Error ? userError.message : 'Unknown error'}
-        </div>
-      </div>
-    );
-  }
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen font-body">
-        <div className="bg-yellow-50 text-yellow-800 rounded-lg p-4 border border-yellow-200 font-body">
-          Please log in to access the admin dashboard
-        </div>
+        <LoadingSkeleton className="h-12 w-12" />
       </div>
     );
   }
 
-  // Safely access user roles
-  const userRoles = user ? (user['https://justify.social/roles'] as string[]) || [] : [];
-  const isSuperAdmin = userRoles.includes('super_admin');
+  // Handle case where user is loaded but not signed in (AuthCheck should handle redirect)
+  if (isLoaded && !isSignedIn) {
+    return <div className="p-4 text-center">Redirecting to sign in...</div>;
+  }
+
+  // Handle case where user is loaded, signed in, but not super admin
+  if (isLoaded && !isSuperAdmin) {
+    return (
+      <div className="text-center py-8 font-body">
+        <h2 className="text-2xl font-bold text-red-500 mb-4 font-heading">Access Denied</h2>
+        <p className="mb-4 font-body">
+          You do not have permission to access the admin panel.
+        </p>
+        <button
+          onClick={() => router.push('/')}
+          className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-hover)] transition-colors font-body"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  // Main content render (only if loaded and super admin)
   return (
     <main className="min-h-screen bg-[var(--background-color)] p-8">
-      {/* Error Alert */}
-      {showAlertError && (
-        <div
-          className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative z-50 font-body"
-          role="alert"
-        >
-          <strong className="font-bold">Error! </strong>
-          <span className="block sm:inline font-body">{alertMessage}</span>
-          <span
-            className="absolute top-0 bottom-0 right-0 px-4 py-3 font-body"
-            onClick={() => setShowAlertError(false)}
-          >
-            {<Icon iconId="faXCircleLight" className="h-6 w-6 text-red-500 font-body" />}
-          </span>
-        </div>
+      {/* Show loading state for data fetching */}
+      {isLoadingData && (
+        <p className="text-center py-8 font-body">Loading admin data...</p>
       )}
 
-      {/* Success Alert */}
-      {showAlertSuccess && (
-        <div
-          className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative z-50 font-body"
-          role="alert"
-        >
-          <strong className="font-bold">Success! </strong>
-          <span className="block sm:inline font-body">{alertMessage}</span>
-          <span
-            className="absolute top-0 bottom-0 right-0 px-4 py-3 font-body"
-            onClick={() => setShowAlertSuccess(false)}
-          >
-            {<Icon iconId="faXCircleLight" className="h-6 w-6 text-green-500 font-body" />}
-          </span>
-        </div>
+      {/* Show error state for data fetching */}
+      {!isLoadingData && error && (
+        <p className="text-center py-8 text-red-500 font-body">{error}</p>
       )}
 
-      {userLoading ? (
-        <p className="text-center py-8 font-body">Loading admin panel...</p>
-      ) : userError ? (
-        <p className="text-center py-8 text-red-500 font-body">
-          Error loading user:{' '}
-          {typeof userError === 'object' && userError !== null
-            ? (userError as any).message || 'Unknown error'
-            : 'Unknown error'}
-        </p>
-      ) : !user || !checkIsSuperAdmin(user) ? (
-        <div className="text-center py-8 font-body">
-          <h2 className="text-2xl font-bold text-red-500 mb-4 font-heading">Access Denied</h2>
-          <p className="mb-4 font-body">
-            You do not have permission to access the admin panel.
-          </p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-4 py-2 bg-[var(--accent-color)] text-white rounded-md hover:bg-[var(--accent-hover)] transition-colors font-body"
-          >
-            Return to Dashboard
-          </button>
-        </div>
-      ) : (
+      {/* Show content only when not loading data and no error */}
+      {!isLoadingData && !error && isSuperAdmin && (
         <div className="space-y-8 font-body">
           <header className="flex justify-between items-center font-heading">
             <div className="font-body">
@@ -369,29 +286,29 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--divider-color)]">
-                      {users.map(user => (
-                        <tr key={user.id} className="hover:bg-[var(--background-color)]">
+                      {users.map(userData => (
+                        <tr key={userData.id} className="hover:bg-[var(--background-color)]">
                           <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center font-body">
                               <div className="ml-3 font-body">
                                 <div className="text-sm font-medium text-[var(--primary-color)] font-body">
-                                  {user.name}
+                                  {userData.name}
                                 </div>
                                 <div className="text-sm text-[var(--secondary-color)] font-body">
-                                  {user.email}
+                                  {userData.email}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--primary-color)] font-body">
-                            {user.companyId}
+                            {userData.companyId}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <select
                               className="text-sm rounded-md border border-[var(--divider-color)] px-2 py-1 font-body"
-                              value={user.role}
-                              onChange={e => handleUpdateUserRole(user.id, e.target.value)}
-                              disabled={isUserSuspended(user.id)}
+                              value={userData.role}
+                              onChange={e => handleUpdateUserRole(userData.id, e.target.value)}
+                              disabled={isUserSuspended(userData.id)}
                             >
                               <option value="OWNER">Owner</option>
                               <option value="ADMIN">Admin</option>
@@ -400,33 +317,33 @@ export default function AdminDashboard() {
                             </select>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--primary-color)] font-body">
-                            {new Date(user.lastLogin).toLocaleString()}
+                            {new Date(userData.lastLogin).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium font-body">
                             <button
                               className="text-[var(--accent-color)] hover:text-blue-800 mr-3 font-body"
-                              onClick={() => handleViewUser(user)}
+                              onClick={() => handleViewUser(userData)}
                             >
                               View
                             </button>
-                            {!isUserSuspended(user.id) && (
+                            {!isUserSuspended(userData.id) && (
                               <button
                                 className="text-red-600 hover:text-red-800 font-body"
                                 onClick={() => {
-                                  setUserToSuspend(user);
+                                  setUserToSuspend(userData);
                                   setShowSuspendConfirm(true);
                                 }}
                               >
                                 Suspend
                               </button>
                             )}
-                            {isUserSuspended(user.id) && (
+                            {isUserSuspended(userData.id) && (
                               <span className="text-gray-400 font-body">Suspended</span>
                             )}
                           </td>
                         </tr>
                       ))}
-                      {users.length === 0 && !userLoading && (
+                      {users.length === 0 && !isLoadingData && (
                         <tr>
                           <td
                             colSpan={5}
@@ -605,36 +522,6 @@ export default function AdminDashboard() {
           )}
         </div>
       )}
-
-      {/* Debug Information */}
-      <details className="bg-white rounded-xl shadow-sm border border-[var(--divider-color)]">
-        <summary className="cursor-pointer bg-[var(--background-color)] px-6 py-3 text-lg font-medium text-[var(--primary-color)] hover:bg-opacity-80 rounded-t-xl font-body">
-          Debug Information
-        </summary>
-        <div className="p-6 font-body">
-          <pre className="bg-[var(--background-color)] p-4 rounded-md overflow-auto text-sm text-[var(--primary-color)] font-body">
-            {JSON.stringify(
-              {
-                user: {
-                  email: user.email,
-                  roles: userRoles,
-                  isSuperAdmin,
-                },
-                auth: {
-                  isAuthenticated: !!user,
-                  lastUpdated: new Date().toISOString(),
-                },
-                environment: {
-                  nodeEnv: process.env.NODE_ENV,
-                  buildTime: new Date().toISOString(),
-                },
-              },
-              null,
-              2
-            )}
-          </pre>
-        </div>
-      </details>
     </main>
   );
 }

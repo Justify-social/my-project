@@ -1,17 +1,29 @@
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+
+interface SessionClaimsMetadata {
+  role?: string;
+  // Add other expected metadata properties here
+}
+
+interface CustomSessionClaims {
+  metadata?: SessionClaimsMetadata;
+  // Add other expected claims properties here
+}
 
 export async function GET() {
   try {
-    const session = await getSession();
+    // Use Clerk's auth() helper to get session details
+    const { userId, sessionClaims } = await auth();
 
-    if (!session || !session.user) {
+    if (!userId) {
+      // No active session, user is not authenticated
       return NextResponse.json({ isSuperAdmin: false }, { status: 401 });
     }
 
-    // Check for super_admin role in Auth0 roles
-    const roles = session.user['https://justify.social/roles'] || [];
-    const isSuperAdmin = roles.includes('super_admin');
+    // Safely check for role in Clerk's session claims metadata
+    const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
+    const isSuperAdmin = metadata?.role === 'super_admin';
 
     return NextResponse.json({ isSuperAdmin });
   } catch (error) {

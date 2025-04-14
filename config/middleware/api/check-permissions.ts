@@ -1,21 +1,38 @@
-import { getSession } from '@auth0/nextjs-auth0';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Permission, ROLE_PERMISSIONS, UserRole } from '@/utils/roles';
+// Import Clerk auth helper
+import { auth } from '@clerk/nextjs/server';
 
-export async function checkPermissions(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  requiredPermissions: Permission[]
-) {
+// Define expected structure for sessionClaims metadata if possible
+interface SessionClaimsMetadata {
+  roles?: UserRole[]; // Expect roles to be an array of UserRole
+}
+
+interface CustomSessionClaims {
+  metadata?: SessionClaimsMetadata;
+}
+
+/**
+ * Checks if the currently authenticated user (via Clerk) has the required permissions.
+ * Intended for use in server-side contexts like API routes or Server Components.
+ *
+ * @param {Permission[]} requiredPermissions - An array of permissions required for the action.
+ * @returns {Promise<boolean>} True if the user has all required permissions, false otherwise.
+ */
+export async function checkPermissions(requiredPermissions: Permission[]): Promise<boolean> {
   try {
-    const session = await getSession(req, res);
+    // Get session claims using Clerk's auth()
+    const { userId, sessionClaims } = await auth();
 
-    if (!session?.user) {
+    // If no userId, user is not authenticated
+    if (!userId) {
       return false;
     }
 
-    // Get user roles from Auth0 user metadata
-    const userRoles = (session.user['https://justify.social/roles'] || ['USER']) as UserRole[];
+    // Get user roles from Clerk's session claims metadata
+    const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
+    // Default to ['USER'] role if no roles are found in metadata
+    const userRoles = metadata?.roles || ['USER'];
 
     // Check if user has any of the required roles that grant the permissions
     const hasPermission = userRoles.some(role => {
@@ -25,18 +42,23 @@ export async function checkPermissions(
 
     return hasPermission;
   } catch (error) {
-    console.error('Permission check error:', error);
+    console.error('Server-side permission check error:', error);
     return false;
   }
 }
 
+// The withPermissions middleware factory can remain largely the same,
+// but it should now call the updated checkPermissions function.
+// Note: This factory pattern might be less common with Next.js App Router;
+// often checks are done directly within route handlers or using middleware.ts.
 export function withPermissions(permissions: Permission[]) {
   return async function checkPermissionsMiddleware(
-    req: NextApiRequest,
+    req: NextApiRequest, // Keep types for compatibility if used in Pages Router
     res: NextApiResponse,
-    next: () => void
+    next: (err?: any) => void // Standard middleware next function signature
   ) {
-    const hasPermission = await checkPermissions(req, res, permissions);
+    // Call the updated checkPermissions function (no req/res needed)
+    const hasPermission = await checkPermissions(permissions);
 
     if (!hasPermission) {
       return res.status(403).json({
@@ -45,6 +67,7 @@ export function withPermissions(permissions: Permission[]) {
       });
     }
 
+    // Proceed to the next middleware or route handler
     return next();
   };
 }

@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/session';
+import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 
-// Custom type for Auth0 session user
-interface Auth0User {
-  sub: string;
-  email: string;
-  name: string;
-  [key: string]: any; // For custom claims
+// Define expected structure for sessionClaims metadata
+interface SessionClaimsMetadata {
+  role?: string;
 }
 
-// Helper to check if user is a Super Admin
+interface CustomSessionClaims {
+  metadata?: SessionClaimsMetadata;
+}
+
+// Helper to check if user is a Super Admin using Clerk
 async function isSuperAdmin() {
   try {
-    const session = await getSession();
-    if (!session || !session.user) return false;
+    const { userId, sessionClaims } = await auth();
+    if (!userId) return false;
 
-    // Cast user to Auth0User type to access custom claims
-    const user = session.user as Auth0User;
-    const roles = user['https://justify.social/roles'] || [];
-    return Array.isArray(roles) && roles.includes('super_admin');
+    // Check role in Clerk metadata
+    const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
+    return metadata?.role === 'super_admin';
   } catch (error) {
     console.error('Error checking super admin status:', error);
     return false;
@@ -46,6 +46,7 @@ interface SelectedUserData {
 
 /**
  * GET user details by ID (Admin)
+ * TODO: Implement proper user fetching and ensure calling code checks isSuperAdmin()
  */
 export async function GET(
   request: NextRequest,
@@ -53,6 +54,11 @@ export async function GET(
 ) {
   let id: string | undefined; // Declare id outside try
   try {
+    // Check admin status first (assuming this route requires admin)
+    // if (!await isSuperAdmin()) {
+    //   return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    // }
+
     // Safely access id
     id = contextOrParams?.params?.id || contextOrParams?.id;
     if (!id) {

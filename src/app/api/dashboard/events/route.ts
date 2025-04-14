@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth } from '@clerk/nextjs/server'; // Ensure Clerk auth is imported
 import { getUpcomingEvents } from '@/lib/data/dashboard';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger'; // Adjust path if needed
 
@@ -10,22 +10,22 @@ export const dynamic = 'force-dynamic';
 // export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
-  const response = new NextResponse();
   try {
-    // Pass request and response to getSession
-    const session = await getSession(request, response);
-    const user = session?.user;
+    // Get Clerk auth object
+    const authObject = auth();
+    const userId = authObject.userId;
 
-    if (!user?.sub) {
+    if (!userId) {
       // Return a new response for unauthorized access
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = user.sub;
+    // Fetch events using the Clerk userId
     const events = await getUpcomingEvents(userId);
 
-    // Return standard NextResponse, passing the response object
-    return NextResponse.json({ success: true, data: events }, response);
+    // Return standard NextResponse
+    return NextResponse.json({ success: true, data: events });
+
   } catch (error) {
     console.error('API Error fetching dashboard events:', error);
     dbLogger?.error(
