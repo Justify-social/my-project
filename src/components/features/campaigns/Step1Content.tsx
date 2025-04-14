@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, useFormContext, SubmitHandler } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, useFormContext, SubmitHandler, FieldArrayWithId } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
@@ -223,53 +223,143 @@ type PayloadInfluencer = z.infer<typeof InfluencerSchema>; // Use the Zod schema
 // Type for influencer data coming from the context (uses Backend enum)
 type ContextInfluencer = z.infer<typeof InfluencerSchema>;
 
+// --- Add Helper Functions ---
+
+/**
+ * Detects user's timezone using an IP Geolocation API.
+ */
+async function detectUserTimezone(): Promise<string> {
+    try {
+        // Prefer ipgeolocation.io if key is available
+        const ipGeoApiKey = process.env.NEXT_PUBLIC_IPGEOLOCATION_API_KEY;
+        const endpoint = ipGeoApiKey
+            ? `https://api.ipgeolocation.io/ipgeo?apiKey=${ipGeoApiKey}`
+            : 'https://ipapi.co/json/'; // Fallback
+
+        console.log('Detecting user timezone from IP Geolocation API...');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3-second timeout
+
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            signal: controller.signal,
+            headers: { 'Accept': 'application/json' }, // Needed for ipapi.co
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`API returned status ${response.status}`);
+        }
+        const data = await response.json();
+
+        // Extract timezone based on API used
+        const timezone = ipGeoApiKey ? data.time_zone?.name : data.timezone;
+
+        if (!timezone) {
+            console.warn('Timezone not found in API response:', data);
+            return 'UTC'; // Fallback if timezone field is missing
+        }
+
+        console.log('Detected timezone:', timezone);
+        return timezone;
+    } catch (error) {
+        console.warn('Failed to detect timezone:', error);
+        return 'UTC'; // Default fallback on error
+    }
+}
+
+
+/**
+ * Fetches exchange rates from an external API.
+ */
+async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<{
+    rates: Record<string, number> | null;
+    fetchDate: string;
+} | null> {
+    const exchangeRatesApiKey = process.env.NEXT_PUBLIC_EXCHANGERATES_API_KEY;
+
+    if (!exchangeRatesApiKey) {
+        console.error('Error: NEXT_PUBLIC_EXCHANGERATES_API_KEY is not defined in the environment variables.');
+        return null; // Cannot proceed without API key
+    }
+
+    const endpoint = `https://api.exchangeratesapi.io/v1/latest?access_key=${exchangeRatesApiKey}&base=${baseCurrency}`;
+    const usedApi = 'exchangeratesapi.io';
+
+    console.log(`Fetching rates for ${baseCurrency} from ${usedApi}...`);
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            let errorMessage = `${usedApi} API returned status ${response.status}`;
+            try {
+                const errorJson = JSON.parse(errorBody);
+                if (errorJson?.error?.message) {
+                    errorMessage += `: ${errorJson.error.message}`;
+                } else if (errorJson?.error?.code) {
+                    errorMessage += ` (Code: ${errorJson.error.code})`;
+                }
+            } catch (e) { /* Ignore parsing error, just use status */ }
+            console.error(errorMessage, `| Raw Response: ${errorBody}`);
+            // Throw the specific error message if available
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+
+        // Check for success flag and rates object
+        if (data.success === true && data.rates && Object.keys(data.rates).length > 0) {
+            console.log(`Successfully fetched ${Object.keys(data.rates).length} exchange rates from ${usedApi}.`);
+            return {
+                rates: data.rates,
+                fetchDate: data.timestamp ? new Date(data.timestamp * 1000).toISOString() : new Date().toISOString(), // Use API timestamp if available
+            };
+        } else {
+            // Handle cases where success might be false or rates are missing
+            console.warn(`API call to ${usedApi} succeeded (status ${response.status}) but response indicates failure or missing rates:`, data);
+            throw new Error(`API indicated failure or missing rates: ${JSON.stringify(data?.error || data)}`);
+        }
+
+    } catch (error) {
+        // Log the caught error (could be fetch error or error thrown above)
+        console.error(`Failed to fetch exchange rates from ${usedApi}:`, error);
+        return null; // Return null on any failure
+    }
+}
+
 function Step1Content() {
     const { wizardState, updateWizardState, isLoading, saveProgress, lastSaved, autosaveEnabled } = useWizard();
     const router = useRouter();
+    const initialDataLoaded = useRef(false);
+    const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
+    const [exchangeRateData, setExchangeRateData] = useState<any>(null); // State for exchange rates
 
-    // Initialize form with resolver for Step 1 schema
+    // Effect to detect timezone on mount
+    useEffect(() => {
+        detectUserTimezone().then(tz => {
+            setDetectedTimezone(tz);
+            console.log("Timezone detection complete.", tz);
+        });
+    }, []); // Empty dependency array means run once on mount
+
+    // Initialize form with static defaults
     const form = useForm<Step1FormData>({
         resolver: zodResolver(Step1ValidationSchema),
-        defaultValues: wizardState ? {
-            name: wizardState.name || '',
-            businessGoal: wizardState.businessGoal || '',
-            startDate: wizardState.startDate ? new Date(wizardState.startDate) : new Date(),
-            endDate: wizardState.endDate ? new Date(wizardState.endDate) : new Date(),
-            timeZone: wizardState.timeZone || 'GMT',
-            primaryContact: {
-                firstName: wizardState.primaryContact?.firstName || '',
-                surname: wizardState.primaryContact?.surname || '',
-                email: wizardState.primaryContact?.email || '',
-                position: wizardState.primaryContact?.position || PositionEnum.Values.Director,
-            },
-            secondaryContact: {
-                firstName: wizardState.secondaryContact?.firstName || '',
-                surname: wizardState.secondaryContact?.surname || '',
-                email: wizardState.secondaryContact?.email || '',
-                position: wizardState.secondaryContact?.position || PositionEnum.Values.Director,
-            },
-            additionalContacts: wizardState.additionalContacts && Array.isArray(wizardState.additionalContacts) ? wizardState.additionalContacts.map(contact => ({
-                firstName: contact.firstName || '',
-                surname: contact.surname || '',
-                email: contact.email || '',
-                position: contact.position || PositionEnum.Values.Director,
-            })) : [],
-            currency: wizardState.budget?.currency || CurrencyEnum.Values.USD,
-            totalBudget: wizardState.budget?.total?.toString() || '0',
-            socialMediaBudget: wizardState.budget?.socialMedia?.toString() || '0',
-            influencers: wizardState?.Influencer && Array.isArray(wizardState.Influencer) && wizardState.Influencer.length > 0
-                ? wizardState.Influencer.map((inf: ContextInfluencer) => ({
-                    id: inf.id || `default-${Date.now()}`,
-                    platform: inf.platform || PlatformEnumBackend.Values.INSTAGRAM,
-                    handle: inf.handle || 'placeholder',
-                }))
-                : [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' }],
-        } : {
+        defaultValues: {
             name: '',
             businessGoal: '',
             startDate: new Date(),
             endDate: new Date(),
-            timeZone: 'GMT',
+            timeZone: 'GMT', // Initial static default
             primaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             secondaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             additionalContacts: [],
@@ -281,12 +371,103 @@ function Step1Content() {
         mode: 'onChange',
     });
 
-    const { fields: influencerFields, append: appendInfluencer, remove: removeInfluencer } = useFieldArray({
+    // Effect to reset form when data is loaded from context OR timezone is detected
+    useEffect(() => {
+        if ((!isLoading && wizardState || detectedTimezone) && !initialDataLoaded.current) {
+            // Ensure we only reset ONCE after BOTH data is loaded AND timezone is detected (if applicable)
+            if (isLoading || detectedTimezone === null) {
+                // Still waiting for data or timezone
+                return;
+            }
+
+            console.log("[Step1Content useEffect] Resetting form with wizardState and detected timezone:", wizardState, detectedTimezone);
+
+            const formattedData: Step1FormData = {
+                name: wizardState?.name || '',
+                businessGoal: wizardState?.businessGoal || '',
+                startDate: wizardState?.startDate ? new Date(wizardState.startDate) : new Date(),
+                endDate: wizardState?.endDate ? new Date(wizardState.endDate) : new Date(),
+                // Use loaded timezone, fallback to detected, fallback to GMT
+                timeZone: wizardState?.timeZone || detectedTimezone || 'GMT',
+                primaryContact: {
+                    firstName: wizardState?.primaryContact?.firstName || '',
+                    surname: wizardState?.primaryContact?.surname || '',
+                    email: wizardState?.primaryContact?.email || '',
+                    position: (wizardState?.primaryContact?.position && PositionEnum.safeParse(wizardState.primaryContact.position).success
+                        ? wizardState.primaryContact.position
+                        : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
+                },
+                secondaryContact: {
+                    firstName: wizardState?.secondaryContact?.firstName || '',
+                    surname: wizardState?.secondaryContact?.surname || '',
+                    email: wizardState?.secondaryContact?.email || '',
+                    position: (wizardState?.secondaryContact?.position && PositionEnum.safeParse(wizardState.secondaryContact.position).success
+                        ? wizardState.secondaryContact.position
+                        : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
+                },
+                additionalContacts: Array.isArray(wizardState?.additionalContacts)
+                    ? wizardState.additionalContacts.map(contact => ({
+                        firstName: contact?.firstName || '',
+                        surname: contact?.surname || '',
+                        email: contact?.email || '',
+                        position: (contact?.position && PositionEnum.safeParse(contact.position).success
+                            ? contact.position
+                            : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
+                    }))
+                    : [],
+                currency: (wizardState?.budget?.currency && CurrencyEnum.safeParse(wizardState.budget.currency).success
+                    ? wizardState.budget.currency
+                    : CurrencyEnum.Values.USD) as z.infer<typeof CurrencyEnum>,
+                totalBudget: wizardState?.budget?.total?.toString() || '0',
+                socialMediaBudget: wizardState?.budget?.socialMedia?.toString() || '0',
+                influencers: Array.isArray(wizardState?.Influencer) && wizardState.Influencer.length > 0
+                    ? wizardState.Influencer.map((inf: any) => ({
+                        id: inf?.id || `new-${Date.now()}`,
+                        platform: (inf?.platform && PlatformEnumBackend.safeParse(inf.platform).success
+                            ? inf.platform
+                            : PlatformEnumBackend.Values.INSTAGRAM) as z.infer<typeof PlatformEnumBackend>,
+                        handle: inf?.handle || 'placeholder',
+                    }))
+                    : [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' }],
+            };
+
+            console.log("[Step1Content useEffect] Calling form.reset with formatted data:", formattedData);
+            form.reset(formattedData);
+            initialDataLoaded.current = true; // Mark as loaded
+        }
+    }, [isLoading, wizardState, detectedTimezone, form.reset]);
+
+    // Remove explicit typing and @ts-ignore, let RHF infer
+    const { fields, append: appendInfluencer, remove: removeInfluencer } = useFieldArray({
         control: form.control,
+        // @ts-ignore - Suppress persistent TS error for useFieldArray name inference
         name: "influencers",
     });
 
+    // Watch relevant fields for side effects
     const watchedValues = form.watch();
+    const watchedCurrency = form.watch('currency'); // Watch specifically for currency changes
+
+    // Effect to fetch exchange rates when currency changes
+    useEffect(() => {
+        // Ensure watchedCurrency is a valid string before fetching
+        if (watchedCurrency && typeof watchedCurrency === 'string' && watchedCurrency.length > 0) { // Re-enabled currency watching
+            // const baseCurrencyToFetch = 'EUR'; // Reverted: Use watched currency
+            console.log(`Currency changed to: ${watchedCurrency}. Fetching exchange rates...`);
+            fetchExchangeRates(watchedCurrency).then(data => { // Use watchedCurrency
+                if (data) {
+                    setExchangeRateData(data);
+                    console.log("Exchange rates fetched:", data); // General log message
+                    // Optional: Autosave trigger
+                } else {
+                    setExchangeRateData(null);
+                    console.warn("Failed to fetch exchange rates for", watchedCurrency);
+                }
+            });
+        } else {
+            setExchangeRateData(null); // Clear if currency is invalid/unset
+        }
+    }, [watchedCurrency]); // Dependency: run when watchedCurrency changes
 
     const filteredInfluencers = useMemo(() => {
         const influencers = wizardState?.Influencer;
@@ -479,7 +660,7 @@ function Step1Content() {
                                 <FormField control={form.control} name="currency" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Currency *</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value || CurrencyEnum.Values.USD}>
+                                        <Select onValueChange={field.onChange} value={(field.value as string | undefined) || CurrencyEnum.Values.USD}>
                                             <FormControl>
                                                 <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
                                             </FormControl>
@@ -497,7 +678,7 @@ function Step1Content() {
                                 <FormLabel className="text-md font-semibold">Influencer(s) *</FormLabel>
                                 <FormDescription className="mb-4">Add the influencer(s) you want to work with.</FormDescription>
                                 <div className="space-y-4">
-                                    {influencerFields?.map((item, index) => (
+                                    {fields.map((item, index) => (
                                         <InfluencerEntry
                                             key={item.id}
                                             index={index}
@@ -508,7 +689,7 @@ function Step1Content() {
                                         />
                                     ))}
                                 </div>
-                                <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => appendInfluencer({ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' })} >
+                                <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => appendInfluencer({ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' })} >
                                     <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Influencer
                                 </Button>
                                 {form.formState.errors.influencers?.root && (

@@ -59,8 +59,8 @@ export function ProgressBarWizard({
     return (
         <footer
             className={cn(
-                'sticky bottom-0 border-t bg-background shadow z-40 flex justify-between items-center',
-                'h-[var(--footer-height)] w-full px-4 sm:px-6 font-body text-sm',
+                'fixed bottom-0 left-0 md:left-[var(--sidebar-width)] bg-background shadow z-40 flex justify-between items-center border-t',
+                'h-[65px] w-full md:w-[calc(100%-var(--sidebar-width))] px-4 sm:px-6 font-body text-sm',
                 className
             )}
             role="navigation"
@@ -87,14 +87,14 @@ export function ProgressBarWizard({
                             aria-current={isCurrent ? 'step' : undefined}
                         >
                             <Badge
-                                variant={isCompleted ? 'default' : isCurrent ? 'secondary' : 'outline'}
                                 className={cn(
-                                    "h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0",
-                                    isCompleted && "bg-green-600 border-green-600 text-white", // Consistent completed style
-                                    isCurrent && "border-primary text-primary"
+                                    "h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0 rounded-full",
+                                    isCompleted && "bg-success border-success text-success-foreground",
+                                    isCurrent && "bg-primary border-primary text-primary-foreground",
+                                    isUpcoming && "border border-muted-foreground text-muted-foreground bg-transparent"
                                 )}
                             >
-                                {isCompleted ? <Icon iconId="faCheckSolid" className="h-2.5 w-2.5" /> : number}
+                                {isCompleted ? <span className="relative z-50"><Icon iconId="faCheckSolid" className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-success-foreground" /></span> : number}
                             </Badge>
                             <span className={cn(
                                 "hidden sm:inline truncate",

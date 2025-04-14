@@ -1,0 +1,83 @@
+{
+  "icons": [
+    {
+      "category": "app",
+      "id": "appBilling",
+      "name": "Billing",
+      "faVersion": null,
+      "path": "/icons/app/appBilling.svg"
+    },
+    {
+      "category": "app",
+      "id": "appBrandHealth",
+      "name": "Brand Health",
+      "faVersion": null,
+      "path": "/icons/app/appBrandHealth.svg"
+    },
+    {
+      "category": "app",
+      "id": "appBrandLift",
+      "name": "Brand lift",
+      "faVersion": null,
+      "path": "/icons/app/appBrandLift.svg"
+    },
+    {
+      "category": "app",
+      "id": "appCampaigns",
+      "name": "Campaigns",
+      "faVersion": null,
+      "path": "/icons/app/appCampaigns.svg"
+    },
+    {
+      "category": "app",
+      "id": "appCreativeAssetTesting",
+      "name": "Creative asset testing",
+      "faVersion": null,
+      "path": "/icons/app/appCreativeAssetTesting.svg"
+    },
+    {
+      "category": "app",
+      "id": "appHelp",
+      "name": "Help",
+      "faVersion": null,
+      "path": "/icons/app/appHelp.svg"
+    },
+    {
+      "category": "app",
+      "id": "appHome",
+      "name": "Home",
+      "faVersion": null,
+      "path": "/icons/app/appHome.svg"
+    },
+    {
+      "category": "app",
+      "id": "appInfluencers",
+      "name": "Influencers",
+      "faVersion": null,
+      "path": "/icons/app/appInfluencers.svg"
+    },
+    {
+      "category": "app",
+      "id": "appMmm",
+      "name": "Mmm",
+      "faVersion": null,
+      "path": "/icons/app/appMmm.svg"
+    },
+    {
+      "category": "app",
+      "id": "appReports",
+      "name": "Reports",
+      "faVersion": null,
+      "path": "/icons/app/appReports.svg"
+    },
+    {
+      "category": "app",
+      "id": "appSettings",
+      "name": "Settings",
+      "faVersion": null,
+      "path": "/icons/app/appSettings.svg"
+    }
+  ],
+  "category": "app",
+  "iconCount": 11
+}

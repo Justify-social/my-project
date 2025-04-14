@@ -133,6 +133,10 @@ svg:not(:host).svg-inline--fa {
 
     /* Added Footer Height Variable */
     --footer-height: 65px;
+
+    /* Added Layout Dimension Variables */
+    --sidebar-width: 16rem;
+    /* 256px, equivalent to w-64 */
   }
 
   .dark {
@@ -200,6 +204,9 @@ svg:not(:host).svg-inline--fa {
 
     /* Added Footer Height Variable (can be same or different) */
     --footer-height: 65px;
+
+    /* Layout Dimensions (can be same or different) */
+    --sidebar-width: 16rem;
   }
 
   /* Base styles for all elements */

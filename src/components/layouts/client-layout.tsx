@@ -273,11 +273,11 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   // Define settingsItem for MobileMenu based on context (only for main app)
   const mobileSettingsItem = !isUIComponentsPage
     ? {
-        id: settingsItemDef.id,
-        label: settingsItemDef.label,
-        href: settingsItemDef.href as string,
-        iconId: settingsItemDef.icon || 'faGearLight',
-      }
+      id: settingsItemDef.id,
+      label: settingsItemDef.label,
+      href: settingsItemDef.href as string,
+      iconId: settingsItemDef.icon || 'faGearLight',
+    }
     : undefined;
 
   return (
@@ -305,9 +305,9 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
           </div>
 
           <div
-            className={`flex-1 transition-margin duration-200 md:ml-64 pt-16 font-body overflow-y-auto`}
+            className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 font-body overflow-y-auto`}
           >
-            <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)]">{children}</main>
+            <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">{children}</main>
           </div>
         </div>
 

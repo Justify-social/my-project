@@ -71,6 +71,7 @@ export function LoadingSpinner({
         height={64}
         priority
         className="mb-2"
+        unoptimized
       />
       {label && <p className="text-sm text-muted-foreground">{label}</p>}
     </div>
