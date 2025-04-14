@@ -56,3 +56,5 @@ src/**/__tests__/**/*.test.jsx
 # Cache files
 .cache/
 # Ignore vercel-mcp-server directory
+/vercel-mcp-server/
+/graphiti/
