@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-04-10T18:52:31.989Z",
+  "generatedAt": "2025-04-14T18:18:31.850Z",
   "components": [
     {
       "category": "organism",
@@ -8,6 +8,13 @@
       "status": "10th April",
       "name": "Accordion",
       "filePath": "src/components/ui/accordion.tsx"
+    },
+    {
+      "category": "organism",
+      "description": "Reusable slider component for selecting an age range, integrated with RHF.\nUses Shadcn UI Slider and RHF Controller.",
+      "status": "10th April",
+      "name": "AgeRangeSlider",
+      "filePath": "src/components/ui/slider-age-range.tsx"
     },
     {
       "category": "molecule",
@@ -51,6 +58,13 @@
       "filePath": "src/components/ui/card-asset.tsx"
     },
     {
+      "category": "molecule",
+      "description": "Displays the status of an autosave operation.\nUses FontAwesome icons and accepts status props.",
+      "status": "10th April",
+      "name": "AutosaveIndicator",
+      "filePath": "src/components/ui/autosave-indicator.tsx"
+    },
+    {
       "category": "atom",
       "subcategory": "image",
       "description": "Displays an image or a fallback for user profiles or entities.",
@@ -84,6 +98,14 @@
       "filePath": "src/components/ui/button.tsx"
     },
     {
+      "category": "atom",
+      "subcategory": "button",
+      "description": "An icon component that changes from a light to a solid icon on hover.",
+      "status": "10th April",
+      "name": "ButtonIconAction",
+      "filePath": "src/components/ui/button-icon-action.tsx"
+    },
+    {
       "category": "organism",
       "subcategory": "input",
       "description": "Displays a calendar grid allowing users to view dates and select single or multiple dates.",
@@ -95,7 +117,7 @@
       "category": "organism",
       "subcategory": "calendar",
       "description": "Displays upcoming campaign events in a calendar grid.",
-      "status": "10th April - Rewritten for clarity",
+      "status": "10th April",
       "name": "CalendarUpcoming",
       "filePath": "src/components/ui/calendar-upcoming.tsx"
     },
@@ -166,6 +188,13 @@
     },
     {
       "category": "organism",
+      "description": "Comprehensive, reusable file uploader component integrated with RHF and UploadThing.\nUses Shadcn UI components and provides progress/status feedback.",
+      "status": "10th April",
+      "name": "FileUploader",
+      "filePath": "src/components/ui/file-uploader.tsx"
+    },
+    {
+      "category": "organism",
       "subcategory": "input",
       "description": "Provides form context and helper components for building forms with validation, integrating with react-hook-form.",
       "status": "10th April",
@@ -182,12 +211,26 @@
       "filePath": "src/components/ui/chart-funnel.tsx"
     },
     {
+      "category": "organism",
+      "description": "Reusable gender selection component using checkboxes, integrated with RHF.\nUses Shadcn UI Checkbox and RHF Controller.",
+      "status": "10th April",
+      "name": "GenderSelector",
+      "filePath": "src/components/ui/selector-gender.tsx"
+    },
+    {
       "category": "molecule",
       "subcategory": "overlay",
       "description": "Displays a popover card with content when hovering over a trigger element.",
       "status": "10th April",
       "name": "HoverCard",
       "filePath": "src/components/ui/hover-card.tsx"
+    },
+    {
+      "category": "organism",
+      "description": "Displays information about a single social media influencer.\nUses Shadcn UI Card, Avatar, Icon.",
+      "status": "10th April",
+      "name": "InfluencerCard",
+      "filePath": "src/components/ui/card-influencer.tsx"
     },
     {
       "category": "atom",
@@ -220,9 +263,16 @@
     },
     {
       "category": "organism",
+      "description": "Reusable language selection component using Command (multi/single select), integrated with RHF.\nUses Shadcn UI Popover, Command, Button and RHF Controller.",
+      "status": "10th April",
+      "name": "LanguageSelector",
+      "filePath": "src/components/ui/selector-language.tsx"
+    },
+    {
+      "category": "organism",
       "subcategory": "visualization",
       "description": "Responsive line chart component based on Recharts with support for multiple data series.",
-      "status": "10th April\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
+      "status": "10th April",
       "name": "LineChart",
       "filePath": "src/components/ui/chart-line.tsx"
     },
@@ -313,6 +363,13 @@
       "since": "2023-01-01",
       "name": "Progress",
       "filePath": "src/components/ui/progress.tsx"
+    },
+    {
+      "category": "organism",
+      "description": "A fixed footer progress bar for multi-step wizards, providing navigation.\nUses Shadcn UI Button, Badge.",
+      "status": "10th April",
+      "name": "ProgressBarWizard",
+      "filePath": "src/components/ui/progress-bar-wizard.tsx"
     },
     {
       "category": "organism",
@@ -501,6 +558,13 @@
       },
       {
         "category": "organism",
+        "description": "Reusable slider component for selecting an age range, integrated with RHF.\nUses Shadcn UI Slider and RHF Controller.",
+        "status": "10th April",
+        "name": "AgeRangeSlider",
+        "filePath": "src/components/ui/slider-age-range.tsx"
+      },
+      {
+        "category": "organism",
         "renderType": "server",
         "description": "A responsive area chart component for visualizing cumulative or quantitative data over time or categories.",
         "status": "10th April",
@@ -537,7 +601,7 @@
         "category": "organism",
         "subcategory": "calendar",
         "description": "Displays upcoming campaign events in a calendar grid.",
-        "status": "10th April - Rewritten for clarity",
+        "status": "10th April",
         "name": "CalendarUpcoming",
         "filePath": "src/components/ui/calendar-upcoming.tsx"
       },
@@ -567,6 +631,13 @@
       },
       {
         "category": "organism",
+        "description": "Comprehensive, reusable file uploader component integrated with RHF and UploadThing.\nUses Shadcn UI components and provides progress/status feedback.",
+        "status": "10th April",
+        "name": "FileUploader",
+        "filePath": "src/components/ui/file-uploader.tsx"
+      },
+      {
+        "category": "organism",
         "subcategory": "input",
         "description": "Provides form context and helper components for building forms with validation, integrating with react-hook-form.",
         "status": "10th April",
@@ -584,6 +655,20 @@
       },
       {
         "category": "organism",
+        "description": "Reusable gender selection component using checkboxes, integrated with RHF.\nUses Shadcn UI Checkbox and RHF Controller.",
+        "status": "10th April",
+        "name": "GenderSelector",
+        "filePath": "src/components/ui/selector-gender.tsx"
+      },
+      {
+        "category": "organism",
+        "description": "Displays information about a single social media influencer.\nUses Shadcn UI Card, Avatar, Icon.",
+        "status": "10th April",
+        "name": "InfluencerCard",
+        "filePath": "src/components/ui/card-influencer.tsx"
+      },
+      {
+        "category": "organism",
         "renderType": "server",
         "description": "A card component for displaying key performance indicators with trend visualization using standard Card components.",
         "status": "10th April",
@@ -593,9 +678,16 @@
       },
       {
         "category": "organism",
+        "description": "Reusable language selection component using Command (multi/single select), integrated with RHF.\nUses Shadcn UI Popover, Command, Button and RHF Controller.",
+        "status": "10th April",
+        "name": "LanguageSelector",
+        "filePath": "src/components/ui/selector-language.tsx"
+      },
+      {
+        "category": "organism",
         "subcategory": "visualization",
         "description": "Responsive line chart component based on Recharts with support for multiple data series.",
-        "status": "10th April\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
+        "status": "10th April",
         "name": "LineChart",
         "filePath": "src/components/ui/chart-line.tsx"
       },
@@ -648,6 +740,13 @@
         "since": "2023-07-15",
         "name": "PieChart",
         "filePath": "src/components/ui/chart-pie.tsx"
+      },
+      {
+        "category": "organism",
+        "description": "A fixed footer progress bar for multi-step wizards, providing navigation.\nUses Shadcn UI Button, Badge.",
+        "status": "10th April",
+        "name": "ProgressBarWizard",
+        "filePath": "src/components/ui/progress-bar-wizard.tsx"
       },
       {
         "category": "organism",
@@ -740,6 +839,13 @@
         "status": "10th April",
         "name": "AlertDialog",
         "filePath": "src/components/ui/alert-dialog.tsx"
+      },
+      {
+        "category": "molecule",
+        "description": "Displays the status of an autosave operation.\nUses FontAwesome icons and accepts status props.",
+        "status": "10th April",
+        "name": "AutosaveIndicator",
+        "filePath": "src/components/ui/autosave-indicator.tsx"
       },
       {
         "category": "molecule",
@@ -855,6 +961,14 @@
         "status": "10th April",
         "name": "Button",
         "filePath": "src/components/ui/button.tsx"
+      },
+      {
+        "category": "atom",
+        "subcategory": "button",
+        "description": "An icon component that changes from a light to a solid icon on hover.",
+        "status": "10th April",
+        "name": "ButtonIconAction",
+        "filePath": "src/components/ui/button-icon-action.tsx"
       },
       {
         "category": "atom",
@@ -993,6 +1107,13 @@
       "name": "Accordion",
       "filePath": "src/components/ui/accordion.tsx"
     },
+    "agerangeslider": {
+      "category": "organism",
+      "description": "Reusable slider component for selecting an age range, integrated with RHF.\nUses Shadcn UI Slider and RHF Controller.",
+      "status": "10th April",
+      "name": "AgeRangeSlider",
+      "filePath": "src/components/ui/slider-age-range.tsx"
+    },
     "alert": {
       "category": "molecule",
       "subcategory": "notification",
@@ -1034,6 +1155,13 @@
       "name": "AssetCard",
       "filePath": "src/components/ui/card-asset.tsx"
     },
+    "autosaveindicator": {
+      "category": "molecule",
+      "description": "Displays the status of an autosave operation.\nUses FontAwesome icons and accepts status props.",
+      "status": "10th April",
+      "name": "AutosaveIndicator",
+      "filePath": "src/components/ui/autosave-indicator.tsx"
+    },
     "avatar": {
       "category": "atom",
       "subcategory": "image",
@@ -1067,6 +1195,14 @@
       "name": "Button",
       "filePath": "src/components/ui/button.tsx"
     },
+    "buttoniconaction": {
+      "category": "atom",
+      "subcategory": "button",
+      "description": "An icon component that changes from a light to a solid icon on hover.",
+      "status": "10th April",
+      "name": "ButtonIconAction",
+      "filePath": "src/components/ui/button-icon-action.tsx"
+    },
     "calendar": {
       "category": "organism",
       "subcategory": "input",
@@ -1079,7 +1215,7 @@
       "category": "organism",
       "subcategory": "calendar",
       "description": "Displays upcoming campaign events in a calendar grid.",
-      "status": "10th April - Rewritten for clarity",
+      "status": "10th April",
       "name": "CalendarUpcoming",
       "filePath": "src/components/ui/calendar-upcoming.tsx"
     },
@@ -1148,6 +1284,13 @@
       "name": "DropdownMenu",
       "filePath": "src/components/ui/dropdown-menu.tsx"
     },
+    "fileuploader": {
+      "category": "organism",
+      "description": "Comprehensive, reusable file uploader component integrated with RHF and UploadThing.\nUses Shadcn UI components and provides progress/status feedback.",
+      "status": "10th April",
+      "name": "FileUploader",
+      "filePath": "src/components/ui/file-uploader.tsx"
+    },
     "form": {
       "category": "organism",
       "subcategory": "input",
@@ -1165,6 +1308,13 @@
       "name": "FunnelChart",
       "filePath": "src/components/ui/chart-funnel.tsx"
     },
+    "genderselector": {
+      "category": "organism",
+      "description": "Reusable gender selection component using checkboxes, integrated with RHF.\nUses Shadcn UI Checkbox and RHF Controller.",
+      "status": "10th April",
+      "name": "GenderSelector",
+      "filePath": "src/components/ui/selector-gender.tsx"
+    },
     "hovercard": {
       "category": "molecule",
       "subcategory": "overlay",
@@ -1172,6 +1322,13 @@
       "status": "10th April",
       "name": "HoverCard",
       "filePath": "src/components/ui/hover-card.tsx"
+    },
+    "influencercard": {
+      "category": "organism",
+      "description": "Displays information about a single social media influencer.\nUses Shadcn UI Card, Avatar, Icon.",
+      "status": "10th April",
+      "name": "InfluencerCard",
+      "filePath": "src/components/ui/card-influencer.tsx"
     },
     "input": {
       "category": "atom",
@@ -1202,11 +1359,18 @@
       "name": "Label",
       "filePath": "src/components/ui/label.tsx"
     },
+    "languageselector": {
+      "category": "organism",
+      "description": "Reusable language selection component using Command (multi/single select), integrated with RHF.\nUses Shadcn UI Popover, Command, Button and RHF Controller.",
+      "status": "10th April",
+      "name": "LanguageSelector",
+      "filePath": "src/components/ui/selector-language.tsx"
+    },
     "linechart": {
       "category": "organism",
       "subcategory": "visualization",
       "description": "Responsive line chart component based on Recharts with support for multiple data series.",
-      "status": "10th April\nIt handles date formatting on the X-axis and provides customizable tooltips and legends.",
+      "status": "10th April",
       "name": "LineChart",
       "filePath": "src/components/ui/chart-line.tsx"
     },
@@ -1297,6 +1461,13 @@
       "since": "2023-01-01",
       "name": "Progress",
       "filePath": "src/components/ui/progress.tsx"
+    },
+    "progressbarwizard": {
+      "category": "organism",
+      "description": "A fixed footer progress bar for multi-step wizards, providing navigation.\nUses Shadcn UI Button, Badge.",
+      "status": "10th April",
+      "name": "ProgressBarWizard",
+      "filePath": "src/components/ui/progress-bar-wizard.tsx"
     },
     "radarchart": {
       "category": "organism",
@@ -1473,5 +1644,9 @@
       "filePath": "src/components/ui/card-upcoming-campaign.tsx"
     }
   },
-  "allCategories": ["atom", "molecule", "organism"]
+  "allCategories": [
+    "atom",
+    "molecule",
+    "organism"
+  ]
 }

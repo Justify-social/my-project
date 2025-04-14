@@ -49,6 +49,7 @@ import { cn } from '@/lib/utils';
 import { AutosaveIndicator, AutosaveStatus } from "@/components/ui/autosave-indicator";
 import { InfluencerCard } from "@/components/ui/card-influencer";
 import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
+import { IconButtonAction } from '@/components/ui/button-icon-action'; // Import IconButtonAction
 
 // --- Data Display Components --- 
 
@@ -62,42 +63,41 @@ interface SummarySectionProps {
 
 const SummarySection: React.FC<SummarySectionProps> = ({ title, stepNumber, onEdit, children, isComplete }) => {
     return (
-        <AccordionItem value={`step-${stepNumber}`} className="border-b-0">
-            <AccordionTrigger className={cn(
-                "group",
-                "flex justify-between items-center w-full text-left text-lg font-semibold text-primary p-4 rounded-lg border mb-2 transition-colors hover:bg-muted/50",
-                isComplete ? "border-green-200 bg-green-50/50 hover:bg-green-50/80" : "border-border bg-card",
-                "no-underline hover:no-underline"
-            )}>
-                <div className="flex items-center">
-                    <Badge
-                        variant={isComplete ? "default" : "secondary"}
-                        className={cn(
-                            "mr-3 h-6 w-6 justify-center no-underline",
-                            isComplete && "bg-green-600 text-white"
-                        )}>{stepNumber}</Badge>
-                    <span className="no-underline group-hover:underline">{title}</span>
-                    {isComplete && <Icon iconId="faCircleCheckSolid" className="ml-2 h-4 w-4 text-green-600 flex-shrink-0 no-underline" />}
+        <AccordionItem value={`step-${stepNumber}`} className="group border rounded-lg mb-2 overflow-hidden">
+            <div className={cn(
+                "flex justify-between items-center w-full p-4 cursor-pointer hover:bg-accent/10",
+                isComplete ? "bg-green-50/50" : "bg-card",
+            )} onClick={() => {
+                // Toggle accordion state manually if needed, or rely on AccordionItem's internal state
+            }}>
+                <div className="flex flex-1 items-center text-left text-lg font-semibold text-primary p-0 mr-4">
+                    <div className="flex items-center">
+                        <Badge
+                            variant={isComplete ? "default" : "secondary"}
+                            className={cn(
+                                "mr-3 h-6 w-6 justify-center",
+                                isComplete && "bg-green-600 text-white"
+                            )}>{stepNumber}</Badge>
+                        <span>{title}</span>
+                        {isComplete && <Icon iconId="faCircleCheckSolid" className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
+                    </div>
                 </div>
-                <div className="flex items-center">
-                    <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onEdit(); } }}
-                        className={cn(
-                            'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
-                            'hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-                            'h-8 px-3',
-                            'mr-2 text-sm cursor-pointer no-underline'
-                        )}
-                    >
-                        <Icon iconId="faPenToSquareLight" className="mr-1.5 h-3.5 w-3.5" /> Edit
-                    </span>
+
+                <div className="flex items-center flex-shrink-0">
+                    <IconButtonAction
+                        iconBaseName="faPenToSquare"
+                        hoverColorClass="text-accent"
+                        ariaLabel={`Edit ${title}`}
+                        className="mr-2"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit();
+                        }}
+                    />
                 </div>
-            </AccordionTrigger>
-            <AccordionContent className="p-4 pt-0">
-                <div className="pl-10 mt-2">
+            </div>
+            <AccordionContent className="p-4 pt-0 border-t">
+                <div className="pl-[calc(1rem_+_1.5rem_+_0.75rem)] mt-2">
                     {children}
                 </div>
             </AccordionContent>
@@ -105,6 +105,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ title, stepNumber, onEd
     );
 };
 
+// Restore correct definition for DataItemProps
 interface DataItemProps {
     label: string;
     value?: string | number | string[] | null;
@@ -112,6 +113,7 @@ interface DataItemProps {
     className?: string;
 }
 
+// Restore correct definition for DataItem component
 const DataItem: React.FC<DataItemProps> = ({ label, value, children, className }) => {
     const displayValue = useMemo(() => {
         if (children) return children;
@@ -191,7 +193,7 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
 
 const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-        <DataItem label="Age Range" value={data.demographics?.ageRange?.join(' - ')} />
+        {/* <DataItem label="Age Range" value={data.demographics?.ageRange?.join(' - ')} /> */}
         <DataItem label="Genders" value={data.demographics?.genders} />
         <DataItem label="Languages" value={data.demographics?.languages} />
         <DataItem label="Interests" value={data.targeting?.interests} />
@@ -298,7 +300,7 @@ function Step5Content() {
             secondaryKPIs: draft.secondaryKPIs ?? [],
             features: draft.features ?? [],
             mainMessage: draft.messaging?.mainMessage ?? '',
-            hashtags: draft.messaging?.hashtags ?? '',
+            hashtags: Array.isArray(draft.messaging?.hashtags) ? draft.messaging.hashtags.join(' ') : (draft.messaging?.hashtags ?? ''),
             keyBenefits: draft.messaging?.keyBenefits ?? '',
             memorability: draft.expectedOutcomes?.memorability ?? '',
             purchaseIntent: draft.expectedOutcomes?.purchaseIntent ?? '',
@@ -306,8 +308,8 @@ function Step5Content() {
 
             // Audience - Map carefully to SubmissionPayloadSchema.audience
             audience: {
-                ageRangeMin: draft.demographics?.ageRange?.[0] ?? 18,
-                ageRangeMax: draft.demographics?.ageRange?.[1] ?? 65,
+                ageRangeMin: 18,
+                ageRangeMax: 65,
                 keywords: draft.targeting?.keywords ?? [],
                 interests: draft.targeting?.interests ?? [],
                 // Relational Data - Needs mapping based on API expectation

@@ -32,6 +32,9 @@ module.exports = {
 
   // Experimental features
   experimental: {
-    // Add any experimental features here if needed
+    // Enable Turbopack for faster builds (experimental). Remove or comment out this line if issues arise.
+    // turbopack: {
+    //   logLevel: 'error',
+    // },
   },
 };

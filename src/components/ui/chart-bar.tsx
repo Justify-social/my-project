@@ -132,13 +132,8 @@ export const BarChart: React.FC<BarChartProps> = ({
 
           <Tooltip
             formatter={tooltipFormatter}
-            contentStyle={{
-              fontSize: '12px',
-              backgroundColor: 'hsl(var(--background))', // Use theme background
-              border: '1px solid hsl(var(--border))', // Use theme border
-              borderRadius: '4px',
-              boxShadow: 'var(--shadow-sm)', // Use CSS variable for shadow consistent with Tailwind's shadow-sm
-            }}
+            contentStyle={{}}
+            wrapperStyle={{ backgroundColor: 'bg-background', color: 'text-foreground', borderRadius: 'rounded-md', boxShadow: 'shadow-md', padding: 'p-2', fontSize: 'text-xs' }}
           />
 
           {showLegend && (
@@ -146,7 +141,7 @@ export const BarChart: React.FC<BarChartProps> = ({
               verticalAlign="bottom"
               height={36}
               iconSize={20}
-              wrapperStyle={{ fontSize: '12px' }}
+              wrapperStyle={{ fontSize: 'text-xs', paddingTop: 'pt-2' }}
             />
           )}
 

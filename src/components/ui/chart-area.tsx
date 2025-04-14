@@ -117,11 +117,12 @@ export const AreaChart: React.FC<AreaChartProps> = ({
           <Tooltip
             formatter={tooltipFormatter}
             contentStyle={{
+              backgroundColor: 'hsl(var(--background))',
+              color: 'hsl(var(--foreground))',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-md)',
+              padding: '0.5rem',
               fontSize: '12px',
-              backgroundColor: 'hsl(var(--background))', // Use theme background
-              border: '1px solid hsl(var(--border))', // Use theme border
-              borderRadius: '4px',
-              boxShadow: 'var(--shadow-sm)', // Use CSS variable for shadow consistent with Tailwind's shadow-sm
             }}
           />
 
@@ -130,7 +131,7 @@ export const AreaChart: React.FC<AreaChartProps> = ({
               verticalAlign="bottom"
               height={36}
               iconSize={20}
-              wrapperStyle={{ fontSize: '12px' }}
+              wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
             />
           )}
 

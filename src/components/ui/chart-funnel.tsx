@@ -155,12 +155,12 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
           <Tooltip
             formatter={tooltipFormatter} // Use the (potentially default) formatter
             contentStyle={{
-              backgroundColor: 'hsl(var(--popover))',
-              borderColor: 'hsl(var(--border))',
-              color: 'hsl(var(--popover-foreground))',
+              backgroundColor: 'hsl(var(--background))',
+              color: 'hsl(var(--foreground))',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-md)',
+              padding: '0.5rem',
               fontSize: '12px',
-              borderRadius: 'var(--radius)',
-              boxShadow: 'hsl(var(--shadow))',
             }}
             cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
           />

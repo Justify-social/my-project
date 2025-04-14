@@ -2,8 +2,10 @@
  * @component Button
  * @category atom
  * @subcategory input
- * @description An interactive element triggering an action or navigation.
+ * @description An interactive element triggering an action or navigation. Can contain text and/or icons (passed as children).
+ * For dedicated icon-only action buttons with hover effects (e.g., light/solid swap), use the IconButtonAction component.
  * @status 10th April
+ * @see IconButtonAction
  */
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
@@ -39,7 +41,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

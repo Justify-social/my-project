@@ -16,7 +16,7 @@ export type { ShadcnIconProps } from './shadcn-adapter';
 /**
  * @deprecated Use ShadcnIcon from './shadcn-adapter' instead
  */
-export * from './shadcn';
+export * from './shadcn-adapter';
 
 /**
  * @deprecated Use IconAdapter or ShadcnIcon directly

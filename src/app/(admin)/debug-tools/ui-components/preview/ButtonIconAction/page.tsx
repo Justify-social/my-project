@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 
-import { Button } from '../../../../../../components/ui/button';
-
+// Keep statusStyles definition for potential future use or if referenced elsewhere implicitly
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
   beta: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -14,7 +13,8 @@ const statusStyles: Record<string, string> = {
   development: 'bg-blue-100 text-blue-800 border-blue-200',
 };
 
-export default function ButtonPreviewPage() {
+export default function ButtonIconActionPreviewPage() {
+  // Keep componentMeta definition for potential future use or if referenced elsewhere implicitly
   const componentMeta: {
     name: string;
     description: string;
@@ -25,16 +25,16 @@ export default function ButtonPreviewPage() {
     since: string;
     status?: string | null;
   } = {
-    name: 'Button',
-    description: 'An interactive element triggering an action or navigation.',
+    name: 'ButtonIconAction',
+    description: 'A specialized button displaying only an icon that changes state (e.g., light/solid) on hover.',
     category: 'atom',
-    subcategory: null,
-    renderType: 'server',
-    author: '',
-    since: '',
-    status: null,
+    subcategory: 'button',
+    renderType: 'client', // Assuming this is client due to useState
+    author: '', // Add author if known
+    since: '', // Add version/date if known
+    status: 'stable', // Update status if needed
   };
-  const examples: string[] = [];
+  const examples: string[] = []; // Keep if used by Code Snippets section, otherwise remove
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -50,6 +50,12 @@ export default function ButtonPreviewPage() {
             <span className="mx-2">/</span>
             <span className="capitalize">{componentMeta.category}</span>
           </li>
+          {componentMeta.subcategory && (
+            <li className="flex items-center">
+              <span className="mx-2">/</span>
+              <span className="capitalize">{componentMeta.subcategory}</span>
+            </li>
+          )}
           <li className="flex items-center">
             <span className="mx-2">/</span>
             <span className="font-medium text-primary">{componentMeta.name}</span>
@@ -85,61 +91,37 @@ export default function ButtonPreviewPage() {
         </div>
       </div>
 
-      {/* Examples Section (Rendering the actual component) */}
+      {/* Examples Section (Rendering ONLY the relevant block) */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
         <div className="space-y-6">
-          {/* Variants */}
+          {/* Icon Buttons Section - Kept */}
           <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Variants</h3>
+            <h3 className="text-lg font-medium mb-3">Icon Buttons (Actions)</h3>
             <div className="flex flex-wrap gap-4 items-center">
-              <Button variant="default">Default</Button>
-              <Button variant="secondary">Secondary</Button>
-              <Button variant="destructive">Destructive</Button>
-              <Button variant="outline">Outline</Button>
-              <Button variant="ghost">Ghost</Button>
-              <Button variant="link">Link</Button>
-            </div>
-          </div>
-
-          {/* Sizes */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Sizes</h3>
-            <div className="flex flex-wrap gap-4 items-center">
-              <Button size="sm">Small</Button>
-              <Button size="default">Default</Button>
-              <Button size="lg">Large</Button>
-            </div>
-          </div>
-
-          {/* Icons */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">With Icons (As Children)</h3>
-            <div className="flex flex-wrap gap-4 items-center">
-              <Button>
-                <Icon iconId="faCheckLight" className="mr-2" /> Left Icon
-              </Button>
-              <Button>
-                Right Icon <Icon iconId="faArrowRightLight" className="ml-2" />
-              </Button>
-              <Button variant="outline">
-                <Icon iconId="faFloppyDiskLight" className="mr-2" /> Save
-              </Button>
+              <IconButtonAction
+                iconBaseName="faEye"
+                hoverColorClass="text-accent"
+                ariaLabel="View"
+              />
+              <IconButtonAction
+                iconBaseName="faPenToSquare"
+                hoverColorClass="text-accent"
+                ariaLabel="Edit"
+              />
+              <IconButtonAction
+                iconBaseName="faCopy"
+                hoverColorClass="text-accent"
+                ariaLabel="Copy"
+              />
+              <IconButtonAction
+                iconBaseName="faTrashCan"
+                hoverColorClass="text-destructive"
+                ariaLabel="Delete"
+              />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Note: Icons are passed as children using the Icon component.
+              Note: Uses custom component for Light/Solid icon state on hover.
             </p>
-          </div>
-
-          {/* Disabled State */}
-          <div className="border border-divider rounded-lg p-6">
-            <h3 className="text-lg font-medium mb-3">Disabled State</h3>
-            <div className="flex flex-wrap gap-4 items-center">
-              <Button disabled>Disabled</Button>
-              <Button variant="secondary" disabled>
-                Disabled
-              </Button>
-            </div>
           </div>
         </div>
       </div>

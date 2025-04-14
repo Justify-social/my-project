@@ -182,7 +182,7 @@ const DraftCampaignDataBaseSchema = z.object({
   /** Secondary contact person for the campaign. */
   secondaryContact: ContactSchema.nullable().optional(),
   /** Additional contacts (if applicable). */
-  additionalContacts: z.array(ContactSchema).nullable().optional(), // Allow null
+  additionalContacts: z.array(ContactSchema).default([]), // Ensure always array, default empty
   /** Budget details for the campaign. */
   budget: BudgetSchema.nullable().optional(),
   /** List of influencers associated with the campaign (Key changed to match API). */
@@ -229,11 +229,11 @@ const DraftCampaignDataBaseSchema = z.object({
 
   // --- Step 4 Data ---
   /** List of creative assets uploaded for the campaign. */
-  assets: z.array(DraftAssetSchema).nullable().optional(), // Allow null
+  assets: z.array(DraftAssetSchema).default([]), // Ensure always array, default empty
   /** Creative guidelines or instructions. */
   guidelines: z.string().nullable().optional(), // Allow null
   /** Specific creative requirements (structure assumed, verify with Step 4 form). */
-  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).nullable().optional(), // Allow null
+  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]), // Ensure always array, default empty
   /** Additional notes for Step 4. */
   notes: z.string().nullable().optional(), // Allow null
   /** Flag indicating Step 4 completion. */
@@ -407,35 +407,37 @@ export type SubmissionPayloadData = z.infer<typeof SubmissionPayloadSchema>;
 //---------------------------------------------------------------------------
 
 /** Validation schema for Step 1: Basic Info. */
-export const Step1ValidationSchema = DraftCampaignDataBaseSchema.pick({
-  name: true,
-  businessGoal: true,
-  startDate: true,
-  endDate: true,
-  timeZone: true,
-  primaryContact: true,
-  secondaryContact: true,
-  budget: true, // Keep picking budget object
-  Influencer: true,
+// Refactored to define explicitly instead of using .pick()
+export const Step1ValidationSchema = z.object({
+  // Manually list fields from DraftCampaignDataBaseSchema needed for Step 1
+  name: DraftCampaignDataBaseSchema.shape.name,
+  businessGoal: DraftCampaignDataBaseSchema.shape.businessGoal,
+  startDate: DraftCampaignDataBaseSchema.shape.startDate,
+  endDate: DraftCampaignDataBaseSchema.shape.endDate,
+  timeZone: DraftCampaignDataBaseSchema.shape.timeZone,
+  primaryContact: DraftCampaignDataBaseSchema.shape.primaryContact,
+  secondaryContact: DraftCampaignDataBaseSchema.shape.secondaryContact,
+  additionalContacts: DraftCampaignDataBaseSchema.shape.additionalContacts, // This is z.array(ContactSchema).default([])
+  budget: DraftCampaignDataBaseSchema.shape.budget,
+  Influencer: DraftCampaignDataBaseSchema.shape.Influencer,
 }).extend({
-  // Override or add specific refinements for Step 1
-  // Ensure primary contact details are filled if object exists
+  // Apply original refinements from previous .extend()
   primaryContact: ContactSchema.refine(contact => contact && contact.firstName && contact.surname && contact.email, {
-    message: "Primary contact details must be complete", // Adjust message as needed
-    path: ['firstName'] // Attach error to a specific field if desired
+    message: "Primary contact details must be complete",
+    path: ['firstName']
   }).nullable().optional(),
-  // Example: Ensure at least one influencer is added if the array exists and is not empty
-  Influencer: InfluencerSchema.array().min(1, "Please add at least one influencer").optional(), // Maintain optionality
+  Influencer: InfluencerSchema.array().min(1, "Please add at least one influencer").optional(),
 }).refine(data => {
-  // Apply cross-field validation relevant ONLY to Step 1 fields *after* picking
+  // Apply original cross-field validation: budget
   if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
     return data.budget.socialMedia <= data.budget.total;
   }
   return true;
 }, {
   message: "Social media budget cannot exceed total budget",
-  path: ["budget", "socialMedia"], // Updated path
+  path: ["budget", "socialMedia"],
 }).refine(data => {
+  // Apply original cross-field validation: dates
   try {
     if (data.startDate && data.endDate) {
       return new Date(data.endDate) > new Date(data.startDate);
@@ -446,6 +448,7 @@ export const Step1ValidationSchema = DraftCampaignDataBaseSchema.pick({
   message: "End date must be after start date",
   path: ["endDate"],
 });
+
 /** TypeScript type for Step 1 form data. */
 export type Step1FormData = z.infer<typeof Step1ValidationSchema>;
 
@@ -492,21 +495,23 @@ export const Step3ValidationSchema = DraftCampaignDataBaseSchema.pick({
 export type Step3FormData = z.infer<typeof Step3ValidationSchema>;
 
 /** Validation schema for Step 4: Assets & Guidelines. */
-export const Step4ValidationSchema = DraftCampaignDataBaseSchema.pick({
-  assets: true,
-  guidelines: true,
-  requirements: true,
-  notes: true,
+// Refactored to define explicitly instead of using .pick()
+export const Step4ValidationSchema = z.object({
+  // Manually list fields from DraftCampaignDataBaseSchema needed for Step 4
+  assets: DraftCampaignDataBaseSchema.shape.assets, // This is z.array(DraftAssetSchema).default([])
+  guidelines: DraftCampaignDataBaseSchema.shape.guidelines,
+  requirements: DraftCampaignDataBaseSchema.shape.requirements, // This is z.array(...).default([])
+  notes: DraftCampaignDataBaseSchema.shape.notes,
 }).extend({
-  // We leave the field-level refinements simple here.
-  guidelines: z.string().optional(),
+  // Apply original refinements from previous .extend() and .refine()
+  guidelines: z.string().optional(), // Keep simple refinement
   assets: DraftAssetSchema.array().optional().refine(assets =>
     !assets || assets.every(asset => !asset.url || z.string().url().safeParse(asset.url).success), {
     message: "Invalid URL format in one of the assets",
     path: [0, 'url'] // Example path for first asset with bad URL
-  })
+  }) // Note: .default([]) is on the base schema, .optional() here might conflict? Let's keep optional for refinement.
 }).superRefine((data, ctx) => {
-  // Perform cross-field validation at the object level using superRefine
+  // Apply original cross-field validation
   if (data.assets && data.assets.length > 0 && !data.guidelines) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -515,6 +520,7 @@ export const Step4ValidationSchema = DraftCampaignDataBaseSchema.pick({
     });
   }
 });
+
 /** TypeScript type for Step 4 form data. */
 export type Step4FormData = z.infer<typeof Step4ValidationSchema>;
 

@@ -117,24 +117,8 @@ export default function InfluencerCard({ className }: { className?: string }) {
           <span className="font-semibold text-primary">
             {data.averageEngagement.toFixed(1)}%
           </span>
-          <div className="p-4 bg-white shadow rounded font-body">
-            {/* Header for testing purposes */}
-            <h2 data-testid="influencer-card-header" className="text-xl font-bold mb-2 font-heading">
-              Influencer Management
-            </h2>
-            {error && <p className="text-red-500 text-sm mb-2 font-body">{error}</p>}
-            <div className="flex items-center mb-1 font-body">
-              <span className="text-lg font-body">Total Influencers:</span>
-              <span className="ml-2 text-green-600 font-semibold font-body">
-                {data.totalInfluencers}
-              </span>
-            </div>
-            <div className="flex items-center font-body">
-              <span className="text-lg font-body">Avg Engagement:</span>
-              <span className="ml-2 text-blue-600 font-semibold font-body">
-                {data.averageEngagement}%
-              </span>
-            </div>
-          </div>
-          );
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

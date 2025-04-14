@@ -122,16 +122,18 @@ export function LineChart({
               formatter={(value: number) => [`${value}`, '']}
               labelFormatter={dateStr => formatDate(dateStr as string, dateFormat)}
               contentStyle={{
-                borderRadius: '6px',
                 backgroundColor: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))',
-                boxShadow: 'var(--shadow-sm)',
+                color: 'hsl(var(--foreground))',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-md)',
+                padding: '0.5rem',
+                fontSize: '12px',
               }}
             />
           )}
 
           {/* Legend */}
-          {legend && <Legend wrapperStyle={{ paddingTop: '10px' }} />}
+          {legend && <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />}
 
           {/* Zero reference line */}
           <ReferenceLine y={0} stroke="hsl(var(--border))" />

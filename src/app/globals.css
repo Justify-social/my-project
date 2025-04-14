@@ -91,7 +91,7 @@ svg:not(:host).svg-inline--fa {
     --secondary-foreground: 0 0% 100%;
     /* White */
 
-    --muted: 210 40% 96.1%;
+    --muted: 0 0% 96.1%;
     /* Light gray */
     --muted-foreground: 215 16% 47%;
     /* Medium gray */

@@ -81,7 +81,7 @@ export function LoadingSkeleton({
   return (
     <div
       className={cn('flex', count > 1 ? 'flex-col' : '', className)}
-      style={{ gap: count > 1 ? gap : undefined }}
+      style={{ gap: count > 1 ? gap : undefined, backgroundColor: 'hsl(var(--muted))' }}
       role="status"
       aria-label="Loading"
     >
@@ -214,7 +214,7 @@ export function WizardSkeleton({
       </div>
 
       {/* Step indicator - Use Progress component? Or keep simple? Keep simple for now */}
-      <Skeleton className="h-2 w-full rounded-full">
+      <Skeleton className="h-2 w-full rounded-full" style={{ width: `${(normalizedStep / 5) * 100}%`, backgroundColor: 'hsl(var(--muted))' }}>
         {/* Maybe indicate progress visually? Difficult with skeleton primitive */}
         {/* <div
           className="h-2 bg-primary rounded-full"

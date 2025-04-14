@@ -47,7 +47,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
   const currentCategory = searchParams.get('category');
 
   return (
-    <aside className="w-full h-full bg-[var(--muted-background)] border-r border flex flex-col">
+    <aside className="w-full h-full bg-muted border flex flex-col">
       {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {navItems.map(item => {
@@ -104,7 +104,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
       </nav>
 
       {/* Footer Area */}
-      <div className="p-2 mt-auto border-t border space-y-0.5">
+      <div className="p-2 mt-auto border-t space-y-0.5">
         {/* View Source Link - Apply standard styling */}
         <Link
           href="https://github.com/Justify-social/my-project"

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, useFormContext, SubmitHandler, FieldArrayWithId } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, useFormContext, SubmitHandler, FieldArrayWithId, FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
@@ -56,6 +56,7 @@ import { InfluencerCard } from "@/components/ui/card-influencer";
 import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { differenceInDays, isValid as isValidDate } from 'date-fns';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 
 // --- Formatting Helpers ---
 
@@ -116,14 +117,15 @@ interface InfluencerEntryProps {
     control: UseFormReturn<Step1FormData>['control'];
     errors: UseFormReturn<Step1FormData>['formState']['errors'];
     remove: (index: number) => void;
-    watch: UseFormReturn<Step1FormData>['watch'];
 }
 
-const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove, watch }) => {
+const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove }) => {
     const [isValidating, setIsValidating] = useState(false);
     const [validationData, setValidationData] = useState<InfluencerData | null>(null);
-    const platformValue = watch(`influencers.${index}.platform`);
-    const handleValue = watch(`influencers.${index}.handle`);
+
+    // Define state type to match the expected enum value from the field
+    const [currentPlatform, setCurrentPlatform] = useState<z.infer<typeof PlatformEnumBackend> | undefined>(undefined);
+    const [currentHandle, setCurrentHandle] = useState<string | undefined>(undefined);
 
     const triggerValidation = useCallback(async (platform: string | undefined, handle: string) => {
         if (!platform || !handle || handle.length < 3) {
@@ -150,78 +152,104 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
     const debouncedValidate = useCallback(debounce(triggerValidation, 800), [triggerValidation]);
 
     useEffect(() => {
-        debouncedValidate(platformValue || '', handleValue || '');
+        // Pass the platform value (which is the backend enum) directly
+        debouncedValidate(currentPlatform, currentHandle || '');
         return () => {
             debouncedValidate.cancel();
         };
-    }, [platformValue, handleValue, debouncedValidate]);
+    }, [currentPlatform, currentHandle, debouncedValidate]);
 
-    const influencerError = errors.influencers && errors.influencers[index as unknown as keyof typeof errors.influencers] ? ((errors.influencers[index as unknown as keyof typeof errors.influencers] as any)?.handle?.message || (errors.influencers[index as unknown as keyof typeof errors.influencers] as any)?.platform?.message) : undefined;
+    const influencerError = errors.Influencer && errors.Influencer[index as unknown as keyof typeof errors.Influencer] ? ((errors.Influencer[index as unknown as keyof typeof errors.Influencer] as any)?.handle?.message || (errors.Influencer[index as unknown as keyof typeof errors.Influencer] as any)?.platform?.message) : undefined;
 
     return (
         <Card className="mb-4 border-border bg-card/50 relative overflow-hidden">
             <CardContent className="p-4 space-y-4">
                 <div className="flex justify-end absolute top-2 right-2">
-                    <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} aria-label="Remove Influencer" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                        <Icon iconId="faTrashCanLight" className="h-4 w-4" />
-                    </Button>
+                    <IconButtonAction
+                        iconBaseName="faTrashCan"
+                        hoverColorClass="text-destructive"
+                        ariaLabel="Remove Influencer"
+                        className="h-7 w-7"
+                        onClick={() => remove(index)}
+                    />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <FormField
                         control={control}
-                        name={`influencers.${index}.platform`}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Platform *</FormLabel>
-                                <Select
-                                    onValueChange={(frontendValue) => {
-                                        try { field.onChange(PlatformSchema.parse(frontendValue)); }
-                                        catch (e) { field.onChange(undefined); }
-                                    }}
-                                    value={field.value ? platformToFrontend(field.value) : undefined}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {PlatformEnumFrontend.options.map((platform) => (<SelectItem key={platform} value={platform}>{platform}</SelectItem>))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage>{errors.influencers && (errors.influencers[index as unknown as keyof typeof errors.influencers] as any)?.platform?.message}</FormMessage>
-                            </FormItem>
-                        )}
+                        name={`Influencer.${index}.platform`}
+                        render={({ field }) => {
+                            // Update local state when field value changes
+                            useEffect(() => {
+                                // Type of field.value should match PlatformEnumBackend here
+                                setCurrentPlatform(field.value);
+                            }, [field.value]);
+
+                            return (
+                                <FormItem>
+                                    <FormLabel>Platform *</FormLabel>
+                                    <Select
+                                        onValueChange={(frontendValue) => {
+                                            try {
+                                                const backendValue = PlatformSchema.parse(frontendValue);
+                                                field.onChange(backendValue);
+                                            }
+                                            catch (e) {
+                                                field.onChange(undefined);
+                                            }
+                                        }}
+                                        value={field.value ? platformToFrontend(field.value) : undefined}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger><SelectValue placeholder="Select platform" /></SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {PlatformEnumFrontend.options.map((platform) => (<SelectItem key={platform} value={platform}>{platform}</SelectItem>))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage>{errors.Influencer && (errors.Influencer[index as unknown as keyof typeof errors.Influencer] as any)?.platform?.message}</FormMessage>
+                                </FormItem>
+                            );
+                        }}
                     />
                     <FormField
                         control={control}
-                        name={`influencers.${index}.handle`}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Handle / Username *</FormLabel>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Input placeholder="e.g., @username or channel_name" {...field} />
-                                        {isValidating && (
-                                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                                                <Icon iconId="faSpinnerThirdLight" className="h-4 w-4 text-muted-foreground animate-spin" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </FormControl>
-                                <FormMessage>{errors.influencers && (errors.influencers[index as unknown as keyof typeof errors.influencers] as any)?.handle?.message}</FormMessage>
-                                {!isValidating && validationData === null && handleValue && (handleValue as string).length >= 3 && (
-                                    <FormDescription className="text-destructive flex items-center text-xs pt-1">
-                                        <Icon iconId="faCircleXmarkLight" className="h-3 w-3 mr-1" />
-                                        Handle not found or failed validation.
-                                    </FormDescription>
-                                )}
-                            </FormItem>
-                        )}
+                        name={`Influencer.${index}.handle`}
+                        render={({ field }) => {
+                            // Update local state when field value changes
+                            useEffect(() => {
+                                // field.value for handle is string
+                                setCurrentHandle(field.value);
+                            }, [field.value]);
+
+                            return (
+                                <FormItem>
+                                    <FormLabel>Handle / Username *</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Input placeholder="e.g., @username or channel_name" {...field} />
+                                            {isValidating && (
+                                                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                                    <Icon iconId="faSpinnerThirdLight" className="h-4 w-4 text-muted-foreground animate-spin" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage>{errors.Influencer && (errors.Influencer[index as unknown as keyof typeof errors.Influencer] as any)?.handle?.message}</FormMessage>
+                                    {!isValidating && validationData === null && currentHandle && currentHandle.length >= 3 && (
+                                        <FormDescription className="text-destructive flex items-center text-xs pt-1">
+                                            <Icon iconId="faCircleXmarkLight" className="h-3 w-3 mr-1" />
+                                            Handle not found or failed validation.
+                                        </FormDescription>
+                                    )}
+                                </FormItem>
+                            );
+                        }}
                     />
                 </div>
-                {!isValidating && validationData && platformValue && (
+                {!isValidating && validationData && currentPlatform && (
                     <div className="mt-2">
                         <InfluencerCard
-                            platform={platformValue}
+                            platform={currentPlatform}
                             handle={validationData.handle}
                             displayName={validationData.displayName}
                             avatarUrl={validationData.avatarUrl}
@@ -433,10 +461,13 @@ function Step1Content() {
             primaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             secondaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             additionalContacts: [],
-            currency: CurrencyEnum.Values.USD,
-            totalBudget: '0',
-            socialMediaBudget: '0',
-            influencers: [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' }],
+            // Nest budget fields
+            budget: {
+                currency: CurrencyEnum.Values.USD,
+                total: 0, // Use number for default
+                socialMedia: 0, // Use number for default
+            },
+            Influencer: [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' }],
         },
         mode: 'onChange',
     });
@@ -485,12 +516,14 @@ function Step1Content() {
                             : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
                     }))
                     : [],
-                currency: (wizardState?.budget?.currency && CurrencyEnum.safeParse(wizardState.budget.currency).success
-                    ? wizardState.budget.currency
-                    : CurrencyEnum.Values.USD) as z.infer<typeof CurrencyEnum>,
-                totalBudget: wizardState?.budget?.total?.toString() || '0',
-                socialMediaBudget: wizardState?.budget?.socialMedia?.toString() || '0',
-                influencers: Array.isArray(wizardState?.Influencer) && wizardState.Influencer.length > 0
+                budget: {
+                    currency: (wizardState?.budget?.currency && CurrencyEnum.safeParse(wizardState.budget.currency).success
+                        ? wizardState.budget.currency
+                        : CurrencyEnum.Values.USD) as z.infer<typeof CurrencyEnum>,
+                    total: parseFloat(wizardState?.budget?.total?.toString() || '0') || 0,
+                    socialMedia: parseFloat(wizardState?.budget?.socialMedia?.toString() || '0') || 0,
+                },
+                Influencer: Array.isArray(wizardState?.Influencer) && wizardState.Influencer.length > 0
                     ? wizardState.Influencer.map((inf: any) => ({
                         id: inf?.id || `new-${Date.now()}`,
                         platform: (inf?.platform && PlatformEnumBackend.safeParse(inf.platform).success
@@ -510,19 +543,20 @@ function Step1Content() {
     // Remove explicit typing and @ts-ignore, let RHF infer
     const { fields, append: appendInfluencer, remove: removeInfluencer } = useFieldArray({
         control: form.control,
-        // @ts-ignore - Suppress persistent TS error for useFieldArray name inference
-        name: "influencers",
+        // Apply specific type assertion
+        name: "Influencer" as "Influencer",
     });
 
-    // Add useFieldArray hook for additionalContacts - remove explicit generic type
+    // Add useFieldArray hook for additionalContacts
     const { fields: contactFields, append: appendContact, remove: removeContact } = useFieldArray({
         control: form.control,
-        name: "additionalContacts",
+        // Apply specific type assertion
+        name: 'additionalContacts' as 'additionalContacts',
     });
 
     // Watch relevant fields for side effects
     const watchedValues = form.watch();
-    const watchedCurrency = form.watch('currency'); // Watch specifically for currency changes
+    const watchedCurrency = form.watch('budget.currency'); // Watch specifically for currency changes
 
     // Watch dates for duration calculation
     const watchedStartDate = form.watch('startDate');
@@ -580,12 +614,12 @@ function Step1Content() {
             secondaryContact: currentData.secondaryContact,
             additionalContacts: Array.isArray(currentData.additionalContacts) ? currentData.additionalContacts : [],
             budget: {
-                total: parseFloat(String(currentData.totalBudget || '0')) || 0,
-                socialMedia: parseFloat(String(currentData.socialMediaBudget || '0')) || 0,
-                currency: currentData.currency as z.infer<typeof CurrencyEnum>,
+                total: parseFloat(String(currentData.budget?.total || '0')) || 0,
+                socialMedia: parseFloat(String(currentData.budget?.socialMedia || '0')) || 0,
+                currency: currentData.budget?.currency as z.infer<typeof CurrencyEnum>,
             },
-            Influencer: Array.isArray(currentData.influencers)
-                ? currentData.influencers.filter((inf): inf is ContextInfluencer => !!inf?.platform && !!inf?.handle)
+            Influencer: Array.isArray(currentData.Influencer)
+                ? currentData.Influencer.filter((inf): inf is ContextInfluencer => !!inf?.platform && !!inf?.handle)
                 : [],
             step1Complete: form.formState.isValid,
             currentStep: 1,
@@ -636,12 +670,12 @@ function Step1Content() {
             secondaryContact: data.secondaryContact,
             additionalContacts: Array.isArray(data.additionalContacts) ? data.additionalContacts : [],
             budget: {
-                total: parseFloat(String(data.totalBudget || '0')) || 0,
-                socialMedia: parseFloat(String(data.socialMediaBudget || '0')) || 0,
-                currency: data.currency as z.infer<typeof CurrencyEnum>,
+                total: parseFloat(String(data.budget?.total || '0')) || 0,
+                socialMedia: parseFloat(String(data.budget?.socialMedia || '0')) || 0,
+                currency: data.budget?.currency as z.infer<typeof CurrencyEnum>,
             },
-            Influencer: Array.isArray(data.influencers)
-                ? data.influencers.filter((inf): inf is ContextInfluencer => !!inf?.id && !!inf?.platform && !!inf?.handle)
+            Influencer: Array.isArray(data.Influencer)
+                ? data.Influencer.filter((inf): inf is ContextInfluencer => !!inf?.id && !!inf?.platform && !!inf?.handle)
                 : [],
             step1Complete: true,
             currentStep: 2,
@@ -822,16 +856,13 @@ function Step1Content() {
                                     <div key={item.id} className="p-4 border rounded-md bg-card/50 relative space-y-4">
                                         {/* Optional: Header per contact entry */}
                                         {/* <h5 className="text-sm font-semibold text-muted-foreground">Additional Contact {index + 1}</h5> */}
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
+                                        <IconButtonAction
+                                            iconBaseName="faTrashCan"
+                                            hoverColorClass="text-destructive"
+                                            ariaLabel={`Remove Additional Contact ${index + 1}`}
+                                            className="absolute top-2 right-2 h-7 w-7"
                                             onClick={() => removeContact(index)}
-                                            aria-label={`Remove Additional Contact ${index + 1}`}
-                                            className="absolute top-2 right-2 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                        >
-                                            <Icon iconId="faTrashCanLight" className="h-4 w-4" />
-                                        </Button>
+                                        />
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                                             <FormField control={form.control} name={`additionalContacts.${index}.firstName`} render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Alex" {...field} /></FormControl><FormMessage /></FormItem>)} />
                                             <FormField control={form.control} name={`additionalContacts.${index}.surname`} render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Chen" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -857,8 +888,13 @@ function Step1Content() {
                                 variant="outline"
                                 size="sm"
                                 className="mt-4"
-                                // Pass an empty object to append, relying on form defaultValues
-                                onClick={() => appendContact({})}
+                                // Provide default structure matching ContactSchema
+                                onClick={() => appendContact({
+                                    firstName: '',
+                                    surname: '',
+                                    email: '',
+                                    position: PositionEnum.Values.Director // Ensure this matches your schema/defaults
+                                })}
                             >
                                 <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Additional Contact
                             </Button>
@@ -871,7 +907,7 @@ function Step1Content() {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <FormField control={form.control} name="currency" render={({ field }) => (
+                                <FormField control={form.control} name="budget.currency" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Currency *</FormLabel>
                                         <Select onValueChange={field.onChange} value={(field.value as string | undefined) || CurrencyEnum.Values.USD}>
@@ -885,40 +921,34 @@ function Step1Content() {
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="totalBudget" render={({ field }) => (
+                                <FormField control={form.control} name="budget.total" render={({ field }) => (
                                     <FormItem><FormLabel>Total Budget *</FormLabel>
                                         <FormControl><div className="relative">
-                                            {/* Add pl-7 for padding, update value/onChange for formatting */}
                                             <Input
                                                 type="text"
                                                 placeholder="e.g., 5,000"
                                                 {...field}
-                                                value={formatCurrencyInput(field.value as string)}
-                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))} // Parse value before saving
-                                                className="pl-7" // Add left padding
+                                                value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
+                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
+                                                className="pl-7"
                                             />
-                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("currency") === 'GBP' ? '£' : form.getValues("currency") === 'EUR' ? '€' : '$'}</span>
+                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("budget.currency") === 'GBP' ? '£' : form.getValues("budget.currency") === 'EUR' ? '€' : '$'}</span>
                                         </div></FormControl>
-                                        {/* Optional: Change description if formatting is applied */}
-                                        {/* <FormDescription>Enter budget amount</FormDescription> */}
                                         <FormMessage />
                                     </FormItem>)} />
-                                <FormField control={form.control} name="socialMediaBudget" render={({ field }) => (
+                                <FormField control={form.control} name="budget.socialMedia" render={({ field }) => (
                                     <FormItem><FormLabel>Social Media Budget *</FormLabel>
                                         <FormControl><div className="relative">
-                                            {/* Add pl-7 for padding, update value/onChange for formatting */}
                                             <Input
                                                 type="text"
                                                 placeholder="e.g., 1,000"
                                                 {...field}
-                                                value={formatCurrencyInput(field.value as string)}
-                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))} // Parse value before saving
-                                                className="pl-7" // Add left padding
+                                                value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
+                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
+                                                className="pl-7"
                                             />
-                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("currency") === 'GBP' ? '£' : form.getValues("currency") === 'EUR' ? '€' : '$'}</span>
+                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("budget.currency") === 'GBP' ? '£' : form.getValues("budget.currency") === 'EUR' ? '€' : '$'}</span>
                                         </div></FormControl>
-                                        {/* Optional: Change description if formatting is applied */}
-                                        {/* <FormDescription>Enter budget amount</FormDescription> */}
                                         <FormMessage />
                                     </FormItem>)} />
                             </div>
@@ -933,18 +963,17 @@ function Step1Content() {
                                             control={form.control}
                                             errors={form.formState.errors}
                                             remove={removeInfluencer}
-                                            watch={form.watch}
                                         />
                                     ))}
                                 </div>
                                 <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => appendInfluencer({ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' })} >
                                     <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Influencer
                                 </Button>
-                                {form.formState.errors.influencers?.root && (
-                                    <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.influencers.root.message}</p>
+                                {form.formState.errors.Influencer?.root && (
+                                    <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.Influencer.root.message}</p>
                                 )}
-                                {form.formState.errors.influencers && !form.formState.errors.influencers.root && typeof form.formState.errors.influencers.message === 'string' && (
-                                    <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.influencers.message}</p>
+                                {form.formState.errors.Influencer && !form.formState.errors.Influencer.root && typeof form.formState.errors.Influencer.message === 'string' && (
+                                    <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.Influencer.message}</p>
                                 )}
                             </div>
                         </CardContent>

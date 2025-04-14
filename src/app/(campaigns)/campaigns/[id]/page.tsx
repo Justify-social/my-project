@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Analytics } from '@/lib/analytics/analytics';
 import ErrorFallback from '@/components/features/core/error-handling/ErrorFallback';
 import Skeleton from '@/components/ui/loading-skeleton';
@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui';
 import { Button } from '@/components/ui';
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 
 // Define types locally instead of importing
 // These will be used to define our component props and state
@@ -1396,8 +1397,62 @@ const ErrorStatusBadge = ({ message }: { message: string }) => {
   );
 };
 
+// Define emptyData for error cases
+const emptyData: CampaignDetail = {
+  id: '',
+  campaignName: 'Error',
+  description: 'Data could not be loaded',
+  startDate: '',
+  endDate: '',
+  timeZone: 'UTC',
+  currency: Currency.USD,
+  totalBudget: 0,
+  socialMediaBudget: 0,
+  platform: Platform.Instagram,
+  influencerHandle: '',
+  website: '',
+  primaryContact: {
+    firstName: 'N/A',
+    surname: 'N/A',
+    email: 'N/A',
+    position: Position.Other,
+    phone: 'N/A',
+  },
+  brandName: 'N/A',
+  category: 'N/A',
+  product: 'N/A',
+  targetMarket: 'N/A',
+  submissionStatus: 'error',
+  primaryKPI: '',
+  secondaryKPIs: [],
+  mainMessage: 'N/A',
+  hashtags: 'N/A',
+  memorability: 'N/A',
+  keyBenefits: 'N/A',
+  expectedAchievements: 'N/A',
+  purchaseIntent: 'N/A',
+  brandPerception: 'N/A',
+  features: [],
+  audience: {
+    demographics: {
+      ageRange: [],
+      gender: [],
+      education: [],
+      income: [],
+      interests: [],
+      locations: [],
+      languages: [],
+    },
+  },
+  creativeAssets: [],
+  creativeRequirements: [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
 export default function CampaignDetail() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
+  const id = params?.id as string;
   const router = useRouter();
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -1693,7 +1748,7 @@ export default function CampaignDetail() {
 
   // Wrap the main content in an ErrorBoundary using the 'fallback' prop
   return (
-    <ErrorBoundary
+    <ReactErrorBoundary
       fallback={
         <ErrorFallback
           error={error ? new Error(error) : new Error('Unknown error')}
@@ -1861,3 +1916,15 @@ export default function CampaignDetail() {
                         : `${campaign?.primaryContact?.firstName || ''} ${campaign?.primaryContact?.surname || ''}`}
                     </h4>
                     <p className="text-[var(--secondary-color)] text-sm font-body">
+                      {campaign?.primaryContact?.email || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </DataCard>
+          </div>
+        </div>
+      </div>
+    </ReactErrorBoundary>
+  );
+}

@@ -56,7 +56,7 @@
     "postinstall": "prisma generate",
     "generate:campaign": "prisma generate --schema=./prisma/schemas/campaign-wizard.prisma",
     "migrate:campaign": "prisma migrate dev --schema=./prisma/schemas/campaign-wizard.prisma --name init_campaign_wizard",
-    "prepare": "husky",
+    "prepare": "husky && husky install",
     "index-campaigns": "node scripts/campaign/index-campaigns.js"
   },
   "dependencies": {
@@ -118,7 +118,7 @@
     "framer-motion": "11.1.5",
     "globby": "^14.1.0",
     "lodash": "4.17.21",
-    "next": "15.2.0",
+    "next": "^15.3.0",
     "next-themes": "^0.4.6",
     "node-fetch": "2.7.0",
     "rc-slider": "^11.1.8",
@@ -180,6 +180,7 @@
     "cypress-file-upload": "^5.0.8",
     "eslint": "9.23.0",
     "eslint-config-next": "^15.2.4",
+    "eslint-plugin-react-refresh": "^0.4.19",
     "fs-extra": "^11.3.0",
     "glob": "^10.4.5",
     "husky": "^8.0.3",
@@ -199,6 +200,7 @@
     "tsconfig-paths": "4.2.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
+    "typescript-eslint": "^8.30.0",
     "uuid": "^11.1.0",
     "webpack": "^5.98.0",
     "webpack-bundle-analyzer": "4.10.2",

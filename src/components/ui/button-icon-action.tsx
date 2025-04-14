@@ -2,7 +2,9 @@
  * @component ButtonIconAction
  * @category atom
  * @subcategory button
- * @description An icon component that changes from a light to a solid icon on hover.
+ * @description A specialized button component displaying only an icon that changes state (e.g., light to solid variant) on hover.
+ * Ideal for action icons in tables or lists. Leverages the base Button component with specific styling and behavior.
+ * Use this instead of the standard Button component when an icon-only button with this hover effect is required.
  * @status 10th April
  */
 
@@ -37,7 +39,7 @@ export function IconButtonAction({
     <Button
       variant="ghost"
       size="icon"
-      className={cn('group hover:bg-transparent', className)}
+      className={cn('hover:bg-transparent', className)}
       aria-label={ariaLabel}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

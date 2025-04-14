@@ -209,7 +209,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 h-full z-40 flex flex-col bg-[#f5f5f5] transition-all w-64 md:translate-x-0', // Reverted bg-muted
+        'fixed top-0 left-0 h-full z-40 flex flex-col bg-muted transition-all w-64 md:translate-x-0', // Fixed width, no reference to isCollapsed
         className
       )}
       data-testid="sidebar"

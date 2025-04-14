@@ -161,12 +161,10 @@ export const PieChart: React.FC<PieChartProps> = ({
           <Tooltip
             formatter={tooltipFormatter}
             contentStyle={{
-              backgroundColor: 'hsl(var(--popover))',
-              borderColor: 'hsl(var(--border))',
-              color: 'hsl(var(--popover-foreground))',
-              fontSize: '12px',
-              borderRadius: 'var(--radius)',
-              boxShadow: 'hsl(var(--shadow))',
+              backgroundColor: 'hsl(var(--background))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '4px',
+              boxShadow: 'var(--shadow-sm)',
             }}
             cursor={{
               stroke: 'hsl(var(--border))',
@@ -181,9 +179,8 @@ export const PieChart: React.FC<PieChartProps> = ({
               align="center"
               iconSize={10} // Smaller legend icons
               wrapperStyle={{
-                fontSize: '11px',
-                paddingTop: '20px', // More space for labels
-                color: 'hsl(var(--muted-foreground))',
+                fontSize: '12px',
+                paddingTop: '10px',
               }}
             />
           )}
