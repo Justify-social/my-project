@@ -26,10 +26,13 @@ const formatNumber = (num: number | undefined | null): string => {
 };
 
 // Mapping platforms to FontAwesome icons (adjust IDs as needed)
+// Update IDs to match brands-icon-registry.json (e.g., add 'brands' prefix)
 const platformIcons: Record<z.infer<typeof PlatformEnumBackend>, string> = {
-    INSTAGRAM: "faInstagram", // Assuming Brand icons: fab fa-instagram
-    TIKTOK: "faTiktok",      // fab fa-tiktok
-    YOUTUBE: "faYoutube",     // fab fa-youtube
+    INSTAGRAM: "brandsInstagram",
+    TIKTOK: "brandsTiktok",
+    YOUTUBE: "brandsYoutube",
+    // TODO: Add mappings for other platforms if they exist in PlatformEnumBackend
+    // e.g., FACEBOOK: "brandsFacebook", X: "brandsXTwitter", LINKEDIN: "brandsLinkedin"
 };
 
 export interface InfluencerCardProps {

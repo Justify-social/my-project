@@ -22,6 +22,7 @@ interface DatePickerProps {
   value?: Date | null; // Make value optional for uncontrolled state
   onChange?: (date: Date | undefined) => void; // Change signature slightly for DayPicker
   placeholder?: string;
+  displayFormat?: string;
   // minDate?: Date; // Pass disabled logic directly to Calendar
   disabled?: boolean | ((date: Date) => boolean); // Use Calendar's disabled prop
   className?: string; // Allow styling the trigger button
@@ -32,6 +33,7 @@ export function DatePicker({
   value,
   onChange,
   placeholder = 'Pick a date',
+  displayFormat = 'PPP',
   disabled,
   className,
 }: DatePickerProps) {
@@ -69,7 +71,7 @@ export function DatePicker({
           disabled={typeof disabled === 'boolean' ? disabled : false}
         >
           <Icon iconId="faCalendarDaysLight" className="mr-2 h-4 w-4" />
-          {date ? format(date, 'PPP') : <span>{placeholder}</span>}
+          {date ? format(date, displayFormat) : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">

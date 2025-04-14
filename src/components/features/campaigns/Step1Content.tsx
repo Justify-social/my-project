@@ -19,7 +19,7 @@ import {
     InfluencerSchema,
 } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { LoadingSkeleton, WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,29 @@ import debounce from 'lodash/debounce';
 import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
 import { InfluencerCard } from "@/components/ui/card-influencer";
 import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { differenceInDays, isValid as isValidDate } from 'date-fns';
+
+// --- Formatting Helpers ---
+
+/** Formats a number string into a currency-like string with commas. */
+const formatCurrencyInput = (value: string | number | undefined | null): string => {
+    if (value === null || value === undefined) return '';
+    const stringValue = String(value).replace(/[^\d]/g, ''); // Remove non-digits
+    if (stringValue === '') return '';
+    try {
+        // Use Intl.NumberFormat for robust formatting
+        return new Intl.NumberFormat('en-US').format(parseInt(stringValue, 10));
+    } catch (e) {
+        console.error("Error formatting number:", e);
+        return stringValue; // Fallback to unformatted number string on error
+    }
+};
+
+/** Parses a formatted currency string back into a raw number string. */
+const parseCurrencyInput = (formattedValue: string): string => {
+    return formattedValue.replace(/[^\d]/g, ''); // Remove non-digits (commas, etc.)
+};
 
 // --- Placeholder Influencer Validation Logic & Types ---
 interface InfluencerData {
@@ -336,6 +359,53 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<{
     }
 }
 
+// --- Timezone Helper ---
+// Function to get a list of timezone options (Identifier and formatted name)
+const getTimezoneOptions = () => {
+    if (typeof Intl === 'undefined' || !Intl.supportedValuesOf) {
+        // Fallback for environments without Intl.supportedValuesOf (e.g., older Node)
+        return [{ value: 'UTC', label: 'UTC (Coordinated Universal Time)' }];
+    }
+    const timezones = Intl.supportedValuesOf('timeZone');
+    return timezones.map(tz => {
+        let displayName = tz.replace(/_/g, ' '); // Basic formatting
+        try {
+            // Attempt to get a more descriptive name (might vary by locale/browser)
+            const longName = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'long' })
+                .formatToParts().find(part => part.type === 'timeZoneName')?.value;
+            if (longName && longName !== tz) {
+                // Try to extract abbreviation (less reliable)
+                const shortName = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
+                    .formatToParts().find(part => part.type === 'timeZoneName')?.value;
+                // Prioritize Abbreviation (Long Name) format if possible
+                displayName = shortName && shortName !== longName ? `${shortName} (${longName})` : longName;
+                // Fallback if longName is the same as tz identifier
+                if (displayName === tz) displayName = tz.replace(/_/g, ' ');
+            }
+        } catch (e) {
+            console.warn(`Could not format timezone name for ${tz}:`, e);
+        }
+        return { value: tz, label: displayName };
+    }).sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
+};
+
+// Generate the timezone options once
+const TIMEZONE_OPTIONS = getTimezoneOptions();
+
+// --- Duration Helper ---
+const calculateDuration = (start: Date | string | undefined | null, end: Date | string | undefined | null): string => {
+    if (!start || !end) return '...';
+    const startDate = start instanceof Date ? start : new Date(start);
+    const endDate = end instanceof Date ? end : new Date(end);
+
+    if (!isValidDate(startDate) || !isValidDate(endDate) || endDate < startDate) {
+        return '...';
+    }
+
+    const days = differenceInDays(endDate, startDate) + 1; // Inclusive
+    return `${days} day${days !== 1 ? 's' : ''}`;
+};
+
 function Step1Content() {
     const { wizardState, updateWizardState, isLoading, saveProgress, lastSaved, autosaveEnabled, stepsConfig } = useWizard();
     const router = useRouter();
@@ -444,9 +514,23 @@ function Step1Content() {
         name: "influencers",
     });
 
+    // Add useFieldArray hook for additionalContacts - remove explicit generic type
+    const { fields: contactFields, append: appendContact, remove: removeContact } = useFieldArray({
+        control: form.control,
+        name: "additionalContacts",
+    });
+
     // Watch relevant fields for side effects
     const watchedValues = form.watch();
     const watchedCurrency = form.watch('currency'); // Watch specifically for currency changes
+
+    // Watch dates for duration calculation
+    const watchedStartDate = form.watch('startDate');
+    const watchedEndDate = form.watch('endDate');
+    const campaignDuration = useMemo(() => calculateDuration(watchedStartDate, watchedEndDate), [watchedStartDate, watchedEndDate]);
+
+    // Watch timezone field
+    const watchedTimezone = form.watch('timeZone');
 
     // Effect to fetch exchange rates when currency changes
     useEffect(() => {
@@ -578,7 +662,7 @@ function Step1Content() {
     };
 
     if (isLoading && !wizardState) {
-        return <LoadingSkeleton />;
+        return <WizardSkeleton step={1} />;
     }
 
     const getAutosaveStatus = () => {
@@ -612,16 +696,95 @@ function Step1Content() {
                             <CardDescription>Enter the core details for your campaign.</CardDescription>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Campaign Name *</FormLabel><FormControl><Input placeholder="e.g., Summer Sale Launch" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name="businessGoal" render={({ field }) => (<FormItem><FormLabel>Business Goal</FormLabel><FormControl><Textarea placeholder="What is the main objective?" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                            <div className="md:col-span-2">
-                                <FormLabel>Campaign Dates *</FormLabel>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                                    <FormField control={form.control} name="startDate" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel className="text-sm text-muted-foreground">Start Date</FormLabel><DatePicker value={field.value ? new Date(field.value) : undefined} onChange={(date: any) => field.onChange(date?.toISOString().split('T')[0])} /><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="endDate" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel className="text-sm text-muted-foreground">End Date</FormLabel><DatePicker value={field.value ? new Date(field.value) : undefined} onChange={(date: any) => field.onChange(date?.toISOString().split('T')[0])} /><FormMessage /></FormItem>)} />
+                            {/* Campaign Name & Business Goal still take full width initially, then split on md */}
+                            <FormField control={form.control} name="name" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Campaign Name *</FormLabel><FormControl><Input placeholder="e.g., Summer Sale Launch" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            <FormField control={form.control} name="businessGoal" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Business Goal</FormLabel><FormControl><Textarea placeholder="What is the main objective?" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+
+                            {/* Campaign Duration Section (Column 1) */}
+                            <div className="md:col-span-1 space-y-2"> {/* Container for the first column */}
+                                <FormLabel>Campaign Duration *</FormLabel>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* Start Date Field */}
+                                    <FormField
+                                        control={form.control}
+                                        name="startDate"
+                                        render={({ field }) => (
+                                            // Add relative positioning context for the absolute label
+                                            <FormItem className="flex flex-col relative">
+                                                <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">Start Date</FormLabel>
+                                                <DatePicker
+                                                    value={field.value ? new Date(field.value) : undefined}
+                                                    onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
+                                                    displayFormat="dd/MM/yyyy"
+                                                    className="w-full pt-3" // Increased padding-top slightly
+                                                    placeholder="Select Start Date"
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    {/* End Date Field */}
+                                    <FormField
+                                        control={form.control}
+                                        name="endDate"
+                                        render={({ field }) => (
+                                            // Add relative positioning context for the absolute label
+                                            <FormItem className="flex flex-col relative">
+                                                <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">End Date</FormLabel>
+                                                <DatePicker
+                                                    value={field.value ? new Date(field.value) : undefined}
+                                                    onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
+                                                    displayFormat="dd/MM/yyyy"
+                                                    className="w-full pt-3" // Increased padding-top slightly
+                                                    placeholder="Select End Date"
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
+                                {/* Campaign Duration Display (inside the first column div)*/}
+                                <Alert variant="default" className="mt-4">
+                                    <AlertDescription className="flex items-center text-sm">
+                                        <Icon iconId="faCircleInfoLight" className="h-4 w-4 mr-2 flex-shrink-0" />
+                                        <span>Campaign Duration: {campaignDuration}</span>
+                                    </AlertDescription>
+                                </Alert>
                             </div>
-                            <FormField control={form.control} name="timeZone" render={({ field }) => (<FormItem><FormLabel>Timezone</FormLabel><FormControl><Input placeholder="e.g., Europe/London" {...field} value={field.value ?? ''} /></FormControl><FormDescription>Campaign reports will use this timezone.</FormDescription><FormMessage /></FormItem>)} />
+
+                            {/* Timezone Section (Column 2) */}
+                            <div className="md:col-span-1"> {/* Container for the second column */}
+                                <FormField
+                                    control={form.control}
+                                    name="timeZone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Time Zone *</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value || ''}>
+                                                <FormControl>
+                                                    <SelectTrigger className="w-full">
+                                                        <div className="flex items-center">
+                                                            <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                            <SelectValue placeholder="Select timezone...">
+                                                                {/* Display formatted label of selected timezone */}
+                                                                {field.value ? (TIMEZONE_OPTIONS.find(opt => opt.value === field.value)?.label || field.value) : 'Select timezone...'}
+                                                            </SelectValue>
+                                                        </div>
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {TIMEZONE_OPTIONS.map(option => (
+                                                        <SelectItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -648,6 +811,57 @@ function Step1Content() {
                                     <FormField control={form.control} name="secondaryContact.position" render={({ field }) => (<FormItem><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}><FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl><SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                                 </div>
                             </div>
+
+                            {/* Additional Contacts Section */}
+                            <div className="space-y-4 mt-6"> {/* Added margin-top */}
+                                {/* Render header only if there are contacts or potential to add */}
+                                {(contactFields.length > 0) && (
+                                    <h4 className="text-md font-semibold mb-3 text-foreground">Additional Contacts</h4>
+                                )}
+                                {contactFields.map((item, index) => (
+                                    <div key={item.id} className="p-4 border rounded-md bg-card/50 relative space-y-4">
+                                        {/* Optional: Header per contact entry */}
+                                        {/* <h5 className="text-sm font-semibold text-muted-foreground">Additional Contact {index + 1}</h5> */}
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeContact(index)}
+                                            aria-label={`Remove Additional Contact ${index + 1}`}
+                                            className="absolute top-2 right-2 h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                        >
+                                            <Icon iconId="faTrashCanLight" className="h-4 w-4" />
+                                        </Button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                            <FormField control={form.control} name={`additionalContacts.${index}.firstName`} render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Alex" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                            <FormField control={form.control} name={`additionalContacts.${index}.surname`} render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Chen" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                            <FormField control={form.control} name={`additionalContacts.${index}.email`} render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="alex.chen@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                            <FormField control={form.control} name={`additionalContacts.${index}.position`} render={({ field }) => (
+                                                <FormItem><FormLabel>Position</FormLabel>
+                                                    {/* Revert value prop to use default enum */}
+                                                    <Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}>
+                                                        <FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl>
+                                                        <SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>)}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Add Additional Contact Button */}
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-4"
+                                // Pass an empty object to append, relying on form defaultValues
+                                onClick={() => appendContact({})}
+                            >
+                                <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Additional Contact
+                            </Button>
                         </CardContent>
                     </Card>
                     <Card>
@@ -671,8 +885,42 @@ function Step1Content() {
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="totalBudget" render={({ field }) => (<FormItem><FormLabel>Total Budget *</FormLabel><FormControl><div className="relative"><Input type="text" placeholder="e.g., 5000" {...field} value={String(field.value ?? '')} /><span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("currency") === 'GBP' ? '£' : form.getValues("currency") === 'EUR' ? '€' : '$'}</span></div></FormControl><FormDescription>Enter numbers only</FormDescription><FormMessage /></FormItem>)} />
-                                <FormField control={form.control} name="socialMediaBudget" render={({ field }) => (<FormItem><FormLabel>Social Media Budget *</FormLabel><FormControl><div className="relative"><Input type="text" placeholder="e.g., 1000" {...field} value={String(field.value ?? '')} /><span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("currency") === 'GBP' ? '£' : form.getValues("currency") === 'EUR' ? '€' : '$'}</span></div></FormControl><FormDescription>Enter numbers only</FormDescription><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name="totalBudget" render={({ field }) => (
+                                    <FormItem><FormLabel>Total Budget *</FormLabel>
+                                        <FormControl><div className="relative">
+                                            {/* Add pl-7 for padding, update value/onChange for formatting */}
+                                            <Input
+                                                type="text"
+                                                placeholder="e.g., 5,000"
+                                                {...field}
+                                                value={formatCurrencyInput(field.value as string)}
+                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))} // Parse value before saving
+                                                className="pl-7" // Add left padding
+                                            />
+                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("currency") === 'GBP' ? '£' : form.getValues("currency") === 'EUR' ? '€' : '$'}</span>
+                                        </div></FormControl>
+                                        {/* Optional: Change description if formatting is applied */}
+                                        {/* <FormDescription>Enter budget amount</FormDescription> */}
+                                        <FormMessage />
+                                    </FormItem>)} />
+                                <FormField control={form.control} name="socialMediaBudget" render={({ field }) => (
+                                    <FormItem><FormLabel>Social Media Budget *</FormLabel>
+                                        <FormControl><div className="relative">
+                                            {/* Add pl-7 for padding, update value/onChange for formatting */}
+                                            <Input
+                                                type="text"
+                                                placeholder="e.g., 1,000"
+                                                {...field}
+                                                value={formatCurrencyInput(field.value as string)}
+                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))} // Parse value before saving
+                                                className="pl-7" // Add left padding
+                                            />
+                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("currency") === 'GBP' ? '£' : form.getValues("currency") === 'EUR' ? '€' : '$'}</span>
+                                        </div></FormControl>
+                                        {/* Optional: Change description if formatting is applied */}
+                                        {/* <FormDescription>Enter budget amount</FormDescription> */}
+                                        <FormMessage />
+                                    </FormItem>)} />
                             </div>
                             <div className="mt-4">
                                 <FormLabel className="text-md font-semibold">Influencer(s) *</FormLabel>
