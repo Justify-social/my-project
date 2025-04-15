@@ -302,11 +302,6 @@ function Step4Content() {
     };
     // Combined Save & Next handler
     const onSubmitAndNavigate = async () => {
-        const isValid = await form.trigger();
-        if (!isValid) {
-            toast.error("Please fix the errors before proceeding.");
-            return;
-        }
         const data = form.getValues();
         const payload: Partial<DraftCampaignData> = {
             assets: data.assets,
@@ -316,17 +311,34 @@ function Step4Content() {
             step4Complete: true,
             currentStep: 5,
         };
+        // Update the centralized wizard state (SSOT)
         wizard.updateWizardState(payload);
-        const saved = await wizard.saveProgress(payload);
-        if (saved) {
-            form.reset(data, { keepValues: true, keepDirty: false });
+        try {
+            // Attempt to save progress, but don't block navigation if it fails
+            const saved = await wizard.saveProgress(payload);
+            if (saved) {
+                form.reset(data, { keepValues: true, keepDirty: false });
+                console.log("Progress saved successfully, navigating to Step 5.");
+            } else {
+                console.error("Failed to save progress, but proceeding with navigation to maintain user flow.");
+                toast("Progress not saved, but proceeding to next step. Changes may not persist.", { icon: '⚠️' });
+            }
+            // Navigate to Step 5 regardless of save success, as state is updated locally in WizardContext
+            if (wizard.campaignId) {
+                router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
+            } else {
+                console.error("Navigation failed: Campaign ID not found.");
+                toast.error("Could not navigate: campaign ID not found.");
+            }
+        } catch (error) {
+            console.error("Error during save and navigation:", error);
+            toast.error("An error occurred while saving progress.");
+            // Fallback navigation in case of error, ensuring user can proceed
             if (wizard.campaignId) {
                 router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
             } else {
                 toast.error("Could not navigate: campaign ID not found.");
             }
-        } else {
-            toast.error("Failed to save progress before navigating.");
         }
     };
 
@@ -352,7 +364,7 @@ function Step4Content() {
                 onStepClick={handleStepClick}
                 onBack={handleBack}
                 onNext={onSubmitAndNavigate}
-                isNextDisabled={!form.formState.isValid}
+                isNextDisabled={form.watch('assets')?.length === 0}
                 isNextLoading={form.formState.isSubmitting || wizard.isLoading}
                 getCurrentFormData={form.getValues}
             />
@@ -373,6 +385,7 @@ function Step4Content() {
                                 onUploadComplete={handleAssetUploadComplete}
                                 onUploadError={handleUploadError}
                                 accept={{ "image/*": [], "video/*": [] }} // Example accept prop
+                                sizeLimitText="up to 100MB each"
                             />
                             {/* Display uploaded assets using AssetCard */}
                             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

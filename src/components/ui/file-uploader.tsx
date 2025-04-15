@@ -59,6 +59,8 @@ interface FileUploaderProps<TFieldValues extends FieldValues = FieldValues> {
     maxSizeMB?: number;
     /** Custom accepted file types (passed to react-dropzone). Example: `{ 'image/*': [], 'video/mp4': ['.mp4'] }` */
     accept?: Accept;
+    /** Text to display regarding file size limits */
+    sizeLimitText?: string;
     /** Additional CSS classes for the container */
     className?: string;
     /** Style for the dropzone container */
@@ -77,6 +79,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
         maxFiles = 1,
         maxSizeMB = 4,
         accept,
+        sizeLimitText = `up to ${maxSizeMB}MB each`,
         className,
         style
     }: FileUploaderProps<TFieldValues>
@@ -156,7 +159,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
         }
     }, [localFiles, isUploading, maxFiles, maxSizeMB]);
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
         onDrop,
         accept: acceptedFileTypes,
         maxSize: maxSizeMB * 1024 * 1024,
@@ -188,6 +191,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
                     <FormControl>
                         <div
                             {...getRootProps()}
+                            onClick={() => fileInputRef.current?.click()}
                             className={cn(
                                 "relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
                                 isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/20",
@@ -199,7 +203,7 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
                             aria-invalid={!!fieldState.error || !!errorState}
                             aria-describedby={errorState ? `${name}-dropzone-error` : undefined}
                         >
-                            <input {...getInputProps()} ref={fileInputRef} />
+                            <input {...getInputProps()} ref={fileInputRef} style={{ display: 'none' }} />
 
                             {/* Content based on state */}
                             {isUploading ? (
@@ -228,9 +232,11 @@ export function FileUploader<TFieldValues extends FieldValues = FieldValues>(
                             ) : (
                                 <div className="text-center">
                                     <Icon iconId="faUploadLight" className="h-8 w-8 text-muted-foreground mb-3" />
-                                    <p className="text-sm font-medium">Drag & drop or click to select</p>
+                                    <p className="text-sm font-semibold text-muted-foreground">
+                                        Click to select files or drag & drop
+                                    </p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                        {maxFiles > 1 ? `Max ${maxFiles} files, ` : ""}up to {maxSizeMB}MB each
+                                        {maxFiles > 1 ? `Max ${maxFiles} files, ` : ""}{sizeLimitText}
                                     </p>
                                 </div>
                             )}

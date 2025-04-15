@@ -335,16 +335,16 @@ function Step3Content() {
                                             />
                                         </FormControl>
                                         <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
-                                            {(field.value as unknown as string[])?.map((location: string) => (
-                                                <Badge key={location} variant="secondary" className="pl-2 pr-1 text-sm">
-                                                    {location}
+                                            {(field.value as unknown as { city: string }[])?.map((location: { city: string }) => (
+                                                <Badge key={location.city} variant="secondary" className="pl-2 pr-1 text-sm">
+                                                    {location.city}
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="icon"
                                                         className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                                                        onClick={() => handleRemoveLocation(location)}
-                                                        aria-label={`Remove location ${location}`}
+                                                        onClick={() => handleRemoveLocation(location.city)}
+                                                        aria-label={`Remove location ${location.city}`}
                                                     >
                                                         <Icon iconId="faXmarkLight" className="h-3 w-3" />
                                                     </Button>

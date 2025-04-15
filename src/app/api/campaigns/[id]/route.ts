@@ -278,27 +278,72 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       console.log('Campaign has no assets array or assets are not in array format');
     }
 
-    // Transform the campaign data for frontend consumption
-    // console.log('[API GET /api/campaigns/[id]] Transforming enums...'); // Log before enum transform
-    // let transformedCampaign;
-    // try {
-    //   transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
-    //   console.log('[API GET /api/campaigns/[id]] Enum transformation successful.'); // Log success
-    // } catch (transformError) {
-    //   console.error('[API GET /api/campaigns/[id]] Enum transformation failed:', transformError);
-    //   // Log the data that caused the failure
-    //   console.error(
-    //     '[API GET /api/campaigns/[id]] Data causing transform failure:',
-    //     JSON.stringify(campaign, null, 2)
-    //   );
-    //   throw transformError; // Re-throw to be caught by outer handler
-    // }
-    // console.log('[API GET /api/campaigns/[id]] Enum transformation complete.'); // Log after enum transform
+    // Normalize the campaign data to match frontend schema expectations
+    console.log('[API GET /api/campaigns/[id]] Normalizing data for frontend schema compatibility...');
+    const normalizedCampaign = {
+      ...campaign,
+      // Transform locations if it's an array of strings to array of objects
+      locations: 'locations' in campaign && Array.isArray(campaign.locations) && campaign.locations.length > 0 && typeof campaign.locations[0] === 'string'
+        ? campaign.locations.map(loc => ({ city: loc }))
+        : ('locations' in campaign ? campaign.locations : []),
+      // Ensure budget is in the correct format
+      budget: 'budget' in campaign && campaign.budget && typeof campaign.budget === 'object' ? {
+        currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
+        total: 'total' in campaign.budget ? campaign.budget.total : 0,
+        socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0
+      } : { currency: 'GBP', total: 0, socialMedia: 0 },
+      // Normalize contacts if they exist
+      primaryContact: 'primaryContact' in campaign && campaign.primaryContact && typeof campaign.primaryContact === 'object' ? {
+        firstName: 'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
+        surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
+        email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
+        position: 'position' in campaign.primaryContact ? campaign.primaryContact.position : ''
+      } : null,
+      secondaryContact: 'secondaryContact' in campaign && campaign.secondaryContact && typeof campaign.secondaryContact === 'object' ? {
+        firstName: 'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
+        surname: 'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
+        email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
+        position: 'position' in campaign.secondaryContact ? campaign.secondaryContact.position : ''
+      } : null,
+      // Ensure additionalContacts is always an array
+      additionalContacts: 'additionalContacts' in campaign && Array.isArray(campaign.additionalContacts) ? campaign.additionalContacts : [],
+      // Normalize assets if they exist
+      assets: 'assets' in campaign && Array.isArray(campaign.assets) ? campaign.assets.map(asset => {
+        if (asset && typeof asset === 'object') {
+          return {
+            id: 'id' in asset ? asset.id : '',
+            name: 'name' in asset ? asset.name : '',
+            type: 'type' in asset ? asset.type : 'image',
+            url: 'url' in asset ? asset.url : '',
+            fileName: 'fileName' in asset ? asset.fileName : '',
+            fileSize: 'fileSize' in asset ? asset.fileSize : 0,
+            description: 'description' in asset ? asset.description : '',
+            temp: 'temp' in asset ? asset.temp : false
+          };
+        }
+        return {
+          id: '',
+          name: '',
+          type: 'image',
+          url: '',
+          fileName: '',
+          fileSize: 0,
+          description: '',
+          temp: false
+        };
+      }) : [],
+      // Normalize influencers if they exist
+      Influencer: 'Influencer' in campaign && Array.isArray(campaign.Influencer) ? campaign.Influencer.map(inf => ({
+        id: 'id' in inf ? inf.id : '',
+        platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
+        handle: 'handle' in inf ? inf.handle : '',
+        platformId: 'platformId' in inf ? inf.platformId : ''
+      })) : []
+    };
 
     // Add draft status to the response
     const formattedCampaign = {
-      // ...transformedCampaign, // Use the original campaign data instead
-      ...campaign, // Use the original campaign data
+      ...normalizedCampaign,
       isDraft: !isSubmittedCampaign,
     };
 

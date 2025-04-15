@@ -215,7 +215,7 @@ export function ProgressBarWizard({
                     data-cy="wizard-next-button"
                 >
                     {isNextLoading ? (
-                        <Icon iconId="faSpinnerThirdLight" className="animate-spin mr-1.5 h-4 w-4" />
+                        <Icon iconId="faCircleNotchLight" className="animate-spin mr-1.5 h-4 w-4" />
                     ) : currentStep < totalSteps ? (
                         <Icon iconId="faArrowRightLight" className="h-4 w-4 mr-1.5" />
                     ) : (
