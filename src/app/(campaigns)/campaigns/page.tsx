@@ -814,7 +814,7 @@ const ClientCampaignList: React.FC = () => {
             <Icon
               iconId="faMagnifyingGlassLight"
               size="sm"
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+              className="absolute left-3 inset-y-0 my-auto text-gray-500 pointer-events-none h-4 w-4"
             />
             <Input
               type="text"
