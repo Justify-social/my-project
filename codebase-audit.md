@@ -96,7 +96,7 @@ Several dependencies, such as `axios` (1.8.4) and `lodash` (4.17.21), are known 
 **Theoretical Concern**: Security vulnerabilities in dependencies represent attack vectors that can compromise the entire system. From a cryptographic and security theory perspective, outdated libraries can expose the application to known exploits, violating the principle of defense-in-depth.
 
 #### 5.2 Authentication and Authorization
-The use of `@auth0/nextjs-auth0` indicates a robust authentication system, but the implementation details need scrutiny to ensure no security gaps exist in session management or token handling.
+The use of `@clerk/nextjs` indicates a robust authentication system, but the implementation details need scrutiny to ensure no security gaps exist in session management or token handling.
 
 **Theoretical Concern**: Improper handling of authentication tokens or sessions can lead to unauthorized access or privilege escalation. From a formal security model perspective, any flaw in this area violates the confidentiality and integrity guarantees essential for a secure system.
 
@@ -232,7 +232,7 @@ To elevate the codebase rating from 6.5/10 to 9/10, the following tasks address 
   - Schedule monthly dependency scans in the CI/CD pipeline.
   - Priority: High | Impact: Mitigates known security risks.
 - **Task 5.2: Audit Authentication Implementation**
-  - Conduct a security review of `@auth0/nextjs-auth0` implementation, focusing on session management, token storage, and refresh mechanisms.
+  - Conduct a security review of `@clerk/nextjs` implementation, focusing on session management, token storage, and refresh mechanisms.
   - Implement additional security headers and CSRF protection if not already present.
   - Priority: High | Impact: Ensures confidentiality and integrity of user sessions.
 

@@ -996,149 +996,6 @@ export async function verifyStripeApi(): Promise<ApiVerificationResult> {
 }
 
 /**
- * Verify the Auth0 API
- * This function tests the Auth0 API used for authentication
- */
-export async function verifyAuth0Api(): Promise<ApiVerificationResult> {
-  const apiName = 'Auth0 API';
-  const domain =
-    process.env.AUTH0_ISSUER_BASE_URL?.replace('https://', '') ||
-    'dev-8r7jiixso74f3ef1.us.auth0.com';
-  const endpoint = `${process.env.AUTH0_ISSUER_BASE_URL || 'https://dev-8r7jiixso74f3ef1.us.auth0.com'}/.well-known/openid-configuration`;
-
-  try {
-    console.info(`Testing ${apiName}`);
-
-    // First check if the host is reachable at all to rule out connectivity issues
-    const hostCheck = await isHostReachable(domain);
-
-    if (!hostCheck.reachable) {
-      console.error(`${apiName} host is unreachable`);
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        error: {
-          type: ApiErrorType.NETWORK_ERROR,
-          message: `Cannot connect to the API host. The service may be down or blocked by network policies.`,
-          details: { hostname: domain },
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Check if API keys exist in environment variables
-    const hasSecret = process.env.AUTH0_SECRET !== undefined;
-    const hasBaseUrl = process.env.AUTH0_BASE_URL !== undefined;
-    const hasIssuerBaseUrl = process.env.AUTH0_ISSUER_BASE_URL !== undefined;
-    const hasClientId = process.env.AUTH0_CLIENT_ID !== undefined;
-    const hasClientSecret = process.env.AUTH0_CLIENT_SECRET !== undefined;
-
-    if (!hasSecret || !hasBaseUrl || !hasIssuerBaseUrl || !hasClientId || !hasClientSecret) {
-      console.warn(`${apiName} verification warning: Missing configuration variables`);
-
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        latency: hostCheck.latency,
-        error: {
-          type: ApiErrorType.AUTHENTICATION_ERROR,
-          message: 'Missing Auth0 configuration variables. Check your environment variables.',
-          details: null,
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Attempt to fetch the OIDC configuration
-    try {
-      const startTime = Date.now();
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        signal: controller.signal,
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-
-      clearTimeout(timeoutId);
-      const latency = Date.now() - startTime;
-
-      if (response.ok) {
-        const data = await response.json();
-
-        return {
-          success: true,
-          apiName,
-          endpoint,
-          latency,
-          data: {
-            issuer: data.issuer,
-            authorizationEndpoint: data.authorization_endpoint,
-            tokenEndpoint: data.token_endpoint,
-            userInfoEndpoint: data.userinfo_endpoint,
-            configComplete:
-              hasSecret && hasBaseUrl && hasIssuerBaseUrl && hasClientId && hasClientSecret,
-          },
-        };
-      } else {
-        return {
-          success: false,
-          apiName,
-          endpoint,
-          latency,
-          error: {
-            type: ApiErrorType.SERVER_ERROR,
-            message: `Failed to fetch Auth0 configuration: ${response.status} ${response.statusText}`,
-            details: null,
-            isRetryable: true,
-          },
-        };
-      }
-    } catch (fetchError) {
-      // This might be a CORS error, so we'll return a success with basic info
-      console.warn(
-        `${apiName} API call failed, likely due to CORS. Using host check result instead.`
-      );
-
-      return {
-        success: true,
-        apiName,
-        endpoint,
-        latency: hostCheck.latency,
-        data: {
-          status: 'Auth0 host is reachable',
-          configComplete:
-            hasSecret && hasBaseUrl && hasIssuerBaseUrl && hasClientId && hasClientSecret,
-          note: 'Due to CORS restrictions, the complete API testing can only be done server-side. The host is reachable, which indicates the service is likely operational.',
-        },
-      };
-    }
-  } catch (error) {
-    // Handle unexpected errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-    console.error(`${apiName} verification failed with unexpected error:`, errorMessage);
-
-    return {
-      success: false,
-      apiName,
-      endpoint,
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: errorMessage,
-        details: error,
-        isRetryable: false,
-      },
-    };
-  }
-}
-
-/**
  * Verify the Uploadthing API
  * This function tests the Uploadthing API used for file uploads
  */
@@ -1517,7 +1374,6 @@ export async function verifyAllApis(): Promise<ApiVerificationResult[]> {
     verifyCintExchangeApi(),
     verifyGiphyApi(),
     verifyStripeApi(),
-    verifyAuth0Api(),
     verifyUploadthingApi(),
     verifyDatabaseConnection(),
   ]);
@@ -1535,7 +1391,6 @@ export async function verifyAllApis(): Promise<ApiVerificationResult[]> {
         'Cint Exchange API',
         'GIPHY API',
         'Stripe API',
-        'Auth0 API',
         'Uploadthing API',
         'Database Connection',
       ];
@@ -1561,7 +1416,6 @@ export default {
   verifyCintExchangeApi,
   verifyGiphyApi,
   verifyStripeApi,
-  verifyAuth0Api,
   verifyUploadthingApi,
   verifyDatabaseConnection,
   verifyAllApis,

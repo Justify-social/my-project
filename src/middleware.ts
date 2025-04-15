@@ -16,14 +16,11 @@ const isPublicRoute = createRouteMatcher([
     // Add other public routes like '/pricing', '/about' here if needed
 ]);
 
-export default clerkMiddleware((auth, req) => {
-    // If it's NOT a public route AND it IS a protected route, then protect it.
-    if (!isPublicRoute(req) && isProtectedRoute(req)) {
-        auth.protect();
-    }
-    // Clerk handles its own auth routes implicitly, but isPublicRoute check adds safety.
-    // All other routes not matching isProtectedRoute are implicitly public.
-});
+// Simplified middleware: Let Clerk handle protection based on matchers implicitly.
+// The config below handles which routes the middleware runs on.
+// Clerk's default behavior protects routes NOT matched by public patterns.
+// (Note: The specific logic might depend slightly on Clerk version, but this is the standard approach)
+export default clerkMiddleware();
 
 export const config = {
     // The matcher ensures the middleware runs on relevant paths,

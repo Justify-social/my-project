@@ -7,7 +7,7 @@ import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
 import { extractRouterConfig } from 'uploadthing/server';
 import { ourFileRouter } from '@/app/api/uploadthing/core';
 import { Suspense } from 'react';
-import { connection } from 'next/server';
+// import { connection } from 'next/server'; // Removed deprecated import
 // Import IconContextProvider for consistent icon behavior
 // import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import
 import { SidebarProvider } from '@/providers/SidebarProvider';
@@ -37,7 +37,7 @@ export const metadata = {
 
 // SSR component for UploadThing
 async function UTSSR() {
-  await connection();
+  // await connection(); // Removed usage of deprecated connection
   return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
 }
 

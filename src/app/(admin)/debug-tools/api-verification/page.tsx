@@ -9,7 +9,6 @@ import {
   verifyCintExchangeApi,
   verifyGiphyApi,
   verifyStripeApi,
-  verifyAuth0Api,
   verifyUploadthingApi,
   verifyDatabaseConnection,
   verifyAllApis,
@@ -67,7 +66,6 @@ export default function ApiVerificationPage() {
     giphy: null,
     cint: null,
     stripe: null,
-    auth0: null,
     uploadthing: null,
     database: null,
   });
@@ -85,8 +83,6 @@ export default function ApiVerificationPage() {
     cint: 'Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.',
     stripe:
       'Payment processing platform for subscription and one-time payments. Powers the billing system for premium features.',
-    auth0:
-      'Authentication and user management platform. Handles user sign-up, login, and profile management.',
     uploadthing:
       'File upload service for handling media uploads. Used for storing and managing user-generated content.',
     database:
@@ -119,9 +115,6 @@ export default function ApiVerificationPage() {
           break;
         case 'stripe':
           result = await verifyStripeApi();
-          break;
-        case 'auth0':
-          result = await verifyAuth0Api();
           break;
         case 'uploadthing':
           result = await verifyUploadthingApi();
@@ -157,7 +150,6 @@ export default function ApiVerificationPage() {
       const giphyResult = await verifyGiphyApi();
       const cintResult = await verifyCintExchangeApi();
       const stripeResult = await verifyStripeApi();
-      const auth0Result = await verifyAuth0Api();
       const uploadthingResult = await verifyUploadthingApi();
       const databaseResult = await verifyDatabaseConnection();
 
@@ -168,7 +160,6 @@ export default function ApiVerificationPage() {
         giphyResult,
         cintResult,
         stripeResult,
-        auth0Result,
         uploadthingResult,
         databaseResult,
       ];
@@ -183,7 +174,6 @@ export default function ApiVerificationPage() {
         giphy: new Date(),
         cint: new Date(),
         stripe: new Date(),
-        auth0: new Date(),
         uploadthing: new Date(),
         database: new Date(),
       }));
@@ -415,24 +405,6 @@ export default function ApiVerificationPage() {
 
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
               <div className="flex justify-between items-start font-body">
-                <h3 className="font-medium text-gray-900 font-heading">Auth0 API</h3>
-                {renderApiBadge(
-                  'Auth0 API',
-                  lastTested.auth0,
-                  results.some(r => r.apiName.includes('Auth0'))
-                )}
-              </div>
-              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.auth0}</p>
-              <div className="mt-2 text-xs text-gray-500 font-body">
-                Last tested:{' '}
-                <span className="font-medium font-body">
-                  {formatTimestamp(lastTested.auth0 || null)}
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm font-body">
-              <div className="flex justify-between items-start font-body">
                 <h3 className="font-medium text-gray-900 font-heading">Uploadthing API</h3>
                 {renderApiBadge(
                   'Uploadthing API',
@@ -481,8 +453,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('geolocation')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'geolocation'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -499,8 +471,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('exchange')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'exchange'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -517,8 +489,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('phyllo')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'phyllo'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -535,8 +507,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('giphy')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'giphy'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -553,8 +525,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('cint')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'cint'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -571,8 +543,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('stripe')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'stripe'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -587,28 +559,10 @@ export default function ApiVerificationPage() {
               </button>
 
               <button
-                onClick={() => testApi('auth0')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'auth0'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
-                disabled={isLoading}
-              >
-                {isLoading && selectedApi === 'auth0' ? (
-                  <div className="flex items-center justify-center font-body">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
-                    <span className="font-body">Testing...</span>
-                  </div>
-                ) : (
-                  'Auth0 API'
-                )}
-              </button>
-
-              <button
                 onClick={() => testApi('uploadthing')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'uploadthing'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -625,8 +579,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={() => testApi('database')}
                 className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'database'
-                    ? 'bg-accent-color text-white border-accent-color'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                  ? 'bg-accent-color text-white border-accent-color'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
                   }`}
                 disabled={isLoading}
               >
@@ -643,8 +597,8 @@ export default function ApiVerificationPage() {
               <button
                 onClick={testAllApis}
                 className={`px-4 py-3 rounded-md border font-body font-bold transition-colors ${selectedApi === 'all'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white'
                   }`}
                 disabled={isLoading}
               >
