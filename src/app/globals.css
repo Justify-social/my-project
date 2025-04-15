@@ -375,3 +375,30 @@ main {
     animation: accordion-up 0.2s ease-out;
   }
 }
+
+/* Custom utility for text-accent to enforce Deep Sky Blue */
+.text-accent {
+  color: hsl(var(--accent)) !important;
+  /* Ensures the accent color is applied */
+  color: #00BFFF !important;
+  /* Fallback to explicit Deep Sky Blue */
+}
+
+/* Custom badge styles for campaign statuses */
+.badge-draft {
+  background-color: hsl(var(--warning)) !important;
+  /* Orange for Draft */
+  color: hsl(var(--warning-foreground)) !important;
+}
+
+.badge-active {
+  background-color: hsl(var(--success)) !important;
+  /* Green for Active */
+  color: hsl(var(--success-foreground)) !important;
+}
+
+.badge-ended {
+  background-color: hsl(var(--accent)) !important;
+  /* Accent Blue for Ended */
+  color: hsl(var(--accent-foreground)) !important;
+}
