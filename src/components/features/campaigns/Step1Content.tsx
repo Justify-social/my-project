@@ -754,7 +754,7 @@ function Step1Content() {
         updateWizardState(payload); // Update state first
 
         // Ensure save completes before navigating
-        const saved = await saveProgress(); // Await saveProgress from context
+        const saved = await saveProgress(payload); // Await saveProgress from context
 
         if (saved) {
             console.log("Save successful, navigating to Step 2.");
