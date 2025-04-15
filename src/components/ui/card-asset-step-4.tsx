@@ -210,9 +210,9 @@ export function AssetCardStep4({
 
   // Ensure field names are defined correctly in scope
   const nameFieldName = `assets.${assetIndex}.name`;
-  const justificationFieldName = `assets.${assetIndex}.justification`;
+  const rationaleFieldName = `assets.${assetIndex}.rationale`;
   const budgetFieldName = `assets.${assetIndex}.budget`;
-  const influencerIdsFieldName = `assets.${assetIndex}.influencerIds`;
+  const associatedInfluencerIdsFieldName = `assets.${assetIndex}.associatedInfluencerIds`;
 
   const assetData = {
     name,
@@ -289,20 +289,10 @@ export function AssetCardStep4({
           <p className="mb-2 text-muted-foreground line-clamp-2 text-xs flex-grow">{description}</p>
         )}
 
-        <div className="mt-auto pt-2 space-y-2">
-          {(influencerHandle || description || budget !== undefined) && <Separator />}
-          {budget !== undefined && budget !== null && (
-            <div className="flex justify-end items-center text-foreground">
-              <Icon iconId="faDollarSignLight" className="h-3 w-3 mr-1 text-muted-foreground" />
-              <span className="font-medium text-xs">{formatCurrencyInput(budget)}</span>
-            </div>
-          )}
-        </div>
-
         {/* Influencer Association - Using Shadcn Combobox pattern */}
         <FormField
           control={control}
-          name={influencerIdsFieldName}
+          name={associatedInfluencerIdsFieldName}
           render={({ field }) => {
             const selectedInfluencerIds = field.value || [];
             // Find the full option objects for selected IDs
@@ -314,11 +304,14 @@ export function AssetCardStep4({
               const newValue = selectedInfluencerIds.includes(influencerId)
                 ? selectedInfluencerIds.filter((id: string) => id !== influencerId)
                 : [...selectedInfluencerIds, influencerId];
+              console.log(`AssetCardStep4[${assetIndex}] - Updating ${associatedInfluencerIdsFieldName} to:`, newValue);
               field.onChange(newValue);
             };
 
             const handleRemove = (influencerId: string) => {
-              field.onChange(selectedInfluencerIds.filter((id: string) => id !== influencerId));
+              const newValue = selectedInfluencerIds.filter((id: string) => id !== influencerId);
+              console.log(`AssetCardStep4[${assetIndex}] - Updating ${associatedInfluencerIdsFieldName} to:`, newValue);
+              field.onChange(newValue);
             };
 
             return (
@@ -404,7 +397,7 @@ export function AssetCardStep4({
         {/* Justification */}
         <FormField
           control={control}
-          name={justificationFieldName}
+          name={rationaleFieldName}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs text-muted-foreground">Why this content?</FormLabel>
@@ -415,6 +408,10 @@ export function AssetCardStep4({
                   placeholder="Explain the purpose or strategy..."
                   rows={2}
                   className="text-xs resize-none" // Added resize-none
+                  onChange={e => {
+                    console.log(`AssetCardStep4[${assetIndex}] - Updating ${rationaleFieldName} to:`, e.target.value);
+                    field.onChange(e.target.value);
+                  }}
                 />
               </FormControl>
               <FormMessage className="text-xs" />
@@ -439,7 +436,9 @@ export function AssetCardStep4({
                       value={formatCurrencyInput(field.value)}
                       onChange={e => {
                         const parsedValue = parseCurrencyInput(e.target.value);
-                        field.onChange(parsedValue === '' ? undefined : parseFloat(parsedValue));
+                        const numericValue = parsedValue === '' ? undefined : parseFloat(parsedValue);
+                        console.log(`AssetCardStep4[${assetIndex}] - Updating ${budgetFieldName} to:`, numericValue);
+                        field.onChange(numericValue);
                       }}
                       placeholder="0"
                       className="text-xs pl-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"

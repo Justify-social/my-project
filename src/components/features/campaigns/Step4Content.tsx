@@ -194,16 +194,20 @@ function Step4Content() {
         mode: 'onChange',
         defaultValues: {
             assets: wizard.wizardState?.assets ?? [],
-            guidelines: wizard.wizardState?.guidelines ?? '',
-            requirements: wizard.wizardState?.requirements ?? [],
-            notes: wizard.wizardState?.notes ?? '',
+            // Remove deprecated fields
+            // guidelines: wizard.wizardState?.guidelines ?? '',
+            // requirements: wizard.wizardState?.requirements ?? [],
+            // notes: wizard.wizardState?.notes ?? '',
         }
     });
 
+    // Remove useFieldArray for requirements as it's deprecated
+    /*
     const { fields: requirementFields, append: appendRequirement, remove: removeRequirement } = useFieldArray({
         control: form.control,
         name: "requirements",
     });
+    */
 
     const { fields: assetFields, append: appendAsset, remove: removeAsset } = useFieldArray({
         control: form.control,
@@ -257,9 +261,10 @@ function Step4Content() {
         if (wizard.wizardState && !form.formState.isDirty && !wizard.isLoading) {
             form.reset({
                 assets: wizard.wizardState.assets ?? [],
-                guidelines: wizard.wizardState.guidelines ?? '',
-                requirements: wizard.wizardState.requirements ?? [],
-                notes: wizard.wizardState.notes ?? '',
+                // Remove deprecated fields
+                // guidelines: wizard.wizardState.guidelines ?? '',
+                // requirements: wizard.wizardState.requirements ?? [],
+                // notes: wizard.wizardState.notes ?? '',
             });
         }
     }, [wizard.wizardState, wizard.isLoading, form.reset, form.formState.isDirty]);
@@ -318,10 +323,11 @@ function Step4Content() {
         const data = form.getValues();
         const payload: Partial<DraftCampaignData> = {
             assets: data.assets,
-            guidelines: data.guidelines,
-            requirements: data.requirements,
-            notes: data.notes,
-            step4Complete: true,
+            // Remove deprecated fields
+            // guidelines: data.guidelines,
+            // requirements: data.requirements,
+            // notes: data.notes,
+            step4Complete: true, // Mark step 4 as complete
             currentStep: 5,
         };
         // Update the centralized wizard state (SSOT)

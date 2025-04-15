@@ -50,6 +50,7 @@ import { AutosaveIndicator, AutosaveStatus } from "@/components/ui/autosave-indi
 import { InfluencerCard } from "@/components/ui/card-influencer";
 import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
 import { IconButtonAction } from '@/components/ui/button-icon-action'; // Import IconButtonAction
+import { AssetCard } from '@/components/ui/card-asset';
 
 // --- Data Display Components --- 
 
@@ -215,8 +216,9 @@ const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
 
 const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     <div className="space-y-4">
-        <DataItem label="Brand Guidelines Summary" value={data.guidelines} />
-        <DataItem label="Mandatory Requirements">
+        {/* Remove deprecated fields */}
+        {/* <DataItem label="Brand Guidelines Summary" value={data.guidelines} /> */}
+        {/* <DataItem label="Mandatory Requirements">
             {data.requirements && data.requirements.length > 0 ? (
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                     {data.requirements.map((req, idx) => (
@@ -224,17 +226,36 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
                     ))}
                 </ul>
             ) : <span className="text-muted-foreground italic">None</span>}
-        </DataItem>
+        </DataItem> */}
         <DataItem label="Uploaded Assets">
             {data.assets && data.assets.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                    {data.assets.map((asset, idx) => (
-                        <Badge key={idx} variant="outline">{asset.name || asset.fileName || `Asset ${idx + 1}`}</Badge>
-                    ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
+                    {data.assets.map((asset, idx) => {
+                        // Map the asset data for AssetCard
+                        const assetCardData = {
+                            id: asset.id || idx, // Use asset ID or index as key
+                            name: asset.name || asset.fileName || `Asset ${idx + 1}`,
+                            url: asset.url,
+                            type: asset.type,
+                            description: asset.rationale, // Map rationale to description for display
+                            budget: asset.budget,
+                            // associatedInfluencerIds are not directly displayed by AssetCard
+                            // but could be added if AssetCard is extended
+                        };
+                        return (
+                            <AssetCard
+                                key={assetCardData.id}
+                                asset={assetCardData}
+                                currency={data.budget?.currency ?? 'USD'}
+                                cardClassName="h-full" // Ensure cards fill height in grid
+                                className="p-0" // Adjust padding if needed
+                            />
+                        );
+                    })}
                 </div>
             ) : <span className="text-muted-foreground italic">None uploaded</span>}
         </DataItem>
-        <DataItem label="Additional Notes" value={data.notes} />
+        {/* <DataItem label="Additional Notes" value={data.notes} /> */}
     </div>
 );
 

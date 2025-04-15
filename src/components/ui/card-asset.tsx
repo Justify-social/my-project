@@ -273,10 +273,10 @@ export const AssetPreview = ({
       {mediaTypeIconId && (
         <Badge
           variant="secondary"
-          className="absolute bottom-0.5 left-1 z-10 px-1 py-1 rounded-md text-xs inline-flex items-center"
+          className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
           title={mediaTypeLabel}
         >
-          <Icon iconId={mediaTypeIconId} className="h-2.5 w-2.5" />
+          <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
         </Badge>
       )}
     </div>
@@ -358,11 +358,6 @@ export function AssetCard({
 
       <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <Icon
-            iconId={mediaTypeIconId}
-            className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0"
-            title={mediaTypeLabel}
-          />
           <CardTitle className="text-sm font-medium leading-snug truncate" title={name}>
             {name || 'Untitled Asset'}
           </CardTitle>
@@ -389,15 +384,16 @@ export function AssetCard({
         )}
 
         {description && (
-          <p className="mb-2 text-muted-foreground line-clamp-2 text-xs flex-grow">{description}</p>
+          <div className="mb-2 flex-grow">
+            <span className="text-xs font-medium text-secondary underline">Why this content?</span>
+            <p className="text-sm text-foreground mt-0.5 line-clamp-3">{description}</p>
+          </div>
         )}
 
-        <div className="mt-auto pt-2 space-y-2">
-          {(influencerHandle || description || budget !== undefined) && <Separator />}
+        <div className="mt-auto pt-2 space-y-2 border-t border-divider">
           {budget !== undefined && budget !== null && (
             <div className="flex justify-end items-center text-foreground">
-              <Icon iconId="faDollarSignLight" className="h-3 w-3 mr-1 text-muted-foreground" />
-              <span className="font-medium text-xs">{formatCurrency(budget, currency)}</span>
+              <span className="text-sm font-medium text-primary">{formatCurrency(budget, currency)}</span>
             </div>
           )}
         </div>

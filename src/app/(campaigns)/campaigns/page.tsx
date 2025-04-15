@@ -1,4 +1,3 @@
-// Updated import paths via tree-shake script - 2025-04-01T17:13:32.198Z
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -749,15 +748,18 @@ const ClientCampaignList: React.FC = () => {
           text: 'Submitted',
         };
       case 'in_review':
-      case 'in-review':
-      case 'inreview':
         return {
           class: 'bg-yellow-100 text-yellow-800',
           text: 'In Review',
         };
+      case 'draft':
+        return {
+          class: 'bg-gray-100 text-gray-800',
+          text: 'Draft',
+        };
       case 'paused':
         return {
-          class: 'bg-yellow-100 text-yellow-800',
+          class: 'bg-orange-100 text-orange-800',
           text: 'Paused',
         };
       case 'completed':
@@ -765,24 +767,27 @@ const ClientCampaignList: React.FC = () => {
           class: 'bg-blue-100 text-blue-800',
           text: 'Completed',
         };
-      case 'draft':
       default:
         return {
           class: 'bg-gray-100 text-gray-800',
-          text: 'Draft',
+          text: status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown', // Capitalize if unknown
         };
     }
   };
 
-  // Helper to get KPI display name from key
+  // Helper to get the display name for a KPI key
   const getKpiDisplayName = (kpiKey: string): string => {
-    const kpi = KPI_OPTIONS.find(k => k.key === kpiKey);
-    return kpi ? kpi.title : kpiKey;
+    if (!kpiKey) return 'N/A';
+
+    // Convert from SNAKE_CASE (API) to camelCase (mapping)
+    const camelCaseKey = kpiKey.toLowerCase().replace(/_([a-z])/g, g => g[1].toUpperCase());
+
+    const kpiOption = KPI_OPTIONS.find(option => option.key === camelCaseKey);
+    return kpiOption ? kpiOption.title : kpiKey; // Return the original key if not found
   };
 
-  // Use isLoadingData for rendering loading state
-  if (!isLoaded || (isLoadingData && !error)) {
-    // Show skeleton if Clerk hasn't loaded OR if we are loading data (and no error occurred yet)
+  // Render loading state
+  if (isLoadingData && !campaigns.length) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -945,7 +950,9 @@ const ClientCampaignList: React.FC = () => {
                     className="cursor-pointer text-secondary"
                     onClick={() => requestSort('primaryKPI')}
                   >
-                    Objective
+                    Objective{' '}
+                    {sortConfig?.key === 'primaryKPI' &&
+                      (sortConfig.direction === 'ascending' ? '▲' : '▼')}
                   </TableHead>
                   <TableHead
                     className="cursor-pointer text-secondary"
@@ -967,11 +974,12 @@ const ClientCampaignList: React.FC = () => {
                   const statusInfo = getStatusInfo(campaign.submissionStatus);
                   return (
                     <TableRow key={campaign.id} className="hover:bg-gray-50">
-                      <TableCell>
-                        <Link href={`/campaigns/${campaign.id}`}>
-                          <span className="text-accent hover:underline cursor-pointer font-medium">
-                            {campaign.campaignName || 'Untitled Campaign'}
-                          </span>
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/campaigns/${campaign.id}`}
+                          className="text-accent hover:underline"
+                        >
+                          {campaign.campaignName}
                         </Link>
                       </TableCell>
                       <TableCell>
@@ -982,7 +990,8 @@ const ClientCampaignList: React.FC = () => {
                         </span>
                       </TableCell>
                       <TableCell>
-                        {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
+                        {/* Use the helper function here */}
+                        {getKpiDisplayName(campaign.primaryKPI)}
                       </TableCell>
                       <TableCell>
                         {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}

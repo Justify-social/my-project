@@ -318,7 +318,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             fileName: 'fileName' in asset ? asset.fileName : '',
             fileSize: 'fileSize' in asset ? asset.fileSize : 0,
             description: 'description' in asset ? asset.description : '',
-            temp: 'temp' in asset ? asset.temp : false
+            temp: 'temp' in asset ? asset.temp : false,
+            rationale: 'rationale' in asset ? asset.rationale : '',
+            budget: 'budget' in asset ? asset.budget : undefined,
+            associatedInfluencerIds: 'associatedInfluencerIds' in asset && Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
           };
         }
         return {
@@ -329,7 +332,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           fileName: '',
           fileSize: 0,
           description: '',
-          temp: false
+          temp: false,
+          rationale: '',
+          budget: undefined,
+          associatedInfluencerIds: []
         };
       }) : [],
       // Normalize influencers if they exist

@@ -37,10 +37,12 @@ model CampaignWizard {
   targeting        Json?
   competitors      String[]
   step3Complete    Boolean         @default(false)
+  // Assets field now stores an array of objects, each containing:
+  // - Asset details (url, name, type, etc.)
+  // - associatedInfluencerIds: String[] (IDs linking to Influencer model)
+  // - rationale: String? ("Why this content?")
+  // - budget: Float?
   assets           Json[]
-  guidelines       String?
-  requirements     Json[]
-  notes            String?
   step4Complete    Boolean         @default(false)
   userId           String?         @map("userId")
   user             User?           @relation(fields: [userId], references: [id])

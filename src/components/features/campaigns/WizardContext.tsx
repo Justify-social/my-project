@@ -247,7 +247,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
   // --- Saving Progress ---
   const saveProgress = useCallback(async (dataToSave: Partial<DraftCampaignData>): Promise<string | null> => {
-    let currentCampaignId = campaignId; // Use state campaignId initially
+    const currentCampaignId = campaignId; // Use state campaignId initially
     const currentStep = dataToSave.currentStep;
 
     // --- Handle Campaign Creation if ID is missing ---

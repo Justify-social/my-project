@@ -106,9 +106,9 @@ export const DraftAssetSchema = z.object({
   fileSize: z.number().optional(),
   description: z.string().optional(),
   temp: z.boolean().optional(),
-  justification: z.string().optional(),
+  rationale: z.string().optional(),
   budget: z.number().positive({ message: "Budget must be positive" }).optional(),
-  influencerIds: z.array(z.string()).optional(),
+  associatedInfluencerIds: z.array(z.string()).optional(),
 }).passthrough(); // Use passthrough instead of strict
 
 /** Schema for Demographics object (used within DraftCampaignData). */
@@ -502,14 +502,6 @@ export const Step4ValidationSchema = Step4BaseSchema.extend({
     message: "Invalid URL format in one of the assets",
     path: [0, 'url']
   })
-}).superRefine((data, ctx) => {
-  if (data.assets && data.assets.length > 0 && !data.guidelines) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['guidelines'],
-      message: "Creative guidelines are required when assets are uploaded.",
-    });
-  }
 });
 /** TypeScript type for Step 4 form data. */
 export type Step4FormData = z.infer<typeof Step4ValidationSchema>;
