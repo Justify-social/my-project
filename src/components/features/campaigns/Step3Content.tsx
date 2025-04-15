@@ -88,6 +88,7 @@ function Step3Content() {
     const router = useRouter();
     const wizard = useWizard();
 
+    // --- Form Setup (Hooks must be top-level) ---
     const form = useForm<Step3FormData>({
         resolver: zodResolver(Step3ValidationSchema),
         mode: 'onChange',
@@ -102,7 +103,14 @@ function Step3Content() {
             competitors: wizard.wizardState?.competitors ?? [],
         }
     });
+    const watchedValues = form.watch(); // Watch form values
 
+    // --- State for Tag Inputs (Hooks must be top-level) ---
+    const [keywordInput, setKeywordInput] = useState('');
+    const [locationInput, setLocationInput] = useState('');
+    const [competitorInput, setCompetitorInput] = useState('');
+
+    // --- Effects (Hooks must be top-level) ---
     useEffect(() => {
         if (wizard.wizardState && !form.formState.isDirty && !wizard.isLoading) {
             form.reset({
@@ -118,9 +126,7 @@ function Step3Content() {
         }
     }, [wizard.wizardState, wizard.isLoading, form.reset, form.formState.isDirty]);
 
-    const watchedValues = form.watch();
-
-    // Autosave Logic (COMMENTED OUT)
+    // --- Autosave Logic (COMMENTED OUT - Belongs here if enabled) ---
     /*
         const handleAutosave = useCallback(async () => {
             if (!wizard.campaignId || !form.formState.isDirty || !wizard.autosaveEnabled || wizard.isLoading) return;
@@ -186,7 +192,7 @@ function Step3Content() {
             currentStep: 4,
         };
         wizard.updateWizardState(payload);
-        const saved = await wizard.saveProgress();
+        const saved = await wizard.saveProgress(payload);
         if (saved) {
             form.reset(data, { keepValues: true, keepDirty: false });
             if (wizard.campaignId) {
@@ -199,22 +205,71 @@ function Step3Content() {
         }
     };
 
-    // Render Logic
+    // Keyword Input Handlers
+    const currentKeywords = watchedValues.targeting?.keywords ?? [];
+    const handleAddKeyword = () => {
+        const newKeyword = keywordInput.trim();
+        if (newKeyword && !currentKeywords.includes(newKeyword)) {
+            form.setValue('targeting.keywords', [...currentKeywords, newKeyword], { shouldValidate: true, shouldDirty: true });
+            setKeywordInput(''); // Clear input
+        }
+    };
+    const handleRemoveKeyword = (keywordToRemove: string) => {
+        form.setValue('targeting.keywords', currentKeywords.filter(kw => kw !== keywordToRemove), { shouldValidate: true, shouldDirty: true });
+    };
+    const handleKeywordInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission
+            handleAddKeyword();
+        }
+    };
+
+    // Location Input Handlers
+    const currentLocations = (watchedValues.locations as unknown as string[] ?? []);
+    const handleAddLocation = () => {
+        const newLocation = locationInput.trim();
+        if (newLocation && !currentLocations.includes(newLocation)) {
+            form.setValue('locations', [...currentLocations, newLocation] as any, { shouldValidate: true, shouldDirty: true });
+            setLocationInput(''); // Clear input
+        }
+    };
+    const handleRemoveLocation = (locationToRemove: string) => {
+        form.setValue('locations', currentLocations.filter(loc => loc !== locationToRemove) as any, { shouldValidate: true, shouldDirty: true });
+    };
+    const handleLocationInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleAddLocation();
+        }
+    };
+
+    // Competitor Input Handlers
+    const currentCompetitors = watchedValues.competitors ?? [];
+    const handleAddCompetitor = () => {
+        const newCompetitor = competitorInput.trim();
+        if (newCompetitor && !currentCompetitors.includes(newCompetitor)) {
+            form.setValue('competitors', [...currentCompetitors, newCompetitor], { shouldValidate: true, shouldDirty: true });
+            setCompetitorInput(''); // Clear input
+        }
+    };
+    const handleRemoveCompetitor = (competitorToRemove: string) => {
+        form.setValue('competitors', currentCompetitors.filter(comp => comp !== competitorToRemove), { shouldValidate: true, shouldDirty: true });
+    };
+    const handleCompetitorInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleAddCompetitor();
+        }
+    };
+
+    // --- Render Logic (Starts after all hooks and handlers) ---
+    // Loading State Check
     if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
         // Use WizardSkeleton for step 3 loading
         return <WizardSkeleton step={3} />;
     }
 
-    // Temporary helper for JSON Textarea fields
-    const parseJsonArrayInput = (value: string, fallback: any[] = []) => {
-        try {
-            const parsed = JSON.parse(value);
-            return Array.isArray(parsed) ? parsed : fallback;
-        } catch { return fallback; }
-    };
-    const formatJsonArrayInput = (value: any[] | undefined | null) => JSON.stringify(value || [], null, 2);
-
-    // Determine Autosave Status from context
+    // Determine Autosave Status (Now safe to call after hooks)
     const getAutosaveStatus = () => {
         if (wizard.isLoading) return 'saving';
         if (wizard.lastSaved) return 'success';
@@ -264,22 +319,39 @@ function Step3Content() {
                             <CardDescription>Specify the geographic focus.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {/* TODO: Implement proper Location Selector UI */}
+                            {/* Locations Tag Input */}
                             <FormField
                                 control={form.control}
                                 name="locations"
-                                render={({ field }) => (
+                                render={({ field }) => ( // field value here is expected to be LocationSchema[] but we treat as string[] for tag input
                                     <FormItem>
-                                        <FormLabel>Target Locations (Temp. JSON)</FormLabel>
+                                        <FormLabel>Target Locations</FormLabel>
                                         <FormControl>
-                                            <Textarea
-                                                placeholder='[{"country": "US", "region": "California"}, {"country": "UK"}]'
-                                                value={formatJsonArrayInput(field.value)}
-                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.onChange(parseJsonArrayInput(e.target.value))}
-                                                rows={5}
+                                            <Input
+                                                placeholder="Type a location and press Enter..."
+                                                value={locationInput}
+                                                onChange={(e) => setLocationInput(e.target.value)}
+                                                onKeyDown={handleLocationInputKeyDown}
                                             />
                                         </FormControl>
-                                        <FormDescription>Temporary JSON input.</FormDescription>
+                                        <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
+                                            {(field.value as unknown as string[])?.map((location: string) => (
+                                                <Badge key={location} variant="secondary" className="pl-2 pr-1 text-sm">
+                                                    {location}
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                        onClick={() => handleRemoveLocation(location)}
+                                                        aria-label={`Remove location ${location}`}
+                                                    >
+                                                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                    </Button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                        <FormDescription>Add target countries, regions, or cities.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -291,52 +363,59 @@ function Step3Content() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Advanced Targeting</CardTitle>
-                            <CardDescription>Refine audience by language, interests, keywords.</CardDescription>
+                            <CardDescription>Refine audience by language, interests, and keywords.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <LanguageSelector
                                 name="demographics.languages"
                                 control={form.control}
                                 label="Languages"
-                                options={MOCK_LANGUAGES}
+                                options={MOCK_LANGUAGES} // TODO: Replace with actual fetched options
                                 allowMultiple={true}
+                                placeholder="Select target language(s)..."
                             />
-                            {/* TODO: Implement proper Interest Selector UI */}
-                            <FormField
+                            {/* Replaced JSON placeholder with adapted LanguageSelector for Interests */}
+                            <LanguageSelector
+                                name="targeting.interests" // Connects to the correct form field
                                 control={form.control}
-                                name="targeting.interests"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Interests (Temp. JSON)</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder='["Technology", "Fashion"]'
-                                                value={formatJsonArrayInput(field.value)}
-                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.onChange(parseJsonArrayInput(e.target.value))}
-                                                rows={3}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>Temporary JSON input.</FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                                label="Interests"
+                                options={MOCK_INTERESTS} // Use mock interests for now (TODO: Replace)
+                                allowMultiple={true}
+                                placeholder="Select audience interests..."
                             />
-                            {/* TODO: Implement Keywords input UI */}
+                            {/* Keywords Input */}
                             <FormField
                                 control={form.control}
                                 name="targeting.keywords"
-                                render={({ field }) => (
+                                render={({ field }) => ( // field here represents the array of keywords
                                     <FormItem>
-                                        <FormLabel>Keywords (Temp. JSON)</FormLabel>
+                                        <FormLabel>Keywords</FormLabel>
                                         <FormControl>
-                                            <Textarea
-                                                placeholder='["ai tools", "sustainable fashion"]'
-                                                value={formatJsonArrayInput(field.value)}
-                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.onChange(parseJsonArrayInput(e.target.value))}
-                                                rows={3}
+                                            <Input
+                                                placeholder="Type a keyword and press Enter..."
+                                                value={keywordInput}
+                                                onChange={(e) => setKeywordInput(e.target.value)}
+                                                onKeyDown={handleKeywordInputKeyDown}
                                             />
                                         </FormControl>
-                                        <FormDescription>Temporary JSON input.</FormDescription>
+                                        <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
+                                            {field.value?.map((keyword: string) => (
+                                                <Badge key={keyword} variant="secondary" className="pl-2 pr-1 text-sm">
+                                                    {keyword}
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                        onClick={() => handleRemoveKeyword(keyword)}
+                                                        aria-label={`Remove keyword ${keyword}`}
+                                                    >
+                                                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                    </Button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                        <FormDescription>Add relevant keywords that define your target audience.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -348,25 +427,42 @@ function Step3Content() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Competitor Tracking</CardTitle>
-                            <CardDescription>List competitors (optional).</CardDescription>
+                            <CardDescription>List competitor handles or brand names to monitor (optional).</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {/* TODO: Implement proper Competitor input UI */}
+                            {/* Competitors Tag Input */}
                             <FormField
                                 control={form.control}
                                 name="competitors"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Competitors (Temp. JSON)</FormLabel>
+                                        <FormLabel>Competitors to Monitor</FormLabel>
                                         <FormControl>
-                                            <Textarea
-                                                placeholder='["brandx", "@competitor_handle"]'
-                                                value={formatJsonArrayInput(field.value)}
-                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.onChange(parseJsonArrayInput(e.target.value))}
-                                                rows={3}
+                                            <Input
+                                                placeholder="Type a competitor name/handle and press Enter..."
+                                                value={competitorInput}
+                                                onChange={(e) => setCompetitorInput(e.target.value)}
+                                                onKeyDown={handleCompetitorInputKeyDown}
                                             />
                                         </FormControl>
-                                        <FormDescription>Temporary JSON input.</FormDescription>
+                                        <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
+                                            {field.value?.map((competitor: string) => (
+                                                <Badge key={competitor} variant="secondary" className="pl-2 pr-1 text-sm">
+                                                    {competitor}
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                        onClick={() => handleRemoveCompetitor(competitor)}
+                                                        aria-label={`Remove competitor ${competitor}`}
+                                                    >
+                                                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                    </Button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                        <FormDescription>List competitor handles or brand names.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}

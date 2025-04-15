@@ -278,29 +278,27 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       console.log('Campaign has no assets array or assets are not in array format');
     }
 
-    // Import the EnumTransformers utility to transform enum values
-    const { EnumTransformers } = await import('@/utils/enum-transformers');
-
     // Transform the campaign data for frontend consumption
-    console.log('[API GET /api/campaigns/[id]] Transforming enums...'); // Log before enum transform
-    let transformedCampaign;
-    try {
-      transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
-      console.log('[API GET /api/campaigns/[id]] Enum transformation successful.'); // Log success
-    } catch (transformError) {
-      console.error('[API GET /api/campaigns/[id]] Enum transformation failed:', transformError);
-      // Log the data that caused the failure
-      console.error(
-        '[API GET /api/campaigns/[id]] Data causing transform failure:',
-        JSON.stringify(campaign, null, 2)
-      );
-      throw transformError; // Re-throw to be caught by outer handler
-    }
-    console.log('[API GET /api/campaigns/[id]] Enum transformation complete.'); // Log after enum transform
+    // console.log('[API GET /api/campaigns/[id]] Transforming enums...'); // Log before enum transform
+    // let transformedCampaign;
+    // try {
+    //   transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
+    //   console.log('[API GET /api/campaigns/[id]] Enum transformation successful.'); // Log success
+    // } catch (transformError) {
+    //   console.error('[API GET /api/campaigns/[id]] Enum transformation failed:', transformError);
+    //   // Log the data that caused the failure
+    //   console.error(
+    //     '[API GET /api/campaigns/[id]] Data causing transform failure:',
+    //     JSON.stringify(campaign, null, 2)
+    //   );
+    //   throw transformError; // Re-throw to be caught by outer handler
+    // }
+    // console.log('[API GET /api/campaigns/[id]] Enum transformation complete.'); // Log after enum transform
 
     // Add draft status to the response
     const formattedCampaign = {
-      ...transformedCampaign,
+      // ...transformedCampaign, // Use the original campaign data instead
+      ...campaign, // Use the original campaign data
       isDraft: !isSubmittedCampaign,
     };
 

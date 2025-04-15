@@ -126,7 +126,7 @@ export function LanguageSelector<TFieldValues extends FieldValues = FieldValues>
                                                     {/* Icon indicating selection state */}
                                                     <Icon
                                                         iconId={selectedValues.includes(language.value)
-                                                            ? (allowMultiple ? "faCheckSquareSolid" : "faCircleDotLight") // Check square for multi, dot for single
+                                                            ? (allowMultiple ? "faCheckSolid" : "faCircleDotLight") // Corrected to faCheckSolid
                                                             : "faSquareLight"}
                                                         className={cn("mr-2 h-4 w-4", selectedValues.includes(language.value) ? "opacity-100" : "opacity-50")}
                                                         aria-hidden="true"

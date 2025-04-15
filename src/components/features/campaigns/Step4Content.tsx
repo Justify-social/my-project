@@ -47,9 +47,11 @@ import { AutosaveIndicator } from "@/components/ui/autosave-indicator";
 import { FileUploader, UploadThingResult } from "@/components/ui/file-uploader";
 // Import the new ProgressBarWizard
 import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
+// Import the IconButtonAction component
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 
-// Placeholder for Asset Preview Component
-// import { AssetCard } from '@/components/ui/asset-card'; // Assuming a generic asset card
+// Import the AssetCard component
+import { AssetCard } from '@/components/ui/card-asset';
 
 /**
  * =========================================================================
@@ -220,7 +222,8 @@ function Step4Content() {
             return {
                 // Generate a temporary client-side ID or use res.key if unique enough
                 id: `temp-${res.key || Date.now()}`,
-                url: res.url,
+                // url: res.ufsUrl, // TODO: Update UploadThingResult type and use ufsUrl
+                url: res.url, // Reverting to url due to type issue, acknowledge deprecation
                 name: res.name,
                 fileName: res.name,
                 fileSize: res.size,
@@ -314,7 +317,7 @@ function Step4Content() {
             currentStep: 5,
         };
         wizard.updateWizardState(payload);
-        const saved = await wizard.saveProgress();
+        const saved = await wizard.saveProgress(payload);
         if (saved) {
             form.reset(data, { keepValues: true, keepDirty: false });
             if (wizard.campaignId) {
@@ -370,36 +373,35 @@ function Step4Content() {
                                 onUploadComplete={handleAssetUploadComplete}
                                 onUploadError={handleUploadError}
                                 accept={{ "image/*": [], "video/*": [] }} // Example accept prop
-                                maxFiles={5} // Example: Allow up to 5 files
-                                maxSizeMB={4}
                             />
-                            {/* Display uploaded assets */}
-                            <div className="mt-4 space-y-3">
-                                <FormLabel className="text-sm font-medium">Uploaded Assets:</FormLabel>
-                                {assetFields.length === 0 && (
-                                    <div className="p-4 border-dashed border-2 rounded-md text-center text-muted-foreground">
-                                        No assets uploaded yet.
-                                    </div>
-                                )}
-                                {assetFields.map((asset, index) => (
-                                    <Card key={asset.id} className="p-3 flex justify-between items-center bg-muted/50">
-                                        <div className="flex items-center space-x-3 overflow-hidden">
-                                            <Icon
-                                                iconId={asset.type === 'image' ? 'faFileImageLight' : asset.type === 'video' ? 'faFileVideoLight' : 'faFileLight'}
-                                                className="h-5 w-5 text-muted-foreground flex-shrink-0"
-                                            />
-                                            <div className="truncate">
-                                                <p className="text-sm font-medium truncate">{asset.fileName || asset.name || `Asset ${index + 1}`}</p>
-                                                <p className="text-xs text-muted-foreground truncate">
-                                                    {asset.type || 'Unknown Type'} {asset.fileSize ? `(${(asset.fileSize / 1024 / 1024).toFixed(2)} MB)` : ''}
-                                                </p>
+                            {/* Display uploaded assets using AssetCard */}
+                            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {assetFields.map((asset, index) => {
+                                    // Map DraftAssetSchema fields to AssetCardProps['asset'] structure
+                                    const assetCardData = {
+                                        id: asset.id,
+                                        name: asset.fileName || asset.name || `Asset ${index + 1}`,
+                                        url: asset.url,
+                                        type: asset.type,
+                                        // fileSize: asset.fileSize // Uncomment if AssetCard uses fileSize
+                                    };
+
+                                    // Explicitly return the JSX element
+                                    return (
+                                        <div key={asset.id} className="relative group">
+                                            <AssetCard asset={assetCardData} cardClassName="h-full" />
+                                            <div className="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <IconButtonAction
+                                                    iconBaseName="faTrashCan"
+                                                    hoverColorClass="text-destructive"
+                                                    ariaLabel={`Remove ${assetCardData.name}`}
+                                                    onClick={() => removeAsset(index)}
+                                                    className="bg-background/70 hover:bg-background/90 rounded-full p-1 h-6 w-6"
+                                                />
                                             </div>
                                         </div>
-                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeAsset(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0">
-                                            <Icon iconId="faTrashCanLight" className="h-4 w-4" />
-                                        </Button>
-                                    </Card>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>

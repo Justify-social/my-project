@@ -4,8 +4,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import { Badge } from '../../../../../../components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',

@@ -322,9 +322,9 @@ export function AssetCard({
   const isVideoAsset = type?.includes('video');
   const isImageAsset = type?.includes('image');
   const mediaTypeIconId = isVideoAsset
-    ? 'faVideoLight'
+    ? 'faFileVideoLight'
     : isImageAsset
-      ? 'faCameraLight'
+      ? 'faFileImageLight'
       : 'faFileLight';
   const mediaTypeLabel = isVideoAsset ? 'Video' : isImageAsset ? 'Image' : 'File';
 

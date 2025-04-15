@@ -83,14 +83,16 @@ export const PATCH = tryCatch(
         break;
 
       case 2:
+        console.log('[API PATCH Step 2] Raw body received:', JSON.stringify(body, null, 2)); // Log raw body
         // Use the BASE schema with .partial() for validation
         validationResult = Step2BaseSchema.partial().safeParse(body);
+        console.log('[API PATCH Step 2] Validation Result:', JSON.stringify(validationResult, null, 2)); // Log validation result
         if (!validationResult.success) {
           console.error('Step 2 Validation failed:', validationResult.error.format());
           return NextResponse.json({ error: 'Validation failed', details: validationResult.error.format() }, { status: 400 });
         }
         dataToSave = validationResult.data;
-        console.log('Validated Step 2 data:', JSON.stringify(dataToSave, null, 2));
+        console.log('[API PATCH Step 2] Validated dataToSave:', JSON.stringify(dataToSave, null, 2)); // Log validated data
 
         // Map validated Step 2 fields
         if ('primaryKPI' in dataToSave) mappedData.primaryKPI = dataToSave.primaryKPI;
@@ -98,6 +100,7 @@ export const PATCH = tryCatch(
         if ('features' in dataToSave) mappedData.features = dataToSave.features;
         if ('messaging' in dataToSave) mappedData.messaging = dataToSave.messaging;
         if ('expectedOutcomes' in dataToSave) mappedData.expectedOutcomes = dataToSave.expectedOutcomes;
+        console.log('[API PATCH Step 2] Mapped data (before transform):', JSON.stringify(mappedData, null, 2)); // Log mapped data
         break;
 
       case 3:
@@ -112,9 +115,10 @@ export const PATCH = tryCatch(
 
         // Map validated Step 3 fields (audience etc.)
         if ('demographics' in dataToSave) mappedData.demographics = { ...(mappedData.demographics || {}), ...dataToSave.demographics };
-        if ('locations' in dataToSave) mappedData.locations = dataToSave.locations;
+        if ('locations' in dataToSave) mappedData.locations = dataToSave.locations; // Expecting LocationSchema[] now
         if ('targeting' in dataToSave) mappedData.targeting = { ...(mappedData.targeting || {}), ...dataToSave.targeting };
         if ('competitors' in dataToSave) mappedData.competitors = dataToSave.competitors;
+        console.log('[API PATCH Step 3] Mapped data (before transform):', JSON.stringify(mappedData, null, 2)); // Log mapped data
         break;
 
       case 4:
@@ -187,7 +191,8 @@ export const PATCH = tryCatch(
 
     // --- Influencer Handling (only if DB update succeeded) ---
     const influencerData = body.influencers;
-    let campaignToReturn = updatedCampaign; // Start with the successfully updated campaign
+    // Use the result from the main update as the default
+    let campaignDataForResponse = updatedCampaign;
     let messageSuffix = '';
 
     if (
@@ -218,40 +223,42 @@ export const PATCH = tryCatch(
           }
         });
         console.log('Influencer transaction successful.');
-        // Refetch is necessary to include updated influencers
-        campaignToReturn = await prisma.campaignWizard.findUnique({
+        // Refetch into a temporary variable to get updated influencers
+        const refetchedCampaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId }, include: { Influencer: true },
         });
-        // Add null check after refetch
-        if (!campaignToReturn) {
+        // If refetch was successful, use it for the response
+        if (refetchedCampaign) {
+          campaignDataForResponse = refetchedCampaign;
+          messageSuffix = ' with influencers';
+        } else {
           console.error(`[Influencer Update] Failed to refetch campaign ${campaignId} after influencer update.`);
-          // Return an error because we expected the campaign to exist
-          return NextResponse.json({ success: false, error: 'Failed to retrieve campaign data after update.' }, { status: 500 });
+          // Keep campaignDataForResponse as the original updatedCampaign
+          messageSuffix = ' (influencer refetch failed)';
         }
-        messageSuffix = ' with influencers';
       } catch (infError) {
         console.error('[Influencer Update] Transaction FAILED:', infError);
-        // Keep campaignToReturn as the result from the main update
+        // Keep campaignDataForResponse as the original updatedCampaign
+        messageSuffix = ' (influencer update error)';
       }
     }
     // --- End Influencer Handling ---
 
-    // Explicit null check before final transformation
-    if (!campaignToReturn) {
-      // This case should ideally not be reached due to the earlier check,
-      // but it satisfies the type checker and handles unexpected edge cases.
-      console.error(`[API PATCH - Step ${stepNumber}] campaignToReturn became null unexpectedly before final transformation.`);
+    // Final null check before transformation (using campaignDataForResponse)
+    if (!campaignDataForResponse) {
+      // This should not happen if the initial update worked, but handles edge cases
+      console.error(`[API PATCH - Step ${stepNumber}] campaignDataForResponse became null unexpectedly before final transformation.`);
       return NextResponse.json({ success: false, error: 'Internal server error during final processing.' }, { status: 500 });
     }
 
-    // Now campaignToReturn is guaranteed non-null here
-    // @ts-ignore - Linter struggling with type inference after conditional refetch
-    const transformedCampaignForFrontend =
-      EnumTransformers.transformObjectFromBackend(campaignToReturn);
+    // Transform the final, non-null data for the frontend
+    // const transformedCampaignForFrontend =
+    //   EnumTransformers.transformObjectFromBackend(campaignDataForResponse);
 
     return NextResponse.json({
       success: true,
-      data: transformedCampaignForFrontend,
+      // data: transformedCampaignForFrontend, // Send the raw data from DB
+      data: campaignDataForResponse, // Send the raw data from DB
       message: `Step ${stepNumber} updated${messageSuffix}`,
     });
   },

@@ -259,7 +259,7 @@ function Step2Content() {
             currentStep: 3,
         };
         wizard.updateWizardState(payload);
-        const saved = await wizard.saveProgress();
+        const saved = await wizard.saveProgress(payload);
         if (saved) {
             form.reset(data, { keepValues: true, keepDirty: false });
             if (wizard.campaignId) {

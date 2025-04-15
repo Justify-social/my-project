@@ -92,7 +92,7 @@ export const InfluencerSchema = z.object({
   handle: z.string().min(1, { message: "Influencer handle is required" }),
   platformId: z.string().optional(),
   // TODO: Add other relevant fields if needed for draft state based on Step 1 form
-});
+}).passthrough(); // Allow extra fields like createdAt, updatedAt, campaignId
 
 /** Schema for draft Asset object (used within DraftCampaignData assets array). */
 export const DraftAssetSchema = z.object({
@@ -215,8 +215,8 @@ const DraftCampaignDataBaseSchema = z.object({
   // --- Step 3 Data ---
   /** Audience demographic details (using refined schema). */
   demographics: DemographicsSchema.nullable().optional(),
-  /** Audience location details. */
-  locations: z.array(LocationSchema).nullable().optional(), // Allow null
+  /** Audience location details. Temporarily allowing string[] due to tag input. */
+  locations: z.array(LocationSchema).or(z.array(z.string())).nullable().optional(), // Allow null or string[] or LocationSchema[]
   /** Audience targeting criteria (keywords, interests). */
   targeting: z.object({ // Example structure for JSON targeting
     keywords: z.array(z.string()).optional(),
