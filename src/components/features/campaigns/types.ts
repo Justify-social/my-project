@@ -28,7 +28,7 @@ export const FeatureEnum = z.enum([
   'MIXED_MEDIA_MODELING',
 ]);
 /** Contact Position Enum (from Prisma) */
-export const PositionEnum = z.enum(['Manager', 'Director', 'VP']);
+export const PositionEnum = z.enum(['VP', 'Director', 'Manager', 'Researcher', 'Associate']);
 /** Creative Asset Type Enum (from Prisma) */
 export const CreativeAssetTypeEnum = z.enum(['image', 'video']);
 /** Submission Status Enum (from Prisma) */
@@ -67,8 +67,8 @@ export const ContactSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
   surname: z.string().min(1, { message: "Surname is required" }),
   email: z.string().email({ message: "Invalid email address" }),
-  position: PositionEnum.optional(), // Assuming Position is optional here
-});
+  position: PositionEnum.optional(),
+}).passthrough(); // Add passthrough here
 
 /** Schema for Budget object (used within DraftCampaignData). Handles string input cleanup. */
 export const BudgetSchema = z.object({
@@ -83,35 +83,36 @@ export const BudgetSchema = z.object({
     (val) => (typeof val === 'string' && val.trim() !== '' ? parseFloat(val.replace(/[^\d.-]/g, '')) : val),
     z.number({ invalid_type_error: 'Social media budget must be a number' }).nonnegative({ message: 'Social media budget cannot be negative' })
   ),
-});
+}).passthrough(); // Add passthrough here
 
 /** Schema for Influencer object (used in DraftCampaignData). */
 export const InfluencerSchema = z.object({
-  id: z.string().optional(), // Optional as it might be generated
-  platform: PlatformSchema, // Uses the transforming schema
+  id: z.string().optional(),
+  platform: PlatformSchema,
   handle: z.string().min(1, { message: "Influencer handle is required" }),
-  platformId: z.string().optional(),
-  // TODO: Add other relevant fields if needed for draft state based on Step 1 form
+  platformId: z.string().nullable().optional(),
+  campaignId: z.string().optional(),
+  createdAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
+  updatedAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
 });
 
 /** Schema for draft Asset object (used within DraftCampaignData assets array). */
 export const DraftAssetSchema = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
-  type: CreativeAssetTypeEnum.optional(), // e.g., 'image', 'video'
+  type: CreativeAssetTypeEnum.optional(),
   url: z.string().url().optional(),
-  // Other fields stored in the draft asset JSON
   fileName: z.string().optional(),
   fileSize: z.number().optional(),
   description: z.string().optional(),
-  /** Flag to indicate if this is a temporary upload placeholder before final processing. */
   temp: z.boolean().optional(),
-}).strict();
+  justification: z.string().optional(),
+  budget: z.number().positive({ message: "Budget must be positive" }).optional(),
+  influencerIds: z.array(z.string()).optional(),
+}).passthrough(); // Use passthrough instead of strict
 
 /** Schema for Demographics object (used within DraftCampaignData). */
-// REVISED SCHEMA for percentage distribution
 export const DemographicsSchema = z.object({
-  // Define age brackets explicitly
   age18_24: z.number().int().min(0).max(100).optional().default(0),
   age25_34: z.number().int().min(0).max(100).optional().default(0),
   age35_44: z.number().int().min(0).max(100).optional().default(0),
@@ -121,44 +122,27 @@ export const DemographicsSchema = z.object({
   /** Selected genders. */
   genders: z.array(z.string()).optional(),
   languages: z.array(z.string()).optional(),
-}).strict()
-  // Add refinement to check if sum is 100
-  .refine(data => {
-    const sum = (data.age18_24 || 0) +
-      (data.age25_34 || 0) +
-      (data.age35_44 || 0) +
-      (data.age45_54 || 0) +
-      (data.age55_64 || 0) +
-      (data.age65plus || 0);
-    // Allow a small tolerance for floating point issues if needed, but aim for exact 100
-    return Math.abs(sum - 100) < 0.01 || sum === 0; // Allow 0 sum if untouched
-  }, {
-    message: "Total age distribution must equal 100%",
-    // Path can point to a general field or the object itself
-    path: ["ageDistribution"], // Use a conceptual path if field removed
-  });
+}).passthrough(); // Use passthrough instead of strict
 
 /** Schema for Location object (used within DraftCampaignData locations array). */
 export const LocationSchema = z.object({
-  // Expanded based on Step 3 description
   country: z.string().optional(),
   region: z.string().optional(),
   city: z.string().optional(),
-  // Removed proportion as UI is unclear
-}).strict(); // Made strict
+}).passthrough(); // Use passthrough instead of strict
 
 //---------------------------------------------------------------------------
 // Main Zod Schema for Draft Campaign Data (WizardContext State)
 //---------------------------------------------------------------------------
 
-/** Base schema definition for the Campaign Wizard's draft state. Add .passthrough() */
+/** Base schema definition for the Campaign Wizard's draft state. */
 const DraftCampaignDataBaseSchema = z.object({
   /** Unique identifier for the draft campaign (UUID). */
   id: z.string().optional(),
   /** Timestamp of creation. */
-  createdAt: z.string().datetime().optional().or(z.date()).optional(), // Accept string or Date
+  createdAt: z.string().datetime().nullable().optional().or(z.date()).optional(),
   /** Timestamp of last update. */
-  updatedAt: z.string().datetime().optional().or(z.date()).optional(), // Accept string or Date
+  updatedAt: z.string().datetime().nullable().optional().or(z.date()).optional(),
   /** Current step the user is on in the wizard. */
   currentStep: z.number().default(1),
   /** Flag indicating if the wizard has been fully completed. */
@@ -170,45 +154,54 @@ const DraftCampaignDataBaseSchema = z.object({
   /** Name of the campaign. */
   name: z.string().min(1, { message: "Campaign name is required" }),
   /** High-level business goal for the campaign. */
-  businessGoal: z.string().nullable().optional(), // Made optional and nullable based on data
+  businessGoal: z.string().nullable().optional(),
+  /** NEW: Brand name for the campaign. */
+  brand: z.string().min(1, { message: "Brand name is required" }),
+  /** NEW: Website URL for the campaign/brand. */
+  website: z.string().url({ message: "Invalid website URL" }).nullable().optional(),
   /** Campaign start date (string format from API). */
-  startDate: z.string().datetime().optional().or(z.date()).optional(), // Accept string or Date
+  startDate: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
   /** Campaign end date (string format from API). */
-  endDate: z.string().datetime().optional().or(z.date()).optional(), // Accept string or Date
+  endDate: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
   /** Timezone for the campaign schedule. */
   timeZone: z.string().nullable().optional(),
   /** Primary contact person for the campaign. */
   primaryContact: ContactSchema.nullable().optional(),
   /** Secondary contact person for the campaign. */
-  secondaryContact: ContactSchema.nullable().optional(),
+  secondaryContact: z.preprocess(
+    (val) => {
+      const contact = val as Partial<z.infer<typeof ContactSchema>> | null;
+      if (contact && typeof contact === 'object' && !contact.firstName && !contact.surname && !contact.email) {
+        return null;
+      }
+      return val;
+    },
+    ContactSchema.nullable().optional() // Uses base schema
+  ),
   /** Additional contacts (if applicable). */
-  additionalContacts: z.array(ContactSchema).default([]), // Ensure always array, default empty
+  additionalContacts: z.array(ContactSchema).default([]), // Uses base schema
   /** Budget details for the campaign. */
-  budget: BudgetSchema.nullable().optional(),
+  budget: BudgetSchema.nullable().optional(), // Uses base schema
   /** List of influencers associated with the campaign (Key changed to match API). */
-  Influencer: z.array(InfluencerSchema).optional(), // Changed key from influencers
+  Influencer: z.array(InfluencerSchema).optional(), // Uses base schema
   /** Flag indicating Step 1 completion. */
   step1Complete: z.boolean().default(false),
 
   // --- Step 2 Data ---
   /** Primary Key Performance Indicator (KPI) for the campaign. */
-  primaryKPI: KPIEnum.nullable().optional(), // Allow null
+  primaryKPI: KPIEnum.nullable().optional(),
   /** Secondary KPIs for the campaign. */
-  secondaryKPIs: z.array(KPIEnum).nullable().optional(), // Allow null
+  secondaryKPIs: z.array(KPIEnum).nullable().optional(),
   /** Messaging details (structure assumed, verify with Step 2 form). */
-  messaging: z.object({ // Example structure for JSON messaging
+  messaging: z.object({
     mainMessage: z.string().optional(),
     hashtags: z.array(z.string()).optional(),
-    keyBenefits: z.string().optional(),
-  }).passthrough().nullable().optional(), // Allow null
+    keyBenefits: z.array(z.string()).optional(),
+  }).passthrough().nullable().optional(),
   /** Expected outcomes (structure assumed, verify with Step 2 form). */
-  expectedOutcomes: z.object({ // Example structure for JSON outcomes
-    memorability: z.string().optional(),
-    purchaseIntent: z.string().optional(),
-    brandPerception: z.string().optional(),
-  }).passthrough().nullable().optional(), // Allow null
+  expectedOutcomes: z.object({}).passthrough().nullable().optional(),
   /** Selected features for the campaign (e.g., Brand Lift). */
-  features: z.array(FeatureEnum).nullable().optional(), // Allow null
+  features: z.array(FeatureEnum).nullable().optional(),
   /** Flag indicating Step 2 completion. */
   step2Complete: z.boolean().default(false),
 
@@ -216,58 +209,72 @@ const DraftCampaignDataBaseSchema = z.object({
   /** Audience demographic details (using refined schema). */
   demographics: DemographicsSchema.nullable().optional(),
   /** Audience location details. */
-  locations: z.array(LocationSchema).nullable().optional(), // Allow null
+  locations: z.array(LocationSchema).nullable().optional(),
   /** Audience targeting criteria (keywords, interests). */
-  targeting: z.object({ // Example structure for JSON targeting
-    keywords: z.array(z.string()).optional(),
-    interests: z.array(z.string()).optional(),
-  }).passthrough().nullable().optional(), // Allow null
+  targeting: z.object({}).passthrough().nullable().optional(),
   /** List of competitor brands/handles. */
-  competitors: z.array(z.string()).nullable().optional(), // Allow null
+  competitors: z.array(z.string()).nullable().optional(),
   /** Flag indicating Step 3 completion. */
   step3Complete: z.boolean().default(false),
 
   // --- Step 4 Data ---
   /** List of creative assets uploaded for the campaign. */
-  assets: z.array(DraftAssetSchema).default([]), // Ensure always array, default empty
+  assets: z.array(DraftAssetSchema).default([]),
   /** Creative guidelines or instructions. */
-  guidelines: z.string().nullable().optional(), // Allow null
+  guidelines: z.string().nullable().optional(),
   /** Specific creative requirements (structure assumed, verify with Step 4 form). */
-  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]), // Ensure always array, default empty
+  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]),
   /** Additional notes for Step 4. */
-  notes: z.string().nullable().optional(), // Allow null
+  notes: z.string().nullable().optional(),
   /** Flag indicating Step 4 completion. */
   step4Complete: z.boolean().default(false),
 
   // --- Relations / Other ---
   /** ID of the user who owns the campaign draft. */
-  userId: z.string().nullable().optional(), // Allow null
-  // WizardHistory is likely a separate model/relation and not managed directly here
-}).passthrough(); // Allow extra fields like isDraft
+  userId: z.string().nullable().optional(),
+}).passthrough(); // Apply passthrough to the main base schema
 
 /** Refined Zod schema for Draft Campaign Data, adding cross-field validations. */
-export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema.refine(data => {
-  // Refine budget: socialMediaBudget <= totalBudget
-  if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
-    return data.budget.socialMedia <= data.budget.total;
-  }
-  return true;
-}, {
-  message: "Social media budget cannot exceed total budget",
-  path: ["budget", "socialMedia"], // Updated path
-}).refine(data => {
-  // Refine dates: endDate must be after startDate
-  try {
-    if (data.startDate && data.endDate) {
-      // Basic check; consider date-fns for more robust parsing and timezone handling if needed
-      return new Date(data.endDate) > new Date(data.startDate);
+export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
+  // Refine dates (now comparing strings)
+  .refine(data => {
+    try {
+      // Ensure dates are valid ISO strings before comparison
+      if (data.startDate && data.endDate && z.string().datetime({ offset: true }).safeParse(data.startDate).success && z.string().datetime({ offset: true }).safeParse(data.endDate).success) {
+        // Compare Date objects created from strings
+        return new Date(data.endDate) >= new Date(data.startDate);
+      }
+    } catch (e) { return false; } // Handle potential errors
+    return true; // Allow validation if one or both dates are missing/invalid
+  }, {
+    message: "End date must be on or after start date",
+    path: ["endDate"],
+  })
+  // Refine budget
+  .refine(data => {
+    if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
+      return data.budget.socialMedia <= data.budget.total;
     }
-  } catch (e) { return false; } // Handle potential invalid date strings during comparison
-  return true;
-}, {
-  message: "End date must be after start date",
-  path: ["endDate"],
-});
+    return true;
+  }, {
+    message: "Social media budget cannot exceed total budget",
+    path: ["budget", "socialMedia"],
+  })
+  .refine(data => {
+    if (data.demographics) {
+      const sum = (data.demographics.age18_24 || 0) +
+        (data.demographics.age25_34 || 0) +
+        (data.demographics.age35_44 || 0) +
+        (data.demographics.age45_54 || 0) +
+        (data.demographics.age55_64 || 0) +
+        (data.demographics.age65plus || 0);
+      return sum === 0 || Math.abs(sum - 100) < 0.01;
+    }
+    return true;
+  }, {
+    message: "Total age distribution must equal 100%",
+    path: ['demographics', 'age18_24'],
+  });
 
 /** TypeScript type inferred from DraftCampaignDataSchema, representing the wizard's state. */
 export type DraftCampaignData = z.infer<typeof DraftCampaignDataSchema>;
@@ -409,47 +416,27 @@ export type SubmissionPayloadData = z.infer<typeof SubmissionPayloadSchema>;
 
 // --- Step 1 --- 
 /** BASE schema for Step 1: Basic Info - Only field definitions */
-export const Step1BaseSchema = z.object({
-  name: DraftCampaignDataBaseSchema.shape.name,
-  businessGoal: DraftCampaignDataBaseSchema.shape.businessGoal,
-  startDate: DraftCampaignDataBaseSchema.shape.startDate,
-  endDate: DraftCampaignDataBaseSchema.shape.endDate,
-  timeZone: DraftCampaignDataBaseSchema.shape.timeZone,
-  primaryContact: DraftCampaignDataBaseSchema.shape.primaryContact,
-  secondaryContact: DraftCampaignDataBaseSchema.shape.secondaryContact,
-  additionalContacts: DraftCampaignDataBaseSchema.shape.additionalContacts,
-  budget: DraftCampaignDataBaseSchema.shape.budget,
-  Influencer: DraftCampaignDataBaseSchema.shape.Influencer,
+export const Step1BaseSchema = DraftCampaignDataBaseSchema.pick({
+  name: true,
+  businessGoal: true,
+  brand: true,
+  website: true,
+  startDate: true,
+  endDate: true,
+  timeZone: true,
+  primaryContact: true,
+  secondaryContact: true,
+  additionalContacts: true,
+  budget: true,
+  Influencer: true,
 });
 
 /** FULL Validation schema for Step 1: Basic Info (Used in UI) */
 export const Step1ValidationSchema = Step1BaseSchema.extend({
-  // Apply original refinements from previous .extend()
-  primaryContact: ContactSchema.refine(contact => contact && contact.firstName && contact.surname && contact.email, {
-    message: "Primary contact details must be complete",
-    path: ['firstName'] // Pointing error to firstName field
-  }).nullable().optional(), // Keep nullable/optional as in base
+  primaryContact: ContactSchema.refine(contact => contact !== null, { // Ensure primaryContact object exists
+    message: "Primary contact is required.", // Add a message if needed
+  }),
   Influencer: InfluencerSchema.array().min(1, "Please add at least one influencer").optional(),
-}).refine(data => {
-  // Apply original cross-field validation: budget
-  if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
-    return data.budget.socialMedia <= data.budget.total;
-  }
-  return true;
-}, {
-  message: "Social media budget cannot exceed total budget",
-  path: ["budget", "socialMedia"],
-}).refine(data => {
-  // Apply original cross-field validation: dates
-  try {
-    if (data.startDate && data.endDate) {
-      return new Date(data.endDate) > new Date(data.startDate);
-    }
-  } catch (e) { return false; }
-  return true;
-}, {
-  message: "End date must be after start date",
-  path: ["endDate"],
 });
 /** TypeScript type for Step 1 form data. */
 export type Step1FormData = z.infer<typeof Step1ValidationSchema>;

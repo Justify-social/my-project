@@ -26,27 +26,6 @@ export function standardizeApiResponse(data: unknown) {
 
   const result = { ...(data as Record<string, unknown>) };
 
-  // Handle date fields using DateService
-  ['createdAt', 'updatedAt', 'startDate', 'endDate'].forEach(field => {
-    if (field in result) {
-      // logger.debug(`Processing date field ${field}:`, result[field]);
-
-      // Use DateService to standardize dates
-      const standardized = DateService.standardizeDate(result[field]);
-
-      // Use the ISO format for API data, but preserve the specific format that startDate/endDate need
-      if (field === 'startDate' || field === 'endDate') {
-        // For form date fields, use formatted (YYYY-MM-DD)
-        result[field] = standardized.formatted || null;
-        // logger.debug(`Standardized ${field} to form date:`, result[field]);
-      } else {
-        // For other date fields use ISO
-        result[field] = standardized.iso || null;
-        // logger.debug(`Standardized ${field} to ISO date:`, result[field]);
-      }
-    }
-  });
-
   // Handle the Influencer relation from Prisma model
   if (result.Influencer && Array.isArray(result.Influencer)) {
     // logger.debug('Found Influencer relation in API response:', result.Influencer);

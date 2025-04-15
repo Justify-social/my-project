@@ -246,27 +246,29 @@ export const EnumTransformers = {
         continue;
       }
 
+      // Keep backend enum formats when transforming FROM backend
       if (key === 'kpi' || key === 'primaryKPI') {
-        result[key] = this.kpiFromBackend(value as KPI);
+        result[key] = value; // Keep backend format (e.g., AD_RECALL)
       } else if (key === 'secondaryKPIs' && Array.isArray(value)) {
-        result[key] = value.map(kpi => this.kpiFromBackend(kpi as KPI));
+        result[key] = value; // Keep backend format
       } else if (key === 'platform') {
-        result[key] = this.platformFromBackend(value as Platform);
+        result[key] = value; // Keep backend format (e.g., INSTAGRAM)
       } else if (key === 'currency') {
-        result[key] = this.currencyFromBackend(value as Currency);
+        result[key] = value; // Keep backend format (e.g., USD)
       } else if (key === 'position') {
-        result[key] = this.positionFromBackend(value as Position);
+        result[key] = value; // Keep backend format (e.g., Director)
       } else if (key === 'features' && Array.isArray(value)) {
-        result[key] = value.map(feature => this.featureFromBackend(feature as Feature));
+        result[key] = value; // Keep backend format
       } else if (key === 'role') {
-        result[key] = this.teamRoleFromBackend(value as TeamRole);
+        result[key] = value; // Keep backend format (TeamRole)
       } else if (key === 'status') {
-        result[key] = this.invitationStatusFromBackend(value as InvitationStatus);
+        // Assuming status refers to Campaign Status (DRAFT, etc.)
+        result[key] = value; // Keep backend format 
       } else if (key === 'userRole') {
-        result[key] = this.userRoleFromBackend(value as UserRole);
+        result[key] = value; // Keep backend format (UserRole)
       } else if (value instanceof Date) {
-        // Explicitly handle Date objects
-        result[key] = value.toISOString(); // Convert to ISO string for API response
+        // Keep Date objects as Date objects
+        result[key] = value; // KEEP as Date object
       } else if (typeof value === 'object') {
         result[key] = this.transformObjectFromBackend(value);
       } else {

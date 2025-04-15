@@ -50,8 +50,11 @@ import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
 // Import the IconButtonAction component
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 
-// Import the AssetCard component
-import { AssetCard } from '@/components/ui/card-asset';
+// Import the NEW AssetCardStep4 component using default import
+import AssetCardStep4 from '@/components/ui/card-asset-step-4';
+
+// Infer the DraftAsset type
+type DraftAsset = z.infer<typeof DraftAssetSchema>;
 
 /**
  * =========================================================================
@@ -207,6 +210,14 @@ function Step4Content() {
         name: "assets",
     });
 
+    // Prepare influencer options for the select component
+    const influencerOptions = React.useMemo(() => {
+        return wizard.wizardState?.Influencer?.map(inf => ({
+            id: inf.id, // Keep the actual influencer ID
+            handle: inf.handle
+        })) ?? [];
+    }, [wizard.wizardState?.Influencer]);
+
     // Updated callback for the new FileUploader
     const handleAssetUploadComplete = useCallback((results: UploadThingResult[]) => {
         // Map UploadThingResult to DraftAssetSchema format
@@ -232,6 +243,8 @@ function Step4Content() {
             };
         });
         appendAsset(assetsToAdd);
+        // Log form state after append
+        console.log('Form state after appending assets:', form.getValues('assets'));
     }, [appendAsset]);
 
     // Handle upload errors (optional, FileUploader shows toast)
@@ -387,27 +400,30 @@ function Step4Content() {
                                 accept={{ "image/*": [], "video/*": [] }} // Example accept prop
                                 sizeLimitText="up to 100MB each"
                             />
-                            {/* Display uploaded assets using AssetCard */}
-                            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {assetFields.map((asset, index) => {
-                                    // Map DraftAssetSchema fields to AssetCardProps['asset'] structure
-                                    const assetCardData = {
-                                        id: asset.id,
-                                        name: asset.fileName || asset.name || `Asset ${index + 1}`,
-                                        url: asset.url,
-                                        type: asset.type,
-                                        // fileSize: asset.fileSize // Uncomment if AssetCard uses fileSize
-                                    };
-
-                                    // Explicitly return the JSX element
+                            {/* Display uploaded assets using AssetCardStep4 */}
+                            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {assetFields.map((field, index) => { // Use field and index from useFieldArray
+                                    // Log field data during map
+                                    console.log(`Rendering AssetCardStep4 for index: ${index}, field data:`, field);
                                     return (
-                                        <div key={asset.id} className="relative group">
-                                            <AssetCard asset={assetCardData} cardClassName="h-full" />
+                                        <div key={field.id} className="relative group">
+                                            {/* Render the new Step 4 card component, passing asset data directly */}
+                                            <AssetCardStep4
+                                                assetIndex={index}
+                                                asset={field as DraftAsset} // Pass the field data as the asset prop
+                                                control={form.control}
+                                                setValue={form.setValue}
+                                                getValues={form.getValues} // Pass getValues from form
+                                                saveProgress={wizard.saveProgress} // Pass saveProgress from context
+                                                availableInfluencers={influencerOptions}
+                                                currency={wizard.wizardState?.budget?.currency ?? 'USD'} // Pass currency
+                                            />
+                                            {/* Keep remove button functionality */}
                                             <div className="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <IconButtonAction
                                                     iconBaseName="faTrashCan"
                                                     hoverColorClass="text-destructive"
-                                                    ariaLabel={`Remove ${assetCardData.name}`}
+                                                    ariaLabel={`Remove asset ${index + 1}`}
                                                     onClick={() => removeAsset(index)}
                                                     className="bg-background/70 hover:bg-background/90 rounded-full p-1 h-6 w-6"
                                                 />

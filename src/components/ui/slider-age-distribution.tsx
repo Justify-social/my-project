@@ -211,30 +211,39 @@ export function AgeDistributionSliderGroup<TFieldValues extends FieldValues>(
 
             {/* Age Distribution Summary - Colored Rounded Rectangles */}
             <div className="mt-6">
-                <FormLabel className="text-sm font-medium text-muted-foreground">Age Distribution Summary</FormLabel>
-                <div className="mt-2 flex flex-wrap gap-2 justify-start items-center">
-                    {AGE_BRACKETS.map((bracket, index) => { // Add index for color cycling
-                        const percentage = currentValues[bracket.key];
-                        const colorClass = SUMMARY_COLORS[index % SUMMARY_COLORS.length]; // Cycle through colors
-                        return (
-                            <div
-                                key={`${bracket.key}-summary`}
-                                className={cn(
-                                    "relative h-12 w-16 rounded-md border-2 flex flex-col items-center justify-center p-1 transition-colors duration-200",
-                                    percentage > 0
-                                        ? colorClass // Apply dynamic color class
-                                        : "border-input bg-transparent opacity-60" // Style for 0%
-                                )}
-                                title={`${bracket.label}: ${percentage.toFixed(0)}%`}
-                            >
-                                <span className={cn(
-                                    "text-xs font-semibold",
-                                    percentage > 0 ? "text-foreground" : "text-muted-foreground" // Adjust text color based on percentage
-                                )}>{percentage.toFixed(0)}%</span>
-                                <span className="text-[10px] text-muted-foreground mt-0.5">{bracket.label}</span>
-                            </div>
-                        );
-                    })}
+                {/* <FormLabel className="text-sm font-medium text-muted-foreground">Age Distribution Summary</FormLabel> */}
+                <div className="mt-2 flex justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start items-center max-w-xl">
+                        {AGE_BRACKETS.map((bracket) => { // Remove index dependency for color
+                            const percentage = currentValues[bracket.key];
+                            // Determine color class based on percentage value
+                            const colorClass = percentage > 10
+                                ? "bg-accent/10 border-accent" // High %
+                                : percentage > 0
+                                    ? "bg-secondary/10 border-secondary" // Low/Mid %
+                                    : "border-input bg-transparent opacity-60"; // Zero %
+
+                            // Ensure the return statement is always reached
+                            return (
+                                <div
+                                    key={`${bracket.key}-summary`}
+                                    className={cn(
+                                        "relative h-12 w-16 rounded-md border-2 flex flex-col items-center justify-center p-1 transition-colors duration-200",
+                                        percentage > 0
+                                            ? colorClass // Apply dynamic color class
+                                            : "border-input bg-transparent opacity-60" // Style for 0%
+                                    )}
+                                    title={`${bracket.label}: ${percentage.toFixed(0)}%`}
+                                >
+                                    <span className={cn(
+                                        "text-xs font-semibold",
+                                        percentage > 0 ? "text-foreground" : "text-muted-foreground" // Adjust text color based on percentage
+                                    )}>{percentage.toFixed(0)}%</span>
+                                    <span className="text-[10px] text-muted-foreground mt-0.5">{bracket.label}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </FormItem>

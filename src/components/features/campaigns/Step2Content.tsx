@@ -131,7 +131,7 @@ function Step2Content() {
             messaging: {
                 mainMessage: wizard.wizardState?.messaging?.mainMessage ?? '',
                 hashtags: wizard.wizardState?.messaging?.hashtags ?? [],
-                keyBenefits: wizard.wizardState?.messaging?.keyBenefits ?? '',
+                keyBenefits: wizard.wizardState?.messaging?.keyBenefits ?? [],
             },
             expectedOutcomes: {
                 memorability: wizard.wizardState?.expectedOutcomes?.memorability ?? '',
@@ -153,7 +153,7 @@ function Step2Content() {
                 messaging: {
                     mainMessage: messaging.mainMessage ?? '',
                     hashtags: messaging.hashtags ?? [],
-                    keyBenefits: messaging.keyBenefits ?? '',
+                    keyBenefits: messaging.keyBenefits ?? [],
                 },
                 expectedOutcomes: {
                     memorability: outcomes.memorability ?? '',
@@ -166,6 +166,8 @@ function Step2Content() {
 
     // State for the hashtag input field
     const [hashtagInput, setHashtagInput] = useState('');
+    // State for the key benefit input field
+    const [keyBenefitInput, setKeyBenefitInput] = useState('');
 
     // Watch form values for autosave
     const watchedValues = form.watch();
@@ -281,6 +283,8 @@ function Step2Content() {
 
     // Watch hashtag array for UI updates
     const currentHashtags = form.watch('messaging.hashtags') ?? [];
+    // Watch key benefits array for UI updates
+    const currentKeyBenefits = form.watch('messaging.keyBenefits') ?? [];
 
     // --- Hashtag Input Handlers ---
     const handleAddHashtag = () => {
@@ -299,6 +303,26 @@ function Step2Content() {
         if (event.key === 'Enter') {
             event.preventDefault(); // Prevent form submission
             handleAddHashtag();
+        }
+    };
+
+    // --- Key Benefit Input Handlers ---
+    const handleAddKeyBenefit = () => {
+        const newBenefit = keyBenefitInput.trim();
+        if (newBenefit && !(currentKeyBenefits.includes(newBenefit))) {
+            form.setValue('messaging.keyBenefits', [...currentKeyBenefits, newBenefit], { shouldValidate: true, shouldDirty: true });
+            setKeyBenefitInput(''); // Clear input
+        }
+    };
+
+    const handleRemoveKeyBenefit = (benefitToRemove: string) => {
+        form.setValue('messaging.keyBenefits', currentKeyBenefits.filter(b => b !== benefitToRemove), { shouldValidate: true, shouldDirty: true });
+    };
+
+    const handleKeyBenefitKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission
+            handleAddKeyBenefit();
         }
     };
 
@@ -479,7 +503,7 @@ function Step2Content() {
                             <CardDescription>Define the key messages and value propositions.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <FormField control={form.control} name="messaging.mainMessage" render={({ field }) => (<FormItem><FormLabel>Main Message *</FormLabel><FormControl><Textarea placeholder="Single most important takeaway..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            <FormField control={form.control} name="messaging.mainMessage" render={({ field }) => (<FormItem><FormLabel>Main Message</FormLabel><FormControl><Textarea placeholder="Single most important takeaway..." {...field} /></FormControl><FormMessage /></FormItem>)} />
 
                             {/* --- Hashtag Input - REVISED --- */}
                             <FormItem>
@@ -516,7 +540,39 @@ function Step2Content() {
                             </FormItem>
                             {/* --- End Hashtag Input --- */}
 
-                            <FormField control={form.control} name="messaging.keyBenefits" render={({ field }) => (<FormItem><FormLabel>Key Benefits / Value Proposition *</FormLabel><FormControl><Textarea placeholder="List 3-5 key benefits..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            {/* --- Key Benefit Input - REVISED --- */}
+                            <FormItem>
+                                <FormLabel>Key Benefits / Value Proposition</FormLabel>
+                                {/* Input first */}
+                                <FormControl>
+                                    <Input
+                                        placeholder="Type a key benefit and press Enter..."
+                                        value={keyBenefitInput}
+                                        onChange={(e) => setKeyBenefitInput(e.target.value)}
+                                        onKeyDown={handleKeyBenefitKeyDown}
+                                    />
+                                </FormControl>
+                                {/* Badges display below input */}
+                                <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center"> {/* Added pt-2 */}
+                                    {currentKeyBenefits.map((benefit) => (
+                                        <Badge key={benefit} variant="secondary" className="pl-2 pr-1 text-sm">
+                                            {benefit}
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                onClick={() => handleRemoveKeyBenefit(benefit)}
+                                            >
+                                                <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                <span className="sr-only">Remove key benefit {benefit}</span>
+                                            </Button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <FormMessage>{form.formState.errors.messaging?.keyBenefits?.message}</FormMessage>
+                            </FormItem>
+                            {/* --- End Key Benefit Input --- */}
                         </CardContent>
                     </Card>
 
@@ -527,16 +583,16 @@ function Step2Content() {
                             <CardDescription>Outline expected outcomes based on objectives and KPIs.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <FormField control={form.control} name="expectedOutcomes.memorability" render={({ field }) => (<FormItem><FormLabel>Memorability / Ad Recall Hypothesis</FormLabel><FormControl><Textarea placeholder="e.g., We expect Ad Recall to increase by 15%..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name="expectedOutcomes.purchaseIntent" render={({ field }) => (<FormItem><FormLabel>Purchase/Action Intent Hypothesis *</FormLabel><FormControl><Textarea placeholder="e.g., Purchase intent will rise by 10%..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name="expectedOutcomes.brandPerception" render={({ field }) => (<FormItem><FormLabel>Brand Perception Hypothesis</FormLabel><FormControl><Textarea placeholder="e.g., Campaign will shift perception towards..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            <FormField control={form.control} name="expectedOutcomes.memorability" render={({ field }) => (<FormItem><FormLabel>Memorability / Ad Recall Hypothesis</FormLabel><FormControl><Textarea placeholder="We expect Ad Recall to increase by 15%..." {...field} value={field.value as string ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                            <FormField control={form.control} name="expectedOutcomes.purchaseIntent" render={({ field }) => (<FormItem><FormLabel>Purchase/Action Intent Hypothesis</FormLabel><FormControl><Textarea placeholder="Purchase intent will rise by 10%..." {...field} value={field.value as string ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                            <FormField control={form.control} name="expectedOutcomes.brandPerception" render={({ field }) => (<FormItem><FormLabel>Brand Perception Hypothesis</FormLabel><FormControl><Textarea placeholder="Campaign will shift perception towards..." {...field} value={field.value as string ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                         </CardContent>
                     </Card>
 
                     {/* Features Card */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center"><Icon iconId="faListLight" className="w-5 h-5 mr-2 text-accent" />Features to Include *</CardTitle>
+                            <CardTitle className="flex items-center"><Icon iconId="faListLight" className="w-5 h-5 mr-2 text-accent" />Features to Include</CardTitle>
                             <CardDescription>Select features to enable for this campaign.</CardDescription>
                         </CardHeader>
                         <CardContent>

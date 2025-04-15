@@ -9,6 +9,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { useUser } from '@clerk/nextjs';
 import { LoadingSkeleton, TableSkeleton } from '@/components/ui';
 import { Button } from '@/components/ui/button';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -990,66 +991,38 @@ const ClientCampaignList: React.FC = () => {
                         {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2 justify-center">
-                          <span
-                            className="group text-secondary hover:text-accent cursor-pointer p-1"
+                        <div className="flex items-center space-x-1 justify-center">
+                          <IconButtonAction
+                            iconBaseName="faEye"
+                            hoverColorClass="text-accent"
+                            ariaLabel="View campaign"
                             onClick={() => handleViewCampaign(campaign.id.toString())}
-                            aria-label="View campaign"
-                          >
-                            <Icon
-                              iconId="faEyeLight"
-                              className="group-hover:hidden block w-4 h-4"
-                            />
-                            <Icon
-                              iconId="faEyeSolid"
-                              className="hidden group-hover:block w-4 h-4"
-                            />
-                          </span>
+                            className="w-8 h-8"
+                          />
                           <Link
                             href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                           >
-                            <span
-                              className="group text-secondary hover:text-accent cursor-pointer p-1"
-                              aria-label="Edit campaign"
-                            >
-                              <Icon
-                                iconId="faPenToSquareLight"
-                                className="group-hover:hidden block w-4 h-4"
-                              />
-                              <Icon
-                                iconId="faPenToSquareSolid"
-                                className="hidden group-hover:block w-4 h-4"
-                              />
-                            </span>
+                            <IconButtonAction
+                              iconBaseName="faPenToSquare"
+                              hoverColorClass="text-accent"
+                              ariaLabel="Edit campaign"
+                              className="w-8 h-8"
+                            />
                           </Link>
-                          <span
-                            className="group text-secondary hover:text-accent cursor-pointer p-1"
+                          <IconButtonAction
+                            iconBaseName="faCopy"
+                            hoverColorClass="text-accent"
+                            ariaLabel="Duplicate campaign"
                             onClick={() => handleDuplicateClick(campaign)}
-                            aria-label="Duplicate campaign"
-                          >
-                            <Icon
-                              iconId="faCopyLight"
-                              className="group-hover:hidden block w-4 h-4"
-                            />
-                            <Icon
-                              iconId="faCopySolid"
-                              className="hidden group-hover:block w-4 h-4"
-                            />
-                          </span>
-                          <span
-                            className="group text-secondary hover:text-destructive cursor-pointer p-1"
+                            className="w-8 h-8"
+                          />
+                          <IconButtonAction
+                            iconBaseName="faTrashCan"
+                            hoverColorClass="text-destructive"
+                            ariaLabel="Delete campaign"
                             onClick={() => handleDeleteClick(campaign)}
-                            aria-label="Delete campaign"
-                          >
-                            <Icon
-                              iconId="faTrashCanLight"
-                              className="group-hover:hidden block w-4 h-4"
-                            />
-                            <Icon
-                              iconId="faTrashCanSolid"
-                              className="hidden group-hover:block w-4 h-4"
-                            />
-                          </span>
+                            className="w-8 h-8"
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1205,46 +1178,38 @@ const ClientCampaignList: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 border-t border-divider pt-3 mt-3">
-                <span
-                  className="group text-secondary hover:text-accent cursor-pointer p-1"
+              <div className="flex justify-end space-x-1 border-t border-divider pt-3 mt-3">
+                <IconButtonAction
+                  iconBaseName="faEye"
+                  hoverColorClass="text-accent"
+                  ariaLabel="View campaign"
                   onClick={() => handleViewCampaign(campaign.id.toString())}
-                  aria-label="View campaign"
+                  className="w-8 h-8"
+                />
+                <Link
+                  href={`/campaigns/wizard/step-1?id=${campaign.id}`}
                 >
-                  <Icon iconId="faEyeLight" className="group-hover:hidden block w-4 h-4" />
-                  <Icon iconId="faEyeSolid" className="hidden group-hover:block w-4 h-4" />
-                </span>
-                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
-                  <span
-                    className="group text-secondary hover:text-accent cursor-pointer p-1"
-                    aria-label="Edit campaign"
-                  >
-                    <Icon
-                      iconId="faPenToSquareLight"
-                      className="group-hover:hidden block w-4 h-4"
-                    />
-                    <Icon
-                      iconId="faPenToSquareSolid"
-                      className="hidden group-hover:block w-4 h-4"
-                    />
-                  </span>
+                  <IconButtonAction
+                    iconBaseName="faPenToSquare"
+                    hoverColorClass="text-accent"
+                    ariaLabel="Edit campaign"
+                    className="w-8 h-8"
+                  />
                 </Link>
-                <span
-                  className="group text-secondary hover:text-accent cursor-pointer p-1"
+                <IconButtonAction
+                  iconBaseName="faCopy"
+                  hoverColorClass="text-accent"
+                  ariaLabel="Duplicate campaign"
                   onClick={() => handleDuplicateClick(campaign)}
-                  aria-label="Duplicate campaign"
-                >
-                  <Icon iconId="faCopyLight" className="group-hover:hidden block w-4 h-4" />
-                  <Icon iconId="faCopySolid" className="hidden group-hover:block w-4 h-4" />
-                </span>
-                <span
-                  className="group text-secondary hover:text-destructive cursor-pointer p-1"
+                  className="w-8 h-8"
+                />
+                <IconButtonAction
+                  iconBaseName="faTrashCan"
+                  hoverColorClass="text-destructive"
+                  ariaLabel="Delete campaign"
                   onClick={() => handleDeleteClick(campaign)}
-                  aria-label="Delete campaign"
-                >
-                  <Icon iconId="faTrashCanLight" className="group-hover:hidden block w-4 h-4" />
-                  <Icon iconId="faTrashCanSolid" className="hidden group-hover:block w-4 h-4" />
-                </span>
+                  className="w-8 h-8"
+                />
               </div>
             </div>
           );

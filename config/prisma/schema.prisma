@@ -16,6 +16,8 @@ model CampaignWizard {
   status           Status          @default(DRAFT)
   name             String          @db.VarChar(255)
   businessGoal     String
+  brand            String
+  website          String?
   startDate        DateTime
   endDate          DateTime
   timeZone         String
@@ -310,9 +312,11 @@ enum Currency {
 }
 
 enum Position {
-  Manager
-  Director
   VP
+  Director
+  Manager
+  Researcher
+  Associate
 }
 
 enum CreativeAssetType {

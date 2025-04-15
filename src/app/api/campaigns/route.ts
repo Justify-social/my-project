@@ -16,6 +16,18 @@ import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
 import { withValidation } from '@/config/middleware/api/validate-api';
 import { tryCatch } from '@/config/middleware/api/handle-api-errors';
+import {
+  DraftCampaignDataSchema,
+  ContactSchema,
+  BudgetSchema,
+  InfluencerSchema,
+  KPIEnum,
+  FeatureEnum,
+  StatusEnum,
+  DraftAssetSchema,
+  LocationSchema,
+  DemographicsSchema
+} from '@/components/features/campaigns/types';
 
 // Define schemas for campaign creation validation
 // Note: Frontend uses 'Instagram', backend uses 'INSTAGRAM' - transformation required
@@ -224,6 +236,83 @@ const campaignFlexibleSchema = z.object({
   budget: z.any().optional(),
 });
 
+// Define a specific schema for the POST API endpoint validation
+// Replicates DraftCampaignDataSchema structure but ensures dates expect strings
+const CampaignPostApiSchema = z.object({
+  id: z.string().optional(),
+  createdAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
+  updatedAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
+  currentStep: z.number().default(1),
+  isComplete: z.boolean().default(false),
+  status: StatusEnum.default('DRAFT'),
+  name: z.string().min(1, { message: "Campaign name is required" }),
+  businessGoal: z.string().nullable().optional(),
+  brand: z.string().min(1, { message: "Brand name is required" }),
+  website: z.string().url({ message: "Invalid website URL" }).nullable().optional(),
+  // Use z.string().datetime() for API date string handling
+  startDate: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
+  endDate: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),   // Expect string
+  timeZone: z.string().nullable().optional(),
+  primaryContact: ContactSchema.nullable().optional(),
+  secondaryContact: z.preprocess(
+    (val) => {
+      const contact = val as Partial<z.infer<typeof ContactSchema>> | null;
+      if (contact && typeof contact === 'object' && !contact.firstName && !contact.surname && !contact.email) {
+        return null;
+      }
+      return val;
+    },
+    ContactSchema.nullable().optional()
+  ),
+  additionalContacts: z.array(ContactSchema).default([]),
+  budget: BudgetSchema.nullable().optional(),
+  Influencer: z.array(InfluencerSchema.extend({ // Ensure Influencer schema expects string dates here too
+    createdAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
+    updatedAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
+  })).optional(),
+  step1Complete: z.boolean().default(false),
+  primaryKPI: KPIEnum.nullable().optional(),
+  secondaryKPIs: z.array(KPIEnum).nullable().optional(),
+  messaging: z.object({}).passthrough().nullable().optional(),
+  expectedOutcomes: z.object({}).passthrough().nullable().optional(),
+  features: z.array(FeatureEnum).nullable().optional(),
+  step2Complete: z.boolean().default(false),
+  demographics: DemographicsSchema.nullable().optional(),
+  locations: z.array(LocationSchema).nullable().optional(),
+  targeting: z.object({}).passthrough().nullable().optional(),
+  competitors: z.array(z.string()).nullable().optional(),
+  step3Complete: z.boolean().default(false),
+  assets: z.array(DraftAssetSchema).default([]),
+  guidelines: z.string().nullable().optional(),
+  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]),
+  notes: z.string().nullable().optional(),
+  step4Complete: z.boolean().default(false),
+  userId: z.string().nullable().optional(),
+}).passthrough()
+  // Re-apply refinements needed for API validation (budget, dates)
+  .refine(data => {
+    if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
+      return data.budget.socialMedia <= data.budget.total;
+    }
+    return true;
+  }, {
+    message: "Social media budget cannot exceed total budget",
+    path: ["budget", "socialMedia"],
+  })
+  .refine(data => {
+    try {
+      // Ensure dates are valid ISO strings before comparison
+      if (data.startDate && data.endDate && z.string().datetime({ offset: true }).safeParse(data.startDate).success && z.string().datetime({ offset: true }).safeParse(data.endDate).success) {
+        // Compare Date objects created from strings
+        return new Date(data.endDate) >= new Date(data.startDate);
+      }
+    } catch (e) { return false; }
+    return true;
+  }, {
+    message: "End date must be on or after start date",
+    path: ["endDate"],
+  });
+
 // GET handler - List campaigns
 export async function GET(request: NextRequest) {
   // --- Add runtime logging for DATABASE_URL ---
@@ -290,177 +379,97 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST handler - Create campaign with flexible schema
+// POST handler - Create campaign
 export const POST = withValidation(
-  campaignFlexibleSchema,
-  async (data: z.infer<typeof campaignFlexibleSchema>, request: NextRequest) => {
+  CampaignPostApiSchema, // Use the API-specific schema
+  async (data: z.infer<typeof CampaignPostApiSchema>, request: NextRequest) => {
     try {
-      // Log the raw request data
+      // Log the raw request data (now validated against the stricter schema)
       console.log('Raw request data:', JSON.stringify(data, null, 2));
 
       // Import the EnumTransformers utility
       const { EnumTransformers } = await import('@/utils/enum-transformers');
-
-      // Check if we're handling a draft submission
-      const isDraft = data.status === 'draft';
-      console.log(`Processing ${isDraft ? 'DRAFT' : 'COMPLETE'} submission`);
-
-      // Apply stricter validation for non-drafts inside the handler
-      if (!isDraft) {
-        const requiredFields = [
-          'businessGoal',
-          'startDate',
-          'endDate',
-          'timeZone',
-          'currency',
-        ] as const;
-        const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
-
-        if (missingFields.length > 0) {
-          console.error(`Missing required fields: ${missingFields.join(', ')}`);
-          return NextResponse.json(
-            {
-              success: false,
-              error: `Missing required fields for complete submission: ${missingFields.join(', ')}`,
-              details: { missingFields },
-            },
-            { status: 400 }
-          );
-        }
-
-        // Validate influencers for non-draft submissions
-        if (data.influencers && Array.isArray(data.influencers)) {
-          // Check if any influencer is missing required fields
-          const invalidInfluencers = data.influencers.filter(
-            influencer => influencer && (!influencer.platform || !influencer.handle)
-          );
-
-          if (invalidInfluencers.length > 0) {
-            console.error('Invalid influencers data:', invalidInfluencers);
-            return NextResponse.json(
-              {
-                success: false,
-                error: 'Influencer data incomplete',
-                details: { invalidInfluencers },
-              },
-              { status: 400 }
-            );
-          }
-        }
-      } else {
-        // For drafts, filter out any incomplete influencer entries
-        if (data.influencers && Array.isArray(data.influencers)) {
-          data.influencers = data.influencers.filter(
-            influencer => influencer && influencer.platform && influencer.handle
-          );
-        }
-      }
 
       // Transform any enum values from frontend to backend format
       // Note: This will handle Currency, Platform, Position, KPI and Feature enums
       const transformedData = EnumTransformers.transformObjectToBackend(data);
       console.log('Transformed data for API:', JSON.stringify(transformedData, null, 2));
 
-      // Extract budget data from either the budget object or top-level properties
-      const budgetData = transformedData.budget || {
-        total: transformedData.totalBudget || 0,
-        currency: transformedData.currency || 'USD',
-        socialMedia: transformedData.socialMediaBudget || 0,
-      };
-
+      // Extract budget data directly from the validated object
+      const budgetData = transformedData.budget || { total: 0, currency: 'USD', socialMedia: 0 }; // Use default if null/undefined
       console.log('Budget data:', JSON.stringify(budgetData, null, 2));
 
-      // For drafts, be more lenient with contact data handling
-      // Initialize with empty objects for drafts
-      const primaryContactData =
-        transformedData.primaryContact &&
-        (transformedData.primaryContact.firstName || transformedData.primaryContact.email)
-          ? {
-              firstName: transformedData.primaryContact.firstName || '',
-              surname: transformedData.primaryContact.surname || '',
-              email: transformedData.primaryContact.email || '',
-              position: transformedData.primaryContact.position || 'Manager',
-            }
-          : isDraft
-            ? {}
-            : null;
-
-      const secondaryContactData =
-        transformedData.secondaryContact &&
-        (transformedData.secondaryContact.firstName || transformedData.secondaryContact.email)
-          ? {
-              firstName: transformedData.secondaryContact.firstName || '',
-              surname: transformedData.secondaryContact.surname || '',
-              email: transformedData.secondaryContact.email || '',
-              position: transformedData.secondaryContact.position || 'Manager',
-            }
-          : isDraft
-            ? {}
-            : null;
-
-      // Convert to JSON strings for database storage
-      const primaryContactJson = primaryContactData
-        ? JSON.stringify(primaryContactData)
+      // Contact data is now validated correctly, handle nulls properly
+      const primaryContactJson = transformedData.primaryContact
+        ? JSON.stringify(transformedData.primaryContact)
         : Prisma.JsonNull;
-      const secondaryContactJson = secondaryContactData
-        ? JSON.stringify(secondaryContactData)
+      const secondaryContactJson = transformedData.secondaryContact // Already processed by preprocess
+        ? JSON.stringify(transformedData.secondaryContact)
         : Prisma.JsonNull;
 
       console.log('Primary contact:', primaryContactJson);
       console.log('Secondary contact:', secondaryContactJson);
 
-      // Prepare DB creation data - only include fields that are in the database schema
+      // Prepare DB creation data - converting date strings to Date objects
       const dbData = {
         id: uuidv4(),
         name: transformedData.name,
         businessGoal: transformedData.businessGoal || '',
-        // Ensure we always have valid dates
-        startDate:
-          transformedData.startDate && transformedData.startDate !== ''
-            ? new Date(transformedData.startDate)
-            : new Date(), // Default to current date if not provided
-        endDate:
-          transformedData.endDate && transformedData.endDate !== ''
-            ? new Date(transformedData.endDate)
-            : new Date(), // Default to current date if not provided
+        brand: transformedData.brand || '',
+        website: transformedData.website || null,
+        // Convert validated date strings to Date objects for Prisma
+        startDate: transformedData.startDate ? new Date(transformedData.startDate) : new Date(),
+        endDate: transformedData.endDate ? new Date(transformedData.endDate) : new Date(),
         timeZone: transformedData.timeZone || 'UTC',
-        primaryContact: primaryContactJson,
-        secondaryContact: secondaryContactJson,
-        budget: JSON.stringify(budgetData),
-        updatedAt: new Date(),
-        status: isDraft ? Status.DRAFT : Status.COMPLETED,
+        // Pass objects/arrays directly for Json/Json[] fields
+        primaryContact: transformedData.primaryContact || Prisma.JsonNull,
+        secondaryContact: transformedData.secondaryContact || Prisma.JsonNull,
+        additionalContacts: transformedData.additionalContacts || [],
+        budget: transformedData.budget || Prisma.JsonNull,
+        primaryKPI: transformedData.primaryKPI,
+        secondaryKPIs: transformedData.secondaryKPIs || [], // Prisma expects Enum[]
+        features: transformedData.features || [], // Prisma expects Enum[]
+        messaging: transformedData.messaging || Prisma.JsonNull,
+        expectedOutcomes: transformedData.expectedOutcomes || Prisma.JsonNull,
+        demographics: transformedData.demographics || Prisma.JsonNull,
+        locations: transformedData.locations || [], // Pass array directly
+        targeting: transformedData.targeting || Prisma.JsonNull,
+        competitors: transformedData.competitors || [], // Prisma expects String[]
+        assets: transformedData.assets || [], // Pass array directly
+        guidelines: transformedData.guidelines,
+        requirements: transformedData.requirements || [], // Pass array directly
+        notes: transformedData.notes,
+        status: Status.DRAFT,
         step1Complete: true,
         step2Complete: false,
         step3Complete: false,
         step4Complete: false,
-        // Initialize arrays
-        secondaryKPIs: [],
-        features: [],
-        locations: [],
-        competitors: [],
-        assets: [],
-        requirements: [],
+        isComplete: false,
+        currentStep: 1,
+        updatedAt: new Date(),
+        // userId: ??? 
       };
 
-      console.log('Database creation data:', JSON.stringify(dbData, null, 2));
+      console.log('Database creation data (Corrected Types):', JSON.stringify(dbData, null, 2));
 
       try {
         // Create campaign and handle influencers in the same transaction
         const campaign = await prisma.$transaction(async tx => {
           // First create the campaign
           const newCampaign = await tx.campaignWizard.create({
-            data: dbData,
+            data: dbData as any, // Use 'as any' carefully or ensure dbData matches Prisma types
           });
 
           // If there are influencers in the request, create them
+          // Use transformedData.Influencer (capital I)
           if (
-            transformedData.influencers &&
-            Array.isArray(transformedData.influencers) &&
-            transformedData.influencers.length > 0
+            transformedData.Influencer &&
+            Array.isArray(transformedData.Influencer) &&
+            transformedData.Influencer.length > 0
           ) {
             // Filter out any incomplete influencer data
-            const validInfluencers = transformedData.influencers.filter(
-              (inf): inf is NonNullable<typeof inf> =>
+            const validInfluencers = transformedData.Influencer.filter(
+              (inf: any): inf is NonNullable<typeof inf> =>
                 !!inf &&
                 typeof inf === 'object' &&
                 typeof inf.platform === 'string' &&

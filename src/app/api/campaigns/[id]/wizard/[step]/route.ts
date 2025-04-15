@@ -66,6 +66,8 @@ export const PATCH = tryCatch(
         // Map validated Step 1 fields
         if ('name' in dataToSave) mappedData.name = dataToSave.name;
         if ('businessGoal' in dataToSave) mappedData.businessGoal = dataToSave.businessGoal;
+        if ('brand' in dataToSave) mappedData.brand = dataToSave.brand;
+        if ('website' in dataToSave) mappedData.website = dataToSave.website;
         if ('startDate' in dataToSave && dataToSave.startDate) mappedData.startDate = new Date(dataToSave.startDate);
         if ('endDate' in dataToSave && dataToSave.endDate) mappedData.endDate = new Date(dataToSave.endDate);
         if ('timeZone' in dataToSave) mappedData.timeZone = dataToSave.timeZone;
@@ -190,7 +192,7 @@ export const PATCH = tryCatch(
     }
 
     // --- Influencer Handling (only if DB update succeeded) ---
-    const influencerData = body.influencers;
+    const influencerData = body.Influencer;
     // Use the result from the main update as the default
     let campaignDataForResponse = updatedCampaign;
     let messageSuffix = '';

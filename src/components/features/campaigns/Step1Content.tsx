@@ -57,6 +57,8 @@ import { ProgressBarWizard } from "@/components/ui/progress-bar-wizard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { differenceInDays, isValid as isValidDate } from 'date-fns';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
+import timezonesData from '@/lib/timezones.json'; // Import the static timezone data
+import { logger } from '@/lib/logger';
 
 // --- Formatting Helpers ---
 
@@ -226,7 +228,7 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
                                     <FormLabel>Handle / Username *</FormLabel>
                                     <FormControl>
                                         <div className="relative">
-                                            <Input placeholder="e.g., @username or channel_name" {...field} />
+                                            <Input placeholder="@username or channel_name" {...field} />
                                             {isValidating && (
                                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                                                     <Icon iconId="faSpinnerThirdLight" className="h-4 w-4 text-muted-foreground animate-spin" />
@@ -387,45 +389,15 @@ async function fetchExchangeRates(baseCurrency: string = 'USD'): Promise<{
     }
 }
 
-// --- Timezone Helper ---
-// Function to get a list of timezone options (Identifier and formatted name)
-const getTimezoneOptions = () => {
-    if (typeof Intl === 'undefined' || !Intl.supportedValuesOf) {
-        // Fallback for environments without Intl.supportedValuesOf (e.g., older Node)
-        return [{ value: 'UTC', label: 'UTC (Coordinated Universal Time)' }];
-    }
-    const timezones = Intl.supportedValuesOf('timeZone');
-    return timezones.map(tz => {
-        let displayName = tz.replace(/_/g, ' '); // Basic formatting
-        try {
-            // Attempt to get a more descriptive name (might vary by locale/browser)
-            const longName = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'long' })
-                .formatToParts().find(part => part.type === 'timeZoneName')?.value;
-            if (longName && longName !== tz) {
-                // Try to extract abbreviation (less reliable)
-                const shortName = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
-                    .formatToParts().find(part => part.type === 'timeZoneName')?.value;
-                // Prioritize Abbreviation (Long Name) format if possible
-                displayName = shortName && shortName !== longName ? `${shortName} (${longName})` : longName;
-                // Fallback if longName is the same as tz identifier
-                if (displayName === tz) displayName = tz.replace(/_/g, ' ');
-            }
-        } catch (e) {
-            console.warn(`Could not format timezone name for ${tz}:`, e);
-        }
-        return { value: tz, label: displayName };
-    }).sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
-};
-
-// Generate the timezone options once
-const TIMEZONE_OPTIONS = getTimezoneOptions();
-
 // --- Duration Helper ---
-const calculateDuration = (start: Date | string | undefined | null, end: Date | string | undefined | null): string => {
-    if (!start || !end) return '...';
-    const startDate = start instanceof Date ? start : new Date(start);
-    const endDate = end instanceof Date ? end : new Date(end);
+const calculateDuration = (startStr: string | null | undefined, endStr: string | null | undefined): string => {
+    // Explicitly handle null/undefined/empty inputs
+    if (!startStr || !endStr) return '...';
 
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    // Check for invalid date parsing
     if (!isValidDate(startDate) || !isValidDate(endDate) || endDate < startDate) {
         return '...';
     }
@@ -452,15 +424,17 @@ function Step1Content() {
         });
     }, []); // Empty dependency array means run once on mount
 
-    // Initialize form with static defaults
-    const form = useForm<Step1FormData>({
+    // Initialize form with static defaults - PROVIDE EXPLICIT TYPE
+    const form = useForm<z.infer<typeof Step1ValidationSchema>>({
         resolver: zodResolver(Step1ValidationSchema),
         defaultValues: {
             name: '',
             businessGoal: '',
-            startDate: new Date(),
-            endDate: new Date(),
-            timeZone: 'GMT', // Initial static default
+            brand: '',
+            website: '',
+            startDate: null,
+            endDate: null,
+            timeZone: 'GMT',
             primaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             secondaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             additionalContacts: [],
@@ -489,9 +463,10 @@ function Step1Content() {
             const formattedData: Step1FormData = {
                 name: wizardState?.name || '',
                 businessGoal: wizardState?.businessGoal || '',
-                startDate: wizardState?.startDate ? new Date(wizardState.startDate) : new Date(),
-                endDate: wizardState?.endDate ? new Date(wizardState.endDate) : new Date(),
-                // Use loaded timezone, fallback to detected, fallback to GMT
+                brand: wizardState?.brand || '',
+                website: wizardState?.website || '',
+                startDate: wizardState?.startDate || null,
+                endDate: wizardState?.endDate || null,
                 timeZone: wizardState?.timeZone || detectedTimezone || 'GMT',
                 primaryContact: {
                     firstName: wizardState?.primaryContact?.firstName || '',
@@ -556,11 +531,6 @@ function Step1Content() {
 
     // Watch relevant fields for side effects
     const watchedCurrency = form.watch('budget.currency'); // Watch specifically for currency changes
-
-    // Watch dates for duration calculation
-    const watchedStartDate = form.watch('startDate');
-    const watchedEndDate = form.watch('endDate');
-    const campaignDuration = useMemo(() => calculateDuration(watchedStartDate, watchedEndDate), [watchedStartDate, watchedEndDate]);
 
     // Watch timezone field
     const watchedTimezone = form.watch('timeZone');
@@ -732,8 +702,10 @@ function Step1Content() {
         const payload: Partial<DraftCampaignData> = {
             name: data.name,
             businessGoal: data.businessGoal,
-            startDate: data.startDate instanceof Date ? data.startDate.toISOString() : data.startDate || '',
-            endDate: data.endDate instanceof Date ? data.endDate.toISOString() : data.endDate || '',
+            brand: data.brand,
+            website: data.website,
+            startDate: data.startDate,
+            endDate: data.endDate,
             timeZone: data.timeZone,
             primaryContact: data.primaryContact,
             secondaryContact: data.secondaryContact,
@@ -753,22 +725,16 @@ function Step1Content() {
         console.log("Submitting Step 1 data and navigating:", payload);
         updateWizardState(payload); // Update state first
 
-        // Ensure save completes before navigating
-        const saved = await saveProgress(payload); // Await saveProgress from context
+        // Ensure save completes before navigating and get the ID
+        const savedCampaignId = await saveProgress(payload);
 
-        if (saved) {
-            console.log("Save successful, navigating to Step 2.");
-            // form.reset(data, { keepValues: true, keepDirty: false }); // Reset form state after successful save & navigation
-            const currentCampaignId = wizardState?.campaignId || searchParams?.get('id');
-            if (currentCampaignId) {
-                router.push(`/campaigns/wizard/step-2?id=${currentCampaignId}`);
-            } else {
-                console.error("Cannot navigate, campaign ID is missing.");
-                toast.error("Could not navigate: campaign ID not found.");
-            }
+        if (savedCampaignId) { // Check if we got an ID back
+            logger.info("Save successful, navigating to Step 2."); // Use logger
+            // Use the returned/confirmed ID for navigation
+            router.push(`/campaigns/wizard/step-2?id=${savedCampaignId}`);
         } else {
             toast.error("Failed to save progress before navigating.");
-            console.error("Save failed, navigation aborted.");
+            logger.error("Save failed, navigation aborted."); // Use logger
         }
     };
 
@@ -803,65 +769,126 @@ function Step1Content() {
                                 <CardTitle>Basic Information</CardTitle>
                                 <CardDescription>Enter the core details for your campaign.</CardDescription>
                             </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Campaign Name & Business Goal still take full width initially, then split on md */}
-                                <FormField control={form.control} name="name" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Campaign Name *</FormLabel><FormControl><Input placeholder="e.g., Summer Sale Launch" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                <FormField control={form.control} name="businessGoal" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Business Goal</FormLabel><FormControl><Textarea placeholder="What is the main objective?" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                            <CardContent className="space-y-6">
+                                {/* Row 1: Campaign Name & Business Goal */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Campaign Name *</FormLabel><FormControl><Input placeholder="Summer Sale Launch" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    <FormField control={form.control} name="businessGoal" render={({ field }) => (<FormItem><FormLabel>Business Goal</FormLabel><FormControl><Textarea placeholder="What is the main objective?" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                                </div>
+                                {/* Row 2: Brand & Website */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="brand"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Brand Name *</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Acme Corporation" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="website"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Website</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="https://www.example.com" {...field} value={field.value ?? ''} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                                {/* Campaign Duration Section (Column 1) */}
-                                <div className="md:col-span-1 space-y-2"> {/* Container for the first column */}
-                                    <FormLabel>Campaign Duration *</FormLabel>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {/* Start Date Field */}
-                                        <FormField
-                                            control={form.control}
-                                            name="startDate"
-                                            render={({ field }) => (
-                                                // Add relative positioning context for the absolute label
-                                                <FormItem className="flex flex-col relative">
-                                                    <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">Start Date</FormLabel>
-                                                    <DatePicker
-                                                        value={field.value ? new Date(field.value) : undefined}
-                                                        onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
-                                                        displayFormat="dd/MM/yyyy"
-                                                        className="w-full pt-3" // Increased padding-top slightly
-                                                        placeholder="Select Start Date"
-                                                    />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        {/* End Date Field */}
-                                        <FormField
-                                            control={form.control}
-                                            name="endDate"
-                                            render={({ field }) => (
-                                                // Add relative positioning context for the absolute label
-                                                <FormItem className="flex flex-col relative">
-                                                    <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">End Date</FormLabel>
-                                                    <DatePicker
-                                                        value={field.value ? new Date(field.value) : undefined}
-                                                        onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
-                                                        displayFormat="dd/MM/yyyy"
-                                                        className="w-full pt-3" // Increased padding-top slightly
-                                                        placeholder="Select End Date"
-                                                    />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                        {/* --- NEW CARD for Schedule & Timezone --- */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Schedule & Timezone</CardTitle>
+                                <CardDescription>Set the campaign dates and select the relevant timezone.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Campaign Duration Section (Moved Here) */}
+                                <div className="md:col-span-1 space-y-4"> {/* Container for Duration */}
+                                    <div> {/* Group for Duration Inputs + Display */}
+                                        <FormLabel>Campaign Duration *</FormLabel>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2"> {/* Added mt-2 */}
+                                            {/* Start Date Field */}
+                                            <FormField
+                                                control={form.control}
+                                                name="startDate"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col relative">
+                                                        <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">Start Date</FormLabel>
+                                                        <DatePicker
+                                                            value={field.value ? new Date(field.value) : undefined}
+                                                            onChange={(date: Date | undefined) => {
+                                                                field.onChange(date ? date.toISOString() : null);
+                                                                form.trigger('endDate');
+                                                            }}
+                                                            displayFormat="dd/MM/yyyy"
+                                                            className="w-full pt-3"
+                                                            placeholder="Select Start Date"
+                                                        />
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            {/* End Date Field */}
+                                            <FormField
+                                                control={form.control}
+                                                name="endDate"
+                                                render={({ field }) => {
+                                                    // Get string value and CAST to expected type
+                                                    const currentStartDateStr = form.getValues("startDate") as string | null;
+                                                    const disabledBefore = (date: Date) => {
+                                                        if (!currentStartDateStr) return false; // Check if string exists
+                                                        const currentStartDate = new Date(currentStartDateStr);
+                                                        if (!isValidDate(currentStartDate)) {
+                                                            return false; // Don't disable if start date is invalid
+                                                        }
+                                                        // Disable dates strictly BEFORE the start date
+                                                        return date < currentStartDate;
+                                                    };
+
+                                                    return (
+                                                        <FormItem className="flex flex-col relative">
+                                                            <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">End Date</FormLabel>
+                                                            <DatePicker
+                                                                value={field.value ? new Date(field.value) : undefined}
+                                                                onChange={(date: Date | undefined) => {
+                                                                    field.onChange(date ? date.toISOString() : null);
+                                                                    form.trigger('endDate');
+                                                                }}
+                                                                displayFormat="dd/MM/yyyy"
+                                                                className="w-full pt-3"
+                                                                placeholder="Select End Date"
+                                                                disabled={disabledBefore}
+                                                            />
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    );
+                                                }}
+                                            />
+                                        </div>
+                                        {/* Campaign Duration Display */}
+                                        <Alert variant="default" className="mt-4">
+                                            <AlertDescription className="flex items-center text-sm">
+                                                <Icon iconId="faCircleInfoLight" className="h-4 w-4 mr-2 flex-shrink-0" />
+                                                <span>Campaign Duration: {calculateDuration(form.getValues('startDate') as string | null, form.getValues('endDate') as string | null)}</span>
+                                            </AlertDescription>
+                                        </Alert>
                                     </div>
-                                    {/* Campaign Duration Display (inside the first column div)*/}
-                                    <Alert variant="default" className="mt-4">
-                                        <AlertDescription className="flex items-center text-sm">
-                                            <Icon iconId="faCircleInfoLight" className="h-4 w-4 mr-2 flex-shrink-0" />
-                                            <span>Campaign Duration: {campaignDuration}</span>
-                                        </AlertDescription>
-                                    </Alert>
                                 </div>
 
-                                {/* Timezone Section (Column 2) */}
-                                <div className="md:col-span-1"> {/* Container for the second column */}
+                                {/* Timezone Section (Moved Here) */}
+                                <div className="md:col-span-1"> {/* Container for Timezone */}
                                     <FormField
                                         control={form.control}
                                         name="timeZone"
@@ -875,13 +902,13 @@ function Step1Content() {
                                                                 <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4 text-muted-foreground" />
                                                                 <SelectValue placeholder="Select timezone...">
                                                                     {/* Display formatted label of selected timezone */}
-                                                                    {field.value ? (TIMEZONE_OPTIONS.find(opt => opt.value === field.value)?.label || field.value) : 'Select timezone...'}
+                                                                    {field.value ? (timezonesData.find(opt => opt.value === field.value)?.label || field.value) : 'Select timezone...'}
                                                                 </SelectValue>
                                                             </div>
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {TIMEZONE_OPTIONS.map(option => (
+                                                        {timezonesData.map(option => (
                                                             <SelectItem key={option.value} value={option.value}>
                                                                 {option.label}
                                                             </SelectItem>
@@ -895,6 +922,8 @@ function Step1Content() {
                                 </div>
                             </CardContent>
                         </Card>
+                        {/* --- END NEW CARD --- */}
+
                         <Card>
                             <CardHeader>
                                 <CardTitle>Contact Information</CardTitle>
@@ -1000,7 +1029,7 @@ function Step1Content() {
                                             <FormControl><div className="relative">
                                                 <Input
                                                     type="text"
-                                                    placeholder="e.g., 5,000"
+                                                    placeholder="5,000"
                                                     {...field}
                                                     value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
                                                     onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
@@ -1015,7 +1044,7 @@ function Step1Content() {
                                             <FormControl><div className="relative">
                                                 <Input
                                                     type="text"
-                                                    placeholder="e.g., 1,000"
+                                                    placeholder="1,000"
                                                     {...field}
                                                     value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
                                                     onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}

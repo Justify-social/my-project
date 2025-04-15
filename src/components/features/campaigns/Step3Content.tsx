@@ -56,13 +56,23 @@ import { GenderSelector } from "@/components/ui/selector-gender";
 import { LanguageSelector } from "@/components/ui/selector-language";
 
 // --- Mock Data (Replace with actual data fetching/static data) ---
-const MOCK_LANGUAGES = [
+// Updated list of top 15 languages, sorted alphabetically
+const TOP_LANGUAGES = [
+    { value: "ar", label: "Arabic" },
+    { value: "bn", label: "Bengali" },
+    { value: "zh", label: "Chinese (Mandarin)" },
     { value: "en", label: "English" },
-    { value: "es", label: "Spanish" },
     { value: "fr", label: "French" },
     { value: "de", label: "German" },
-    { value: "it", label: "Italian" },
+    { value: "hi", label: "Hindi" },
+    { value: "id", label: "Indonesian" }, // Often grouped with Malay
+    { value: "ja", label: "Japanese" },
+    { value: "ko", label: "Korean" },
     { value: "pt", label: "Portuguese" },
+    { value: "ru", label: "Russian" },
+    { value: "es", label: "Spanish" },
+    { value: "tr", label: "Turkish" },
+    { value: "vi", label: "Vietnamese" },
 ];
 
 const MOCK_LOCATIONS = [
@@ -109,6 +119,7 @@ function Step3Content() {
     const [keywordInput, setKeywordInput] = useState('');
     const [locationInput, setLocationInput] = useState('');
     const [competitorInput, setCompetitorInput] = useState('');
+    const [interestInput, setInterestInput] = useState('');
 
     // --- Effects (Hooks must be top-level) ---
     useEffect(() => {
@@ -206,7 +217,7 @@ function Step3Content() {
     };
 
     // Keyword Input Handlers
-    const currentKeywords = watchedValues.targeting?.keywords ?? [];
+    const currentKeywords = Array.isArray(watchedValues.targeting?.keywords) ? watchedValues.targeting.keywords : [];
     const handleAddKeyword = () => {
         const newKeyword = keywordInput.trim();
         if (newKeyword && !currentKeywords.includes(newKeyword)) {
@@ -225,16 +236,16 @@ function Step3Content() {
     };
 
     // Location Input Handlers
-    const currentLocations = (watchedValues.locations as unknown as string[] ?? []);
+    const currentLocations = Array.isArray(watchedValues.locations) ? watchedValues.locations : [];
     const handleAddLocation = () => {
         const newLocation = locationInput.trim();
-        if (newLocation && !currentLocations.includes(newLocation)) {
-            form.setValue('locations', [...currentLocations, newLocation] as any, { shouldValidate: true, shouldDirty: true });
+        if (newLocation && !currentLocations.some(loc => loc.city === newLocation)) {
+            form.setValue('locations', [...currentLocations, { city: newLocation }] as any, { shouldValidate: true, shouldDirty: true });
             setLocationInput(''); // Clear input
         }
     };
-    const handleRemoveLocation = (locationToRemove: string) => {
-        form.setValue('locations', currentLocations.filter(loc => loc !== locationToRemove) as any, { shouldValidate: true, shouldDirty: true });
+    const handleRemoveLocation = (locationCityToRemove: string) => {
+        form.setValue('locations', currentLocations.filter(loc => loc.city !== locationCityToRemove) as any, { shouldValidate: true, shouldDirty: true });
     };
     const handleLocationInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
@@ -243,8 +254,27 @@ function Step3Content() {
         }
     };
 
+    // Interest Input Handlers (New)
+    const currentInterests = Array.isArray(watchedValues.targeting?.interests) ? watchedValues.targeting.interests : [];
+    const handleAddInterest = () => {
+        const newInterest = interestInput.trim();
+        if (newInterest && !currentInterests.includes(newInterest)) {
+            form.setValue('targeting.interests', [...currentInterests, newInterest], { shouldValidate: true, shouldDirty: true });
+            setInterestInput(''); // Clear input
+        }
+    };
+    const handleRemoveInterest = (interestToRemove: string) => {
+        form.setValue('targeting.interests', currentInterests.filter(i => i !== interestToRemove), { shouldValidate: true, shouldDirty: true });
+    };
+    const handleInterestInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission
+            handleAddInterest();
+        }
+    };
+
     // Competitor Input Handlers
-    const currentCompetitors = watchedValues.competitors ?? [];
+    const currentCompetitors = Array.isArray(watchedValues.competitors) ? watchedValues.competitors : [];
     const handleAddCompetitor = () => {
         const newCompetitor = competitorInput.trim();
         if (newCompetitor && !currentCompetitors.includes(newCompetitor)) {
@@ -304,11 +334,14 @@ function Step3Content() {
                                 setValue={form.setValue}
                                 errors={form.formState.errors}
                             />
-                            <GenderSelector
-                                name="demographics.genders"
-                                control={form.control}
-                                label="Gender(s)"
-                            />
+                            {/* Wrap GenderSelector for centering */}
+                            <div className="flex justify-center pt-4">
+                                <GenderSelector
+                                    name="demographics.genders"
+                                    control={form.control}
+                                    label="Gender(s)"
+                                />
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -323,7 +356,7 @@ function Step3Content() {
                             <FormField
                                 control={form.control}
                                 name="locations"
-                                render={({ field }) => ( // field value here is expected to be LocationSchema[] but we treat as string[] for tag input
+                                render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Target Locations</FormLabel>
                                         <FormControl>
@@ -335,21 +368,26 @@ function Step3Content() {
                                             />
                                         </FormControl>
                                         <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
-                                            {(field.value as unknown as { city: string }[])?.map((location: { city: string }) => (
-                                                <Badge key={location.city} variant="secondary" className="pl-2 pr-1 text-sm">
-                                                    {location.city}
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                                                        onClick={() => handleRemoveLocation(location.city)}
-                                                        aria-label={`Remove location ${location.city}`}
-                                                    >
-                                                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                                                    </Button>
-                                                </Badge>
-                                            ))}
+                                            {/* Ensure field.value is treated as array & handle optional city */}
+                                            {(Array.isArray(field.value) ? field.value : []).map((location, index) => {
+                                                const city = location?.city;
+                                                if (!city) return null; // Skip rendering if city is missing
+                                                return (
+                                                    <Badge key={`${city}-${index}`} variant="secondary" className="pl-2 pr-1 text-sm">
+                                                        {city}
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                            onClick={() => handleRemoveLocation(city)}
+                                                            aria-label={`Remove location ${city}`}
+                                                        >
+                                                            <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                        </Button>
+                                                    </Badge>
+                                                );
+                                            })}
                                         </div>
                                         <FormDescription>Add target countries, regions, or cities.</FormDescription>
                                         <FormMessage />
@@ -370,24 +408,65 @@ function Step3Content() {
                                 name="demographics.languages"
                                 control={form.control}
                                 label="Languages"
-                                options={MOCK_LANGUAGES} // TODO: Replace with actual fetched options
+                                options={TOP_LANGUAGES} // Use the new list
                                 allowMultiple={true}
                                 placeholder="Select target language(s)..."
                             />
-                            {/* Replaced JSON placeholder with adapted LanguageSelector for Interests */}
+                            {/* Remove LanguageSelector for Interests - Replaced with Tag Input */}
+                            {/* 
                             <LanguageSelector
-                                name="targeting.interests" // Connects to the correct form field
+                                name="targeting.interests" 
                                 control={form.control}
                                 label="Interests"
-                                options={MOCK_INTERESTS} // Use mock interests for now (TODO: Replace)
+                                options={MOCK_INTERESTS} 
                                 allowMultiple={true}
                                 placeholder="Select audience interests..."
+                            /> 
+                            */}
+                            {/* --- Interest Tag Input (New) --- */}
+                            <FormField
+                                control={form.control}
+                                name="targeting.interests"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Interests</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Type an interest and press Enter..."
+                                                value={interestInput}
+                                                onChange={(e) => setInterestInput(e.target.value)}
+                                                onKeyDown={handleInterestInputKeyDown}
+                                            />
+                                        </FormControl>
+                                        <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
+                                            {(Array.isArray(field.value) ? field.value : []).map((interest: string) => (
+                                                <Badge key={interest} variant="secondary" className="pl-2 pr-1 text-sm">
+                                                    {interest}
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                                                        onClick={() => handleRemoveInterest(interest)}
+                                                        aria-label={`Remove interest ${interest}`}
+                                                    >
+                                                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                                                    </Button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                        <FormDescription>Add relevant audience interests.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
+                            {/* --- End Interest Tag Input --- */}
+
                             {/* Keywords Input */}
                             <FormField
                                 control={form.control}
                                 name="targeting.keywords"
-                                render={({ field }) => ( // field here represents the array of keywords
+                                render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Keywords</FormLabel>
                                         <FormControl>
@@ -399,7 +478,8 @@ function Step3Content() {
                                             />
                                         </FormControl>
                                         <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
-                                            {field.value?.map((keyword: string) => (
+                                            {/* Ensure field.value is treated as array */}
+                                            {(Array.isArray(field.value) ? field.value : []).map((keyword: string) => (
                                                 <Badge key={keyword} variant="secondary" className="pl-2 pr-1 text-sm">
                                                     {keyword}
                                                     <Button
@@ -446,7 +526,7 @@ function Step3Content() {
                                             />
                                         </FormControl>
                                         <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
-                                            {field.value?.map((competitor: string) => (
+                                            {(Array.isArray(field.value) ? field.value : []).map((competitor: string) => (
                                                 <Badge key={competitor} variant="secondary" className="pl-2 pr-1 text-sm">
                                                     {competitor}
                                                     <Button
@@ -462,7 +542,7 @@ function Step3Content() {
                                                 </Badge>
                                             ))}
                                         </div>
-                                        <FormDescription>List competitor handles or brand names.</FormDescription>
+                                        <FormDescription>Add competitor handles or brand names to monitor.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -475,4 +555,4 @@ function Step3Content() {
     );
 }
 
-export default Step3Content; 
+export default Step3Content;

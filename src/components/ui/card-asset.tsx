@@ -99,15 +99,19 @@ interface AssetPreviewProps {
   url?: string;
   fileName?: string;
   type?: string;
+  mediaTypeIconId?: string;
+  mediaTypeLabel?: string;
   showTypeLabel?: boolean;
   className?: string;
   [key: string]: any;
 }
 
-const AssetPreview = ({
+export const AssetPreview = ({
   url,
   fileName,
   type,
+  mediaTypeIconId,
+  mediaTypeLabel,
   showTypeLabel = false,
   className,
   ...props
@@ -264,6 +268,17 @@ const AssetPreview = ({
           <Icon iconId="faFileCircleQuestionLight" className="h-10 w-10 text-muted-foreground/50" />
         </div>
       )}
+
+      {/* NEW: File Type Badge Overlay */}
+      {mediaTypeIconId && (
+        <Badge
+          variant="secondary"
+          className="absolute bottom-0.5 left-1 z-10 px-1 py-1 rounded-md text-xs inline-flex items-center"
+          title={mediaTypeLabel}
+        >
+          <Icon iconId={mediaTypeIconId} className="h-2.5 w-2.5" />
+        </Badge>
+      )}
     </div>
   );
 };
@@ -339,7 +354,7 @@ export function AssetCard({
       )}
       {...props}
     >
-      <AssetPreview url={url} fileName={name} type={type} showTypeLabel={showTypeLabel} />
+      <AssetPreview url={url} fileName={name} type={type} mediaTypeIconId={mediaTypeIconId} mediaTypeLabel={mediaTypeLabel} showTypeLabel={showTypeLabel} />
 
       <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
