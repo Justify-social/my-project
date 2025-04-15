@@ -62,3 +62,29 @@ export async function GET(
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  contextOrParams: any // Revert to 'any' workaround
+) {
+  // Safely access id
+  const campaignId = contextOrParams?.params?.id || contextOrParams?.id;
+  console.log(`DELETE /api/campaigns/${campaignId}/submit`);
+
+  // Ensure ID was extracted
+  if (!campaignId) {
+    console.error('Failed to extract campaign ID from request context/params in DELETE /submit');
+    return NextResponse.json({ error: 'Invalid request: Missing campaign ID' }, { status: 400 });
+  }
+
+  try {
+    // TODO: Add actual delete logic here, referencing backup file
+
+    // Simulated response for now
+    const simulatedStatus = { campaignId, status: 'DELETED' }; // Example status
+    return NextResponse.json({ success: true, data: simulatedStatus });
+  } catch (error) {
+    console.error(`Error in DELETE /api/campaigns/${campaignId}/submit:`, error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+  }
+}

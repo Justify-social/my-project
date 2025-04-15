@@ -29,11 +29,15 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
+import { AutosaveIndicator, AutosaveStatus } from "@/components/ui/autosave-indicator";
+import { useWizard } from '@/components/features/campaigns/WizardContext';
+import { DraftCampaignData } from '@/components/features/campaigns/types';
+import { toast } from 'react-hot-toast';
 
 // Define the structure for each step passed in
 export interface WizardStepConfig {
@@ -61,6 +65,8 @@ export interface ProgressBarWizardProps {
     submitButtonText?: string;
     /** Optional: Add custom class names */
     className?: string;
+    /** Function to get the current step's validated form data */
+    getCurrentFormData: () => any | null; // Use 'any' for now, or import specific step types union
 }
 
 export function ProgressBarWizard({
@@ -72,10 +78,55 @@ export function ProgressBarWizard({
     isNextDisabled = false,
     isNextLoading = false,
     submitButtonText = "Submit",
+    getCurrentFormData,
     className
 }: ProgressBarWizardProps) {
 
     const totalSteps = steps.length;
+    const wizard = useWizard();
+    const [isManualSaving, setIsManualSaving] = useState(false);
+
+    // Manual Save Handler
+    const handleManualSave = async () => {
+        if (!wizard.campaignId) {
+            toast.error("Cannot save, campaign ID not found.");
+            return;
+        }
+        if (!getCurrentFormData) {
+            toast.error("Save handler not configured correctly.");
+            return;
+        }
+
+        setIsManualSaving(true);
+        toast.loading('Saving changes...', { id: 'manual-save-toast' });
+
+        const currentData = getCurrentFormData();
+
+        if (!currentData) {
+            toast.error('Cannot save, form data is invalid or unavailable.', { id: 'manual-save-toast' });
+            setIsManualSaving(false);
+            return;
+        }
+
+        // Directly call saveProgress with the data from the current step
+        try {
+            // Add currentStep to the data object before sending
+            const dataToSaveWithStep = { ...currentData, currentStep: currentStep };
+            const success = await wizard.saveProgress(dataToSaveWithStep);
+
+            if (success) {
+                toast.success('Changes saved successfully!', { id: 'manual-save-toast', duration: 5000 });
+            } else {
+                // saveProgress logs errors and shows toast, maybe remove redundant one here?
+                // toast.error('Failed to save changes.', { id: 'manual-save-toast' });
+            }
+        } catch (error) {
+            console.error("Manual save error:", error);
+            toast.error('An error occurred during save.', { id: 'manual-save-toast' });
+        } finally {
+            setIsManualSaving(false);
+        }
+    };
 
     return (
         <footer
@@ -136,17 +187,31 @@ export function ProgressBarWizard({
                         variant="outline"
                         size="sm"
                         onClick={onBack}
-                        disabled={isNextLoading} // Disable back if next is loading
+                        disabled={isNextLoading || isManualSaving}
                     >
                         <Icon iconId="faArrowLeftLight" className="h-4 w-4 mr-1.5" /> Back
                     </Button>
                 )}
                 <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleManualSave}
+                    disabled={isManualSaving || isNextLoading}
+                    title="Save current progress"
+                >
+                    <Icon
+                        iconId={isManualSaving ? "faCircleNotchLight" : "faFloppyDiskLight"}
+                        className={cn("h-4 w-4 mr-1.5", isManualSaving && "animate-spin")}
+                    />
+                    Save
+                </Button>
+                <Button
+                    type="button"
                     variant="default"
                     size="sm"
                     onClick={onNext}
-                    disabled={isNextDisabled || isNextLoading}
+                    disabled={isNextDisabled || isNextLoading || isManualSaving}
                     data-cy="wizard-next-button"
                 >
                     {isNextLoading ? (
@@ -158,7 +223,6 @@ export function ProgressBarWizard({
                     )}
                     {currentStep < totalSteps ? 'Next' : submitButtonText}
                 </Button>
-                {/* Note: If the progress bar is not visible on certain steps (e.g., step 3), check parent component for conditional rendering or CSS issues. */}
             </div>
         </footer>
     );

@@ -130,8 +130,8 @@ interface WizardContextType {
   isLoading: boolean;
   /** Boolean indicating if editing an existing campaign (an ID is present). */
   isEditing: boolean;
-  /** Function to manually trigger saving the current draft progress. Returns true on success, false on failure. */
-  saveProgress: () => Promise<boolean>;
+  /** Function to manually trigger saving the current draft progress. Accepts data to save. Returns true on success, false on failure. */
+  saveProgress: (dataToSave: Partial<DraftCampaignData>) => Promise<boolean>;
   /** Timestamp of the last successful save operation. Null if never saved. */
   lastSaved: Date | null;
   /** Boolean indicating if autosave is currently enabled. */
@@ -160,7 +160,6 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const campaignId = searchParams?.get('id');
 
-  // State uses the imported DraftCampaignData type
   const [wizardState, setWizardState] = useState<DraftCampaignData | null>(defaultWizardState);
   const [isLoading, setIsLoading] = useState<boolean>(!!campaignId);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -239,32 +238,42 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   const updateWizardState = useCallback((updates: Partial<DraftCampaignData>) => {
     setWizardState(prevState => {
       const merged = prevState ? { ...prevState, ...updates } : (updates as DraftCampaignData);
-      logger.debug('Updating wizard state:', { updates, newState: merged });
-      setUserEdited(true);
+      logger.debug('Updating wizard state (non-save):', { updates, newState: merged });
+      // Note: userEdited flag logic removed previously
       return merged;
     });
   }, []);
 
   // --- Saving Progress ---
-  const saveProgress = useCallback(async (): Promise<boolean> => {
-    if (!campaignId || !wizardState) {
-      logger.warn('Save prerequisites not met:', { campaignId: !!campaignId, wizardState: !!wizardState });
-      return false;
-    }
-    const validation = DraftCampaignDataSchema.safeParse(wizardState);
-    if (!validation.success) {
-      logger.error("Save aborted: Current wizard state is invalid", validation.error.errors);
-      toast.error("Cannot save, data is invalid. Please check fields.");
-      return false;
-    }
-    logger.info('Attempting to save progress for campaign:', campaignId);
-    try {
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: validation.data }),
+  const saveProgress = useCallback(async (dataToSave: Partial<DraftCampaignData>): Promise<boolean> => {
+    // Use campaignId from state/props, ensure currentStep comes from dataToSave
+    if (!campaignId || typeof dataToSave.currentStep !== 'number') {
+      logger.warn('Save prerequisites not met:', {
+        campaignId: !!campaignId,
+        currentStep: dataToSave?.currentStep,
       });
+      return false;
+    }
+    const currentStep = dataToSave.currentStep;
+
+    // Use the dataToSave argument directly
+    const dataForApi = dataToSave;
+
+    logger.info(`Attempting to save progress for campaign: ${campaignId}, step: ${currentStep}`);
+    setIsSaving(true); // Set saving state
+    try {
+      const apiUrl = `/api/campaigns/${campaignId}/wizard/${currentStep}`;
+      logger.debug(`Calling API endpoint: PATCH ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        // Send the data received as argument
+        body: JSON.stringify(dataForApi), // Use dataForApi 
+      });
+
       if (!response.ok) {
+        // ... error handling ...
         let errorBody = '';
         try {
           const errorData = await response.json();
@@ -277,8 +286,10 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         setLastSaved(new Date());
         logger.info('Progress saved successfully');
         if (result.data) {
+          logger.debug('Data received from PATCH API:', JSON.stringify(result.data, null, 2));
           const parsedUpdate = DraftCampaignDataSchema.safeParse(result.data);
           if (parsedUpdate.success) {
+            // Update context state with the final data from backend
             setWizardState(prevState => (prevState ? { ...prevState, ...parsedUpdate.data } : parsedUpdate.data));
           } else {
             logger.warn("Backend save response data failed validation", parsedUpdate.error.errors);
@@ -286,43 +297,34 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         }
         return true;
       } else {
+        // ... error handling ...
         logger.error('Failed to save progress (API failure):', result);
         toast.error(`Failed to save progress: ${result.error || 'Unknown API error'}`);
         return false;
       }
     } catch (error: any) {
+      // ... error handling ...
       logger.error('Error saving progress:', error);
       toast.error(`Error saving progress: ${error.message}`);
       return false;
+    } finally {
+      setIsSaving(false); // Clear saving state
     }
-  }, [campaignId, wizardState]);
+    // Remove wizardState dependency, add campaignId
+  }, [campaignId]);
 
-  // Debounced save function for autosave
+  // Debounced save function is no longer needed for autosave
+  /*
   const debouncedSaveProgress = useCallback(
-    debounce(() => {
-      if (autosaveEnabled && campaignId && wizardState && !isSaving) {
-        logger.debug('Autosave triggered...', { userEdited });
-        setIsSaving(true);
-        saveProgress().finally(() => setIsSaving(false));
-      } else {
-        logger.debug('Autosave skipped', { autosaveEnabled, campaignId: !!campaignId, wizardState: !!wizardState, isSaving });
-      }
-    }, 2000),
-    [saveProgress, autosaveEnabled, campaignId, wizardState, isSaving]
+    debounce(() => { ... }, 2000),
+    [saveProgress, autosaveEnabled, campaignId, wizardState, isSaving] 
   );
+  */
 
-  // Effect to trigger debounced save when wizardState changes
-  useEffect(() => {
-    logger.debug('Checking autosave conditions', { isLoading, campaignId: !!campaignId, wizardState: !!wizardState, autosaveEnabled, isSaving, userEdited });
-    if (!isLoading && campaignId && wizardState && autosaveEnabled && !isSaving && userEdited) {
-      logger.debug('Triggering autosave due to user edit');
-      debouncedSaveProgress();
-      setUserEdited(false);
-    }
-    return () => {
-      debouncedSaveProgress.cancel();
-    };
-  }, [wizardState, isLoading, campaignId, autosaveEnabled, debouncedSaveProgress, isSaving, userEdited]);
+  // Autosave trigger effect is commented out / removed
+  /*
+  useEffect(() => { ... }, [ ... ]);
+  */
 
   // Determine if we are editing an existing campaign
   const isEditing = !!campaignId && wizardState !== null;
@@ -335,7 +337,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       updateWizardState,
       isLoading,
       isEditing,
-      saveProgress,
+      saveProgress, // Pass the modified saveProgress
       lastSaved,
       autosaveEnabled,
       setAutosaveEnabled,
@@ -348,7 +350,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
     updateWizardState,
     isLoading,
     isEditing,
-    saveProgress,
+    saveProgress, // Add modified saveProgress here
     lastSaved,
     autosaveEnabled,
     setAutosaveEnabled,

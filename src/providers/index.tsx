@@ -27,7 +27,14 @@ export default function Providers({
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         {children}
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            success: {
+              className: 'border border-green-500',
+            },
+          }}
+        />
       </ThemeProvider>
     </QueryClientProvider>
   );

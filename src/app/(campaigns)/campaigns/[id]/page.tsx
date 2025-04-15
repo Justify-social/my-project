@@ -60,6 +60,7 @@ interface CampaignData {
         uploaded: Array<{ name: string; url: string }>;
         notes: string;
     };
+    contacts?: Array<{ name: string; email: string; position: string; phone?: string }>;
 }
 
 // DataItem component for consistent display formatting
@@ -151,6 +152,26 @@ export default function CampaignDetail() {
                         uploaded: data.assets && Array.isArray(data.assets) ? data.assets.map((asset: any) => ({ name: asset?.name || 'Unnamed Asset', url: asset?.url || '#' })) : [],
                         notes: data.notes || 'Not Set',
                     },
+                    contacts: [
+                        ...(data.primaryContact ? [{
+                            name: `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() || 'N/A',
+                            email: data.primaryContact.email || 'N/A',
+                            position: data.primaryContact.position || 'N/A',
+                            phone: undefined
+                        }] : []),
+                        ...(data.secondaryContact ? [{
+                            name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() || 'N/A',
+                            email: data.secondaryContact.email || 'N/A',
+                            position: data.secondaryContact.position || 'N/A',
+                            phone: undefined
+                        }] : []),
+                        ...(data.additionalContacts && Array.isArray(data.additionalContacts) ? data.additionalContacts.map((contact: any) => ({
+                            name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
+                            email: contact.email || 'N/A',
+                            position: contact.position || 'N/A',
+                            phone: undefined
+                        })) : [])
+                    ],
                 };
                 console.log('Transformed Campaign Data:', transformedData); // Debug log to inspect transformed data
                 setCampaignData(transformedData);
@@ -293,24 +314,20 @@ export default function CampaignDetail() {
                     <Card className="shadow-md border border-divider rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg">
                         <CardHeader className="border-b border-divider pb-3 bg-background/50 backdrop-blur-sm">
                             <CardTitle className="text-lg text-foreground tracking-tight">Contacts</CardTitle>
-                            <CardDescription className="text-sm text-muted-foreground">Key contacts for the campaign</CardDescription>
+                            <CardDescription className="text-sm text-muted-foreground">Key contacts associated with this campaign</CardDescription>
                         </CardHeader>
                         <CardContent className="p-5 space-y-3">
-                            <DataItem label="Primary Contact" value={
-                                <div>
-                                    <p>{campaignData.primaryContact.name}</p>
-                                    <p className="text-sm text-muted-foreground">{campaignData.primaryContact.email}</p>
-                                    <p className="text-sm text-muted-foreground">{campaignData.primaryContact.position}</p>
-                                </div>
-                            } iconId="faUserLight" />
-                            {campaignData.secondaryContact && (
-                                <DataItem label="Secondary Contact" value={
-                                    <div>
-                                        <p>{campaignData.secondaryContact.name}</p>
-                                        <p className="text-sm text-muted-foreground">{campaignData.secondaryContact.email}</p>
-                                        <p className="text-sm text-muted-foreground">{campaignData.secondaryContact.position}</p>
+                            {campaignData.contacts && campaignData.contacts.length > 0 ? (
+                                campaignData.contacts.map((contact, index) => (
+                                    <div key={index} className="border-b border-divider pb-2 last:border-b-0 last:pb-0">
+                                        <p className="text-sm font-medium text-primary">{contact.name || 'N/A'}</p>
+                                        <p className="text-sm text-secondary">{contact.position || 'N/A'}</p>
+                                        {contact.email && <p className="text-sm text-secondary break-words">Email: {contact.email}</p>}
+                                        {contact.phone && <p className="text-sm text-secondary">Phone: {contact.phone}</p>}
                                     </div>
-                                } iconId="faUserLight" />
+                                ))
+                            ) : (
+                                <p className="text-sm text-secondary italic">No contacts available.</p>
                             )}
                         </CardContent>
                     </Card>

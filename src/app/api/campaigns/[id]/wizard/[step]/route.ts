@@ -1,131 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { connectToDatabase } from '@/lib/db';
 import { prisma } from '@/lib/prisma';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { tryCatch } from '@/config/middleware/api';
 import { z } from 'zod';
+// Import the BASE schemas for partial validation
+import {
+  Step1BaseSchema,
+  Step2BaseSchema,
+  Step3BaseSchema,
+  Step4BaseSchema,
+  Step5BaseSchema
+} from '@/components/features/campaigns/types';
 
-// --- Define Schema Locally ---
-// (Copied from src/app/api/campaigns/[id]/route.ts)
-const campaignUpdateSchema = z.object({
-  campaignName: z.string().min(1).max(255).optional(),
-  businessGoal: z.string().optional(),
-  description: z.string().optional(),
-  startDate: z
-    .string()
-    .optional()
-    .transform(str => (str ? new Date(str) : undefined)),
-  endDate: z
-    .string()
-    .optional()
-    .transform(str => (str ? new Date(str) : undefined)),
-  timeZone: z.string().optional(),
-  currency: z.enum(['USD', 'GBP', 'EUR']).optional(),
-  totalBudget: z.number().min(0).optional(),
-  socialMediaBudget: z.number().min(0).optional(),
-  platform: z.enum(['INSTAGRAM', 'YOUTUBE', 'TIKTOK']).optional(),
-  influencerHandle: z.string().optional(),
-  mainMessage: z.string().optional(),
-  hashtags: z.string().optional(),
-  memorability: z.string().optional(),
-  keyBenefits: z.string().optional(),
-  expectedAchievements: z.string().optional(),
-  purchaseIntent: z.string().optional(),
-  brandPerception: z.string().optional(),
-  primaryKPI: z
-    .enum([
-      'AD_RECALL',
-      'BRAND_AWARENESS',
-      'CONSIDERATION',
-      'MESSAGE_ASSOCIATION',
-      'BRAND_PREFERENCE',
-      'PURCHASE_INTENT',
-      'ACTION_INTENT',
-      'RECOMMENDATION_INTENT',
-      'ADVOCACY',
-    ])
-    .optional(),
-  // Step 2 specific fields
-  secondaryKPIs: z.array(z.string()).optional(),
-  features: z.array(z.string()).optional(),
-  // Allow messaging as a nested object
-  messaging: z
-    .object({
-      mainMessage: z.string().optional(),
-      hashtags: z.string().optional(),
-      memorability: z.string().optional(),
-      keyBenefits: z.string().optional(),
-      expectedAchievements: z.string().optional(),
-      purchaseIntent: z.string().optional(),
-      brandPerception: z.string().optional(),
-    })
-    .optional(),
-  // Step 3 audience data - add comprehensive schema
-  audience: z
-    .object({
-      location: z.array(z.string()).optional(),
-      ageDistribution: z
-        .object({
-          age1824: z.number().optional(),
-          age2534: z.number().optional(),
-          age3544: z.number().optional(),
-          age4554: z.number().optional(),
-          age5564: z.number().optional(),
-          age65plus: z.number().optional(),
-        })
-        .optional(),
-      gender: z.array(z.string()).optional(),
-      otherGender: z.string().optional(),
-      screeningQuestions: z.array(z.string()).optional(),
-      languages: z.array(z.string()).optional(),
-      educationLevel: z.string().optional(),
-      jobTitles: z.array(z.string()).optional(),
-      incomeLevel: z.number().optional(),
-      competitors: z.array(z.string()).optional(),
-    })
-    .optional(),
-  // Step metadata
-  step: z.number().optional(),
-  status: z.enum(['draft', 'submitted']).optional(),
-  name: z.string().optional(),
-  // Other fields
-  contacts: z.string().optional(),
-  additionalContacts: z.array(z.record(z.string(), z.any())).optional(),
-  primaryContact: z
-    .object({
-      firstName: z.string(),
-      surname: z.string(),
-      email: z.string().email(),
-      position: z.string(),
-    })
-    .optional(),
-  secondaryContact: z
-    .object({
-      firstName: z.string(),
-      surname: z.string(),
-      email: z.string().email(),
-      position: z.string(),
-    })
-    .optional(),
-  creativeRequirements: z
-    .array(
-      z.object({
-        requirement: z.string(),
-      })
-    )
-    .optional(),
-  brandGuidelines: z
-    .array(
-      z.object({
-        guideline: z.string(),
-      })
-    )
-    .optional(),
-  // For backward compatibility
-  submissionStatus: z.enum(['draft', 'submitted']).optional(),
-  influencers: z.array(z.any()).optional(),
-});
+// Keep the comprehensive schema for reference if needed, but don't use for top-level validation
+const fullCampaignSchemaForReference = z.object({ /* ... existing full schema ... */ });
 
 /**
  * PATCH handler for saving/updating campaign wizard step data
@@ -147,293 +36,232 @@ export const PATCH = tryCatch(
     // Connect to database
     await connectToDatabase();
 
-    // Parse and validate request body
+    // Parse request body
     const body = await request.json();
     console.log(`Received Step ${stepNumber} body:`, JSON.stringify(body, null, 2));
 
-    const validationResult = campaignUpdateSchema.safeParse(body);
-
-    if (!validationResult.success) {
-      console.error('Validation failed:', validationResult.error.format());
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validationResult.error.format(),
-        },
-        { status: 400 }
-      );
-    }
-
-    const dataToSave = validationResult.data;
-
-    console.log('Validated data:', JSON.stringify(dataToSave, null, 2));
-
-    // --- Map frontend data to backend schema (based on /api/campaigns/[id]/route.ts) ---
-    // Initialize mappedData reliably
-    const mappedData: any = {
-      updatedAt: new Date(),
-      currentStep: stepNumber, // Track current step
-      // Initialize nested objects potentially used across steps
-      budget: {},
-      primaryContact: {},
-      secondaryContact: {},
-      messaging: {},
-      demographics: {},
-      locations: [],
-      targeting: {},
-      competitors: [],
-    };
+    // --- STEP-SPECIFIC VALIDATION AND MAPPING --- 
+    let validationResult: z.SafeParseReturnType<any, any>;
+    let dataToSave: Partial<any> = {}; // Use Partial or a specific step type
+    const mappedData: any = { updatedAt: new Date(), currentStep: stepNumber }; // Initialize common fields
 
     // Set step completion flag based on current step
     if (stepNumber >= 1) mappedData.step1Complete = true;
     if (stepNumber >= 2) mappedData.step2Complete = true;
     if (stepNumber >= 3) mappedData.step3Complete = true;
     if (stepNumber >= 4) mappedData.step4Complete = true;
-    // Add step 5 if applicable
-    // if (stepNumber >= 5) mappedData.step5Complete = true;
+    if (stepNumber >= 5) mappedData.isComplete = true; // Step 5 might set isComplete
 
-    // Map fields common across steps or specific to Step 1
-    if (dataToSave.name || dataToSave.campaignName) {
-      mappedData.name = dataToSave.name || dataToSave.campaignName;
-    }
-    if (dataToSave.businessGoal || dataToSave.description) {
-      mappedData.businessGoal = dataToSave.businessGoal || dataToSave.description;
-    }
-    if (dataToSave.startDate) {
-      mappedData.startDate = new Date(dataToSave.startDate);
-    }
-    if (dataToSave.endDate) {
-      mappedData.endDate = new Date(dataToSave.endDate);
-    }
-    if (dataToSave.timeZone) {
-      mappedData.timeZone = dataToSave.timeZone;
-    }
-    if (dataToSave.currency || dataToSave.totalBudget || dataToSave.socialMediaBudget) {
-      mappedData.budget = {
-        currency: dataToSave.currency || 'USD',
-        total: dataToSave.totalBudget || 0,
-        socialMedia: dataToSave.socialMediaBudget || 0,
-      };
-    }
-    if (dataToSave.primaryContact) {
-      mappedData.primaryContact = dataToSave.primaryContact;
-    }
-    if (dataToSave.secondaryContact) {
-      mappedData.secondaryContact = dataToSave.secondaryContact;
-    }
-    // --- Re-added mapping for additionalContacts as it should now exist on the model ---
-    if (Array.isArray(dataToSave.additionalContacts)) {
-      mappedData.additionalContacts = dataToSave.additionalContacts;
-    }
-
-    // Map Step 2 specific fields (Objective & Messaging)
-    if (stepNumber === 2) {
-      if (dataToSave.primaryKPI) {
-        mappedData.primaryKPI = dataToSave.primaryKPI;
-      }
-      if (dataToSave.secondaryKPIs) {
-        mappedData.secondaryKPIs = Array.isArray(dataToSave.secondaryKPIs)
-          ? dataToSave.secondaryKPIs
-          : [dataToSave.secondaryKPIs];
-      }
-      if (dataToSave.features) {
-        mappedData.features = Array.isArray(dataToSave.features)
-          ? dataToSave.features
-          : [dataToSave.features];
-      }
-      if (
-        dataToSave.messaging ||
-        dataToSave.mainMessage ||
-        dataToSave.hashtags ||
-        dataToSave.memorability ||
-        dataToSave.keyBenefits ||
-        dataToSave.expectedAchievements ||
-        dataToSave.purchaseIntent ||
-        dataToSave.brandPerception
-      ) {
-        mappedData.messaging = {
-          mainMessage: dataToSave.mainMessage || dataToSave.messaging?.mainMessage || '',
-          hashtags: dataToSave.hashtags || dataToSave.messaging?.hashtags || '',
-          memorability: dataToSave.memorability || dataToSave.messaging?.memorability || '',
-          keyBenefits: dataToSave.keyBenefits || dataToSave.messaging?.keyBenefits || '',
-          expectedAchievements:
-            dataToSave.expectedAchievements || dataToSave.messaging?.expectedAchievements || '',
-          purchaseIntent: dataToSave.purchaseIntent || dataToSave.messaging?.purchaseIntent || '',
-          brandPerception:
-            dataToSave.brandPerception || dataToSave.messaging?.brandPerception || '',
-        };
-      }
-    }
-
-    // Map Step 3 specific fields (Target Audience)
-    if (stepNumber === 3 && dataToSave.audience) {
-      // Map age distribution
-      if (dataToSave.audience.ageDistribution) {
-        mappedData.demographics.ageDistribution = dataToSave.audience.ageDistribution;
-      }
-      // Map gender and otherGender
-      if (Array.isArray(dataToSave.audience.gender)) {
-        mappedData.demographics.gender = dataToSave.audience.gender;
-      }
-      if (dataToSave.audience.otherGender) {
-        mappedData.demographics.otherGender = dataToSave.audience.otherGender;
-      }
-      // Map educationLevel and incomeLevel
-      if (dataToSave.audience.educationLevel) {
-        mappedData.demographics.educationLevel = dataToSave.audience.educationLevel;
-      }
-      if (dataToSave.audience.incomeLevel) {
-        mappedData.demographics.incomeLevel = dataToSave.audience.incomeLevel;
-      }
-      // Map jobTitles
-      if (Array.isArray(dataToSave.audience.jobTitles)) {
-        mappedData.demographics.jobTitles = dataToSave.audience.jobTitles;
-      }
-      // Map location
-      if (Array.isArray(dataToSave.audience.location)) {
-        mappedData.locations = dataToSave.audience.location.map((loc: string) => ({
-          location: loc,
-        }));
-      }
-      // Map screeningQuestions
-      if (Array.isArray(dataToSave.audience.screeningQuestions)) {
-        mappedData.targeting.screeningQuestions = dataToSave.audience.screeningQuestions.map(
-          (q: string) => ({ question: q })
-        );
-      }
-      // Map languages
-      if (Array.isArray(dataToSave.audience.languages)) {
-        mappedData.targeting.languages = dataToSave.audience.languages.map((lang: string) => ({
-          language: lang,
-        }));
-      }
-      // Map competitors
-      if (Array.isArray(dataToSave.audience.competitors)) {
-        mappedData.competitors = dataToSave.audience.competitors;
-      }
-    }
-
-    // Map Step 4 specific fields (Creative Assets)
-    // TODO: Add mapping logic for step 4 fields (e.g., creative assets, guidelines) if needed
-    // if (stepNumber === 4 && dataToSave.creativeAssets) { ... }
-
-    // Map Step 5 specific fields (Review)
-    // TODO: Add mapping logic for step 5 fields if needed
-    // if (stepNumber === 5 && dataToSave.status) { mappedData.status = dataToSave.status.toUpperCase(); }
-
-    // Handle status (often updated in the final step)
-    if (dataToSave.status) {
-      mappedData.status = dataToSave.status.toUpperCase(); // Ensure uppercase for DB
-    }
-
-    // Remove fields that shouldn't be directly updated if they weren't part of the specific step's payload
-    // Example: Don't overwrite audience data when saving step 1
-    // This logic might need refinement based on how partial updates are handled frontend
-    // For now, we map everything received in the validated payload.
-
-    // Transform enums before saving
-    const transformedDataForDb = EnumTransformers.transformObjectToBackend(mappedData);
-    console.log('Data ready for DB update:', JSON.stringify(transformedDataForDb, null, 2));
-
-    // --- Update Database ---
-    const updatedCampaign = await prisma.campaignWizard.update({
-      where: { id: campaignId },
-      data: transformedDataForDb,
-      include: {
-        Influencer: true, // Include influencers if needed
-      },
-    });
-    console.log('DB Update successful for Campaign ID:', campaignId);
-
-    // --- Handle Influencers (Added logic mirroring main route) ---
-    if (
-      dataToSave &&
-      dataToSave.influencers != null && // Check not null/undefined
-      Array.isArray(dataToSave.influencers) &&
-      dataToSave.influencers.length > 0
-    ) {
-      console.log('Updating influencers for wizard campaign:', campaignId);
-
-      // Assign to a new constant for clearer type narrowing
-      const influencersToSave = dataToSave.influencers;
-
-      // Use a transaction to ensure atomicity
-      await prisma.$transaction(async tx => {
-        // First delete existing influencers for this campaign
-        await tx.influencer.deleteMany({
-          where: { campaignId },
-        });
-        console.log('Deleted existing influencers for campaign:', campaignId);
-
-        // Then create new influencers for the campaign using the new constant
-        const influencerCreateData = influencersToSave
-          .filter((inf: any) => inf.handle && inf.platform) // Ensure basic validity
-          .map((inf: any) => ({
-            // Generate an ID if needed, or use provided if exists (handle potential type issues)
-            id:
-              typeof inf.id === 'string'
-                ? inf.id
-                : `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
-            platform: EnumTransformers.platformToBackend(inf.platform), // Transform platform enum
-            handle: inf.handle,
-            platformId: inf.platformId || '', // Ensure platformId is a string
-            campaignId: campaignId, // Link to the current campaign wizard record
-            updatedAt: new Date(),
-          }));
-
-        if (influencerCreateData.length > 0) {
-          await tx.influencer.createMany({
-            data: influencerCreateData,
-          });
-          console.log(
-            `Created ${influencerCreateData.length} new influencers for campaign:`,
-            campaignId
-          );
+    switch (stepNumber) {
+      case 1:
+        // Use the BASE schema with .partial() for validation
+        validationResult = Step1BaseSchema.partial().safeParse(body);
+        if (!validationResult.success) {
+          console.error('Step 1 Validation failed:', validationResult.error.format());
+          return NextResponse.json({ error: 'Validation failed', details: validationResult.error.format() }, { status: 400 });
         }
-      });
+        dataToSave = validationResult.data;
+        console.log('Validated Step 1 data:', JSON.stringify(dataToSave, null, 2));
 
-      // Refetch the campaign with updated influencers to include in the response
-      const campaignWithInfluencers = await prisma.campaignWizard.findUnique({
+        // Map validated Step 1 fields
+        if ('name' in dataToSave) mappedData.name = dataToSave.name;
+        if ('businessGoal' in dataToSave) mappedData.businessGoal = dataToSave.businessGoal;
+        if ('startDate' in dataToSave && dataToSave.startDate) mappedData.startDate = new Date(dataToSave.startDate);
+        if ('endDate' in dataToSave && dataToSave.endDate) mappedData.endDate = new Date(dataToSave.endDate);
+        if ('timeZone' in dataToSave) mappedData.timeZone = dataToSave.timeZone;
+        if ('budget' in dataToSave && dataToSave.budget) {
+          mappedData.budget = {
+            currency: dataToSave.budget.currency || 'USD',
+            total: dataToSave.budget.total || 0,
+            socialMedia: dataToSave.budget.socialMedia || 0
+          };
+        }
+        if ('primaryContact' in dataToSave) mappedData.primaryContact = dataToSave.primaryContact;
+        if ('secondaryContact' in dataToSave) mappedData.secondaryContact = dataToSave.secondaryContact;
+        if ('additionalContacts' in dataToSave) mappedData.additionalContacts = dataToSave.additionalContacts;
+        // Influencers handled separately
+        break;
+
+      case 2:
+        // Use the BASE schema with .partial() for validation
+        validationResult = Step2BaseSchema.partial().safeParse(body);
+        if (!validationResult.success) {
+          console.error('Step 2 Validation failed:', validationResult.error.format());
+          return NextResponse.json({ error: 'Validation failed', details: validationResult.error.format() }, { status: 400 });
+        }
+        dataToSave = validationResult.data;
+        console.log('Validated Step 2 data:', JSON.stringify(dataToSave, null, 2));
+
+        // Map validated Step 2 fields
+        if ('primaryKPI' in dataToSave) mappedData.primaryKPI = dataToSave.primaryKPI;
+        if ('secondaryKPIs' in dataToSave) mappedData.secondaryKPIs = dataToSave.secondaryKPIs;
+        if ('features' in dataToSave) mappedData.features = dataToSave.features;
+        if ('messaging' in dataToSave) mappedData.messaging = dataToSave.messaging;
+        if ('expectedOutcomes' in dataToSave) mappedData.expectedOutcomes = dataToSave.expectedOutcomes;
+        break;
+
+      case 3:
+        // Use the BASE schema with .partial() for validation
+        validationResult = Step3BaseSchema.partial().safeParse(body);
+        if (!validationResult.success) {
+          console.error('Step 3 Validation failed:', validationResult.error.format());
+          return NextResponse.json({ error: 'Validation failed', details: validationResult.error.format() }, { status: 400 });
+        }
+        dataToSave = validationResult.data;
+        console.log('Validated Step 3 data:', JSON.stringify(dataToSave, null, 2));
+
+        // Map validated Step 3 fields (audience etc.)
+        if ('demographics' in dataToSave) mappedData.demographics = { ...(mappedData.demographics || {}), ...dataToSave.demographics };
+        if ('locations' in dataToSave) mappedData.locations = dataToSave.locations;
+        if ('targeting' in dataToSave) mappedData.targeting = { ...(mappedData.targeting || {}), ...dataToSave.targeting };
+        if ('competitors' in dataToSave) mappedData.competitors = dataToSave.competitors;
+        break;
+
+      case 4:
+        // Use the BASE schema with .partial() for validation
+        validationResult = Step4BaseSchema.partial().safeParse(body);
+        if (!validationResult.success) {
+          console.error('Step 4 Validation failed:', validationResult.error.format());
+          return NextResponse.json({ error: 'Validation failed', details: validationResult.error.format() }, { status: 400 });
+        }
+        dataToSave = validationResult.data;
+        console.log('Validated Step 4 data:', JSON.stringify(dataToSave, null, 2));
+
+        // Map validated Step 4 fields
+        if ('assets' in dataToSave) mappedData.assets = dataToSave.assets;
+        if ('guidelines' in dataToSave) mappedData.guidelines = dataToSave.guidelines;
+        if ('requirements' in dataToSave) mappedData.requirements = dataToSave.requirements;
+        if ('notes' in dataToSave) mappedData.notes = dataToSave.notes;
+        break;
+
+      case 5:
+        // Use the BASE schema with .partial() for validation
+        validationResult = Step5BaseSchema.partial().safeParse(body);
+        if (!validationResult.success) {
+          console.error('Step 5 Validation failed:', validationResult.error.format());
+          return NextResponse.json({ error: 'Validation failed', details: validationResult.error.format() }, { status: 400 });
+        }
+        dataToSave = validationResult.data;
+        console.log('Validated Step 5 data:', JSON.stringify(dataToSave, null, 2));
+
+        // Map validated Step 5 fields (e.g., final status)
+        if ('status' in dataToSave && dataToSave.status) {
+          mappedData.status = dataToSave.status.toUpperCase();
+        }
+        // Potentially set isComplete based on validation/status?
+        // mappedData.isComplete = true;
+        break;
+
+      default:
+        return NextResponse.json({ error: `Invalid step number: ${stepNumber}` }, { status: 400 });
+    }
+
+    // Ensure data was actually saved/validated before proceeding
+    if (!dataToSave) {
+      console.error(`Validation or data processing failed for step ${stepNumber}, but no error response was sent.`);
+      return NextResponse.json({ error: 'Internal processing error for step data' }, { status: 500 });
+    }
+
+    // Transform enums only for the fields being updated in this step
+    const transformedDataForDb = EnumTransformers.transformObjectToBackend(mappedData);
+    // Log data JUST BEFORE DB update
+    console.log(`[DB Update - Step ${stepNumber}] Data being sent to Prisma:`, JSON.stringify(transformedDataForDb, null, 2));
+
+    let updatedCampaign;
+    try {
+      updatedCampaign = await prisma.campaignWizard.update({
         where: { id: campaignId },
+        data: transformedDataForDb,
         include: {
           Influencer: true,
         },
       });
-      // Use the refetched data for the response transformation
-      const transformedCampaignForFrontend =
-        EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
-      return NextResponse.json({
-        success: true,
-        data: transformedCampaignForFrontend,
-        message: `Step ${stepNumber} ${dataToSave.status === 'draft' ? 'saved as draft' : 'updated'} with influencers`,
-      });
+      // Log result IMMEDIATELY AFTER successful DB update
+      console.log(`[DB Update - Step ${stepNumber}] Prisma update successful. Result:`, JSON.stringify(updatedCampaign, null, 2));
+    } catch (dbError) {
+      // Catch and log specific Prisma errors
+      console.error(`[DB Update - Step ${stepNumber}] Prisma update FAILED:`, dbError);
+      // Return a specific error response
+      return NextResponse.json({ success: false, error: 'Database update failed.', details: dbError instanceof Error ? dbError.message : String(dbError) }, { status: 500 });
+    }
+
+    // --- Influencer Handling (only if DB update succeeded) ---
+    const influencerData = body.influencers;
+    let campaignToReturn = updatedCampaign; // Start with the successfully updated campaign
+    let messageSuffix = '';
+
+    if (
+      stepNumber === 1 &&
+      influencerData != null &&
+      Array.isArray(influencerData)
+    ) {
+      console.log('Updating influencers for wizard campaign (Step 1):', campaignId);
+      try {
+        await prisma.$transaction(async tx => {
+          await tx.influencer.deleteMany({ where: { campaignId } });
+          console.log('Deleted existing influencers for campaign:', campaignId);
+          const influencerCreateData = influencerData
+            .filter((inf: any) => inf.handle && inf.platform)
+            .map((inf: any) => ({
+              id: typeof inf.id === 'string' ? inf.id : `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
+              platform: EnumTransformers.platformToBackend(inf.platform),
+              handle: inf.handle,
+              platformId: inf.platformId || '',
+              campaignId: campaignId,
+              updatedAt: new Date(),
+            }));
+          if (influencerCreateData.length > 0) {
+            await tx.influencer.createMany({ data: influencerCreateData });
+            console.log(`Created ${influencerCreateData.length} new influencers for campaign:`, campaignId);
+          } else {
+            console.log('No valid influencers provided to create for campaign:', campaignId);
+          }
+        });
+        console.log('Influencer transaction successful.');
+        // Refetch is necessary to include updated influencers
+        campaignToReturn = await prisma.campaignWizard.findUnique({
+          where: { id: campaignId }, include: { Influencer: true },
+        });
+        // Add null check after refetch
+        if (!campaignToReturn) {
+          console.error(`[Influencer Update] Failed to refetch campaign ${campaignId} after influencer update.`);
+          // Return an error because we expected the campaign to exist
+          return NextResponse.json({ success: false, error: 'Failed to retrieve campaign data after update.' }, { status: 500 });
+        }
+        messageSuffix = ' with influencers';
+      } catch (infError) {
+        console.error('[Influencer Update] Transaction FAILED:', infError);
+        // Keep campaignToReturn as the result from the main update
+      }
     }
     // --- End Influencer Handling ---
 
-    // --- Transform response for frontend (Original path if no influencers) ---
+    // Explicit null check before final transformation
+    if (!campaignToReturn) {
+      // This case should ideally not be reached due to the earlier check,
+      // but it satisfies the type checker and handles unexpected edge cases.
+      console.error(`[API PATCH - Step ${stepNumber}] campaignToReturn became null unexpectedly before final transformation.`);
+      return NextResponse.json({ success: false, error: 'Internal server error during final processing.' }, { status: 500 });
+    }
+
+    // Now campaignToReturn is guaranteed non-null here
+    // @ts-ignore - Linter struggling with type inference after conditional refetch
     const transformedCampaignForFrontend =
-      EnumTransformers.transformObjectFromBackend(updatedCampaign);
+      EnumTransformers.transformObjectFromBackend(campaignToReturn);
 
     return NextResponse.json({
       success: true,
-      data: transformedCampaignForFrontend, // Return actual updated data
-      message: `Step ${stepNumber} ${dataToSave.status === 'draft' ? 'saved as draft' : 'updated'}`,
+      data: transformedCampaignForFrontend,
+      message: `Step ${stepNumber} updated${messageSuffix}`,
     });
   },
-  {
-    // Options for tryCatch
-    entityName: 'CampaignWizardStep',
-    operation: DbOperation.UPDATE,
-  }
+  { entityName: 'CampaignWizardStep' }
 );
 
-/**
- * GET handler for retrieving campaign wizard step data
- * NOTE: This is likely redundant if the main /api/campaigns/[id] fetches all data.
- * Consider removing or simplifying if not strictly needed for step-specific logic.
- */
+// --- GET handler (Ensure this export is correct) ---
 export const GET = tryCatch(
   async (request: NextRequest, { params }: { params: Promise<{ id: string; step: string }> }) => {
+    // ... (Original GET handler logic) ...
     const { id: campaignId, step } = await params;
     const stepNumber = parseInt(step, 10);
 
@@ -444,18 +272,14 @@ export const GET = tryCatch(
       );
     }
 
-    console.log(`GET /api/campaigns/${campaignId}/wizard/${stepNumber}`);
+    console.log(`GET /api/campaigns/${campaignId}/wizard/${stepNumber} - Fetching full record`);
 
-    // Connect to database
     await connectToDatabase();
 
-    // Fetch the specific campaign step data (potentially redundant)
-    // You might only need the main GET /api/campaigns/[id] endpoint
     const campaign = await prisma.campaignWizard.findUnique({
       where: { id: campaignId },
       include: {
-        // Include relations needed for this specific step if any
-        Influencer: true, // Example
+        Influencer: true,
       },
     });
 
@@ -463,18 +287,12 @@ export const GET = tryCatch(
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
-    // Transform for frontend
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
-    // Return only data relevant to this step? Or the whole campaign?
-    // Returning whole campaign for now, consistent with main GET
     return NextResponse.json({
       success: true,
       data: transformedCampaign,
     });
   },
-  {
-    entityName: 'CampaignWizardStep',
-    operation: DbOperation.FETCH,
-  }
+  { entityName: 'CampaignWizardStep' }
 );

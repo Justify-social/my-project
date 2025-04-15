@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Card, Button, Alert, AlertTitle, AlertDescription } from '@/components/ui';
 import { format } from 'date-fns';
 
@@ -86,7 +87,7 @@ export default function GraphitiDashboard() {
 
       {isLoading && (
         <div className="flex justify-center py-12">
-          <LoadingSpinner size="lg" />
+          <LoadingSkeleton />
         </div>
       )}
 

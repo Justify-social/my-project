@@ -10,7 +10,7 @@
 import { Suspense } from 'react';
 // Removed cookies import
 // Import SSOT LoadingSkeleton
-// import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 // Correct AuthCheck import path using alias
 import AuthCheck from '@/components/features/users/AuthCheck';
 // Removed getSession import
@@ -19,7 +19,7 @@ import ClientDashboard from './ClientDashboard'; // Import the new client compon
 // import { getUpcomingEvents, getUpcomingCampaigns } from '@/lib/data/dashboard'; // Hypothetical import
 // import type { CalendarEvent } from "@/components/ui/calendar-upcoming";
 // import type { CampaignData } from "@/components/ui/card-upcoming-campaign";
-import { LoadingSpinner } from '@/components/ui/loading-spinner'; // Import the main LoadingSpinner
+// Removed LoadingSpinner import
 
 // Removed DashboardLoadingSkeleton definition
 
@@ -32,11 +32,11 @@ export default function Dashboard() {
       {' '}
       {/* AuthCheck likely handles redirect if not authenticated */}
       <div className="px-4 md:px-6 py-6 font-body">
-        {/* Use LoadingSpinner as the fallback */}
+        {/* Use LoadingSkeleton as the fallback */}
         <Suspense
           fallback={
             <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
-              <LoadingSpinner label="Loading Dashboard..." />
+              <LoadingSkeleton />
             </div>
           }
         >

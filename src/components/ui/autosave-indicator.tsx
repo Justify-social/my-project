@@ -50,9 +50,9 @@ export function AutosaveIndicator({ status, lastSaved, errorMessage, className }
             colorClasses = "text-blue-600"; // Or interactive blue
             break;
         case 'success':
-            iconId = "faCheckCircleSolid";
+            iconId = "faFloppyDiskSolid";
             text = lastSaved ? `Saved ${formatTime(lastSaved)}` : "Saved";
-            colorClasses = "text-green-600";
+            colorClasses = "text-green-700 bg-green-50 border border-green-500 rounded-md px-3 py-1";
             break;
         case 'error':
             iconId = "faExclamationTriangleLight";
@@ -75,9 +75,15 @@ export function AutosaveIndicator({ status, lastSaved, errorMessage, className }
             break;
     }
 
+    // Conditionally apply base padding/styling unless it's success/error which have specific styles
+    const baseClasses = "flex items-center text-xs font-medium";
+    const conditionalClasses = status === 'success' || status === 'error'
+        ? colorClasses // Success/Error have self-contained styles
+        : `${baseClasses} ${colorClasses}`; // Idle/Saving apply color to base
+
     return (
         <div
-            className={cn("flex items-center text-xs font-medium", colorClasses, className)}
+            className={cn(conditionalClasses, className)} // Use combined classes
             role="status"
             aria-live="polite" // Announce changes politely
             aria-atomic="true"

@@ -170,48 +170,49 @@ function Step2Content() {
     // Watch form values for autosave
     const watchedValues = form.watch();
 
-    // --- Autosave Logic ---
-    const handleAutosave = useCallback(async () => {
-        if (!wizard.campaignId || !form.formState.isDirty || !wizard.autosaveEnabled || wizard.isLoading) return;
-        const isValid = await form.trigger();
-        if (!isValid) return;
-        const currentData = form.getValues();
-
-        const payload: Partial<DraftCampaignData> = {
-            primaryKPI: currentData.primaryKPI,
-            secondaryKPIs: currentData.secondaryKPIs,
-            messaging: {
-                mainMessage: currentData.messaging?.mainMessage,
-                hashtags: currentData.messaging?.hashtags ?? [],
-                keyBenefits: currentData.messaging?.keyBenefits,
-            },
-            expectedOutcomes: currentData.expectedOutcomes,
-            features: currentData.features,
-            step2Complete: form.formState.isValid,
-            currentStep: 2,
-        };
-        try {
-            wizard.updateWizardState(payload);
-            const success = await wizard.saveProgress();
-            if (success) {
-                form.reset(currentData, { keepValues: true, keepDirty: false, keepErrors: true });
-            } else {
-                toast.error("Failed to save draft.");
+    // --- Autosave Logic (COMMENTED OUT) ---
+    /*
+        const handleAutosave = useCallback(async () => {
+            if (!wizard.campaignId || !form.formState.isDirty || !wizard.autosaveEnabled || wizard.isLoading) return;
+            const isValid = await form.trigger();
+            if (!isValid) return;
+            const currentData = form.getValues();
+    
+            const payload: Partial<DraftCampaignData> = {
+                primaryKPI: currentData.primaryKPI,
+                secondaryKPIs: currentData.secondaryKPIs,
+                messaging: {
+                    mainMessage: currentData.messaging?.mainMessage,
+                    hashtags: currentData.messaging?.hashtags ?? [],
+                    keyBenefits: currentData.messaging?.keyBenefits,
+                },
+                expectedOutcomes: currentData.expectedOutcomes,
+                features: currentData.features,
+                step2Complete: form.formState.isValid,
+                currentStep: 2,
+            };
+            try {
+                wizard.updateWizardState(payload);
+                const success = await wizard.saveProgress();
+                if (success) {
+                    form.reset(currentData, { keepValues: true, keepDirty: false, keepErrors: true });
+                } else {
+                    toast.error("Failed to save draft.");
+                }
+            } catch (error) {
+                console.error("Autosave error:", error);
+                toast.error("An error occurred saving draft.");
             }
-        } catch (error) {
-            console.error("Autosave error:", error);
-            toast.error("An error occurred saving draft.");
-        }
-    }, [wizard, form, wizard.autosaveEnabled]);
-
-    const debouncedAutosaveRef = useRef(debounce(handleAutosave, 2000));
-    useEffect(() => {
-        if (!wizard.isLoading && form.formState.isDirty && wizard.autosaveEnabled) {
-            debouncedAutosaveRef.current();
-        }
-        return () => { debouncedAutosaveRef.current.cancel(); };
-    }, [watchedValues, wizard.isLoading, form.formState.isDirty, wizard.autosaveEnabled]);
-
+        }, [wizard, form, wizard.autosaveEnabled]);
+    
+        const debouncedAutosaveRef = useRef(debounce(handleAutosave, 2000));
+        useEffect(() => {
+            if (!wizard.isLoading && form.formState.isDirty && wizard.autosaveEnabled) {
+                debouncedAutosaveRef.current();
+            }
+            return () => { debouncedAutosaveRef.current.cancel(); };
+        }, [watchedValues, wizard.isLoading, form.formState.isDirty, wizard.autosaveEnabled]);
+    */
     const onSubmit: SubmitHandler<Step2FormData> = async (data) => { /* ... */ };
 
     // --- Render Logic ---
@@ -311,13 +312,8 @@ function Step2Content() {
                 onNext={onSubmitAndNavigate}
                 isNextDisabled={!form.formState.isValid}
                 isNextLoading={form.formState.isSubmitting || wizard.isLoading}
+                getCurrentFormData={form.getValues}
             />
-            <div className="fixed top-4 right-4 z-50">
-                <AutosaveIndicator
-                    status={getAutosaveStatus()}
-                    lastSaved={wizard.lastSaved}
-                />
-            </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-8 pb-[var(--footer-height)]">
 
@@ -354,7 +350,18 @@ function Step2Content() {
                                                                 ? "bg-primary/10 hover:bg-primary/20 border-l-4 border-l-primary"
                                                                 : "hover:bg-muted/50"
                                                         )}
-                                                        onClick={() => form.setValue('primaryKPI', kpi.key, { shouldValidate: true })}
+                                                        onClick={() => {
+                                                            const kpiKey = kpi.key;
+                                                            // Check if the selected KPI is currently in the secondary list
+                                                            const currentSecondaryKPIs = form.getValues('secondaryKPIs') || [];
+                                                            if (currentSecondaryKPIs.includes(kpiKey)) {
+                                                                // Remove it from secondary list if selecting as primary
+                                                                const updatedSecondaryKPIs = currentSecondaryKPIs.filter(key => key !== kpiKey);
+                                                                form.setValue('secondaryKPIs', updatedSecondaryKPIs, { shouldDirty: true }); // Update secondary first
+                                                            }
+                                                            // Set the new primary KPI
+                                                            form.setValue('primaryKPI', kpiKey, { shouldValidate: true, shouldDirty: true });
+                                                        }}
                                                         style={{ cursor: 'pointer' }}
                                                     >
                                                         {/* Explanation Cell - Revised for vertical icon span */}

@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/ui/navigation/sidebar';
 import { useSidebar } from '@/providers/SidebarProvider';
 import { usePathname } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -241,7 +242,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderCo
     : undefined;
 
   return (
-    <React.Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><LoadingSpinner size="lg" /></div>}>
+    <React.Suspense fallback={<LoadingSkeleton />}>
       <ThemeProvider defaultTheme="light">
         <div className="min-h-screen flex flex-col">
           <Header

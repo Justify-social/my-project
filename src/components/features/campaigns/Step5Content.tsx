@@ -464,11 +464,8 @@ function Step5Content() {
                 isNextDisabled={!form.formState.isValid || isSubmitting}
                 isNextLoading={isSubmitting}
                 submitButtonText="Submit Campaign"
+                getCurrentFormData={() => null}
             />
-
-            <div className="fixed top-4 right-4 z-50">
-                <AutosaveIndicator status={getAutosaveStatus()} lastSaved={wizard.lastSaved} />
-            </div>
 
             <h1 className="text-2xl font-semibold">Review Campaign Details</h1>
 

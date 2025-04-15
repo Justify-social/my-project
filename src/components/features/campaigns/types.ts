@@ -403,13 +403,12 @@ export type SubmissionPayloadData = z.infer<typeof SubmissionPayloadSchema>;
 
 //---------------------------------------------------------------------------
 // Step-Specific Validation Schemas (for RHF `useForm` resolver)
-// These pick relevant fields from the main Draft schema for step-by-step validation.
+// These pick/extend relevant fields from the main Draft schema for step-by-step validation.
 //---------------------------------------------------------------------------
 
-/** Validation schema for Step 1: Basic Info. */
-// Refactored to define explicitly instead of using .pick()
-export const Step1ValidationSchema = z.object({
-  // Manually list fields from DraftCampaignDataBaseSchema needed for Step 1
+// --- Step 1 --- 
+/** BASE schema for Step 1: Basic Info - Only field definitions */
+export const Step1BaseSchema = z.object({
   name: DraftCampaignDataBaseSchema.shape.name,
   businessGoal: DraftCampaignDataBaseSchema.shape.businessGoal,
   startDate: DraftCampaignDataBaseSchema.shape.startDate,
@@ -417,15 +416,18 @@ export const Step1ValidationSchema = z.object({
   timeZone: DraftCampaignDataBaseSchema.shape.timeZone,
   primaryContact: DraftCampaignDataBaseSchema.shape.primaryContact,
   secondaryContact: DraftCampaignDataBaseSchema.shape.secondaryContact,
-  additionalContacts: DraftCampaignDataBaseSchema.shape.additionalContacts, // This is z.array(ContactSchema).default([])
+  additionalContacts: DraftCampaignDataBaseSchema.shape.additionalContacts,
   budget: DraftCampaignDataBaseSchema.shape.budget,
   Influencer: DraftCampaignDataBaseSchema.shape.Influencer,
-}).extend({
+});
+
+/** FULL Validation schema for Step 1: Basic Info (Used in UI) */
+export const Step1ValidationSchema = Step1BaseSchema.extend({
   // Apply original refinements from previous .extend()
   primaryContact: ContactSchema.refine(contact => contact && contact.firstName && contact.surname && contact.email, {
     message: "Primary contact details must be complete",
-    path: ['firstName']
-  }).nullable().optional(),
+    path: ['firstName'] // Pointing error to firstName field
+  }).nullable().optional(), // Keep nullable/optional as in base
   Influencer: InfluencerSchema.array().min(1, "Please add at least one influencer").optional(),
 }).refine(data => {
   // Apply original cross-field validation: budget
@@ -448,34 +450,37 @@ export const Step1ValidationSchema = z.object({
   message: "End date must be after start date",
   path: ["endDate"],
 });
-
 /** TypeScript type for Step 1 form data. */
 export type Step1FormData = z.infer<typeof Step1ValidationSchema>;
 
-/** Validation schema for Step 2: Objectives. */
-export const Step2ValidationSchema = DraftCampaignDataBaseSchema.pick({
+// --- Step 2 --- 
+/** BASE schema for Step 2: Objectives - Only field definitions */
+export const Step2BaseSchema = DraftCampaignDataBaseSchema.pick({
   primaryKPI: true,
   secondaryKPIs: true,
   messaging: true,
   expectedOutcomes: true,
   features: true,
-}).extend({
+});
+/** FULL Validation schema for Step 2: Objectives (Used in UI) */
+export const Step2ValidationSchema = Step2BaseSchema.extend({
   // Ensure primaryKPI is selected
   primaryKPI: KPIEnum.nullable().refine(val => val != null, { message: "Primary KPI is required" }),
-  // Optional: Add validation for messaging fields if needed
-  // messaging: z.object({ ... }).optional().refine(msg => msg?.mainMessage, { message: "Main message is required" })
 });
 /** TypeScript type for Step 2 form data. */
 export type Step2FormData = z.infer<typeof Step2ValidationSchema>;
 
-/** Validation schema for Step 3: Audience. Uses refined sub-schemas. */
-export const Step3ValidationSchema = DraftCampaignDataBaseSchema.pick({
-  demographics: true, // This now refers to the schema with ageDistribution
+// --- Step 3 --- 
+/** BASE schema for Step 3: Audience - Only field definitions */
+export const Step3BaseSchema = DraftCampaignDataBaseSchema.pick({
+  demographics: true,
   locations: true,
   targeting: true,
   competitors: true,
-}).refine(data => {
-  // Refinement for age distribution sum
+});
+/** FULL Validation schema for Step 3: Audience (Used in UI) */
+export const Step3ValidationSchema = Step3BaseSchema.refine(data => {
+  // Refinement for age distribution sum (copied from previous schema)
   if (data.demographics) {
     const sum = (data.demographics.age18_24 || 0) +
       (data.demographics.age25_34 || 0) +
@@ -483,35 +488,33 @@ export const Step3ValidationSchema = DraftCampaignDataBaseSchema.pick({
       (data.demographics.age45_54 || 0) +
       (data.demographics.age55_64 || 0) +
       (data.demographics.age65plus || 0);
-    // Only enforce if the user has interacted (sum is not 0)
     return sum === 0 || Math.abs(sum - 100) < 0.01;
   }
   return true;
 }, {
   message: "Total age distribution must equal 100%",
-  path: ['demographics', 'age18_24'], // Point error to first field for UI
+  path: ['demographics', 'age18_24'],
 });
 /** TypeScript type for Step 3 form data. */
 export type Step3FormData = z.infer<typeof Step3ValidationSchema>;
 
-/** Validation schema for Step 4: Assets & Guidelines. */
-// Refactored to define explicitly instead of using .pick()
-export const Step4ValidationSchema = z.object({
-  // Manually list fields from DraftCampaignDataBaseSchema needed for Step 4
-  assets: DraftCampaignDataBaseSchema.shape.assets, // This is z.array(DraftAssetSchema).default([])
+// --- Step 4 --- 
+/** BASE schema for Step 4: Assets & Guidelines - Only field definitions */
+export const Step4BaseSchema = z.object({
+  assets: DraftCampaignDataBaseSchema.shape.assets,
   guidelines: DraftCampaignDataBaseSchema.shape.guidelines,
-  requirements: DraftCampaignDataBaseSchema.shape.requirements, // This is z.array(...).default([])
+  requirements: DraftCampaignDataBaseSchema.shape.requirements,
   notes: DraftCampaignDataBaseSchema.shape.notes,
-}).extend({
-  // Apply original refinements from previous .extend() and .refine()
-  guidelines: z.string().optional(), // Keep simple refinement
+});
+/** FULL Validation schema for Step 4: Assets & Guidelines (Used in UI) */
+export const Step4ValidationSchema = Step4BaseSchema.extend({
+  guidelines: z.string().optional(),
   assets: DraftAssetSchema.array().optional().refine(assets =>
     !assets || assets.every(asset => !asset.url || z.string().url().safeParse(asset.url).success), {
     message: "Invalid URL format in one of the assets",
-    path: [0, 'url'] // Example path for first asset with bad URL
-  }) // Note: .default([]) is on the base schema, .optional() here might conflict? Let's keep optional for refinement.
+    path: [0, 'url']
+  })
 }).superRefine((data, ctx) => {
-  // Apply original cross-field validation
   if (data.assets && data.assets.length > 0 && !data.guidelines) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -520,14 +523,15 @@ export const Step4ValidationSchema = z.object({
     });
   }
 });
-
 /** TypeScript type for Step 4 form data. */
 export type Step4FormData = z.infer<typeof Step4ValidationSchema>;
 
-// --- Step 5: Review & Submit ---
+// --- Step 5 --- 
 // No specific validation schema needed for the form itself, as Step 5 is primarily for review.
-// Final validation happens during the construction of the submission payload
-// using the `SubmissionPayloadSchema` before calling the API.
+// Base schema can just reference status or other fields if needed for partial save
+export const Step5BaseSchema = DraftCampaignDataBaseSchema.pick({ status: true /*, potentially other final fields */ });
+export const Step5ValidationSchema = Step5BaseSchema; // No extra validation for now
+export type Step5FormData = z.infer<typeof Step5ValidationSchema>;
 
 //---------------------------------------------------------------------------
 // Shared Prop Types for Wizard Components

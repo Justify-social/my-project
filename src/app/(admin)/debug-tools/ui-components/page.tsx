@@ -24,6 +24,7 @@ import {
 } from '@/components/ui';
 import { Icon } from '@/components/ui/icon';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { iconRegistryData } from '@/lib/generated/icon-registry';
 import { IconMetadata } from '@/components/ui/icon/icon-types';
 import { Button as UiButton } from '@/components/ui/button';
@@ -190,7 +191,7 @@ export default function ComponentBrowserPage() {
   if (isLoadingRegistry) {
     return (
       <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[300px]">
-        <LoadingSpinner size="lg" />
+        <LoadingSkeleton />
       </div>
     );
   }
@@ -220,7 +221,7 @@ export default function ComponentBrowserPage() {
   }
 
   return (
-    <Suspense fallback={<div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[300px]"><LoadingSpinner size="lg" /></div>}>
+    <Suspense fallback={<div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[300px]"><LoadingSkeleton /></div>}>
       <div className="container mx-auto py-8 px-4 max-w-7xl">
         <h1 className="text-3xl font-bold mb-6 text-primary">UI Component Browser</h1>
         <p className="mb-6 text-secondary">Browse and preview the UI components and icons available in the system.</p>

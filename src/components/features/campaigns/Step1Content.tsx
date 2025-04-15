@@ -111,7 +111,7 @@ async function validateInfluencerHandle(platform: string | undefined, handle: st
     };
 }
 
-// --- Influencer Entry Component --- 
+// --- Influencer Entry Component ---
 interface InfluencerEntryProps {
     index: number;
     control: UseFormReturn<Step1FormData>['control'];
@@ -435,11 +435,14 @@ const calculateDuration = (start: Date | string | undefined | null, end: Date | 
 };
 
 function Step1Content() {
-    const { wizardState, updateWizardState, isLoading, saveProgress, lastSaved, autosaveEnabled, stepsConfig } = useWizard();
+    const { wizardState, updateWizardState, isLoading, saveProgress, lastSaved, autosaveEnabled, setAutosaveEnabled, stepsConfig } = useWizard();
     const router = useRouter();
     const initialDataLoaded = useRef(false);
     const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
     const [exchangeRateData, setExchangeRateData] = useState<any>(null); // State for exchange rates
+    // Get searchParams once
+    const searchParams = useMemo(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''), []);
+
 
     // Effect to detect timezone on mount
     useEffect(() => {
@@ -467,7 +470,7 @@ function Step1Content() {
                 total: 0, // Use number for default
                 socialMedia: 0, // Use number for default
             },
-            Influencer: [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' }],
+            Influencer: [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }], // Start empty handle
         },
         mode: 'onChange',
     });
@@ -529,9 +532,9 @@ function Step1Content() {
                         platform: (inf?.platform && PlatformEnumBackend.safeParse(inf.platform).success
                             ? inf.platform
                             : PlatformEnumBackend.Values.INSTAGRAM) as z.infer<typeof PlatformEnumBackend>,
-                        handle: inf?.handle || 'placeholder',
+                        handle: inf?.handle || '',
                     }))
-                    : [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' }],
+                    : [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }], // Start empty handle
             };
 
             console.log("[Step1Content useEffect] Calling form.reset with formatted data:", formattedData);
@@ -540,22 +543,18 @@ function Step1Content() {
         }
     }, [isLoading, wizardState, detectedTimezone, form.reset]);
 
-    // Remove explicit typing and @ts-ignore, let RHF infer
+    // UseFieldArray hooks (CORRECTED - no type assertions)
     const { fields, append: appendInfluencer, remove: removeInfluencer } = useFieldArray({
         control: form.control,
-        // Apply specific type assertion
-        name: "Influencer" as "Influencer",
+        name: "Influencer",
     });
 
-    // Add useFieldArray hook for additionalContacts
     const { fields: contactFields, append: appendContact, remove: removeContact } = useFieldArray({
         control: form.control,
-        // Apply specific type assertion
-        name: 'additionalContacts' as 'additionalContacts',
+        name: 'additionalContacts',
     });
 
     // Watch relevant fields for side effects
-    const watchedValues = form.watch();
     const watchedCurrency = form.watch('budget.currency'); // Watch specifically for currency changes
 
     // Watch dates for duration calculation
@@ -570,7 +569,6 @@ function Step1Content() {
     useEffect(() => {
         // Ensure watchedCurrency is a valid string before fetching
         if (watchedCurrency && typeof watchedCurrency === 'string' && watchedCurrency.length > 0) { // Re-enabled currency watching
-            // const baseCurrencyToFetch = 'EUR'; // Reverted: Use watched currency
             console.log(`Currency changed to: ${watchedCurrency}. Fetching exchange rates...`);
             fetchExchangeRates(watchedCurrency).then(data => { // Use watchedCurrency
                 if (data) {
@@ -599,57 +597,128 @@ function Step1Content() {
         return contacts.filter((contact) => !!contact?.email);
     }, [wizardState?.additionalContacts]);
 
-    const handleAutosave = useCallback(async () => {
-        if (!wizardState?.campaignId || !form.formState.isDirty || !autosaveEnabled || isLoading) return;
-        await form.trigger();
-        const currentData = form.getValues();
 
-        const payload: Partial<DraftCampaignData> = {
-            name: currentData.name,
-            businessGoal: currentData.businessGoal,
-            startDate: currentData.startDate instanceof Date ? currentData.startDate.toISOString() : currentData.startDate || undefined,
-            endDate: currentData.endDate instanceof Date ? currentData.endDate.toISOString() : currentData.endDate || undefined,
-            timeZone: currentData.timeZone,
-            primaryContact: currentData.primaryContact,
-            secondaryContact: currentData.secondaryContact,
-            additionalContacts: Array.isArray(currentData.additionalContacts) ? currentData.additionalContacts : [],
-            budget: {
-                total: parseFloat(String(currentData.budget?.total || '0')) || 0,
-                socialMedia: parseFloat(String(currentData.budget?.socialMedia || '0')) || 0,
-                currency: currentData.budget?.currency as z.infer<typeof CurrencyEnum>,
-            },
-            Influencer: Array.isArray(currentData.Influencer)
-                ? currentData.Influencer.filter((inf): inf is ContextInfluencer => !!inf?.platform && !!inf?.handle)
-                : [],
-            step1Complete: form.formState.isValid,
-            currentStep: 1,
-        };
-        try {
-            updateWizardState(payload);
-            const success = await saveProgress();
-            if (success) {
-                form.reset(currentData, { keepValues: true, keepDirty: false, keepErrors: true });
+    // --- AUTOSAVE LOGIC (COMMENTED OUT) --- 
+    /*
+        // Ref to store the latest form and context values for the debounced function
+        const latestStateRef = useRef({
+            isDirty: form.formState.isDirty,
+            isLoading: isLoading,
+            isValid: form.formState.isValid,
+            autosaveEnabled: autosaveEnabled,
+            wizardState: wizardState,
+            getValues: form.getValues,
+            trigger: form.trigger,
+            updateWizardState: updateWizardState,
+            searchParams: searchParams,
+        });
+    
+        // Update the ref whenever relevant state/props change
+        useEffect(() => {
+            latestStateRef.current = {
+                isDirty: form.formState.isDirty,
+                isLoading: isLoading,
+                isValid: form.formState.isValid,
+                autosaveEnabled: autosaveEnabled,
+                wizardState: wizardState,
+                getValues: form.getValues,
+                trigger: form.trigger,
+                updateWizardState: updateWizardState,
+                searchParams: searchParams,
+            };
+        }, [form.formState.isDirty, isLoading, form.formState.isValid, autosaveEnabled, wizardState, form.getValues, form.trigger, updateWizardState, searchParams]);
+    
+        // Create the debounced function using useRef to keep it stable
+        const debouncedSaveRef = useRef(
+            debounce(() => {
+                // Access the LATEST state values via the ref inside the debounced function
+                const { 
+                    isDirty,
+                    isLoading: currentIsLoading,
+                    isValid: currentIsValid,
+                    autosaveEnabled: currentAutosaveEnabled,
+                    wizardState: currentWizardState,
+                    getValues,
+                    trigger,
+                    updateWizardState: currentUpdateWizardState,
+                    searchParams: currentSearchParams
+                } = latestStateRef.current;
+    
+                console.log('[Debounced Save] Executing. Checking conditions...');
+                console.log('[Debounced Save] Conditions:', { currentAutosaveEnabled, currentIsLoading, isDirty });
+    
+                if (!currentAutosaveEnabled || currentIsLoading || !isDirty) {
+                     console.log('[Debounced Save] Skipped.');
+                     return;
+                }
+                
+                const campaignIdFromUrl = currentSearchParams?.get('id');
+                const currentCampaignId = currentWizardState?.campaignId || campaignIdFromUrl;
+                if (!currentCampaignId) {
+                     console.log('[Debounced Save] Skipped: Campaign ID is missing.');
+                    return;
+                }
+    
+                console.log('[Debounced Save] Conditions met. Triggering validation for campaign:', currentCampaignId);
+    
+                trigger().then((isValidNow) => {
+                    if (!isValidNow) {
+                        console.warn('[Debounced Save] Payload generation skipped: Form validation failed.');
+                        return;
+                    }
+                    const currentData = getValues();
+                    const payload: Partial<DraftCampaignData> = {
+                        // ... payload construction ...
+                        name: currentData.name,
+                        businessGoal: currentData.businessGoal,
+                        startDate: currentData.startDate instanceof Date ? currentData.startDate.toISOString() : currentData.startDate || undefined,
+                        endDate: currentData.endDate instanceof Date ? currentData.endDate.toISOString() : currentData.endDate || undefined,
+                        timeZone: currentData.timeZone,
+                        primaryContact: currentData.primaryContact,
+                        secondaryContact: currentData.secondaryContact,
+                        additionalContacts: Array.isArray(currentData.additionalContacts) ? currentData.additionalContacts : [],
+                        budget: {
+                            total: parseFloat(String(currentData.budget?.total || '0')) || 0,
+                            socialMedia: parseFloat(String(currentData.budget?.socialMedia || '0')) || 0,
+                            currency: currentData.budget?.currency as z.infer<typeof CurrencyEnum>,
+                        },
+                        Influencer: Array.isArray(currentData.Influencer)
+                            ? currentData.Influencer.filter((inf): inf is ContextInfluencer => !!inf?.platform && !!inf?.handle)
+                            : [],
+                        step1Complete: isValidNow,
+                        currentStep: 1,
+                    };
+                    console.log('[Debounced Save] Updating wizard state with payload:', JSON.stringify(payload, null, 2));
+                    currentUpdateWizardState(payload);
+                    console.log('[Debounced Save] Wizard state updated. Context will handle actual saving.');
+                });
+            }, 2000)
+        ).current;
+    
+        // useEffect hook to trigger the debounced save
+        useEffect(() => {
+            console.log('[Autosave Trigger useEffect] Checking conditions...');
+            // ... (conditions check) ...
+            if (!isLoading && form.formState.isDirty && autosaveEnabled) {
+                console.log('[Autosave Trigger useEffect] Conditions met. Calling debounced function.');
+                debouncedSaveRef();
             } else {
-                toast.error("Failed to save draft.");
+                // ... (log skip reason) ...
+                console.log(`[Autosave Trigger useEffect] Conditions not met. Skipping debounce call. Reason: ${reason}`);
             }
-        } catch (error) {
-            console.error("Autosave error:", error);
-            toast.error("An error occurred while saving draft.");
-        }
-    }, [wizardState?.campaignId, form, autosaveEnabled, isLoading, updateWizardState, saveProgress]);
-
-    const debouncedAutosaveRef = useRef(debounce(handleAutosave, 2000));
-    useEffect(() => {
-        if (!isLoading && form.formState.isDirty && autosaveEnabled) {
-            debouncedAutosaveRef.current();
-        }
-        return () => { debouncedAutosaveRef.current.cancel(); };
-    }, [watchedValues, isLoading, form.formState.isDirty, autosaveEnabled]);
+            return () => {
+                console.log('[Autosave Trigger useEffect] Cleaning up. Cancelling debounced save.');
+                debouncedSaveRef.cancel();
+            };
+        }, [isLoading, form.formState.isDirty, autosaveEnabled, debouncedSaveRef]);
+    */
+    // --- END AUTOSAVE LOGIC ---
 
     const handleStepClick = (step: number) => {
         if (wizardState?.campaignId && step === 1) {
             router.push(`/campaigns/wizard/step-1?id=${wizardState.campaignId}`);
         }
+        // Add logic for other steps if needed, potentially saving first
     };
 
     const onSubmitAndNavigate = async () => {
@@ -675,23 +744,31 @@ function Step1Content() {
                 currency: data.budget?.currency as z.infer<typeof CurrencyEnum>,
             },
             Influencer: Array.isArray(data.Influencer)
-                ? data.Influencer.filter((inf): inf is ContextInfluencer => !!inf?.id && !!inf?.platform && !!inf?.handle)
+                ? data.Influencer.filter((inf): inf is ContextInfluencer => !!inf?.id && !!inf?.platform && !!inf?.handle) // Filter valid influencers
                 : [],
-            step1Complete: true,
-            currentStep: 2,
+            step1Complete: true, // Explicitly mark step 1 as complete on successful submit
+            currentStep: 2, // Set current step to the next step
         };
-        updateWizardState(payload);
-        const saved = await saveProgress();
+
+        console.log("Submitting Step 1 data and navigating:", payload);
+        updateWizardState(payload); // Update state first
+
+        // Ensure save completes before navigating
+        const saved = await saveProgress(); // Await saveProgress from context
+
         if (saved) {
-            form.reset(data, { keepValues: true, keepDirty: false });
-            if (wizardState?.campaignId) {
-                router.push(`/campaigns/wizard/step-2?id=${wizardState.campaignId}`);
+            console.log("Save successful, navigating to Step 2.");
+            // form.reset(data, { keepValues: true, keepDirty: false }); // Reset form state after successful save & navigation
+            const currentCampaignId = wizardState?.campaignId || searchParams?.get('id');
+            if (currentCampaignId) {
+                router.push(`/campaigns/wizard/step-2?id=${currentCampaignId}`);
             } else {
                 console.error("Cannot navigate, campaign ID is missing.");
                 toast.error("Could not navigate: campaign ID not found.");
             }
         } else {
             toast.error("Failed to save progress before navigating.");
+            console.error("Save failed, navigation aborted.");
         }
     };
 
@@ -700,288 +777,286 @@ function Step1Content() {
     }
 
     const getAutosaveStatus = () => {
-        if (isLoading) return 'saving';
+        // Reflect saving state based on context's isLoading, potentially add isSaving from context if available
+        if (isLoading) return 'saving'; // Might need refinement if context provides a specific isSaving flag
         if (lastSaved) return 'success';
         return 'idle';
     };
 
     return (
         <>
-            <div className="fixed top-4 right-4 z-50">
-                <AutosaveIndicator
-                    status={getAutosaveStatus()}
-                    lastSaved={lastSaved}
-                />
-            </div>
             <ProgressBarWizard
                 currentStep={1}
                 steps={stepsConfig}
                 onStepClick={handleStepClick}
-                onBack={null}
+                onBack={null} // No back button on Step 1
                 onNext={onSubmitAndNavigate}
-                isNextDisabled={!form.formState.isValid}
-                isNextLoading={form.formState.isSubmitting || isLoading}
+                isNextDisabled={!form.formState.isValid} // Disable next if form invalid
+                isNextLoading={form.formState.isSubmitting || isLoading} // Reflect loading state
+                getCurrentFormData={form.getValues}
             />
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-6 pt-8 pb-[var(--footer-height)]">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Basic Information</CardTitle>
-                            <CardDescription>Enter the core details for your campaign.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Campaign Name & Business Goal still take full width initially, then split on md */}
-                            <FormField control={form.control} name="name" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Campaign Name *</FormLabel><FormControl><Input placeholder="e.g., Summer Sale Launch" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name="businessGoal" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Business Goal</FormLabel><FormControl><Textarea placeholder="What is the main objective?" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+            <FormProvider {...form}> {/* Use FormProvider if passing form methods down */}
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-6 pt-8 pb-[var(--footer-height)]">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Basic Information</CardTitle>
+                                <CardDescription>Enter the core details for your campaign.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Campaign Name & Business Goal still take full width initially, then split on md */}
+                                <FormField control={form.control} name="name" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Campaign Name *</FormLabel><FormControl><Input placeholder="e.g., Summer Sale Launch" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name="businessGoal" render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Business Goal</FormLabel><FormControl><Textarea placeholder="What is the main objective?" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
 
-                            {/* Campaign Duration Section (Column 1) */}
-                            <div className="md:col-span-1 space-y-2"> {/* Container for the first column */}
-                                <FormLabel>Campaign Duration *</FormLabel>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {/* Start Date Field */}
+                                {/* Campaign Duration Section (Column 1) */}
+                                <div className="md:col-span-1 space-y-2"> {/* Container for the first column */}
+                                    <FormLabel>Campaign Duration *</FormLabel>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {/* Start Date Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="startDate"
+                                            render={({ field }) => (
+                                                // Add relative positioning context for the absolute label
+                                                <FormItem className="flex flex-col relative">
+                                                    <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">Start Date</FormLabel>
+                                                    <DatePicker
+                                                        value={field.value ? new Date(field.value) : undefined}
+                                                        onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
+                                                        displayFormat="dd/MM/yyyy"
+                                                        className="w-full pt-3" // Increased padding-top slightly
+                                                        placeholder="Select Start Date"
+                                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        {/* End Date Field */}
+                                        <FormField
+                                            control={form.control}
+                                            name="endDate"
+                                            render={({ field }) => (
+                                                // Add relative positioning context for the absolute label
+                                                <FormItem className="flex flex-col relative">
+                                                    <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">End Date</FormLabel>
+                                                    <DatePicker
+                                                        value={field.value ? new Date(field.value) : undefined}
+                                                        onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
+                                                        displayFormat="dd/MM/yyyy"
+                                                        className="w-full pt-3" // Increased padding-top slightly
+                                                        placeholder="Select End Date"
+                                                    />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {/* Campaign Duration Display (inside the first column div)*/}
+                                    <Alert variant="default" className="mt-4">
+                                        <AlertDescription className="flex items-center text-sm">
+                                            <Icon iconId="faCircleInfoLight" className="h-4 w-4 mr-2 flex-shrink-0" />
+                                            <span>Campaign Duration: {campaignDuration}</span>
+                                        </AlertDescription>
+                                    </Alert>
+                                </div>
+
+                                {/* Timezone Section (Column 2) */}
+                                <div className="md:col-span-1"> {/* Container for the second column */}
                                     <FormField
                                         control={form.control}
-                                        name="startDate"
+                                        name="timeZone"
                                         render={({ field }) => (
-                                            // Add relative positioning context for the absolute label
-                                            <FormItem className="flex flex-col relative">
-                                                <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">Start Date</FormLabel>
-                                                <DatePicker
-                                                    value={field.value ? new Date(field.value) : undefined}
-                                                    onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
-                                                    displayFormat="dd/MM/yyyy"
-                                                    className="w-full pt-3" // Increased padding-top slightly
-                                                    placeholder="Select Start Date"
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    {/* End Date Field */}
-                                    <FormField
-                                        control={form.control}
-                                        name="endDate"
-                                        render={({ field }) => (
-                                            // Add relative positioning context for the absolute label
-                                            <FormItem className="flex flex-col relative">
-                                                <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">End Date</FormLabel>
-                                                <DatePicker
-                                                    value={field.value ? new Date(field.value) : undefined}
-                                                    onChange={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
-                                                    displayFormat="dd/MM/yyyy"
-                                                    className="w-full pt-3" // Increased padding-top slightly
-                                                    placeholder="Select End Date"
-                                                />
+                                            <FormItem>
+                                                <FormLabel>Time Zone *</FormLabel>
+                                                <Select onValueChange={field.onChange} value={field.value || ''}>
+                                                    <FormControl>
+                                                        <SelectTrigger className="w-full">
+                                                            <div className="flex items-center">
+                                                                <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                                <SelectValue placeholder="Select timezone...">
+                                                                    {/* Display formatted label of selected timezone */}
+                                                                    {field.value ? (TIMEZONE_OPTIONS.find(opt => opt.value === field.value)?.label || field.value) : 'Select timezone...'}
+                                                                </SelectValue>
+                                                            </div>
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {TIMEZONE_OPTIONS.map(option => (
+                                                            <SelectItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
                                 </div>
-                                {/* Campaign Duration Display (inside the first column div)*/}
-                                <Alert variant="default" className="mt-4">
-                                    <AlertDescription className="flex items-center text-sm">
-                                        <Icon iconId="faCircleInfoLight" className="h-4 w-4 mr-2 flex-shrink-0" />
-                                        <span>Campaign Duration: {campaignDuration}</span>
-                                    </AlertDescription>
-                                </Alert>
-                            </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Contact Information</CardTitle>
+                                <CardDescription>Primary contact is required.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div>
+                                    <h4 className="text-md font-semibold mb-3 text-foreground">Primary Contact *</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md bg-card/50">
+                                        <FormField control={form.control} name="primaryContact.firstName" render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="John" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="primaryContact.surname" render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="primaryContact.email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="primaryContact.position" render={({ field }) => (<FormItem><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}><FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl><SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-md font-semibold mb-3 text-foreground">Secondary Contact (Optional)</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md bg-card/50">
+                                        <FormField control={form.control} name="secondaryContact.firstName" render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Jane" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="secondaryContact.surname" render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Smith" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="secondaryContact.email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="jane.smith@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="secondaryContact.position" render={({ field }) => (<FormItem><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}><FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl><SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+                                    </div>
+                                </div>
 
-                            {/* Timezone Section (Column 2) */}
-                            <div className="md:col-span-1"> {/* Container for the second column */}
-                                <FormField
-                                    control={form.control}
-                                    name="timeZone"
-                                    render={({ field }) => (
+                                {/* Additional Contacts Section */}
+                                <div className="space-y-4 mt-6"> {/* Added margin-top */}
+                                    {/* Render header only if there are contacts or potential to add */}
+                                    {(contactFields.length > 0) && (
+                                        <h4 className="text-md font-semibold mb-3 text-foreground">Additional Contacts</h4>
+                                    )}
+                                    {contactFields.map((item, index) => (
+                                        <div key={item.id} className="p-4 border rounded-md bg-card/50 relative space-y-4">
+                                            {/* Optional: Header per contact entry */}
+                                            {/* <h5 className="text-sm font-semibold text-muted-foreground">Additional Contact {index + 1}</h5> */}
+                                            <IconButtonAction
+                                                iconBaseName="faTrashCan"
+                                                hoverColorClass="text-destructive"
+                                                ariaLabel={`Remove Additional Contact ${index + 1}`}
+                                                className="absolute top-2 right-2 h-7 w-7"
+                                                onClick={() => removeContact(index)}
+                                            />
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                                <FormField control={form.control} name={`additionalContacts.${index}.firstName`} render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Alex" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                                <FormField control={form.control} name={`additionalContacts.${index}.surname`} render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Chen" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                                <FormField control={form.control} name={`additionalContacts.${index}.email`} render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="alex.chen@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                                <FormField control={form.control} name={`additionalContacts.${index}.position`} render={({ field }) => (
+                                                    <FormItem><FormLabel>Position</FormLabel>
+                                                        {/* Revert value prop to use default enum */}
+                                                        <Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}>
+                                                            <FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl>
+                                                            <SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>)}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Add Additional Contact Button */}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-4"
+                                    // Provide default structure matching ContactSchema
+                                    onClick={() => appendContact({
+                                        firstName: '',
+                                        surname: '',
+                                        email: '',
+                                        position: PositionEnum.Values.Director // Ensure this matches your schema/defaults
+                                    })}
+                                >
+                                    <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Additional Contact
+                                </Button>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Budget & Influencers</CardTitle>
+                                <CardDescription>Define the budget and add influencer(s).</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                    <FormField control={form.control} name="budget.currency" render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Time Zone *</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value || ''}>
+                                            <FormLabel>Currency *</FormLabel>
+                                            <Select onValueChange={field.onChange} value={(field.value as string | undefined) || CurrencyEnum.Values.USD}>
                                                 <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <div className="flex items-center">
-                                                            <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4 text-muted-foreground" />
-                                                            <SelectValue placeholder="Select timezone...">
-                                                                {/* Display formatted label of selected timezone */}
-                                                                {field.value ? (TIMEZONE_OPTIONS.find(opt => opt.value === field.value)?.label || field.value) : 'Select timezone...'}
-                                                            </SelectValue>
-                                                        </div>
-                                                    </SelectTrigger>
+                                                    <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {TIMEZONE_OPTIONS.map(option => (
-                                                        <SelectItem key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {CurrencyEnum.options.map(curr => (<SelectItem key={curr} value={curr}>{curr}</SelectItem>))}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
                                         </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Contact Information</CardTitle>
-                            <CardDescription>Primary contact is required.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div>
-                                <h4 className="text-md font-semibold mb-3 text-foreground">Primary Contact *</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md bg-card/50">
-                                    <FormField control={form.control} name="primaryContact.firstName" render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="John" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="primaryContact.surname" render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="primaryContact.email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="primaryContact.position" render={({ field }) => (<FormItem><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}><FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl><SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+                                    )} />
+                                    <FormField control={form.control} name="budget.total" render={({ field }) => (
+                                        <FormItem><FormLabel>Total Budget *</FormLabel>
+                                            <FormControl><div className="relative">
+                                                <Input
+                                                    type="text"
+                                                    placeholder="e.g., 5,000"
+                                                    {...field}
+                                                    value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
+                                                    onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
+                                                    className="pl-7"
+                                                />
+                                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("budget.currency") === 'GBP' ? '£' : form.getValues("budget.currency") === 'EUR' ? '€' : '$'}</span>
+                                            </div></FormControl>
+                                            <FormMessage />
+                                        </FormItem>)} />
+                                    <FormField control={form.control} name="budget.socialMedia" render={({ field }) => (
+                                        <FormItem><FormLabel>Social Media Budget *</FormLabel>
+                                            <FormControl><div className="relative">
+                                                <Input
+                                                    type="text"
+                                                    placeholder="e.g., 1,000"
+                                                    {...field}
+                                                    value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
+                                                    onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
+                                                    className="pl-7"
+                                                />
+                                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("budget.currency") === 'GBP' ? '£' : form.getValues("budget.currency") === 'EUR' ? '€' : '$'}</span>
+                                            </div></FormControl>
+                                            <FormMessage />
+                                        </FormItem>)} />
                                 </div>
-                            </div>
-                            <div>
-                                <h4 className="text-md font-semibold mb-3 text-foreground">Secondary Contact (Optional)</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md bg-card/50">
-                                    <FormField control={form.control} name="secondaryContact.firstName" render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Jane" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="secondaryContact.surname" render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Smith" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="secondaryContact.email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="jane.smith@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="secondaryContact.position" render={({ field }) => (<FormItem><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}><FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl><SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                                </div>
-                            </div>
-
-                            {/* Additional Contacts Section */}
-                            <div className="space-y-4 mt-6"> {/* Added margin-top */}
-                                {/* Render header only if there are contacts or potential to add */}
-                                {(contactFields.length > 0) && (
-                                    <h4 className="text-md font-semibold mb-3 text-foreground">Additional Contacts</h4>
-                                )}
-                                {contactFields.map((item, index) => (
-                                    <div key={item.id} className="p-4 border rounded-md bg-card/50 relative space-y-4">
-                                        {/* Optional: Header per contact entry */}
-                                        {/* <h5 className="text-sm font-semibold text-muted-foreground">Additional Contact {index + 1}</h5> */}
-                                        <IconButtonAction
-                                            iconBaseName="faTrashCan"
-                                            hoverColorClass="text-destructive"
-                                            ariaLabel={`Remove Additional Contact ${index + 1}`}
-                                            className="absolute top-2 right-2 h-7 w-7"
-                                            onClick={() => removeContact(index)}
-                                        />
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                            <FormField control={form.control} name={`additionalContacts.${index}.firstName`} render={({ field }) => (<FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Alex" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                            <FormField control={form.control} name={`additionalContacts.${index}.surname`} render={({ field }) => (<FormItem><FormLabel>Surname</FormLabel><FormControl><Input placeholder="Chen" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                            <FormField control={form.control} name={`additionalContacts.${index}.email`} render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="alex.chen@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                            <FormField control={form.control} name={`additionalContacts.${index}.position`} render={({ field }) => (
-                                                <FormItem><FormLabel>Position</FormLabel>
-                                                    {/* Revert value prop to use default enum */}
-                                                    <Select onValueChange={field.onChange} value={field.value || PositionEnum.Values.Director}>
-                                                        <FormControl><SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger></FormControl>
-                                                        <SelectContent>{PositionEnum.options.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>)}
+                                <div className="mt-4">
+                                    <FormLabel className="text-md font-semibold">Influencer(s) *</FormLabel>
+                                    <FormDescription className="mb-4">Add the influencer(s) you want to work with.</FormDescription>
+                                    <div className="space-y-4">
+                                        {fields.map((item, index) => (
+                                            <InfluencerEntry
+                                                key={item.id}
+                                                index={index}
+                                                control={form.control}
+                                                errors={form.formState.errors}
+                                                remove={removeInfluencer}
                                             />
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-
-                            {/* Add Additional Contact Button */}
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="mt-4"
-                                // Provide default structure matching ContactSchema
-                                onClick={() => appendContact({
-                                    firstName: '',
-                                    surname: '',
-                                    email: '',
-                                    position: PositionEnum.Values.Director // Ensure this matches your schema/defaults
-                                })}
-                            >
-                                <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Additional Contact
-                            </Button>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Budget & Influencers</CardTitle>
-                            <CardDescription>Define the budget and add influencer(s).</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <FormField control={form.control} name="budget.currency" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Currency *</FormLabel>
-                                        <Select onValueChange={field.onChange} value={(field.value as string | undefined) || CurrencyEnum.Values.USD}>
-                                            <FormControl>
-                                                <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {CurrencyEnum.options.map(curr => (<SelectItem key={curr} value={curr}>{curr}</SelectItem>))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                                <FormField control={form.control} name="budget.total" render={({ field }) => (
-                                    <FormItem><FormLabel>Total Budget *</FormLabel>
-                                        <FormControl><div className="relative">
-                                            <Input
-                                                type="text"
-                                                placeholder="e.g., 5,000"
-                                                {...field}
-                                                value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
-                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
-                                                className="pl-7"
-                                            />
-                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("budget.currency") === 'GBP' ? '£' : form.getValues("budget.currency") === 'EUR' ? '€' : '$'}</span>
-                                        </div></FormControl>
-                                        <FormMessage />
-                                    </FormItem>)} />
-                                <FormField control={form.control} name="budget.socialMedia" render={({ field }) => (
-                                    <FormItem><FormLabel>Social Media Budget *</FormLabel>
-                                        <FormControl><div className="relative">
-                                            <Input
-                                                type="text"
-                                                placeholder="e.g., 1,000"
-                                                {...field}
-                                                value={formatCurrencyInput(field.value !== null && field.value !== undefined ? String(field.value) : '')}
-                                                onChange={(e) => field.onChange(parseCurrencyInput(e.target.value))}
-                                                className="pl-7"
-                                            />
-                                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{form.getValues("budget.currency") === 'GBP' ? '£' : form.getValues("budget.currency") === 'EUR' ? '€' : '$'}</span>
-                                        </div></FormControl>
-                                        <FormMessage />
-                                    </FormItem>)} />
-                            </div>
-                            <div className="mt-4">
-                                <FormLabel className="text-md font-semibold">Influencer(s) *</FormLabel>
-                                <FormDescription className="mb-4">Add the influencer(s) you want to work with.</FormDescription>
-                                <div className="space-y-4">
-                                    {fields.map((item, index) => (
-                                        <InfluencerEntry
-                                            key={item.id}
-                                            index={index}
-                                            control={form.control}
-                                            errors={form.formState.errors}
-                                            remove={removeInfluencer}
-                                        />
-                                    ))}
+                                    <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => appendInfluencer({ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' })} >
+                                        <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Influencer
+                                    </Button>
+                                    {form.formState.errors.Influencer?.root && (
+                                        <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.Influencer.root.message}</p>
+                                    )}
+                                    {form.formState.errors.Influencer && !form.formState.errors.Influencer.root && typeof form.formState.errors.Influencer.message === 'string' && (
+                                        <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.Influencer.message}</p>
+                                    )}
                                 </div>
-                                <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => appendInfluencer({ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: 'placeholder' })} >
-                                    <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Influencer
-                                </Button>
-                                {form.formState.errors.Influencer?.root && (
-                                    <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.Influencer.root.message}</p>
-                                )}
-                                {form.formState.errors.Influencer && !form.formState.errors.Influencer.root && typeof form.formState.errors.Influencer.message === 'string' && (
-                                    <p className="text-sm font-medium text-destructive mt-2">{form.formState.errors.Influencer.message}</p>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </form>
-            </Form>
+                            </CardContent>
+                        </Card>
+                    </form>
+                </Form>
+            </FormProvider>
         </>
     );
 }
 
-export default Step1Content; 
+export default Step1Content;

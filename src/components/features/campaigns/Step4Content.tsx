@@ -250,43 +250,44 @@ function Step4Content() {
 
     const watchedValues = form.watch();
 
-    // Autosave Logic
-    const handleAutosave = useCallback(async () => {
-        if (!wizard.campaignId || !form.formState.isDirty || !wizard.autosaveEnabled || wizard.isLoading) return;
-        const isValid = await form.trigger();
-        if (!isValid) return;
-        const currentData = form.getValues();
-
-        const payload: Partial<DraftCampaignData> = {
-            assets: currentData.assets, // Save assets managed by RHF state
-            guidelines: currentData.guidelines,
-            requirements: currentData.requirements,
-            notes: currentData.notes,
-            step4Complete: form.formState.isValid,
-            currentStep: 4,
-        };
-        try {
-            wizard.updateWizardState(payload);
-            const success = await wizard.saveProgress();
-            if (success) {
-                form.reset(currentData, { keepValues: true, keepDirty: false, keepErrors: true });
-            } else {
-                toast.error("Failed to save Step 4 draft.");
+    // Autosave Logic (COMMENTED OUT)
+    /*
+        const handleAutosave = useCallback(async () => {
+            if (!wizard.campaignId || !form.formState.isDirty || !wizard.autosaveEnabled || wizard.isLoading) return;
+            const isValid = await form.trigger();
+            if (!isValid) return;
+            const currentData = form.getValues();
+    
+            const payload: Partial<DraftCampaignData> = {
+                assets: currentData.assets, // Save assets managed by RHF state
+                guidelines: currentData.guidelines,
+                requirements: currentData.requirements,
+                notes: currentData.notes,
+                step4Complete: form.formState.isValid,
+                currentStep: 4,
+            };
+            try {
+                wizard.updateWizardState(payload);
+                const success = await wizard.saveProgress();
+                if (success) {
+                    form.reset(currentData, { keepValues: true, keepDirty: false, keepErrors: true });
+                } else {
+                    toast.error("Failed to save Step 4 draft.");
+                }
+            } catch (error) {
+                console.error("Step 4 Autosave error:", error);
+                toast.error("An error occurred saving Step 4 draft.");
             }
-        } catch (error) {
-            console.error("Step 4 Autosave error:", error);
-            toast.error("An error occurred saving Step 4 draft.");
-        }
-    }, [wizard, form, wizard.autosaveEnabled]);
-
-    const debouncedAutosaveRef = useRef(debounce(handleAutosave, 2000));
-    useEffect(() => {
-        if (!wizard.isLoading && form.formState.isDirty && wizard.autosaveEnabled) {
-            debouncedAutosaveRef.current();
-        }
-        return () => { debouncedAutosaveRef.current.cancel(); };
-    }, [watchedValues, wizard.isLoading, form.formState.isDirty, wizard.autosaveEnabled]);
-
+        }, [wizard, form, wizard.autosaveEnabled]);
+    
+        const debouncedAutosaveRef = useRef(debounce(handleAutosave, 2000));
+        useEffect(() => {
+            if (!wizard.isLoading && form.formState.isDirty && wizard.autosaveEnabled) {
+                debouncedAutosaveRef.current();
+            }
+            return () => { debouncedAutosaveRef.current.cancel(); };
+        }, [watchedValues, wizard.isLoading, form.formState.isDirty, wizard.autosaveEnabled]);
+    */
     // Navigation Handlers
     const handleStepClick = (step: number) => {
         if (wizard.campaignId && step < 5) { // Allow nav to completed/current
@@ -350,10 +351,8 @@ function Step4Content() {
                 onNext={onSubmitAndNavigate}
                 isNextDisabled={!form.formState.isValid}
                 isNextLoading={form.formState.isSubmitting || wizard.isLoading}
+                getCurrentFormData={form.getValues}
             />
-            <div className="fixed top-4 right-4 z-50">
-                <AutosaveIndicator status={getAutosaveStatus()} lastSaved={wizard.lastSaved} />
-            </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-8 pb-[var(--footer-height)]"> {/* Add padding-bottom */}
                     {/* --- Assets Card --- */}
