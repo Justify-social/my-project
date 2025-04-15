@@ -806,12 +806,6 @@ const ClientCampaignList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
-        <Link href="/campaigns/wizard/step-1" passHref>
-          <Button>
-            <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
-            New Campaign
-          </Button>
-        </Link>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
@@ -1013,8 +1007,6 @@ const ClientCampaignList: React.FC = () => {
                           </span>
                           <Link
                             href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                            passHref
-                            legacyBehavior
                           >
                             <span
                               className="group text-secondary hover:text-accent cursor-pointer p-1"
@@ -1222,7 +1214,7 @@ const ClientCampaignList: React.FC = () => {
                   <Icon iconId="faEyeLight" className="group-hover:hidden block w-4 h-4" />
                   <Icon iconId="faEyeSolid" className="hidden group-hover:block w-4 h-4" />
                 </span>
-                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} passHref legacyBehavior>
+                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
                   <span
                     className="group text-secondary hover:text-accent cursor-pointer p-1"
                     aria-label="Edit campaign"
