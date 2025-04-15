@@ -47,7 +47,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
   const currentCategory = searchParams.get('category');
 
   return (
-    <aside className="w-full h-full bg-muted border flex flex-col">
+    <aside className="w-full h-full bg-muted flex flex-col">
       {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {navItems.map(item => {

@@ -222,6 +222,18 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderCo
       href: '/debug-tools/ui-components?tab=icons',
       iconId: 'faStarLight',
     },
+    {
+      id: 'debug-palette',
+      label: 'Colour Palette',
+      href: '/debug-tools/ui-components?tab=palette',
+      iconId: 'faPaletteLight',
+    },
+    {
+      id: 'debug-fonts',
+      label: 'Fonts',
+      href: '/debug-tools/ui-components?tab=fonts',
+      iconId: 'faPencilLight',
+    },
   ];
 
   // --- End Navigation Definitions ---

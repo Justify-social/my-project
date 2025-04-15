@@ -34,6 +34,8 @@ import {
   type ComponentCategory,
 } from './types';
 import { cn } from '@/lib/utils';
+import PaletteDisplay from './PaletteDisplay';
+import FontDisplay from './FontDisplay';
 
 const CATEGORIES_DISPLAY: Record<ComponentCategory, { icon: string }> = {
   atom: { icon: 'faAtomLight' },
@@ -150,6 +152,20 @@ export default function ComponentBrowserPage() {
     }
   }, []);
 
+  // Helper function to get icon ID for filter buttons
+  const getFilterIconId = (category: string): string => {
+    switch (category) {
+      case 'All': return 'faListLight';
+      case 'Hover': return 'faHandPointerLight';
+      case 'App': return 'faTableCellsLight';
+      case 'Brands': return 'brandsGithub'; // Example Brand
+      case 'KPIs': return 'faChartLineLight';
+      case 'Light': return 'faLightbulbLight';
+      case 'Solid': return 'faLightbulbSolid'; // Assuming exists in solid registry
+      default: return 'faQuestionLight';
+    }
+  };
+
   const handleCategoryClick = (category: ComponentCategory) => {
     setSelectedCategory(category);
     const currentParams = new URLSearchParams(window.location.search);
@@ -227,9 +243,11 @@ export default function ComponentBrowserPage() {
         <p className="mb-6 text-secondary">Browse and preview the UI components and icons available in the system.</p>
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full mb-6">
-          <TabsList className="grid grid-cols-2 mb-4 w-full sm:w-64">
+          <TabsList className="grid grid-cols-4 mb-4 w-full sm:w-[500px]">
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="icons">Icons</TabsTrigger>
+            <TabsTrigger value="palette">Colour Palette</TabsTrigger>
+            <TabsTrigger value="fonts">Fonts</TabsTrigger>
           </TabsList>
           <TabsContent value="components" className="space-y-6 mt-0">
             {/* Components Content */}
@@ -247,8 +265,11 @@ export default function ComponentBrowserPage() {
                     className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
                   />
                   <span className="flex-1 capitalize">{category}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {registry?.byCategory[category]?.length || 0}
+                  <span className={cn(
+                    "text-xs",
+                    selectedCategory === category ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                  )}>
+                    {registry?.byCategory?.[category]?.length || 0}
                   </span>
                 </UiButton>
               ))}
@@ -308,80 +329,55 @@ export default function ComponentBrowserPage() {
           <TabsContent value="icons" className="space-y-6 mt-0">
             {/* Icons Content */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6 xl:gap-8 mb-6">
-              {iconCategories.map((category: string) => (
-                <UiButton
-                  key={category}
-                  variant={selectedIconCategory === category ? 'default' : 'outline'}
-                  className="h-auto py-3 px-2 sm:px-4 text-left justify-start"
-                  onClick={() => setSelectedIconCategory(category)}
-                >
-                  <Icon
-                    iconId={
-                      category === 'All'
-                        ? 'faIconsLight'
-                        : category === 'Hover'
-                          ? 'faHandPointerLight'
-                          : category === 'App'
-                            ? 'faMobileLight'
-                            : category === 'Brands'
-                              ? 'faBrandsSquareFontAwesome'
-                              : category === 'KPIs'
-                                ? 'faChartLineLight'
-                                : category === 'Light'
-                                  ? 'faLightbulbLight'
-                                  : category === 'Solid'
-                                    ? 'faLightbulbSolid'
-                                    : 'faQuestionLight'
-                    }
-                    name={
-                      category === 'All'
-                        ? 'faIconsLight'
-                        : category === 'Hover'
-                          ? 'faHandPointerLight'
-                          : category === 'App'
-                            ? 'faMobileLight'
-                            : category === 'Brands'
-                              ? 'faBrandsSquareFontAwesome'
-                              : category === 'KPIs'
-                                ? 'faChartLineLight'
-                                : category === 'Light'
-                                  ? 'faLightbulbLight'
-                                  : category === 'Solid'
-                                    ? 'faLightbulbSolid'
-                                    : 'faQuestionLight'
-                    }
-                    className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
-                  />
-                  <span className="flex-1 capitalize">{category}</span>
-                  <span className="text-xs text-muted-foreground">{getCategoryCount(category)}</span>
-                </UiButton>
-              ))}
+              {iconCategories.map((category: string) => {
+                const iconId = getFilterIconId(category);
+                return (
+                  <UiButton
+                    key={category}
+                    variant={selectedIconCategory === category ? 'default' : 'outline'}
+                    className="h-auto py-3 px-2 sm:px-4 text-left justify-start"
+                    onClick={() => setSelectedIconCategory(category)}
+                  >
+                    <Icon
+                      iconId={iconId}
+                      name={iconId} // Use the determined ID for name too
+                      className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
+                    />
+                    <span className="flex-1 capitalize">{category}</span>
+                    <span className={cn(
+                      "text-xs",
+                      selectedIconCategory === category ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                    )}>
+                      {getCategoryCount(category)}
+                    </span>
+                  </UiButton>
+                );
+              })}
             </div>
 
             {selectedIconCategory === 'Hover' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6 max-h-[600px] overflow-y-auto p-1">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 mb-6 max-h-[600px] overflow-y-auto p-1">
                 {hoverPairs.map(pair => (
                   <div
                     key={pair.lightId}
-                    className="border border-divider rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200"
+                    className="border border-divider rounded-md p-2 hover:bg-gray-50 transition-colors duration-200 flex flex-col items-center"
                   >
-                    <div className="flex justify-center mb-2 relative group cursor-pointer">
+                    <div className="flex justify-center items-center h-12 w-12 mb-1 flex-shrink-0 relative group cursor-pointer">
                       <Icon
                         iconId={pair.lightId}
-                        className="w-[55%] h-[55%] fill-primary group-hover:hidden"
+                        className="h-6 w-6 text-primary group-hover:hidden"
                       />
                       <Icon
                         iconId={pair.solidId}
-                        className="w-[55%] h-[55%] hidden group-hover:block"
-                        style={{ fill: 'var(--color-accent)' }}
+                        className="h-6 w-6 hidden group-hover:block text-accent"
                       />
                     </div>
-                    <div className="text-xs text-center truncate text-secondary">{pair.name}</div>
+                    <div className="text-[10px] text-center truncate text-secondary w-full">{pair.name}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6 max-h-[600px] overflow-y-auto p-1">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 mb-6 max-h-[600px] overflow-y-auto p-1">
                 {allIcons
                   .filter(icon =>
                     selectedIconCategory === 'All' ||
@@ -390,19 +386,27 @@ export default function ComponentBrowserPage() {
                   .map(icon => (
                     <div
                       key={icon.id}
-                      className="border border-divider rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200"
+                      className="border border-divider rounded-md p-2 hover:bg-gray-50 transition-colors duration-200 flex flex-col items-center"
                     >
-                      <div className="flex justify-center mb-2">
+                      <div className="flex justify-center items-center h-12 w-12 mb-1 flex-shrink-0">
                         <Icon
                           iconId={icon.id}
-                          className="w-[55%] h-[55%] fill-primary group-hover:fill-[var(--color-accent)]"
+                          className="h-6 w-6 text-primary group-hover:text-[var(--color-accent)]"
                         />
                       </div>
-                      <div className="text-xs text-center truncate text-secondary">{icon.name}</div>
+                      <div className="text-[10px] text-center truncate text-secondary w-full">{icon.name}</div>
                     </div>
                   ))}
               </div>
             )}
+          </TabsContent>
+          <TabsContent value="palette" className="space-y-6 mt-0">
+            {/* Palette Content */}
+            <PaletteDisplay />
+          </TabsContent>
+          <TabsContent value="fonts" className="space-y-6 mt-0">
+            {/* Fonts Content */}
+            <FontDisplay />
           </TabsContent>
         </Tabs>
       </div>
