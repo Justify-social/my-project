@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     // Get Clerk auth object
-    const authObject = auth();
+    const authObject = await auth();
     const userId = authObject.userId;
 
     if (!userId) {

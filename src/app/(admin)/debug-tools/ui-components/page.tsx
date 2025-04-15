@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
@@ -220,134 +220,151 @@ export default function ComponentBrowserPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-primary">UI Component Browser</h1>
+    <Suspense fallback={<div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[300px]"><LoadingSpinner size="lg" /></div>}>
+      <div className="container mx-auto py-8 px-4 max-w-7xl">
+        <h1 className="text-3xl font-bold mb-6 text-primary">UI Component Browser</h1>
+        <p className="mb-6 text-secondary">Browse and preview the UI components and icons available in the system.</p>
 
-      <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="components">Components</TabsTrigger>
-          <TabsTrigger value="icons">Icon Library</TabsTrigger>
-        </TabsList>
+        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full mb-6">
+          <TabsList className="grid grid-cols-2 mb-4 w-full sm:w-64">
+            <TabsTrigger value="components">Components</TabsTrigger>
+            <TabsTrigger value="icons">Icons</TabsTrigger>
+          </TabsList>
+          <TabsContent value="components" className="space-y-6 mt-0">
+            {/* Components Content */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6 xl:gap-8 mb-6">
+              {registry?.allCategories?.map((category: ComponentCategory) => (
+                <UiButton
+                  key={category}
+                  variant={selectedCategory === category ? 'default' : 'outline'}
+                  className="h-auto py-3 px-2 sm:px-4 text-left justify-start"
+                  onClick={() => handleCategoryClick(category)}
+                >
+                  <Icon
+                    iconId={CATEGORIES_DISPLAY[category]?.icon || 'faQuestionLight'}
+                    name={CATEGORIES_DISPLAY[category]?.icon || 'faQuestionLight'}
+                    className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
+                  />
+                  <span className="flex-1 capitalize">{category}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {registry?.byCategory[category]?.length || 0}
+                  </span>
+                </UiButton>
+              ))}
+            </div>
 
-        <TabsContent value="components">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {(registry.allCategories || [])
-              .map((category: ComponentCategory) => {
-                const catDisplay = CATEGORIES_DISPLAY[category];
-                const count = registry.byCategory[category]?.length || 0;
-                if (count === 0 || category === 'unknown') return null;
-
-                return (
+            {selectedCategory && filteredComponents.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                {filteredComponents.map((component: ExtendedComponentMetadata) => (
                   <Card
-                    key={category}
-                    className={cn(
-                      'cursor-pointer hover:shadow-lg transition-shadow',
-                      selectedCategory === category
-                        ? 'border-accent ring-2 ring-accent'
-                        : 'border-divider'
-                    )}
-                    onClick={() => handleCategoryClick(category)}
+                    key={component.name}
+                    className="hover:shadow-md transition-shadow duration-200 border-divider"
                   >
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium capitalize">{category}</CardTitle>
-                      <Icon
-                        iconId={catDisplay?.icon || 'faQuestionSolid'}
-                        className="h-4 w-4 text-muted-foreground"
-                      />
+                    <CardHeader className="p-3 sm:p-4 border-b border-divider">
+                      <CardTitle className="text-base sm:text-lg flex items-center justify-between">
+                        <span>{component.name}</span>
+                        {component.status && (
+                          <span
+                            className={cn(
+                              'text-xs px-2 py-0.5 rounded-full border font-medium',
+                              statusStyles[component.status] || statusStyles.development
+                            )}
+                          >
+                            {component.status}
+                          </span>
+                        )}
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="text-xs text-secondary">
-                        {count} component{count !== 1 ? 's' : ''}
+                    <CardContent className="p-3 sm:p-4">
+                      {component.description && (
+                        <p className="text-sm text-secondary mb-3 line-clamp-2 overflow-hidden text-ellipsis h-10">
+                          {component.description}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-3 flex-wrap gap-2">
+                        {component.subcategory && <span>{component.subcategory}</span>}
+                        <span className="capitalize">{component.renderType || 'N/A'}</span>
                       </div>
+                      <Link
+                        href={`/debug-tools/ui-components/preview/${component.name}`}
+                        className="text-xs text-Interactive hover:underline"
+                      >
+                        View Details &rarr;
+                      </Link>
                     </CardContent>
                   </Card>
-                );
-              })
-              .filter(Boolean)}
-          </div>
-
-          {selectedCategory && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 capitalize text-primary">
-                {selectedCategory} Components
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredComponents.length > 0 ? (
-                  filteredComponents.map((comp: ExtendedComponentMetadata) => (
-                    <Link
-                      key={comp.name}
-                      href={`/debug-tools/ui-components/preview/${comp.name}`}
-                      className="block border border-divider rounded-lg hover:shadow-md hover:border-Interactive transition-all duration-150 bg-background group"
-                      passHref
-                    >
-                      <div className="p-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center space-x-2 overflow-hidden">
-                            <Icon
-                              iconId={
-                                CATEGORIES_DISPLAY[comp.category]?.icon ||
-                                CATEGORIES_DISPLAY.unknown.icon
-                              }
-                              className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                              title={`Category: ${comp.category}`}
-                            />
-                            <h3 className="text-md font-semibold text-primary group-hover:text-Interactive truncate">
-                              {comp.name}
-                            </h3>
-                          </div>
-                          {comp.status && (
-                            <span
-                              className={cn(
-                                'text-xs font-medium px-2 py-0.5 rounded-full border whitespace-nowrap',
-                                statusStyles[comp.status] || statusStyles.development
-                              )}
-                            >
-                              {comp.status}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-secondary line-clamp-2">
-                          {comp.description || 'No description available.'}
-                        </p>
-                      </div>
-                    </Link>
-                  ))
-                ) : (
-                  <p className="text-secondary col-span-full">
-                    No components found in the '{selectedCategory}' category.
-                  </p>
-                )}
+                ))}
               </div>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="icons">
-          <h2 className="text-xl font-semibold mb-4">Icon Library</h2>
-          <div className="flex flex-wrap gap-2 mb-6">
-            {FIXED_ICON_CATEGORIES.map(category => {
-              const count = getCategoryCount(category);
-              return (
+            ) : selectedCategory ? (
+              <Alert className="border-divider mb-6">
+                <AlertTitle>No components in this category</AlertTitle>
+                <AlertDescription>
+                  There are no components registered under the &quot;{selectedCategory}&quot; category.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </TabsContent>
+          <TabsContent value="icons" className="space-y-6 mt-0">
+            {/* Icons Content */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6 xl:gap-8 mb-6">
+              {iconCategories.map((category: string) => (
                 <UiButton
                   key={category}
                   variant={selectedIconCategory === category ? 'default' : 'outline'}
-                  size="sm"
+                  className="h-auto py-3 px-2 sm:px-4 text-left justify-start"
                   onClick={() => setSelectedIconCategory(category)}
-                  disabled={count === 0}
                 >
-                  {category} ({count})
+                  <Icon
+                    iconId={
+                      category === 'All'
+                        ? 'faIconsLight'
+                        : category === 'Hover'
+                          ? 'faHandPointerLight'
+                          : category === 'App'
+                            ? 'faMobileLight'
+                            : category === 'Brands'
+                              ? 'faBrandsSquareFontAwesome'
+                              : category === 'KPIs'
+                                ? 'faChartLineLight'
+                                : category === 'Light'
+                                  ? 'faLightbulbLight'
+                                  : category === 'Solid'
+                                    ? 'faLightbulbSolid'
+                                    : 'faQuestionLight'
+                    }
+                    name={
+                      category === 'All'
+                        ? 'faIconsLight'
+                        : category === 'Hover'
+                          ? 'faHandPointerLight'
+                          : category === 'App'
+                            ? 'faMobileLight'
+                            : category === 'Brands'
+                              ? 'faBrandsSquareFontAwesome'
+                              : category === 'KPIs'
+                                ? 'faChartLineLight'
+                                : category === 'Light'
+                                  ? 'faLightbulbLight'
+                                  : category === 'Solid'
+                                    ? 'faLightbulbSolid'
+                                    : 'faQuestionLight'
+                    }
+                    className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
+                  />
+                  <span className="flex-1 capitalize">{category}</span>
+                  <span className="text-xs text-muted-foreground">{getCategoryCount(category)}</span>
                 </UiButton>
-              );
-            })}
-          </div>
-          {allIcons.length > 0 ? (
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
-              {selectedIconCategory === 'Hover'
-                ? hoverPairs.map(pair => (
-                    <Card
-                      key={pair.lightId}
-                      className="group flex flex-col items-center text-center hover:bg-gray-100 aspect-square pt-2 cursor-pointer border-divider"
-                    >
+              ))}
+            </div>
+
+            {selectedIconCategory === 'Hover' ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6 max-h-[600px] overflow-y-auto p-1">
+                {hoverPairs.map(pair => (
+                  <div
+                    key={pair.lightId}
+                    className="border border-divider rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <div className="flex justify-center mb-2 relative group cursor-pointer">
                       <Icon
                         iconId={pair.lightId}
                         className="w-[55%] h-[55%] fill-primary group-hover:hidden"
@@ -357,45 +374,37 @@ export default function ComponentBrowserPage() {
                         className="w-[55%] h-[55%] hidden group-hover:block"
                         style={{ fill: 'var(--color-accent)' }}
                       />
-                      <p className="text-xs text-secondary break-all pt-1 mt-auto">
-                        {pair.name || getIconInfo(pair.lightId)?.baseName || pair.lightId}
-                      </p>
-                    </Card>
-                  ))
-                : allIcons
-                    .filter(iconMeta => {
-                      const isAll = selectedIconCategory === 'All';
-                      const categoryToCompare = selectedIconCategory.toLowerCase();
-                      const iconCategory = iconMeta.category?.toLowerCase();
-                      const categoryMatch = iconCategory === categoryToCompare;
-                      if (selectedIconCategory === 'Light' && iconMeta.id.endsWith('Light'))
-                        return true;
-                      if (selectedIconCategory === 'Solid' && iconMeta.id.endsWith('Solid'))
-                        return true;
-                      if (selectedIconCategory === 'Brands' && iconMeta.id.startsWith('faBrands'))
-                        return true;
-                      return isAll || categoryMatch;
-                    })
-                    .map(iconMeta => (
-                      <Card
-                        key={iconMeta.id}
-                        className="group flex flex-col items-center text-center hover:bg-gray-100 aspect-square pt-2 cursor-pointer border-divider"
-                      >
+                    </div>
+                    <div className="text-xs text-center truncate text-secondary">{pair.name}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6 max-h-[600px] overflow-y-auto p-1">
+                {allIcons
+                  .filter(icon =>
+                    selectedIconCategory === 'All' ||
+                    icon.category?.toLowerCase() === selectedIconCategory.toLowerCase()
+                  )
+                  .map(icon => (
+                    <div
+                      key={icon.id}
+                      className="border border-divider rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <div className="flex justify-center mb-2">
                         <Icon
-                          iconId={iconMeta.id}
+                          iconId={icon.id}
                           className="w-[55%] h-[55%] fill-primary group-hover:fill-[var(--color-accent)]"
                         />
-                        <p className="text-xs text-secondary break-all pt-1 mt-auto">
-                          {iconMeta.name || getIconInfo(iconMeta.id)?.baseName || iconMeta.id}
-                        </p>
-                      </Card>
-                    ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Icon registry could not be loaded.</p>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
+                      </div>
+                      <div className="text-xs text-center truncate text-secondary">{icon.name}</div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Suspense>
   );
 }

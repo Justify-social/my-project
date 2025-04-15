@@ -241,48 +241,50 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderCo
     : undefined;
 
   return (
-    <ThemeProvider defaultTheme="light">
-      <div className="min-h-screen flex flex-col">
-        <Header
-          companyName="Justify"
-          remainingCredits={100}
-          notificationsCount={3}
-          onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
-          authControls={authHeaderControls}
-        />
+    <React.Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><LoadingSpinner size="lg" /></div>}>
+      <ThemeProvider defaultTheme="light">
+        <div className="min-h-screen flex flex-col">
+          <Header
+            companyName="Justify"
+            remainingCredits={100}
+            notificationsCount={3}
+            onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
+            authControls={authHeaderControls}
+          />
 
-        <div className="flex flex-1 overflow-hidden">
-          <div
-            className={cn(
-              'fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30',
-              'hidden md:block'
-            )}
-          >
-            {isUIComponentsPage ? (
-              <SidebarUIComponents navItems={debugNavItems} />
-            ) : (
-              <Sidebar items={sidebarItems} activePath={pathname} title="Justify" />
-            )}
+          <div className="flex flex-1 overflow-hidden">
+            <div
+              className={cn(
+                'fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30',
+                'hidden md:block'
+              )}
+            >
+              {isUIComponentsPage ? (
+                <SidebarUIComponents navItems={debugNavItems} />
+              ) : (
+                <Sidebar items={sidebarItems} activePath={pathname} title="Justify" />
+              )}
+            </div>
+
+            <div
+              className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 font-body overflow-y-auto`}
+            >
+              <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">{children}</main>
+            </div>
           </div>
 
-          <div
-            className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 font-body overflow-y-auto`}
-          >
-            <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">{children}</main>
-          </div>
+          <MobileMenu
+            isOpen={isMobileOpen}
+            onOpenChange={setIsMobileOpen}
+            menuItems={mobileMenuItems}
+            remainingCredits={100}
+            notificationsCount={3}
+            companyName="Justify"
+            user={user}
+          />
         </div>
-
-        <MobileMenu
-          isOpen={isMobileOpen}
-          onOpenChange={setIsMobileOpen}
-          menuItems={mobileMenuItems}
-          remainingCredits={100}
-          notificationsCount={3}
-          companyName="Justify"
-          user={user}
-        />
-      </div>
-    </ThemeProvider>
+      </ThemeProvider>
+    </React.Suspense>
   );
 };
 
