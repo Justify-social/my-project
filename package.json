@@ -21,7 +21,7 @@
     "test:e2e": "cypress run",
     "test:local": "jest --testPathPattern=src",
     "lint:all": "run-p lint:fix lint:format",
-    "lint:fix": "eslint --config eslint.config.mjs --ext .js,.jsx,.ts,.tsx --fix --ignore-path .gitignore",
+    "lint:fix": "eslint --config eslint.config.mjs --ext .js,.jsx,.ts,.tsx --fix",
     "lint:format": "npx prettier --config config/prettier/.prettierrc.json --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint:check-format": "prettier --config config/prettier/.prettierrc.json --check \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint-staged": "lint-staged",
