@@ -1,12 +1,14 @@
 'use client';
 
 import React from 'react';
-import { UserProfile } from '@clerk/nextjs';
+import { UserProfile, SignOutButton } from '@clerk/nextjs';
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 // Basic User Profile Page using Clerk component
-const UserProfilePage = () => {
+const UserProfileSettingsPage = () => {
     return (
-        <div className="w-full">
+        <div className="w-full space-y-6">
             <UserProfile
                 path="/settings/profile" // Matches the route
                 routing="path"          // Required for catch-all
@@ -49,8 +51,15 @@ const UserProfilePage = () => {
             >
                 {/* Custom sections can still be added here if needed */}
             </UserProfile>
+
+            <Separator />
+            <div className="flex justify-start pt-4">
+                <SignOutButton>
+                    <Button variant="outline">Sign Out</Button>
+                </SignOutButton>
+            </div>
         </div>
     );
 };
 
-export default UserProfilePage; 
+export default UserProfileSettingsPage; 

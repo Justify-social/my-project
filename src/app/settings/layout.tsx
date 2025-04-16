@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Assuming this path is correct
 import { Separator } from '@/components/ui/separator';
 
@@ -10,31 +11,51 @@ import { Separator } from '@/components/ui/separator';
 const getActiveTab = (pathname: string | null): string => {
     if (!pathname) return 'profile';
     // Check based on the full path segment
-    if (pathname.endsWith('/team')) return 'team';
-    if (pathname.endsWith('/branding')) return 'branding';
-    // Default to profile if it ends with /profile or is just /settings (or fails)
-    if (pathname.endsWith('/profile')) return 'profile';
-    // Add a check for the base /settings path if needed, defaulting to profile
-    if (pathname === '/settings' || pathname === '/settings/') return 'profile';
-    return 'profile'; // Default fallback
+    if (pathname.startsWith('/settings/team')) return 'team'; // Use startsWith for catch-all
+    if (pathname.startsWith('/settings/branding')) return 'branding';
+    if (pathname.startsWith('/settings/super-admin')) return 'super-admin'; // Add check for super-admin
+    // Default to profile (catch-all handled by UserProfile component)
+    return 'profile'; // Default fallback remains profile
 };
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const { sessionClaims } = useAuth(); // Get session claims
     const activeTab = getActiveTab(pathname);
 
-    // Update hrefs to be absolute paths from the root
-    const navItems = [
+    // Log the claims to the browser console for debugging
+    useEffect(() => {
+        console.log("Session Claims:", JSON.stringify(sessionClaims, null, 2));
+    }, [sessionClaims]);
+
+    // Check the flat metadata.role claim
+    const isSuperAdmin = sessionClaims?.['metadata.role'] === 'SUPER_ADMIN';
+
+    // Base navigation items
+    const baseNavItems = [
         { label: 'Profile Settings', value: 'profile', href: '/settings/profile' },
         { label: 'Team Management', value: 'team', href: '/settings/team' },
         { label: 'Branding', value: 'branding', href: '/settings/branding' },
     ];
 
+    // Conditionally add Super Admin tab
+    const navItems = [...baseNavItems];
+    if (isSuperAdmin) {
+        navItems.push({
+            label: 'Super Admin',
+            value: 'super-admin',
+            href: '/settings/super-admin'
+        });
+    }
+
+    // Dynamically set grid columns
+    const gridColsClass = isSuperAdmin ? 'sm:grid-cols-4' : 'sm:grid-cols-3';
+
     return (
-        <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="container mx-auto px-4 py-6 md:py-10">
             <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6">Settings</h1>
             <Tabs value={activeTab} className="w-full">
-                <TabsList className="mb-6 grid w-full grid-cols-1 sm:grid-cols-3 gap-2 h-auto bg-transparent p-0">
+                <TabsList className={`grid w-full grid-cols-1 ${gridColsClass} gap-2 h-auto bg-transparent p-0`}>
                     {navItems.map((item) => (
                         <Link href={item.href} key={item.value} passHref>
                             <TabsTrigger
@@ -47,7 +68,6 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                     ))}
                 </TabsList>
                 <Separator className="mb-8" />
-                {/* Content for the active tab will be rendered here via the page file */}
                 {children}
             </Tabs>
         </div>
