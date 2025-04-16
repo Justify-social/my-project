@@ -1,7 +1,7 @@
 'use client'; // This page will likely need client-side state and interactions
 
 import React, { useEffect, useState } from 'react'; // Added useEffect, useState
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -16,14 +16,63 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, For
 import { toast } from 'react-hot-toast'; // For feedback
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 
-// Define a simple Zod schema for validation (can be expanded)
+// --- Font Loading (Must be top-level constants) ---
+import {
+    Inter,
+    Poppins,
+    Lato,
+    Montserrat,
+    Roboto,
+    Open_Sans,
+    Raleway,
+    Oswald,
+    Roboto_Mono,
+    Noto_Sans,
+    Nunito_Sans,
+    Playfair_Display,
+} from 'next/font/google';
+
+// Instantiate each font loader directly
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-poppins' });
+const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], variable: '--font-lato' });
+const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-montserrat' });
+const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-roboto' });
+const openSans = Open_Sans({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-open-sans' });
+const raleway = Raleway({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-raleway' });
+const oswald = Oswald({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-oswald' });
+const robotoMono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-roboto-mono' });
+const notoSans = Noto_Sans({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-noto-sans' });
+const nunitoSans = Nunito_Sans({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-nunito-sans' });
+const playfairDisplay = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-playfair-display' });
+
+// Create a mapping from font name (string) to the font object
+const fontMap: Record<string, { className: string }> = {
+    Inter: inter,
+    Poppins: poppins,
+    Lato: lato,
+    Montserrat: montserrat,
+    Roboto: roboto,
+    Open_Sans: openSans,
+    Raleway: raleway,
+    Oswald: oswald,
+    Roboto_Mono: robotoMono,
+    Noto_Sans: notoSans,
+    Nunito_Sans: nunitoSans,
+    Playfair_Display: playfairDisplay,
+};
+
+// Sort font names alphabetically for the options list
+const fontOptions = Object.keys(fontMap).sort();
+// -------------------------------------------
+
+// Define Zod schema
 const brandingSchema = z.object({
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color").optional().default('#333333'),
     secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color").optional().default('#4A5568'),
     accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex color").optional().default('#00BFFF'),
-    headerFont: z.string().min(1, "Header font is required").default('Inter'),
-    bodyFont: z.string().min(1, "Body font is required").default('Inter'),
-    logoUrl: z.string().url("Invalid URL").optional().nullable(), // Store the URL from UploadThing
+    headerFont: z.enum(fontOptions as [string, ...string[]]).default('Inter'),
+    bodyFont: z.enum(fontOptions as [string, ...string[]]).default('Inter'),
 });
 
 type BrandingFormValues = z.infer<typeof brandingSchema>;
@@ -41,8 +90,16 @@ const BrandingPage = () => {
                 const result = await response.json();
                 if (result.success) {
                     setIsLoadingData(false);
-                    // Important: Ensure fetched data matches schema or provide defaults
-                    return brandingSchema.parse(result.data || {});
+                    // Fetch data and parse, ensuring logoUrl is handled if it comes from API but isn't in schema
+                    const fetchedData = result.data || {};
+                    const parsedData = {
+                        primaryColor: fetchedData.primaryColor,
+                        secondaryColor: fetchedData.secondaryColor,
+                        accentColor: fetchedData.accentColor,
+                        headerFont: fetchedData.headerFont,
+                        bodyFont: fetchedData.bodyFont,
+                    }
+                    return brandingSchema.parse(parsedData);
                 } else {
                     throw new Error(result.error || 'Failed to parse settings');
                 }
@@ -55,7 +112,15 @@ const BrandingPage = () => {
         }
     });
 
-    const { control, handleSubmit, setValue, formState: { isSubmitting, errors } } = form;
+    const { control, handleSubmit, watch, formState: { isSubmitting, errors } } = form;
+
+    // Watch selected fonts for preview
+    const watchedHeaderFont = watch('headerFont', 'Inter');
+    const watchedBodyFont = watch('bodyFont', 'Inter');
+
+    // Get className from the font map
+    const headerFontClass = fontMap[watchedHeaderFont]?.className || fontMap['Inter'].className;
+    const bodyFontClass = fontMap[watchedBodyFont]?.className || fontMap['Inter'].className;
 
     // onSubmit now sends the PATCH request
     const onSubmit = async (data: BrandingFormValues) => {
@@ -88,21 +153,10 @@ const BrandingPage = () => {
         }
     };
 
-    // Handler for when logo upload completes
-    const handleLogoUploadComplete = (results: UploadThingResult[]) => {
-        if (results && results.length > 0 && results[0].url) {
-            setValue('logoUrl', results[0].url, { shouldValidate: true, shouldDirty: true });
-            console.log("Logo URL set in form:", results[0].url);
-        } else {
-            console.warn("Upload completed but no URL found in result:", results);
-        }
-    };
-
     // Display loading skeletons
     if (isLoadingData) {
         return (
             <div className="space-y-8">
-                <Skeleton className="h-40 w-full" />
                 <Skeleton className="h-40 w-full" />
                 <Skeleton className="h-40 w-full" />
                 <div className="flex justify-end">
@@ -118,46 +172,50 @@ const BrandingPage = () => {
                 <Card className="border-divider">
                     <CardHeader>
                         <CardTitle className="text-xl font-bold text-primary">Colour Palette</CardTitle>
-                        <CardDescription className="text-secondary">Define your application's core colors.</CardDescription>
+                        <CardDescription className="text-secondary">Add your brand's core colours.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={control}
-                            name="primaryColor"
-                            render={({ field }) => (
-                                <FormItem className="flex items-center justify-between">
-                                    {/* Label managed by ColorPicker internally */}
-                                    <FormControl>
-                                        <ColorPicker label="Primary Color (Jet)" value={field.value ?? ''} onChange={field.onChange} />
-                                    </FormControl>
-                                    <FormMessage className="ml-4 text-xs" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={control}
-                            name="secondaryColor"
-                            render={({ field }) => (
-                                <FormItem className="flex items-center justify-between">
-                                    <FormControl>
-                                        <ColorPicker label="Secondary Color (Payne's Grey)" value={field.value ?? ''} onChange={field.onChange} />
-                                    </FormControl>
-                                    <FormMessage className="ml-4 text-xs" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={control}
-                            name="accentColor"
-                            render={({ field }) => (
-                                <FormItem className="flex items-center justify-between">
-                                    <FormControl>
-                                        <ColorPicker label="Accent Color (Deep Sky Blue)" value={field.value ?? ''} onChange={field.onChange} />
-                                    </FormControl>
-                                    <FormMessage className="ml-4 text-xs" />
-                                </FormItem>
-                            )}
-                        />
+                    <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
+                            <FormField
+                                control={control}
+                                name="primaryColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Primary Colour</FormLabel>
+                                        <FormControl>
+                                            <ColorPicker value={field.value ?? ''} onChange={field.onChange} id="primary-color-picker" />
+                                        </FormControl>
+                                        <FormMessage className="ml-4 text-xs" />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={control}
+                                name="secondaryColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Secondary Colour</FormLabel>
+                                        <FormControl>
+                                            <ColorPicker value={field.value ?? ''} onChange={field.onChange} id="secondary-color-picker" />
+                                        </FormControl>
+                                        <FormMessage className="ml-4 text-xs" />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={control}
+                                name="accentColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Accent Colour</FormLabel>
+                                        <FormControl>
+                                            <ColorPicker value={field.value ?? ''} onChange={field.onChange} id="accent-color-picker" />
+                                        </FormControl>
+                                        <FormMessage className="ml-4 text-xs" />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -166,105 +224,70 @@ const BrandingPage = () => {
                         <CardTitle className="text-xl font-bold text-primary">Typography</CardTitle>
                         <CardDescription className="text-secondary">Select fonts for headings and body text.</CardDescription>
                     </CardHeader>
-                    <CardContent className="grid gap-6 sm:grid-cols-2">
-                        <FormField
-                            control={control}
-                            name="headerFont"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Header Font</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select header font" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="Inter">Inter</SelectItem>
-                                            <SelectItem value="Poppins">Poppins</SelectItem>
-                                            <SelectItem value="Roboto">Roboto</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={control}
-                            name="bodyFont"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Body Font</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select body font" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="Inter">Inter</SelectItem>
-                                            <SelectItem value="Poppins">Poppins</SelectItem>
-                                            <SelectItem value="Roboto">Roboto</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                </Card>
-
-                <Card className="border-divider">
-                    <CardHeader>
-                        <CardTitle className="text-xl font-bold text-primary">Brand Logo</CardTitle>
-                        <CardDescription className="text-secondary">Upload your company logo. The uploaded image URL will be saved.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {/* Note: FileUploader manages its own state for the upload process.
-                           We link it to RHF primarily for validation triggering (if needed)
-                           and to capture the final URL via onUploadComplete. */}
-                        <FormField
-                            control={control}
-                            name="logoUrl" // Field to potentially validate or hold the URL
-                            render={({ field }) => ( // field isn't directly used by FileUploader input, but useful for RHF state
-                                <FormItem>
-                                    <FormLabel>Logo File</FormLabel>
-                                    <FormControl>
-                                        <FileUploader
-                                            control={control} // Pass control down
-                                            name={field.name} // Pass name down
-                                            endpoint="logoUploader" // Use the likely correct UploadThing endpoint key
-                                            maxFiles={1}
-                                            maxSizeMB={2} // Match description/requirements
-                                            accept={{ 'image/*': ['.png', '.jpeg', '.jpg', '.svg'] }}
-                                            onUploadComplete={handleLogoUploadComplete}
-                                            onUploadError={(error) => {
-                                                toast.error(`Logo upload failed: ${error.message}`);
-                                                // Optional: Clear the form field if upload fails
-                                                // setValue('logoUrl', null, { shouldValidate: true });
-                                            }}
-                                        // We don't need field.onChange or field.value directly here
-                                        // as FileUploader handles the file selection & upload process.
-                                        // RHF integration is primarily for the final URL and validation.
-                                        />
-                                    </FormControl>
-                                    {/* Optionally display the currently saved logo URL */}
-                                    {field.value && (
-                                        <FormDescription className="mt-2 text-xs">
-                                            Current Logo URL: <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline break-all">{field.value}</a>
-                                        </FormDescription>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <CardContent className="space-y-6">
+                        <div className="grid gap-6 sm:grid-cols-2">
+                            <FormField
+                                control={control}
+                                name="headerFont"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Header Font</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select header font" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {fontOptions.map(fontName => (
+                                                    <SelectItem key={fontName} value={fontName}>{fontName.replace(/_/g, ' ')}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={control}
+                                name="bodyFont"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Body Font</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select body font" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {fontOptions.map(fontName => (
+                                                    <SelectItem key={fontName} value={fontName}>{fontName.replace(/_/g, ' ')}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <Separator />
+                        <div className="mt-6 space-y-4">
+                            <h4 className="text-md font-semibold text-primary">Font Preview</h4>
+                            <div>
+                                <p className={`text-lg font-semibold ${headerFontClass}`}>Header: Justify your social spend</p>
+                            </div>
+                            <div>
+                                <p className={`text-sm ${bodyFontClass}`}>Body: Justify your social spend</p>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <Separator />
 
                 <div className="flex justify-end">
-                    <Button type="submit" disabled={isSubmitting} className="bg-interactive hover:bg-interactive/90">
+                    <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? "Saving..." : "Save Changes"}
                     </Button>
                 </div>
