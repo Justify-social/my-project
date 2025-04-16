@@ -247,7 +247,8 @@ class DbLogger {
       // Ensure deep cloning doesn't modify original object on failure
       try {
         clonedData = JSON.parse(JSON.stringify(data));
-      } catch (_error) { // Renamed error to _error
+      } catch (_error) {
+        // Renamed error to _error
         // Log the error using the logger, include context if available
         this.error(
           DbOperation.VALIDATION, // Assuming validation context if clone fails
